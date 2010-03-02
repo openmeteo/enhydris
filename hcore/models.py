@@ -336,6 +336,33 @@ class TimeStep(Lookup):
     length_minutes = models.PositiveIntegerField()
     length_months = models.PositiveSmallIntegerField()
     def __unicode__(self):
+        """
+        Return timestep descriptions in a more human readable format
+        """
+
+        hours = self.length_minutes / 60
+        minutes = self.length_minutes - 60 * hours
+        years = self.length_months / 12
+        months = self.length_months - years*12
+        desc = ""
+        link = ""
+        if years:
+            desc += "%d year(s)" % years
+            link = ','
+        if months:
+            desc += link+"%d month(s)" % months
+            link = ','
+        if hours:
+            desc += link+"%d hour(s)" % hours
+            link = ','
+        if minutes:
+            desc += link+"%d minute(s)" % minutes
+            link = ','
+        if desc:
+            return desc
+
+        return "(0,0)"
+
         return "(%d, %d)" % (self.length_minutes, self.length_months)
     def save(self, force_insert=False, force_update=False):
         if not _int_xor(self.length_minutes, self.length_months):
