@@ -167,7 +167,7 @@
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Instrument' %}</th>
-                <td>{{ timeseries.instrument }}</td>
+                <td><a href="{% url instrument_detail timeseries.instrument %}">{{ timeseries.instrument }}</a></td>
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Time Step' %}</th>

@@ -371,9 +371,9 @@ class Timeseries(models.Model):
         verbose_name_plural = "Time Series"
     @property
     def related_station(self):
-        if self.gentity and self.gentity.__class__.__name__ == 'Station':
+        try:
             return Station.objects.get(id=self.gentity.id)
-        else:
+        except:
             return None
     def __unicode__(self):
         return self.name

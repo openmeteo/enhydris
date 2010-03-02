@@ -4,13 +4,15 @@ These template tags are for counting. Used in the frontpage stats
 
 from django.template import Library, Node, TemplateSyntaxError
 from django.conf import settings
+from django.db.models import get_model
 from enhydris.hcore.models import *
 
 register = Library()
 
-def do_count(model):
+def do_count(appmodel):
     try:
-        exec("count = "+model+".objects.all().count()")
+        model = get_model(*appmodel.split('.'))
+        count = model.objects.all().count()
     except:
         count = 0
 
@@ -20,7 +22,6 @@ register.simple_tag( do_count )
 
 
 class LastModifiedStations(Node):
-
     def __init__(self, number=5):
         self.number = number
 

@@ -19,10 +19,10 @@
         <div id="frontpage_stats">
             <span id="header"> {% trans "Current Statistics" %} </span>
             <hr />
-            <p> {% trans "Currently there are " %} <span>{% do_count "User" %}</span> {% trans "users registered on the site" %} </p>
-            <p> {% trans "Currently there are " %} <span>{% do_count "Station" %}</span> {% trans "stations hosted on the site" %} </p>
-            <p> {% trans "Currently there are " %} <span>{% do_count "Instrument" %}</span> {% trans "instruments hosted on the site" %} </p>
-            <p> {% trans "Currently there are " %} <span>{% do_count "Timeseries" %}</span> {% trans "timeseries hosted on the site" %} </p>
+            <p> {% trans "Currently there are " %} <span>{% do_count "auth.User" %}</span> {% trans "users registered on the site" %} </p>
+            <p> {% trans "Currently there are " %} <span>{% do_count "hcore.Station" %}</span> {% trans "stations hosted on the site" %} </p>
+            <p> {% trans "Currently there are " %} <span>{% do_count "hcore.Instrument" %}</span> {% trans "instruments hosted on the site" %} </p>
+            <p> {% trans "Currently there are " %} <span>{% do_count "hcore.Timeseries" %}</span> {% trans "timeseries hosted on the site" %} </p>
         </div>
         
         <div id="frontpage_activity" style="margin-top:1em;">
