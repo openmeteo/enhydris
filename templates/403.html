@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Forbidden access" %}{% endblock %}
+
+{% block content_title %}
+  <h2 class="pagetitle">{% trans "Forbidden access" %}</h2>
+{% endblock %}
+
+{% block content %}
+
+<p>{% trans "Looks like you do not have the necessary permissions for the required action." %}</p>
+
+{% url index as index %}
+<p>{% blocktrans %}Here's a link to the <a href="{{ index }}">homepage</a>.{% endblocktrans %}</p>
+
+{% endblock %}

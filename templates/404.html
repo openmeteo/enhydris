@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Page not found" %}{% endblock %}
+
+{% block content_title %}
+  <h2 class="pagetitle">{% trans "Page not found" %}</h2>
+{% endblock %}
+
+{% block content %}
+<div style="text-align:center">
+<img src="{{ MEDIA_URL }}images/dont_panic.png" />
+<h2 color="Indigo">{% trans "It's just a 404 Error!" %} </h2>
+
+<p>
+{% trans "You probably followed a bad link." %}
+
+{% url index as index %}
+{% blocktrans %}Here's a link to the <a href="{{ index }}">homepage</a>.{% endblocktrans %}
+</p>
+</div>
+{% endblock %}

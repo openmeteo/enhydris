@@ -1,0 +1,7 @@
+user {{user}} sent and email with the following context:
+
+#############################################################################
+{{message}}
+#############################################################################
+
+You can reach user {{user}} at the following email: {{email}}

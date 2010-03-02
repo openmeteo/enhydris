@@ -1,0 +1,48 @@
+"""
+These template tags are for counting. Used in the frontpage stats
+"""
+
+from django.template import Library, Node, TemplateSyntaxError
+from django.conf import settings
+from hydroscope.hcore.models import *
+
+register = Library()
+
+def do_count(model):
+    try:
+        exec("count = "+model+".objects.all().count()")
+    except:
+        count = 0
+
+    return count
+
+register.simple_tag( do_count )
+
+
+class LastModifiedStations(Node):
+
+    def __init__(self, number=5):
+        self.number = number
+
+    def render(self, context):
+        try:
+            latest_stations = Station.objects.all().order_by('last_modified').reverse()[:self.number]
+        except ValueError:
+            latest_stations = None
+
+        context['latest_stations'] = latest_stations
+        return ''
+
+class DoGetLatestStations:
+
+    def __init__(self):
+        pass
+
+    def __call__(self, parser, token):
+        tokens = token.contents.split()
+        if not tokens[1].isdigit():
+            raise TemplateSyntaxError, (
+                "The argument for '%s' must be an integer" % tokens[0])
+        return LastModifiedStations(tokens[1])
+
+register.tag('get_latest_stations', DoGetLatestStations())

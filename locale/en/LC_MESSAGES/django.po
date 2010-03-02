@@ -1,0 +1,609 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-11-20 12:28+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: settings.py:88
+msgid "District"
+msgstr ""
+
+#: settings.py:89
+msgid "Prefecture"
+msgstr ""
+
+#: hcore/models.py:15 templates/profiles/profile_detail.html:9
+msgid "Username"
+msgstr ""
+
+#: hcore/models.py:16
+msgid "First Name"
+msgstr ""
+
+#: hcore/models.py:17
+msgid "Last Name"
+msgstr ""
+
+#: hcore/models.py:18
+msgid "Location"
+msgstr ""
+
+#: hcore/models.py:19 templates/profiles/profile_detail.html:29
+msgid "Organization"
+msgstr ""
+
+#: hcore/models.py:30
+msgid "Profile"
+msgstr ""
+
+#: hcore/models.py:31 templates/profiles/profile_list.html:5
+msgid "Profiles"
+msgstr ""
+
+#: hcore/models.py:319
+#, python-format
+msgid ""
+"%s is not a valid time step; exactly one of minutes and months must be zero"
+msgstr ""
+
+#: hcore/models.py:345
+msgid "Invalid time step: if time_step is null, offsets must also be null"
+msgstr ""
+
+#: hcore/models.py:349
+msgid ""
+"Invalid time step: if time_step is not null, actual offsets must be provided"
+msgstr ""
+
+#: hcore/models.py:354
+msgid "Invalid time step: nominal offsets must be both null or both not null"
+msgstr ""
+
+#: hcore/utils.py:5
+#, python-format
+msgid "%f is not a valid latitude"
+msgstr ""
+
+#: hcore/utils.py:9
+#, python-format
+msgid "%f is not a valid longitude"
+msgstr ""
+
+#: hcore/utils.py:13
+#, python-format
+msgid "%f is not a valid altitude"
+msgstr ""
+
+#: hcore/templates/filter_table.html:7
+msgid "Country"
+msgstr ""
+
+#: hcore/templates/filter_table.html:100
+#: templates/hcore/station_detail.html:46
+msgid "Water Division"
+msgstr ""
+
+#: hcore/templates/filter_table.html:128
+#: templates/hcore/station_detail.html:42
+msgid "Water Basin"
+msgstr ""
+
+#: hcore/templates/filter_table.html:156
+#: templates/hcore/station_detail.html:78
+msgid "Owner"
+msgstr ""
+
+#: hcore/templates/filter_table.html:184
+#: templates/hcore/instrument_detail.html:17
+#: templates/hcore/station_detail.html:84
+#: templates/hcore/station_detail.html:131
+#: templates/hcore/station_detail.html:191
+#: templates/hcore/station_detail.html:222
+msgid "Type"
+msgstr ""
+
+#: templates/403.html:4 templates/403.html.py:7
+msgid "Forbidden access"
+msgstr ""
+
+#: templates/403.html:12
+msgid ""
+"Looks like you do not have the necessary permissions for the required action."
+msgstr ""
+
+#: templates/403.html:15 templates/404.html:15
+#, python-format
+msgid "Here's a link to the <a href=\"%(index)s\">homepage</a>."
+msgstr ""
+
+#: templates/404.html:4 templates/404.html.py:7
+msgid "Page not found"
+msgstr ""
+
+#: templates/404.html:12
+msgid "Looks like you followed a bad link."
+msgstr ""
+
+#: templates/500.html:4 templates/500.html.py:7
+msgid "Page unavailable"
+msgstr ""
+
+#: templates/500.html:12
+msgid "We're sorry, but the requested page is currently unavailable."
+msgstr ""
+
+#: templates/500.html:14
+msgid "Please try again later."
+msgstr ""
+
+#: templates/base-sample.html:7
+msgid "Hydroscope"
+msgstr ""
+
+#: templates/base-sample.html:20
+msgid "Go to station list"
+msgstr ""
+
+#: templates/base-sample.html:21
+msgid "Go to map"
+msgstr ""
+
+#: templates/base-sample.html:52
+msgid "Sign out from the website"
+msgstr ""
+
+#: templates/base-sample.html:52
+msgid "Sign out"
+msgstr ""
+
+#: templates/base-sample.html:56
+#, python-format
+msgid "Welcome <a href=\"/profile/%(user_username)s\">%(user_username)s</a>!"
+msgstr ""
+
+#: templates/base-sample.html:60
+msgid "Sign in"
+msgstr ""
+
+#: templates/base-sample.html:62
+#: templates/registration/registration_form.html:76
+msgid "Register"
+msgstr ""
+
+#: templates/base-sample.html:68
+msgid "Go to start page"
+msgstr ""
+
+#: templates/base-sample.html:71
+msgid "Stations"
+msgstr ""
+
+#: templates/base-sample.html:72
+msgid "Map"
+msgstr ""
+
+#: templates/index.html:9
+msgid "Welcome to Hydroscope"
+msgstr ""
+
+#: templates/index.html:11
+msgid "Please choose an option from the menu above."
+msgstr ""
+
+#: templates/hcore/instrument_detail.html:5
+msgid "Instrument Details"
+msgstr ""
+
+#: templates/hcore/instrument_detail.html:9
+#: templates/hcore/station_detail.html:26
+#: templates/hcore/station_detail.html:129
+#: templates/hcore/station_detail.html:156
+#: templates/hcore/station_detail.html:189
+#: templates/hcore/station_detail.html:220
+#: templates/hcore/station_detail.html:262
+#: templates/hcore/timeseries_detail.html:22
+msgid "ID"
+msgstr ""
+
+#: templates/hcore/instrument_detail.html:13
+#: templates/hcore/station_detail.html:30
+#: templates/hcore/station_detail.html:221
+#: templates/hcore/station_detail.html:263
+#: templates/hcore/timeseries_detail.html:26
+#: templates/profiles/profile_detail.html:14
+msgid "Name"
+msgstr ""
+
+#: templates/hcore/instrument_detail.html:21
+#: templates/hcore/station_detail.html:38
+#: templates/hcore/station_detail.html:161
+#: templates/hcore/station_detail.html:223
+#: templates/hcore/station_detail.html:268
+#: templates/hcore/timeseries_detail.html:46
+msgid "Remarks"
+msgstr ""
+
+#: templates/hcore/instrument_detail.html:25
+#: templates/hcore/station_detail.html:224
+msgid "Manufacturer"
+msgstr ""
+
+#: templates/hcore/instrument_detail.html:29
+#: templates/hcore/station_detail.html:225
+msgid "Model"
+msgstr ""
+
+#: templates/hcore/instrument_detail.html:33
+#: templates/hcore/station_detail.html:88
+#: templates/hcore/station_detail.html:226
+msgid "Is Active"
+msgstr ""
+
+#: templates/hcore/instrument_detail.html:37
+#: templates/hcore/station_detail.html:96
+#: templates/hcore/station_detail.html:227
+msgid "Start Date"
+msgstr ""
+
+#: templates/hcore/instrument_detail.html:41
+#: templates/hcore/station_detail.html:100
+#: templates/hcore/station_detail.html:228
+msgid "End Date"
+msgstr ""
+
+#: templates/hcore/station_detail.html:15
+msgid "Click to expand/collapse"
+msgstr ""
+
+#: templates/hcore/station_detail.html:34
+msgid "Short Name"
+msgstr ""
+
+#: templates/hcore/station_detail.html:50
+msgid "Political Division"
+msgstr ""
+
+#: templates/hcore/station_detail.html:54
+msgid "Abscissa"
+msgstr ""
+
+#: templates/hcore/station_detail.html:58
+msgid "Ordinate"
+msgstr ""
+
+#: templates/hcore/station_detail.html:62
+msgid "SRID"
+msgstr ""
+
+#: templates/hcore/station_detail.html:66
+msgid "Approximate"
+msgstr ""
+
+#: templates/hcore/station_detail.html:70
+msgid "Altitude"
+msgstr ""
+
+#: templates/hcore/station_detail.html:74
+msgid "ASRID"
+msgstr ""
+
+#: templates/hcore/station_detail.html:92
+msgid "Is Automatic"
+msgstr ""
+
+#: templates/hcore/station_detail.html:105
+msgid "Overseers"
+msgstr ""
+
+#: templates/hcore/station_detail.html:122
+msgid "Station (Gentity) Alternative Codes"
+msgstr ""
+
+#: templates/hcore/station_detail.html:130
+#: templates/hcore/station_detail.html:157
+#: templates/hcore/station_detail.html:190
+msgid "Date"
+msgstr ""
+
+#: templates/hcore/station_detail.html:149
+msgid "Station (Gentity) Files"
+msgstr ""
+
+#: templates/hcore/station_detail.html:158
+msgid "File Type"
+msgstr ""
+
+#: templates/hcore/station_detail.html:159
+msgid "Content"
+msgstr ""
+
+#: templates/hcore/station_detail.html:160
+msgid "Description"
+msgstr ""
+
+#: templates/hcore/station_detail.html:182
+msgid "Station (Gentity) Events"
+msgstr ""
+
+#: templates/hcore/station_detail.html:192
+msgid "User"
+msgstr ""
+
+#: templates/hcore/station_detail.html:193
+msgid "Report"
+msgstr ""
+
+#: templates/hcore/station_detail.html:213
+msgid "Instruments"
+msgstr ""
+
+#: templates/hcore/station_detail.html:255
+msgid "Timeseries"
+msgstr ""
+
+#: templates/hcore/station_detail.html:264
+#: templates/hcore/timeseries_detail.html:30
+msgid "Variable"
+msgstr ""
+
+#: templates/hcore/station_detail.html:265
+#: templates/hcore/timeseries_detail.html:34
+msgid "Unit Of Measurement"
+msgstr ""
+
+#: templates/hcore/station_detail.html:266
+#: templates/hcore/timeseries_detail.html:38
+msgid "Precision"
+msgstr ""
+
+#: templates/hcore/station_detail.html:267
+#: templates/hcore/timeseries_detail.html:42
+msgid "Time Zone"
+msgstr ""
+
+#: templates/hcore/station_detail.html:269
+#: templates/hcore/timeseries_detail.html:50
+msgid "Instrument"
+msgstr ""
+
+#: templates/hcore/station_detail.html:270
+#: templates/hcore/timeseries_detail.html:54
+msgid "Time Step"
+msgstr ""
+
+#: templates/hcore/station_detail.html:271
+#: templates/hcore/timeseries_detail.html:58
+msgid "Nominal Offset Minutes"
+msgstr ""
+
+#: templates/hcore/station_detail.html:272
+#: templates/hcore/timeseries_detail.html:62
+msgid "Nominal Offset Months"
+msgstr ""
+
+#: templates/hcore/station_detail.html:273
+#: templates/hcore/timeseries_detail.html:66
+msgid "Actual Offset Minutes"
+msgstr ""
+
+#: templates/hcore/station_detail.html:274
+#: templates/hcore/timeseries_detail.html:70
+msgid "Actual Offset Months"
+msgstr ""
+
+#: templates/hcore/station_list.html:40 templates/hcore/station_map.html:110
+msgid "Filter"
+msgstr ""
+
+#: templates/hcore/station_list.html:44 templates/hcore/station_map.html:113
+msgid "Station Catalogue"
+msgstr ""
+
+#: templates/hcore/station_list.html:88 templates/hcore/station_map.html:159
+msgid "No entries found."
+msgstr ""
+
+#: templates/hcore/station_list.html:89 templates/hcore/station_map.html:160
+msgid "You may want to try again with a different filter."
+msgstr ""
+
+#: templates/hcore/station_map.html:26
+msgid "Click to hide the station list"
+msgstr ""
+
+#: templates/hcore/station_map.html:27
+msgid "Click to hide the map area"
+msgstr ""
+
+#: templates/hcore/station_map.html:28
+msgid "Click to expand the station list"
+msgstr ""
+
+#: templates/hcore/station_map.html:29
+msgid "Click to expand the map"
+msgstr ""
+
+#: templates/hcore/station_map.html:30
+msgid "Locate stations on the map"
+msgstr ""
+
+#: templates/hcore/station_map.html:31
+msgid "Select stations to locate on the map"
+msgstr ""
+
+#: templates/hcore/station_map.html:90
+msgid "Locate Stations"
+msgstr ""
+
+#: templates/hcore/station_map.html:94
+msgid "List Stations"
+msgstr ""
+
+#: templates/hcore/timeseries_detail.html:5
+msgid "Timeseries Details"
+msgstr ""
+
+#: templates/hcore/timeseries_detail.html:8
+msgid ""
+"\n"
+"                    Download Timeseries in plain text from \n"
+"                "
+msgstr ""
+
+#: templates/hcore/timeseries_detail.html:11
+#: templates/profiles/profile_detail.html:34
+#: templates/profiles/profile_detail.html:35
+msgid "here"
+msgstr ""
+
+#: templates/hcore/timeseries_detail.html:14
+msgid ""
+"\n"
+"                   You don't have permissions to download the time series "
+"in \n"
+"                   plain text format.\n"
+"               "
+msgstr ""
+
+#: templates/profiles/create_profile.html:7
+#: templates/profiles/edit_profile.html:8
+msgid "Sorry there are corrections needed in your form below:"
+msgstr ""
+
+#: templates/profiles/edit_profile.html:6
+#: templates/profiles/profile_detail.html:6
+msgid "User profile for"
+msgstr ""
+
+#: templates/profiles/edit_profile.html:19
+msgid "Submit Changes"
+msgstr ""
+
+#: templates/profiles/profile_detail.html:19
+msgid "Email"
+msgstr ""
+
+#: templates/profiles/profile_detail.html:24
+msgid "Address"
+msgstr ""
+
+#: templates/profiles/profile_detail.html:34
+msgid "Edit you user profile "
+msgstr ""
+
+#: templates/profiles/profile_detail.html:35
+msgid "Reset your password "
+msgstr ""
+
+#: templates/registration/login.html:4 templates/registration/login.html:8
+msgid "Login"
+msgstr ""
+
+#: templates/registration/login.html:12
+msgid "Your username and password didn't match. Please try again."
+msgstr ""
+
+#: templates/registration/login.html:18
+#, python-format
+msgid "You are already logged in as \"%(user)s\"."
+msgstr ""
+
+#: templates/registration/login.html:25
+#: templates/registration/registration_form.html:18
+msgid "Username:"
+msgstr ""
+
+#: templates/registration/login.html:26
+#: templates/registration/registration_form.html:43
+msgid "Password:"
+msgstr ""
+
+#: templates/registration/logout.html:4 templates/registration/logout.html:9
+msgid "Logged out"
+msgstr ""
+
+#: templates/registration/logout.html:10
+msgid "You've been logged out."
+msgstr ""
+
+#: templates/registration/logout.html:10
+msgid "Log in again"
+msgstr ""
+
+#: templates/registration/password_reset_email.html:2
+msgid "You're receiving this e-mail because you requested a password reset"
+msgstr ""
+
+#: templates/registration/password_reset_email.html:3
+#, python-format
+msgid "for your user account at %(site_name)s"
+msgstr ""
+
+#: templates/registration/password_reset_email.html:5
+msgid "Please go to the following page and choose a new password:"
+msgstr ""
+
+#: templates/registration/password_reset_email.html:9
+msgid "Your username, in case you've forgotten:"
+msgstr ""
+
+#: templates/registration/password_reset_email.html:11
+msgid "Thanks for using our site!"
+msgstr ""
+
+#: templates/registration/password_reset_email.html:13
+#, python-format
+msgid "The %(site_name)s team"
+msgstr ""
+
+#: templates/registration/registration_form.html:4
+msgid "Sign up"
+msgstr ""
+
+#: templates/registration/registration_form.html:9
+msgid "Please correct the errors below: "
+msgstr ""
+
+#: templates/registration/registration_form.html:12
+msgid "Create an account"
+msgstr ""
+
+#: templates/registration/registration_form.html:30
+msgid "Email address:"
+msgstr ""
+
+#: templates/registration/registration_form.html:56
+msgid "Password (again):"
+msgstr ""
+
+#: templates/registration/registration_form.html:80
+msgid ""
+"Please fill out the form (all fields are required), and your account will be "
+"created."
+msgstr ""
+
+#: templates/registration/registration_form.html:81
+msgid ""
+"You'll then be sent an email with instructions on how to finish your "
+"registration."
+msgstr ""
+
+#: templates/registration/registration_form.html:83
+msgid "If you already have an account, you can"
+msgstr ""
+
+#: templates/registration/registration_form.html:83
+msgid "login here"
+msgstr ""

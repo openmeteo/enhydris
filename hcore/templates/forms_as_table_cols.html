@@ -1,0 +1,43 @@
+{% load i18n %}
+
+{% if formset %}
+    {% for form in formset.forms %} 
+        {% if form.non_field_errors %}
+            <ul class="fielderrors">{{ form.non_field_errors }}</ul>
+        {% endif %}
+    {% endfor %}
+
+    {% for form in formset.forms %}
+        {% if forloop.first %}
+			<thead>
+            <tr>
+            {% for field in form.visible_fields %}
+                <th>{{ field.label }} {% if field.field.required %}<span class="required">*</span>{% endif %}</th>
+            {% endfor %} 
+            </tr>
+			</thead>
+			<tbody>
+        {% endif %}
+
+        {% for field in form.visible_fields %}
+            {% if forloop.first %}
+                {% if forloop.parentloop.last %}
+                    <tr id="{{formset.prefix}}_row_{{forloop.parentloop.counter}}" class="{{formset.prefix}}_last_row" style="height:15px">
+                {% else %} 
+                    <tr id="{{formset.prefix}}_row_{{forloop.parentloop.counter}}" style="height:15px">
+                {% endif %}
+            {% endif %}
+                <td>
+                    <p class="fieldp">{{ field }}</p>
+                    {% if field.errors %}<p class="fielderrors">{% for error in field.errors %}{{ error }}{% endfor %}</p>{% endif %}
+                </td>
+                {% if forloop.last %}
+                {% for field in form.hidden_fields %}
+                    {{ field }}
+                {% endfor %}
+                </tr>
+                {% endif %} 
+        {% endfor %}
+	{% endfor %}
+		</tbody>
+{% endif %}

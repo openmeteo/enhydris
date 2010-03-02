@@ -1,0 +1,159 @@
+{% load i18n %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+  <title>{% block title %}{% trans "Hydroscope" %}{% endblock %}</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  {% block basecss %}
+  <link media="screen" href="/site_media/css/base.css" type="text/css" rel="stylesheet">
+  <link media="screen" href="/site_media/css/tablesorter.css" type="text/css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ MEDIA_URL }}css/jquery.fancybox-1.2.6.css" type="text/css" media="screen">
+  <link type="text/css" href="{{ MEDIA_URL }}css/smoothness/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
+  <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
+  {% endblock %}
+  {% block basejs %}
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.min.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tablesorter.min.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.qtip-1.0.0-rc2.min.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/base.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.fancybox-1.2.6.js"></script> 
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
+  <script type="text/javascript">
+      $(document).ready(function(){
+        tooltip('#menu_stations', '{% trans "Go to station list" %}', "topRight", "bottomLeft");
+        tooltip('#menu_map', '{% trans "Go to map" %}', "topRight", "bottomLeft");
+      });
+  </script>
+  <script type="text/javascript">
+    var MEDIA_URL = "{{ MEDIA_URL }}"
+  </script>
+  {% endblock %}
+  {% block shortcut_icon %}{% endblock %}
+  {% block extracss %}{% endblock %}
+  {% block extrajs %}{% endblock %}
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+<div id="wrapper">
+  <div id="header">
+	<ul id="menu"> 
+		<li class="logo"> 
+			<a href='/'>
+			<img style="float:left;" alt="" src="{{ MEDIA_URL}}images/menu_left.png" border="0"/> 
+			</a>
+			<ul id="main"> 
+				<li>{% trans "Welcome to <b>Hydroscope</b>" %}</li> 
+			</ul> 
+		</li> 
+				<li><a href="{% url station_list %}">{% trans "Stations" %}</a> 
+		</li>
+		<li><a href="{% url map_view %}">Map</a> 
+		</li>
+		<li><a href="#">{% trans  "Help" %} </a> 
+			<ul id="help"> 
+				<li> 
+					<img class="corner_inset_left" alt="" src="{{ MEDIA_URL }}images/corner_inset_left.png"/> 
+					<a href="{% url contact_form %}">{% trans "Contact Us" %}</a> 
+					<img class="corner_inset_right" alt="" src="{{ MEDIA_URL }}images/corner_inset_right.png"/> 
+				</li> 
+				<li><a href="#">About</a></li> 
+				<li class="last"> 
+					<img class="corner_left" alt="" src="{{ MEDIA_URL }}images/corner_left.png"/> 
+					<img class="middle" alt="" src="{{MEDIA_URL}}images/dot.gif"/> 
+					<img class="corner_right" alt="" src="{{ MEDIA_URL }}images/corner_right.png"/> 
+				</li> 
+			</ul> 
+		</li>
+		<li class="searchContainer"> 
+					<form method=GET action='/stations/l/'>
+						<input type="hidden" name="check" value="search" />
+						<div>
+						<input type="text" name="q" size="20" style="height:15px;" />
+						<input type="image" src="{{ MEDIA_URL }}images/icons/magnifier.png" alt="{% trans "Search" %}" style="border:none;" />
+						</div>
+					</form>
+		<!--
+			<ul id="search"> 
+				<li>
+					<img class="corner_inset_left" alt="" src="{{ MEDIA_URL }}images/corner_inset_left.png"/> 
+					<a href="#">All</a> 
+					<img class="corner_inset_right" alt="" src="{{ MEDIA_URL }}images/corner_inset_right.png"/> 
+				</li>
+				<li><input id="Stations" type="checkbox" />Stations</li> 
+				<li><input id="Instruments" type="checkbox" />Instruments</li> 
+				<li><input id="Timeseries" type="checkbox" />Timeseries</li> 
+				<li class="last"> 
+					<img class="corner_left" alt="" src="{{ MEDIA_URL }}images/corner_left.png"/> 
+					<img class="middle" alt="" src="{{ MEDIA_URL }}images/dot.gif"/> 
+					<img class="corner_right" alt="" src="{{ MEDIA_URL }}images/corner_right.png"/> 
+				</li> 
+			</ul>
+		-->
+		</li> 
+		<img style="float:left;" alt="" src="{{ MEDIA_URL }}images/menu_right.png"/>
+	</ul> 
+
+	<ul id="menu2"> 
+			<img style="float:right" alt="" src="{{ MEDIA_URL }}images/menu_right.png"/>
+			<li>
+			{% url django.views.i18n.set_language as set_language_url %}
+				<form action="{{ set_language_url }}" method="post">
+				<p style="display: inline;">
+					<input name="next" type="hidden" value="{{ request.path }}">
+						<select name="language">
+						{% for lang in LANGUAGES %}
+						   <option value="{{ lang.0 }}" {% ifequal request.session.django_language lang.0 %}selected="selected"{% endifequal %}>{{ lang.1 }}</option>
+						{% endfor %}
+						</select>
+						<input type="submit" value="Go">
+				</p>
+				</form>
+			</li>
+		{% if user.is_authenticated %}
+			<li><a href="{% url auth_logout %}">Logout</a> 
+			</li> 
+			<li id="userinfo">
+            {% blocktrans with user.username as user_username %}Welcome <a href="/profile/{{ user_username }}">{{ user_username }}</a>!{% endblocktrans %}&nbsp;
+			</li>
+			<img style="float:right" alt="" src="{{ MEDIA_URL }}images/top_menu_left.png"/>
+		{% else %}
+			<li><a href="{% url registration_register %}">Register</a></li> 
+			<li><a class="loginform" href="{% url auth_login %}">Login</a></li> 
+
+			<img style="float:right" alt="" src="{{ MEDIA_URL }}images/top_menu_left_bw.png"/>
+			<li>
+		{% endif %}
+			
+	</ul>
+	</div>
+	    <div id="content">
+		<div id="body">
+		  {% block content %}
+			<div id="body_main">
+			  {% block messages %}
+				{% if messages %}
+					<div class="messages">
+					{% for message in messages %}
+						<span class="i16 tip message">{{ message }}</span> 
+					{% endfor %}
+					</div>
+				{% endif %}
+			  {% endblock %}
+			{% block content_main %}
+            {% endblock %}
+			</div>
+		  {% endblock %}
+		</div>
+	  </div>
+</div>
+
+  <div id="footer">{% block footer %}
+      {% block footerlinks %}{% endblock %}
+    {% block powered %}{% endblock %}
+    {% block extrafooter %}{% endblock %}
+  {% endblock %}</div>
+{% block bodyend %}{% endblock %}
+</body>
+</html>

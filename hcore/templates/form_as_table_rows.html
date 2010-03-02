@@ -1,0 +1,29 @@
+{% load i18n %}
+
+{% if form %}
+    {% if form.non_field_errors %}
+        <ul class="fielderrors">{{ form.non_field_errors }}</ul>
+    {% endif %}
+    {% for field in form %}
+        {% if field.is_hidden %}
+            {{ field }}
+            {% if field.errors %}
+               <p class="fieldp">{{ field }}</p>
+               <p class="fielderrors">{% for error in field.errors %}{{ error }}{% endfor %}</p>
+            {% endif %}
+        {% else %}
+            <tr{% if id %} id="sub_{{ id }}{{ forloop.counter}}" style="display:none"{% endif %}>
+            <th>{{ field.label }}: {% if field.field.required %}<span class="required">*</span>{% endif %}</th>
+            <td>
+                <p class="fieldp">{{ field }}</p>
+                {% if field.errors %}<p class="fielderrors">{% for error in field.errors %}{{ error }}{% endfor %}</p>{% endif %}
+            </td>
+            <td>
+                <p class="helptext">
+                    {{ field.help_text }}
+                </p>
+            </td>
+            </tr>
+        {% endif %}
+    {% endfor %}
+{% endif %}

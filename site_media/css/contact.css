@@ -1,0 +1,89 @@
+/*
+Credits: Bit Repository
+CSS Library: http://www.bitrepository.com/
+*/
+
+div#body {
+    background:transparent !important;
+    border: none;
+}
+div#form .notification_error
+{
+border: 1px solid #A25965;
+height: auto;
+width: 90%;
+padding: 4px;
+background: #F8F0F1;
+text-align: left;
+-moz-border-radius: 5px;
+}
+
+div#form .notification_ok
+{
+border: 1px #567397 solid;
+height: auto;
+width: 90%
+padding: 8px;
+background: #f5f9fd;
+text-align: center;
+-moz-border-radius: 5px;
+}
+
+div#form .info_fieldset { 
+    -moz-border-radius: 7px;
+    border: 1px #999 solid;
+    background-color: #F4F4EE;
+    margin-top: 4em;
+ }
+
+div#form .info_fieldset legend
+{
+border: 1px #999 solid;
+color: black; 
+background-color:#9FC54E;
+font: 13px Verdana;
+
+padding: 2px 5px 2px 5px;
+-moz-border-radius: 3px;
+}
+
+div#form .button
+{
+border: 1px solid #999999;
+border-top-color: #CCCCCC;
+border-left-color: #CCCCCC; 
+
+background: white;
+
+color: #333333; 
+
+font: 11px Verdana, Helvetica, Arial, sans-serif;
+
+-moz-border-radius: 3px;
+}
+
+/* Label */
+div#form label {width: 140px; padding-left: 20px; margin: 5px; float: left; text-align: left;}
+
+/* Input, Textarea */
+div#form input, textarea
+{
+margin: 5px;
+padding: 0px;
+float: left;
+
+border: 1px solid #999999;
+border-top-color: #CCCCCC;
+border-left-color: #CCCCCC; 
+color: #333333; 
+
+font: 12px Verdana, Helvetica, Arial, sans-serif;
+
+-moz-border-radius: 3px;
+}
+
+/* BR */
+
+div#form br { clear: left; }
+
+div#form label.error { float: none; color: red; padding-left: .5em; vertical-align: top; font-size:0.8em; text-align:left;}

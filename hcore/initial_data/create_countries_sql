@@ -1,0 +1,41 @@
+#!/usr/bin/python
+
+# create_countries_sql <input >output
+#
+# This program reads its input, which should be the official English ISO
+# 3166-1 alpha 2 list of countries in text format, semicolon delimited
+# (list starting after a blank line), and creates as its output a SQL
+# file that will create the required records in the database.
+
+import sys
+
+preamble = True
+out = sys.stdout
+out.write("BEGIN TRANSACTION;\n")
+out.write("SET CONSTRAINTS ALL DEFERRED;\n")
+pk = 0
+
+for line in sys.stdin:
+
+    # Skip to blank line
+    if preamble:
+        if line.strip(): continue
+        preamble = False
+        continue
+
+    pk += 1
+    (english_name, code) = line.strip().split(';')
+    out.write("INSERT INTO hcore_gentity(id, name, short_name, remarks, "
+        +"name_alt, short_name_alt, remarks_alt) "
+        +"VALUES (%d, '%s', '%s', '', '%s', '%s', '');\n"
+        % (pk, english_name.replace("'", "''"),
+               english_name[:51].replace("'", "''"),
+               english_name.replace("'", "''"),
+               english_name[:51].replace("'", "''"),
+        ))
+    out.write("INSERT INTO hcore_garea(gentity_ptr_id) VALUES (%d);\n" % (pk,))
+    out.write("INSERT INTO hcore_politicaldivision(garea_ptr_id, code) " +
+              "VALUES (%d, '%s');\n" % (pk, code))
+    out.write("\n")
+
+out.write("COMMIT;")

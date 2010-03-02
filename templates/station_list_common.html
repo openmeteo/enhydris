@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block extra_head %}
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/hide_disable.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/ajax_calls.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.getUrlParam.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $(".tablehighlighted tbody tr").hover( 
+             function() {  // mouseover 
+                  $(this).addClass('highlight'); 
+             }, 
+             function() {  // mouseout 
+                  $(this).removeClass('highlight'); 
+        });
+    });
+    </script>
+{% endblock %}

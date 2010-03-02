@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Sign up" %}{% endblock %}
+
+{% block content %}
+
+  {% if form.errors %}
+  <p class="error">{% trans "Please correct the errors below: " %}{{ form.non_field_errors }}</p>
+      {% endif %}
+    
+      <h3>{% trans "Create an account" %}</h3>
+     
+      <form method="post" action="" class="wide">
+        <table>  
+            <tr>
+        <th align="right">    
+          <label for="id_username">{% trans "Username:" %}</label>
+         </th>
+        <td>
+          {{ form.username }}
+
+          {% if form.username.errors %}
+            <p class="fielderrors" style="display:inline;color:#FF3333">{{ form.username.errors.as_text }}</p>
+            {% endif %}
+      </td>
+  </tr>
+  <tr>
+      <th align="right">
+          <label for="id_email">{% trans "Email address:" %}</label>
+
+      </th>
+      <td>
+          {{ form.email }}
+
+          {% if form.email.errors %}
+            <p class="fielderrors" style="display:inline;color:#FF3333">{{ form.email.errors.as_text }}</p>
+          {% endif %}
+      </td>
+  </tr>
+  <tr>
+        <th align="right">
+          <label for="id_password1">{% trans "Password:" %}</label>
+
+      </th>
+      <td>
+          {{ form.password1 }}
+
+          {% if form.password1.errors %}
+            <p class="fielderrors" style="display:inline;color:#FF3333">{{ form.password1.errors.as_text }}</p>
+          {% endif %}
+      </td>
+  </tr>
+  <tr>
+      <th align="right">
+          <label for="id_password2">{% trans "Password (again):" %}</label>
+
+      </th>
+      <td>
+          {{ form.password2 }}
+
+          {% if form.password2.errors %}
+            <p class="fielderrors" style="display:inline;color: #FF3333" >{{ form.password2.errors.as_text }}</p>
+          {% endif %}
+      </td>
+  </tr>
+        </table>
+        <p>
+          <label>Have you read and accepted the <a href="/terms/" target="blank">terms of service?</a></label>
+          
+          {{ form.tos }} I agree.
+          </p> 
+          {% if form.tos.errors %}
+            <p class="fielderrors" style="color: #FF3333" >{{ form.tos.errors.as_text }}</p>
+          {% endif %}
+        <p class="submit"><input type="submit" value="{% trans "Register" %} &rarr;"></p>
+      </form>
+     
+    
+    <p>{% trans "Please fill out the form (all fields are required), and your account will be created." %}<br>
+    {% trans "You'll then be sent an email with instructions on how to finish your registration." %}</p>
+    
+    <p>{% trans "If you already have an account, you can" %} <a href="/accounts/login/">{% trans "login here" %}</a>.</p>
+    
+    {% endblock %}
+    
+{% block login %}{% endblock %}

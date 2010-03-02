@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{{MEDIA_URL}}css/contact.css" />
+{% endblock %}
+
+{% block content %}
+
+<center>
+<div id="form" align="left" style="width: 700px;">
+
+<fieldset class="info_fieldset"><legend>Thank you!</legend>
+<img src="{{MEDIA_URL}}images/icons/mail_sent.png" style="float:left;margin:
+10px 20px 10px 10px;">
+
+<div style="margin:25px 15px;">
+<p>Thank you for contacting us.</p>
+
+<p>We will attempt to get back to you within 48 hours</p>
+
+<p style="float:right"><a href="{% url index %}">[ HOME ]</a></p>
+</div>
+</fieldset>
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,64 @@
+/* This is used to override the classes used in jquery ui */
+
+.table_container{
+    padding:1.5em;
+    font-size:0.85em;
+}
+
+.table_container input, .table_container select, .table_container textarea{
+    font-size:0.85em;
+}
+
+.table_container a, .table_container a:visited{
+    border-bottom:medium none;
+    color:#4C0D8C;
+    text-decoration:none;
+}
+
+.anchor_override a, .anchor_override a:visited{
+    border-bottom:medium none;
+    color:#4C0D8C;
+    text-decoration:none;
+    font-size:0.85em;
+}
+
+.anchor_override a:hover{
+    border-bottom:1px solid #AAAAAA;
+    text-decoration:none;
+}
+
+.search_container{
+    font-size:0.85em;
+}
+
+.noborder a:hover{
+    border: none;
+}
+
+.help_widget{
+    -moz-background-clip:border;
+    -moz-background-inline-policy:continuous;
+    -moz-background-origin:padding;
+    -moz-border-radius-bottomleft:8px;
+    -moz-border-radius-bottomright:8px;
+    -moz-border-radius-topleft:8px;
+    -moz-border-radius-topright:8px;
+    background:#FFFFFF url(images/ui-bg_flat_0_aaaaaa_40x100.png) repeat-x scroll 50% 50%;
+    margin:-8px 0 0 -8px;
+    padding:12px;
+    width:400px;
+    text-align:justify;
+    color: #111111;
+}
+
+.tablehighlighted .highlight td, .tablehighlighted tr.even.highlight  td{
+    background-color: #f4f4d8;
+}
+
+.ui-tabs { 
+	z-index:10 !important;
+}
+
+.ui-tabs-nav{
+	z-index:1 !important;
+}

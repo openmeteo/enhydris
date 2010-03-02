@@ -1,0 +1,158 @@
+{% extends "station_list_common.html" %}
+{% load i18n %}
+{% load pagination_tags %}
+{% load sorting_tags %}
+{% load stationlist_filter %}
+
+{% block extracss %}
+{% endblock %}
+
+{% block extrajs %}
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $('#political_division').change( function() {
+            val = $(this).attr('value');
+            render_dist_filter(val);
+        });
+
+        $('#district').change( function() {
+            val = $(this).attr('value');
+            render_pref_filter(val);
+        });
+
+        if ( ! $('#political_division').attr(':disabled') ) { 
+           render_dist_filter($('#political_division').attr('value'));
+        }
+
+        $('#filter_submit').click( function() {
+            station_search();
+        });
+        
+        $(".tablehighlighted tbody tr").hover( 
+             function() {  // mouseover 
+                  $(this).addClass('highlight'); 
+             }, 
+             function() {  // mouseout 
+                  $(this).removeClass('highlight'); 
+        });
+    });
+    </script>
+    <script type="text/javascript">
+        $(function() {
+            $("#tabs").tabs();
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    {% autosort station_list %}
+    {% autopaginate station_list 20 %}
+    
+    <div id="tabs">
+        <ul>
+            <li class="noborder"><a href="#tabs-1">List</a></li>
+            <li class="noborder"><a href="#tabs-2">Advanced Search</a></li>
+        </ul>
+
+        <div id="tabs-1" class="table_container">
+            <div>
+                <p>
+                  <h3>{% trans 'Searching' %}</h3>
+					<div class="searchform">
+					  <form action="." method="GET">
+						<label for="q">{% trans "Find Stations by name, description, etc." %}</label><br/>
+						<input type="hidden" name="check" value="search">
+						<input type="text" name="q" size="40" value="{{ query|escape }}">
+						<input class="i16 magnifier" type="submit" value="{% trans "Search" %}" 
+							{% if request.GET.ts_only %} checked {% endif %}>
+						<br />
+						<input type="checkbox" name="ts_only" value="True" {% if request.GET.ts_only %} checked="checked" {% endif %}> {% trans "Display only stations with timeseries"%} <br>
+					  </form>
+					</div>
+ 
+                    {% if search %}
+                    <div class="ui-widget">
+                        <div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;"> 
+                            <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+                            {% trans "Search results obtained" %} ::
+                            <a href="{% url station_list %}">{% trans " Back to all results" %}</a> ::
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if advanced_search %}
+                    <div class="ui-widget">
+                        <div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;"> 
+                            <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+                            {% trans "Filter based search results obtained" %} ::
+                            <a href="{% url station_list %}">{% trans " Back to all results" %}</a> ::
+                        </div>
+                    </div>
+                    {% endif %}
+                </p>
+            </div>
+
+
+           <h3 style="font-size:14pt;font-weight:200;">
+               {% trans 'Station Catalogue' %}
+           </h3>
+            {% if enabled_user_content %}
+                {% if perms.hcore.add_station %}
+                <p class="anchor_override" style="cursor:pointer;text-align:left">
+                       <a href="{% url station_add %}">
+                          <img src="/media/img/admin/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
+                          {% trans "Add a new station " %}
+                      </a>
+                </p>
+                {% endif %}
+            {% endif %}
+
+            {% if station_list %}
+            <table class="tablesorter tablehighlighted data_table">
+              <thead>
+                <tr>
+                  <th>{% anchor id 'ID' %}</th>
+                  <th>{% anchor name 'Name' %}</th>
+                  <th>{% anchor water_basin 'Water Basin' %}</th>
+                  <th>{% anchor water_division 'Water Division' %}</th>
+                  <th>{% anchor political_division 'Political Division' %}</th>
+                  <th>{% anchor owner 'Owner' %}</th>
+                  <th>{% anchor type 'Type' %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for station in station_list %}
+                {% with station.id as station_id %}
+                {% url station_detail station_id as station_url %}
+                  <tr class="{% cycle 'odd' 'even' %}">
+                    <td><a href="{{ station_url }}">{{ station_id }}</a></td>
+                    <td>{{ station.name }}</td>
+                    <td>{{ station.water_basin.name }}</td>
+                    <td>{{ station.water_division.name }}</td>
+                    <td>{{ station.political_division.name }}</td>
+                    <td>{{ station.owner }}</td>
+                    <td>{{ station.type.descr }}</td>
+                  </tr>
+                {% endwith %}
+                {% endfor %}
+            </tbody>
+            </table>
+            {% else %}
+              <p>{% trans "No entries found." %}</p>
+              <p>{% trans "You may want to try again with a different filter." %}</p>
+            {% endif %}
+        	<br />
+            {% paginate %}
+        </div>
+        <div id="tabs-2">
+            <p>
+              {% block filters %}
+              <div style="padding: 10px;">
+              <h3>{% trans 'Filter' %}</h3>
+              {% filter_table request "True" %}
+              {% endblock %}
+              </div>
+            </p>
+        </div>
+    </div>
+
+{% endblock %}

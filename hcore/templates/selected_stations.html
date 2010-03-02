@@ -1,0 +1,8 @@
+{% load stationlist_filter %}
+{% with selected_ids|check_contains:station_id as is_checked %} 
+    {% if is_checked %}
+        <td><input type="checkbox" class="station_selected_ids" name="station_id" checked="checked" value="{{ station_id }}" ></td>
+    {% else %}
+        <td><input type="checkbox" class="station_selected_ids" name="station_id" value="{{ station_id }}" ></td>
+    {% endif %}
+{% endwith %}

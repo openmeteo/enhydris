@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Success!" %}{% endblock %}
+
+{% block content_title %}
+  <h2 class="pagetitle">{% trans "Success!" %}</h2>
+{% endblock %}
+
+{% block content %}
+<div style="padding-top:2em;">
+	<img src="{{MEDIA_URL}}images/icons/icon_confirmation.gif" /><h2 style="display:inline; padding-left:10px">{% trans msg %}</h2>
+	{% url index as index %}
+	<p>{% blocktrans %}Here's a link to the <a href="{{ index }}">homepage</a>.{% endblocktrans %}</p>
+</div>
+{% endblock %}
+

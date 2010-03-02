@@ -1,0 +1,203 @@
+{% extends "station_list_common.html" %}
+{% load i18n %}
+{% load pagination_tags %}
+{% load sorting_tags %}
+{% load stationlist_filter %}
+{% block extracss %}
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/map_page.css"/>
+{% endblock %} 
+
+{% block extrajs %}
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/hide_panel.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/checkbox_store.js"></script>
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+    <script type="text/javascript">
+    var sids = [];    
+    $(document).ready(initialize);
+    $(document).ready(function(){
+
+        /* Buttons hovering handling */
+        $('.fg-button').hover(
+            function(){ 
+                $(this).addClass("ui-state-hover"); 
+            },
+            function(){ 
+                $(this).removeClass("ui-state-hover"); 
+            }
+        )
+
+
+        $('#help_dialog').dialog({
+            bgiframe: true,
+            height: 300,
+            width: 300,
+            modal: true,
+            autoOpen: false
+        });
+
+        $('#help_trigger').click(function(){
+            $('#help_dialog').dialog('open')
+        });
+
+        $('.station_selected_ids').click(toggleCheck);
+        $('.page').click(storeValue);
+        $('.next').click(storeValue);
+        $('.previous').click(storeValue);
+
+        tooltip('.qtip_hidePanel', '{% trans "Click to hide the station list" %}', "topRight", "bottomLeft");
+        tooltip('.qtip_hideMap', '{% trans "Click to hide the map area" %}', "topLeft", "bottomRight");
+        tooltip('.qtip_showPanel', '{% trans "Click to expand the station list" %}', "topRight", "bottomLeft");
+        tooltip('.qtip_showMap', '{% trans "Click to expand the map" %}', "topLeft", "bottomRight");
+        tooltip('#select_stations', '{% trans "Select stations to locate on the map" %}', "topRight", "bottomLeft");
+
+        $('#select_stations').click(function (){
+            var n = $("input:checked[class=station_selected_ids]").length;
+            if(n==0){
+                tk = $("input:checkbox[class=station_selected_ids]");
+				tk.attr("checked","checked");
+				tk.each(toggleCheck);
+			}else{
+				ut = $("input:checkbox[class=station_selected_ids]");
+				ut.attr("checked", "");
+				ut.each(toggleCheck);
+			}
+
+        });
+
+		$('#political_division').change( function() {
+			val = $(this).attr('value')
+			render_dist_filter(val);
+		});
+
+        if ( ! $('#political_division').attr(':disabled') ) { 
+            render_dist_filter($('#political_division').attr('value'));
+        }
+		
+		$('#district').change( function() {
+			val = $(this).attr('value')
+			render_pref_filter(val);
+		});
+
+		$('#filter_submit').click( function() {
+			station_search();
+		});
+
+        $("#map_stations").click(function(){
+            render_station_list({ station_list:"10001,10002" })
+        });
+    });
+
+    function initialize() {
+        var latlng = new google.maps.LatLng(38.11727165830543, 23.8018798828125);
+        var myOptions = {zoom: 8, center: latlng, mapTypeId: google.maps.MapTypeId.ROADMAP};
+        var map = new google.maps.Map(document.getElementById("map_data"), myOptions);};
+    </script>
+
+
+{% endblock %}
+
+
+{% block content %}
+<div id="mapcontainer">
+
+    <div id="map_nav"> 
+        <div id="panel_toggle"> 
+            <a id="hidePanel" class="panel_togglers qtip_hidePanel"> 
+                <img id="hp" class="collapse_expand_map" src="{{ MEDIA_URL }}images/icons/resultset_previous.png" alt="Hide Panel"></img>
+            </a>
+            List
+            <a id="showPanel" class="panel_togglers qtip_showPanel">
+                <img id="sp" class="collapse_expand_map" src="{{ MEDIA_URL }}images/icons/resultset_next_disabled.png" alt="Show Panel"></img>
+            </a>
+                <button type="submit" id="show_stations" style="margin-left:5px" class="ui-state-default ui-corner-all fg-button"><span class="ui-icon ui-icon-image fg-button-icon-left"></span>&nbsp;{% trans "Locate Stations" %}</button>
+        </div>
+        <div id="map_toggle">
+            <button type="button" id="map_stations" style="margin-right:5px" class="ui-state-default ui-corner-all fg-button" ><span class="ui-icon ui-icon-transferthick-e-w fg-button-icon-left"></span>&nbsp;{% trans "List Stations" %}</button>
+             <a id="showMap" class="panel_togglers qtip_showMap"> 
+                <img id="sm" class="collapse_expand_map" src="{{ MEDIA_URL }}images/icons/resultset_previous_disabled.png" alt="Show Map"></img>
+            </a>
+            Map
+            <a id="hideMap" class="panel_togglers qtip_hideMap">
+                <img id="hm" class="collapse_expand_map" src="{{ MEDIA_URL }}images/icons/resultset_next.png" alt="Hide Map"></img>
+            </a>
+        </div>
+    </div>
+
+    <div id="leftofmap"> 
+			
+		<h3>{% trans 'Searching' %}</h3>
+		<div class="searchform">
+		  <form action="." method="GET">
+			<label for="q">{% trans "Find Stations by name, description, etc." %}</label><br/>
+			<input type="hidden" name="check" value="search">
+			<input type="text" name="q" size="40" value="{{ query|escape }}">
+			<input class="i16 magnifier" type="submit" value="{% trans "Search" %}"	/>
+			<br />
+			<input type="checkbox" name="ts_only" value="True" {% if request.GET.ts_only %} checked="checked" {% endif %}> {% trans "Display only stations with timeseries"%} <br>
+		  </form>
+		</div>
+        <br \>
+        {% autosort station_list %}
+        {% autopaginate station_list 17 %}
+        {% block filters %}
+        {% comment %}
+          <h3>{% trans 'Filter' %}
+            <sup>
+                <a id="help_trigger" style="cursor:pointer">
+                    <img src="{{ MEDIA_URL }}images/icons/help.png">
+                </a>
+            </sup>
+          </h3>
+          <fieldset class="ui-corner-all" style="padding-top:1em;border-style:solid;border-color:#DDD;max-width:520px;">
+          {% filter_table request "False" %}
+          </fieldset>
+        {% endcomment %}
+        {% endblock %}
+        <h3>{% trans 'Station Catalogue' %}</h3>
+        {% if station_list %}
+        <table id='station_table' class="tablesorter tablehighlighted data_table" onload="SetLinks">
+          <thead>
+            <tr>
+              <th><a id='select_stations' style="cursor:pointer">Select</a></th>
+              <th>{% anchor id 'ID' %}</th>
+              <th>{% anchor name 'Name' %}</th>
+              <th class="hide_extra">{% anchor water_basin 'Water Basin' %}</th>
+              <th class="hide_extra">{% anchor water_division 'Water Division' %}</th>
+              <th class="hide_extra">{% anchor political_division 'Political Division' %}</th>
+              <th class="hide_extra">{% anchor owner 'Owner' %}</th>
+              <th class="hide_extra">{% anchor type 'Type' %}</th>
+            </tr>
+          </thead>
+          <tbody id="tbody_list">
+            {% for station in station_list %}
+            {% with station.id as station_id %}
+            {% url station_detail station_id as station_url %}
+              <tr class="{% cycle 'odd' 'even' %}">
+                {% filter_station_ids request station_id %} 
+                <td><a href="{{ station_url }}">{{ station_id }}</a></td>
+                <td>{{ station.name }}</td>
+                <td class="hide_extra">{{ station.water_basin.name }}</td>
+                <td class="hide_extra">{{ station.water_division.name }}</td>
+                <td class="hide_extra">{{ station.political_division.name }}</td>
+                <td class="hide_extra">{{ station.owner_any }}</td>
+                <td class="hide_extra">{{ station.type.descr }}</td>
+              </tr>
+            {% endwith %}
+            {% endfor %}
+        </tbody>
+        </table>
+		<br />
+        {% else %}
+          <p>{% trans "No entries found." %}</p>
+          <p>{% trans "You may want to try again with a different filter." %}</p>
+        {% endif %}
+        {% paginate %}
+    </div>
+
+    <div id="mapcontent">
+        <div id="map_data" style="width:auto !important;">
+        </div>
+    </div>
+
+</div>
+{% endblock %}

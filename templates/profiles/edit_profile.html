@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+<h3>{% trans "User profile for" %} {{ profile.user }}: </h3>
+    {% if form.errors %}
+    <p class="errorlist">{% trans "Sorry there are corrections needed in your form below:" %} {{ form.non_field_errors }}</p>
+    {% endif %}
+    {% if form.is_multipart %}
+    <form enctype="multipart/form-data" method="post" action=".">
+    {% else %}
+    <form method="post" action=".">
+    {% endif %}
+    <table>
+    {{ form.as_table }}
+    </table>
+    <br/>
+    <input type="submit" value="{% trans "Submit Changes" %} &rarr;" />
+    </form>
+{% endblock %}

@@ -1,0 +1,4 @@
+<!-- The GET params that must also be included -->
+{% for key,value in getvars.items %}
+    <input type="hidden" name="{{ key }}" value="{{ value }}"/>
+{% endfor %}

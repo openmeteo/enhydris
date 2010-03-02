@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Login" %}{% endblock %}
+
+{% block content %}
+
+<div id="box"><h3>{% trans 'Login' %}</h3></div>
+
+{% if form.errors %}
+<div id="alert">
+    <p style="color: #FF3333">{% trans "Your username and password didn't match. Please try again." %}</p>
+</div>  
+{% endif %}
+
+{% if user.is_authenticated %}
+<div id="alert">
+    <p style="color: #FF3333">{% blocktrans %}You are already logged in as "{{ user }}".{% endblocktrans %}</p>
+</div>  
+{% endif %}
+
+<form method="post" action=".">
+<p>
+<table>
+<tr><td><label for="id_username">{% trans 'Username:' %}</label></td><td>{{ form.username }}</td></tr>
+<tr><td><label for="id_password">{% trans 'Password:'%}</label></td><td>{{ form.password }}</td></tr>
+</table>
+</p>
+<p>
+<input type="submit" value="Login">
+<input type="hidden" name="next" value="/">
+</p>
+</form>
+
+{% endblock %}
