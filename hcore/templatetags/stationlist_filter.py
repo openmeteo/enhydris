@@ -20,7 +20,7 @@ def stationlist_filter_params(get_vars):
 @register.inclusion_tag('filter_table.html')
 def filter_table(request, help_inline):
     """Choose the option to be selected based on the GET variables.
-    
+
     "help_inline" variable denotes if an explanation text will be presented or instead
     of this a link to popup help is appeared.
     """

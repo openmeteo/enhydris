@@ -234,6 +234,13 @@
                 <td style="border-bottom:0"><a class="hide_disable_toggler"> On/Off </a></td>
             </tr>
             <tr>
+            <td colspan="2" style="text-align:center;padding-left:2em;border-top:0;border-bottom:0">
+            <p>
+            <input type="checkbox" id="ts_only" name="ts_only" value="True" {% if get_vars.ts_only %} checked="checked" {% endif %}> {% trans "Display only stations with timeseries"%} <br>
+            </p>
+            </td>
+            </tr>
+            <tr>
                 <td colspan="2" style="text-align:center;padding-left:2em;border-top:0;border-bottom:0">
                     <p>
                         <input type="submit" class="i16 magnifier" id="filter_submit">

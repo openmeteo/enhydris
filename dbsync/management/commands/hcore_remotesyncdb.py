@@ -16,7 +16,7 @@ from socket import socket, gethostbyname, AF_INET, SOCK_STREAM
 from django.core import serializers
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
-from django.db import  models as dj_models
+from django.db import models as dj_models
 from enhydris.dbsync.models import Database
 
 try:

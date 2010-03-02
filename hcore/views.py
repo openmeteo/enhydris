@@ -45,7 +45,7 @@ def station_list(request, queryset, *args, **kwargs):
 
     if request.GET.has_key("ts_only") and request.GET["ts_only"]=="True":
         from django.db.models import Count
-        tmpset = Station.objects.annotate(tsnum=Count('timeseries'))
+        tmpset = queryset.annotate(tsnum=Count('timeseries'))
         queryset = tmpset.exclude(tsnum=0)
 
     if request.GET.has_key("check") and request.GET["check"]=="search":

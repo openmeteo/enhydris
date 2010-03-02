@@ -1,4 +1,3 @@
-
 // General Ajax function to get the station list content after a map event
 
 function render_station_list(post_data){
@@ -96,6 +95,7 @@ function station_search() {
 	pd_v = $('#political_division');
 	p_v = $('#prefecture'); 
 	d_v = $('#district');
+    
 	if ( pd_v.val() > 0 ) { 
 		if ( p_v.val() > 0 && ! p_v.is(':disabled')) { 
 			query += '&political_division=' + p_v.val();
@@ -126,7 +126,10 @@ function station_search() {
 	if ( t_v.val() > 0 && ! t_v.is(':disabled') ) { 
 		query += '&type=' + t_v.val();
 	} 
-	
+    
+    if ( $("#ts_only").is(':checked') ) {
+        query += '&ts_only=True';
+    }
 	var pathname = window.location.pathname;
 	window.location.replace(pathname+query);
 
