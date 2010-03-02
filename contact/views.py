@@ -9,12 +9,11 @@ from django import forms
 from django.forms.widgets import *
 from django.core.mail import mail_managers, BadHeaderError
 from django.template.loader import render_to_string
-from hydroscope.contact.forms import ContactForm
+from enhydris.contact.forms import ContactForm
 
 # global salt var
 SALT = settings.SECRET_KEY[:5]
 IMAGE_URL = settings.CAPTCHA_ROOT
-
 
 def contactview(request):
     """
@@ -82,6 +81,7 @@ def createcapcha(request):
     font=ImageFont.truetype(settings.CAPTCHA_FONT, 18)
     draw.text((3,0),imgtext, font=font, fill=(000,000,50))
     temp = IMAGE_URL + imghash + '.jpg'
+    print temp
     im.save(temp, "JPEG")
 
     return imghash

@@ -5,8 +5,8 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import signals
 from pthelma import timeseries
-from hydroscope.hcore.utils import *
-from hydroscope.dbsync.models import Database
+from enhydris.hcore.utils import *
+from enhydris.dbsync.models import Database
 
 # Lookups
 class Lookup(models.Model):
@@ -304,7 +304,7 @@ class Instrument(models.Model):
     def __unicode__(self):
         # This gets commended out because it causes significant delays #XXX:
         #return self.name or self.name_alt or self.type.descr or str(self.id)
-        return self.type.descr
+        return self.name or str(self.id)
 
 # Time series and related models
 
@@ -446,5 +446,5 @@ if hasattr(settings, 'USERS_CAN_ADD_CONTENT')\
         signals.post_save.connect(make_user_editor, User)
 
 from django.db.models.signals import post_syncdb
-import hydroscope.hcore.signals
-post_syncdb.connect(hydroscope.hcore.signals.after_syncdb)
+import enhydris.hcore.signals
+post_syncdb.connect(enhydris.hcore.signals.after_syncdb)

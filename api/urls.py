@@ -1,8 +1,8 @@
 from django.conf.urls.defaults import *
 from piston.resource import Resource
 from piston.emitters import Emitter
-from hydroscope.api.handlers import *
-from hydroscope.api.emitters import CFEmitter
+from enhydris.api.handlers import *
+from enhydris.api.emitters import CFEmitter
 
 Emitter.register('json', CFEmitter, 'application/json; charset=utf-8')
 

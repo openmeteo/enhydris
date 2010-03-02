@@ -1,6 +1,6 @@
 
 from django.contrib import admin
-from hydroscope.permissions.models import Permission
+from enhydris.permissions.models import Permission
 
 class PermissionAdmin(admin.ModelAdmin):
     model = Permission

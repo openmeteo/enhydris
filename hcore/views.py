@@ -16,9 +16,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.db.models import Q
 from django.utils import simplejson
-from hydroscope.hcore.models import *
-from hydroscope.hcore.decorators import filter_by, sort_by
-from hydroscope.hcore.forms import StationForm, TimeseriesForm, InstrumentForm
+from enhydris.hcore.models import *
+from enhydris.hcore.decorators import filter_by, sort_by
+from enhydris.hcore.forms import StationForm, TimeseriesForm, InstrumentForm
 from django.utils.html import escape
 
 ####################################################

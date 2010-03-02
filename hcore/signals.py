@@ -4,7 +4,7 @@ from django.db import transaction
 def after_syncdb(sender, **kwargs):
     import sys
     from django.db import connection
-    if sender.__name__!='hydroscope.hcore.models': return
+    if sender.__name__!='enhydris.hcore.models': return
     cursor = connection.cursor()
 
     sys.stderr.write("Creating table ts_records...\n")

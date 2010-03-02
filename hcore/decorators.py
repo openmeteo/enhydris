@@ -1,4 +1,4 @@
-from hydroscope.hcore.models import Station
+from enhydris.hcore.models import Station
 
 #############################################################
 # Decorators for sorting and filtering

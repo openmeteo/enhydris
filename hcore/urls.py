@@ -2,8 +2,8 @@ from django.conf import settings
 from django.conf.urls.defaults import *
 from django.views.generic import list_detail
 
-from hydroscope.hcore import views
-from hydroscope.hcore.models import (Instrument, Timeseries, Station)
+from enhydris.hcore import views
+from enhydris.hcore.models import (Instrument, Timeseries, Station)
 
 instruments = {'queryset': Instrument.objects.all(),
                'template_object_name': 'instrument',}

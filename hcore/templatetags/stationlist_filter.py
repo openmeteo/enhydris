@@ -1,7 +1,7 @@
 import string
 from django.template import Library
 from django.conf import settings
-from hydroscope.hcore.models import *
+from enhydris.hcore.models import *
 
 register = Library()
 

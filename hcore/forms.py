@@ -12,8 +12,8 @@ from django.utils.translation import ugettext_lazy as _
 from registration.forms import RegistrationForm
 from ajax_select.fields import (AutoCompleteSelectMultipleField,
                                     AutoCompleteSelectField)
-from hydroscope.hcore.models import *
-from hydroscope.hcore.widgets import *
+from enhydris.hcore.models import *
+from enhydris.hcore.widgets import *
 
 
 

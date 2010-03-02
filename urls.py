@@ -5,8 +5,8 @@ from django.contrib import admin
 from django.views.generic.simple import direct_to_template
 from registration.views import register
 from profiles.views import create_profile, edit_profile, profile_detail
-from hydroscope.hcore.forms import HcoreRegistrationForm
-from hydroscope.hcore.views import terms, profile_view
+from enhydris.hcore.forms import HcoreRegistrationForm
+from enhydris.hcore.views import terms, profile_view
 
 admin.autodiscover()
 
@@ -35,7 +35,7 @@ urlpatterns = patterns('',
 
 
     # contact form
-    (r'^contact/$', include('hydroscope.contact.urls')),
+    (r'^contact/$', include('enhydris.contact.urls')),
     # terms of usage
     (r'^terms/$', terms),
 
@@ -46,6 +46,6 @@ urlpatterns = patterns('',
     (r'^admin/(.*)', admin.site.root),
     (r'^grappelli/', include('grappelli.urls')),
     (r'^ajax/', include('ajax_select.urls')),
-    (r'^api/', include('hydroscope.api.urls')),
-    (r'', include('hydroscope.hcore.urls')),
+    (r'^api/', include('enhydris.api.urls')),
+    (r'', include('enhydris.hcore.urls')),
 )

@@ -4,7 +4,7 @@ These template tags are for counting. Used in the frontpage stats
 
 from django.template import Library, Node, TemplateSyntaxError
 from django.conf import settings
-from hydroscope.hcore.models import *
+from enhydris.hcore.models import *
 
 register = Library()
 

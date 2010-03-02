@@ -17,7 +17,7 @@ from django.core import serializers
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 from django.db import  models as dj_models
-from hydroscope.dbsync.models import Database
+from enhydris.dbsync.models import Database
 
 try:
     import urllib2

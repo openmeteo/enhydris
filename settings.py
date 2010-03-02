@@ -1,4 +1,4 @@
-# Django settings for hydroscope project.
+# Django settings for enhydris project.
 # coding=UTF-8
 import sys
 import os.path
@@ -136,7 +136,7 @@ MIDDLEWARE_CLASSES = (
     'django_sorting.middleware.SortingMiddleware',
 )
 
-ROOT_URLCONF = 'hydroscope.urls'
+ROOT_URLCONF = 'enhydris.urls'
 
 TEMPLATE_DIRS = (
     os.path.join(os.path.dirname(sys.modules[__name__].__file__), 'templates'),
@@ -164,10 +164,10 @@ INSTALLED_APPS = (
     'ajax_select',
 
     # Hydroscope Apps
-    'hydroscope.dbsync',
-    'hydroscope.hcore',
-    'hydroscope.contact',
-    'hydroscope.api',
-    'hydroscope.permissions',
+    'enhydris.dbsync',
+    'enhydris.hcore',
+    'enhydris.contact',
+    'enhydris.api',
+    'enhydris.permissions',
 
 )

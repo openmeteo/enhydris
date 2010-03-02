@@ -1,7 +1,7 @@
 
 from south.db import db
 from django.db import models
-from hydroscope.hcore.models import *
+from enhydris.hcore.models import *
 
 class Migration:
     

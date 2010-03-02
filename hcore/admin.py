@@ -4,8 +4,8 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
-from hydroscope.hcore.models import *
-from hydroscope.hcore.forms import *
+from enhydris.hcore.models import *
+from enhydris.hcore.forms import *
 
 ##########################################
 

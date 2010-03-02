@@ -1,7 +1,7 @@
 import string
 from piston.handler import BaseHandler
 from piston.utils import rc
-from hydroscope.hcore.models import *
+from enhydris.hcore.models import *
 
 
 class StationHandler(BaseHandler):
