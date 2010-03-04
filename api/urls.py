@@ -1,10 +1,15 @@
 from django.conf.urls.defaults import *
 from piston.resource import Resource
 from piston.emitters import Emitter
+from enhydris.api.authentication import RemoteInstanceAuthentication
 from enhydris.api.handlers import *
-from enhydris.api.emitters import CFEmitter
+from enhydris.api.emitters import CFEmitter, TSEmitter
 
+# JSON emitter for sync db process
 Emitter.register('json', CFEmitter, 'application/json; charset=utf-8')
+# hts emitter for remote hts file downloading (incl. http authentication)
+Emitter.register('hts', TSEmitter, 'text/vnd.openmeteo.timeseries;charset=iso-8859-7')
+auth = RemoteInstanceAuthentication(realm="Timeseries realm")
 
 # Used for gis
 station_handler = Resource(StationHandler)
@@ -41,6 +46,10 @@ TimeZone_Resource = Resource(TimeZone_Handler)
 TimeStep_Resource = Resource(TimeStep_Handler)
 Timeseries_Resource = Resource(Timeseries_Handler)
 
+# Used for timeseries data
+TSDATA_Resource = Resource(handler=TSDATA_Handler, authentication=auth)
+
+# urls
 urlpatterns = patterns('',
    url(r'^station/(?P<station_id>\d+)/', station_handler),
    url(r'^station_list/', station_list_handler),
@@ -73,4 +82,5 @@ urlpatterns = patterns('',
     url(r'^TimeZone/$', TimeZone_Resource),
     url(r'^TimeStep/$', TimeStep_Resource),
     url(r'^Timeseries/$', Timeseries_Resource),
+    url(r'^tsdata/(?P<ts_id>\d+)/$', TSDATA_Resource, {'emitter_format': 'hts'} ),
 )

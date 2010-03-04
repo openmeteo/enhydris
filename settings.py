@@ -104,6 +104,10 @@ FILTER_POLITICAL_SUBDIVISION2_NAME= _('Prefecture')
 USERS_CAN_ADD_CONTENT=False
 SITE_CONTENT_IS_FREE=False
 
+
+PISTON_DISPLAY_ERRORS = True
+PISTON_EMAIL_ERRORS = True
+
 # Options for ajax selects
 AJAX_LOOKUP_CHANNELS = {
     'maintainers': dict(model='auth.User', search_field='username'),

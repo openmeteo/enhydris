@@ -1,8 +1,8 @@
 import string
+from django.shortcuts import get_object_or_404
 from piston.handler import BaseHandler
 from piston.utils import rc
 from enhydris.hcore.models import *
-
 
 class StationHandler(BaseHandler):
     allowed_methods = ('GET',)
@@ -25,7 +25,7 @@ class StationListHandler(BaseHandler):
     allowed_methods = ('POST',)
     model = Station
 
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         """
         Return a set of station objects.
 
@@ -44,7 +44,20 @@ class StationListHandler(BaseHandler):
                     response.append(station)
                 except Station.DoesNotExist:
                     pass
+
         return response
+
+# Timeseries handler for ts data
+class TSDATA_Handler(BaseHandler):
+    """
+    This handler is responsible for taking a timeseries id and returning the
+    actual timeseries data to the client.
+    """
+    def read(self, request, ts_id, *args, **kwargs):
+        timeseries = get_object_or_404(Timeseries, pk=int(ts_id))
+        return timeseries
+
+# Regular handlers for the rest of the models
 
 class Lookup_Handler(BaseHandler):
     """
