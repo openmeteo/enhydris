@@ -1,12 +1,14 @@
 jQuery(document).ready(function(){
     $("#hidePanel").click(function(){
         $("#leftofmap").hide();
+		google.maps.event.trigger(MAP, 'resize');
         $("#mapcontent").show();
         $("#hp").attr("src","/site_media/images/icons/resultset_previous_disabled.png");
         $("#sp").attr("src","/site_media/images/icons/resultset_next.png");
         $("#hm").attr("src","/site_media/images/icons/resultset_next.png");
         $("#sm").attr("src","/site_media/images/icons/resultset_previous_disabled.png");
         $("#show_stations").removeAttr("disabled");
+
     });
 
     $("#showPanel").click(function(){
@@ -44,18 +46,3 @@ jQuery(document).ready(function(){
         el.hide();
     }
 });
-    
-$(document).ready(function (){
-        station_list = ""; /* WHAT NOW? */
-        gis_page = "gis-server/get_map/station_list/";
-        $.post(gis_page, {'station_list': station_list}, placeMap)
-        $("#map_data").html("<p>Error contacting GIS server.</p>");
-    });
-
-    function placeMap( RContent, RStatus) {
-        if ( RStatus == "Success" ) {
-            $("#map_data").html(RContent);
-        } else {
-            $("#map_data").html("<p>Error contacting GIS server.</p>");
-        }
-    }
