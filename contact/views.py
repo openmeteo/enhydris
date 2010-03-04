@@ -81,7 +81,6 @@ def createcapcha(request):
     font=ImageFont.truetype(settings.CAPTCHA_FONT, 18)
     draw.text((3,0),imgtext, font=font, fill=(000,000,50))
     temp = IMAGE_URL + imghash + '.jpg'
-    print temp
     im.save(temp, "JPEG")
 
     return imghash
