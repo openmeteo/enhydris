@@ -416,7 +416,7 @@ class Timeseries(models.Model):
             if (self.nominal_offset_minutes is None
                                 and self.nominal_offset_months is not None) \
                         or (self.nominal_offset_minutes is not None
-                                    and self.nominal_offset_Months is None):
+                                    and self.nominal_offset_months is None):
                 raise Exception(_("Invalid time step: nominal offsets must be both null or both not null"))
         super(Timeseries, self).save(force_insert, force_update)
 
