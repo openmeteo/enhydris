@@ -167,7 +167,11 @@
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Instrument' %}</th>
+				{% if timeseries.instrument %}
                 <td><a href="{% url instrument_detail timeseries.instrument %}">{{ timeseries.instrument }}</a></td>
+				{% else %} 
+                <td>None</td>
+				{% endif %}
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Time Step' %}</th>
