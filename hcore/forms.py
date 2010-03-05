@@ -140,32 +140,24 @@ class TimeseriesForm(ModelForm):
                 return None
             fdata = self.cleaned_data['data']
             fdata.seek(0)
-            lines = len(fdata.readlines())
-
-            if fdata.content_type != 'application/octet-stream':
-                err_msg = _("File doesn\'t seem to be of the\
-                                            appropriate type.")
-                raise forms.ValidationError(err_msg)
-
-
-            #check headers
-            if lines < 15:
-                err_msg = _("File doesn\'t seem to contain valid data.")
-                raise forms.ValidationError(err_msg)
-
-            #check all lines!
-            fdata.seek(0)
-            start = next(s for s in range(lines) if fdata.readline() == '\r\n')
-            fdata.seek(0)
             adata = fdata.readlines()
 
-            # start reading at start+1 (start is the empty line)
-            for line in adata[start+1:]:
-                if not re.match(
-                    '^\d{4}-\d{2}-\d{2} (?:\d{2}:\d{2})?,(\d)*(?:\.\d+)?,'
-                    '.*\r\n$', line):
-                    err_msg = _("File doesn\'t seem to contain valid data.")
-                    raise forms.ValidationError(err_msg)
+            try:
+                line_counter = 0
+                in_header = True
+                for line in adata:
+                    line_counter += 1
+                    if in_header:
+                        if adata[0].isspace(): in_header = False
+                        continue
+                    if line.isspace() and line_counter==len(adata): break
+                    if not re.match(
+                        '^\d{4}-\d{2}-\d{2} (?:\d{2}:\d{2})?,(\d)*(?:\.\d+)?,'
+                        '.*\r\n$', line):
+                        raise forms.ValidationError(_("Invalid record"))
+            except Exception as e:
+                raise forms.ValidationError(_("Error in file: %s at line %d.")
+                    % (str(e), line_counter))
             return self.cleaned_data["data"]
 
     @db.transaction.commit_manually
