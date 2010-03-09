@@ -113,9 +113,11 @@ class TimeseriesForm(ModelForm):
     which a user may upload additional data.
     """
     gentity = forms.ModelChoiceField(Gentity.objects.all())
-    data = forms.FileField(required=False)
-    data_policy = forms.ChoiceField(label=_('New data policy'),
-                                    choices=(('A','Append to existing'),
+    if hasattr(settings, 'STORE_TSDATA_LOCALLY') and\
+        settings.STORE_TSDATA_LOCALLY:
+        data = forms.FileField(required=False)
+        data_policy = forms.ChoiceField(label=_('New data policy'),
+                                        choices=(('A','Append to existing'),
                                              ('O','Overwrite existing'),))
 
 
@@ -170,7 +172,7 @@ class TimeseriesForm(ModelForm):
             tseries.save()
 
         # Handle pushing additional data if present back to the db
-        if self.cleaned_data['data']:
+        if 'data' in self.cleaned_data and self.cleaned_data['data']:
             ts = timeseries.Timeseries(int(self.instance.id))
             self.cleaned_data['data'].seek(0)
             lines = len(self.cleaned_data['data'].readlines())

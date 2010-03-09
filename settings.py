@@ -65,8 +65,6 @@ MEDIA_URL = '/site_media/'
 CAPTCHA_ROOT=os.path.join(PROJECT_PATH, 'site_media/captchas/')
 CAPTCHA_FONT=os.path.join(PROJECT_PATH, 'site_media/arizona.ttf')
 
-
-
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
@@ -104,9 +102,22 @@ FILTER_POLITICAL_SUBDIVISION2_NAME= _('Prefecture')
 USERS_CAN_ADD_CONTENT=False
 SITE_CONTENT_IS_FREE=False
 
+# Options for timeseries data
+# If this is set to false then users cannot upload timeseries data to this
+# instance and can ogly view existing data. Also, in order to download the
+# data, the REMOTE_INSTANCE_CREDENTIALS should be set for the instance that all
+# the data came from.
+STORE_TSDATA_LOCALLY=False
 
-PISTON_DISPLAY_ERRORS = True
-PISTON_EMAIL_ERRORS = True
+# Domain-specific credentials for instance authentication.
+# Used primarily when the 'STORE_TSDATA_LOCALLY=False' in order to pull
+# timeseries data from the originating hydroscope instance using
+# username/password authentication. The user credentials must belong to a
+# superuser.
+#
+# For example to be able to pull from kyy.hydroscope.gr define:
+#REMOTE_INSTANCE_CREDENTIALS = {'kyy.hydroscope.gr': ('myusername', 'mypassword')}
+
 
 # Options for ajax selects
 AJAX_LOOKUP_CHANNELS = {

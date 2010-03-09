@@ -16,10 +16,13 @@ from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.db.models import Q
 from django.utils import simplejson
+from django.utils.html import escape
+from django.utils.translation import ugettext_lazy as _
 from enhydris.hcore.models import *
 from enhydris.hcore.decorators import filter_by, sort_by
 from enhydris.hcore.forms import StationForm, TimeseriesForm, InstrumentForm
-from django.utils.html import escape
+
+
 
 ####################################################
 # VIEWS
@@ -211,67 +214,177 @@ def get_subdivision(request, division_id):
     response.write("]")
     return response
 
+
+TS_ERROR = "There seems to be some problem with our internal infrastucture. The"
+" admins have been notified of this and will try to resolve the matter as soon as"
+" possible. Please try again later. Please try again later."
+
 @login_required
 def download_timeseries(request, object_id):
-    """Return plain text data of a specific timeseries.
-
-    NOTE: All this function is obsolete the time it's written. It's only
-    intended as proof-of-concept to download timeseries and open them in
-    Hydrognomon. Changes are required on Hydrognomon, in order to proper
-    implement version 2 of the timeseries "File format" here and in Hydrognomon,
-    and in order to do proper security checks. In addition, all flags are
-    removed before downloading timeseries, otherwise the current version of
-    Hydrognomon is in trouble.
+    """
+    This function handles timeseries downloading either from the local db or
+    from a remote instance.
     """
 
     timeseries = get_object_or_404(Timeseries, pk=int(object_id))
 
-    # Determine time step and convert it to old format
-    t = timeseries.time_step
-    if t:
-        minutes, months = (t.length_minutes, t.length_months)
+    # Check whether this instance has local store enabled or else we need to
+    # fetch ts data from remote instance
+    if hasattr(settings, 'STORE_TSDATA_LOCALLY') and\
+        settings.STORE_TSDATA_LOCALLY:
+        """Return plain text data of a specific timeseries.
+
+        NOTE: All this function is obsolete the time it's written. It's only
+        intended as proof-of-concept to download timeseries and open them in
+        Hydrognomon. Changes are required on Hydrognomon, in order to proper
+        implement version 2 of the timeseries "File format" here and in Hydrognomon,
+        and in order to do proper security checks. In addition, all flags are
+        removed before downloading timeseries, otherwise the current version of
+        Hydrognomon is in trouble.
+        """
+
+        # Determine time step and convert it to old format
+        t = timeseries.time_step
+        if t:
+            minutes, months = (t.length_minutes, t.length_months)
+        else:
+            minutes, months = ( 5, 0)
+        old_timestep = 0
+        if   (minutes, months) == (   5,  0): old_timestep = 7
+        elif (minutes, months) == (  10,  0): old_timestep = 1
+        elif (minutes, months) == (  60,  0): old_timestep = 2
+        elif (minutes, months) == (1440,  0): old_timestep = 3
+        elif (minutes, months) == (   0,  1): old_timestep = 4
+        elif (minutes, months) == (   0, 12): old_timestep = 5
+        time_step_strict = (not timeseries.nominal_offset_minutes) and (
+                                            not timeseries.nominal_offset_months)
+        time_step_strict = time_step_strict and 'True' or 'False'
+
+        # Create a proper title and comment
+        title = timeseries.name
+        if not title: title = 'id=%d' % (timeseries.id)
+        title = title.encode('iso-8859-7')
+        symbol = timeseries.unit_of_measurement.symbol.encode('iso-8859-7')
+        comment = [timeseries.variable.descr.encode('iso-8859-7'),
+                   timeseries.gentity.name.encode('iso-8859-7')]
+
+        ts = pthelma.timeseries.Timeseries(int(object_id))
+        ts.read_from_db(django.db.connection)
+        for k in ts.keys(): ts[k] = (ts[k], "") # Remove flags
+        response = HttpResponse(mimetype=
+                                'text/vnd.openmeteo.timeseries; charset=iso-8859-7')
+        response['Content-Disposition'] = "attachment; filename=%s.hts"%(object_id,)
+        response.write("Delimiter=,\r\n")
+        response.write('FlagDelimiter=" "\r\n')
+        response.write("DecimalSeparator=.\r\n")
+        response.write("DateFormat=yyyy-mm-dd HH:nn\r\n")
+        response.write("TimeStep=%d\r\n" % (old_timestep,))
+        response.write("TimeStepStrict=%s\r\n" % (time_step_strict,))
+        response.write("MUnit=%s\r\n" % (symbol,))
+        response.write('Flags=""\r\n')
+        response.write("Variable=0\r\n")# % (timeseries.variable.descr,))
+        response.write("VariableType=Unknown\r\n")
+        response.write("Title=%s\r\n" % (title,))
+        for c in comment: response.write("Comment=%s\r\n" % (c,))
+        response.write("\r\n")
+        ts.write(response)
+        return response
     else:
-        minutes, months = ( 5, 0)
-    old_timestep = 0
-    if   (minutes, months) == (   5,  0): old_timestep = 7
-    elif (minutes, months) == (  10,  0): old_timestep = 1
-    elif (minutes, months) == (  60,  0): old_timestep = 2
-    elif (minutes, months) == (1440,  0): old_timestep = 3
-    elif (minutes, months) == (   0,  1): old_timestep = 4
-    elif (minutes, months) == (   0, 12): old_timestep = 5
-    time_step_strict = (not timeseries.nominal_offset_minutes) and (
-                                        not timeseries.nominal_offset_months)
-    time_step_strict = time_step_strict and 'True' or 'False'
+        """
+        Here we use the piston api to fetch a specific timeseries data from the
+        original database from which it was synced. Since this requires http
+        authentication, we use the username/password stored in the database instance to
+        connect.
 
-    # Create a proper title and comment
-    title = timeseries.name
-    if not title: title = 'id=%d' % (timeseries.id)
-    title = title.encode('iso-8859-7')
-    symbol = timeseries.unit_of_measurement.symbol.encode('iso-8859-7')
-    comment = [timeseries.variable.descr.encode('iso-8859-7'),
-               timeseries.gentity.name.encode('iso-8859-7')]
+        NOTE: The user used for the sync should be a superuser in the remote
+        instance.
+        """
+        import urllib2, re, base64
 
-    ts = pthelma.timeseries.Timeseries(int(object_id))
-    ts.read_from_db(django.db.connection)
-    for k in ts.keys(): ts[k] = (ts[k], "") # Remove flags
-    response = HttpResponse(mimetype=
-                            'text/vnd.openmeteo.timeseries; charset=iso-8859-7')
-    response['Content-Disposition'] = "attachment; filename=%s.hts"%(object_id,)
-    response.write("Delimiter=,\r\n")
-    response.write('FlagDelimiter=" "\r\n')
-    response.write("DecimalSeparator=.\r\n")
-    response.write("DateFormat=yyyy-mm-dd HH:nn\r\n")
-    response.write("TimeStep=%d\r\n" % (old_timestep,))
-    response.write("TimeStepStrict=%s\r\n" % (time_step_strict,))
-    response.write("MUnit=%s\r\n" % (symbol,))
-    response.write('Flags=""\r\n')
-    response.write("Variable=0\r\n")# % (timeseries.variable.descr,))
-    response.write("VariableType=Unknown\r\n")
-    response.write("Title=%s\r\n" % (title,))
-    for c in comment: response.write("Comment=%s\r\n" % (c,))
-    response.write("\r\n")
-    ts.write(response)
-    return response
+        # Read the creds from the settings file
+        REMOTE_INSTANCE_CREDENTIALS = getattr(settings,
+                'REMOTE_INSTANCE_CREDENTIALS', {})
+
+        
+        # Get the original timeseries id and the source database
+        if timeseries.original_id and timeseries.original_db:
+            ts_id = timeseries.original_id
+            db_host = timeseries.original_db.hostname
+        else:
+            request.user.message_set.create(message="No data were found for "
+                    " these timeseries.")
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+        # Next we check the setting files for a uname/pass for this host
+        uname, pwd = REMOTE_INSTANCE_CREDENTIALS.get(db_host, (None,None))
+
+        # We craft the url
+        url = 'http://'+db_host + '/api/tsdata/' + str(ts_id)
+        req = urllib2.Request(url)
+
+        try:
+            handle = urllib2.urlopen(req)
+        except IOError, e:
+            # here we *want* to fail
+            pass
+        else:
+            # If we don't fail then the page isn't protected
+            # which means something is not right. Raise hell
+            # mail admins + return user notification.
+            request.user.message_set.create(message= TS_ERROR)
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+        if not hasattr(e, 'code') or e.code != 401:
+            # we got an error - but not a 401 error
+            request.user.message_set.create(message= TS_ERROR)
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+        authline = e.headers['www-authenticate']
+        # this gets the www-authenticate line from the headers
+        # which has the authentication scheme and realm in it
+
+        authobj = re.compile(
+            r'''(?:\s*www-authenticate\s*:)?\s*(\w*)\s+realm=['"]([^'"]+)['"]''',
+            re.IGNORECASE)
+        # this regular expression is used to extract scheme and realm
+        matchobj = authobj.match(authline)
+
+        if not matchobj:
+            # if the authline isn't matched by the regular expression
+            # then something is wrong
+            request.user.message_set.create(message= TS_ERROR)
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+        scheme = matchobj.group(1)
+        realm = matchobj.group(2)
+        # here we've extracted the scheme
+        # and the realm from the header
+        if scheme.lower() != 'basic':
+            # we don't support other auth
+            # mail admins + inform user of error
+            request.user.message_set.create(message= TS_ERROR)
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+        # now the good part.
+        base64string = base64.encodestring(
+                '%s:%s' % (uname, pwd))[:-1]
+        authheader =  "Basic %s" % base64string
+        req.add_header("Authorization", authheader)
+
+        try:
+            handle = urllib2.urlopen(req)
+        except IOError, e:
+            # here we shouldn't fail if the username/password is right
+            request.user.message_set.create(message= TS_ERROR)
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+        tsdata = handle.read()
+
+        response = HttpResponse(mimetype='text/vnd.openmeteo.timeseries;charset=iso-8859-7')
+        response['Content-Disposition']="attachment;filename=%s.hts"%(object_id,)
+
+        response.write(tsdata)
+        return response
 
 def terms(request):
     return render_to_response('terms.html', RequestContext(request,{}) )
