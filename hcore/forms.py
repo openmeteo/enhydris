@@ -112,7 +112,9 @@ class TimeseriesForm(ModelForm):
     This form extends the basic Timeseries model with a file field through
     which a user may upload additional data.
     """
+
     gentity = forms.ModelChoiceField(Gentity.objects.all())
+
     if hasattr(settings, 'STORE_TSDATA_LOCALLY') and\
         settings.STORE_TSDATA_LOCALLY:
         data = forms.FileField(required=False)
@@ -134,6 +136,7 @@ class TimeseriesForm(ModelForm):
             ids = [ p.object_id for p in perms]
             self.fields["gentity"].queryset = Gentity.objects.filter(
                                                 id__in=ids)
+
 
     def clean_data(self):
         # Here we should check if file contains valid timeseries data.
@@ -161,6 +164,44 @@ class TimeseriesForm(ModelForm):
                 raise forms.ValidationError(_("Error in file: %s at line %d.")
                     % (str(e), line_counter))
             return self.cleaned_data["data"]
+
+    def clean(self):
+        """
+        This function checks the timestep and offset values and reports
+        inconsistencies.
+        """
+        time_step = self.cleaned_data.get('time_step', None)
+        nominal_offset_minutes = self.cleaned_data.get('nominal_offset_minutes',
+                                                             None)
+        nominal_offset_months = self.cleaned_data.get('nominal_offset_months',
+                                                             None)
+        actual_offset_minutes = self.cleaned_data.get('actual_offset_minutes',
+                                                             None)
+        actual_offset_months = self.cleaned_data.get('nominal_offset_minutes',
+                                                             None)
+
+        if not time_step:
+            if nominal_offset_minutes or \
+                nominal_offset_months or \
+                actual_offset_minutes or \
+                actual_offset_months:
+                    raise forms.ValidationError(_("Invalid Timestep: If time step is"
+                                           " null, the offsets must also be null!"))
+
+        else:
+            if actual_offset_minutes is None \
+                or actual_offset_months is None:
+                raise forms.ValidationError(_("Invalid offset: If time step is"
+                         " not null, actual offset values must be provided!"))
+
+            if (nominal_offset_minutes is None \
+              and nominal_offset_months is not None) \
+              or (nominal_offset_minutes is not None \
+              and nominal_offset_months is None):
+                raise forms.ValidationError(_("Invalid offsets: Nominal"
+                              " offsets must be both null or both not null!"))
+
+        return self.cleaned_data
 
     @db.transaction.commit_manually
     def save(self, commit=True, *args,**kwargs):
