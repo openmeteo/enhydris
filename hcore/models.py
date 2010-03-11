@@ -244,7 +244,7 @@ class StationManager(models.Manager):
 
 
 class Station(Gpoint):
-    owner = models.ForeignKey(Lentity)
+    owner = models.ForeignKey(Lentity, related_name="owned_stations")
     type = models.ForeignKey(StationType)
     is_automatic = models.BooleanField()
     is_active = models.BooleanField()

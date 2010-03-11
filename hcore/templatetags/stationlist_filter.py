@@ -40,7 +40,7 @@ def filter_table(request, help_inline):
             'water_division': WaterDivision.objects.all(),
             'water_division': WaterDivision.objects.all(),
             'water_basin': WaterBasin.objects.all(),
-            'owner': Lentity.objects.all(),
+            'owner': [ l for l in Lentity.objects.all() if not l.owned_stations.all().count() == 0 ],
             'type': StationType.objects.all(),
             'get_vars': request.GET,
             'url_type': string.split(request.get_full_path(),sep="/")[1],
