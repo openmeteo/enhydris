@@ -1,3 +1,6 @@
+from django.conf import settings
+from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.contrib.auth.decorators import user_passes_test
 from enhydris.hcore.models import Station
 
 #############################################################
@@ -63,3 +66,28 @@ def sort_by(f):
             queryset = queryset.order_by(column)
         return f(request, queryset, *args, **nkwargs)
     return _dec
+
+##############################################################################
+# Custom login required decorator
+##############################################################################
+
+
+def timeseries_permission(function=None, redirect_field_name=REDIRECT_FIELD_NAME):
+    """
+    Decorator for timeseries_download view that checks if only authenticated
+    users have access to the data and then acts like the login_required
+    decorator. Otherwise, it just calls the function.
+    """
+
+    if hasattr(settings, 'TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS') and\
+            settings.TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
+        return function
+
+    actual_decorator = user_passes_test(
+        lambda u: u.is_authenticated(),
+        redirect_field_name=redirect_field_name
+    )
+
+    if function:
+        return actual_decorator(function)
+    return actual_decorator

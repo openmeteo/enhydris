@@ -172,6 +172,23 @@ ul.errorlist li {
   color: #c27878;
 }
 
+ul.notifications {
+    margin:0;
+    padding:0;
+    border: 1px solid red;
+    margin: 10px 0px;
+    padding:25px 10px 15px 50px;
+    background: url('../images/icons/delete.png')  no-repeat;
+    background-position: 10px center;
+    background-color: #FFBABA;
+}
+
+li.error {
+    color: #D8000C;
+
+    list-style-type: none;
+}
+
 .fielderrors {
   color: #c27878;
 }

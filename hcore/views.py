@@ -19,7 +19,7 @@ from django.utils import simplejson
 from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
 from enhydris.hcore.models import *
-from enhydris.hcore.decorators import filter_by, sort_by
+from enhydris.hcore.decorators import filter_by, sort_by, timeseries_permission
 from enhydris.hcore.forms import StationForm, TimeseriesForm, InstrumentForm
 
 
@@ -132,10 +132,18 @@ def timeseries_detail(request, queryset, object_id, *args, **kwargs):
     if hasattr(settings, 'USERS_CAN_ADD_CONTENT'):
         if settings.USERS_CAN_ADD_CONTENT:
             enabled_user_content = True
+
+
+    anonymous_can_download_data = False
+    if hasattr(settings, 'TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS') and\
+            settings.TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
+        anonymous_can_download_data = True
     tseries = get_object_or_404(Timeseries, id=object_id)
     related_station = tseries.related_station
     kwargs["extra_context"] = {'related_station': related_station,
-                              'enabled_user_content':enabled_user_content}
+                              'enabled_user_content':enabled_user_content,
+                              'anonymous_can_download_data':
+                                    anonymous_can_download_data}
 
     return list_detail.object_detail(request, queryset, object_id, *args, **kwargs)
 
@@ -215,11 +223,11 @@ def get_subdivision(request, division_id):
     return response
 
 
-TS_ERROR = "There seems to be some problem with our internal infrastucture. The"
+TS_ERROR = ("There seems to be some problem with our internal infrastucture. The"
 " admins have been notified of this and will try to resolve the matter as soon as"
-" possible. Please try again later. Please try again later."
+" possible.  Please try again later.")
 
-@login_required
+@timeseries_permission
 def download_timeseries(request, object_id):
     """
     This function handles timeseries downloading either from the local db or
@@ -293,7 +301,7 @@ def download_timeseries(request, object_id):
         """
         Here we use the piston api to fetch a specific timeseries data from the
         original database from which it was synced. Since this requires http
-        authentication, we use the username/password stored in the database instance to
+        authentication, we use the username/password stored in the settings file to
         connect.
 
         NOTE: The user used for the sync should be a superuser in the remote
@@ -305,14 +313,13 @@ def download_timeseries(request, object_id):
         REMOTE_INSTANCE_CREDENTIALS = getattr(settings,
                 'REMOTE_INSTANCE_CREDENTIALS', {})
 
-        
         # Get the original timeseries id and the source database
         if timeseries.original_id and timeseries.original_db:
             ts_id = timeseries.original_id
             db_host = timeseries.original_db.hostname
         else:
-            request.user.message_set.create(message="No data were found for "
-                    " these timeseries.")
+            request.notifications.error("No data was found for "
+                    " the requested timeseries.")
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
         # Next we check the setting files for a uname/pass for this host
@@ -323,7 +330,7 @@ def download_timeseries(request, object_id):
         req = urllib2.Request(url)
 
         try:
-            handle = urllib2.urlopen(req)
+            handle = urllib2.urlopen(req,{},10)
         except IOError, e:
             # here we *want* to fail
             pass
@@ -331,12 +338,12 @@ def download_timeseries(request, object_id):
             # If we don't fail then the page isn't protected
             # which means something is not right. Raise hell
             # mail admins + return user notification.
-            request.user.message_set.create(message= TS_ERROR)
+            request.notifications.error(TS_ERROR)
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
         if not hasattr(e, 'code') or e.code != 401:
             # we got an error - but not a 401 error
-            request.user.message_set.create(message= TS_ERROR)
+            request.notifications.error(TS_ERROR)
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
         authline = e.headers['www-authenticate']
@@ -352,7 +359,7 @@ def download_timeseries(request, object_id):
         if not matchobj:
             # if the authline isn't matched by the regular expression
             # then something is wrong
-            request.user.message_set.create(message= TS_ERROR)
+            request.notifications.error(TS_ERROR)
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
         scheme = matchobj.group(1)
@@ -362,7 +369,7 @@ def download_timeseries(request, object_id):
         if scheme.lower() != 'basic':
             # we don't support other auth
             # mail admins + inform user of error
-            request.user.message_set.create(message= TS_ERROR)
+            request.notifications.error(TS_ERROR)
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
         # now the good part.
@@ -375,7 +382,7 @@ def download_timeseries(request, object_id):
             handle = urllib2.urlopen(req)
         except IOError, e:
             # here we shouldn't fail if the username/password is right
-            request.user.message_set.create(message= TS_ERROR)
+            request.notifications.error(TS_ERROR)
             return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
         tsdata = handle.read()

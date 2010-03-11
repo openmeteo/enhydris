@@ -65,6 +65,10 @@ MEDIA_URL = '/site_media/'
 CAPTCHA_ROOT=os.path.join(PROJECT_PATH, 'site_media/captchas/')
 CAPTCHA_FONT=os.path.join(PROJECT_PATH, 'site_media/arizona.ttf')
 
+
+# Options for django-notify
+NOTIFICATIONS_STORAGE = 'session.SessionStorage'
+
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
@@ -101,13 +105,14 @@ FILTER_POLITICAL_SUBDIVISION2_NAME= _('Prefecture')
 # Options for site content
 USERS_CAN_ADD_CONTENT=False
 SITE_CONTENT_IS_FREE=False
+TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS=False
 
 # Options for timeseries data
 # If this is set to false then users cannot upload timeseries data to this
 # instance and can ogly view existing data. Also, in order to download the
 # data, the REMOTE_INSTANCE_CREDENTIALS should be set for the instance that all
 # the data came from.
-STORE_TSDATA_LOCALLY=False
+STORE_TSDATA_LOCALLY=True
 
 # Domain-specific credentials for instance authentication.
 # Used primarily when the 'STORE_TSDATA_LOCALLY=False' in order to pull
@@ -132,6 +137,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.i18n',
     'django.core.context_processors.media',
     'django.core.context_processors.request',
+    'django_notify.context_processors.notifications',
 )
 
 # List of callables that know how to import templates from various sources.
@@ -147,6 +153,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.gzip.GZipMiddleware',
+    'django_notify.middleware.NotificationsMiddleware',
     'pagination.middleware.PaginationMiddleware',
     'django_sorting.middleware.SortingMiddleware',
 )
@@ -184,5 +191,4 @@ INSTALLED_APPS = (
     'enhydris.contact',
     'enhydris.api',
     'enhydris.permissions',
-
 )
