@@ -192,13 +192,13 @@
                       {% if get_vars.owner %}
                           {% with get_vars.owner|intvalue as id_int %}
                             {% ifequal s.id id_int %}
-                              <option value="{{ s.id }}" selected="selected">{{ s.name_any }}</option>
+                              <option value="{{ s.id }}" selected="selected">{{ s }}</option>
                             {% else %}
-                              <option value="{{ s.id }}">{{ s.name_any }}</option>
+                              <option value="{{ s.id }}">{{ s }}</option>
                             {% endifequal %}
                           {% endwith %}
                       {% else %}
-                        <option value="{{ s.id }}">{{ s.name_any }}</option>
+                        <option value="{{ s.id }}">{{ s }}</option>
                       {% endif %}
                     {% endfor %}
                     </select>
