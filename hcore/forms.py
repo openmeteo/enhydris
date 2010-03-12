@@ -106,6 +106,31 @@ class InstrumentForm(ModelForm):
                                                 id__in=ids)
 
 
+def _int_xor(i1, i2):
+    """Return True if one and only one of i1 and i2 is zero."""
+    return (i1 or i2) and not (i1 and i2)
+
+class TimeStepForm(ModelForm):
+    """
+    Form for TimeStep
+    """
+
+    class Meta:
+        model = TimeStep
+
+
+    def clean(self):
+        """
+        This clean function ensures that length minutes and length months have
+        valid values.
+        """
+        length_minutes = self.cleaned_data.get('length_minutes', None)
+        length_months = self.cleaned_data.get('length_months', None)
+        if not _int_xor(length_minutes, length_months):
+            raise forms.ValidationError(_("Invalid timestep: exactly one of"
+                    " minutes and months must be zero"))
+
+        return self.cleaned_data
 
 class TimeseriesForm(ModelForm):
     """
@@ -119,6 +144,7 @@ class TimeseriesForm(ModelForm):
         settings.STORE_TSDATA_LOCALLY:
         data = forms.FileField(required=False)
         data_policy = forms.ChoiceField(label=_('New data policy'),
+                                        required=False,
                                         choices=(('A','Append to existing'),
                                              ('O','Overwrite existing'),))
 
@@ -177,7 +203,7 @@ class TimeseriesForm(ModelForm):
                                                              None)
         actual_offset_minutes = self.cleaned_data.get('actual_offset_minutes',
                                                              None)
-        actual_offset_months = self.cleaned_data.get('nominal_offset_minutes',
+        actual_offset_months = self.cleaned_data.get('actual_offset_months',
                                                              None)
 
         if not time_step:

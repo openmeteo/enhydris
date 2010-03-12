@@ -60,6 +60,7 @@ class UnitOfMeasurementAdmin(admin.ModelAdmin):
     list_display = [f.name for f in UnitOfMeasurement._meta.fields]
 
 class TimeStepAdmin(admin.ModelAdmin):
+    form = TimeStepForm
     list_display = [f.name for f in TimeStep._meta.fields]
 
 class TimeZoneAdmin(admin.ModelAdmin):
