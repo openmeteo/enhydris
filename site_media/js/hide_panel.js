@@ -1,7 +1,6 @@
 jQuery(document).ready(function(){
     $("#hidePanel").click(function(){
         $("#leftofmap").hide();
-		google.maps.event.trigger(MAP, 'resize');
         $("#mapcontent").show();
         $("#hp").attr("src","/site_media/images/icons/resultset_previous_disabled.png");
         $("#sp").attr("src","/site_media/images/icons/resultset_next.png");

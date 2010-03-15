@@ -3,26 +3,52 @@
 {% load pagination_tags %}
 {% load sorting_tags %}
 {% load stationlist_filter %}
-{% load srid_conversion %}
 {% block extracss %}
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/map_page.css"/>
+    <link type="text/css" href="{{ MEDIA_URL }}css/smoothness/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
+    <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
 {% endblock %} 
 
-{% block extrajs %}
+{% block extra_head %}
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/ajax_calls.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/hide_panel.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/checkbox_store.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/hide_disable.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/gis.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.getUrlParam.js"></script>
-    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/checkbox_store.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/1.5/js/dojo/dijit/themes/tundra/tundra.css">
+    <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=1.5"></script>
+    <script type="text/javascript">djConfig = { parseOnLoad:true }</script>
+
     <script type="text/javascript">
-    var sids = [];    
-	var MAP;
-    $(document).ready(initialize);
+
+
+	// GIS init stuff
+	var map, stations=[];
+    var queryStations, queryStationsTask;
+	var queryTask, query, featureSet;
+    var Server = "147.102.160.29"; 
+
+	// THYAMIS "147.102.160.29"; //Hermes "192.168.200.249"; //Server 85.72.53.43 if outside GEOSET
+    var defaultSymbol, highlightSymbol;
+    var initialExtent;
+
+    dojo.require("esri.map");
+    dojo.require("esri.toolbars.draw");
+    dojo.require("esri.tasks.query");
+    dojo.require("esri.tasks.geometry");
+
+//	dojo.addOnLoad( function() { WhenSelected(); });
+    dojo.addOnLoad( function() {init(); });
+
+	var sids = [];
+    
     $(document).ready(function(){
-		var path = new String(window.location);
-		if ( path.indexOf("&selected_ids") >= 0 ) {	
-			sids = $(document).getUrlParam("selected_ids").split("%2C");
+		if ( $(document).getUrlParam('selected_ids') ) {
+			syncSids();	
 		}
-		
+
         /* Buttons hovering handling */
         $('.fg-button').hover(
             function(){ 
@@ -32,8 +58,6 @@
                 $(this).removeClass("ui-state-hover"); 
             }
         );
-
-
         $('#help_dialog').dialog({
             bgiframe: true,
             height: 300,
@@ -55,20 +79,21 @@
         tooltip('.qtip_hideMap', '{% trans "Click to hide the map area" %}', "topLeft", "bottomRight");
         tooltip('.qtip_showPanel', '{% trans "Click to expand the station list" %}', "topRight", "bottomLeft");
         tooltip('.qtip_showMap', '{% trans "Click to expand the map" %}', "topLeft", "bottomRight");
+        tooltip('#show_stations', '{% trans "Locate stations on the map" %}', "topRight", "bottomRight");
         tooltip('#select_stations', '{% trans "Select stations to locate on the map" %}', "topRight", "bottomLeft");
 
         $('#select_stations').click(function (){
             var tk = $("input:checked[class=station_selected_ids]")
             var ut = $("input:not(:checked)[class=station_selected_ids]")
 
-            tk.each(function(){
-				tk.attr("checked","");
-				tk.each(function() {sids.pop($(this).val())});
+           tk.each(function(){
+				$(this).attr("checked","");
+				sids = removeItem(sids, $(this).attr("value"));
 			});
 
 			ut.each(function(){
-				ut.attr("checked","checked")
-				ut.each(function() {sids.push($(this).val())});
+				$(this).attr("checked","checked");
+				sids.push($(this).attr("value"));
 			});
 
         });
@@ -95,77 +120,24 @@
             render_station_list({ station_list:"10001,10002" })
         });
 
-		$('#show_stations').bind('click', displayMarkers);
+		$("#show_stations").click(function(){
+			// get all stations ids from checkboxes and url address
+			slist = [];
+			slist = "(";
+			for ( i in sids ) {
+				slist += '\''+sids[i]+'\',';
+			}
+			if (slist.length > 2) {
+				slist = slist.substring(0,slist.length-1);
+			}
+			slist += ")";
+			
+			//feed ids to the GIS calling function
+			StationSelect(slist);
 
 	});
 
-	function displayMarkers() {
-		google.maps.Map.prototype.clearMarkers()
-		var stores = [];
-		var markers = [];
-		var infowindow = [];
-
-		for ( i=0; i< sids.length ; i++  ) {
-			long_id = "#"+sids[i]+"_longitude";
-			lat_id = "#"+sids[i]+"_latitude";
-			name_id = "#"+sids[i]+"_name";
-			longitude = $(long_id).val();
-			latitude = $(lat_id).val();
-			name = $(name_id).html();
-			if(! longitude || ! latitude ) {
-				continue;
-			}	
-
-			stores[i] = new google.maps.LatLng(longitude, latitude);
-
-			markers[i] = new google.maps.Marker({
-				position: stores[i], 
-				map: MAP, 
-				title: name
-			});
-			/*
-
-			infowindow[i] = new google.maps.InfoWindow({
-				content: name
- 			});
-
-			google.maps.event.addListener(markers[i], 'click', function() {
-				(infowindow[i]).open(MAP,markers[i]);
-			});
-			*/
-		}
-		}
-
-    function initialize() {
-        var latlng = new google.maps.LatLng(38.11727165830543, 23.8018798828125);
-        var myOptions = {zoom: 8, center: latlng, mapTypeId: google.maps.MapTypeId.ROADMAP};
-        MAP = new google.maps.Map(document.getElementById("map_data"), myOptions);
-		};
-
-	google.maps.Map.prototype.markers = new Array();
-
-	google.maps.Map.prototype.getMarkers = function() {
-		return this.markers
-	};
-
-
-	google.maps.Map.prototype.clearMarkers = function() {
-		for(var i=0; i<this.markers.length; i++){
-			this.markers[i].setMap(null);
-		}
-		this.markers = new Array();
-	};
-
-
-	google.maps.Marker.prototype._setMap = google.maps.Marker.prototype.setMap;
-
-
-	google.maps.Marker.prototype.setMap = function(map) {
-		if (map) {
-			map.markers[map.markers.length] = this;
-		}
-		this._setMap(map);
-	}
+    });
 
     </script>
 
@@ -251,14 +223,12 @@
               <tr class="{% cycle 'odd' 'even' %}">
                 {% filter_station_ids request station_id %} 
                 <td><a href="{{ station_url }}">{{ station_id }}</a></td>
-                <td id="{{station.id}}_name">{{ station.name }}</td>
+                <td>{{ station.name }}</td>
                 <td class="hide_extra">{{ station.water_basin.name }}</td>
                 <td class="hide_extra">{{ station.water_division.name }}</td>
                 <td class="hide_extra">{{ station.political_division.name }}</td>
                 <td class="hide_extra">{{ station.owner_any }}</td>
                 <td class="hide_extra">{{ station.type.descr }}</td>
-				<td class="hidden"><input id="{{station.id}}_longitude" value={% get_longitude station_id %} /></td>
-				<td class="hidden"><input id="{{station.id}}_latitude" value={% get_latitude station_id %} /></td>
               </tr>
             {% endwith %}
             {% endfor %}
@@ -273,7 +243,7 @@
     </div>
 
     <div id="mapcontent">
-        <div id="map_data" style="width:auto !important;">
+        <div id="map_data" class="tundra" style="border:1px solid #ccc;">
         </div>
     </div>
 
