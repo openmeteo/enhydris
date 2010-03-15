@@ -328,9 +328,8 @@ def download_timeseries(request, object_id):
         # We craft the url
         url = 'http://'+db_host + '/api/tsdata/' + str(ts_id)
         req = urllib2.Request(url)
-
         try:
-            handle = urllib2.urlopen(req,{},10)
+            handle = urllib2.urlopen(req,timeout=10)
         except IOError, e:
             # here we *want* to fail
             pass
