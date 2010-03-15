@@ -157,7 +157,7 @@ class PoliticalDivision(Garea):
     f_dependencies = ['Garea']
     def __unicode__(self):
         result = self.short_name or self.name or self.short_name_alt \
-            or self.name_alt or self.id
+            or self.name_alt or str(self.id)
         if self.parent: result = result + ', ' + self.parent.__unicode__()
         return result
 
