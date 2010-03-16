@@ -5,6 +5,7 @@
 {% load stationlist_filter %}
 
 {% block extracss %}
+
 {% endblock %}
 
 {% block extrajs %}
@@ -35,12 +36,37 @@
              function() {  // mouseout 
                   $(this).removeClass('highlight'); 
         });
-    });
-    </script>
-    <script type="text/javascript">
-        $(function() {
+
+		$(function() {
             $("#tabs").tabs();
         });
+
+
+	  // Reset Font Size
+	  var originalFontSize = $('.data_table').css('font-size');
+		$(".resetFont").click(function(){
+		$('.data_table').css('font-size', originalFontSize);
+	  });
+	  // Increase Font Size
+	  $(".increaseFont").click(function(){
+		var currentFontSize = $('.data_table').css('font-size');
+		var currentFontSizeNum = parseFloat(currentFontSize, 10);
+		var newFontSize = currentFontSizeNum + 0.5;
+		$('.data_table').css('font-size', newFontSize);
+		return false;
+	  });
+	  // Decrease Font Size
+	  $(".decreaseFont").click(function(){
+		var currentFontSize = $('.data_table').css('font-size');
+		var currentFontSizeNum = parseFloat(currentFontSize, 10);
+		var newFontSize = currentFontSizeNum - 0.5;
+		$('.data_table').css('font-size', newFontSize);
+		return false;
+	  });
+
+    });
+
+
     </script>
 {% endblock %}
 
@@ -95,6 +121,7 @@
            <h3 style="font-size:14pt;font-weight:200;">
                {% trans 'Station Catalogue' %}
            </h3>
+			
             {% if enabled_user_content %}
                 {% if perms.hcore.add_station %}
                 <p class="anchor_override" style="cursor:pointer;text-align:left">
@@ -107,7 +134,13 @@
             {% endif %}
 
             {% if station_list %}
-            <table class="tablesorter tablehighlighted data_table">
+			<span style="float:right"> 
+				<img class="decreaseFont" style="cursor:pointer" src="{{MEDIA_URL}}images/icons/user-decrease.png">
+				<img class="resetFont" style="cursor:pointer" src="{{MEDIA_URL}}images/icons/user-reset.png">
+				<img class="increaseFont" style="cursor:pointer" src="{{MEDIA_URL}}images/icons/user-increase.png">
+			</span>
+
+            <table class="tablesorter tablehighlighted data_table" style='width:100%'>
               <thead>
                 <tr>
                   <th>{% anchor id 'ID' %}</th>

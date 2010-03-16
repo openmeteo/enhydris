@@ -274,7 +274,7 @@ table.formset td {
 
 /* menu */ 
 #menu{ margin:0px; list-style:none; color:#fff; line-height:45px; display:inline-block; 
-    float:left; z-index:1000; position:absolute; min-width:570px;} 
+    float:left; z-index:1000;  min-width:570px;} 
 #menu a { color:#fff; text-decoration:none; } 
 #menu > li {background:#172322 none repeat scroll 0 0; cursor:pointer; float:left; position:relative; 
     padding:0px 10px;max-height: 45px;} 
