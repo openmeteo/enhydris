@@ -60,16 +60,6 @@ def gracefull_exit(status):
     transaction.commit()
     transaction.leave_transaction_management()
 
-    # close all file descriptors
-    # (normally we should close all up to 1024 but since the program opens up
-    # at most a few fds, 32 is a pretty good worst case scenario.
-    for fd in range(3,32):
-        try:
-            os.fsync(fd)
-            os.close(fd)
-        except (OSError, IOError):
-            pass
-
     # exit
     sys.exit(status)
 
@@ -400,9 +390,8 @@ class Command(BaseCommand):
             action='store_true',
             help='Doesn\'t actually submit any changes, just fetches remote'\
                  ' dumps and saves them locally.'),
-        make_option('--clean-first', '-C', dest='clean', default=False,
-            action='store_true',
-            help='Before syncing the local db, it flushes all data'),
+        make_option('--work-dir', '-w', dest='cwd', default='/tmp',
+            help='Define the temp dir in which all temp files will be stored'),
         make_option('--no-backups', '-N', dest='bkp', default=False,
             action='store_true',
             help='Default behaviour is to take a backup of the local db'\
@@ -446,6 +435,7 @@ class Command(BaseCommand):
         fetch = options.get('fetch')
         skip = options.get('skip')
         resume = options.get('resume')
+        cwd = options.get('cwd')
 
         # check if we have a remote node and an app
         if not remote or not app:
@@ -504,13 +494,20 @@ class Command(BaseCommand):
             MSG("The following models will be excluded %s" %
                 [m for m in exc_list] )
 
+        # change cwd
+        try:
+            os.chdir(cwd)
+        except OSError:
+            ERR_MSG("Could not chdir to %s. You could provide another custon"\
+                    " temp directory using the -w switch." % cwd)
+
         if not resume:
 
             # Get the fixture for each model
             for model in models:
                 MSG("Syncing model %s" % model.__name__)
                 try:
-                    req = urllib2.Request('http://'+remote+':'+port+'/api/'+
+                    req = urllib2.Request('http://'+remote+':'+str(port)+'/api/'+
                                             model.__name__+'/')
                     with RotatingThing(" - Downloading %s fixtures  " % \
                                                 model.__name__):
@@ -598,7 +595,9 @@ class Command(BaseCommand):
                     transaction.leave_transaction_management()
                     gracefull_exit(1)
 
+
             fd.close()
+            os.unlink(fd.name)
             fixture_count += 1
 
 #        if object_count > 0:
