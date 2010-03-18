@@ -74,6 +74,9 @@ NOTIFICATIONS_STORAGE = 'session.SessionStorage'
 # Examples: "http://foo.com/media/", "/media/".
 ADMIN_MEDIA_PREFIX = '/media/'
 
+# Grappelli title
+GRAPPELLI_ADMIN_TITLE = 'Enhydris Administration'
+
 # The URL where requests are redirected after login when the
 # contrib.auth.login view gets no next parameter.
 LOGIN_REDIRECT_URL = '/'
