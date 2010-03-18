@@ -57,11 +57,11 @@
 		<h3>Profile Management:</h3>
 		<div class="anchor_override">
 			<img src="{{MEDIA_URL}}images/icons/user_edit.png" />
-			<a href="/profile/edit/">{% trans "Edit you user profile" %}</a></div>
+			<a href="/profile/edit/">{% trans "Edit your user profile" %}</a></div>
 		<div class="anchor_override">
 		
 			<img src="{{MEDIA_URL}}images/icons/key.png" />
-	 		<a href="/accounts/password/reset/">{% trans "Reset your password" %}</a></div>
+	 		<a href="{% url password_change %}">{% trans "Change your password" %}</a></div>
 		{% if user.is_superuser %}
 		<div class="anchor_override">
 			<img src="{{MEDIA_URL}}images/icons/lock_open.png" />

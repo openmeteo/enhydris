@@ -5,8 +5,18 @@
     font-size:0.85em;
 }
 
+.table_container th{
+	color: #333;
+	text-align: right;
+	padding-right: 0.85em;
+	font-size: 1em;
+
+}
+
+
 .table_container input, .table_container select, .table_container textarea{
-    font-size:0.85em;
+    font-size:0.9em;
+	padding: 0.2em 0.3em;
 }
 
 .table_container a, .table_container a:visited{
@@ -61,4 +71,14 @@
 
 .ui-tabs-nav{
 	z-index:1 !important;
+}
+
+.ui-widget {
+font-family:Verdana,Arial,sans-serif;
+font-size:0.9em;
+}
+
+
+.ui-widget-content a {
+color:#4C0D8C;
 }

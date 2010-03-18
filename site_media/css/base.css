@@ -155,9 +155,7 @@ ul li, ol li {
 }
 
 input, textarea {
-
   font-family: sans-serif;
-  padding: 0 0em;
   border: 1px solid #aaa;
   -moz-border-radius: 2px;
   -webkit-border-radius: 2px;
@@ -182,6 +180,7 @@ ul.notifications {
     background-position: 10px center;
     background-color: #FFBABA;
 }
+
 
 li.error {
     color: #D8000C;
@@ -242,11 +241,24 @@ table.formset td {
 
 /* ICONS */
 .i16 {
-  background-repeat: no-repeat;
-  background-position: 0.2em 50%;
-  padding-left:1.5em;
+    background-repeat: no-repeat;
+	padding-left: 24px;
+	-moz-border-radius-bottomleft:3px;
+	-moz-border-radius-bottomright:3px;
+	-moz-border-radius-topleft:3px;
+	-moz-border-radius-topright:3px;
+	background-position:5px 50%;
+	padding-bottom:6px;
+	padding-right:6px;
+	padding-top:6px;
+	font-size: 1em;
 }
 
+.i16.long {
+	padding: 1px 6px 2px 24px;
+}
+
+.i16.submit { background-image:url('../images/icons/tick.png'); }
 .i16.show_list { background-image: url('../images/icons/table_refresh.png'); }
 .i16.magnifier { background-image: url('../images/icons/magnifier.png'); }
 .i16.help { background-image: url('../images/icons/help.png'); }
@@ -331,6 +343,9 @@ table.formset td {
    position: relative; 
    text-align: center; 
    zoom: 1; 
+   height:100%;
+   overflow: hidden;
+   width:200px;
 }
 
 .fg-button-icon-left{
@@ -380,3 +395,18 @@ table.formset td {
 #frontpage div #header {
     color: black;
 }
+
+#login_form {
+	-moz-background-clip:border;
+	-moz-background-inline-policy:continuous;
+	-moz-background-origin:padding;
+	-moz-border-radius-bottomleft:7px;
+	-moz-border-radius-topright:7px;
+	background:#F4F4EE none repeat scroll 0 0;
+	border:1px solid #bbb;
+	margin:2em auto;
+	text-align:center;
+	width:300px;
+	padding: 1em;
+}
+

@@ -3,7 +3,9 @@
 {% load i18n %}
 
 {% block content %}
-<h3>{% trans "User profile for" %} {{ profile.user }}: </h3>
+<h2>{% trans "User profile for" %} {{ profile.user }}: </h2>
+	<p>{% trans "You can change your personal information using the form below. Make any changes necessary and then click the 'Change' button."%}
+	</p>
     {% if form.errors %}
     <p class="errorlist">{% trans "Sorry there are corrections needed in your form below:" %} {{ form.non_field_errors }}</p>
     {% endif %}
@@ -12,10 +14,12 @@
     {% else %}
     <form method="post" action=".">
     {% endif %}
-    <table>
+    <table class="table_container">
+	<tbody>
     {{ form.as_table }}
+	</tbody>
     </table>
     <br/>
-    <input type="submit" value="{% trans "Submit Changes" %} &rarr;" />
+  <p class="submit"><input type="submit" class="i16 submit" value="{% trans "Change" %}" /></p>
     </form>
 {% endblock %}

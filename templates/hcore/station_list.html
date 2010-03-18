@@ -80,7 +80,7 @@
             <li class="noborder"><a href="#tabs-2">Advanced Search</a></li>
         </ul>
 
-        <div id="tabs-1" class="table_container">
+        <div id="tabs-1" >
             <div>
                 <p>
                   <h3>{% trans 'Searching' %}</h3>
@@ -89,7 +89,7 @@
 						<label for="q">{% trans "Find Stations by name, description, etc." %}</label><br/>
 						<input type="hidden" name="check" value="search">
 						<input type="text" name="q" size="40" value="{{ query|escape }}">
-						<input class="i16 magnifier" type="submit" value="{% trans "Search" %}" 
+						<input class="i16 magnifier long" type="submit" value="{% trans "Search" %}" 
 							{% if request.GET.ts_only %} checked {% endif %}>
 						<br />
 						<input type="checkbox" name="ts_only" value="True" {% if request.GET.ts_only %} checked="checked" {% endif %}> {% trans "Display only stations with timeseries"%} <br>
@@ -140,7 +140,7 @@
 				<img class="increaseFont" style="cursor:pointer" src="{{MEDIA_URL}}images/icons/user-increase.png">
 			</span>
 
-            <table class="tablesorter tablehighlighted data_table" style='width:100%'>
+            <table class="table_container tablesorter tablehighlighted data_table" style='width:100%'>
               <thead>
                 <tr>
                   <th>{% anchor id 'ID' %}</th>

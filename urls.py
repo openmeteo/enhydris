@@ -13,16 +13,19 @@ admin.autodiscover()
 urlpatterns = patterns('',
     (r'^accounts/register/$', register, {'form_class':
         HcoreRegistrationForm}, 'registration_register'),
-    (r'^accounts/', include('registration.urls')),
-    (r'^accounts/password_reset/$', password_reset, {'template_name':
-        'registration/password_reset.html'}),
-    (r'^accounts/password_reset_done/$', password_reset_done,
-        {'template_name': 'registration/password_reset_done.html'}),
-    (r'^accounts/password_change/$', password_change, {'template_name':
-        'registration/password_change.html'}),
-    (r'^accounts/password_change_done/$', password_change_done,
-        {'template_name': 'registration/password_change_done.html'}),
+    (r'^accounts/password/reset/$', password_reset, {'template_name':
+        'registration/password_reset.html'}, 'password_reset'),
+    (r'^accounts/password/reset/done/$', password_reset_done,
+        {'template_name': 'registration/password_reset_done.html'},
+        'password_reset_done'),
+    (r'^accounts/password/change/$', password_change, {'template_name':
+        'registration/password_change.html'}, 'password_change'),
+    (r'^accounts/password/change/done/$', password_change_done,
+        {'template_name': 'registration/password_change_done.html'},
+        'password_change_done'),
 
+
+    (r'^accounts/', include('registration.urls')),
 
     # django profiles
     # to enable django <-> site admin overlapping
