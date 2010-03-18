@@ -6,6 +6,7 @@
 <head>
   <title>{% block title %}{% trans "Hydroscope" %}{% endblock %}</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=7" />
   {% block basecss %}
   <link media="screen" href="/site_media/css/base.css" type="text/css" rel="stylesheet">
   <link media="screen" href="/site_media/css/tablesorter.css" type="text/css" rel="stylesheet">
@@ -92,11 +93,35 @@
 			</ul>
 		-->
 		</li> 
-		<img style="float:left;" alt="" src="{{ MEDIA_URL }}images/menu_right.png"/>
+		<ul>
+		<img style="float:left" alt="" src="{{ MEDIA_URL }}images/menu_right.png"/>
+		</ul>
 	</ul> 
 
 	<ul id="menu2"> 
-			<img style="float:right" alt="" src="{{ MEDIA_URL }}images/menu_right.png"/>
+
+		{% if user.is_authenticated %}
+
+				<ul>
+					<img style="float:left" alt="" src="{{ MEDIA_URL }}images/top_menu_left.png"/>
+				</ul>
+			<li id="userinfo">
+            {% blocktrans with user.username as user_username %}Welcome <a href="/profile/{{ user_username }}">{{ user_username }}</a>!{% endblocktrans %}&nbsp;
+			</li>
+
+			<li><a href="{% url auth_logout %}">Logout</a> 
+			</li> 
+		{% else %}
+			<ul>
+			<img style="float:left" alt="" src="{{ MEDIA_URL }}images/top_menu_left_bw.png"/>
+			</ul>
+			<li><a class="loginform" href="{% url auth_login %}">Login</a></li> 
+
+			<li><a href="{% url registration_register %}">Register</a></li> 
+
+
+		{% endif %}
+
 			<li>
 			{% url django.views.i18n.set_language as set_language_url %}
 				<form action="{{ set_language_url }}" method="post">
@@ -110,21 +135,12 @@
 						<input type="submit" value="Go">
 				</p>
 				</form>
-			</li>
-		{% if user.is_authenticated %}
-			<li><a href="{% url auth_logout %}">Logout</a> 
-			</li> 
-			<li id="userinfo">
-            {% blocktrans with user.username as user_username %}Welcome <a href="/profile/{{ user_username }}">{{ user_username }}</a>!{% endblocktrans %}&nbsp;
-			</li>
-			<img style="float:right" alt="" src="{{ MEDIA_URL }}images/top_menu_left.png"/>
-		{% else %}
-			<li><a href="{% url registration_register %}">Register</a></li> 
-			<li><a class="loginform" href="{% url auth_login %}">Login</a></li> 
 
-			<img style="float:right" alt="" src="{{ MEDIA_URL }}images/top_menu_left_bw.png"/>
-			<li>
-		{% endif %}
+
+			</li>
+			<ul>
+			<img style="float:left" alt="" src="{{ MEDIA_URL }}images/menu_right.png"/>
+			</ul>
 			
 	</ul>
 	</div>

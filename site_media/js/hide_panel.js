@@ -2,6 +2,7 @@ jQuery(document).ready(function(){
     $("#hidePanel").click(function(){
         $("#leftofmap").hide();
         $("#mapcontent").show();
+		map.resize();
         $("#hp").attr("src","/site_media/images/icons/resultset_previous_disabled.png");
         $("#sp").attr("src","/site_media/images/icons/resultset_next.png");
         $("#hm").attr("src","/site_media/images/icons/resultset_next.png");
@@ -30,6 +31,7 @@ jQuery(document).ready(function(){
 
     $("#showMap").click(function(){
         $("#mapcontent").show();
+		map.resize();
         $("#hm").attr("src","/site_media/images/icons/resultset_next.png");
         $("#sm").attr("src","/site_media/images/icons/resultset_previous_disabled.png");
         collapse_table();

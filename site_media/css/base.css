@@ -266,7 +266,7 @@ table.formset td {
 #menu2 { margin:0px; list-style:none; color:#fff; line-height:45px; display:inline-block;
     float:right; z-index:1000; padding-right:4em;}
 #menu2 a { color:#fff; text-decoration:none; } 
-#menu2 > li {background:#172322 none repeat scroll 0 0; cursor:pointer; float:right; position:relative; 
+#menu2 > li {background:#172322 none repeat scroll 0 0; cursor:pointer; float:left; position:relative; 
     padding:0px 10px; max-height: 45px;} 
 #menu2 > li a:hover {color:#B0D730;} 
 #menu2 .logo {background:transparent none repeat scroll 0% 0%; padding:0px; 
