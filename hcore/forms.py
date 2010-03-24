@@ -91,7 +91,8 @@ class StationForm(GpointForm, GentityForm):
 
 class InstrumentForm(ModelForm):
     station = forms.ModelChoiceField(Station.objects.all())
-
+    type = forms.ModelChoiceField(InstrumentType.objects,
+                                widget=SelectWithPop(model_name='instrumenttype'))
     class Meta:
         model = Instrument
 
@@ -138,7 +139,15 @@ class TimeseriesForm(ModelForm):
     which a user may upload additional data.
     """
 
-    gentity = forms.ModelChoiceField(Gentity.objects.all())
+    gentity = forms.ModelChoiceField(Gentity.objects.all(),
+                widget=SelectWithPop(model_name='gentity'))
+    variable = forms.ModelChoiceField(Variable.objects,
+                                widget=SelectWithPop(model_name='variable'))
+    unit_of_measurement = forms.ModelChoiceField(UnitOfMeasurement.objects,
+                                widget=SelectWithPop(model_name='unitofmeasurement'))
+    time_zone = forms.ModelChoiceField(TimeZone.objects,
+                                widget=SelectWithPop(model_name='timezone'))
+
 
     if hasattr(settings, 'STORE_TSDATA_LOCALLY') and\
         settings.STORE_TSDATA_LOCALLY:

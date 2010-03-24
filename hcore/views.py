@@ -750,7 +750,8 @@ Generic model creation
 """
 
 ALLOWED_TO_EDIT = ('waterbasin', 'waterdivision', 'person', 'organization',
-                   'stationtype', 'lentity', 'politicaldivision')
+                   'stationtype', 'lentity','gentity', 'variable', 'timezone',
+                   'politicaldivision','instrumenttype', 'unitofmeasurement')
 
 @login_required
 def model_add(request, model_name=''):
