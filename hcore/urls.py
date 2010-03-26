@@ -20,6 +20,9 @@ urlpatterns = patterns('',
     (r'^stations/l/$',
      views.station_list, stations, 'station_list'),
 
+    (r'^stations/info/$',
+     views.station_info, {}, 'station_info'),
+
     (r'^stations/d/(?P<object_id>\d+)/$',
      views.station_detail, stations, 'station_detail'),
 

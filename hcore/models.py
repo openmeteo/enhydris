@@ -19,6 +19,7 @@ class Lookup(models.Model):
     descr_alt = models.CharField(max_length=200, blank=True)
     class Meta:
         abstract = True
+
     def __unicode__(self):
         return self.descr or self.descr_alt
 

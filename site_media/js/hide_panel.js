@@ -1,18 +1,21 @@
 jQuery(document).ready(function(){
+
     $("#hidePanel").click(function(){
         $("#leftofmap").hide();
         $("#mapcontent").show();
-		map.resize();
         $("#hp").attr("src","/site_media/images/icons/resultset_previous_disabled.png");
         $("#sp").attr("src","/site_media/images/icons/resultset_next.png");
         $("#hm").attr("src","/site_media/images/icons/resultset_next.png");
         $("#sm").attr("src","/site_media/images/icons/resultset_previous_disabled.png");
+		$("#leftofmap").css('width', '450px');
+		map.resize();
         $("#show_stations").removeAttr("disabled");
 
     });
 
     $("#showPanel").click(function(){
         $("#leftofmap").show();
+		map.resize();
         $("#sp").attr("src","/site_media/images/icons/resultset_next_disabled.png");
         $("#hp").attr("src","/site_media/images/icons/resultset_previous.png");
         collapse_table();
@@ -21,6 +24,7 @@ jQuery(document).ready(function(){
     $("#hideMap").click(function(){
         $("#mapcontent").hide();
         $("#leftofmap").show();
+		$("#leftofmap").css('width', "auto");
         $("#hm").attr("src","/site_media/images/icons/resultset_next_disabled.png");
         $("#sm").attr("src","/site_media/images/icons/resultset_previous.png");
         $("#sp").attr("src","/site_media/images/icons/resultset_next_disabled.png");
@@ -31,19 +35,22 @@ jQuery(document).ready(function(){
 
     $("#showMap").click(function(){
         $("#mapcontent").show();
-		map.resize();
         $("#hm").attr("src","/site_media/images/icons/resultset_next.png");
         $("#sm").attr("src","/site_media/images/icons/resultset_previous_disabled.png");
         collapse_table();
+		$("#leftofmap").css('width', '450px');
+		map.resize();
         $("#show_stations").removeAttr("disabled");
     });
 
     function expand_table(){
-        el = $(".hide_extra");
-        el.show();
+		for (i=3;i<8;i++){
+			oTable.fnSetColumnVis( i, true );
+		}
     }
     function collapse_table(){
-        el = $(".hide_extra");
-        el.hide();
+		for (i=3;i<8;i++){
+			oTable.fnSetColumnVis( i, false );
+		}
     }
 });

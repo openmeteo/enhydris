@@ -9,10 +9,12 @@
 
 #leftofmap{
     float: left;
-    padding: 1em 60px 1em 1em;
+    padding: 1em;
     border-right: 1px solid #FFF; 
     overflow:hidden;
+	width:450px;
 }
+
 #mapcontent{
     height: 700px;
     margin: 10px 10px 10px 10px;
@@ -78,4 +80,9 @@
 #showStations{
     display:inline;
     padding-left: 20px;
+}
+
+.paging_full_numbers {
+	width:450px;
+	padding-top:0.5em;
 }

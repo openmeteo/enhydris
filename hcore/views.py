@@ -3,8 +3,7 @@ import json
 import math
 import django.db
 import pthelma.timeseries
-
-from string import lower
+from string import lower, split
 from django.http import (HttpResponse, HttpResponseRedirect,
                             HttpResponseForbidden, Http404)
 from django.shortcuts import render_to_response, get_object_or_404
@@ -91,6 +90,77 @@ def station_list(request, queryset, *args, **kwargs):
                                     settings.USERS_CAN_ADD_CONTENT})
 
     return list_detail.object_list(request,queryset=queryset, *args, **kwargs )
+
+
+# This list represents all the columns of the map table and is used when the
+# user wants to sort the table. The fields represent model fields and are
+# written the same way in this list.
+SORTING_DICT= ('id', 'id', 'name', 'water_basin', 'water_division',
+                            'political_division', 'owner', 'type')
+
+def station_info(request, *args, **kwargs):
+    """
+    This function takes care of serving station data via AJAX for the map
+    table.
+    """
+    from django.utils import simplejson
+    from django.core import serializers
+#    if settings.DEBUG:
+#        print 'iDisplayStart: %s' % request.POST.get('iDisplayStart','')
+#        print 'iDisplayLength: %s' % request.POST.get('iDisplayLength','')
+#        print 'sSearch: %s' % request.POST.get('sSearch','')
+#        print 'bEscapeRegex: %s' % request.POST.get('bEscapeRegex','')
+#        print 'iColumns: %s' % request.POST.get('iColumns','')
+#        print 'iSortingCols: %s' % request.POST.get('iSortingCols','')
+#        print 'iSortCol_0: %s' % request.POST.get('iSortCol_0','')
+#        print 'sSortDir_0: %s' % request.POST.get('sSortDir_0','')
+#        print 'iSortCol_1: %s' % request.POST.get('iSortCol_1','')
+#        print 'sSortDir_1: %s' % request.POST.get('sSortDir_1','')
+#        print 'sEcho: %s' % request.POST.get('sEcho','')
+#
+
+
+    if request.POST and request.POST.has_key('station_list'):
+        ids = split(request.POST['station_list'],",")
+        stations = Station.objects.filter(id__in=ids)
+    else:
+        stations = Station.objects.all()
+
+    # for search
+    # for sorting
+
+    scols = request.POST.get('iSortingCols', '0')
+    for i in range(0,int(scols)):
+
+        if request.POST.has_key('iSortCol_'+str(i)):
+            col = int(request.POST.get('iSortCol_'+str(i)))
+            if request.POST.has_key('sSortDir_'+str(i)) and \
+                request.POST['sSortDir_'+str(i)] == 'asc':
+                stations=stations.order_by(SORTING_DICT[col])
+            else:
+                stations=stations.order_by(SORTING_DICT[col]).reverse()
+
+    # for items displayed
+    dlength = int(request.POST.get('iDisplayLength','10'))
+    dstart = int(request.POST.get('iDisplayStart','0'))
+
+
+    json = simplejson.dumps({
+        'sEcho': request.POST.get('sEcho','1'),
+        'iTotalRecords': stations.count(),
+        'iTotalDisplayRecords': stations.count(),
+        'aaData': [
+            ['<input type="checkbox" class="station_selected_ids"'\
+             ' name="station_id" value="'+str(station.id)+'" >',
+            station.id,
+            unicode(station),
+            unicode(station.water_division),
+            unicode(station.water_basin),
+            unicode(station.political_division),
+            unicode(station.owner),
+            unicode(station.type)] for station in stations[dstart:dstart+dlength]]})
+    return HttpResponse(json, mimetype='application/json')
+
 
 def timeseries_data(request, *args, **kwargs):
     if request.method == "GET" and request.GET.has_key('object_id'):

@@ -14,11 +14,15 @@ function init() {
 	esri.config.defaults.io.proxyUrl = "http://" + Server + "/proxy.ashx"; 
 	esri.config.defaults.io.alwaysUseProxy = false;
 	//Create map, set initial extent
-	map = new esri.Map("map_data", {nav:false, extent: new esri.geometry.Extent( {"xmin" :104010,"ymin" :3785403,"xmax" : 1007943, "ymax" : 4689336},  new esri.SpatialReference({wkid:2100}) ), showInfoWindowOnClick:false});
+	
+	map = new esri.Map("map_data", {nav:true, slider:true, extent: new esri.geometry.Extent( {"xmin" :104010,"ymin" :3785403,"xmax" : 1007943, "ymax" : 4689336},  new esri.SpatialReference({wkid:2100}) ), showInfoWindowOnClick:false});
 	var LayerLink = "http://" + Server + "/ArcGIS/rest/services/HydroScope_Stations/MapServer";
 	map.addLayer(new esri.layers.ArcGISDynamicMapServiceLayer(LayerLink));
+	dojo.connect(map, "onLoad", createToolbar);
+
 	map.height = Math.floor((parseFloat(map.height) + 0.5));
 	map.width = Math.floor(parseFloat(map.width) + 0.5);
+
 	initialExtent = map.extent;
 
 	//Initialize symbology for Stations
@@ -67,7 +71,43 @@ function init() {
 
 
 //=============================================================================
+function createToolbar(map) {
+	toolbar = new esri.toolbars.Draw(map);
+	dojo.connect(toolbar, "onDrawEnd", QueryStations1);
+}
+
+//=============================================================================
+function QueryStations1(extent)
+	 {  //Query Stations Layer #0 - Find stations from spatial query
+		map.graphics.clear();
+		ShowExtent(extent);
+		var queryStationsLink = "http://" + Server + "/ArcGIS/rest/services/HydroScope_Stations/MapServer/0";
+        queryStationsTask = new esri.tasks.QueryTask(queryStationsLink);
+        queryStations = new esri.tasks.Query();
+        queryStations.returnGeometry = true;
+  			queryStations.outFields = ["objectid","name","srid","abscissa","ordinate","water_basin_id","water_division_id","political_division_id","owner_id","type_id","descr","is_active","is_automatic","start_date","end_date"];
+			  queryStations.geometry = extent;
+				queryStationsTask.execute(queryStations, function(fset) {					 									      
+																						      if (fset.features.length == 1) 
+																							 	     { showFeature1(fset.features[0]); }
+																						      else if (fset.features.length !== 0) 
+																						         { showFeatureSet1(fset); }
+																										 });
+			map.setExtent(extent.getExtent().expand(1.2));
+}  
+
+//=============================================================================
     
+      function ShowExtent(extent)
+            {// Show Extent as graphic
+                var ExtentSymbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_NONE,new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_DASH, new dojo.Color([255,0,0]), 2), new dojo.Color([255,255,255,0.9]));
+                var ExtentGraphic = new esri.Graphic(extent, ExtentSymbol);
+                map.graphics.add(ExtentGraphic);
+                map.setExtent(extent.getExtent().expand(1.2));
+      }
+
+//=============================================================================
+
       function ClickMap(where) {
 						var queryLink = "http://" + Server + "/ArcGIS/rest/services/Hydroscope_Stations/MapServer/0";
         		queryTask = new esri.tasks.QueryTask(queryLink);
@@ -155,6 +195,36 @@ function showFeatureSet(fset,evt) {
       map.infoWindow.setContent(content);
       map.infoWindow.show(screenPoint,map.getInfoWindowAnchor(evt.screenPoint));
  }
+
+
+//=============================================================================
+		
+		function showFeature1(feature) {
+     //Add one point to map and set symbology
+      attr = feature.attributes;
+	     var x = attr.abscissa; y = attr.ordinate;
+			 var point = new esri.geometry.Point( {"x": x,"y": y}, new esri.SpatialReference({"wkid":attr.srid}) );
+	     var graphPoint = new esri.Graphic(point, defaultSymbol);
+			 map.graphics.add(graphPoint);
+			 StList[0]=attr.objectid;
+			 }
+
+//=============================================================================
+			function showFeatureSet1(fset) {
+        //Add points to map and set symbology
+       var features = fset.features;
+       var attr = features[0].attributes;
+			 StList=[];
+	     for (var i=0, il=features.length; i<il; i++)
+		   {
+      		  attr = features[i].attributes;
+			      var point = new esri.geometry.Point( {"x": attr.abscissa ,"y": attr.ordinate}, new esri.SpatialReference({"wkid":attr.srid}) );
+         	  var graphPoint = new esri.Graphic(point, defaultSymbol);
+			   	  map.graphics.add(graphPoint);
+						StList[i] = attr.objectid;
+			 }    			   
+       
+		  }
 
 //=============================================================================
 function QueryDistrict(perif)
