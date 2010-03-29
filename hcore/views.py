@@ -8,6 +8,7 @@ from django.http import (HttpResponse, HttpResponseRedirect,
                             HttpResponseForbidden, Http404)
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
+from django.template.loader import render_to_string
 from django.views.generic import list_detail
 from django.views.generic.create_update import create_object
 from django.contrib.auth.decorators import login_required, permission_required
@@ -126,6 +127,10 @@ def station_info(request, *args, **kwargs):
     else:
         stations = Station.objects.all()
 
+    sids = ""
+    if request.POST.has_key('sids'):
+        sids = request.POST['sids']
+
     # for search
     # for sorting
 
@@ -150,9 +155,9 @@ def station_info(request, *args, **kwargs):
         'iTotalRecords': stations.count(),
         'iTotalDisplayRecords': stations.count(),
         'aaData': [
-            ['<input type="checkbox" class="station_selected_ids"'\
-             ' name="station_id" value="'+str(station.id)+'" >',
-            station.id,
+            [render_to_string("select_box.html", {'station':station,
+                                    'sids':sids}),
+            '<a href="/stations/d/'+str(station.id)+'">'+str(station.id)+'</a>',
             unicode(station),
             unicode(station.water_division),
             unicode(station.water_basin),
