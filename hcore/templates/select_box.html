@@ -1,0 +1,8 @@
+{% load stationlist_filter %}
+{% with sids|check_contains:station.id as is_checked %} 
+{% if is_checked %}
+    <input type="checkbox" class="station_selected_ids" name="station_id" onclick="toggleCheck(this);" value="{{ station.id }}" checked="checked">
+{% else %}
+    <input type="checkbox" class="station_selected_ids" name="station_id" onclick="toggleCheck(this);" value="{{ station.id }}">
+{% endif %} 
+{% endwith %}
