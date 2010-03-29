@@ -83,6 +83,9 @@
 			if ( ! jData.length < 1  ) {
 				aoData.push({ "name": "station_list", "value": jData});
 			}
+			if ( ! sids.length < 1  ) {
+				aoData.push({ "name": "sids", "value": sids});
+			}
             $.ajax ( {
               "dataType": 'json',
               "type": "POST",
@@ -103,19 +106,18 @@
                 $(this).removeClass("ui-state-hover"); 
             }
         );
-        $('#help_dialog').dialog({
-            bgiframe: true,
-            height: 300,
-            width: 300,
-            modal: true,
-            autoOpen: false
-        });
 
-        $('#help_trigger').click(function(){
-            $('#help_dialog').dialog('open')
-        });
+        //$('#help_dialog').dialog({
+        //    bgiframe: true,
+        //    height: 300,
+        //    width: 300,
+        //    modal: true,
+        //    autoOpen: false
+        //});
 
-        $('.station_selected_ids').click(toggleCheck);
+        //$('#help_trigger').click(function(){
+        //    $('#help_dialog').dialog('open')
+        //});
 
         tooltip('.qtip_hidePanel', '{% trans "Click to hide the station list" %}', "topRight", "bottomLeft");
         tooltip('.qtip_hideMap', '{% trans "Click to hide the map area" %}', "topLeft", "bottomRight");
@@ -217,6 +219,7 @@
     </div>
 
     <div id="leftofmap"> 
+
 		{% comment %}	
 		<h3>{% trans 'Searching' %}</h3>
 		<div class="searchform">

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load form_as_table %} 
+{% load dict_parser %}
 
 {% block extracss %}
 	<link type="text/css" href="{{ MEDIA_URL }}css/smoothness/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
@@ -86,7 +87,7 @@
 		<li class="noborder"><a href="#tabs-1">Station</a></li>
 	{% if form.instance.pk %}  
 	{% for key,formset in formsets.items %}
-		<li class="noborder"><a href="#tabs-{{forloop.counter|add:"1"}}" {% if formset.errors %}style="color:red;"{% endif %}  >{{formset.prefix|title}}</a></li>
+		<li class="noborder"><a href="#tabs-{{forloop.counter|add:"1"}}">{% if err_dict|dict_get:key %}<span style='color:red'>*&nbsp;</span>{% endif %}{{formset.prefix|title}}</a></li>
 	{% endfor %}
 	{% endif %}
 	</ul>
@@ -128,9 +129,7 @@
 
 	<div id="tabs-{{forloop.counter|add:"1"}}" style="overflow:auto;">
 		<h3>Station {{formset.prefix|title}}:</h3>
-	{% if formset.errors %}
-		<p class="fielderrors">{% trans "Please correct the errors below: " %}{{ formset.non_field_errors }}</p>
-	{% endif %}
+
 		<div class='formsets'>
 				<p class="anchor_override" style="cursor:pointer;text-align:left">
     				<a class="add" onclick="return add_inline_form('{{ formset.prefix }}')">
@@ -138,6 +137,9 @@
     					add new {{ formset.prefix|title }}
     				</a>
 				</p>
+	{% if err_dict|dict_get:key %}
+		<p class="fielderrors">{% trans "Please correct the errors below: " %}{{ formset.non_field_errors }}</p>
+	{% endif %}
 			<table class='tablesorter table_container'>
 					{% forms_as_table_cols formset %}
 			</table>

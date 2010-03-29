@@ -133,6 +133,7 @@ class TimeStepForm(ModelForm):
 
         return self.cleaned_data
 
+
 class TimeseriesForm(ModelForm):
     """
     This form extends the basic Timeseries model with a file field through
@@ -148,14 +149,6 @@ class TimeseriesForm(ModelForm):
     time_zone = forms.ModelChoiceField(TimeZone.objects,
                                 widget=SelectWithPop(model_name='timezone'))
 
-
-    if hasattr(settings, 'STORE_TSDATA_LOCALLY') and\
-        settings.STORE_TSDATA_LOCALLY:
-        data = forms.FileField(required=False)
-        data_policy = forms.ChoiceField(label=_('New data policy'),
-                                        required=False,
-                                        choices=(('A','Append to existing'),
-                                             ('O','Overwrite existing'),))
 
 
     class Meta:
@@ -238,7 +231,7 @@ class TimeseriesForm(ModelForm):
 
         return self.cleaned_data
 
-    @db.transaction.commit_manually
+    @db.transaction.commit_on_success
     def save(self, commit=True, *args,**kwargs):
 
         tseries = super(TimeseriesForm,self).save(commit=False)
@@ -262,3 +255,18 @@ class TimeseriesForm(ModelForm):
                 ts.write_to_db(db.connection, transaction=db.transaction)
 
         return tseries
+
+
+class TimeseriesDataForm(TimeseriesForm):
+    """
+    Additional timeseries form to present the data upload fields
+    """
+    if hasattr(settings, 'STORE_TSDATA_LOCALLY') and\
+        settings.STORE_TSDATA_LOCALLY:
+        data = forms.FileField(required=False)
+        data_policy = forms.ChoiceField(label=_('New data policy'),
+                                        required=False,
+                                        choices=(('A','Append to existing'),
+                                             ('O','Overwrite existing'),))
+
+

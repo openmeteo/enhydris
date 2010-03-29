@@ -82,7 +82,7 @@
     padding-left: 20px;
 }
 
-.paging_full_numbers {
-	width:450px;
+#station_table_paginate{
+	width:auto;
 	padding-top:0.5em;
 }

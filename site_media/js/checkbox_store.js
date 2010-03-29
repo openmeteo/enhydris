@@ -1,6 +1,6 @@
-function toggleCheck()
-{
-    val = $(this).attr('value');
+function toggleCheck(obj)
+{	
+    val = $(obj).attr('value');
     if (detectItem(sids,val)) {
         sids = removeItem(sids,val);
     } else { 
@@ -28,8 +28,6 @@ function removeItem(originalArray, itemToRemove) {
             originalArray.splice(j, 1);
     } else { j++; }
     }
-   
     return originalArray;
-
 }
 

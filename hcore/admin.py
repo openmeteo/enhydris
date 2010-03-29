@@ -152,7 +152,7 @@ class InstrumentAdmin(admin.ModelAdmin):
 admin.site.register(Instrument, InstrumentAdmin)
 
 class TimeseriesAdmin(admin.ModelAdmin):
-    form = TimeseriesForm
+    form = TimeseriesDataForm
     # ChangeList format
     list_display = ('id', 'name', 'remarks', 'gentity', 'variable', 
         'unit_of_measurement', 'precision', 'time_zone', 'instrument',
