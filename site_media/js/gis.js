@@ -202,6 +202,7 @@ function showFeatureSet(fset,evt) {
 		function showFeature1(feature) {
      //Add one point to map and set symbology
       attr = feature.attributes;
+	  StList = [];
 	     var x = attr.abscissa; y = attr.ordinate;
 			 var point = new esri.geometry.Point( {"x": x,"y": y}, new esri.SpatialReference({"wkid":attr.srid}) );
 	     var graphPoint = new esri.Graphic(point, defaultSymbol);
