@@ -62,6 +62,8 @@ class Person(Lentity):
     middle_names_alt = models.CharField(max_length=100, blank=True)
     initials_alt = models.CharField(max_length=20, blank=True)
     f_dependencies = ['Lentity']
+    class Meta:
+        ordering = ('last_name', 'first_name',)
     def __unicode__(self):
         return self.last_name + ' ' + self.initials
 
@@ -71,6 +73,10 @@ class Organization(Lentity):
     name_alt = models.CharField(max_length=200, blank=True)
     acronym_alt = models.CharField(max_length=50, blank=True)
     f_dependencies = ['Lentity']
+
+    class Meta:
+        ordering = ('name',)
+
     def __unicode__(self):
         if self.acronym: return self.acronym
         return str(self.id)
@@ -94,6 +100,7 @@ class Gentity(models.Model):
     remarks_alt = models.TextField(blank=True)
     class Meta:
         verbose_name_plural="Gentities"
+        ordering = ('name',)
     def __unicode__(self):
         return self.short_name or self.short_name_alt or self.name \
             or self.name_alt or str(self.id)

@@ -9,6 +9,7 @@ jQuery(document).ready(function(){
         $("#sm").attr("src","/site_media/images/icons/resultset_previous_disabled.png");
 		$("#leftofmap").css('width', '450px');
 		map.resize();
+		map.reposition();
         $("#show_stations").removeAttr("disabled");
 
     });
@@ -16,6 +17,7 @@ jQuery(document).ready(function(){
     $("#showPanel").click(function(){
         $("#leftofmap").show();
 		map.resize();
+		map.reposition();
         $("#sp").attr("src","/site_media/images/icons/resultset_next_disabled.png");
         $("#hp").attr("src","/site_media/images/icons/resultset_previous.png");
         collapse_table();
@@ -40,6 +42,7 @@ jQuery(document).ready(function(){
         collapse_table();
 		$("#leftofmap").css('width', '450px');
 		map.resize();
+		map.reposition();
         $("#show_stations").removeAttr("disabled");
     });
 
