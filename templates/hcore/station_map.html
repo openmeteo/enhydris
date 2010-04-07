@@ -8,6 +8,7 @@
     <link type="text/css" href="{{ MEDIA_URL }}css/smoothness/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
     <link type="text/css" href="{{ MEDIA_URL }}css/maptable.css" rel="stylesheet" />
     <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css rel="stylesheet" />
+
 {% endblock %} 
 
 {% block extra_head %}
@@ -19,8 +20,8 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.dataTables.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/checkbox_store.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/1.5/js/dojo/dijit/themes/tundra/tundra.css">
-    <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=1.5"></script>
+    <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=1.6"></script>
+    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/1.6/js/dojo/dijit/themes/soria/soria.css">
     <script type="text/javascript">djConfig = { parseOnLoad:true }</script>
     <script type="text/javascript">
 
@@ -29,6 +30,7 @@
 	var map, stations=[];
     var queryStations, queryStationsTask;
 	var queryTask, query, featureSet;
+	var toolbar;
     var Server = "147.102.160.29"; 
 	var StList = [];
 
@@ -143,6 +145,7 @@
 
         });
 
+
 //		$('#political_division').change( function() {
 //			val = $(this).attr('value')
 //			render_dist_filter(val);
@@ -185,6 +188,16 @@
 	});
 
     });
+
+    function clear_cboxes () {
+            var tk = $("input:checked[class=station_selected_ids]")
+
+           tk.each(function(){
+				$(this).attr("checked","");
+			});
+
+        }
+
 
     </script>
 
@@ -249,7 +262,10 @@
         {% endcomment %}
         {% endblock %}
         <h3 style="display:inline">{% trans 'Station Catalogue' %}</h3>
-    	<button style="float:right" onClick="loadAllStations();">Load all Stations</button>
+		<div id="buttons" style="float:right">
+			<button onClick="sids = [];clear_cboxes();">Clear Selected</button>
+			<button onClick="loadAllStations();">Load all Stations</button>
+		</div>
         {% if station_list %}
         <table id='station_table' class="display" style="width:100%"> 
           <thead>
@@ -275,15 +291,15 @@
         {% endif %}
     </div>
 
-    <div id="mapcontent" class="tundra"> 
+    <div id="mapcontent" class="soria"> 
 
     <b>SELECT TOOLS :</b>
     <button dojoType="dijit.form.Button" onClick="toolbar.activate(esri.toolbars.Draw.EXTENT);map.hidePanArrows();map.hideZoomSlider();">Box</button>
     <button dojoType="dijit.form.Button" onClick="toolbar.activate(esri.toolbars.Draw.FREEHAND_POLYGON);map.hidePanArrows();map.hideZoomSlider();">Freehand Polygon</button>
     <button dojoType="dijit.form.Button" onClick="toolbar.deactivate();map.showPanArrows();map.showZoomSlider();">Deactivate</button>
     <button dojoType="dijit.form.Button" onClick="map.setExtent(initialExtent,false);toolbar.deactivate();map.showPanArrows();map.showZoomSlider();">Reload Map</button>
-    <br /><b>SHOW STATIONS WITHIN AN EXTENT</b>
-        <div id="map_data" class="tundra" style="border:1px solid #ccc;" >
+    <br />
+        <div id="map_data" class="soria" style="border:1px solid #ccc;" >
         </div>
     </div>
 

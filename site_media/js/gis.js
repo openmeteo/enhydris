@@ -10,12 +10,31 @@ function StationSelect(stationList)
 
 function init() {
 
+
+	// Set Levels Of Detail (lods) Params
+	var lods = [ {"level" :  0, "resolution" :  1450, "scale" : 5576923},
+				 {"level" :  1, "resolution" : 971.1, "scale" : 3735000},
+		   {"level" :  2, "resolution" : 902.2, "scale" : 3470000},
+		   {"level" :  3, "resolution" : 833.3, "scale" : 3205000},
+		   {"level" :  4, "resolution" : 764.4, "scale" : 2940000},
+		   {"level" :  5, "resolution" : 695.5, "scale" : 2675000},
+					 {"level" :  6, "resolution" : 626.6, "scale" : 2410000},
+		   {"level" :  7, "resolution" : 557.7, "scale" : 2145000},
+		   {"level" :  8, "resolution" : 488.8, "scale" : 1880000},
+		   {"level" :  9, "resolution" : 419.9, "scale" : 1615000},
+		   {"level" : 10, "resolution" :   351, "scale" : 1350000},
+							 {"level" : 11, "resolution" : 282.1, "scale" : 1085000},
+		   {"level" : 12, "resolution" : 213.2, "scale" :  820000},
+		   {"level" : 13, "resolution" : 144.3, "scale" :  555000},
+		   {"level" : 14, "resolution" :    39, "scale" :  150000},
+		   {"level" : 15, "resolution" :    13, "scale" :   50000} ];
+
+
 	//Set proxy params
 	esri.config.defaults.io.proxyUrl = "http://" + Server + "/proxy.ashx"; 
 	esri.config.defaults.io.alwaysUseProxy = false;
 	//Create map, set initial extent
-	
-	map = new esri.Map("map_data", {nav:true, slider:true, extent: new esri.geometry.Extent( {"xmin" :104010,"ymin" :3785403,"xmax" : 1007943, "ymax" : 4689336},  new esri.SpatialReference({wkid:2100}) ), showInfoWindowOnClick:false});
+	map = new esri.Map("map_data", {nav:true, slider:true, extent: new esri.geometry.Extent( {"xmin" :11462,"ymin" :3785403,"xmax" : 1107943, "ymax" : 4689336},  new esri.SpatialReference({wkid:2100}) ), showInfoWindowOnClick:false, lods: lods});
 	var LayerLink = "http://" + Server + "/ArcGIS/rest/services/HydroScope_Stations/MapServer";
 	map.addLayer(new esri.layers.ArcGISDynamicMapServiceLayer(LayerLink));
 	dojo.connect(map, "onLoad", createToolbar);
@@ -93,7 +112,7 @@ function QueryStations1(extent)
 																						      else if (fset.features.length !== 0) 
 																						         { showFeatureSet1(fset); }
 																										 });
-			map.setExtent(extent.getExtent().expand(1.2));
+			map.setExtent(extent.getExtent().expand(1.8));
 }  
 
 //=============================================================================
@@ -103,7 +122,7 @@ function QueryStations1(extent)
                 var ExtentSymbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_NONE,new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_DASH, new dojo.Color([255,0,0]), 2), new dojo.Color([255,255,255,0.9]));
                 var ExtentGraphic = new esri.Graphic(extent, ExtentSymbol);
                 map.graphics.add(ExtentGraphic);
-                map.setExtent(extent.getExtent().expand(1.2));
+                map.setExtent(extent.getExtent().expand(1.8));
       }
 
 //=============================================================================
