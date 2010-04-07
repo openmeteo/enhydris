@@ -306,6 +306,7 @@ table.formset td {
 /* main submenu */ 
 #menu #main { left:0px; top:-10px; padding-top:0px;margin-left:25px; background-color:#0068a5; color:#fff; 
     z-index:999; width:125px; position:absolute;} 
+#menu #help {z-index:999;} 
 /* search */ 
 .searchContainer div { background-color:#fff; display:inline; padding:5px;-moz-border-radius: 5px;
 -webkit-border-radius: 5px;} 
