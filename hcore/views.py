@@ -540,7 +540,7 @@ def _station_edit_or_create(request,station_id=None):
             if hasattr(settings, 'USERS_CAN_ADD_CONTENT')\
                 and settings.USERS_CAN_ADD_CONTENT:
                     # Make creating user the station creator
-                    if not station.creator:
+                    if not station_id:
                         station.creator = request.user
                         # Give perms to the creator
                         user.add_row_perm(station, 'edit')

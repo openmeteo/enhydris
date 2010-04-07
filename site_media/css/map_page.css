@@ -10,7 +10,6 @@
 #leftofmap{
     float: left;
     padding: 1em;
-    border-right: 1px solid #FFF; 
     overflow:hidden;
 	width:450px;
 }

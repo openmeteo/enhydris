@@ -6,7 +6,9 @@ def dict_get(value, arg):
     #{{dictionary|dict_get:var}}
     #where dictionary is duh a dictionary and var is a variable representing
     #one of it's keys
+    if value:
+        return value.get(arg, None)
 
-    return value.get(arg, None)
+    return None
 
 register.filter('dict_get',dict_get)
