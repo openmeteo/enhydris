@@ -38,6 +38,9 @@ class WaterBasinAdmin(GareaAdmin):
     list_display = [f.name for f in WaterBasin._meta.fields]
     list_display_links = [f.name for f in WaterBasin._meta.fields]
 
+class GentityFileAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in GentityFile._meta.fields]
+
 class GentityAltCodeTypeAdmin(admin.ModelAdmin):
     list_display = [f.name for f in GentityAltCodeType._meta.fields]
 
@@ -80,6 +83,7 @@ admin.site.register(WaterDivision, WaterDivisionAdmin)
 admin.site.register(WaterBasin, WaterBasinAdmin)
 
 admin.site.register(GentityAltCodeType, GentityAltCodeTypeAdmin)
+admin.site.register(GentityFile, GentityFileAdmin)
 admin.site.register(FileType, FileTypeAdmin)
 admin.site.register(EventType, EventTypeAdmin)
 admin.site.register(StationType, StationTypeAdmin)
