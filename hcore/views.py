@@ -344,8 +344,6 @@ def download_gentityfile(request, gf_id):
         import urllib2, re, base64
 
         gfile = get_object_or_404(GentityFile, pk=int(gf_id))
-        filename = gfile.content.file.name
-        download_name = gfile.content.name.split('/')[-1]
 
         # Read the creds from the settings file
         REMOTE_INSTANCE_CREDENTIALS = getattr(settings,
@@ -425,11 +423,10 @@ def download_gentityfile(request, gf_id):
 
         filedata = handle.read()
 
-        filename = gfile.content.file.name
         download_name = gfile.content.name.split('/')[-1]
         content_type = gfile.file_type.mime_type
         response = HttpResponse(mimetype=content_type)
-        response['Content-Length'] = os.path.getsize(filename)
+        response['Content-Length'] = len(filedata)
         response['Content-Disposition'] = "attachment; filename=%s"%download_name
         response.write(filedata)
 
