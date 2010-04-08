@@ -3,13 +3,16 @@ from piston.resource import Resource
 from piston.emitters import Emitter
 from enhydris.api.authentication import RemoteInstanceAuthentication
 from enhydris.api.handlers import *
-from enhydris.api.emitters import CFEmitter, TSEmitter
+from enhydris.api.emitters import CFEmitter, TSEmitter, GFEmitter
 
 # JSON emitter for sync db process
 Emitter.register('json', CFEmitter, 'application/json; charset=utf-8')
 # hts emitter for remote hts file downloading (incl. http authentication)
 Emitter.register('hts', TSEmitter, 'text/vnd.openmeteo.timeseries;charset=iso-8859-7')
 auth = RemoteInstanceAuthentication(realm="Timeseries realm")
+# Emitter for gfd (aka GenityFileData)
+Emitter.register('gfd', GFEmitter,'application/octet-stream;charset=utf-8')
+auth = RemoteInstanceAuthentication(realm="GentityFile realm")
 
 # Used for gis
 station_handler = Resource(StationHandler)
@@ -48,6 +51,7 @@ Timeseries_Resource = Resource(Timeseries_Handler)
 
 # Used for timeseries data
 TSDATA_Resource = Resource(handler=TSDATA_Handler, authentication=auth)
+GFDATA_Resource = Resource(handler=GFDATA_Handler, authentication=auth)
 
 # urls
 urlpatterns = patterns('',
@@ -83,4 +87,5 @@ urlpatterns = patterns('',
     url(r'^TimeStep/$', TimeStep_Resource),
     url(r'^Timeseries/$', Timeseries_Resource),
     url(r'^tsdata/(?P<ts_id>\d+)/$', TSDATA_Resource, {'emitter_format': 'hts'} ),
+    url(r'^gfdata/(?P<gf_id>\d+)/$', GFDATA_Resource, {'emitter_format': 'gfd'} ),
 )

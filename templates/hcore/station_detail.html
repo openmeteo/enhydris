@@ -46,6 +46,14 @@
 		{% endif %}
 	{% endif %} 
     </h2></p>
+		{% if notifications %}
+        <ul class="notifications">
+                {% for message in notifications %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+        </ul>
+        {% endif %}
+
         {% if station %}
         <table class="definition tablesorter table_container">
             <tr class="{% cycle 'odd' 'even' as rowalts %}">
@@ -164,7 +172,7 @@
                     </a>
                 </td>
                 <td>
-                    <table class="tablesorter">
+                    <table class="tablesorter" style='text-align:right;'>
                         <thead>
                             <tr>
                                 <th>{% trans 'ID' %}</th>
@@ -199,7 +207,7 @@
                     </a>
                 </td>
                 <td>
-                    <table class="tablesorter">
+                    <table class="tablesorter" style='text-align:right'>
                         <thead>
                             <tr>
                                 <th>{% trans 'ID' %}</th>
@@ -208,6 +216,7 @@
                                 <th>{% trans 'Content' %}</th>
                                 <th>{% trans 'Description' %}</th>
                                 <th>{% trans 'Remarks' %}</th>
+								<th>{% trans 'Request File' %}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -216,9 +225,16 @@
                             <td>{{ file.id }}</td>
                             <td>{{ file.date }}</td>
                             <td>{{ file.file_type }}</td>
-                            <td>{{ file.conent }}</td>
+                            <td>{{ file.content }}</td>
                             <td>{{ file.descr }}</td>
                             <td>{{ file.remarks }}</td>
+							<td>
+							{% if request.user.is_authenticated %}  
+								<a href="{% url gentityfile_dl file.id %}"><img style="border:none" src="{{MEDIA_URL}}images/icons/download.png"></a>
+							{% else %} 
+								<i>N/A</i>
+							{% endif %} 
+							</td>
                         </tr>
                         {% endfor %}
                         </tbody>
@@ -240,7 +256,7 @@
                     </a>
                 </td>
                 <td>
-                    <table class="tablesorter">
+                    <table class="tablesorter" style='text-align:right;'>
                         <thead>
                             <tr>
                                 <th>{% trans 'ID' %}</th>
@@ -279,7 +295,7 @@
                     </a>
                 </td>
                 <td>
-                    <table class="tablesorter">
+                    <table class="tablesorter" style='text-align:right;'>
                         <thead>
                             <tr>
                               <th>{% trans "ID" %}</th>
@@ -329,7 +345,7 @@
                     </a>
                 </td>
                 <td>
-                    <table class="tablesorter">
+                    <table class="tablesorter" style='text-align:right;'>
                         <thead>
                             <tr>
                               <th>{% trans "ID" %}</th>

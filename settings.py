@@ -91,6 +91,10 @@ AUTH_PROFILE_MODULE = 'hcore.UserProfile'
 SESSION_COOKIE_AGE=3600
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
+# GentityFile upload directory (must be relative path and it'll be created
+# under site_media dir)
+GENTITYFILE_DIR = 'gentityfile'
+
 # GIS Configuration
 GIS_SERVER="147.102.160.29"
 

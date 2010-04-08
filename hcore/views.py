@@ -1,6 +1,8 @@
 import calendar
 import json
 import math
+import mimetypes
+import os
 import django.db
 import pthelma.timeseries
 from string import lower, split
@@ -15,11 +17,12 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.db.models import Q
+from django.core.servers.basehttp import FileWrapper
 from django.utils import simplejson
 from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
 from enhydris.hcore.models import *
-from enhydris.hcore.decorators import filter_by, sort_by, timeseries_permission
+from enhydris.hcore.decorators import *
 from enhydris.hcore.forms import StationForm, TimeseriesForm, InstrumentForm
 
 
@@ -31,6 +34,16 @@ def index(request):
     return render_to_response('index.html', {},
         context_instance=RequestContext(request))
 
+
+def protect_gentityfile(request):
+    """
+    This view is used to disallow users to be able to browse through the
+    uploaded gentity files which is the default behaviour of django.
+    """
+    response = render_to_response('404.html',
+                  RequestContext(request))
+    response.status_code = 404
+    return response
 
 def station_detail(request, *args, **kwargs):
     stat = get_object_or_404(Station, pk=kwargs["object_id"])
@@ -208,7 +221,6 @@ def timeseries_detail(request, queryset, object_id, *args, **kwargs):
         if settings.USERS_CAN_ADD_CONTENT:
             enabled_user_content = True
 
-
     anonymous_can_download_data = False
     if hasattr(settings, 'TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS') and\
             settings.TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
@@ -301,6 +313,128 @@ def get_subdivision(request, division_id):
     response.write("]")
     return response
 
+
+GF_ERROR = ("The file you requested is temporary unavailable. Please try again"
+            " later.")
+
+@gentityfile_permission
+def download_gentityfile(request, gf_id):
+    """
+    This function handles requests for gentityfile downloads and serves the
+    content to the user.
+    """
+
+    if hasattr(settings, "STORE_TSDATA_LOCALLY") and\
+      settings.STORE_TSDATA_LOCALLY:
+        gfile = get_object_or_404(GentityFile, pk=int(gf_id))
+        filename = gfile.content.file.name
+        wrapper  = FileWrapper(open(filename))
+        download_name = gfile.content.name.split('/')[-1]
+        content_type = mimetypes.guess_type(filename)[0]
+        response = HttpResponse(content_type=content_type)
+        response['Content-Length'] = os.path.getsize(filename)
+        response['Content-Disposition'] = "attachment; filename=%s"%download_name
+
+        for chunk in wrapper:
+            response.write(chunk)
+    else:
+        """
+        Fetch GentityFile content from remote instance.
+        """
+        import urllib2, re, base64
+
+        gfile = get_object_or_404(GentityFile, pk=int(gf_id))
+        filename = gfile.content.file.name
+        download_name = gfile.content.name.split('/')[-1]
+
+        # Read the creds from the settings file
+        REMOTE_INSTANCE_CREDENTIALS = getattr(settings,
+                'REMOTE_INSTANCE_CREDENTIALS', {})
+
+        # Get the original GentityFile id and the source database
+        if gfile.original_id and gfile.original_db:
+            gf_id = gfile.original_id
+            db_host = gfile.original_db.hostname
+        else:
+            request.notifications.error("No data was found for "
+                    " the requested Gentity file.")
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+        # Next we check the setting files for a uname/pass for this host
+        uname, pwd = REMOTE_INSTANCE_CREDENTIALS.get(db_host, (None,None))
+
+        # We craft the url
+        url = 'http://'+db_host + '/api/gfdata/' + str(gf_id)
+        req = urllib2.Request(url)
+        try:
+            handle = urllib2.urlopen(req,timeout=10)
+        except IOError, e:
+            # here we *want* to fail
+            pass
+        else:
+            # If we don't fail then the page isn't protected
+            # which means something is not right. Raise hell
+            # mail admins + return user notification.
+            request.notifications.error(GF_ERROR)
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+        if not hasattr(e, 'code') or e.code != 401:
+            # we got an error - but not a 401 error
+            request.notifications.error(GF_ERROR)
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+        authline = e.headers['www-authenticate']
+        # this gets the www-authenticate line from the headers
+        # which has the authentication scheme and realm in it
+
+        authobj = re.compile(
+            r'''(?:\s*www-authenticate\s*:)?\s*(\w*)\s+realm=['"]([^'"]+)['"]''',
+            re.IGNORECASE)
+        # this regular expression is used to extract scheme and realm
+        matchobj = authobj.match(authline)
+
+        if not matchobj:
+            # if the authline isn't matched by the regular expression
+            # then something is wrong
+            request.notifications.error(GF_ERROR)
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+        scheme = matchobj.group(1)
+        realm = matchobj.group(2)
+        # here we've extracted the scheme
+        # and the realm from the header
+        if scheme.lower() != 'basic':
+            # we don't support other auth
+            # mail admins + inform user of error
+            request.notifications.error(GF_ERROR)
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+        # now the good part.
+        base64string = base64.encodestring(
+                '%s:%s' % (uname, pwd))[:-1]
+        authheader =  "Basic %s" % base64string
+        req.add_header("Authorization", authheader)
+
+        try:
+            handle = urllib2.urlopen(req)
+        except IOError, e:
+            # here we shouldn't fail if the username/password is right
+            request.notifications.error(GF_ERROR)
+            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+
+        filedata = handle.read()
+
+        filename = gfile.content.file.name
+        download_name = gfile.content.name.split('/')[-1]
+        content_type = gfile.file_type.mime_type
+        response = HttpResponse(mimetype=content_type)
+        response['Content-Length'] = os.path.getsize(filename)
+        response['Content-Disposition'] = "attachment; filename=%s"%download_name
+        response.write(filedata)
+
+
+    return response
 
 TS_ERROR = ("There seems to be some problem with our internal infrastucture. The"
 " admins have been notified of this and will try to resolve the matter as soon as"

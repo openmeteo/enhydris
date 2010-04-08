@@ -57,8 +57,15 @@ class TSDATA_Handler(BaseHandler):
         timeseries = get_object_or_404(Timeseries, pk=int(ts_id))
         return timeseries
 
-# Regular handlers for the rest of the models
+class GFDATA_Handler(BaseHandler):
+    """
+    This handler serves the GentityFile contents using piston API.
+    """
+    def read(self, request, gf_id, *args, **kwargs):
+        gfile = get_object_or_404(GentityFile, pk=int(gf_id))
+        return gfile
 
+# Regular handlers for the rest of the models
 class Lookup_Handler(BaseHandler):
     """
     API handler for hcore model Lookup.

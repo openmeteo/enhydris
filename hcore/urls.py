@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls.defaults import *
+from django.http import Http404
 from django.views.generic import list_detail
 
 from enhydris.hcore import views
@@ -43,6 +44,12 @@ urlpatterns = patterns('',
 
     (r'^timeseries/d/(?P<object_id>\d+)/download/$',
      views.download_timeseries, {}, 'timeseries_text'),
+
+    (r'^gentityfile/(?P<gf_id>\d+)/download/$',
+     views.download_gentityfile, {}, 'gentityfile_dl'),
+
+    (r'^site_media/'+settings.GENTITYFILE_DIR+'/.*$',
+     views.protect_gentityfile, {}, ''),
 )
 
 # If users can modify content, enable these views

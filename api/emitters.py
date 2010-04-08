@@ -1,4 +1,7 @@
+import mimetypes
+import os
 from django.core import serializers
+from django.core.servers.basehttp import FileWrapper
 from django.db import connection as django_db_connection
 from django.http import HttpResponse
 from piston.emitters import Emitter
@@ -83,5 +86,28 @@ class TSEmitter(Emitter):
         for c in comment: response.write("Comment=%s\r\n" % (c,))
         response.write("\r\n")
         ts.write(response)
+
+        return response
+
+class GFEmitter(Emitter):
+    """
+    This emitter takes care of reading the GentityFile contents and then
+    neding them back to the user as a file.
+    """
+    def construct(self):
+        return None
+
+    def render(self, request):
+        gfile = self.data
+        filename = gfile.content.file.name
+        wrapper = FileWrapper(open(filename))
+        download_name = gfile.content.name.split('/')[-1]
+        content_type = mimetypes.guess_type(filename)[0]
+        response = HttpResponse(mimetype=content_type)
+        response['Content-Length'] = os.path.getsize(filename)
+        response['Content-Disposition'] = "attachment;filename=%s"%download_name
+
+        for chunk in wrapper:
+            response.write(chunk)
 
         return response

@@ -203,17 +203,19 @@ class FileType(Lookup):
         if self.mime_type: return self.mime_type
         return str(self.id)
 
+# Where to upload the actual data
+GENTITYFILEDIR = settings.GENTITYFILE_DIR
+
 class GentityFile(models.Model):
     # for db sync issues
     original_id = models.IntegerField(null=True, blank=True, editable=False)
     original_db = models.ForeignKey(Database, null=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
 
-
     gentity = models.ForeignKey(Gentity)
     date = models.DateField(blank=True, null=True)
     file_type = models.ForeignKey(FileType)
-    content = models.FileField(upload_to='gentityfile')
+    content = models.FileField(upload_to=GENTITYFILEDIR)
     descr = models.CharField(max_length=100)
     remarks = models.TextField(blank=True)
     descr_alt = models.CharField(max_length=100)
