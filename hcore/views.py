@@ -279,7 +279,11 @@ def map_view(request, stations='',  *args, **kwargs):
             results = []
         kwargs["extra_context"].update({'query': query_string,
                                         'terms': search_terms, })
-
+    try:
+        gis = settings.GIS_SERVER
+    except AttributeError:
+        gis = None
+    kwargs["extra_context"].update({'gis_server':gis},)
 
     kwargs["extra_context"].update({'station_list':stations},)
 

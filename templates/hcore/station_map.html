@@ -8,7 +8,6 @@
     <link type="text/css" href="{{ MEDIA_URL }}css/smoothness/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
     <link type="text/css" href="{{ MEDIA_URL }}css/maptable.css" rel="stylesheet" />
     <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css rel="stylesheet" />
-
 {% endblock %} 
 
 {% block extra_head %}
@@ -25,16 +24,16 @@
     <script type="text/javascript">djConfig = { parseOnLoad:true }</script>
     <script type="text/javascript">
 
-
-	// GIS init stuff
-	var map, stations=[];
+    // GIS init stuff
+    var map, stations=[];
     var queryStations, queryStationsTask;
-	var queryTask, query, featureSet;
-	var toolbar;
-    var Server = "147.102.160.29"; 
-	var StList = [];
+    var queryTask, query, featureSet;
+    var toolbar;
+    var Server = "{{ gis_server }}" ; 
 
-	// THYAMIS "147.102.160.29"; //Hermes "192.168.200.249"; //Server 85.72.53.43 if outside GEOSET
+    var StList = [];
+
+    // THYAMIS "147.102.160.29"; //Hermes "192.168.200.249"; //Server 85.72.53.43 if outside GEOSET
     var defaultSymbol, highlightSymbol;
     var initialExtent;
 
@@ -43,34 +42,36 @@
     dojo.require("esri.tasks.query");
     dojo.require("esri.tasks.geometry");
 
-//	dojo.addOnLoad( function() { WhenSelected(); });
-    dojo.addOnLoad( function() {init(); });
+//    dojo.addOnLoad( function() { WhenSelected(); });
+    {% if gis_server %} 
+        dojo.addOnLoad( function() {init(); });
+    {% endif %}
 
-	var sids = [];
+    var sids = [];
     var elements = [];
-	var oTable;
-	var jData = [];
+    var oTable;
+    var jData = [];
 
-	
-	function loadAllStations() {
-		jData = [];
-		oTable.fnDraw();		
-	}
+    
+    function loadAllStations() {
+        jData = [];
+        oTable.fnDraw();        
+    }
 
     $(document).ready(function(){
 
 
-	oTable = $('#station_table').dataTable({
-		"bJQueryUI": true,
-		"sPaginationType": "full_numbers",
-		"aaSorting": [[ 1, "asc" ]],
-		"bServerSide": true,
-		"bProcessing": true,
-		"sAjaxSource": "/stations/info/",
-		"sDom": '<"top"i>rt<"bottom"lp<"clear">',
-//	to enable filtering use the one below
-//		"sDom": '<"top"i>rt<"bottom"flp<"clear">',
-		"bAutoWidth": false,
+    oTable = $('#station_table').dataTable({
+        "bJQueryUI": true,
+        "sPaginationType": "full_numbers",
+        "aaSorting": [[ 1, "asc" ]],
+        "bServerSide": true,
+        "bProcessing": true,
+        "sAjaxSource": "/stations/info/",
+        "sDom": '<"top"i>rt<"bottom"lp<"clear">',
+//    to enable filtering use the one below
+//        "sDom": '<"top"i>rt<"bottom"flp<"clear">',
+        "bAutoWidth": false,
         "aoColumns" : [
             { "bSortable": false, "sWidth": "30px" },
             { "asSorting": [ "desc", "asc" ] , "sWidth": "40px"},
@@ -81,22 +82,22 @@
             { "asSorting": [ "desc", "asc" ] , "bVisible":    false },
             { "asSorting": [ "desc", "asc" ] , "bVisible":    false }
         ],
-		"fnServerData": function (sSource, aoData, fnCallback) {
-			if ( ! jData.length < 1  ) {
-				aoData.push({ "name": "station_list", "value": jData});
-			}
-			if ( ! sids.length < 1  ) {
-				aoData.push({ "name": "sids", "value": sids});
-			}
+        "fnServerData": function (sSource, aoData, fnCallback) {
+            if ( ! jData.length < 1  ) {
+                aoData.push({ "name": "station_list", "value": jData});
+            }
+            if ( ! sids.length < 1  ) {
+                aoData.push({ "name": "sids", "value": sids});
+            }
             $.ajax ( {
               "dataType": 'json',
               "type": "POST",
               "url": sSource,
-			  "data": aoData,
+              "data": aoData,
               "success": fnCallback
             } );
          }
-	});
+    });
 
 
         /* Buttons hovering handling */
@@ -134,67 +135,71 @@
             var ut = $("input:not(:checked)[class=station_selected_ids]")
 
            tk.each(function(){
-				$(this).attr("checked","");
-				sids = removeItem(sids, $(this).attr("value"));
-			});
+                $(this).attr("checked","");
+                sids = removeItem(sids, $(this).attr("value"));
+            });
 
-			ut.each(function(){
-				$(this).attr("checked","checked");
-				sids.push($(this).attr("value"));
-			});
+            ut.each(function(){
+                $(this).attr("checked","checked");
+                sids.push($(this).attr("value"));
+            });
 
         });
 
 
-//		$('#political_division').change( function() {
-//			val = $(this).attr('value')
-//			render_dist_filter(val);
-//		});
+//        $('#political_division').change( function() {
+//            val = $(this).attr('value')
+//            render_dist_filter(val);
+//        });
 //
 //        if ( ! $('#political_division').attr(':disabled') ) { 
 //            render_dist_filter($('#political_division').attr('value'));
 //        }
-//		
-//		$('#district').change( function() {
-//			val = $(this).attr('value')
-//			render_pref_filter(val);
-//		});
+//        
+//        $('#district').change( function() {
+//            val = $(this).attr('value')
+//            render_pref_filter(val);
+//        });
 //
-//		$('#filter_submit').click( function() {
-//			station_search();
-//		});
+//        $('#filter_submit').click( function() {
+//            station_search();
+//        });
 
         $("#map_stations").click(function(){
-			slist = StList.join(',');
-			jData = slist; 
-			oTable.fnDraw();
-		});
+            slist = StList.join(',');
+            jData = slist; 
+            oTable.fnDraw();
+        });
 
 
-		$("#show_stations").click(function(){
-			// get all stations ids from checkboxes and url address
-			slist = [];
-			slist = "(";
-			for ( i in sids ) {
-				slist += '\''+sids[i]+'\',';
-			}
-			if (slist.length > 2) {
-				slist = slist.substring(0,slist.length-1);
-			}
-			slist += ")";
-			
-			//feed ids to the GIS calling function
-			StationSelect(slist);
-	});
+        $("#show_stations").click(function(){
+            // get all stations ids from checkboxes and url address
+            slist = [];
+            slist = "(";
+            for ( i in sids ) {
+                slist += '\''+sids[i]+'\',';
+            }
+            if (slist.length > 2) {
+                slist = slist.substring(0,slist.length-1);
+            }
+            slist += ")";
+            
+            //feed ids to the GIS calling function
+            StationSelect(slist);
+    });
 
+
+        {% if not gis_server %} 
+            $("#mapcontent").html("<div style=\"margin:auto\"><h3>No GIS server configured!</h3></div>");
+        {% endif %}
     });
 
     function clear_cboxes () {
             var tk = $("input:checked[class=station_selected_ids]")
 
            tk.each(function(){
-				$(this).attr("checked","");
-			});
+                $(this).attr("checked","");
+            });
 
         }
 
@@ -233,20 +238,20 @@
 
     <div id="leftofmap"> 
 
-		{% comment %}	
-		<h3>{% trans 'Searching' %}</h3>
-		<div class="searchform">
-		  <form action="." method="GET">
-			<label for="q">{% trans "Find Stations by name, description, etc." %}</label><br/>
-			<input type="hidden" name="check" value="search">
-			<input type="text" name="q" size="40" value="{{ query|escape }}">
-			<input class="i16 magnifier long" type="submit" value="{% trans "Search" %}"	/>
-			<br />
-			<input type="checkbox" name="ts_only" value="True" {% if request.GET.ts_only %} checked="checked" {% endif %}> {% trans "Display only stations with timeseries"%} <br>
-		  </form>
-		</div>
+        {% comment %}    
+        <h3>{% trans 'Searching' %}</h3>
+        <div class="searchform">
+          <form action="." method="GET">
+            <label for="q">{% trans "Find Stations by name, description, etc." %}</label><br/>
+            <input type="hidden" name="check" value="search">
+            <input type="text" name="q" size="40" value="{{ query|escape }}">
+            <input class="i16 magnifier long" type="submit" value="{% trans "Search" %}"    />
+            <br />
+            <input type="checkbox" name="ts_only" value="True" {% if request.GET.ts_only %} checked="checked" {% endif %}> {% trans "Display only stations with timeseries"%} <br>
+          </form>
+        </div>
         <br \>
-		{% endcomment %}
+        {% endcomment %}
         {% block filters %}
         {% comment %}
           <h3>{% trans 'Filter' %}
@@ -262,10 +267,10 @@
         {% endcomment %}
         {% endblock %}
         <h3 style="display:inline">{% trans 'Station Catalogue' %}</h3>
-		<div id="buttons" style="float:right">
-			<button onClick="sids = [];clear_cboxes();">Clear Selected</button>
-			<button onClick="loadAllStations();">Load all Stations</button>
-		</div>
+        <div id="buttons" style="float:right">
+            <button onClick="sids = [];clear_cboxes();">Clear Selected</button>
+            <button onClick="loadAllStations();">Load all Stations</button>
+        </div>
         {% if station_list %}
         <table id='station_table' class="display" style="width:100%;text-align:center;"> 
           <thead>
@@ -284,7 +289,7 @@
           <tbody id="tbody_list">
           </tbody>
         </table>
-		<br />
+        <br />
         {% else %}
           <p>{% trans "No entries found." %}</p>
           <p>{% trans "You may want to try again with a different filter." %}</p>
