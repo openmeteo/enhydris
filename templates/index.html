@@ -17,7 +17,7 @@
     </div>
         <div id="frontpage">
         <div id="frontpage_stats">
-            <span id="header"> {% trans "Current Statistics" %} </span>
+            <span class="header"> {% trans "Current Statistics" %} </span>
             <hr />
             <p> {% trans "Currently there are " %} <span>{% do_count "auth.User" %}</span> {% trans "users registered on the site" %} </p>
             <p> {% trans "Currently there are " %} <span>{% do_count "hcore.Station" %}</span> {% trans "stations hosted on the site" %} </p>
@@ -26,7 +26,7 @@
         </div>
         
         <div id="frontpage_activity" style="margin-top:1em;">
-            <span id="header"> {% trans "Recent Activity" %} </span>
+            <span class="header"> {% trans "Recent Activity" %} </span>
             <hr />
             {% get_latest_stations 5  %}
 			{% if latest_stations %}

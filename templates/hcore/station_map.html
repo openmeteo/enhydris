@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/map_page.css"/>
     <link type="text/css" href="{{ MEDIA_URL }}css/smoothness/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
     <link type="text/css" href="{{ MEDIA_URL }}css/maptable.css" rel="stylesheet" />
-    <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css rel="stylesheet" />
+    <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
 {% endblock %} 
 
 {% block extra_head %}
@@ -20,11 +20,11 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/checkbox_store.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
     <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=1.6"></script>
-    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/1.6/js/dojo/dijit/themes/soria/soria.css">
-    <script type="text/javascript">djConfig = { parseOnLoad:true }</script>
+    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/1.6/js/dojo/dijit/themes/soria/soria.css" />
     <script type="text/javascript">
-
-    // GIS init stuff
+/*	<![CDATA[ */
+	djConfig = { parseOnLoad:true }
+    /* GIS init stuff */
     var map, stations=[];
     var queryStations, queryStationsTask;
     var queryTask, query, featureSet;
@@ -33,7 +33,7 @@
 
     var StList = [];
 
-    // THYAMIS "147.102.160.29"; //Hermes "192.168.200.249"; //Server 85.72.53.43 if outside GEOSET
+    /* THYAMIS "147.102.160.29";Hermes "192.168.200.249"; //Server 85.72.53.43 if outside GEOSET */
     var defaultSymbol, highlightSymbol;
     var initialExtent;
 
@@ -42,7 +42,7 @@
     dojo.require("esri.tasks.query");
     dojo.require("esri.tasks.geometry");
 
-//    dojo.addOnLoad( function() { WhenSelected(); });
+/*    dojo.addOnLoad( function() { WhenSelected(); }); */
     {% if gis_server %} 
         dojo.addOnLoad( function() {init(); });
     {% endif %}
@@ -69,8 +69,8 @@
         "bProcessing": true,
         "sAjaxSource": "/stations/info/",
         "sDom": '<"top"i>rt<"bottom"lp<"clear">',
-//    to enable filtering use the one below
-//        "sDom": '<"top"i>rt<"bottom"flp<"clear">',
+/*    to enable filtering use the one below
+        "sDom": '<"top"i>rt<"bottom"flp<"clear">', */
         "bAutoWidth": false,
         "aoColumns" : [
             { "bSortable": false, "sWidth": "30px" },
@@ -110,6 +110,7 @@
             }
         );
 
+/*
         //$('#help_dialog').dialog({
         //    bgiframe: true,
         //    height: 300,
@@ -121,7 +122,7 @@
         //$('#help_trigger').click(function(){
         //    $('#help_dialog').dialog('open')
         //});
-
+*/
         tooltip('.qtip_hidePanel', '{% trans "Click to hide the station list" %}', "topRight", "bottomLeft");
         tooltip('.qtip_hideMap', '{% trans "Click to hide the map area" %}', "topLeft", "bottomRight");
         tooltip('.qtip_showPanel', '{% trans "Click to expand the station list" %}', "topRight", "bottomLeft");
@@ -146,7 +147,7 @@
 
         });
 
-
+/*
 //        $('#political_division').change( function() {
 //            val = $(this).attr('value')
 //            render_dist_filter(val);
@@ -164,6 +165,7 @@
 //        $('#filter_submit').click( function() {
 //            station_search();
 //        });
+*/
 
         $("#map_stations").click(function(){
             slist = StList.join(',');
@@ -173,7 +175,7 @@
 
 
         $("#show_stations").click(function(){
-            // get all stations ids from checkboxes and url address
+            /* get all stations ids from checkboxes and url address */
             slist = [];
             slist = "(";
             for ( i in sids ) {
@@ -184,7 +186,7 @@
             }
             slist += ")";
             
-            //feed ids to the GIS calling function
+            /* feed ids to the GIS calling function */
             StationSelect(slist);
     });
 
@@ -203,7 +205,7 @@
 
         }
 
-
+	/* ]]> */
     </script>
 
 
@@ -237,45 +239,18 @@
     </div>
 
     <div id="leftofmap"> 
-
-        {% comment %}    
-        <h3>{% trans 'Searching' %}</h3>
-        <div class="searchform">
-          <form action="." method="GET">
-            <label for="q">{% trans "Find Stations by name, description, etc." %}</label><br/>
-            <input type="hidden" name="check" value="search">
-            <input type="text" name="q" size="40" value="{{ query|escape }}">
-            <input class="i16 magnifier long" type="submit" value="{% trans "Search" %}"    />
-            <br />
-            <input type="checkbox" name="ts_only" value="True" {% if request.GET.ts_only %} checked="checked" {% endif %}> {% trans "Display only stations with timeseries"%} <br>
-          </form>
-        </div>
-        <br \>
-        {% endcomment %}
         {% block filters %}
-        {% comment %}
-          <h3>{% trans 'Filter' %}
-            <sup>
-                <a id="help_trigger" style="cursor:pointer">
-                    <img src="{{ MEDIA_URL }}images/icons/help.png">
-                </a>
-            </sup>
-          </h3>
-          <fieldset class="ui-corner-all" style="padding-top:1em;border-style:solid;border-color:#DDD;max-width:520px;">
-          {% filter_table request "False" %}
-          </fieldset>
-        {% endcomment %}
         {% endblock %}
         <h3 style="display:inline">{% trans 'Station Catalogue' %}</h3>
         <div id="buttons" style="float:right">
-            <button onClick="sids = [];clear_cboxes();">Clear Selected</button>
-            <button onClick="loadAllStations();">Load all Stations</button>
+            <button onclick="sids = [];clear_cboxes();">Clear Selected</button>
+            <button onclick="loadAllStations();">Load all Stations</button>
         </div>
         {% if station_list %}
         <table id='station_table' class="display" style="width:100%;text-align:center;"> 
           <thead>
             <tr>
-              <th width="50"><a id='select_stations' style="cursor:pointer">Select</a></th>
+              <th><a id='select_stations' style="cursor:pointer">Select</a></th>
               <th>{% anchor id 'ID' %}</th>
               <th>{% anchor name 'Name' %}</th>
               <th>{% anchor water_basin 'Water Basin' %}</th>
@@ -287,6 +262,9 @@
           </thead>
 
           <tbody id="tbody_list">
+			<tr>
+			<th></th>
+			</tr>
           </tbody>
         </table>
         <br />
@@ -299,10 +277,10 @@
     <div id="mapcontent" class="soria"> 
 
     <b>SELECT TOOLS :</b>
-    <button dojoType="dijit.form.Button" onClick="toolbar.activate(esri.toolbars.Draw.EXTENT);map.hidePanArrows();map.hideZoomSlider();">Box</button>
-    <button dojoType="dijit.form.Button" onClick="toolbar.activate(esri.toolbars.Draw.FREEHAND_POLYGON);map.hidePanArrows();map.hideZoomSlider();">Freehand Polygon</button>
-    <button dojoType="dijit.form.Button" onClick="toolbar.deactivate();map.showPanArrows();map.showZoomSlider();">Deactivate</button>
-    <button dojoType="dijit.form.Button" onClick="map.setExtent(initialExtent,false);toolbar.deactivate();map.showPanArrows();map.showZoomSlider();">Reload Map</button>
+    <button onclick="toolbar.activate(esri.toolbars.Draw.EXTENT);map.hidePanArrows();map.hideZoomSlider();">Box</button>
+    <button onclick="toolbar.activate(esri.toolbars.Draw.FREEHAND_POLYGON);map.hidePanArrows();map.hideZoomSlider();">Freehand Polygon</button>
+    <button onclick="toolbar.deactivate();map.showPanArrows();map.showZoomSlider();">Deactivate</button>
+    <button onclick="map.setExtent(initialExtent,false);toolbar.deactivate();map.showPanArrows();map.showZoomSlider();">Reload Map</button>
     <br />
         <div id="map_data" class="soria" style="border:1px solid #ccc;" >
         </div>

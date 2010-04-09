@@ -82,24 +82,23 @@
 
         <div id="tabs-1" >
             <div>
-                <p>
                   <h3>{% trans 'Searching' %}</h3>
 					<div class="searchform">
-					  <form action="." method="GET">
-						<label for="q">{% trans "Find Stations by name, description, etc." %}</label><br/>
-						<input type="hidden" name="check" value="search">
-						<input type="text" name="q" size="40" value="{{ query|escape }}">
+					  <form action="." method="get">
+						<p><label>{% trans "Find Stations by name, description, etc." %}</label></p>
+						<div><input type="hidden" name="check" value="search" /></div>
+						<div><input type="text" name="q" size="40" value="{{ query|escape }}" />
 						<input class="i16 magnifier long" type="submit" value="{% trans "Search" %}" 
-							{% if request.GET.ts_only %} checked {% endif %}>
-						<br />
-						<input type="checkbox" name="ts_only" value="True" {% if request.GET.ts_only %} checked="checked" {% endif %}> {% trans "Display only stations with timeseries"%} <br>
+							{% if request.GET.ts_only %} checked {% endif %} />
+						<br /></div>
+						<div><input type="checkbox" name="ts_only" value="True" {% if request.GET.ts_only %} checked="checked" {% endif %} /><span>{% trans "Display only stations with timeseries"%}</span> <br /></div>
 					  </form>
 					</div>
  
                     {% if search %}
                     <div class="ui-widget">
                         <div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;"> 
-                            <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+                            <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em; color:#4C0D8C;"></span>
                             {% trans "Search results obtained" %} ::
                             <a href="{% url station_list %}">{% trans " Back to all results" %}</a> ::
                         </div>
@@ -114,7 +113,6 @@
                         </div>
                     </div>
                     {% endif %}
-                </p>
             </div>
 
 
@@ -135,9 +133,9 @@
 
             {% if station_list %}
 			<span style="float:right"> 
-				<img class="decreaseFont" style="cursor:pointer" src="{{MEDIA_URL}}images/icons/user-decrease.png">
-				<img class="resetFont" style="cursor:pointer" src="{{MEDIA_URL}}images/icons/user-reset.png">
-				<img class="increaseFont" style="cursor:pointer" src="{{MEDIA_URL}}images/icons/user-increase.png">
+				<img class="decreaseFont" style="cursor:pointer" alt="Decrease font size" src="{{MEDIA_URL}}images/icons/user-decrease.png" />
+				<img class="resetFont" style="cursor:pointer" alt="Decrease font size" src="{{MEDIA_URL}}images/icons/user-reset.png" />
+				<img class="increaseFont" style="cursor:pointer" alt="Decrease font size" src="{{MEDIA_URL}}images/icons/user-increase.png" />
 			</span>
 
             <table class="table_container tablesorter tablehighlighted data_table" style='width:100%;text-align:center'>
@@ -177,14 +175,12 @@
             {% paginate %}
         </div>
         <div id="tabs-2">
-            <p>
               {% block filters %}
               <div style="padding: 10px;">
               <h3>{% trans 'Filter' %}</h3>
               {% filter_table request "True" %}
               {% endblock %}
               </div>
-            </p>
         </div>
     </div>
 

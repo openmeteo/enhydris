@@ -1,16 +1,16 @@
 {% load i18n %}
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
-   "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
-<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
   <title>{% block title %}{% trans "Hydroscope" %}{% endblock %}</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=7" />
   {% block basecss %}
-  <link media="screen" href="/site_media/css/base.css" type="text/css" rel="stylesheet">
-  <link media="screen" href="/site_media/css/tablesorter.css" type="text/css" rel="stylesheet">
-  <link rel="stylesheet" href="{{ MEDIA_URL }}css/jquery.fancybox-1.2.6.css" type="text/css" media="screen">
+  <link media="screen" href="/site_media/css/base.css" type="text/css" rel="stylesheet" />
+  <link media="screen" href="/site_media/css/tablesorter.css" type="text/css" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ MEDIA_URL }}css/jquery.fancybox-1.2.6.css" type="text/css" media="screen" />
   <link type="text/css" href="{{ MEDIA_URL }}css/smoothness/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
   <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
   {% endblock %}
@@ -42,7 +42,7 @@
 	<ul id="menu"> 
 		<li class="logo"> 
 			<a href='/'>
-			<img style="float:left;" alt="" src="{{ MEDIA_URL}}images/menu_left.png" border="0"/> 
+			<img style="float:left;border:0;" alt="" src="{{ MEDIA_URL}}images/menu_left.png" /> 
 			</a>
 			<ul id="main"> 
 				<li>{% trans "Welcome to <b>Hydroscope</b>" %}</li> 
@@ -68,9 +68,9 @@
 			</ul> 
 		</li>
 		<li class="searchContainer"> 
-					<form method=GET action='/stations/l/'>
-						<input type="hidden" name="check" value="search" />
+					<form method="get" action='/stations/l/'>
 						<div>
+						<input type="hidden" name="check" value="search" />
 						<input type="text" name="q" size="20" style="height:15px;" />
 						<input type="image" src="{{ MEDIA_URL }}images/icons/magnifier.png" alt="{% trans "Search" %}" style="border:none;" />
 						</div>
@@ -93,18 +93,18 @@
 			</ul>
 		-->
 		</li> 
-		<ul>
-		<img style="float:left" alt="" src="{{ MEDIA_URL }}images/menu_right.png"/>
-		</ul>
+		<li style="background:transparent;margin:0;padding:0;">
+			<img style="float:left" alt="" src="{{ MEDIA_URL }}images/menu_right.png" />
+		</li>
 	</ul> 
 
 	<ul id="menu2"> 
 
 		{% if user.is_authenticated %}
 
-				<ul>
-					<img style="float:left" alt="" src="{{ MEDIA_URL }}images/top_menu_left.png"/>
-				</ul>
+			<li style="background:transparent;margin:0;padding:0;">
+				<img style="float:left" alt="" src="{{ MEDIA_URL }}images/top_menu_left.png"/>
+			</li>
 			<li id="userinfo">
             {% blocktrans with user.username as user_username %}Welcome <a href="/profile/{{ user_username }}">{{ user_username }}</a>!{% endblocktrans %}&nbsp;
 			</li>
@@ -112,9 +112,9 @@
 			<li><a href="{% url auth_logout %}">Logout</a> 
 			</li> 
 		{% else %}
-			<ul>
+			<li style="background:transparent;margin:0;padding:0;">
 			<img style="float:left" alt="" src="{{ MEDIA_URL }}images/top_menu_left_bw.png"/>
-			</ul>
+			</li>
 			<li><a class="loginform" href="{% url auth_login %}">Login</a></li> 
 
 			<li><a href="{% url registration_register %}">Register</a></li> 
@@ -126,21 +126,21 @@
 			{% url django.views.i18n.set_language as set_language_url %}
 				<form action="{{ set_language_url }}" method="post">
 				<p style="display: inline;">
-					<input name="next" type="hidden" value="{{ request.path }}">
+					<input name="next" type="hidden" value="{{ request.path }}" />
 						<select name="language">
 						{% for lang in LANGUAGES %}
 						   <option value="{{ lang.0 }}" {% ifequal request.session.django_language lang.0 %}selected="selected"{% endifequal %}>{{ lang.1 }}</option>
 						{% endfor %}
 						</select>
-						<input type="submit" value="Go">
+						<input type="submit" value="Go" />
 				</p>
 				</form>
 
 
 			</li>
-			<ul>
+			<li style="background:transparent;margin:0;padding:0;">
 			<img style="float:left" alt="" src="{{ MEDIA_URL }}images/menu_right.png"/>
-			</ul>
+			</li>
 			
 	</ul>
 	</div>

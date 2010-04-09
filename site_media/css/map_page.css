@@ -63,6 +63,7 @@
 
 #station_table{
     min-width: 300px;
+	max-width: 100%;
 }
 
 .pagination{
@@ -82,6 +83,16 @@
 }
 
 #station_table_paginate{
+	min-width: 350px;
 	width:auto;
 	padding-top:0.5em;
+	float:right;
+}
+
+#station_table_paginate span {
+	width:auto;
+}
+
+#station_table_wrapper { 
+	max-width: 100%;
 }
