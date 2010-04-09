@@ -2,7 +2,6 @@
 Hcore Forms.
 """
 
-import re
 from pthelma import timeseries
 from django import forms, db
 from django.contrib.auth.models import User
@@ -206,31 +205,16 @@ class TimeseriesForm(ModelForm):
 
 
     def clean_data(self):
-        # Here we should check if file contains valid timeseries data.
-        if 'data' in self.cleaned_data:
-            if not self.cleaned_data['data']:
-                return None
-            fdata = self.cleaned_data['data']
-            fdata.seek(0)
-            adata = fdata.readlines()
-
-            try:
-                line_counter = 0
-                in_header = True
-                for line in adata:
-                    line_counter += 1
-                    if in_header:
-                        if adata[0].isspace(): in_header = False
-                        continue
-                    if line.isspace() and line_counter==len(adata): break
-                    if not re.match(
-                        '^\d{4}-\d{2}-\d{2} (?:\d{2}:\d{2})?,(\d)*(?:\.\d+)?,'
-                        '.*\r\n$', line):
-                        raise forms.ValidationError(_("Invalid record"))
-            except Exception as e:
-                raise forms.ValidationError(_("Error in file: %s at line %d.")
-                    % (str(e), line_counter))
-            return self.cleaned_data["data"]
+        # Check if file contains valid timeseries data.
+        if ('data' not in self.cleaned_data) or not self.cleaned_data['data']:
+            return None
+        self.cleaned_data['data'].seek(0)
+        ts = timeseries.Timeseries()
+        try:
+            ts.read_file(self.cleaned_data['data'])
+        except Exception as e:
+            raise forms.ValidationError(str(e))
+        return self.cleaned_data['data']
 
     def clean(self):
         """
@@ -283,11 +267,7 @@ class TimeseriesForm(ModelForm):
         if 'data' in self.cleaned_data and self.cleaned_data['data']:
             ts = timeseries.Timeseries(int(self.instance.id))
             self.cleaned_data['data'].seek(0)
-            lines = len(self.cleaned_data['data'].readlines())
-            self.cleaned_data['data'].seek(0)
-            start = next(s for s in range(lines) if self.cleaned_data['data'].readline() == '\r\n')
-            self.cleaned_data['data'].seek(0)
-            ts.read(self.cleaned_data['data'].readlines()[start+1:])
+            ts.read_file(self.cleaned_data['data'])
             if self.cleaned_data['data_policy'] == 'A':
                 ts.append_to_db(db.connection, transaction=db.transaction)
             else:
