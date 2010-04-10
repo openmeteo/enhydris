@@ -16,37 +16,33 @@
 {% endblock %}
 
 {% block content %}
-<center>
 
 
-<div id="form" align="left" style="width: 700px;">
+<div id="form" style="width: 700px;margin:auto;">
 
 <fieldset class="info_fieldset"><legend>Contact us!</legend>
 
 
-<form id="ajax-contact-form" action="." method="POST">
-<input type="hidden" value="{{ hash }}" name="hash">
-<label for"cname">Name</label><INPUT id="cname" class="textbox required" type="text" name="name" value=""><br />
+<form id="ajax-contact-form" action="." method="post">
+<div><input type="hidden" value="{{ hash }}" name="hash" /></div>
+<div><label for="cname">Name</label><input id="cname" class="textbox required" type="text" name="name" value="" /><br /></div>
 
-<label for="cmail">E-Mail</label><INPUT id="cmail" class="textbox required email " type="text" name="email" value=""><br />
+<div><label for="cmail">E-Mail</label><input id="cmail" class="textbox required email " type="text" name="email" value="" /><br /></div>
 
-<label for="csubject">Subject</label><INPUT id="csubject" class="textbox required" type="text" name="subject" value=""><br />
+<div><label for="csubject">Subject</label><input id="csubject" class="textbox required" type="text" name="subject" value="" /><br /></div>
 
-<label for="cmsg">Message</label><TEXTAREA id="cmsg" class="textbox required" NAME="message" ROWS="10" COLS="40"></TEXTAREA><br />
+<div><label for="cmsg">Message</label><textarea id="cmsg" class="textbox required" name="message" rows="10" cols="40"></textarea><br /></div>
 
-<label for="captcha">Captcha</label> Type the letters in the box:<br />
-<label><span style="color:red">{{message}}</span></label><img src="{{MEDIA_URL}}captchas/{{captcha}}"><input class="required" type="text" size="20"
-style="line-height=40px" name="captcha"><br />
+<div><label for="captcha">Captcha</label> Type the letters in the box:<br /></div>
+<div><label><span style="color:red">{{message}}</span></label><img alt="Captcha" src="{{MEDIA_URL}}captchas/{{captcha}}" /><input class="required" type="text" size="20"
+style="line-height=40px" name="captcha" id="captcha"/><br /></div>
 
-<label>&nbsp;</label><INPUT class="submit" type="submit" name="submit" value="Send Message">
+<div><label>&nbsp;</label><input class="submit" type="submit" name="submit" value="Send Message" /></div>
 </form>
-
-</div>
 
 </fieldset>
 
 </div>
 
- </center>
 
 {% endblock %}
