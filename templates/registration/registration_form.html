@@ -1,5 +1,21 @@
-{% extends "base.html" %}
+{% extends "base-sample.html" %}
 {% load i18n %}
+{% block extracss %}
+<link rel="stylesheet" href="{{MEDIA_URL}}css/jquery.fancybox-1.3.1.css" type="text/css" media="screen" />
+{% endblock %} 
+{% block extra_head %}
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.fancybox-1.3.1.js"></script>
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+	$("a#terms").fancybox({
+		'hideOnContentClick': true
+	});
+});
+</script>
+
+{% endblock %} 
 
 {% block title %}{% trans "Sign up" %}{% endblock %}
 
@@ -66,7 +82,7 @@
   </tr>
         </table>
         <p>
-          <label>Have you read and accepted the <a href="/terms/" target="blank">terms of service?</a></label>
+          <label>Have you read and accepted the <a id="terms" href="{% url terms %}" class="iframe">terms of service?</a></label>
           
           {{ form.tos }} I agree.
           </p> 

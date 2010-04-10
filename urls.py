@@ -40,7 +40,7 @@ urlpatterns = patterns('',
     # contact form
     (r'^contact/$', include('enhydris.contact.urls')),
     # terms of usage
-    (r'^terms/$', terms),
+    (r'^terms/$', terms,{}, 'terms'),
 
     # internationalization
     (r'^i18n/', include('django.conf.urls.i18n')),
