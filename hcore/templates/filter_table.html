@@ -38,9 +38,9 @@
                 </td>
                 <td><a class="hide_disable_toggler"> On/Off </a></td>
                 <td rowspan="7" style="border:0;padding-left:3em;vertical-align:top">
-                    <div {% ifequal help_inline "False" %}id="help_dialog" title="Using Filters"{% endifequal %} >
-                            {% ifequal help_inline "True" %}
-                            <div style="text-align:left">
+                    <div {% ifequal help_inline "False" %}style="display:none;"{% endifequal %} id="help_dialog" title="Using Filters" >
+						{% ifequal help_inline "True" %}
+						<div style="text-align:left">
 							<h3 style="display:inline"><span class="i16 help">{% trans "Using Filters" %}</span></h3>
 						</div>
 
@@ -61,9 +61,9 @@
 						{% else %}
 						</p>
 						{% endifequal %}
-				</div>
-			</td>
-		</tr>
+					</div>
+				</td>
+			</tr>
 		<tr>
 			<th>
 				{% trans subdiv1 %} 

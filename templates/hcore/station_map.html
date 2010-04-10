@@ -8,6 +8,8 @@
     <link type="text/css" href="{{ MEDIA_URL }}css/smoothness/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
     <link type="text/css" href="{{ MEDIA_URL }}css/maptable.css" rel="stylesheet" />
     <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/1.6/js/dojo/dijit/themes/soria/soria.css" />
+    <link type="text/css" href="{{ MEDIA_URL }}css/jquery.fancybox-1.3.1.css" rel="stylesheet" />
 {% endblock %} 
 
 {% block extra_head %}
@@ -19,8 +21,9 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.dataTables.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/checkbox_store.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.fancybox-1.3.1.js"></script>
     <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=1.6"></script>
-    <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/1.6/js/dojo/dijit/themes/soria/soria.css" />
+
     <script type="text/javascript">
 /*	<![CDATA[ */
 	djConfig = { parseOnLoad:true }
@@ -51,15 +54,18 @@
     var elements = [];
     var oTable;
     var jData = [];
+	var clearFilter = false;
 
     
     function loadAllStations() {
         jData = [];
+		clearFilter = true;
+		sids = [];
+        clear_cboxes(); 
         oTable.fnDraw();        
     }
 
     $(document).ready(function(){
-
 
     oTable = $('#station_table').dataTable({
         "bJQueryUI": true,
@@ -83,12 +89,21 @@
             { "asSorting": [ "desc", "asc" ] , "bVisible":    false }
         ],
         "fnServerData": function (sSource, aoData, fnCallback) {
-            if ( ! jData.length < 1  ) {
-                aoData.push({ "name": "station_list", "value": jData});
-            }
+
+			if (clearFilter) {
+				;
+			} else { 
+				if ( ! jData.length < 1 ) { 
+					aoData.push({ "name": "station_list", "value": jData});
+				} else {
+					aoData.push({ "name": "station_list", "value": {{ station_list }} });
+				}
+			}
+
             if ( ! sids.length < 1  ) {
                 aoData.push({ "name": "sids", "value": sids});
             }
+
             $.ajax ( {
               "dataType": 'json',
               "type": "POST",
@@ -96,6 +111,7 @@
               "data": aoData,
               "success": fnCallback
             } );
+
          }
     });
 
@@ -111,17 +127,17 @@
         );
 
 /*
-        //$('#help_dialog').dialog({
-        //    bgiframe: true,
-        //    height: 300,
-        //    width: 300,
-        //    modal: true,
-        //    autoOpen: false
-        //});
+        $('#help_dialog').dialog({
+            bgiframe: true,
+            height: 300,
+            width: 300,
+            modal: true,
+            autoOpen: false
+        });
 
-        //$('#help_trigger').click(function(){
-        //    $('#help_dialog').dialog('open')
-        //});
+        $('#help_trigger').click(function(){
+           $('#help_dialog').dialog('open')
+        });
 */
         tooltip('.qtip_hidePanel', '{% trans "Click to hide the station list" %}', "topRight", "bottomLeft");
         tooltip('.qtip_hideMap', '{% trans "Click to hide the map area" %}', "topLeft", "bottomRight");
@@ -147,34 +163,39 @@
 
         });
 
-/*
-//        $('#political_division').change( function() {
-//            val = $(this).attr('value')
-//            render_dist_filter(val);
-//        });
-//
-//        if ( ! $('#political_division').attr(':disabled') ) { 
-//            render_dist_filter($('#political_division').attr('value'));
-//        }
-//        
-//        $('#district').change( function() {
-//            val = $(this).attr('value')
-//            render_pref_filter(val);
-//        });
-//
-//        $('#filter_submit').click( function() {
-//            station_search();
-//        });
-*/
+
+        $('#political_division').change( function() {
+            val = $(this).attr('value')
+            render_dist_filter(val);
+        });
+
+        if ( ! $('#political_division').attr(':disabled') ) { 
+            render_dist_filter($('#political_division').attr('value'));
+        }
+        
+        $('#district').change( function() {
+            val = $(this).attr('value')
+            render_pref_filter(val);
+        });
+
+        $('#filter_submit').click( function() {
+            station_search();
+        });
+
 
         $("#map_stations").click(function(){
             slist = StList.join(',');
             jData = slist; 
+			clearFilter = false;
+			sids = [];
+			clear_cboxes();
             oTable.fnDraw();
+
         });
 
 
         $("#show_stations").click(function(){
+
             /* get all stations ids from checkboxes and url address */
             slist = [];
             slist = "(";
@@ -185,11 +206,18 @@
                 slist = slist.substring(0,slist.length-1);
             }
             slist += ")";
-            
+
             /* feed ids to the GIS calling function */
             StationSelect(slist);
-    });
+		});
 
+		$("a#inline").fancybox({
+			'transitionIn'	:	'fade',
+			'transitionOut'	:	'fade',
+			'speedIn'		:	600, 
+			'speedOut'		:	200, 
+			'hideOnContentClick': false
+		});		
 
         {% if not gis_server %} 
             $("#mapcontent").html("<div style=\"margin:auto\"><h3>No GIS server configured!</h3></div>");
@@ -240,12 +268,23 @@
 
     <div id="leftofmap"> 
         {% block filters %}
+		<div style="display:none;">
+		<div id="hidden_filter">
+          {% filter_table request "False" %}
+		</div>
+		</div>
         {% endblock %}
-        <h3 style="display:inline">{% trans 'Station Catalogue' %}</h3>
-        <div id="buttons" style="float:right">
-            <button onclick="sids = [];clear_cboxes();">Clear Selected</button>
-            <button onclick="loadAllStations();">Load all Stations</button>
-        </div>
+		<div>
+			<h3 style="display:inline;">{% trans 'Station Catalogue' %}</h3> 
+			<sup>
+					<a id="inline" href="#hidden_filter" title="Station Filter"><img alt="Filter stations;" style="border:0" src="{{ MEDIA_URL }}images/icons/magnifier.png" />
+					</a>
+			</sup>	
+			<div id="buttons" style="float:right">
+				<button onclick="sids = [];clear_cboxes();">Clear Selected</button>
+				<button onclick="loadAllStations();">Load all Stations</button>
+			</div>
+		</div>
         {% if station_list %}
         <table id='station_table' class="display" style="width:100%;text-align:center;"> 
           <thead>

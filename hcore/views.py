@@ -134,15 +134,17 @@ def station_info(request, *args, **kwargs):
 #
 
 
+    sids = ""
+    if request.POST.has_key('sids'):
+        sids = request.POST['sids']
+
     if request.POST and request.POST.has_key('station_list'):
         ids = split(request.POST['station_list'],",")
         stations = Station.objects.filter(id__in=ids)
     else:
         stations = Station.objects.all()
 
-    sids = ""
-    if request.POST.has_key('sids'):
-        sids = request.POST['sids']
+
 
     # for search
     # for sorting
@@ -254,9 +256,10 @@ def instrument_detail(request, queryset, object_id, *args, **kwargs):
             'water_division',))
 @sort_by
 def map_view(request, stations='',  *args, **kwargs):
+
     if request.GET.has_key("ts_only") and request.GET["ts_only"]=="True":
         from django.db.models import Count
-        tmpset = Station.objects.annotate(tsnum=Count('timeseries'))
+        tmpset = stations.annotate(tsnum=Count('timeseries'))
         stations = tmpset.exclude(tsnum=0)
 
     if request.GET.has_key("check") and request.GET["check"]=="search":
@@ -297,7 +300,7 @@ def map_view(request, stations='',  *args, **kwargs):
         gis = None
     kwargs["extra_context"].update({'gis_server':gis},)
 
-    kwargs["extra_context"].update({'station_list':stations},)
+    kwargs["extra_context"].update({'station_list': [ s.id for s in stations]},)
 
 
     return render_to_response('hcore/station_map.html', kwargs["extra_context"],
