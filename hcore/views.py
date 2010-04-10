@@ -23,7 +23,8 @@ from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
 from enhydris.hcore.models import *
 from enhydris.hcore.decorators import *
-from enhydris.hcore.forms import StationForm, TimeseriesForm, InstrumentForm
+from enhydris.hcore.forms import (StationForm, TimeseriesForm, InstrumentForm,
+                                    GentityFileForm, GentityEventForm)
 
 
 
@@ -858,6 +859,203 @@ def timeseries_delete(request, timeseries_id):
 
 
 """
+GentityFile/Event Views
+"""
+
+def _gentityfile_edit_or_create(request,gfile_id=None,station_id=None):
+    if gfile_id:
+        # Edit
+        gfile = get_object_or_404(GentityFile, id=gfile_id)
+    else:
+        # Add
+        gfile = None
+
+
+    if gfile_id and not station_id:
+        # Editing
+        try:
+            station = gfile.gentity
+        except:
+            # GentityFile doesn't have a relative station.
+            # This shouldn't happen. Admin should fix such cases
+            response = render_to_response('404.html',
+                       RequestContext(request))
+            response.status_code = 404
+            return response
+        else:
+            # Check perms
+            if not request.user.has_row_perm(station,'edit'):
+                response = render_to_response('403.html',
+                               RequestContext(request))
+                response.status_code = 403
+                return response
+
+    if station_id and not gfile_id:
+        # Adding new
+        station = get_object_or_404(Station, id=station_id)
+        if not request.user.has_row_perm(station,'edit'):
+            response = render_to_response('403.html',
+                           RequestContext(request))
+            response.status_code = 403
+            return response
+
+    user = request.user
+    # Done with checks
+    if request.method == 'POST':
+        if gfile:
+            form = GentityFileForm(request.POST,request.FILES,instance=gfile,user=user)
+        else:
+            form = GentityFileForm(request.POST,request.FILES,user=user)
+        if form.is_valid():
+            gfile = form.save()
+            # do stuff
+            gfile.save()
+            if not gfile_id:
+                gfile_id=str(gfile.id)
+            return HttpResponseRedirect('/stations/d/'+str(gfile.gentity.id))
+    else:
+        if gfile:
+            form = GentityFileForm(instance=gfile,user=user)
+        else:
+            form = GentityFileForm(user=user)
+
+    print "done"
+    return render_to_response('hcore/gentityfile_edit.html', {'form': form},
+                    context_instance=RequestContext(request))
+
+@permission_required('hcore.add_gentityfile')
+def gentityfile_add(request):
+    """
+    Create new gentityfile. GentityFile can only be added as part of an existing
+    station.
+    """
+    return _gentityfile_edit_or_create(request)
+
+@login_required
+def gentityfile_edit(request,gentityfile_id):
+    """
+    Edit existing gentityfile. Permissions are checked against the relative
+    station that the gentityfile is part of.
+    """
+    return _gentityfile_edit_or_create(request, gfile_id=gentityfile_id)
+
+@login_required
+def gentityfile_delete(request, gentityfile_id):
+    """
+    Delete existing gentityfile. Permissions are checked against the relative
+    station that the gentityfile is part of.
+    """
+    gfile = get_object_or_404(GentityFile, id=gentityfile_id)
+    related_station = gfile.related_station
+    if gfile and related_station:
+        if request.user.has_row_perm(related_station, 'edit'):
+            gfile.delete()
+            return render_to_response('success.html',
+                    {'msg': 'GentityFile deleted successfully',},
+                    context_instance=RequestContext(request))
+    response = render_to_response('403.html',
+                   RequestContext(request))
+    response.status_code = 403
+    return response
+
+
+def _gentityevent_edit_or_create(request,gevent_id=None,station_id=None):
+    if gevent_id:
+        # Edit
+        gevent = get_object_or_404(GentityEvent, id=gevent_id)
+    else:
+        # Add
+        gevent = None
+
+    if gevent_id and not station_id:
+        # Editing
+        try:
+            station = gevent.gentity
+        except:
+            # GentityEvent doesn't have a relative station.
+            # This shouldn't happen. Admin should fix such cases
+            response = render_to_response('404.html',
+                       RequestContext(request))
+            response.status_code = 404
+            return response
+        else:
+            # Check perms
+            if not request.user.has_row_perm(station,'edit'):
+                response = render_to_response('403.html',
+                               RequestContext(request))
+                response.status_code = 403
+                return response
+
+    if station_id and not gevent_id:
+        # Adding new
+        station = get_object_or_404(Station, id=station_id)
+        if not request.user.has_row_perm(station,'edit'):
+            response = render_to_response('403.html',
+                           RequestContext(request))
+            response.status_code = 403
+            return response
+
+    user = request.user
+    # Done with checks
+    if request.method == 'POST':
+        if gevent:
+            form = GentityEventForm(request.POST,request.FILES,instance=gevent,user=user)
+        else:
+            form = GentityEventForm(request.POST,request.FILES,user=user)
+        if form.is_valid():
+            gevent = form.save()
+            # do stuff
+            gevent.save()
+            if not gevent_id:
+                gevent_id=str(gevent.id)
+            return HttpResponseRedirect('/stations/d/'+str(gevent.gentity.id))
+    else:
+        if gevent:
+            form = GentityEventForm(instance=gevent,user=user)
+        else:
+            form = GentityEventForm(user=user)
+
+    return render_to_response('hcore/gentityevent_edit.html', {'form': form},
+                    context_instance=RequestContext(request))
+
+@permission_required('hcore.add_gentityevent')
+def gentityevent_add(request):
+    """
+    Create new gentityevent. GentityEvent can only be added as part of an existing
+    station.
+    """
+    return _gentityevent_edit_or_create(request)
+
+@login_required
+def gentityevent_edit(request,gentityevent_id):
+    """
+    Edit existing gentityevent. Permissions are checked against the relative
+    station that the gentityevent is part of.
+    """
+    return _gentityevent_edit_or_create(request, gevent_id=gentityevent_id)
+
+@login_required
+def gentityevent_delete(request, gentityevent_id):
+    """
+    Delete existing gentityevent. Permissions are checked against the relative
+    station that the gentityevent is part of.
+    """
+    gevent = get_object_or_404(GentityEvent, id=gentityevent_id)
+    related_station = gevent.related_station
+    if gevent and related_station:
+        if request.user.has_row_perm(related_station, 'edit'):
+            gevent.delete()
+            return render_to_response('success.html',
+                    {'msg': 'GentityEvent deleted successfully',},
+                    context_instance=RequestContext(request))
+    response = render_to_response('403.html',
+                   RequestContext(request))
+    response.status_code = 403
+    return response
+
+
+
+"""
 Instument views
 """
 
@@ -964,7 +1162,8 @@ Generic model creation
 
 ALLOWED_TO_EDIT = ('waterbasin', 'waterdivision', 'person', 'organization',
                    'stationtype', 'lentity','gentity', 'variable', 'timezone',
-                   'politicaldivision','instrumenttype', 'unitofmeasurement')
+                   'politicaldivision','instrumenttype', 'unitofmeasurement',
+                   'filetype','eventtype')
 
 @login_required
 def model_add(request, model_name=''):

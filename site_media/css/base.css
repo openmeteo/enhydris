@@ -411,3 +411,23 @@ table.formset td {
 	padding: 1em;
 }
 
+div#menu_bar {
+	-moz-background-clip:border;
+	-moz-background-inline-policy:continuous;
+	-moz-background-origin:padding;
+	background:#F6F6EA none repeat scroll 0 0;
+	color:#A4A4A4;
+	font-size:10px;
+	height:23px;
+	line-height:23px;
+	margin-bottom:2em;
+	padding:0 10px;
+}
+
+.menu_options {
+	padding: 0.2em 0.5em;
+}
+
+.mgmt_button { 
+    border: 0;
+}

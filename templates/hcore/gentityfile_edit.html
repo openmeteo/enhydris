@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load form_as_table %} 
+{% block extra_head %}
+
+    <link type="text/css" href="{{ MEDIA_URL }}css/smoothness/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
+    <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
+	<script type="text/javascript" src="/media/js/admin/RelatedObjectLookups.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+		$("[id$='_date']").datepicker({ dateFormat: 'yy-mm-dd' });
+	});
+</script>
+
+{% endblock %}
+
+{% block title %}
+{% if form.instance.pk %}
+	{% trans "Edit Gentity File"  %}
+{% else %} 
+	{% trans "Add Gentity File" %}
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<form method="post" action="" class="wide" enctype="multipart/form-data">
+    {% if form.instance.pk %}
+            <h3>
+                {% trans "Edit gentity file details:" %}
+            </h3>
+        {% else %} 
+            <h3>{% trans "Fill the gentity file details:" %}</h3>
+    {% endif %}
+
+    {% if form.errors %}
+        <p class="fielderrors">{% trans "Please correct the errors below: " %}{{ form.non_field_errors }}</p>
+    {% endif %}
+	<form method="post" action="" class="wide">
+		<table class="table_container">
+			<tbody>
+				{% form_as_table_rows form  %}
+			</tbody>
+		</table>
+
+	<p class="submit"><input type="submit" value="{% trans "Submit Changes" %} &rarr;"></p>
+    </form>
+{% endblock %}

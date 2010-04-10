@@ -41,6 +41,45 @@ class HcoreRegistrationForm(RegistrationForm):
 Model forms.
 """
 
+class GentityFileForm(ModelForm):
+
+    file_type = forms.ModelChoiceField(FileType.objects,
+                                widget=SelectWithPop(model_name='filetype'))
+
+    class Meta:
+        model = GentityFile
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(GentityFileForm, self).__init__(*args, **kwargs)
+
+        if user and not user.is_superuser:
+            perms = user.get_rows_with_permission(Station(), 'edit')
+            ids = [ p.object_id for p in perms]
+            self.fields["gentity"].queryset = Gentity.objects.filter(
+                                                id__in=ids)
+
+class GentityEventForm(ModelForm):
+
+    type = forms.ModelChoiceField(EventType.objects,
+                                widget=SelectWithPop(model_name='eventtype'))
+
+    class Meta:
+        model = GentityEvent
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(GentityEventForm, self).__init__(*args, **kwargs)
+
+        if user and not user.is_superuser:
+            perms = user.get_rows_with_permission(Station(), 'edit')
+            ids = [ p.object_id for p in perms]
+            self.fields["gentity"].queryset = Gentity.objects.filter(
+                                                id__in=ids)
+
+
+
+
 class GentityForm(ModelForm):
     class Meta:
         model = Gentity

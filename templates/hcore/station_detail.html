@@ -18,10 +18,15 @@
   <script type="text/javascript">
       $(document).ready(function(){
         tooltip('.collapse_toggler', '{% trans "Click to expand/collapse" %}', "topRight", "bottomLeft");
-    });
+		$(".verification_required").click(function(){
+			return confirmPost();
+		});
+      });
+
+	
 
 	function confirmPost(){
-	var agree=confirm("Are you sure you want to delete this station?");
+	var agree=confirm("Are you sure you want to delete this object?");
 	if (agree)
 		return true ;
 	else
@@ -46,6 +51,26 @@
 		{% endif %}
 	{% endif %} 
     </h2></p>
+	{% if enabled_user_content %}
+		{% if request.user|can_edit:station %}
+		<div id="menu_bar">
+			<ul style="list-style-type:none;">
+				<li>
+					<span style="color:#A0A095">More: </span>
+					<span class="menu_options"><a href="{% url timeseries_add %}">Add new Timeseries</a></span>
+					/	
+					<span class="menu_options"><a href="{% url instrument_add %}">Add new Instrument</a></span>	
+					/
+					<span class="menu_options"><a href="{% url gentityfile_add %}">Add new File</a></span>	
+					/
+					<span class="menu_options"><a href="{% url gentityevent_add %}">Add new Event</a></span>	
+				<li>
+			</ul>
+			<br />
+		</div>
+		{% endif %}
+	{% endif %}
+
 		{% if notifications %}
         <ul class="notifications">
                 {% for message in notifications %}
@@ -172,12 +197,19 @@
                     </a>
                 </td>
                 <td>
-                    <table class="tablesorter" style='text-align:right;'>
+                    <table class="tablesorter" style='text-align:right;width:100%;'>
                         <thead>
                             <tr>
                                 <th>{% trans 'ID' %}</th>
                                 <th>{% trans 'Date' %}</th>
                                 <th>{% trans 'Type' %}</th>
+{% comment %}
+								{% if enabled_user_content %}
+									{% if request.user|can_edit:station %}
+									<th>{% trans "Management" %}</th>
+									{% endif %}
+								{% endif %}
+{% endcomment %}
                             </tr>
                         </thead>
                         <tbody>
@@ -186,6 +218,17 @@
                             <td>{{ code.id }}</td>
                             <td>{{ code.date }}</td>
                             <td>{{ code.type }}</td>
+{% comment %}
+							{% if enabled_user_content %}
+								{% if request.user|can_edit:station %}
+								<td style="text-align:center;">
+								<a href="{% url gentityaltcode_edit file.id %}"><img class="mgmt_button" alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url gentityaltcode_delete file.id %}"><img class="mgmt_button verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
+								</td>
+
+								{% endif %}
+							{% endif %}
+{% endcomment %}
                         </tr>
                         {% endfor %}
                         </tbody>
@@ -207,7 +250,7 @@
                     </a>
                 </td>
                 <td>
-                    <table class="tablesorter" style='text-align:right'>
+                    <table class="tablesorter" style='text-align:right;width:100%;'>
                         <thead>
                             <tr>
                                 <th>{% trans 'ID' %}</th>
@@ -217,6 +260,11 @@
                                 <th>{% trans 'Description' %}</th>
                                 <th>{% trans 'Remarks' %}</th>
 								<th>{% trans 'Request File' %}</th>
+								{% if enabled_user_content %}
+									{% if request.user|can_edit:station %}
+									<th>{% trans "Management" %}</th>
+									{% endif %}
+								{% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -235,7 +283,15 @@
 								<i>N/A</i>
 							{% endif %} 
 							</td>
-                        </tr>
+							{% if enabled_user_content %}
+								{% if request.user|can_edit:station %}
+								<td style="text-align:center;">
+								<a href="{% url gentityfile_edit file.id %}"><img class="mgmt_button" alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url gentityfile_delete file.id %}"><img class="mgmt_button verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
+								</td>
+								{% endif %}
+							{% endif %}
+						</tr>
                         {% endfor %}
                         </tbody>
                     </table>
@@ -256,7 +312,7 @@
                     </a>
                 </td>
                 <td>
-                    <table class="tablesorter" style='text-align:right;'>
+                    <table class="tablesorter" style='text-align:right;width:100%;'>
                         <thead>
                             <tr>
                                 <th>{% trans 'ID' %}</th>
@@ -264,6 +320,11 @@
                                 <th>{% trans 'Type' %}</th>
                                 <th>{% trans 'User' %}</th>
                                 <th>{% trans 'Report' %}</th>
+								{% if enabled_user_content %}
+									{% if request.user|can_edit:station %}
+									<th>{% trans "Management" %}</th>
+									{% endif %}
+								{% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -274,6 +335,14 @@
                             <td>{{ event.type }}</td>
                             <td>{{ event.user }}</td>
                             <td>{{ event.report }}</td>
+							{% if enabled_user_content %}
+								{% if request.user|can_edit:station %}
+								<td style="text-align:center;">
+								<a href="{% url gentityevent_edit event.id %}"><img class="mgmt_button" alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url gentityevent_delete event.id %}"><img class="mgmt_button verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
+								</td>
+								{% endif %}
+							{% endif %}
                         </tr>
                         {% endfor %}
                         </tbody>
@@ -307,6 +376,11 @@
                               <th>{% trans "Is Active" %}</th>
                               <th>{% trans "Start Date" %}</th>
                               <th>{% trans "End Date" %}</th>
+								{% if enabled_user_content %}
+									{% if request.user|can_edit:station %}
+									<th>{% trans "Management" %}</th>
+									{% endif %}
+								{% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -323,6 +397,14 @@
                             <td>{{ instrument.is_active }}</td>
                             <td>{{ instrument.start_date }}</td>
                             <td>{{ instrument.end_date }}</td>
+							{% if enabled_user_content %}
+								{% if request.user|can_edit:station %}
+								<td style="text-align:center;">
+								<a href="{% url instrument_edit instrument.id %}"><img class="mgmt_button" alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url instrument_delete instrument.id %}"><img class="mgmt_button verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
+								</td>
+								{% endif %}
+							{% endif %}
                         </tr>
                         {% endwith %}
                         {% endfor %}
@@ -345,7 +427,7 @@
                     </a>
                 </td>
                 <td>
-                    <table class="tablesorter" style='text-align:right;'>
+                    <table class="tablesorter" style='text-align:right;width:100%;'>
                         <thead>
                             <tr>
                               <th>{% trans "ID" %}</th>
@@ -354,6 +436,11 @@
                               <th>{% trans "Unit Of Measurement" %}</th>
                               <th>{% trans "Remarks" %}</th>
                               <th>{% trans "Instrument" %}</th>
+								{% if enabled_user_content %}
+									{% if request.user|can_edit:station %}
+									<th>{% trans "Management" %}</th>
+									{% endif %}
+								{% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -367,6 +454,14 @@
                             <td>{{ t.unit_of_measurement }}</td>
                             <td>{{ t.remarks }}</td>
                             <td>{{ t.instrument }}</td>
+							{% if enabled_user_content %}
+								{% if request.user|can_edit:station %}
+								<td style="text-align:center;">
+								<a href="{% url timeseries_edit t.id %}"><img class="mgmt_button" alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url timeseries_delete t.id %}"><img class="mgmt_button verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
+								</td>
+								{% endif %}
+							{% endif %}
                         </tr>
                         {% endwith %}
                         {% endfor %}

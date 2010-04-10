@@ -72,6 +72,22 @@ if settings.USERS_CAN_ADD_CONTENT:
     (r'^timeseries/delete/(?P<timeseries_id>\d+)/$',
      views.timeseries_delete, {} , 'timeseries_delete'),
 
+    (r'^gentityfile/edit/(?P<gentityfile_id>\d+)/$',
+     views.gentityfile_edit, {} , 'gentityfile_edit'),
+
+    (r'^gentityfile/add/$', views.gentityfile_add, {}, 'gentityfile_add'),
+
+    (r'^gentityfile/delete/(?P<gentityfile_id>\d+)/$',
+     views.gentityfile_delete, {} , 'gentityfile_delete'),
+
+    (r'^gentityevent/edit/(?P<gentityevent_id>\d+)/$',
+     views.gentityevent_edit, {} , 'gentityevent_edit'),
+
+    (r'^gentityevent/add/$', views.gentityevent_add, {}, 'gentityevent_add'),
+
+    (r'^gentityevent/delete/(?P<gentityevent_id>\d+)/$',
+     views.gentityevent_delete, {} , 'gentityevent_delete'),
+
     (r'^instrument/edit/(?P<instrument_id>\d+)/$',
      views.instrument_edit, {} , 'instrument_edit'),
 

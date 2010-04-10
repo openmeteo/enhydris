@@ -222,6 +222,12 @@ class GentityFile(models.Model):
     remarks_alt = models.TextField(blank=True)
     def __unicode__(self):
         return self.descr or self.descr_alt or str(self.id)
+    @property
+    def related_station(self):
+        try:
+            return Station.objects.get(id=self.gentity.id)
+        except:
+            return None
 
 class EventType(Lookup): pass
 
@@ -239,9 +245,14 @@ class GentityEvent(models.Model):
     report_alt = models.TextField(blank=True)
     def __unicode__(self):
         return str(self.date)+' '+self.type.__unicode__()
+    @property
+    def related_station(self):
+        try:
+            return Station.objects.get(id=self.gentity.id)
+        except:
+            return None
 
 # Station and its related models
-
 class StationType(Lookup): pass
 
 class StationManager(models.Manager):
