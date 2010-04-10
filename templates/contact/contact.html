@@ -18,12 +18,12 @@
 {% block content %}
 
 
-<div id="form" style="width: 700px;margin:auto;">
+<div id="form" style="width: 700px;margin:auto;padding:0;">
 
-<fieldset class="info_fieldset"><legend>Contact us!</legend>
+<fieldset class="info_fieldset"><legend style="margin-top:-10px;">Contact us!</legend>
 
 
-<form id="ajax-contact-form" action="." method="post">
+<form id="ajax-contact-form" action="." style="padding:1em;" method="post">
 <div><input type="hidden" value="{{ hash }}" name="hash" /></div>
 <div><label for="cname">Name</label><input id="cname" class="textbox required" type="text" name="name" value="" /><br /></div>
 
@@ -34,8 +34,8 @@
 <div><label for="cmsg">Message</label><textarea id="cmsg" class="textbox required" name="message" rows="10" cols="40"></textarea><br /></div>
 
 <div><label for="captcha">Captcha</label> Type the letters in the box:<br /></div>
-<div><label><span style="color:red">{{message}}</span></label><img alt="Captcha" src="{{MEDIA_URL}}captchas/{{captcha}}" /><input class="required" type="text" size="20"
-style="line-height=40px" name="captcha" id="captcha"/><br /></div>
+<div><label><span style="color:red">{{message}}</span></label><input class="required" type="text" size="20"
+style="line-height=40px" name="captcha" id="captcha"/> <img alt="Captcha" src="{{MEDIA_URL}}captchas/{{captcha}}" /><br /></div>
 
 <div><label>&nbsp;</label><input class="submit" type="submit" name="submit" value="Send Message" /></div>
 </form>
