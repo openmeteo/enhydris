@@ -1,11 +1,11 @@
 import mimetypes
 import os
+import pthelma
 from django.core import serializers
 from django.core.servers.basehttp import FileWrapper
 from django.db import connection as django_db_connection
 from django.http import HttpResponse
 from piston.emitters import Emitter
-from pthelma.timeseries import Timeseries as pts
 from enhydris.hcore.models import Timeseries, TimeStep
 
 class CFEmitter(Emitter):
@@ -42,51 +42,35 @@ class TSEmitter(Emitter):
     def render(self, request):
         timeseries = self.data
         # Determine time step and convert it to old format
-        t = timeseries.time_step
-        if t:
-            minutes, months = (t.length_minutes, t.length_months)
-        else:
-            minutes, months = ( 5, 0)
-        old_timestep = 0
-        if   (minutes, months) == (   5,  0): old_timestep = 7
-        elif (minutes, months) == (  10,  0): old_timestep = 1
-        elif (minutes, months) == (  60,  0): old_timestep = 2
-        elif (minutes, months) == (1440,  0): old_timestep = 3
-        elif (minutes, months) == (   0,  1): old_timestep = 4
-        elif (minutes, months) == (   0, 12): old_timestep = 5
-        time_step_strict = (not timeseries.nominal_offset_minutes) and (
-                                            not timeseries.nominal_offset_months)
-        time_step_strict = time_step_strict and 'True' or 'False'
-
-        # Create a proper title and comment
-        title = timeseries.name
-        if not title: title = 'id=%d' % (timeseries.id)
-        title = title.encode('iso-8859-7')
-        symbol = timeseries.unit_of_measurement.symbol.encode('iso-8859-7')
-        comment = [timeseries.variable.descr.encode('iso-8859-7'),
-                   timeseries.gentity.name.encode('iso-8859-7')]
-
-        ts = pts(int(timeseries.id))
+        t = timeseries # nickname, because we use it much in next statement
+        ts = pthelma.timeseries.Timeseries(
+            id = int(t.id),
+            time_step = pthelma.timeseries.TimeStep(
+                length_minutes = t.time_step.length_minutes if t.time_step
+                                            else 0,
+                length_months = t.time_step.length_months if t.time_step
+                                            else 0,
+                nominal_offset =
+                    (t.nominal_offset_minutes, t.nominal_offset_months)
+                    if t.nominal_offset_minutes and t.nominal_offset_months
+                    else (0,0),
+                actual_offset =
+                    (t.actual_offset_minutes, t.actual_offset_months)
+                    if t.actual_offset_minutes and t.actual_offset_months
+                    else (0,0)),
+            unit = t.unit_of_measurement.symbol,
+            title = t.name,
+            timezone = '%s (UTC+%02d%02d)' % (t.time_zone.code,
+                t.time_zone.utc_offset / 60, t.time_zone.utc_offset % 60),
+            variable = t.variable.descr,
+            precision = t.precision,
+            comment = '%s\n\n%s' % (t.gentity.name, t.remarks)
+        )
         ts.read_from_db(django_db_connection)
-        for k in ts.keys(): ts[k] = (ts[k], "") # Remove flags
         response = HttpResponse(mimetype=
-                                'text/vnd.openmeteo.timeseries; charset=iso-8859-7')
-        response['Content-Disposition'] = "attachment;filename=%s.hts"%(timeseries.id,)
-        response.write("Delimiter=,\r\n")
-        response.write('FlagDelimiter=" "\r\n')
-        response.write("DecimalSeparator=.\r\n")
-        response.write("DateFormat=yyyy-mm-dd HH:nn\r\n")
-        response.write("TimeStep=%d\r\n" % (old_timestep,))
-        response.write("TimeStepStrict=%s\r\n" % (time_step_strict,))
-        response.write("MUnit=%s\r\n" % (symbol,))
-        response.write('Flags=""\r\n')
-        response.write("Variable=0\r\n")# % (timeseries.variable.descr,))
-        response.write("VariableType=Unknown\r\n")
-        response.write("Title=%s\r\n" % (title,))
-        for c in comment: response.write("Comment=%s\r\n" % (c,))
-        response.write("\r\n")
-        ts.write(response)
-
+                                'text/vnd.openmeteo.timeseries; charset=utf-8')
+        response['Content-Disposition'] = "attachment; filename=%s.hts"%(t.id,)
+        ts.write_file(response)
         return response
 
 class GFEmitter(Emitter):
