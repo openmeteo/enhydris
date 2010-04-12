@@ -88,6 +88,15 @@ if settings.USERS_CAN_ADD_CONTENT:
     (r'^gentityevent/delete/(?P<gentityevent_id>\d+)/$',
      views.gentityevent_delete, {} , 'gentityevent_delete'),
 
+    (r'^gentityaltcode/edit/(?P<gentityaltcode_id>\d+)/$',
+     views.gentityaltcode_edit, {} , 'gentityaltcode_edit'),
+
+    (r'^gentityaltcode/add/$', views.gentityaltcode_add, {}, 'gentityaltcode_add'),
+
+    (r'^gentityaltcode/delete/(?P<gentityaltcode_id>\d+)/$',
+     views.gentityaltcode_delete, {} , 'gentityaltcode_delete'),
+
+
     (r'^instrument/edit/(?P<instrument_id>\d+)/$',
      views.instrument_edit, {} , 'instrument_edit'),
 

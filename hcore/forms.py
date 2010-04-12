@@ -58,6 +58,25 @@ class GentityFileForm(ModelForm):
             self.fields["gentity"].queryset = Gentity.objects.filter(
                                                 id__in=ids)
 
+class GentityAltCodeForm(ModelForm):
+
+    type = forms.ModelChoiceField(GentityAltCodeType.objects,
+                      widget=SelectWithPop(model_name='gentityaltcodetype'))
+
+    class Meta:
+        model = GentityAltCode
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(GentityAltCodeForm, self).__init__(*args, **kwargs)
+
+        if user and not user.is_superuser:
+            perms = user.get_rows_with_permission(Station(), 'edit')
+            ids = [ p.object_id for p in perms]
+            self.fields["gentity"].queryset = Gentity.objects.filter(
+                                                id__in=ids)
+
+
 class GentityEventForm(ModelForm):
 
     type = forms.ModelChoiceField(EventType.objects,

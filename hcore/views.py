@@ -23,9 +23,7 @@ from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
 from enhydris.hcore.models import *
 from enhydris.hcore.decorators import *
-from enhydris.hcore.forms import (StationForm, TimeseriesForm, InstrumentForm,
-                                    GentityFileForm, GentityEventForm,
-                                    TimeseriesDataForm)
+from enhydris.hcore.forms import *
 
 
 
@@ -1028,6 +1026,101 @@ def gentityevent_delete(request, gentityevent_id):
     return response
 
 
+def _gentityaltcode_edit_or_create(request,galtcode_id=None,station_id=None):
+    if galtcode_id:
+        # Edit
+        galtcode = get_object_or_404(GentityAltCode, id=galtcode_id)
+    else:
+        # Add
+        galtcode = None
+
+    if galtcode_id and not station_id:
+        # Editing
+        try:
+            station = galtcode.gentity
+        except:
+            # GentityAltCode doesn't have a relative station.
+            # This shouldn't happen. Admin should fix such cases
+            response = render_to_response('404.html',
+                       RequestContext(request))
+            response.status_code = 404
+            return response
+        else:
+            # Check perms
+            if not request.user.has_row_perm(station,'edit'):
+                response = render_to_response('403.html',
+                               RequestContext(request))
+                response.status_code = 403
+                return response
+
+    if station_id and not galtcode_id:
+        # Adding new
+        station = get_object_or_404(Station, id=station_id)
+        if not request.user.has_row_perm(station,'edit'):
+            response = render_to_response('403.html',
+                           RequestContext(request))
+            response.status_code = 403
+            return response
+
+    user = request.user
+    # Done with checks
+    if request.method == 'POST':
+        if galtcode:
+            form = GentityAltCodeForm(request.POST,request.FILES,instance=galtcode,user=user)
+        else:
+            form = GentityAltCodeForm(request.POST,request.FILES,user=user)
+        if form.is_valid():
+            galtcode = form.save()
+            # do stuff
+            galtcode.save()
+            if not galtcode_id:
+                galtcode_id=str(galtcode.id)
+            return HttpResponseRedirect('/stations/d/'+str(galtcode.gentity.id))
+    else:
+        if galtcode:
+            form = GentityAltCodeForm(instance=galtcode,user=user)
+        else:
+            form = GentityAltCodeForm(user=user)
+
+    return render_to_response('hcore/gentityaltcode_edit.html', {'form': form},
+                    context_instance=RequestContext(request))
+
+@permission_required('hcore.add_gentityaltcode')
+def gentityaltcode_add(request):
+    """
+    Create new gentityaltcode. GentityAltCode can only be added as part of an existing
+    station.
+    """
+    return _gentityaltcode_edit_or_create(request)
+
+@login_required
+def gentityaltcode_edit(request,gentityaltcode_id):
+    """
+    Edit existing gentityaltcode. Permissions are checked against the relative
+    station that the gentityaltcode is part of.
+    """
+    return _gentityaltcode_edit_or_create(request, galtcode_id=gentityaltcode_id)
+
+@login_required
+def gentityaltcode_delete(request, gentityaltcode_id):
+    """
+    Delete existing gentityaltcode. Permissions are checked against the relative
+    station that the gentityaltcode is part of.
+    """
+    galtcode = get_object_or_404(GentityAltCode, id=gentityaltcode_id)
+    related_station = galtcode.related_station
+    if galtcode and related_station:
+        if request.user.has_row_perm(related_station, 'edit'):
+            galtcode.delete()
+            return render_to_response('success.html',
+                    {'msg': 'GentityAltCode deleted successfully',},
+                    context_instance=RequestContext(request))
+    response = render_to_response('403.html',
+                   RequestContext(request))
+    response.status_code = 403
+    return response
+
+
 
 """
 Instument views
@@ -1137,7 +1230,7 @@ Generic model creation
 ALLOWED_TO_EDIT = ('waterbasin', 'waterdivision', 'person', 'organization',
                    'stationtype', 'lentity','gentity', 'variable', 'timezone',
                    'politicaldivision','instrumenttype', 'unitofmeasurement',
-                   'filetype','eventtype')
+                   'filetype','eventtype','gentityaltcodetype')
 
 @login_required
 def model_add(request, model_name=''):

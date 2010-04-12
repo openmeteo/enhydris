@@ -196,6 +196,12 @@ class GentityAltCode(models.Model):
     value = models.CharField(max_length=100)
     def __unicode__(self):
         return self.type.descr+' '+self.type.value
+    @property
+    def related_station(self):
+        try:
+            return Station.objects.get(id=self.gentity.id)
+        except:
+            return None
 
 class FileType(Lookup):
     mime_type = models.CharField(max_length=64)
