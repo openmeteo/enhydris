@@ -214,6 +214,7 @@ class TimeseriesForm(ModelForm):
             ts.read_file(self.cleaned_data['data'])
         except Exception as e:
             raise forms.ValidationError(str(e))
+
         return self.cleaned_data['data']
 
     def clean(self):
@@ -252,6 +253,24 @@ class TimeseriesForm(ModelForm):
                 raise forms.ValidationError(_("Invalid offsets: Nominal"
                               " offsets must be both null or both not null!"))
 
+
+        # XXX: This is not a good idea but it's the only way to handle append
+        # errors. We save the data in the clean function instead of the save
+        # and if an error occurs we rollback the transaction and show the error
+        # in the form. Another way would be to write a try_append() function in
+        # pthelma.timeseries but this is specific to enhydris and should not be
+        # part of the pthelma module.
+
+        if 'data' in self.cleaned_data and self.cleaned_data['data']:
+            ts = timeseries.Timeseries(int(self.instance.id))
+            self.cleaned_data['data'].seek(0)
+            ts.read_file(self.cleaned_data['data'])
+            if self.cleaned_data['data_policy'] == 'A':
+                try:
+                    ts.append_to_db(db.connection, transaction=db.transaction)
+                except Exception as e:
+                    raise forms.ValidationError(_(e.message))
+
         return self.cleaned_data
 
     @db.transaction.commit_on_success
@@ -269,7 +288,8 @@ class TimeseriesForm(ModelForm):
             self.cleaned_data['data'].seek(0)
             ts.read_file(self.cleaned_data['data'])
             if self.cleaned_data['data_policy'] == 'A':
-                ts.append_to_db(db.connection, transaction=db.transaction)
+                pass
+                # ts.append_to_db(db.connection, transaction=db.transaction)
             else:
                 ts.write_to_db(db.connection, transaction=db.transaction)
 

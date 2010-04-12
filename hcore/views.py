@@ -24,7 +24,8 @@ from django.utils.translation import ugettext_lazy as _
 from enhydris.hcore.models import *
 from enhydris.hcore.decorators import *
 from enhydris.hcore.forms import (StationForm, TimeseriesForm, InstrumentForm,
-                                    GentityFileForm, GentityEventForm)
+                                    GentityFileForm, GentityEventForm,
+                                    TimeseriesDataForm)
 
 
 
@@ -459,12 +460,18 @@ def download_timeseries(request, object_id):
         ts = pthelma.timeseries.Timeseries(
             id = int(object_id),
             time_step = pthelma.timeseries.TimeStep(
-                length_minutes = t.time_step.minutes,
-                length_months = t.time_step.months,
-                nominal_offset = (t.nominal_offset_minutes,
-                                                t.nominal_offset_months),
-                actual_offset = (t.actual_offset_minutes,
-                                                t.actual_offset_months)),
+                length_minutes = t.time_step.length_minutes if t.time_step
+                                            else 0,
+                length_months = t.time_step.length_months if t.time_step
+                                            else 0,
+                nominal_offset =
+                    (t.nominal_offset_minutes, t.nominal_offset_months)
+                    if t.nominal_offset_minutes and t.nominal_offset_months
+                    else (0,0),
+                actual_offset =
+                    (t.actual_offset_minutes, t.actual_offset_months)
+                    if t.actual_offset_minutes and t.actual_offset_months
+                    else (0,0)),
             unit = t.unit_of_measurement.symbol,
             title = t.name,
             timezone = '%s (UTC+%02d%02d)' % (t.time_zone.code,
@@ -477,7 +484,7 @@ def download_timeseries(request, object_id):
         response = HttpResponse(mimetype=
                                 'text/vnd.openmeteo.timeseries; charset=utf-8')
         response['Content-Disposition'] = "attachment; filename=%s.hts"%(object_id,)
-        timeseries.write_file(response)
+        ts.write_file(response)
         return response
     else:
         """
@@ -769,7 +776,7 @@ def _timeseries_edit_or_create(request,tseries_id=None,station_id=None):
     # Done with checks
     if request.method == 'POST':
         if tseries:
-            form = TimeseriesForm(request.POST,request.FILES,instance=tseries,user=user)
+            form = TimeseriesDataForm(request.POST,request.FILES,instance=tseries,user=user)
         else:
             form = TimeseriesForm(request.POST,request.FILES,user=user)
         if form.is_valid():
@@ -781,7 +788,7 @@ def _timeseries_edit_or_create(request,tseries_id=None,station_id=None):
             return HttpResponseRedirect('/timeseries/d/'+tseries_id)
     else:
         if tseries:
-            form = TimeseriesForm(instance=tseries,user=user)
+            form = TimeseriesDataForm(instance=tseries,user=user)
         else:
             form = TimeseriesForm(user=user)
 
@@ -887,7 +894,6 @@ def _gentityfile_edit_or_create(request,gfile_id=None,station_id=None):
         else:
             form = GentityFileForm(user=user)
 
-    print "done"
     return render_to_response('hcore/gentityfile_edit.html', {'form': form},
                     context_instance=RequestContext(request))
 
