@@ -264,7 +264,7 @@ table.formset td {
 .i16.help { background-image: url('../images/icons/help.png'); }
 
 #menu2 { margin:0px; list-style:none; color:#fff; line-height:45px; display:inline-block;
-    float:right; z-index:1000; padding-right:4em;}
+    float:right; z-index:1000; padding-right:3em;padding-left:0;}
 #menu2 a { color:#fff; text-decoration:none; } 
 #menu2 > li {background:#172322 none repeat scroll 0 0; cursor:pointer; float:left; position:relative; 
     padding:0px 10px; max-height: 45px;} 
