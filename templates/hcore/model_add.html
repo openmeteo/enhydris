@@ -13,7 +13,7 @@
 <h2> Add New {{form_prefix|title}}</h2>
 
 {% if form.errors %}
-	<p class="fielderrors">{% trans "Please correct the errors below: " %}{{ form.non_field_errors }}</p>
+	<p class="fielderrors">{% trans "Please correct the errors below: " %}{{ form.field_errors }}</p>
 {% endif %}
     <form method="post" action="/add/{%filter lower%}{{form_prefix}}{% endfilter %}/" class="wide">
 	<table class="table_container">

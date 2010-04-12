@@ -205,7 +205,8 @@ class TimeseriesForm(ModelForm):
                                 widget=SelectWithPop(model_name='unitofmeasurement'))
     time_zone = forms.ModelChoiceField(TimeZone.objects,
                                 widget=SelectWithPop(model_name='timezone'))
-
+    time_step = forms.ModelChoiceField(TimeStep.objects,
+                                widget=SelectWithPop(model_name='timestep'))
 
 
     class Meta:

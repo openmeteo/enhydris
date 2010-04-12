@@ -1230,7 +1230,7 @@ Generic model creation
 ALLOWED_TO_EDIT = ('waterbasin', 'waterdivision', 'person', 'organization',
                    'stationtype', 'lentity','gentity', 'variable', 'timezone',
                    'politicaldivision','instrumenttype', 'unitofmeasurement',
-                   'filetype','eventtype','gentityaltcodetype')
+                   'filetype','eventtype','gentityaltcodetype','timestep')
 
 @login_required
 def model_add(request, model_name=''):
@@ -1268,6 +1268,7 @@ def model_add(request, model_name=''):
     return create_object(request, model,
                 post_save_redirect="/add/"+lower(model.__name__)+"/?_complete=1",
                 template_name='hcore/model_add.html',
+                form_class= TimeStepForm if model.__name__=='TimeStep' else None,
                 extra_context={'form_prefix': model.__name__,})
 
 # Profile page
