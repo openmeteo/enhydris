@@ -52,7 +52,7 @@ function station_search() {
 	p_v = $('#prefecture'); 
 	d_v = $('#district');
     
-	if ( pd_v.val() > 0 ) { 
+	if ( pd_v.val() > 0  && ! pd_v.is(':disabled')) { 
 		if ( p_v.val() > 0 && ! p_v.is(':disabled')) { 
 			query += '&political_division=' + p_v.val();
 			query += '&district=' + d_v.val();
