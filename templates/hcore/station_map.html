@@ -10,6 +10,7 @@
     <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="http://serverapi.arcgisonline.com/jsapi/arcgis/1.6/js/dojo/dijit/themes/soria/soria.css" />
     <link type="text/css" href="{{ MEDIA_URL }}css/jquery.fancybox-1.3.1.css" rel="stylesheet" />
+    <link type="text/css" href="{{ MEDIA_URL }}css/tipTip.css" rel="stylesheet" />
 {% endblock %} 
 
 {% block extra_head %}
@@ -21,6 +22,7 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.dataTables.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/checkbox_store.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.minified.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.fancybox-1.3.1.js"></script>
     <script type="text/javascript" src="http://serverapi.arcgisonline.com/jsapi/arcgis/?v=1.6"></script>
 
@@ -115,6 +117,7 @@
          }
     });
 
+		$('.tiptip').tipTip();
 
         /* Buttons hovering handling */
         $('.fg-button').hover(
@@ -139,13 +142,13 @@
            $('#help_dialog').dialog('open')
         });
 */
-        tooltip('.qtip_hidePanel', '{% trans "Click to hide the station list" %}', "topRight", "bottomLeft");
+/*        tooltip('.qtip_hidePanel', '{% trans "Click to hide the station list" %}', "topRight", "bottomLeft");
         tooltip('.qtip_hideMap', '{% trans "Click to hide the map area" %}', "topLeft", "bottomRight");
         tooltip('.qtip_showPanel', '{% trans "Click to expand the station list" %}', "topRight", "bottomLeft");
         tooltip('.qtip_showMap', '{% trans "Click to expand the map" %}', "topLeft", "bottomRight");
         tooltip('#show_stations', '{% trans "Locate stations on the map" %}', "topRight", "bottomRight");
         tooltip('#select_stations', '{% trans "Select stations to locate on the map" %}', "topRight", "bottomLeft");
-
+*/
 
         $('#select_stations').click(function (){
             var tk = $("input:checked[class=station_selected_ids]")
@@ -245,22 +248,22 @@
 
     <div id="map_nav"> 
         <div id="panel_toggle"> 
-            <a id="hidePanel" class="panel_togglers qtip_hidePanel"> 
+            <a id="hidePanel" class="panel_togglers qtip_hidePanel tiptip" title="Hide Station List"> 
                 <img id="hp" class="collapse_expand_map" src="{{ MEDIA_URL }}images/icons/resultset_previous.png" alt="Hide Panel"></img>
             </a>
             List
-            <a id="showPanel" class="panel_togglers qtip_showPanel">
+            <a id="showPanel" class="panel_togglers qtip_showPanel tiptip" title="Show Station List">
                 <img id="sp" class="collapse_expand_map" src="{{ MEDIA_URL }}images/icons/resultset_next_disabled.png" alt="Show Panel"></img>
             </a>
-                <button type="submit" id="show_stations" style="margin-left:5px" class="ui-state-default ui-corner-all fg-button"><span class="ui-icon ui-icon-image fg-button-icon-left"></span>&nbsp;{% trans "Locate Stations" %}</button>
+                <button type="submit" id="show_stations" style="margin-left:5px" class="ui-state-default ui-corner-all fg-button tiptip" title="Show stations on map"><span class="ui-icon ui-icon-image fg-button-icon-left"></span>&nbsp;{% trans "Locate Stations" %}</button>
         </div>
         <div id="map_toggle">
-            <button type="button" id="map_stations" style="margin-right:5px" class="ui-state-default ui-corner-all fg-button" ><span class="ui-icon ui-icon-transferthick-e-w fg-button-icon-left"></span>&nbsp;{% trans "List Stations" %}</button>
-             <a id="showMap" class="panel_togglers qtip_showMap"> 
+            <button type="button" id="map_stations" style="margin-right:5px" class="ui-state-default ui-corner-all fg-button tiptip" title="Show map stations in list" ><span class="ui-icon ui-icon-transferthick-e-w fg-button-icon-left"></span>&nbsp;{% trans "List Stations" %}</button>
+             <a id="showMap" class="panel_togglers qtip_showMap tiptip" title="Show Map"> 
                 <img id="sm" class="collapse_expand_map" src="{{ MEDIA_URL }}images/icons/resultset_previous_disabled.png" alt="Show Map"></img>
-            </a>
+            </a> 
             Map
-            <a id="hideMap" class="panel_togglers qtip_hideMap">
+            <a id="hideMap" class="panel_togglers qtip_hideMap tiptip" title="Hide Map">
                 <img id="hm" class="collapse_expand_map" src="{{ MEDIA_URL }}images/icons/resultset_next.png" alt="Hide Map"></img>
             </a>
         </div>
@@ -277,7 +280,7 @@
 		<div>
 			<h3 style="display:inline;">{% trans 'Station Catalogue' %}</h3> 
 			<sup>
-					<a id="inline" href="#hidden_filter" title="Station Filter"><img alt="Filter stations;" style="border:0" src="{{ MEDIA_URL }}images/icons/magnifier.png" />
+					<a id="inline" href="#hidden_filter" class="tiptip" title="Station Advanced filter"><img alt="Filter Stations" style="border:0" src="{{ MEDIA_URL }}images/icons/magnifier.png" />
 					</a>
 			</sup>	
 			<div id="buttons" style="float:right">
