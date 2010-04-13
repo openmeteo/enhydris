@@ -462,14 +462,11 @@ def download_timeseries(request, object_id):
                                             else 0,
                 length_months = t.time_step.length_months if t.time_step
                                             else 0,
-                nominal_offset =
-                    (t.nominal_offset_minutes, t.nominal_offset_months)
-                    if t.nominal_offset_minutes and t.nominal_offset_months
-                    else (0,0),
-                actual_offset =
-                    (t.actual_offset_minutes, t.actual_offset_months)
-                    if t.actual_offset_minutes and t.actual_offset_months
-                    else (0,0)),
+                nominal_offset = (t.nominal_offset_minutes,
+                                         t.nominal_offset_months),
+                actual_offset = (t.actual_offset_minutes,
+                                         t.actual_offset_months)
+            ),
             unit = t.unit_of_measurement.symbol,
             title = t.name,
             timezone = '%s (UTC+%02d%02d)' % (t.time_zone.code,
