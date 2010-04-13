@@ -50,10 +50,15 @@ class TSEmitter(Emitter):
                                             else 0,
                 length_months = t.time_step.length_months if t.time_step
                                             else 0,
-                nominal_offset = (t.nominal_offset_minutes,
-                                         t.nominal_offset_months),
-                actual_offset = (t.actual_offset_minutes,
-                                         t.actual_offset_months)
+
+                nominal_offset =
+                    (t.nominal_offset_minutes, t.nominal_offset_months)
+                    if t.nominal_offset_minutes and t.nominal_offset_months
+                    else None,
+                actual_offset =
+                    (t.actual_offset_minutes, t.actual_offset_months)
+                    if t.actual_offset_minutes and t.actual_offset_months
+                    else (0,0)
             ),
             unit = t.unit_of_measurement.symbol,
             title = t.name,
