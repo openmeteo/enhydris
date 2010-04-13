@@ -4,11 +4,14 @@
 
 {% block extracss %}
     <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
+    <link type="text/css" href="{{ MEDIA_URL }}css/tipTip.css" rel="stylesheet" />
+    <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
 {% endblock %}
 
 {% block extra_head %}
   <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.qtip-1.0.0-rc2.min.js"></script>
-  <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.minified.js"></script>
+
   <script type="text/javascript">
   $(document).ready(function() { 
       $(".tablesorter").tablesorter(); 
@@ -17,10 +20,11 @@
   <script type="text/javascript" src="{{ MEDIA_URL }}js/collapser.js"></script>
   <script type="text/javascript">
       $(document).ready(function(){
-        tooltip('.collapse_toggler', '{% trans "Click to expand/collapse" %}', "topRight", "bottomLeft");
 		$(".verification_required").click(function(){
 			return confirmPost();
 		});
+		
+		$('.tiptip').tipTip({defaultPosition:"top"});
       });
 
 	function confirmPost(){
@@ -217,8 +221,8 @@
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">
-								<a href="{% url gentityaltcode_edit code.id %}"><img class="mgmt_button" alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url gentityaltcode_delete code.id %}"><img class="mgmt_button verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
+								<a href="{% url gentityaltcode_edit code.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url gentityaltcode_delete code.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
 								</td>
 
 								{% endif %}
@@ -280,8 +284,8 @@
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">
-								<a href="{% url gentityfile_edit file.id %}"><img class="mgmt_button" alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url gentityfile_delete file.id %}"><img class="mgmt_button verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
+								<a href="{% url gentityfile_edit file.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url gentityfile_delete file.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
 								</td>
 								{% endif %}
 							{% endif %}
@@ -332,8 +336,8 @@
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">
-								<a href="{% url gentityevent_edit event.id %}"><img class="mgmt_button" alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url gentityevent_delete event.id %}"><img class="mgmt_button verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
+								<a href="{% url gentityevent_edit event.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url gentityevent_delete event.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
 								</td>
 								{% endif %}
 							{% endif %}
@@ -394,8 +398,8 @@
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">
-								<a href="{% url instrument_edit instrument.id %}"><img class="mgmt_button" alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url instrument_delete instrument.id %}"><img class="mgmt_button verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
+								<a href="{% url instrument_edit instrument.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url instrument_delete instrument.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
 								</td>
 								{% endif %}
 							{% endif %}
@@ -451,8 +455,8 @@
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">
-								<a href="{% url timeseries_edit t.id %}"><img class="mgmt_button" alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url timeseries_delete t.id %}"><img class="mgmt_button verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
+								<a href="{% url timeseries_edit t.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url timeseries_delete t.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
 								</td>
 								{% endif %}
 							{% endif %}
