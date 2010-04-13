@@ -33,6 +33,7 @@ function render_pref_filter(data){
 			options = '<option value="0" selected="selected" disabled>Select a Prefecture</option>';
 		}
 		for (var i = 0; i < j.length; i++) {
+
             if ( pref == j[i].id ) {
                 options += '<option value="' + j[i].id + '" selected=\'selected\'>' + j[i].name+ '</option>';
             } else { 
@@ -52,7 +53,7 @@ function station_search() {
 	p_v = $('#prefecture'); 
 	d_v = $('#district');
     
-	if ( pd_v.val() > 0  && ! pd_v.is(':disabled')) { 
+	if ( pd_v.val() > 0 ){ 
 		if ( p_v.val() > 0 && ! p_v.is(':disabled')) { 
 			query += '&political_division=' + p_v.val();
 			query += '&district=' + d_v.val();
@@ -60,7 +61,7 @@ function station_search() {
 		} else if ( d_v.val() > 0 && ! d_v.is(':disabled')) { 
 			query += '&political_division=' + d_v.val();
 			query += '&district=' + d_v.val();
-		} else {
+		} else if (! pd_v.is(':disabled')) {
 			query += '&political_division=' + pd_v.val()
 		}
 	} 

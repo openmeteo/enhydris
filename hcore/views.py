@@ -311,8 +311,10 @@ def get_subdivision(request, division_id):
     response = HttpResponse(content_type='text/plain;charset=utf8')
     divisions = PoliticalDivision.objects.filter(parent=division_id)
     response.write("[")
-    for div in divisions:
-        response.write(simplejson.dumps({"name": div.name,"id": div.pk})+',')
+    for num,div in enumerate(divisions):
+        response.write(simplejson.dumps({"name": div.name,"id": div.pk}))
+        if num < divisions.count()-1:
+            response.write(',')
     response.write("]")
     return response
 
