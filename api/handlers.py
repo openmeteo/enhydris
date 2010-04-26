@@ -5,25 +5,25 @@ from piston.utils import rc
 from enhydris.hcore.models import *
 
 class StationHandler(BaseHandler):
-    allowed_methods = ('GET',)
     model = Station
-
-    def read(self, request, station_id):
-        """Return a station object"""
-        station = None
-        try:
-            station = Station.objects.get(id=station_id)
-        except Station.DoesNotExist:
-            pass
-        return station
-
-#WARNING!!! This part accepts XHR requests only in the last version crafted by
-# yml, so it must be cloned from the following url:
-# hg clone https://bitbucket.org/yml/django-piston/
+    fields = ('id', 'name', 'srid', 'abscissa', 'ordinate', 'altitude',
+                'asrid','is_active',
+                ('water_basin',('name',)),
+                ('water_division',('name',)),
+                ('political_division',('name',)),
+                ('type',('descr',)),
+                ('owner',('name_any',)))
 
 class StationListHandler(BaseHandler):
-    allowed_methods = ('POST',)
+    allowed_methods = ('POST')
     model = Station
+    fields = ('id', 'name', 'srid', 'abscissa', 'ordinate', 'altitude',
+                'asrid','is_active',
+                ('water_basin',('name',)),
+                ('water_division',('name',)),
+                ('political_division',('name',)),
+                ('type',('descr',)),
+                ('owner',('name_any',)))
 
     def create(self, request, *args, **kwargs):
         """

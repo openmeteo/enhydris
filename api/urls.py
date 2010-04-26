@@ -1,10 +1,12 @@
 from django.conf.urls.defaults import *
 from piston.resource import Resource
-from piston.emitters import Emitter
+from piston.emitters import Emitter, JSONEmitter
 from enhydris.api.authentication import RemoteInstanceAuthentication
 from enhydris.api.handlers import *
 from enhydris.api.emitters import CFEmitter, TSEmitter, GFEmitter
 
+# Default JSON emitter
+Emitter.register('default', JSONEmitter, 'application/json; charset=utf-8')
 # JSON emitter for sync db process
 Emitter.register('json', CFEmitter, 'application/json; charset=utf-8')
 # hts emitter for remote hts file downloading (incl. http authentication)
@@ -55,8 +57,8 @@ GFDATA_Resource = Resource(handler=GFDATA_Handler, authentication=auth)
 
 # urls
 urlpatterns = patterns('',
-   url(r'^station/(?P<station_id>\d+)/', station_handler),
-   url(r'^station_list/', station_list_handler),
+
+
     url(r'^Lookup/$', Lookup_Resource),
     url(r'^Lentity/$', Lentity_Resource),
     url(r'^Person/$', Person_Resource),
@@ -78,6 +80,9 @@ urlpatterns = patterns('',
     url(r'^StationType/$', StationType_Resource),
     url(r'^StationManager/$', StationManager_Resource),
     url(r'^Station/$', Station_Resource),
+    url(r'^Station/info/$', station_handler, {'emitter_format': 'default'}),
+    url(r'^Station/info/(?P<id>\d+)/$', station_handler, {'emitter_format': 'default'}),
+    url(r'^Station/info/list/$', station_list_handler, {'emitter_format': 'default'}),
     url(r'^Overseer/$', Overseer_Resource),
     url(r'^InstrumentType/$', InstrumentType_Resource),
     url(r'^Instrument/$', Instrument_Resource),
