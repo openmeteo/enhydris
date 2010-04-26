@@ -96,7 +96,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 GENTITYFILE_DIR = 'gentityfile'
 
 # GIS Configuration
-GIS_SERVER="147.102.160.29"
+GIS_SERVER=""
 
 # Options for django-registration
 ACCOUNT_ACTIVATION_DAYS=7
