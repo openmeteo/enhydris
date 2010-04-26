@@ -2,6 +2,7 @@ from django.db import connection as db_connection
 from django.db import models
 from django.contrib.auth.models import User, Group
 from django.conf import settings
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import signals
 from pthelma import timeseries
@@ -144,16 +145,24 @@ class PoliticalDivisionManager(models.Manager):
 
         child = None
         children = []
-        for child in self.filter(parent=local_parent):
-            try:
-                children.extend(self.get_leaf_subdivisions(child))
-            except TypeError:
-                # This is the case we have only an object instance, not a list
-                children.append(self.get_leaf_subdivisions(child))
+        object =  PoliticalDivision.objects.get(pk=local_parent)
+        parents = PoliticalDivision.objects.all().filter(
+                            Q(name=object.name)&
+                            Q(short_name=object.short_name)&
+                            Q(name_alt=object.name_alt)&
+                            Q(short_name_alt=object.short_name_alt))
+        for parent in parents:
+            for child in self.filter(parent=parent.id):
+                try:
+                    children.extend(self.get_leaf_subdivisions(child.id))
+                except TypeError:
+                    # This is the case we have only an object instance, not a list
+                    children.append(self.get_leaf_subdivisions(child.id))
+
         if children:
             return children
         if not child:
-            return [ local_parent ]
+            return [ p for p in parents ]
 
 class PoliticalDivision(Garea):
     parent = models.ForeignKey('self', null=True, blank=True)

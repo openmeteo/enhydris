@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import user_passes_test
-from enhydris.hcore.models import Station
+from django.db.models import Q
+from enhydris.hcore.models import *
 
 #############################################################
 # Decorators for sorting and filtering
@@ -9,10 +10,10 @@ from enhydris.hcore.models import Station
 def filter_by(filter_list):
     """
     Filter out entries from an object list view.
-    
+
     Use as a decorator to select particular model fields to filter out
     from a object_list view. Example use::
-    
+
     @filtering_by(('owner', 'type',))
     def station_list(*args, **kwargs):
         return list_detail.object_list(*args, **kwargs)
@@ -35,11 +36,34 @@ def filter_by(filter_list):
                         nkwargs["extra_context"].update({"advanced_search":True})
                     # This is a HACK for the self relation table
                     # political division
-                    if mydict.has_key("political_division"):
-                        political_division = mydict.pop("political_division")
-                        queryset = Station.objects.get_by_political_division(political_division)
-                    else:
-                        queryset = queryset.filter(**mydict)
+                    if arg == "political_division":
+                        queryset = Station.objects.get_by_political_division(value)
+                    elif arg == "owner":
+                        obj = Lentity.objects.get(pk=value)
+                        term = obj.__unicode__()
+                        queryset = queryset.filter(
+                                  Q(owner__organization__name=term) |
+                                  Q(owner__person__first_name=term) &
+                                  Q(owner__person__last_name=term))
+                    elif arg == "type":
+                        obj = StationType.objects.get(pk=value)
+                        term = obj.__unicode__()
+                        queryset = queryset.filter(
+                                          Q(type__descr=term) |
+                                          Q(type__descr_alt=term))
+                    elif arg == "water_division":
+                        obj = WaterDivision.objects.get(pk=value)
+                        term = obj.__unicode__()
+                        queryset = queryset.filter(
+                                      Q(water_division__name=term) |
+                                      Q(water_division__name_alt=term))
+                    elif arg == "water_basin":
+                        obj = WaterBasin.objects.get(pk=value)
+                        term = obj.__unicode__()
+                        queryset = queryset.filter(
+                                  Q(water_basin__name=term) |
+                                  Q(water_basin__name_alt=term))
+
             return f(request, queryset, *args, **nkwargs)
         return _dec
     return fil

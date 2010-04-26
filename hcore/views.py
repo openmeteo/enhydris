@@ -309,7 +309,12 @@ def map_view(request, stations='',  *args, **kwargs):
 def get_subdivision(request, division_id):
     """Ajax call to refresh divisions in filter table"""
     response = HttpResponse(content_type='text/plain;charset=utf8')
-    divisions = PoliticalDivision.objects.filter(parent=division_id)
+    div = PoliticalDivision.objects.get(pk=division_id)
+    parent_divs = PoliticalDivision.objects.filter(Q(name=div.name)&
+                                                 Q(name_alt=div.name_alt)&
+                                                 Q(short_name=div.short_name)&
+                                           Q(short_name_alt=div.short_name_alt))
+    divisions = PoliticalDivision.objects.filter(parent__in=[p.id for p in parent_divs])
     response.write("[")
     for num,div in enumerate(divisions):
         response.write(simplejson.dumps({"name": div.name,"id": div.pk}))

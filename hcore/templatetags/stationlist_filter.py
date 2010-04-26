@@ -5,6 +5,21 @@ from enhydris.hcore.models import *
 
 register = Library()
 
+def uniquify_query(query):
+    """
+    Given a queryset this function takes care of uniquifying the results based
+    on the results of the __unicode__ function.
+    """
+
+    seen = []
+    items = []
+    for item in query:
+        if item.__unicode__() not in seen:
+            seen.append(item.__unicode__())
+            items.append(item)
+
+    return items
+
 # TODO: Is this really needed?
 @register.inclusion_tag('append_get_params.html')
 def stationlist_filter_params(get_vars):
@@ -37,11 +52,11 @@ def filter_table(request, help_inline):
                 PoliticalDivision.objects.filter(parent=None),
             'district': [],
             'prefecture': [],
-            'water_division': WaterDivision.objects.all(),
-            'water_division': WaterDivision.objects.all(),
-            'water_basin': WaterBasin.objects.all(),
-            'owner': [ l for l in Lentity.objects.all() if not l.owned_stations.all().count() == 0 ],
-            'type': StationType.objects.all(),
+            'water_division': uniquify_query(WaterDivision.objects.all()),
+            'water_basin': uniquify_query(WaterBasin.objects.all()),
+            'owner': uniquify_query([ l for l in Lentity.objects.all()
+                     if not l.owned_stations.all().count() == 0 ]),
+            'type': uniquify_query(StationType.objects.all()),
             'get_vars': request.GET,
             'url_type': string.split(request.get_full_path(),sep="/")[1],
             'country': PoliticalDivision.objects.filter(name=country),
