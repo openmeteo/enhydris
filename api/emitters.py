@@ -21,7 +21,16 @@ class CFEmitter(Emitter):
         Render function which serializes the actual data.
         """
         cb = request.GET.get('callback')
-        seria = serializers.serialize('json', self.data, indent=1)
+
+        # if object wasn't found self data already contains the response
+        if isinstance(self.data, HttpResponse):
+            return self.data
+
+        # if self.data has object or queryset serialize and return this
+        try:
+            seria = serializers.serialize('json', self.data, indent=1)
+        except TypeError:
+            seria = serializers.serialize('json', [ self.data ], indent=1)
 
         # Callback
         if cb:
@@ -40,6 +49,12 @@ class TSEmitter(Emitter):
         return None
 
     def render(self, request):
+
+        if isinstance(self.data, HttpResponse):
+            Emitter.unregister('hts')
+            Emitter.register('hts',TSEmitter,'text/plain;utf-8')
+            return self.data
+
         timeseries = self.data
         # Determine time step and convert it to old format
         t = timeseries # nickname, because we use it much in next statement
@@ -84,11 +99,26 @@ class GFEmitter(Emitter):
         return None
 
     def render(self, request):
+        """
+        In here we do a nasty hack to work around the fact that the emitter
+        only allows a specific mimetype per Emitter. We unregister and
+        reregister our Emitter after we've guessed the files content_type.
+        This may cause problems if content type is guessed wrong.
+        """
+
+        # if object wasn't found self data already contains the response
+        if isinstance(self.data, HttpResponse):
+            Emitter.unregister('gfd')
+            Emitter.register('gfd',GFEmitter,'text/plain;utf-8')
+            return self.data
+
         gfile = self.data
         filename = gfile.content.file.name
         wrapper = FileWrapper(open(filename))
         download_name = gfile.content.name.split('/')[-1]
         content_type = mimetypes.guess_type(filename)[0]
+        Emitter.unregister('gfd')
+        Emitter.register('gfd',GFEmitter,content_type)
         response = HttpResponse(mimetype=content_type)
         response['Content-Length'] = os.path.getsize(filename)
         response['Content-Disposition'] = "attachment;filename=%s"%download_name

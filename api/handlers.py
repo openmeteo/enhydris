@@ -54,7 +54,10 @@ class TSDATA_Handler(BaseHandler):
     actual timeseries data to the client.
     """
     def read(self, request, ts_id, *args, **kwargs):
-        timeseries = get_object_or_404(Timeseries, pk=int(ts_id))
+        try:
+            timeseries = Timeseries.objects.get(pk=int(ts_id))
+        except:
+            return rc.NOT_FOUND
         return timeseries
 
 class GFDATA_Handler(BaseHandler):
@@ -62,7 +65,11 @@ class GFDATA_Handler(BaseHandler):
     This handler serves the GentityFile contents using piston API.
     """
     def read(self, request, gf_id, *args, **kwargs):
-        gfile = get_object_or_404(GentityFile, pk=int(gf_id))
+        try:
+            gfile = GentityFile.objects.get(pk=int(gf_id))
+        except:
+            return rc.NOT_FOUND
+
         return gfile
 
 # Regular handlers for the rest of the models
