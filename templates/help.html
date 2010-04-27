@@ -1,0 +1,1245 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Enhydris Help Page" %}{% endblock %}
+
+{% block content_title %}
+  <h2 class="pagetitle">{% trans "Help page" %}</h2>
+{% endblock %}
+
+{% block extracss %}
+  <link type="text/css" href="{{ MEDIA_URL }}css/help_page.css" rel="stylesheet" />
+{% endblock %} 
+
+{% block content%}
+<div class=Section1>
+
+<p class=MsoTitle><span lang=EN-US>&nbsp;</span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0
+ style='border-collapse:collapse'>
+ <tr>
+  <td width=568 valign=top style='width:426.1pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoTitle>Οδηγός Χρήστη για τα Υδρολογικά Δεδομένα</p>
+  <p class=MsoTitle>&nbsp;</p>
+  <p class=MsoToc1><span
+  class=MsoHyperlink><span lang=EN-GB style='font-family:"Arial","sans-serif";
+  text-decoration:none'><a href="#_Toc259037259"><span lang=EL
+  style='text-decoration:none'>1.</span><span style='color:windowtext;
+  font-weight:normal;text-decoration:none'>     </span><span lang=EL
+  style='text-decoration:none'>Πρόσβαση στην εφαρμογή</span><span
+  style='color:windowtext;display:none;text-decoration:none'>.. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>2</span></a></span></span></p>
+  <p class=MsoToc1><span class=MsoHyperlink><span lang=EN-GB style='font-family:
+  "Arial","sans-serif";text-decoration:none'><a href="#_Toc259037260"><span
+  lang=EL style='text-decoration:none'>2.</span><span style='color:windowtext;
+  font-weight:normal;text-decoration:none'>     </span><span lang=EL
+  style='text-decoration:none'>Εγγραφή και Είσοδος στον Ιστοχώρο</span><span
+  style='color:windowtext;display:none;text-decoration:none'>.. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>3</span></a></span></span></p>
+  <p class=MsoToc1><span class=MsoHyperlink><span lang=EN-GB style='font-family:
+  "Arial","sans-serif";text-decoration:none'><a href="#_Toc259037261"><span
+  lang=EL style='text-decoration:none'>3.</span><span style='color:windowtext;
+  font-weight:normal;text-decoration:none'>     </span><span lang=EL
+  style='text-decoration:none'>Σταθμοί</span><span style='color:windowtext;
+  display:none;text-decoration:none'> </span><span
+  style='color:windowtext;display:none;text-decoration:none'>4</span></a></span></span></p>
+  <p class=MsoToc2 style='margin-bottom:6.0pt'><span class=MsoHyperlink><span
+  lang=EN-GB style='font-family:"Arial","sans-serif";text-decoration:none'><a
+  href="#_Toc259037262"><span lang=EL style='text-decoration:none'>3.1.
+  Πρόσβαση</span><span style='color:windowtext;display:none;text-decoration:
+  none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>4</span></a></span></span></p>
+  <p class=MsoToc2 style='margin-bottom:6.0pt'><span class=MsoHyperlink><span
+  lang=EN-GB style='font-family:"Arial","sans-serif";text-decoration:none'><a
+  href="#_Toc259037263"><span lang=EL style='text-decoration:none'>3.2. Λίστα</span><span
+  style='color:windowtext;display:none;text-decoration:none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>5</span></a></span></span></p>
+  <p class=MsoToc2 style='margin-bottom:6.0pt'><span class=MsoHyperlink><span
+  lang=EN-GB style='font-family:"Arial","sans-serif";text-decoration:none'><a
+  href="#_Toc259037264"><span lang=EL style='text-decoration:none'>3.3. Σύνθετη
+  Αναζήτηση</span><span style='color:windowtext;display:none;text-decoration:
+  none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>6</span></a></span></span></p>
+  <p class=MsoToc1><span class=MsoHyperlink><span lang=EN-GB style='font-family:
+  "Arial","sans-serif";text-decoration:none'><a href="#_Toc259037265"><span
+  lang=EL style='text-decoration:none'>4.</span><span style='color:windowtext;
+  font-weight:normal;text-decoration:none'>     </span><span lang=EL
+  style='text-decoration:none'>Χάρτης</span><span style='color:windowtext;
+  display:none;text-decoration:none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>7</span></a></span></span></p>
+  <p class=MsoToc2 style='margin-bottom:6.0pt'><span class=MsoHyperlink><span
+  lang=EN-GB style='font-family:"Arial","sans-serif";text-decoration:none'><a
+  href="#_Toc259037266"><span lang=EL style='text-decoration:none'>4.1.
+  Πρόσβαση</span><span style='color:windowtext;display:none;text-decoration:
+  none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>7</span></a></span></span></p>
+  <p class=MsoToc2 style='margin-bottom:6.0pt'><span class=MsoHyperlink><span
+  lang=EN-GB style='font-family:"Arial","sans-serif";text-decoration:none'><a
+  href="#_Toc259037267"><span lang=EL style='text-decoration:none'>4.2. Χρήση
+  του Χάρτη</span><span style='color:windowtext;display:none;text-decoration:
+  none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>8</span></a></span></span></p>
+  <p class=MsoToc3 style='margin-bottom:6.0pt'><span class=MsoHyperlink><span
+  lang=EN-GB style='font-family:"Arial","sans-serif";text-decoration:none'><a
+  href="#_Toc259037268"><span lang=EL style='text-decoration:none'>4.2.1 Χρήση
+  του χάρτη με το ποντίκι και το πληκτρολόγιο</span><span style='color:windowtext;
+  display:none;text-decoration:none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>8</span></a></span></span></p>
+  <p class=MsoToc3 style='margin-bottom:6.0pt'><span class=MsoHyperlink><span
+  lang=EN-GB style='font-family:"Arial","sans-serif";text-decoration:none'><a
+  href="#_Toc259037269"><span lang=EL style='text-decoration:none'>4.2.2 Χρήση
+  του χάρτη με το εργαλεία του χάρτη</span><span style='color:windowtext;
+  display:none;text-decoration:none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>8</span></a></span></span></p>
+  <p class=MsoToc2 style='margin-bottom:6.0pt'><span class=MsoHyperlink><span
+  lang=EN-GB style='font-family:"Arial","sans-serif";text-decoration:none'><a
+  href="#_Toc259037270"><span lang=EL style='text-decoration:none'>4.3. Επιλογή
+  σταθμών</span><span style='color:windowtext;display:none;text-decoration:
+  none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>11</span></a></span></span></p>
+  <p class=MsoToc2 style='margin-bottom:6.0pt'><span class=MsoHyperlink><span
+  lang=EN-GB style='font-family:"Arial","sans-serif";text-decoration:none'><a
+  href="#_Toc259037271"><span lang=EL style='text-decoration:none'>4.4. Σύνθετη
+  Αναζήτηση</span><span style='color:windowtext;display:none;text-decoration:
+  none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>10</span></a></span></span></p>
+  <p class=MsoToc2 style='margin-bottom:6.0pt'><span class=MsoHyperlink><span
+  lang=EN-GB style='font-family:"Arial","sans-serif";text-decoration:none'><a
+  href="#_Toc259037272"><span lang=EL style='text-decoration:none'>4.5. Εμφάνιση
+  Σταθμών στη Λίστα</span><span style='color:windowtext;display:none;
+  text-decoration:none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>14</span></a></span></span></p>
+  <p class=MsoToc2 style='margin-bottom:6.0pt'><span class=MsoHyperlink><span
+  lang=EN-GB style='font-family:"Arial","sans-serif";text-decoration:none'><a
+  href="#_Toc259037273"><span lang=EL style='text-decoration:none'>4.6.
+  Εμφάνιση Σταθμών στο Χάρτη</span><span style='color:windowtext;display:none;
+  text-decoration:none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>15</span></a></span></span></p>
+  <p class=MsoToc1><span class=MsoHyperlink><span lang=EN-GB style='font-family:
+  "Arial","sans-serif";text-decoration:none'><a href="#_Toc259037274"><span
+  lang=EL style='text-decoration:none'>5.</span><span style='color:windowtext;
+  font-weight:normal;text-decoration:none'>     </span><span lang=EL
+  style='text-decoration:none'>Πληροφορίες Σταθμών</span><span
+  style='color:windowtext;display:none;text-decoration:none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>12</span></a></span></span></p>
+  <p class=MsoToc2 style='margin-bottom:6.0pt'><span class=MsoHyperlink><span
+  lang=EN-GB style='font-family:"Arial","sans-serif";text-decoration:none'><a
+  href="#_Toc259037275"><span lang=EL style='text-decoration:none'>5.1 Γενικές
+  Πληροφορίες</span><span style='color:windowtext;display:none;text-decoration:
+  none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>12</span></a></span></span></p>
+  <p class=MsoToc2 style='margin-bottom:6.0pt'><span class=MsoHyperlink><span
+  lang=EN-GB style='font-family:"Arial","sans-serif";text-decoration:none'><a
+  href="#_Toc259037276"><span lang=EL style='text-decoration:none'>5.2
+  Πληροφορίες Οργάνων</span><span style='color:windowtext;display:none;
+  text-decoration:none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>12</span></a></span></span></p>
+  <p class=MsoToc2 style='margin-bottom:6.0pt'><span class=MsoHyperlink><span
+  lang=EN-GB style='font-family:"Arial","sans-serif";text-decoration:none'><a
+  href="#_Toc259037277"><span lang=EL style='text-decoration:none'>5</span><span
+  style='text-decoration:none'>.3 Πληροφορίες Χρονοσειρών</span><span
+  style='color:windowtext;display:none;text-decoration:none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>12</span></a></span></span></p>
+  <p class=MsoToc3 style='margin-bottom:6.0pt'><span class=MsoHyperlink><span
+  lang=EN-GB style='font-family:"Arial","sans-serif";text-decoration:none'><a
+  href="#_Toc259037278"><span lang=EL style='text-decoration:none'>5</span><span
+  style='text-decoration:none'>.3.1 Διάγραμμα χρονοσειράς</span><span
+  style='color:windowtext;display:none;text-decoration:none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>12</span></a></span></span></p>
+  <p class=MsoToc3 style='margin-bottom:6.0pt'><span class=MsoHyperlink><span
+  lang=EN-GB style='font-family:"Arial","sans-serif";text-decoration:none'><a
+  href="#_Toc259037279"><span lang=EL style='text-decoration:none'>5</span><span
+  style='text-decoration:none'>.3.2 Πίνακας χρονοσειράς</span><span
+  style='color:windowtext;display:none;text-decoration:none'>. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>12</span></a></span></span></p>
+  <p class=MsoToc1><span class=MsoHyperlink><span lang=EN-GB style='font-family:
+  "Arial","sans-serif";text-decoration:none'><a href="#_Toc259037280"><span
+  lang=EL style='text-decoration:none'>6.</span><span style='color:windowtext;
+  font-weight:normal;text-decoration:none'>     </span><span lang=EL
+  style='text-decoration:none'>Βοήθεια</span><span style='color:windowtext;
+  display:none;text-decoration:none'>.. </span><span
+  style='color:windowtext;display:none;text-decoration:none'>17</span></a></span></span></p>
+  <p class=MsoToc1><span class=MsoHyperlink><span lang=EN-GB style='font-family:
+  "Arial","sans-serif";text-decoration:none'><a href="#_Toc259037281"><span
+  lang=EL style='text-decoration:none'>7.</span><span style='color:windowtext;
+  font-weight:normal;text-decoration:none'>     </span><span lang=EL
+  style='text-decoration:none'>Σύνδεσμοι</span><span style='color:windowtext;
+  display:none;text-decoration:none'> </span><span
+  style='color:windowtext;display:none;text-decoration:none'>18</span></a></span></span></p>
+  <p class=MsoNormal style='margin-top:0cm;margin-right:0cm;margin-bottom:6.0pt;
+  margin-left:49.65pt'><span lang=EN-US style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <h1 style='margin-left:36.0pt;text-indent:-18.0pt'><a name="_Toc259037259">1.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp; </span>Πρόσβαση στην εφαρμογή</a>
+  </h1>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Η πρόσβαση
+  στην εφαρμογή γίνεται από την κεντρική σελίδα του Υδροσκοπίου. Ο χρήστης από
+  το μενού «Επιλογές» που βρίσκεται στα αριστερά της σελίδας επιλέγει την
+  επιλογή «Υδρολογικά δεδομένα».  </span></p>
+  <p class=MsoNormal><span lang=EN-US style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <div align=center>
+  <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=240
+   style='width:180.3pt;border-collapse:collapse'>
+   <tr style='height:260.25pt'>
+    <td valign=top style='padding:0cm 5.4pt 0cm 5.4pt;height:260.25pt'>
+    <p class=MsoNormal><span style='position:absolute;z-index:3;margin-left:
+    30px;margin-top:13px;width:176px;height:325px'><img width=176 height=325
+    src="{{MEDIA_URL}}images/help_files/image001.gif"></span></p>
+    </td>
+   </tr>
+  </table>
+  </div>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Η πρώτη
+  σελίδα που ανοίγει περιλαμβάνει:</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img width=370 height=224
+  src="{{MEDIA_URL}}images/help_files/image002.gif"></span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal style='margin-left:72.0pt;text-indent:-18.0pt'><span
+  style='font-family:"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+  </span></span><span style='font-family:"Arial","sans-serif"'>ένα μήνυμα
+  καλωσορίσματος, </span></p>
+  <p class=MsoNormal style='margin-left:72.0pt;text-indent:-18.0pt'><span
+  style='font-family:"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+  </span></span><span style='font-family:"Arial","sans-serif"'>ένα πλαίσιο με
+  στατιστικά στοιχεία σχετικά με τον ιστοχώρο όπως για παράδειγμα πόσοι σταθμοί
+  φιλοξενούνται στον ιστοχώρο, πόσα όργανα μέτρησης, πόσες χρονοσειρές κτλ.</span></p>
+  <p class=MsoNormal style='margin-left:54.0pt'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img width=238 height=114
+  src="{{MEDIA_URL}}images/help_files/image003.gif"></span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal style='margin-left:72.0pt;text-indent:-18.0pt'><span
+  style='font-family:"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+  </span></span><span style='font-family:"Arial","sans-serif"'>ένα πλαίσιο με
+  τις πιο πρόσφατες δραστηριότητες στον ιστοχώρο </span></p>
+  <p class=MsoNormal style='margin-left:54.0pt'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img width=272 height=117
+  src="{{MEDIA_URL}}images/help_files/image004.gif"></span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal style='margin-left:72.0pt;text-indent:-18.0pt'><span
+  style='font-family:"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+  </span></span><span style='font-family:"Arial","sans-serif"'>την επιλογή
+  γλώσσας όπου ο χρήστης μπορεί με τη βοήθεια του συρόμενου μενού να επιλέξει
+  τη γλώσσα με την οποία επιθυμεί να συνεχίσει την πλοήγησή του στην εφαρμογή.</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img width=141 height=38
+  src="{{MEDIA_URL}}images/help_files/image005.gif"></span></p>
+  <p class=MsoNormal style='margin-left:54.0pt'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal style='margin-left:72.0pt;text-indent:-18.0pt'><span
+  style='font-family:"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+  </span></span><span style='font-family:"Arial","sans-serif"'>ένα πλαίσιο
+  αναζήτησης σταθμού στο οποίο μπορεί ο χρήστης να εισάγει με κεφαλαία το όνομα
+  του σταθμού που επιθυμεί ή μια περιγραφή πχ. ΑΤΤΙΚΗ για σταθμούς που
+  βρίσκονται στην Αττική.</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img width=170 height=52
+  src="{{MEDIA_URL}}images/help_files/image006.gif"></span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal style='margin-left:72.0pt;text-indent:-18.0pt'><span
+  style='font-family:"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+  </span></span><span style='font-family:"Arial","sans-serif"'>ένα πλαίσιο
+  αναζήτησης στον ιστοχώρο</span></p>
+  <p class=MsoNormal style='margin-left:54.0pt'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img width=173 height=31
+  src="{{MEDIA_URL}}images/help_files/image007.gif"></span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal style='margin-left:72.0pt;text-indent:-18.0pt'><span
+  style='font-family:"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+  </span></span><span style='font-family:"Arial","sans-serif"'>τα κουμπιά
+  εισόδου κι εγγραφής στον ιστοχώρο</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img width=156 height=53
+  src="{{MEDIA_URL}}images/help_files/image008.gif"></span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal style='margin-left:72.0pt;text-indent:-18.0pt'><span
+  style='font-family:"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+  </span></span><span style='font-family:"Arial","sans-serif"'>το εργαλείο
+  επιλογής μεγέθους της γραμματοσειράς της σελίδας</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img width=65 height=24
+  src="{{MEDIA_URL}}images/help_files/image009.jpg"></span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal style='margin-left:72.0pt;text-indent:-18.0pt'><span
+  style='font-family:"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+  </span></span><span style='font-family:"Arial","sans-serif"'>ένα οριζόντιο
+  μενού με το οποίο γίνεται η μετάβαση στις σελίδες «Σταθμοί», «Χάρτης» και
+  «Βοήθεια».</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img width=150 height=54
+  src="{{MEDIA_URL}}images/help_files/image010.gif"></span></p>
+  <p class=MsoTitle><span lang=EN-US>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=568 valign=top style='width:426.1pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <h1 style='margin-left:36.0pt;text-indent:-18.0pt'><a name="_Toc259037260">2.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp; </span>Εγγραφή και Είσοδος στον
+  Ιστοχώρο</a></h1>
+  <p class=MsoNormal>&nbsp;</p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Εγγραφή
+  στον ιστοχώρο γίνεται κάνοντας κλικ στο «Register» και συμπληρώνοντας τη
+  φόρμα που ανοίγει. Όλα τα πεδία είναι υποχρεωτικό να συμπληρωθούν. </span></p>
+  <p class=MsoNormal>&nbsp;</p>
+  <p class=MsoNormal align=center style='text-align:center'><img width=301
+  height=183 src="{{MEDIA_URL}}images/help_files/image011.gif"></p>
+  <p class=MsoNormal align=center style='text-align:center'>&nbsp;</p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Στο πρώτο
+  πεδίο εισάγεται το όνομα του χρήστη, στο δεύτερο η διεύθυνση ηλεκτρονικού
+  ταχυδρομείου, στο τρίτο ο κωδικός πρόσβασής και στο τέταρτο εισάγεται ξανά ο
+  κωδικός πρόσβασης για επιβεβαίωση. Βάζοντας τικ στο κουτί που βρίσκεται από
+  κάτω ο χρήστης δηλώνει ότι έχει διαβάσει και αποδέχεται τους όρους χρήσης της
+  υπηρεσίας. Με κλικ στο κουμπί Register ολοκληρώνεται η διαδικασία.</span> </p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Είσοδος
+  στον ιστοχώρο γίνεται με το κουμπί «Login» κι εφόσον έχει προηγηθεί εγγραφή
+  σε αυτόν. </span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img width=135 height=94
+  src="{{MEDIA_URL}}images/help_files/image012.gif"></span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Στην
+  καρτέλα που εμφανίζεται συμπληρώνονται το όνομα χρήστη και ο κωδικός και για
+  να ολοκληρωθεί η είσοδος γίνεται κλικ στο κουμπί «</span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>Login</span><span style='font-family:
+  "Arial","sans-serif"'>». Σε περίπτωση που ο χρήστης ξεχάσει τον κωδικό
+  πρόσβασής του στην υπηρεσία, κάνει κλικ στο «</span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>Forgot</span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'> </span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>my</span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'> </span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>Password</span><span
+  style='font-family:"Arial","sans-serif"'>», οπότε εμφανίζεται η ακόλουθη
+  καρτέλα. </span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><img width=353
+  height=95 src="{{MEDIA_URL}}images/help_files/image013.gif"></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Σε αυτή την
+  καρτέλα ο χρήστης συμπληρώνει μόνο τη διεύθυνση του ηλεκτρονικού του ταχυδρομείου
+  και κάνει κλικ στο κουμπί «Reset my Password». Με αυτόν τον τρόπο
+  αποστέλλεται στα εισερχόμενα της αλληλογραφίας του χρήστη ένας νέος κωδικός
+  τον οποίο μπορεί να χρησιμοποιήσει για είσοδο στην υπηρεσία.</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=568 valign=top style='width:426.1pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <h1 style='margin-left:36.0pt;text-indent:-18.0pt'><a name="_Toc259037261">3.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp; </span>Σταθμοί</a> </h1>
+  <p class=MsoNormal>&nbsp;</p>
+  <h2 style='margin-left:18.0pt'><a name="_Toc259037262"><span
+  style='font-size:12.0pt'>3.1. Πρόσβαση</span></a></h2>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Η πρόσβαση
+  στη σελίδα «Σταθμοί» γίνεται από την αρχική σελίδα της εφαρμογής «Υδρολογικά
+  δεδομένα». Εφόσον ο χρήστης εισέλθει στη σελίδα μπορεί να επιλέξει δύο
+  καρτέλες. Η πρώτη είναι η λίστα και η δεύτερη η σύνθετη αναζήτηση.</span></p>
+  <p class=MsoTitle>&nbsp;</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=568 valign=top style='width:426.1pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <h2 style='margin-left:21.3pt'><a name="_Toc259037263"><span
+  style='font-size:12.0pt'>3.2. Λίστα</span></a></h2>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'> </span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Στην
+  καρτέλα της λίστας ο χρήστης μπορεί να αναζητήσει το σταθμό ενδιαφέροντός του
+  στον κατάλογο της καρτέλας, </span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'><img
+  width=579 height=217 src="{{MEDIA_URL}}images/help_files/image014.gif"></span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>ή να
+  πληκτρολογήσει με κεφαλαία το όνομα του σταθμού ή την περιγραφή του στο
+  πλαίσιο αναζήτησης. </span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img width=300 height=85
+  src="{{MEDIA_URL}}images/help_files/image015.gif"></span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Ο κατάλογος
+  των σταθμών θα περιλαμβάνει εκείνους τους σταθμούς που πληρούν τα κριτήρια
+  που τέθηκαν στο πλαίσιο αναζήτησης. Μάλιστα υπάρχει η δυνατότητα στον
+  κατάλογο να εμφανιστούν μόνο οι σταθμοί για τους οποίους υπάρχουν χρονοσειρές
+  επιλέγοντας την εντολή που βρίσκεται κάτω από το πλαίσιο αναζήτησης, «Display
+  only the stations with timeseries». Κάνοντας κλικ στον τίτλο μιας στήλης, οι
+  σταθμοί ταξινομούνται κατά αύξουσα ή φθίνουσα σειρά με βάση τη στήλη αυτή.</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=568 valign=top style='width:426.1pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <h2 style='margin-left:21.3pt'><a name="_Toc259037264"></a><a
+  name="_3.3._Σύνθετη_Αναζήτηση"></a><span style='font-size:12.0pt'>3.3.
+  Σύνθετη Αναζήτηση</span></h2>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Αναζήτηση
+  σταθμών μπορεί να γίνει και με την σύνθετη αναζήτηση. </span></p>
+  <p class=MsoNormal><span lang=EN-US style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <div align=center>
+  <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0
+   style='border-collapse:collapse'>
+   <tr>
+    <td width=521 valign=top style='width:390.7pt;padding:0cm 5.4pt 0cm 5.4pt'>
+    <p class=MsoNormal><img width=472 height=265
+    src="{{MEDIA_URL}}images/help_files/image016.gif" align=left></p>
+    </td>
+   </tr>
+   <tr>
+    <td width=521 valign=top style='width:390.7pt;padding:0cm 5.4pt 0cm 5.4pt'>
+    <p class=MsoNormal><span lang=EN-US style='font-size:10.0pt;font-family:
+    "Arial","sans-serif"'>&nbsp;</span></p>
+    </td>
+   </tr>
+  </table>
+  </div>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Σε αυτή την
+  περίπτωση ο χρήστης ενεργοποιεί τα φίλτρα που επιθυμεί να χρησιμοποιήσει στην
+  αναζήτησή του κάνοντας κλικ στο κουμπί </span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>On</span><span style='font-family:
+  "Arial","sans-serif"'>/</span><span lang=EN-US style='font-family:"Arial","sans-serif"'>Off</span><span
+  style='font-family:"Arial","sans-serif"'> δίπλα από κάθε πεδίο. Στη συνέχεια
+  με τη βοήθεια των συρόμενων μενού συμπληρώνει τα κριτήρια που επιθυμεί και
+  κάνει κλικ στο κουμπί «Υποβολή Ερωτήματος». Ο χρήστης έχει τη δυνατότητα να
+  εμφανίσει μόνο τους σταθμούς με χρονοσειρές. Το πρώτο φίλτρο συμπληρώνεται
+  αυτόματα με το όνομα της χώρας </span><span lang=EN-US style='font-family:
+  "Arial","sans-serif"'>GREECE</span><span style='font-family:"Arial","sans-serif"'>.
+  Στο δεύτερο και τρίτο φίλτρο ο χρήστης ορίζει αντίστοιχα το Διαμέρισμα και το
+  Νομό ενώ στο τέταρτο και το πέμπτο το υδατικό διαμέρισμα και τη λεκάνη
+  απορροής. Στο έκτο φίλτρο ορίζεται ο ιδιοκτήτης του σταθμού και στο έβδομο ο
+  τύπος του. Τέλος, επιλέγοντας την τελευταία επιλογή «</span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>Display</span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'> </span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>only</span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'> </span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>stations</span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'> </span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>with</span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'> </span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>timeseries</span><span
+  style='font-family:"Arial","sans-serif"'>», δίνεται η δυνατότητα στο χρήστη
+  να εμφανίσει μόνο τους σταθμούς που διαθέτουν χρονοσειρές. Κανένα από τα
+  ανωτέρω πεδία δεν είναι υποχρεωτικό να συμπληρωθεί. </span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Αφού ο
+  χρήστης ορίσει τα φίλτρα που επιθυμεί, υποβάλλει το ερώτημα, πατώντας το
+  κουμπί «</span><span lang=EN-US style='font-family:"Arial","sans-serif"'>Submit</span><span
+  lang=EN-US style='font-family:"Arial","sans-serif"'> </span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>Query</span><span style='font-family:
+  "Arial","sans-serif"'>», κι έτσι εμφανίζεται μια λίστα με τους σταθμούς που
+  πληρούν τα κριτήρια που όρισε.</span></p>
+  <p class=MsoTitle>&nbsp;</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=568 valign=top style='width:426.1pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <h1 style='margin-left:36.0pt;text-indent:-18.0pt'><a name="_Toc259037265">4.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp; </span>Χάρτης</a></h1>
+  <p class=MsoNormal>&nbsp;</p>
+  <h2 style='margin-left:18.0pt'><a name="_Toc259037266"><span
+  style='font-size:12.0pt'>4.1. Πρόσβαση</span></a></h2>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img width=535 height=289
+  src="{{MEDIA_URL}}images/help_files/image017.jpg"></span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Η πρόσβαση
+  στη σελίδα «Χάρτης» γίνεται από το οριζόντιο μενού της αρχικής σελίδας της
+  εφαρμογής «Υδρολογικά δεδομένα». Σε αυτήν την σελίδα ο χρήστης μπορεί να
+  εμφανίσει πάνω στο χάρτη τους σταθμούς που επιθυμεί.</span></p>
+  <p class=MsoTitle>&nbsp;</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=568 valign=top style='width:426.1pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <h2 style='margin-left:18.0pt'><a name="_Toc259037267"><span
+  style='font-size:12.0pt'>4.2. Χρήση του Χάρτη</span></a></h2>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <h3 style='margin-left:72.0pt'><a name="_Toc259037268"><u><span
+  style='font-size:12.0pt;font-weight:normal'>4.2.1 Χρήση του χάρτη με το
+  ποντίκι και το πληκτρολόγιο</span></u></a></h3>
+  <p class=MsoNormal>&nbsp;</p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Η
+       μετατόπιση του χάρτη μπορεί να γίνει με πατημένο το αριστερό κλικ και
+       σέρνοντας το χάρτη προς την κατεύθυνση που επιθυμεί ο χρήστης.</span></li>
+  </ul>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Κυλώντας
+       τη ροδέλα του ποντικιού προς τα εμπρός ο χρήστης μπορεί να μεγεθύνει το
+       χάρτη ενώ αντίθετα κυλώντας τη προς τα πίσω μπορεί να τον σμικρύνει.</span></li>
+  </ul>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Ο χρήστης
+       μπορεί να μεγεθύνει μια συγκεκριμένη περιοχή που επιθυμεί, αν με
+       πατημένο το πλήκτρο SHIFT σύρει τον κέρσορα πάνω στο χάρτη. Αντιθέτως,
+       μπορεί να σμικρύνει αν σύρει και πάλι τον κέρσορα έχοντας όμως πατημένα
+       τα κουμπιά CTRL+SHIFT.</span></li>
+  </ul>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Πατώντας
+       SHIFT και κάνοντας κλικ στο χάρτη τότε γίνεται εστίαση στο κέντρο</span></li>
+  </ul>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Με διπλό
+       κλικ γίνεται μεγέθυνση και εστίαση στο κέντρο.</span></li>
+  </ul>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Πατώντας
+       SHIFT και κάνοντας διπλό κλικ γίνεται μεγέθυνση και εστίαση στο κέντρο.</span></li>
+  </ul>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Με τα
+       βέλη του πληκτρολογίου μπορεί να γίνει μετατόπιση του χάρτη κάθετα ή
+       οριζόντια, ενώ με τα πλήκτρα </span><span lang=EN-US style='font-family:
+       "Arial","sans-serif"'>Home</span><span style='font-family:"Arial","sans-serif"'>,
+       </span><span lang=EN-US style='font-family:"Arial","sans-serif"'>End</span><span
+       style='font-family:"Arial","sans-serif"'>, </span><span lang=EN-US
+       style='font-family:"Arial","sans-serif"'>Page</span><span lang=EN-US
+       style='font-family:"Arial","sans-serif"'> </span><span lang=EN-US
+       style='font-family:"Arial","sans-serif"'>Up</span><span
+       style='font-family:"Arial","sans-serif"'> και </span><span lang=EN-US
+       style='font-family:"Arial","sans-serif"'>Page</span><span lang=EN-US
+       style='font-family:"Arial","sans-serif"'> </span><span lang=EN-US
+       style='font-family:"Arial","sans-serif"'>Down</span><span
+       style='font-family:"Arial","sans-serif"'>, γίνεται αντίστοιχα μετατόπιση
+       επάνω αριστερά, κάτω αριστερά, επάνω δεξιά και κάτω δεξιά.</span></li>
+  </ul>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Πατώντας
+       το πλήκτρο + γίνεται μεγέθυνση</span></li>
+  </ul>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Πατώντας
+       το πλήκτρο – γίνεται σμίκρυνση.</span></li>
+  </ul>
+  <p class=MsoNormal>&nbsp;</p>
+  <p class=MsoNormal style='margin-left:18.0pt'>&nbsp;</p>
+  <h3 style='margin-left:72.0pt'><a name="_Toc259037269"><u><span
+  style='font-size:12.0pt;font-weight:normal'>4.2.2 Χρήση του χάρτη με το
+  εργαλεία του χάρτη</span></u></a></h3>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Η χρήση του
+  χάρτη μπορεί να γίνει και με τα διάφορα εργαλεία </span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Με το
+       ακόλουθο εργαλείο ο χρήστης μπορεί να μεγεθύνει ή να σμικρύνει το χάρτη</span></li>
+  </ul>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'><img width=42 height=248
+  src="{{MEDIA_URL}}images/help_files/image018.jpg"></span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoBodyTextIndent2>Πατώντας το επάνω βέλος ο χάρτης μεγεθύνεται ενώ
+  με το κάτω βέλος ο χάρτης σμικρύνεται. Υπάρχει η δυνατότητα να επιτύχει ο
+  χρήστης τη μεγέθυνση που επιθυμεί κάνοντας κλικ στο δείκτη και σέρνοντάς τον
+  πάνω στη ράβδο.</p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Στα όρια
+       της περιοχής του χάρτη υπάρχουν οκτώ βέλη για τη μετακίνησή του προς την
+       κατεύθυνση που επιθυμεί ο χρήστης. Τέσσερα από αυτά θα μετακινήσουν το
+       χάρτη διαγώνια.</span></li>
+  </ul>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <div align=center>
+  <table class=MsoNormalTable border=1 cellspacing=0 cellpadding=0
+   style='border-collapse:collapse;border:none'>
+   <tr>
+    <td width=38 style='width:28.8pt;border-top:solid #3366FF 1.5pt;border-left:
+    solid #3366FF 1.5pt;border-bottom:none;border-right:none;padding:0cm 5.4pt 0cm 5.4pt'>
+    <p class=MsoNormal align=right style='text-align:right'><span
+    style='font-family:"Arial","sans-serif"'><img width=23 height=25
+    src="{{MEDIA_URL}}images/help_files/image019.jpg"></span></p>
+    </td>
+    <td width=40 style='width:30.3pt;border-top:solid #3366FF 1.5pt;border-left:
+    none;border-bottom:none;border-right:solid #3366FF 1.5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+    <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'><img
+    width=26 height=23 src="{{MEDIA_URL}}images/help_files/image020.jpg"></span></p>
+    </td>
+   </tr>
+   <tr>
+    <td width=38 style='width:28.8pt;border-top:none;border-left:solid #3366FF 1.5pt;
+    border-bottom:solid #3366FF 1.5pt;border-right:none;padding:0cm 5.4pt 0cm 5.4pt'>
+    <p class=MsoNormal align=right style='text-align:right'><span
+    style='font-family:"Arial","sans-serif"'><img width=24 height=24
+    src="{{MEDIA_URL}}images/help_files/image021.jpg"></span></p>
+    </td>
+    <td width=40 style='width:30.3pt;border-top:none;border-left:none;
+    border-bottom:solid #3366FF 1.5pt;border-right:solid #3366FF 1.5pt;
+    padding:0cm 5.4pt 0cm 5.4pt'>
+    <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'><img
+    width=26 height=27 src="{{MEDIA_URL}}images/help_files/image022.jpg"></span></p>
+    </td>
+   </tr>
+  </table>
+  </div>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoToc4>Ενώ τα άλλα τέσσερα βέλη θα μετακινήσουν το χάρτη είτε
+  οριζόντια είτε κάθετα</p>
+  <p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+  <div align=center>
+  <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0
+   style='border-collapse:collapse'>
+   <tr>
+    <td width=143 valign=top style='width:107.2pt;padding:0cm 5.4pt 0cm 5.4pt'>
+    <table class=MsoNormalTable border=1 cellspacing=0 cellpadding=0
+     align=left style='border-collapse:collapse;border:none;margin-left:6.75pt;
+     margin-right:6.75pt'>
+     <tr>
+      <td width=41 valign=top style='width:31.05pt;border-top:solid #3366FF 1.5pt;
+      border-left:solid #3366FF 1.5pt;border-bottom:none;border-right:none;
+      padding:0cm 5.4pt 0cm 5.4pt'>
+      <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+      </td>
+      <td width=40 style='width:30.3pt;border:none;border-top:solid #3366FF 1.5pt;
+      padding:0cm 5.4pt 0cm 5.4pt'>
+      <p class=MsoNormal align=center style='text-align:center'><span
+      style='font-family:"Arial","sans-serif"'><img width=26 height=25
+      src="{{MEDIA_URL}}images/help_files/image023.jpg"></span></p>
+      </td>
+      <td width=40 valign=top style='width:30.3pt;border-top:solid #3366FF 1.5pt;
+      border-left:none;border-bottom:none;border-right:solid #3366FF 1.5pt;
+      padding:0cm 5.4pt 0cm 5.4pt'>
+      <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+      </td>
+     </tr>
+     <tr>
+      <td width=41 style='width:31.05pt;border:none;border-left:solid #3366FF 1.5pt;
+      padding:0cm 5.4pt 0cm 5.4pt'>
+      <p class=MsoNormal align=right style='text-align:right'><span
+      style='font-family:"Arial","sans-serif"'><img width=27 height=24
+      src="{{MEDIA_URL}}images/help_files/image024.jpg"></span></p>
+      </td>
+      <td width=40 style='width:30.3pt;border:none;padding:0cm 5.4pt 0cm 5.4pt'>
+      <p class=MsoNormal align=center style='text-align:center'><span
+      style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+      </td>
+      <td width=40 style='width:30.3pt;border:none;border-right:solid #3366FF 1.5pt;
+      padding:0cm 5.4pt 0cm 5.4pt'>
+      <p class=MsoNormal align=center style='text-align:center'><span
+      style='font-family:"Arial","sans-serif"'><img width=26 height=24
+      src="{{MEDIA_URL}}images/help_files/image025.jpg"></span></p>
+      </td>
+     </tr>
+     <tr style='height:4.0pt'>
+      <td width=41 valign=top style='width:31.05pt;border-top:none;border-left:
+      solid #3366FF 1.5pt;border-bottom:solid #3366FF 1.5pt;border-right:none;
+      padding:0cm 5.4pt 0cm 5.4pt;height:4.0pt'>
+      <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+      </td>
+      <td width=40 style='width:30.3pt;border:none;border-bottom:solid #3366FF 1.5pt;
+      padding:0cm 5.4pt 0cm 5.4pt;height:4.0pt'>
+      <p class=MsoNormal align=center style='text-align:center'><span
+      style='font-family:"Arial","sans-serif"'><img width=26 height=26
+      src="{{MEDIA_URL}}images/help_files/image026.jpg"></span></p>
+      </td>
+      <td width=40 valign=top style='width:30.3pt;border-top:none;border-left:
+      none;border-bottom:solid #3366FF 1.5pt;border-right:solid #3366FF 1.5pt;
+      padding:0cm 5.4pt 0cm 5.4pt;height:4.0pt'>
+      <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+      </td>
+     </tr>
+    </table>
+    <p class=MsoNormal></p>
+    </td>
+   </tr>
+  </table>
+  </div>
+  <p class=MsoNormal><span lang=EN-US style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Η
+       επαναφορά του χάρτη στην αρχική έκταση γίνεται με το κουμπί </span><span
+       lang=EN-US style='font-family:"Arial","sans-serif"'>Reload</span><span
+       lang=EN-US style='font-family:"Arial","sans-serif"'> </span><span
+       lang=EN-US style='font-family:"Arial","sans-serif"'>Map</span><span
+       style='font-family:"Arial","sans-serif"'>, που είναι το τελευταίο της
+       εργαλειοθήκης </span><span lang=EN-US style='font-family:"Arial","sans-serif"'>Select</span><span
+       lang=EN-US style='font-family:"Arial","sans-serif"'> </span><span
+       lang=EN-US style='font-family:"Arial","sans-serif"'>tools</span><span
+       style='font-family:"Arial","sans-serif"'> που βρίσκεται πάνω ακριβώς από
+       το χάρτη</span></li>
+  </ul>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'><img width=357 height=24
+  src="{{MEDIA_URL}}images/help_files/image027.jpg"></span></p>
+  <p class=MsoNormal style='margin-left:36.0pt'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal style='margin-left:36.0pt'><span style='font-family:"Arial","sans-serif"'>Τα
+  υπόλοιπα εργαλεία αυτής της εργαλειοθήκης περιγράφονται στην <a
+  href="#_4.3._Επιλογή_σταθμών">Επιλογή σταθμών</a></span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Στο
+       οριζόντιο μενού, στα αριστερά της οθόνης υπάρχει η λέξη </span><span
+       lang=EN-US style='font-family:"Arial","sans-serif"'>list</span><span
+       style='font-family:"Arial","sans-serif"'> και εκατέρωθεν της δύο βέλη. Ο
+       χρήστης μπορεί πατώντας το αριστερό βέλος δίπλα από τη λέξη </span><span
+       lang=EN-US style='font-family:"Arial","sans-serif"'>list</span><span
+       style='font-family:"Arial","sans-serif"'> να αποκρύψει τη λίστα και να
+       εμφανίσει σε όλη την οθόνη το χάρτη. Έπειτα πατώντας το δεξί βέλος
+       μπορεί να επαναφέρει δίπλα στο χάρτη τη λίστα. </span></li>
+  </ul>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img border=0 width=76 height=33
+  src="{{MEDIA_URL}}images/help_files/image028.jpg"></span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Αντίστοιχα
+       πατώντας το βέλος δεξιά από τη λέξη </span><span lang=EN-US
+       style='font-family:"Arial","sans-serif"'>Map</span><span
+       style='font-family:"Arial","sans-serif"'> ο χρήστης μπορεί να αποκρύψει
+       το χάρτη ώστε να καταλάβει όλη την οθόνη η λίστα με τους σταθμούς και
+       τις σχετικές με αυτούς πληροφορίες, Ο χάρτης επανέρχεται πατώντας το
+       αριστερό βέλος.</span></li>
+  </ul>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img border=0 width=71 height=34
+  src="{{MEDIA_URL}}images/help_files/image029.jpg"></span></p>
+  <p class=MsoTitle>&nbsp;</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=568 valign=top style='width:426.1pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <h2 style='margin-left:21.3pt'><a name="_Toc259037270"></a><a
+  name="_4.3._Επιλογή_σταθμών"></a><span style='font-size:12.0pt'>4.3. Επιλογή
+  σταθμών</span></h2>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'> Η <b>επιλογή</b>
+  των σταθμών μπορεί να γίνει με τους εξής τρόπους:</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal style='margin-left:72.0pt;text-indent:-18.0pt'><span
+  style='font-family:"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+  </span></span><span style='font-family:"Arial","sans-serif"'>Ο πρώτος τρόπος
+  είναι να ψάξει ο χρήστης στη λίστα με τους σταθμούς που βρίσκεται στα
+  αριστερά του χάρτη και να επιλέξει αυτούς που επιθυμεί κάνοντας κλικ στο
+  κουτάκι που βρίσκεται δίπλα του. Οι 1539 σταθμοί που φιλοξενεί η ιστοσελίδα
+  μπορούν να μοιραστούν σε σελίδες των 10, 25, 50, 100 σταθμών. Πόσοι σταθμοί
+  θα εμφανίζονται ανά σελίδα επιλέγεται με τη βοήθεια του συρόμενου μενού </span><span
+  lang=EN-US style='font-family:"Arial","sans-serif"'>Show</span><span
+  style='font-family:"Arial","sans-serif"'>. </span></p>
+  <p class=MsoNormal style='margin-left:54.0pt'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img border=0 width=128 height=81
+  src="{{MEDIA_URL}}images/help_files/image030.jpg"></span></p>
+  <p class=MsoNormal style='margin-left:54.0pt'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal style='margin-left:72.2pt'><span style='font-family:"Arial","sans-serif"'>Ο
+  χρήστης μπορεί να κάνει κλικ στον αριθμό της σελίδας ή στα κουμπιά “</span><span
+  lang=EN-US style='font-family:"Arial","sans-serif"'>First</span><span
+  style='font-family:"Arial","sans-serif"'>”, “</span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>Previous</span><span
+  style='font-family:"Arial","sans-serif"'>”, “</span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>Next</span><span style='font-family:
+  "Arial","sans-serif"'>” και “</span><span lang=EN-US style='font-family:"Arial","sans-serif"'>Last</span><span
+  style='font-family:"Arial","sans-serif"'>” για να αναζητήσει και να επιλέξει
+  τους σταθμούς που επιθυμεί.</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img border=0 width=277 height=47
+  src="{{MEDIA_URL}}images/help_files/image031.jpg"></span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoBodyTextIndent><span style='font-family:"Arial","sans-serif"'> </span></p>
+  <p class=MsoBodyTextIndent style='text-indent:-18.0pt'><span
+  style='font-family:"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+  </span></span><span style='font-family:"Arial","sans-serif"'>Η άλλη
+  δυνατότητα που έχει ο χρήστης είναι να χρησιμοποιήσει τα εργαλεία επιλογής, </span><span
+  lang=EN-US style='font-family:"Arial","sans-serif"'>Select</span><span
+  lang=EN-US style='font-family:"Arial","sans-serif"'> </span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>tools</span><span style='font-family:
+  "Arial","sans-serif"'>. Με το πρώτο από αυτά τα εργαλεία, </span><span
+  lang=EN-US style='font-family:"Arial","sans-serif"'>Box</span><span
+  style='font-family:"Arial","sans-serif"'>, ο χρήστης μπορεί να σχεδιάσει ένα
+  παραλληλόγραμμο πάνω στο χάρτη κάνοντας κλικ και σέρνοντας το ποντίκι έχοντας
+  το κλικ πατημένο.</span></p>
+  <p class=MsoBodyTextIndent style='margin-left:54.0pt'><span style='font-family:
+  "Arial","sans-serif"'> </span></p>
+  <p class=MsoBodyTextIndent align=center style='margin-left:0cm;text-align:
+  center'><span lang=EN-US style='font-family:"Arial","sans-serif"'><img
+  border=0 width=369 height=22 src="{{MEDIA_URL}}images/help_files/image032.jpg"></span></p>
+  <p class=MsoBodyTextIndent align=center style='margin-left:0cm;text-align:
+  center'><span lang=EN-US style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoBodyTextIndent align=center style='margin-left:0cm;text-align:
+  center'><span lang=EN-US style='font-family:"Arial","sans-serif"'><img
+  border=0 width=259 height=208 src="{{MEDIA_URL}}images/help_files/image033.jpg"><img
+  border=0 width=218 height=208 src="{{MEDIA_URL}}images/help_files/image034.jpg"></span></p>
+  <p class=MsoBodyTextIndent><span lang=EN-US style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoBodyTextIndent><span style='font-family:"Arial","sans-serif"'>Γίνεται
+  μεγέθυνση της επιλεγμένης περιοχής του χάρτη, ενώ επιλέγονται και οι σταθμοί
+  που περικλείονται σε αυτή. </span></p>
+  <p class=MsoBodyTextIndent><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoBodyTextIndent style='text-indent:-18.0pt'><span
+  style='font-family:"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+  </span></span><span style='font-family:"Arial","sans-serif"'>Το επόμενο
+  κουμπί, </span><span lang=EN-US style='font-family:"Arial","sans-serif"'>Freehand</span><span
+  lang=EN-US style='font-family:"Arial","sans-serif"'> </span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>polygon</span><span
+  style='font-family:"Arial","sans-serif"'>, έχει ακριβώς την ίδια λειτουργία
+  μόνο που τώρα η περιοχή δεν είναι ένα παραλληλόγραμμο αλλά μπορεί να έχει
+  όποιο σχήμα επιλέξει ο χρήστης σχεδιάζοντάς την με ελεύθερο χέρι. </span></p>
+  <p class=MsoBodyTextIndent><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoBodyTextIndent align=center style='margin-left:0cm;text-align:
+  center'><span style='font-family:"Arial","sans-serif"'><img border=0
+  width=265 height=235 src="{{MEDIA_URL}}images/help_files/image035.jpg"><img
+  border=0 width=225 height=235 src="{{MEDIA_URL}}images/help_files/image036.jpg"></span></p>
+  <p class=MsoBodyTextIndent align=center style='margin-left:0cm;text-align:
+  center'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoBodyTextIndent style='text-indent:-18.0pt'><span
+  style='font-family:"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+  </span></span><span style='font-family:"Arial","sans-serif"'>Για να
+  σταματήσει η λειτουργία των εργαλείων και να μπορέσει να επανέλθει το ποντίκι
+  στην προηγούμενη λειτουργία του κατά την οποία γίνεται σμίκρυνση, μεγέθυνση
+  και μετακίνηση του χάρτη θα πρέπει να πατήσουμε το κουμπί Deactivate.</span></p>
+  <p class=MsoBodyTextIndent style='text-indent:-18.0pt'><span
+  style='font-family:"Courier New"'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;
+  </span></span><span style='font-family:"Arial","sans-serif"'>Επιλογή σταθμών
+  γίνεται και με τη <a href="#_4.4._Σύνθετη_Αναζήτηση">Σύνθετη Αναζήτηση</a></span></p>
+  <p class=MsoBodyTextIndent style='margin-left:54.0pt'><span style='font-family:
+  "Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoBodyTextIndent style='margin-left:0cm'><span style='font-family:
+  "Arial","sans-serif"'>Για να γίνει η <b>αποεπιλογή</b> των σταθμών στο χάρτη
+  έτσι ώστε να μπορεί να γίνει μια νέα επιλογή αποεπιλέγουμε του σταθμούς από
+  τη λίστα πατώντας το κουμπί </span><span lang=EN-US style='font-family:"Arial","sans-serif"'>Clear</span><span
+  lang=EN-US style='font-family:"Arial","sans-serif"'> </span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>Selected</span><span
+  style='font-family:"Arial","sans-serif"'> και στη συνέχεια πατάμε Locate
+  stations.</span></p>
+  <p class=MsoBodyTextIndent align=center style='margin-left:0cm;text-align:
+  center'>&nbsp;</p>
+  <p class=MsoBodyTextIndent align=center style='margin-left:0cm;text-align:
+  center'><img border=0 width=99 height=27
+  src="{{MEDIA_URL}}images/help_files/image037.jpg"></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=568 valign=top style='width:426.1pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <h2 style='margin-left:21.3pt'><a name="_Toc259037271"></a><a
+  name="_4.4._Σύνθετη_Αναζήτηση"></a><span style='font-size:12.0pt'>4.4.
+  Σύνθετη Αναζήτηση</span></h2>
+  <p class=MsoNormal>&nbsp;</p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Το παράθυρο
+  της σύνθετης αναζήτησης ανοίγει πατώντας το κουμπί με το μεγεθυντικό φακό που
+  βρίσκεται πάνω από τη λίστα με τους σταθμούς, αριστερά από το χάρτη.</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><img border=0
+  width=27 height=25 src="{{MEDIA_URL}}images/help_files/image038.jpg"></p>
+  <p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Στο
+  παράθυρο που αναδύεται ο χρήστης ενεργοποιεί τα φίλτρα που επιθυμεί και
+  εισάγει τις συνθήκες της αναζήτησής του όπως ακριβώς και στην περίπτωση της <a
+  href="#_3.3._Σύνθετη_Αναζήτηση">Σύνθετης Αναζήτησης</a> στους σταθμούς.  </span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><img border=0
+  width=243 height=149 src="{{MEDIA_URL}}images/help_files/image039.jpg"></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Πατώντας το
+  κουμπί «Υποβολή ερωτήματος» ο χάρτης μεγεθύνεται για να περιλάβει την περιοχή
+  στην οποία βρίσκονται οι σταθμοί. Οι επιλεγμένοι σταυροί σημειώνονται με μπλε
+  χρώμα και μπαίνουν στη λίστα αριστερά από το χάρτη.</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=568 valign=top style='width:426.1pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <h2 style='margin-left:21.3pt'><a name="_Toc259037272"><span
+  style='font-size:12.0pt'>4.5. Εμφάνιση Σταθμών στη Λίστα</span></a></h2>
+  <p class=MsoNormal>&nbsp;</p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Προκειμένου
+  να εμφανιστούν στη λίστα οι σταθμοί που επιλέξαμε με κάποιον από τους τρόπους
+  που παρουσιάζονται στην <a href="#_4.3._Επιλογή_σταθμών">Επιλογή σταθμών</a>,
+  πατάμε το κουμπί </span><span lang=EN-US style='font-family:"Arial","sans-serif"'>List</span><span
+  lang=EN-US style='font-family:"Arial","sans-serif"'> </span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>Stations</span><span
+  style='font-family:"Arial","sans-serif"'> που βρίσκεται πάνω δεξιά στη σελίδα
+  του χάρτη.</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img border=0 width=406 height=210
+  src="{{MEDIA_URL}}images/help_files/image040.jpg"></span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'>&nbsp;</p>
+  <p class=MsoNormal align=center style='text-align:center'><img border=0
+  width=174 height=31 src="{{MEDIA_URL}}images/help_files/image041.jpg"></p>
+  <p class=MsoNormal align=center style='text-align:center'>&nbsp;</p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Εάν ο
+  χρήστης επιθυμεί να εμφανιστούν και πάλι όλοι οι σταθμοί στη λίστα μπορεί να
+  πατήσει το κουμπί «Load all Stations» που βρίσκεται στην κορυφή της λίστας.</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><img border=0
+  width=120 height=25 src="{{MEDIA_URL}}images/help_files/image042.jpg"></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=568 valign=top style='width:426.1pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <h2 style='margin-left:21.3pt'><a name="_Toc259037273"><span
+  style='font-size:12.0pt'>4.6. Εμφάνιση Σταθμών στο Χάρτη</span></a></h2>
+  <p class=MsoNormal style='margin-left:72.0pt'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Αφού γίνει
+  η επιλογή των σταθμών με έναν από τους παραπάνω τρόπους, ο χρήστης πατάει το
+  κουμπί «</span><span lang=EN-US style='font-family:"Arial","sans-serif"'>Locate</span><span
+  lang=EN-US style='font-family:"Arial","sans-serif"'> </span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>Stations</span><span
+  style='font-family:"Arial","sans-serif"'>» που βρίσκεται πάνω αριστερά στη
+  σελίδα του χάρτη. Στη θέση του χάρτη θα εμφανιστεί η περιοχή που περιλαμβάνει
+  τους σταθμούς που έχουν επιλεγεί. Οι σταθμοί αυτοί σημειώνονται στο χάρτη με
+  έναν μπλε κύκλο. Στην περίπτωση που ο χρήστης επιθυμεί, μπορεί, κάνοντας κλικ
+  στην εντολή «</span><span lang=EN-US style='font-family:"Arial","sans-serif"'>select</span><span
+  style='font-family:"Arial","sans-serif"'>», να επιλέξει όλους του σταθμούς
+  της σελίδας.</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoTitle><img border=0 width=500 height=186
+  src="{{MEDIA_URL}}images/help_files/image043.gif"></p>
+  <p class=MsoTitle>&nbsp;</p>
+  <p class=MsoTitle><img border=0 width=164 height=27
+  src="{{MEDIA_URL}}images/help_files/image044.jpg"></p>
+  <p class=MsoNormal>&nbsp;</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=568 valign=top style='width:426.1pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <h1 style='margin-left:36.0pt;text-indent:-18.0pt'><a name="_Toc259037274">5.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp; </span>Πληροφορίες Σταθμών</a></h1>
+  <p class=MsoNormal>&nbsp;</p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Κάνοντας
+  κλικ στον κωδικό του κάθε σταθμού, δηλαδή στη στήλη «Id», ανοίγει μια καρτέλα
+  με όλες τις διαθέσιμες πληροφορίες για αυτόν το σταθμό.</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <h2 style='margin-left:22.55pt'><a name="_Toc259037275"></a><a
+  name="_4.1_Γενικές_Πληροφορίες"></a><span style='font-size:12.0pt'>5.1
+  Γενικές Πληροφορίες</span></h2>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Στο ανώτερο
+  τμήμα της καρτέλας ο χρήστης μπορεί να βρει πληροφορίες για τη λεκάνη και το
+  διαμέρισμα στα οποία ανήκει ο σταθμός, την πολιτική διαίρεση, τις
+  συντεταγμένες, τον ιδιοκτήτη, τον υπεύθυνο του σταθμού, την περίοδο για την
+  οποία υπάρχουν δεδομένα κα. </span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img border=0 width=344 height=312
+  src="{{MEDIA_URL}}images/help_files/image045.gif"></span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <h2 style='margin-left:22.55pt'><a name="_Toc259037276"></a><a
+  name="_4.2_Πληροφορίες_Οργάνων"></a><span style='font-size:12.0pt'>5.2
+  Πληροφορίες Οργάνων</span></h2>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>&nbsp;</span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>Κάτω από αυτές τις πληροφορίες υπάρχει ένας
+  κατάλογος με τα όργανα «</span><span lang=EN-US style='font-size:12.0pt;
+  font-weight:normal'>Instruments</span><span style='font-size:12.0pt;
+  font-weight:normal'>» του σταθμού, στον οποίο αναγράφεται: στη στήλη «</span><span
+  lang=EN-US style='font-size:12.0pt;font-weight:normal'>Id</span><span
+  style='font-size:12.0pt;font-weight:normal'>» ο κωδικός του οργάνου, στη
+  στήλη «</span><span lang=EN-US style='font-size:12.0pt;font-weight:normal'>Name</span><span
+  style='font-size:12.0pt;font-weight:normal'>» το όνομά του, στη στήλη «</span><span
+  lang=EN-US style='font-size:12.0pt;font-weight:normal'>Type</span><span
+  style='font-size:12.0pt;font-weight:normal'>» ο τύπος του, στη στήλη «</span><span
+  lang=EN-US style='font-size:12.0pt;font-weight:normal'>Manufacturer</span><span
+  style='font-size:12.0pt;font-weight:normal'>» ο κατασκευαστής, στη στήλη «</span><span
+  lang=EN-US style='font-size:12.0pt;font-weight:normal'>Model</span><span
+  style='font-size:12.0pt;font-weight:normal'>» το μοντέλο, στη στήλη «</span><span
+  lang=EN-US style='font-size:12.0pt;font-weight:normal'>Is</span><span
+  lang=EN-US style='font-size:12.0pt;font-weight:normal'> </span><span
+  lang=EN-US style='font-size:12.0pt;font-weight:normal'>Active</span><span
+  style='font-size:12.0pt;font-weight:normal'>» αν είναι εν ενεργεία, στη στήλη
+  «</span><span lang=EN-US style='font-size:12.0pt;font-weight:normal'>Start</span><span
+  lang=EN-US style='font-size:12.0pt;font-weight:normal'> </span><span
+  lang=EN-US style='font-size:12.0pt;font-weight:normal'>Date</span><span
+  style='font-size:12.0pt;font-weight:normal'>» την ημερομηνία κατά την οποία
+  ξεκίνησε η καταγραφή και στη στήλη «</span><span lang=EN-US style='font-size:
+  12.0pt;font-weight:normal'>End</span><span lang=EN-US style='font-size:12.0pt;
+  font-weight:normal'> </span><span lang=EN-US style='font-size:12.0pt;
+  font-weight:normal'>Date</span><span style='font-size:12.0pt;font-weight:
+  normal'>» την ημερομηνία της τελευταίας καταγραφής. </span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>&nbsp;</span></p>
+  <p class=MsoTitle><img border=0 width=470 height=108
+  src="{{MEDIA_URL}}images/help_files/image046.gif"></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>&nbsp;</span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>Κάνοντας κλικ πάνω στον κωδικό του οργάνου ανοίγει
+  μια καρτέλα με πληροφορίες σχετικές με το όργανο. </span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>&nbsp;</span></p>
+  <p class=MsoTitle><img border=0 width=641 height=203
+  src="{{MEDIA_URL}}images/help_files/image047.gif"></p>
+  <p class=MsoTitle><span lang=EN-US>&nbsp;</span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>Οι πληροφορίες αυτές περιλαμβάνουν τον κωδικό του
+  οργάνου, το σταθμό στον οποίο βρίσκεται, τον τύπο του οργάνου, παρατηρήσεις
+  σχετικές με την κατάστασή του και άλλα σχετικά στοιχεία, τον κατασκευαστή, το
+  μοντέλο, αν είναι εν ενεργεία, την ημερομηνία της πρώτης καταγραφής και την
+  ημερομηνία της τελευταίας καταγραφής. Κάνοντας κλικ πάνω στο όνομα του
+  σταθμού, ο χρήστης επιστρέφει στην προηγούμενη καρτέλα, <a
+  href="#_4.1_Γενικές_Πληροφορίες">πληροφορίες σταθμού</a>. Σε αυτή την καρτέλα
+  κάτω από τον κατάλογο των οργάνων «</span><span lang=EN-US style='font-size:
+  12.0pt;font-weight:normal'>Instruments</span><span style='font-size:12.0pt;
+  font-weight:normal'>», υπάρχει ένας κατάλογος με τις χρονοσειρές «</span><span
+  lang=EN-US style='font-size:12.0pt;font-weight:normal'>Timeseries</span><span
+  style='font-size:12.0pt;font-weight:normal'>» εφόσον αυτές είναι διαθέσιμες. </span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>&nbsp;</span></p>
+  <h2 style='margin-left:22.55pt'><a name="_Toc259037277"><span
+  style='font-size:12.0pt'>5</span></a><span lang=EN-GB style='font-size:12.0pt'>.3
+  Πληροφορίες Χρονοσειρών</span></h2>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>&nbsp;</span></p>
+  <p class=MsoTitle><img border=0 width=585 height=174
+  src="{{MEDIA_URL}}images/help_files/image048.gif"></p>
+  <p class=MsoTitle><span lang=EN-US style='font-size:12.0pt'>&nbsp;</span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>Η στήλη «</span><span lang=EN-US style='font-size:
+  12.0pt;font-weight:normal'>Id</span><span style='font-size:12.0pt;font-weight:
+  normal'>» περιλαμβάνει τον κωδικό της χρονοσειράς, η στήλη «</span><span
+  lang=EN-US style='font-size:12.0pt;font-weight:normal'>Variable</span><span
+  style='font-size:12.0pt;font-weight:normal'>» τη μεταβλητή στην οποία
+  αναφέρεται, η στήλη «</span><span lang=EN-US style='font-size:12.0pt;
+  font-weight:normal'>Unit</span><span lang=EN-US style='font-size:12.0pt;
+  font-weight:normal'> </span><span lang=EN-US style='font-size:12.0pt;
+  font-weight:normal'>Of</span><span lang=EN-US style='font-size:12.0pt;
+  font-weight:normal'> </span><span lang=EN-US style='font-size:12.0pt;
+  font-weight:normal'>Measurement</span><span style='font-size:12.0pt;
+  font-weight:normal'>» τη μονάδα μέτρησης, η στήλη «</span><span lang=EN-US
+  style='font-size:12.0pt;font-weight:normal'>Remarks</span><span
+  style='font-size:12.0pt;font-weight:normal'>» παρατηρήσεις και η στήλη «</span><span
+  lang=EN-US style='font-size:12.0pt;font-weight:normal'>Instrument</span><span
+  style='font-size:12.0pt;font-weight:normal'>» τον κωδικό του οργάνου από το
+  οποίο προέρχονται οι καταγραφές.  Κάνοντας κλικ πάνω στον κωδικό της
+  χρονοσειράς ανοίγει μια καρτέλα η οποία στα αριστερά περιλαμβάνει έναν πίνακα
+  με πληροφορίες πάνω στη χρονοσειρά. </span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>&nbsp;</span></p>
+  <p class=MsoTitle><span style='font-weight:normal'><img border=0 width=190
+  height=236 src="{{MEDIA_URL}}images/help_files/image049.gif"></span></p>
+  <p class=MsoTitle><span style='font-size:12.0pt;font-weight:normal'>&nbsp;</span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>Οι πληροφορίες αυτές περιλαμβάνουν τον κωδικό της
+  χρονοσειράς, το σταθμό στον οποίο αναφέρεται, το όνομα, τη μεταβλητή που
+  καταγράφει, τη μονάδα μέτρησης, την ακρίβεια, τη ζώνη ώρας, παρατηρήσεις, τον
+  κωδικό του οργάνου μέτρησης, το χρονικό βήμα κτλ. Με κλικ πάνω στο όνομα του
+  σταθμού ο χρήστης επιστρέφει στη σελίδα με τις <a
+  href="#_4.1_Γενικές_Πληροφορίες">πληροφορίες του σταθμού</a> ενώ με κλικ στον
+  κωδικό του οργάνου ο χρήστης επιστρέφει στη σελίδα με τις <a
+  href="#_4.2_Πληροφορίες_Οργάνων">πληροφορίες του οργάνου</a>.</span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>&nbsp;</span></p>
+  <h3 style='margin-left:72.0pt'><a name="_Toc259037278"><u><span
+  style='font-size:12.0pt;font-weight:normal'>5.3.1 Διάγραμμα χρονοσειράς</span></u></a></h3>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>&nbsp;</span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>Στα δεξιά της καρτέλας υπάρχει το διάγραμμα της
+  χρονοσειράς.</span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>&nbsp;</span></p>
+  <p class=MsoTitle><span style='position:absolute;z-index:1;
+  margin-left:16px;margin-top:161px;width:151px;height:64px'><img width=151
+  height=64 src="{{MEDIA_URL}}images/help_files/image050.gif"
+  alt="Pentagon: Διάγραμμα χρονοσειράς"></span><span style='position:absolute;
+  z-index:2;margin-left:16px;margin-top:24px;width:151px;height:64px'><img
+  width=151 height=64 src="{{MEDIA_URL}}images/help_files/image051.gif"
+  alt="Pentagon: Διάγραμμα αναφοράς"></span><img border=0 width=315 height=312
+  src="{{MEDIA_URL}}images/help_files/image052.gif"></p>
+  <p class=MsoTitle><span style='font-size:12.0pt'>&nbsp;</span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>Στο διάγραμμα αρχικά φαίνονται οι τιμές από την
+  πρώτη ημέρα των καταγραφών έως την τελευταία. Ο χρήστης έχει τη δυνατότητα να
+  επιλέξει την περίοδο καταγραφών που τον ενδιαφέρει από το διάγραμμα αναφοράς
+  που βρίσκεται πάνω από το διάγραμμα της χρονοσειράς. Συγκεκριμένα κάνει κλικ
+  στην αρχή της περιόδου που τον ενδιαφέρει και κρατώντας το πατημένο σέρνει
+  τον κέρσορα μέχρι το τέλος της περιόδου που τον ενδιαφέρει. Τότε στο
+  διάγραμμα της χρονοσειράς εμφανίζεται η συγκεκριμένη χρονική περίοδος και οι
+  καταγραφές που εμπίπτουν σε αυτή.</span></p>
+  <p class=MsoTitle align=left style='text-align:left'>    </p>
+  <p class=MsoTitle align=left style='text-align:left'><img width=614
+  height=234 src="{{MEDIA_URL}}images/help_files/image053.gif" align=left><span
+  style='font-size:12.0pt;font-weight:normal'> </span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>Για να επανέλθει το διάγραμμα στην αρχική του
+  μορφή ο χρήστης πρέπει να σύρει τον κέρσορα από την αρχή έως το τέλος του
+  διαγράμματος αναφοράς. Από την αρχική κατάσταση του διαγράμματος ο χρήστης
+  μπορεί να επιλέξει την περιοχή που επιθυμεί σέρνοντας τον κέρσορα στο
+  διάγραμμα της χρονοσειράς. </span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>&nbsp;</span></p>
+  <h3 style='margin-left:65.1pt'><a name="_Toc259037279"><u><span
+  style='font-size:12.0pt;font-weight:normal'>5.3.2 Πίνακας χρονοσειράς</span></u></a></h3>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>&nbsp;</span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>Εκτός από το διάγραμμα της χρονοσειράς ο χρήστης
+  μπορεί να κατεβάσει τον πίνακα με τα δεδομένα της κάθε χρονοσειράς κάνοντας
+  κλικ στη λέξη «</span><span lang=EN-US style='font-size:12.0pt;font-weight:
+  normal'>here</span><span style='font-size:12.0pt;font-weight:normal'>» πάνω
+  από τον πίνακα με τα στοιχεία της χρονοσειράς.</span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>&nbsp;</span></p>
+  <div align=center>
+  <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0
+   style='border-collapse:collapse'>
+   <tr style='height:40.55pt'>
+    <td width=294 valign=top style='width:220.6pt;padding:0cm 5.4pt 0cm 5.4pt;
+    height:40.55pt'>
+    <p class=MsoTitle align=left style='text-align:left'><img width=269
+    height=74 src="{{MEDIA_URL}}images/help_files/image054.gif" align=left></p>
+    </td>
+   </tr>
+  </table>
+  </div>
+  <p class=MsoTitle>&nbsp;</p>
+  <p class=MsoTitle><span style='font-weight:normal'><img border=0 width=138
+  height=349 src="{{MEDIA_URL}}images/help_files/image055.gif"></span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=568 valign=top style='width:426.1pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <h1 style='margin-left:36.0pt;text-indent:-18.0pt'><a name="_Toc259037280">6.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp; </span>Βοήθεια</a></h1>
+  <p class=MsoNormal>&nbsp;</p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Το συρόμενο
+  μενού που ανοίγει φέρνοντας τον κέρσορα πάνω στο «Help» του οριζόντιου μενού
+  του υδροσκοπίου, περιλαμβάνει δύο επιλογές.</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'> </span></p>
+  <div align=center>
+  <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0
+   style='border-collapse:collapse'>
+   <tr>
+    <td width=360 valign=top style='width:270.25pt;padding:0cm 5.4pt 0cm 5.4pt'>
+    <p class=MsoNormal><img width=329 height=104
+    src="{{MEDIA_URL}}images/help_files/image056.gif" align=left><span
+    lang=EN-US style='font-family:"Arial","sans-serif"'>.</span></p>
+    <p class=MsoNormal><span lang=EN-US style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+    </td>
+   </tr>
+   <tr>
+    <td width=360 valign=top style='width:270.25pt;padding:0cm 5.4pt 0cm 5.4pt'>
+    <p class=MsoNormal><span lang=EN-US style='font-size:10.0pt'>&nbsp;</span></p>
+    </td>
+   </tr>
+  </table>
+  </div>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Κάνοντας
+  κλικ στην πρώτη επιλογή, «</span><span lang=EN-US style='font-family:"Arial","sans-serif"'>Contact</span><span
+  lang=EN-US style='font-family:"Arial","sans-serif"'> </span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>Us</span><span style='font-family:
+  "Arial","sans-serif"'>», ανοίγει μια καρτέλα στην οποία ο χρήστης μπορεί να
+  συντάξει ένα μήνυμα προς το διαχειριστή του ιστοχώρου. Στο πρώτο πεδίο, «</span><span
+  lang=EN-US style='font-family:"Arial","sans-serif"'>Name</span><span
+  style='font-family:"Arial","sans-serif"'>»  ο χρήστης καλείται να εισάγει το
+  ονοματεπώνυμο του, στο δεύτερο, «</span><span lang=EN-US style='font-family:
+  "Arial","sans-serif"'>E</span><span style='font-family:"Arial","sans-serif"'>-</span><span
+  lang=EN-US style='font-family:"Arial","sans-serif"'>mail</span><span
+  style='font-family:"Arial","sans-serif"'>», τη διεύθυνση ηλεκτρονικού
+  ταχυδρομείου, στο τρίτο, «</span><span lang=EN-US style='font-family:"Arial","sans-serif"'>Subject</span><span
+  style='font-family:"Arial","sans-serif"'>», το θέμα του μηνύματος και στο
+  τέταρτο, «</span><span lang=EN-US style='font-family:"Arial","sans-serif"'>Message</span><span
+  style='font-family:"Arial","sans-serif"'>» να συντάξει το μήνυμα. Πριν ο
+  χρήστης στείλει το μήνυμα καλείται να αντιγράψει στο τελευταίο πεδίο τα
+  γράμματα που βρίσκονται κάτω από το πλαίσιο του μηνύματος. Το μήνυμα
+  αποστέλλεται πατώντας «</span><span lang=EN-US style='font-family:"Arial","sans-serif"'>Send</span><span
+  lang=EN-US style='font-family:"Arial","sans-serif"'> </span><span lang=EN-US
+  style='font-family:"Arial","sans-serif"'>Message</span><span
+  style='font-family:"Arial","sans-serif"'>»</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img border=0 width=447 height=243
+  src="{{MEDIA_URL}}images/help_files/image057.gif"></span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt'>&nbsp;</span></p>
+  <p class=MsoTitle align=left style='text-align:left'><span style='font-size:
+  12.0pt;font-weight:normal'>Κάνοντας κλικ στη δεύτερη επιλογή ο χρήστης
+  μεταβαίνει στην καρτέλα του οδηγού χρήστη.</span></p>
+  <p class=MsoTitle>&nbsp;</p>
+  </td>
+ </tr>
+ <tr>
+  <td width=568 valign=top style='width:426.1pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <h1 style='margin-left:36.0pt;text-indent:-18.0pt'><a name="_Toc259037281">7.<span
+  style='font:7.0pt "Times New Roman"'>&nbsp; </span>Σύνδεσμοι</a></h1>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img border=0 width=374 height=46
+  src="{{MEDIA_URL}}images/help_files/image058.gif"></span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Οι
+  σύνδεσμοι του Site βρίσκονται στο κάτω μέρος τη σελίδας και είναι οι εξής:</span></p>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Webmaster:
+       κάνοντας κλικ σε αυτό το σύνδεσμο αναδύεται ένα παράθυρο ηλεκτρονικού
+       ταχυδρομείου μέσω του οποίου ο χρήστης μπορεί να στείλει ένα μήνυμα στο
+       διαχειριστή του ιστοχώρου</span></li>
+  </ul>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'><img border=0 width=321 height=254
+  src="{{MEDIA_URL}}images/help_files/image059.gif"></span></p>
+  <p class=MsoNormal align=center style='text-align:center'><span
+  style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Αρχή:
+       μετάβαση στην αρχική σελίδα του υδροσκοπίου.</span></li>
+  </ul>
+  <p class=MsoNormal style='margin-left:18.0pt'><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Λογισμικά:
+       μετάβαση στη σελίδα των λογισμικών.</span></li>
+  </ul>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Δεδομένα:
+       μετάβαση στη σελίδα των υδρολογικών δεδομένων.</span></li>
+  </ul>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Το έργο:
+       μετάβαση στη σελίδα που περιλαμβάνει πληροφορίες για το έργο του
+       Υδροσκοπίου</span></li>
+  </ul>
+  <p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+  <ul style='margin-top:0cm' type=circle>
+   <li class=MsoNormal><span style='font-family:"Arial","sans-serif"'>Επικοινωνία:
+       μετάβαση στη σελίδα με τα στοιχεία επικοινωνίας, όπως διεύθυνση,
+       ηλεκτρονικό ταχυδρομείο, αριθμό τηλεφώνου και Φαξ.</span></li>
+  </ul>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoTitle>&nbsp;</p>
+
+<p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-family:"Arial","sans-serif"'>&nbsp;</span></p>
+
+</div>
+{% endblock %}

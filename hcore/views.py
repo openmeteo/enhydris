@@ -590,6 +590,8 @@ def download_timeseries(request, object_id):
 def terms(request):
     return render_to_response('terms.html', RequestContext(request,{}) )
 
+def help(request):
+    return render_to_response('help.html', RequestContext(request,{}) )
 
 """
 Model management views.
