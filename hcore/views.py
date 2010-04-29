@@ -741,7 +741,10 @@ def station_delete(request,station_id):
     station = Station.objects.get(id=station_id)
     if ( request.user.has_row_perm(station,'delete') or
          request.user.has_perm('hcore.delete_station')):
-        station.delete();
+        station.delete()
+        ref = request.META.get('HTTP_REFERER', None)
+        if ref and not ref.endswith(reverse('station_detail',args=[station_id])):
+            return HttpResponseRedirect(ref)
         return render_to_response('success.html',
             {'msg': 'Station deleted successfully',},
             context_instance=RequestContext(request))
@@ -843,6 +846,9 @@ def timeseries_delete(request, timeseries_id):
             ts = pthelma.timeseries.Timeseries(int(timeseries_id))
             ts.delete_from_db(django.db.connection)
             tseries.delete()
+            ref = request.META.get('HTTP_REFERER', None)
+            if ref and not ref.endswith(reverse('timeseries_detail',args=[timeseries_id])):
+                return HttpResponseRedirect(ref)
             return render_to_response('success.html',
                     {'msg': 'Timeseries deleted successfully',},
                     context_instance=RequestContext(request))
@@ -943,6 +949,9 @@ def gentityfile_delete(request, gentityfile_id):
     if gfile and related_station:
         if request.user.has_row_perm(related_station, 'edit'):
             gfile.delete()
+            ref = request.META.get('HTTP_REFERER', None)
+            if ref:
+                return HttpResponseRedirect(ref)
             return render_to_response('success.html',
                     {'msg': 'GentityFile deleted successfully',},
                     context_instance=RequestContext(request))
@@ -1038,6 +1047,9 @@ def gentityevent_delete(request, gentityevent_id):
     if gevent and related_station:
         if request.user.has_row_perm(related_station, 'edit'):
             gevent.delete()
+            ref = request.META.get('HTTP_REFERER', None)
+            if ref:
+                return HttpResponseRedirect(ref)
             return render_to_response('success.html',
                     {'msg': 'GentityEvent deleted successfully',},
                     context_instance=RequestContext(request))
@@ -1133,6 +1145,9 @@ def gentityaltcode_delete(request, gentityaltcode_id):
     if galtcode and related_station:
         if request.user.has_row_perm(related_station, 'edit'):
             galtcode.delete()
+            ref = request.META.get('HTTP_REFERER', None)
+            if ref:
+                return HttpResponseRedirect(ref)
             return render_to_response('success.html',
                     {'msg': 'GentityAltCode deleted successfully',},
                     context_instance=RequestContext(request))
@@ -1233,6 +1248,9 @@ def instrument_delete(request, instrument_id):
     if instrument and related_station:
         if request.user.has_row_perm(related_station, 'edit'):
             instrument.delete()
+            ref = request.META.get('HTTP_REFERER', None)
+            if ref and not ref.endswith(reverse('instrument_detail',args=[instrument_id])):
+                return HttpResponseRedirect(ref)
             return render_to_response('success.html',
                     {'msg': 'Instrument deleted successfully',},
                     context_instance=RequestContext(request))
