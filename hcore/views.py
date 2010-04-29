@@ -18,6 +18,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.db.models import Q
 from django.core.servers.basehttp import FileWrapper
+from django.core.urlresolvers import reverse
 from django.utils import simplejson
 from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
@@ -337,8 +338,11 @@ def download_gentityfile(request, gf_id):
     if hasattr(settings, "STORE_TSDATA_LOCALLY") and\
       settings.STORE_TSDATA_LOCALLY:
         gfile = get_object_or_404(GentityFile, pk=int(gf_id))
-        filename = gfile.content.file.name
-        wrapper  = FileWrapper(open(filename))
+        try:
+            filename = gfile.content.file.name
+            wrapper  = FileWrapper(open(filename))
+        except:
+            raise Http404
         download_name = gfile.content.name.split('/')[-1]
         content_type = mimetypes.guess_type(filename)[0]
         response = HttpResponse(content_type=content_type)
@@ -366,7 +370,7 @@ def download_gentityfile(request, gf_id):
         else:
             request.notifications.error("No data was found for "
                     " the requested Gentity file.")
-            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None) or '/')
 
         # Next we check the setting files for a uname/pass for this host
         uname, pwd = REMOTE_INSTANCE_CREDENTIALS.get(db_host, (None,None))
@@ -384,12 +388,12 @@ def download_gentityfile(request, gf_id):
             # which means something is not right. Raise hell
             # mail admins + return user notification.
             request.notifications.error(GF_ERROR)
-            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None) or '/')
 
         if not hasattr(e, 'code') or e.code != 401:
             # we got an error - but not a 401 error
             request.notifications.error(GF_ERROR)
-            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None) or '/')
 
         authline = e.headers['www-authenticate']
         # this gets the www-authenticate line from the headers
@@ -405,7 +409,7 @@ def download_gentityfile(request, gf_id):
             # if the authline isn't matched by the regular expression
             # then something is wrong
             request.notifications.error(GF_ERROR)
-            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None) or '/')
 
         scheme = matchobj.group(1)
         realm = matchobj.group(2)
@@ -415,7 +419,7 @@ def download_gentityfile(request, gf_id):
             # we don't support other auth
             # mail admins + inform user of error
             request.notifications.error(GF_ERROR)
-            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None) or '/')
 
         # now the good part.
         base64string = base64.encodestring(
@@ -428,7 +432,7 @@ def download_gentityfile(request, gf_id):
         except IOError, e:
             # here we shouldn't fail if the username/password is right
             request.notifications.error(GF_ERROR)
-            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None) or '/')
 
 
         filedata = handle.read()
@@ -515,7 +519,8 @@ def download_timeseries(request, object_id):
         else:
             request.notifications.error("No data was found for "
                     " the requested timeseries.")
-            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
+                                or reverse('timeseries_detail',args=[timeseries.id]))
 
         # Next we check the setting files for a uname/pass for this host
         uname, pwd = REMOTE_INSTANCE_CREDENTIALS.get(db_host, (None,None))
@@ -533,12 +538,14 @@ def download_timeseries(request, object_id):
             # which means something is not right. Raise hell
             # mail admins + return user notification.
             request.notifications.error(TS_ERROR)
-            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
+                                or reverse('timeseries_detail',args=[timeseries.id]))
 
         if not hasattr(e, 'code') or e.code != 401:
             # we got an error - but not a 401 error
             request.notifications.error(TS_ERROR)
-            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
+                                or reverse('timeseries_detail',args=[timeseries.id]))
 
         authline = e.headers['www-authenticate']
         # this gets the www-authenticate line from the headers
@@ -554,7 +561,8 @@ def download_timeseries(request, object_id):
             # if the authline isn't matched by the regular expression
             # then something is wrong
             request.notifications.error(TS_ERROR)
-            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
+                                or reverse('timeseries_detail',args=[timeseries.id]))
 
         scheme = matchobj.group(1)
         realm = matchobj.group(2)
@@ -564,7 +572,8 @@ def download_timeseries(request, object_id):
             # we don't support other auth
             # mail admins + inform user of error
             request.notifications.error(TS_ERROR)
-            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
+                                or reverse('timeseries_detail',args=[timeseries.id]))
 
         # now the good part.
         base64string = base64.encodestring(
@@ -577,7 +586,8 @@ def download_timeseries(request, object_id):
         except IOError, e:
             # here we shouldn't fail if the username/password is right
             request.notifications.error(TS_ERROR)
-            return HttpResponseRedirect(request.META['HTTP_REFERER'])
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
+                                or reverse('timeseries_detail',args=[timeseries.id]))
 
         tsdata = handle.read()
 

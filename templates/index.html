@@ -7,6 +7,14 @@
 {% endblock %}
 
 {% block content_main %}
+        {% if notifications %}
+        <ul class="notifications">
+                {% for message in notifications %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+        </ul>
+        {% endif %}
+
     <div id="frontpage_text">
         <h2>{% trans "Welcome to Hydroscope" %}</h2>
 
