@@ -475,9 +475,9 @@ def download_timeseries(request, object_id):
                 length_months = t.time_step.length_months if t.time_step
                                             else 0,
                 nominal_offset =
-                    (t.nominal_offset_minutes, t.nominal_offset_months)
-                    if t.nominal_offset_minutes and t.nominal_offset_months
-                    else None,
+                    None if None in
+                        (t.nominal_offset_minutes, t.nominal_offset_months)
+                    else (t.nominal_offset_minutes, t.nominal_offset_months),
                 actual_offset =
                     (t.actual_offset_minutes, t.actual_offset_months)
                     if t.actual_offset_minutes and t.actual_offset_months
