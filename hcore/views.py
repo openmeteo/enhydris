@@ -194,7 +194,7 @@ def timeseries_data(request, *args, **kwargs):
         pos = 0
         ts_list = ts.items()
         length =  len(ts_list)
-        step = int(length/250)
+        step = int(length/250) or 1
         while pos < length:
             try:
                 k,v = ts_list[pos]

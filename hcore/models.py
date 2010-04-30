@@ -152,6 +152,7 @@ class PoliticalDivisionManager(models.Manager):
                             Q(name_alt=object.name_alt)&
                             Q(short_name_alt=object.short_name_alt))
         for parent in parents:
+            children.append(parent)
             for child in self.filter(parent=parent.id):
                 try:
                     children.extend(self.get_leaf_subdivisions(child.id))
