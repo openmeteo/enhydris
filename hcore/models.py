@@ -434,6 +434,40 @@ class Timeseries(models.Model):
         verbose_name = "Time Series"
         verbose_name_plural = "Time Series"
     @property
+    def start_date(self):
+        try:
+            ts = timeseries.Timeseries(int(self.id))
+        except:
+            return None
+        # This should be removed if ticket #112 gets resolved
+        c = db_connection.cursor()
+        c.execute(
+            "SELECT to_timestamp(substring(coalesce(top,bottom) from"
+            " '^(.*?),'), 'YYYY-MM-DD HH24:MI')::timestamp FROM ts_records"
+            " WHERE id=%d;" % (ts.id)
+        )
+        r = c.fetchone()
+
+        c.close()
+        return r[0]
+    @property
+    def end_date(self):
+        try:
+            ts = timeseries.Timeseries(int(self.id))
+        except:
+            return None
+        # This should be removed if ticket #112 gets resolved
+        c = db_connection.cursor()
+        c.execute(
+            "SELECT to_timestamp(substring(bottom from E'([^,]*?),[^]*?]?$'),"
+            " 'YYYY-MM-DD HH24:MI')::timestamp FROM ts_records"
+            " WHERE id=%d;" % (ts.id)
+        )
+        r = c.fetchone()
+
+        c.close()
+        return r[0]
+    @property
     def related_station(self):
         try:
             return Station.objects.get(id=self.gentity.id)

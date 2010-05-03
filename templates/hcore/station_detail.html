@@ -191,6 +191,7 @@
                     {% endif %}
                 </td>
             </tr>
+
             <!-- Gentity Alternative Codes table -->
             <tr>
                 <th>{% trans 'Station (Gentity) Alternative Codes' %}</th>
@@ -206,6 +207,7 @@
                             <tr>
                                 <th>{% trans 'ID' %}</th>
                                 <th>{% trans 'Type' %}</th>
+                                <th>{% trans 'Value' %}</th>
 								{% if enabled_user_content %}
 									{% if request.user|can_edit:station %}
 									<th>{% trans "Management" %}</th>
@@ -218,6 +220,7 @@
                         <tr class="{% cycle 'odd' 'even' %}">
                             <td>{{ code.id }}</td>
                             <td>{{ code.type }}</td>
+                            <td>{{ code.value }}</td>
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">
@@ -434,6 +437,8 @@
                               <th>{% trans "Unit Of Measurement" %}</th>
                               <th>{% trans "Remarks" %}</th>
                               <th>{% trans "Instrument" %}</th>
+                              <th>{% trans "Start Date" %}</th>
+                              <th>{% trans "End Date" %}</th>
 								{% if enabled_user_content %}
 									{% if request.user|can_edit:station %}
 									<th>{% trans "Management" %}</th>
@@ -452,6 +457,8 @@
                             <td>{{ t.unit_of_measurement }}</td>
                             <td>{{ t.remarks }}</td>
                             <td>{{ t.instrument }}</td>
+                            <td>{{ t.start_date }}</td>
+                            <td>{{ t.end_date }}</td>
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">

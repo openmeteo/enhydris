@@ -183,6 +183,15 @@
                 <th>{% trans 'Time Step' %}</th>
                 <td>{{ timeseries.time_step }}</td>
             </tr>
+			<tr class="{% cycle rowalts %}">
+                <th>{% trans 'Start Date' %}</th>
+                <td>{{ timeseries.start_date }}</td>
+            </tr>
+			<tr class="{% cycle rowalts %}">
+                <th>{% trans 'End Date' %}</th>
+                <td>{{ timeseries.end_date }}</td>
+            </tr>
+
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Nominal Offset Minutes' %}</th>
                 <td>{{ timeseries.nominal_offset_minutes }}</td>
