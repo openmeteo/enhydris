@@ -68,6 +68,8 @@
 					<span class="menu_options"><a href="{% url gentityevent_add %}">Add new Event</a></span>	
 					/
 					<span class="menu_options"><a href="{% url gentityaltcode_add %}">Add new Alt Code</a></span>	
+					/
+					<span class="menu_options"><a href="{% url overseer_add %}">Add new Overseer</a></span>	
 				<li>
 			</ul>
 			<br />
@@ -181,9 +183,15 @@
                     {% if station.overseers.count %}
                     <table class="tablesorter">
                         <tbody>
-                        {% for overseer in station.overseers.all %}
+                        {% for overseer in station.overseer_set.all %}
                         <tr class="{% cycle 'odd' 'even' %}">
-                            <td>{{ overseer.person.first_name }} {{ overseer.person.last_name }}</td>
+                            <td>{{ overseer.person.first_name }} {{ overseer.person.last_name }} 
+							{% if enabled_user_content %}
+								{% if request.user|can_edit:station %}
+								&nbsp;|&nbsp;<a href="{% url overseer_delete overseer.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
+								{% endif %}
+							{% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                         </tbody>

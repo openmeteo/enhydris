@@ -448,7 +448,7 @@ def download_gentityfile(request, gf_id):
 
     return response
 
-TS_ERROR = ("There seems to be some problem with our internal infrastucture. The"
+TS_ERROR = ("There seems to be some problem with our internal infrastuctrure. The"
 " admins have been notified of this and will try to resolve the matter as soon as"
 " possible.  Please try again later.")
 
@@ -1155,6 +1155,109 @@ def gentityaltcode_delete(request, gentityaltcode_id):
                    RequestContext(request))
     response.status_code = 403
     return response
+
+"""
+Overseer Views
+"""
+
+def _overseer_edit_or_create(request,overseer_id=None,station_id=None):
+    if overseer_id:
+        # Edit
+        overseer = get_object_or_404(Overseer, id=overseer_id)
+    else:
+        # Add
+        overseer = None
+
+
+    if overseer_id and not station_id:
+        # Editing
+        try:
+            station = overseer.station
+        except:
+            # Overseer doesn't have a relative station.
+            # This shouldn't happen. Admin should fix such cases
+            response = render_to_response('404.html',
+                       RequestContext(request))
+            response.status_code = 404
+            return response
+        else:
+            # Check perms
+            if not request.user.has_row_perm(station,'edit'):
+                response = render_to_response('403.html',
+                               RequestContext(request))
+                response.status_code = 403
+                return response
+
+    if station_id and not overseer_id:
+        # Adding new
+        station = get_object_or_404(Station, id=station_id)
+        if not request.user.has_row_perm(station,'edit'):
+            response = render_to_response('403.html',
+                           RequestContext(request))
+            response.status_code = 403
+            return response
+
+    user = request.user
+    # Done with checks
+    if request.method == 'POST':
+        if overseer:
+            form = OverseerForm(request.POST,request.FILES,instance=overseer,user=user)
+        else:
+            form = OverseerForm(request.POST,request.FILES,user=user)
+        if form.is_valid():
+            overseer = form.save()
+            # do stuff
+            overseer.save()
+            if not overseer_id:
+                overseer_id=str(overseer.id)
+            return HttpResponseRedirect('/stations/d/'+str(overseer.station.id))
+    else:
+        if overseer:
+            form = OverseerForm(instance=overseer,user=user)
+        else:
+            form = OverseerForm(user=user)
+
+    return render_to_response('hcore/overseer_edit.html', {'form': form},
+                    context_instance=RequestContext(request))
+
+@permission_required('hcore.add_overseer')
+def overseer_add(request):
+    """
+    Create new overseer. Overseer can only be added as part of an existing
+    station.
+    """
+    return _overseer_edit_or_create(request)
+
+@login_required
+def overseer_edit(request,overseer_id):
+    """
+    Edit existing overseer. Permissions are checked against the relative
+    station that the overseer is part of.
+    """
+    return _overseer_edit_or_create(request, overseer_id=overseer_id)
+
+@login_required
+def overseer_delete(request, overseer_id):
+    """
+    Delete existing overseer. Permissions are checked against the relative
+    station that the overseer is part of.
+    """
+    overseer = get_object_or_404(Overseer, id=overseer_id)
+    related_station = overseer.station
+    if overseer and related_station:
+        if request.user.has_row_perm(related_station, 'edit'):
+            overseer.delete()
+            ref = request.META.get('HTTP_REFERER', None)
+            if ref:
+                return HttpResponseRedirect(ref)
+            return render_to_response('success.html',
+                    {'msg': 'Overseer deleted successfully',},
+                    context_instance=RequestContext(request))
+    response = render_to_response('403.html',
+                   RequestContext(request))
+    response.status_code = 403
+    return response
+
 
 
 

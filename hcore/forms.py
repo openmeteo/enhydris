@@ -40,6 +40,27 @@ class HcoreRegistrationForm(RegistrationForm):
 Model forms.
 """
 
+class OverseerForm(ModelForm):
+
+    person = forms.ModelChoiceField(Person.objects,
+                                widget=SelectWithPop(model_name='person'))
+
+    class Meta:
+        model = Overseer
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(OverseerForm, self).__init__(*args, **kwargs)
+
+        if user and not user.is_superuser:
+            perms = user.get_rows_with_permission(Station(), 'edit')
+            ids = [ p.object_id for p in perms]
+            self.fields["station"].queryset = Gentity.objects.filter(
+                                                id__in=ids)
+
+
+
+
 class GentityFileForm(ModelForm):
 
     file_type = forms.ModelChoiceField(FileType.objects,

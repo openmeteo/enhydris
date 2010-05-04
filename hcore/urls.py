@@ -96,6 +96,13 @@ if settings.USERS_CAN_ADD_CONTENT:
     (r'^gentityaltcode/delete/(?P<gentityaltcode_id>\d+)/$',
      views.gentityaltcode_delete, {} , 'gentityaltcode_delete'),
 
+    (r'^overseer/edit/(?P<overseer_id>\d+)/$',
+     views.overseer_edit, {} , 'overseer_edit'),
+
+    (r'^overseer/add/$', views.overseer_add, {}, 'overseer_add'),
+
+    (r'^overseer/delete/(?P<overseer_id>\d+)/$',
+     views.overseer_delete, {} , 'overseer_delete'),
 
     (r'^instrument/edit/(?P<instrument_id>\d+)/$',
      views.instrument_edit, {} , 'instrument_edit'),
