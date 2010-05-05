@@ -121,18 +121,18 @@ def station_info(request, *args, **kwargs):
     from django.utils import simplejson
     from django.core import serializers
 #    if settings.DEBUG:
-#        print 'iDisplayStart: %s' % request.POST.get('iDisplayStart','')
-#        print 'iDisplayLength: %s' % request.POST.get('iDisplayLength','')
-#        print 'sSearch: %s' % request.POST.get('sSearch','')
-#        print 'bEscapeRegex: %s' % request.POST.get('bEscapeRegex','')
-#        print 'iColumns: %s' % request.POST.get('iColumns','')
-#        print 'iSortingCols: %s' % request.POST.get('iSortingCols','')
-#        print 'iSortCol_0: %s' % request.POST.get('iSortCol_0','')
-#        print 'sSortDir_0: %s' % request.POST.get('sSortDir_0','')
-#        print 'iSortCol_1: %s' % request.POST.get('iSortCol_1','')
-#        print 'sSortDir_1: %s' % request.POST.get('sSortDir_1','')
-#        print 'sEcho: %s' % request.POST.get('sEcho','')
-#
+#       print 'iDisplayStart: %s' % request.POST.get('iDisplayStart','')
+#       print 'iDisplayLength: %s' % request.POST.get('iDisplayLength','')
+#       print 'sSearch: "%s"' % request.POST.get('sSearch','')
+#       print 'bEscapeRegex: %s' % request.POST.get('bEscapeRegex','')
+#       print 'iColumns: %s' % request.POST.get('iColumns','')
+#       print 'iSortingCols: %s' % request.POST.get('iSortingCols','')
+#       print 'iSortCol_0: %s' % request.POST.get('iSortCol_0','')
+#       print 'sSortDir_0: %s' % request.POST.get('sSortDir_0','')
+#       print 'iSortCol_1: %s' % request.POST.get('iSortCol_1','')
+#       print 'sSortDir_1: %s' % request.POST.get('sSortDir_1','')
+#       print 'sEcho: %s' % request.POST.get('sEcho','')
+
 
 
     sids = ""
@@ -148,6 +148,30 @@ def station_info(request, *args, **kwargs):
 
 
     # for search
+    sSearch = request.POST.get('sSearch','')
+    if not sSearch == '':
+        query = Q()
+        for term in sSearch.split(' '):
+            query &= (Q(name__icontains=term) | Q(name_alt__icontains=term) |
+                      Q(short_name__icontains=term )|
+                      Q(short_name_alt__icontains=term) |
+                      Q(remarks__icontains=term) |
+                      Q(remarks_alt__icontains=term)|
+                      Q(water_basin__name__icontains=term) |
+                      Q(water_basin__name_alt__icontains=term) |
+                      Q(water_division__name__icontains=term) |
+                      Q(water_division__name_alt__icontains=term) |
+                      Q(political_division__name__icontains=term) |
+                      Q(political_division__name_alt__icontains=term) |
+                      Q(type__descr__icontains=term) |
+                      Q(type__descr_alt__icontains=term) |
+                      Q(owner__organization__name__icontains=term) |
+                      Q(owner__person__first_name__icontains=term) |
+                      Q(owner__person__last_name__icontains=term))
+        stations = stations.filter(query).distinct()
+
+
+
     # for sorting
 
     scols = request.POST.get('iSortingCols', '0')
