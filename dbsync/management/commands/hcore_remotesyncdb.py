@@ -18,6 +18,7 @@ from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 from django.db import models as dj_models
 from django.db.models import get_app
+from django.utils.http import urlquote
 from enhydris.dbsync.models import Database
 
 try:
@@ -509,14 +510,23 @@ class Command(BaseCommand):
             ERR_MSG("Could not chdir to %s. You could provide another custon"\
                     " temp directory using the -w switch." % cwd)
 
-        if not resume:
+        # get the sync timestamp
+        sync_timestamp = datetime.datetime.now()
 
+        if not resume:
             # Get the fixture for each model
             for model in models:
                 MSG("Syncing model %s" % model.__name__)
+                request_url = ('http://%s:%s/api/%s/' %
+                                 (remote, str(port),model.__name__))
                 try:
-                    req = urllib2.Request('http://'+remote+':'+str(port)+'/api/'+
-                                            model.__name__+'/')
+                    if DB.last_sync:
+                        timestamp = urlquote(str(DB.last_sync))
+                        req = urllib2.Request("%sdate/%s/" % (request_url,
+                                                                timestamp))
+                    else:
+                        req = urllib2.Request(request_url)
+
                     with RotatingThing(" - Downloading %s fixtures  " % \
                                                 model.__name__):
                         response = urllib2.urlopen(req)
@@ -609,14 +619,6 @@ class Command(BaseCommand):
             os.unlink(fd.name)
             fixture_count += 1
 
-#        if object_count > 0:
-#            sequence_sql = connection.ops.sequence_reset_sql(self.style,
-#                        inst_models)
-#            if sequence_sql:
-#                MSG("Resetting sequences")
-#                for line in sequence_sql:
-#                    cursor.execute(line)
-
         try:
             with RotatingThing("Reinitializing foreign keys:  "):
                 eval_fkeys(app_name, models)
@@ -636,4 +638,9 @@ class Command(BaseCommand):
         # close connection
         connection.close()
 
+        # update DB last sync timestamp
+        setattr(DB, 'last_sync', sync_timestamp)
+        DB.save()
+
+        # wrap-up and exit
         gracefull_exit(0)

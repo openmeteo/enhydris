@@ -10,4 +10,4 @@ class Database(models.Model):
     ip_address = models.CharField(_('IP address'), max_length=16)
     hostname = models.CharField(_('Hostname'),unique=True, max_length=255)
     descr = models.TextField(_('Description'),max_length=255, blank=True)
-
+    last_sync = models.DateTimeField(null=True, editable=False)

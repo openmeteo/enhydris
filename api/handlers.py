@@ -72,204 +72,234 @@ class GFDATA_Handler(BaseHandler):
 
         return gfile
 
+
+# Generic Handler including modification date filtering
+
+class GenericHandler(BaseHandler):
+    """
+    Generic handler which adds support to request all models modified after a
+    specific date.
+    """
+    def queryset(self, request):
+        return self.model.objects.all()
+
+    def read(self, request, *args, **kwargs):
+        if not self.has_model():
+            return rc.NOT_IMPLEMENTED
+
+        pkfield = self.model._meta.pk.name
+
+        if pkfield in kwargs:
+            try:
+                return self.queryset(request).get(pk=kwargs.get(pkfield))
+            except ObjectDoesNotExist:
+                return rc.NOT_FOUND
+            except MultipleObjectsReturned: # should never happen, since we're using a PK
+                return rc.BAD_REQUEST
+        elif 'date' in kwargs:
+            return self.queryset(request).filter(last_modified__gt=("%s")
+                            % (kwargs['date']))
+        else:
+            return self.queryset(request).filter(*args, **kwargs)
+
 # Regular handlers for the rest of the models
-class Lookup_Handler(BaseHandler):
+class Lookup_Handler(GenericHandler):
     """
     API handler for hcore model Lookup.
     """
     model = Lookup
     exclude = ()
 
-class Lentity_Handler(BaseHandler):
+class Lentity_Handler(GenericHandler):
     """
     API handler for hcore model Lentity.
     """
     model = Lentity
     exclude = ()
 
-class Person_Handler(BaseHandler):
+class Person_Handler(GenericHandler):
     """
     API handler for hcore model Person.
     """
     model = Person
     exclude = ()
 
-class Organization_Handler(BaseHandler):
+class Organization_Handler(GenericHandler):
     """
     API handler for hcore model Organization.
     """
     model = Organization
     exclude = ()
 
-class Gentity_Handler(BaseHandler):
+class Gentity_Handler(GenericHandler):
     """
     API handler for hcore model Gentity.
     """
     model = Gentity
     exclude = ()
 
-class Gpoint_Handler(BaseHandler):
+class Gpoint_Handler(GenericHandler):
     """
     API handler for hcore model Gpoint.
     """
     model = Gpoint
     exclude = ()
 
-class Gline_Handler(BaseHandler):
+class Gline_Handler(GenericHandler):
     """
     API handler for hcore model Gline.
     """
     model = Gline
     exclude = ()
 
-class Garea_Handler(BaseHandler):
+class Garea_Handler(GenericHandler):
     """
     API handler for hcore model Garea.
     """
     model = Garea
     exclude = ()
 
-class PoliticalDivisionManager_Handler(BaseHandler):
+class PoliticalDivisionManager_Handler(GenericHandler):
     """
     API handler for hcore model PoliticalDivisionManager.
     """
     model = PoliticalDivisionManager
     exclude = ()
 
-class PoliticalDivision_Handler(BaseHandler):
+class PoliticalDivision_Handler(GenericHandler):
     """
     API handler for hcore model PoliticalDivision.
     """
     model = PoliticalDivision
     exclude = ()
 
-class WaterDivision_Handler(BaseHandler):
+class WaterDivision_Handler(GenericHandler):
     """
     API handler for hcore model WaterDivision.
     """
     model = WaterDivision
     exclude = ()
 
-class WaterBasin_Handler(BaseHandler):
+class WaterBasin_Handler(GenericHandler):
     """
     API handler for hcore model WaterBasin.
     """
     model = WaterBasin
     exclude = ()
 
-class GentityAltCodeType_Handler(BaseHandler):
+class GentityAltCodeType_Handler(GenericHandler):
     """
     API handler for hcore model GentityAltCodeType.
     """
     model = GentityAltCodeType
     exclude = ()
 
-class GentityAltCode_Handler(BaseHandler):
+class GentityAltCode_Handler(GenericHandler):
     """
     API handler for hcore model GentityAltCode.
     """
     model = GentityAltCode
     exclude = ()
 
-class FileType_Handler(BaseHandler):
+class FileType_Handler(GenericHandler):
     """
     API handler for hcore model FileType.
     """
     model = FileType
     exclude = ()
 
-class GentityFile_Handler(BaseHandler):
+class GentityFile_Handler(GenericHandler):
     """
     API handler for hcore model GentityFile.
     """
     model = GentityFile
     exclude = ()
 
-class EventType_Handler(BaseHandler):
+class EventType_Handler(GenericHandler):
     """
     API handler for hcore model EventType.
     """
     model = EventType
     exclude = ()
 
-class GentityEvent_Handler(BaseHandler):
+class GentityEvent_Handler(GenericHandler):
     """
     API handler for hcore model GentityEvent.
     """
     model = GentityEvent
     exclude = ()
 
-class StationType_Handler(BaseHandler):
+class StationType_Handler(GenericHandler):
     """
     API handler for hcore model StationType.
     """
     model = StationType
     exclude = ()
 
-class StationManager_Handler(BaseHandler):
+class StationManager_Handler(GenericHandler):
     """
     API handler for hcore model StationManager.
     """
     model = StationManager
     exclude = ()
 
-class Station_Handler(BaseHandler):
+class Station_Handler(GenericHandler):
     """
     API handler for hcore model Station.
     """
     model = Station
     exclude = ('creator',)
 
-class Overseer_Handler(BaseHandler):
+class Overseer_Handler(GenericHandler):
     """
     API handler for hcore model Overseer.
     """
     model = Overseer
     exclude = ()
 
-class InstrumentType_Handler(BaseHandler):
+class InstrumentType_Handler(GenericHandler):
     """
     API handler for hcore model InstrumentType.
     """
     model = InstrumentType
     exclude = ()
 
-class Instrument_Handler(BaseHandler):
+class Instrument_Handler(GenericHandler):
     """
     API handler for hcore model Instrument.
     """
     model = Instrument
     exclude = ()
 
-class Variable_Handler(BaseHandler):
+class Variable_Handler(GenericHandler):
     """
     API handler for hcore model Variable.
     """
     model = Variable
     exclude = ()
 
-class UnitOfMeasurement_Handler(BaseHandler):
+class UnitOfMeasurement_Handler(GenericHandler):
     """
     API handler for hcore model UnitOfMeasurement.
     """
     model = UnitOfMeasurement
     exclude = ()
 
-class TimeZone_Handler(BaseHandler):
+class TimeZone_Handler(GenericHandler):
     """
     API handler for hcore model TimeZone.
     """
     model = TimeZone
     exclude = ()
 
-class TimeStep_Handler(BaseHandler):
+class TimeStep_Handler(GenericHandler):
     """
     API handler for hcore model TimeStep.
     """
     model = TimeStep
     exclude = ()
 
-class Timeseries_Handler(BaseHandler):
+class Timeseries_Handler(GenericHandler):
     """
     API handler for hcore model Timeseries.
     """
