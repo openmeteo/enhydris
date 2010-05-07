@@ -1,5 +1,5 @@
 """
-Management command for hcore which takes care of syncing the master db
+Management command which takes care of syncing the master db
 """
 
 from __future__ import with_statement
@@ -17,6 +17,7 @@ from django.core import serializers
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 from django.db import models as dj_models
+from django.db.models import get_app
 from enhydris.dbsync.models import Database
 
 try:
@@ -150,19 +151,15 @@ def get_models(app, exc_list=None):
 
     # empty model list
     model_list = []
-    # inspect module
-    exec('import '+app)
-    members = inspect.getmembers(eval(app+'.models'))
-    # get actual classes (aka models)
-    for (name, item) in members:
-        if inspect.isclass(item) and \
-                item.__class__.__name__ == "ModelBase" and \
-                item._meta.app_label == app and not \
-                item._meta.abstract:
-            try:
-                exc_list.index(name)
-            except ValueError:
-                model_list.append(item)
+    # get the models of the app
+    app_models = dj_models.get_models(app)
+    # remove excluded models
+    for item in app_models:
+        name = item.__name__
+        try:
+            exc_list.index(name)
+        except ValueError:
+            model_list.append(item)
 
     return model_list
 
@@ -192,7 +189,7 @@ def sort_by_dep(model_list):
 
     return sorted_list
 
-def create_generic_objects(models):
+def create_generic_objects(app):
     """
     This function creates a set of generic objects which hold temporary Not Null
     foreign keys for objects which are being installed.
@@ -215,70 +212,72 @@ def create_generic_objects(models):
 #                f_val = 0
 #        exec("Generic"+model.__name__+"=models."+model.__name__+"()")
 #
-    globals()["GenericGarea"] = models.Garea()
+
+    globals()["GenericGarea"] = app.Garea()
     GenericGarea.save()
-    globals()["GenericGentity"] = models.Gentity()
+    globals()["GenericGentity"] = app.Gentity()
     GenericGentity.save()
-    globals()["GenericGentityAltCodeType"] = models.GentityAltCodeType()
+    globals()["GenericGentityAltCodeType"] = app.GentityAltCodeType()
     GenericGentityAltCodeType.save()
-    globals()["GenericGentityAltCode"] = models.GentityAltCode(gentity=GenericGentity, type
+    globals()["GenericGentityAltCode"] = app.GentityAltCode(gentity=GenericGentity, type
             = GenericGentityAltCodeType )
     GenericGentityAltCode.save()
-    globals()["GenericFileType"] = models.FileType()
+    globals()["GenericFileType"] = app.FileType()
     GenericFileType.save()
-    globals()["GenericEventType"] = models.EventType()
+    globals()["GenericEventType"] = app.EventType()
     GenericEventType.save()
-    globals()["GenericGentityEvent"] = models.GentityEvent(gentity=GenericGentity, type=
+    globals()["GenericGentityEvent"] = app.GentityEvent(gentity=GenericGentity, type=
                 GenericEventType, date = datetime.datetime.now())
     GenericGentityEvent.save()
-    #GenericGentityFile = models.GentityFile()
+    #GenericGentityFile = app.GentityFile()
 
-    globals()["GenericGline"] = models.Gline()
+    globals()["GenericGline"] = app.Gline()
     GenericGline.save()
 
-    globals()["GenericGpoint"] = models.Gpoint()
+    globals()["GenericGpoint"] = app.Gpoint()
     GenericGpoint.save()
-    globals()["GenericInstrumentType"] = models.InstrumentType()
+    globals()["GenericInstrumentType"] = app.InstrumentType()
     GenericInstrumentType.save()
-    globals()["GenericStationType"] = models.StationType()
+    globals()["GenericStationType"] = app.StationType()
     GenericStationType.save()
-    globals()["GenericLentity"] = models.Lentity()
+    globals()["GenericLentity"] = app.Lentity()
     GenericLentity.save()
-    globals()["GenericStation"] = models.Station(owner=GenericLentity, type=
+    globals()["GenericStation"] = app.Station(owner=GenericLentity, type=
                 GenericStationType)
     GenericStation.save()
-    globals()["GenericInstrument"] = models.Instrument(station=GenericStation, type=
+    globals()["GenericInstrument"] = app.Instrument(station=GenericStation, type=
                 GenericInstrumentType)
     GenericInstrument.save()
-    globals()["GenericPerson"] = models.Person()
+    globals()["GenericPerson"] = app.Person()
     GenericPerson.save()
-    globals()["GenericVariable"] = models.Variable()
+    globals()["GenericVariable"] = app.Variable()
     GenericVariable.save()
 
-    globals()["GenericUnitOfMeasurement"] = models.UnitOfMeasurement()
+    globals()["GenericUnitOfMeasurement"] = app.UnitOfMeasurement()
     GenericUnitOfMeasurement.save()
-    globals()["GenericTimeZone"] = models.TimeZone(utc_offset="+2")
+    globals()["GenericTimeZone"] = app.TimeZone(utc_offset="+2")
     GenericTimeZone.save()
 
-    globals()["GenericTimeStep"] = models.TimeStep(length_minutes=0,
+    globals()["GenericTimeStep"] = app.TimeStep(length_minutes=0,
                             length_months=1)
     GenericTimeStep.save()
-    globals()["GenericWaterBasin"] = models.WaterBasin()
+    globals()["GenericWaterBasin"] = app.WaterBasin()
     GenericWaterBasin.save()
-    globals()["GenericWaterDivision"] = models.WaterDivision()
+    globals()["GenericWaterDivision"] = app.WaterDivision()
     GenericWaterDivision.save()
-    globals()["GenericPoliticalDivision"] = models.PoliticalDivision()
+    globals()["GenericPoliticalDivision"] = app.PoliticalDivision()
     GenericPoliticalDivision.save()
 
     transaction.commit()
     transaction.leave_transaction_management()
 
-def store_fkeys(models, model_list, object, m2m_keys='None'):
+def store_fkeys(app_name, model_list, object, m2m_keys='None'):
     """
     This function iterates through the fields of the deserialized object and
     finds all foreign keys. After that, by using the original id, he makes sure
     that the foreign keys point to the correct objects.
     """
+
     foreign_keys = [ f.name for f in object._meta.fields if
                                     isinstance(f, dj_models.ForeignKey) and not
                                     f.name == 'original_db' ]
@@ -286,9 +285,11 @@ def store_fkeys(models, model_list, object, m2m_keys='None'):
     if hasattr(object.__class__, 'f_dependencies'):
         deps = getattr(object.__class__, 'f_dependencies')
         parent = deps[0]
-
     else:
         parent = None
+
+    # get model of parent
+
 
     if foreign_keys or m2m_keys:
         try:
@@ -306,16 +307,18 @@ def store_fkeys(models, model_list, object, m2m_keys='None'):
     # keep only inheritance relationship intact
     for key in foreign_keys:
         if parent and key == parent.lower()+'_ptr':
-            exec('parent_id = object.'+key+'_id')
+            model = dj_models.get_model(app_name, parent)
+            parent_id = getattr(object, key+'_id')
             # get parent object
-            exec('po = models.'+parent+'.objects.get(original_id=parent_id, original_db=DB)')
+            po = model.objects.get(original_id=parent_id, original_db=DB)
             # assing new parent pointer
-            exec('object.'+key+' = po')
+            setattr(object, key, po)
         else:
-            exec('key_val = object.'+key+'_id')
+            key_val = getattr(object, key+'_id')
             if key_val:
                 try:
-                    exec('go_name = object.'+key+'.__class__.__name__')
+                    fobj = getattr(object, key)
+                    go_name = fobj.__class__.__name__
                 except:
                     #remote object doesn't exist yet
                     ff = [ f for (f, m) in object._meta.get_fields_with_model()
@@ -327,12 +330,12 @@ def store_fkeys(models, model_list, object, m2m_keys='None'):
                     batch_jobs[object.__class__][object.original_id]['f_keys'].update({key: key_val})
 
                 try:
-                    exec('object.'+key+' = None')
+                    setattr(object, key, None)
                 except ValueError:
                     #Some attributes don't allow Null. Now what?
-                    exec('object.'+key+' = Generic'+go_name)
+                    setattr(object, key, eval('Generic'+go_name))
 
-def eval_fkeys(models):
+def eval_fkeys(app_name, models):
     """
     This function iterates through all the entries in the ``batch_jobs''
     dictionary and re-evaluates all foreign keys for new objects using the
@@ -343,7 +346,7 @@ def eval_fkeys(models):
         model_name = model.__name__
 
         for object_id in batch_jobs[model].keys():
-            exec("item = models."+model_name+".objects.get(original_id="+str(object_id)+", original_db=DB)")
+            item = model.objects.get(original_id=str(object_id), original_db=DB)
 
             # foreign
             if batch_jobs[model][object_id].has_key('f_keys'):
@@ -351,14 +354,19 @@ def eval_fkeys(models):
                     ff = [ f for (f, m) in model._meta.get_fields_with_model() if
                                         f.name==key][0]
                     ro_name = ff.related.parent_model.__name__
-                    exec("item."+key+'= models.'+ro_name+'.objects.get(original_id=val, original_db=DB)')
+                    f_model = dj_models.get_model(app_name, ro_name)
+                    setattr(item, key, f_model.objects.get(original_id=val,
+                                                            original_db=DB))
             # m2m
             if batch_jobs[model][object_id].has_key('m2m'):
                 for (key, vals) in batch_jobs[model][object_id]['m2m'].iteritems():
-                    exec("remote_class = item."+key+".model.__name__")
+                    remote_obj = getattr(item, key)
+                    remote_class = remote_obj.model.__name__
                     for val in vals:
-                        exec("ro = models."+remote_class+".objects.get(original_id=val, original_db=DB)")
-                        exec("item."+key+'.add(ro)')
+                        f_model = dj_models.get_model(app_name, remote_class)
+                        ro = f_model.objects.get(original_id=val, original_db=DB)
+                        m2m_handler = getattr(item, key)
+                        m2m_handler.add(ro)
 
             item.save()
 
@@ -424,7 +432,7 @@ class Command(BaseCommand):
         # Save command line opts
         remote = options.get('remote', None)
         port = options.get('port')
-        app = options.get('app', None)
+        app_name = options.get('app', None)
         exclude = options.get('exclude', None)
         pretend = options.get('pretend')
         ask = options.get('ask')
@@ -438,7 +446,7 @@ class Command(BaseCommand):
         cwd = options.get('cwd')
 
         # check if we have a remote node and an app
-        if not remote or not app:
+        if not remote or not app_name:
             ERRMSG('You must specify at least one remote system and app to'\
                    ' sync')
             sys.exit(1)
@@ -468,8 +476,8 @@ class Command(BaseCommand):
 
         # import the app's models
         try:
-            exec("import "+app+".models as _models")
-        except ImportError:
+            app = get_app(app_name)
+        except ImproperlyConfigured:
             ERRMSG('Could not load application %s. Exiting...' % app)
             sys.exit(1)
 
@@ -531,7 +539,7 @@ class Command(BaseCommand):
 
         # Create Generic objects to handle temporary dependencies
         MSG("Creating Generic objects")
-        create_generic_objects(_models)
+        create_generic_objects(app)
         MSG("Finished with Generic objects")
 
         # transaction management
@@ -568,7 +576,8 @@ class Command(BaseCommand):
                 inst_models.add(obj.object.__class__)
 
                 try:
-                    exec('upd_obj = _models.'+obj.object.__class__.__name__+'.objects.get(original_id=obj.object.pk, original_db=DB)')
+                    obj_type = dj_models.get_model(app_name, obj.object.__class__.__name__)
+                    upd_obj = obj_type.objects.get(original_id=obj.object.pk, original_db=DB)
                 except Exception, detail:
                     # not already in db
                     obj.object.original_id = obj.object.pk
@@ -580,7 +589,7 @@ class Command(BaseCommand):
 
                 # Here we must also populate the additional fields and
                 # check every addition against the existing objects!
-                store_fkeys(_models, models, obj.object, obj.m2m_data)
+                store_fkeys(app_name, models, obj.object, obj.m2m_data)
 
                 obj.m2m_data = {}
                 obj.object.original_db = DB
@@ -610,7 +619,7 @@ class Command(BaseCommand):
 
         try:
             with RotatingThing("Reinitializing foreign keys:  "):
-                eval_fkeys(_models)
+                eval_fkeys(app_name, models)
         except Exception, details:
             ERRMSG("Error setting up foreign keys: %s" % details)
             transaction.rollback()

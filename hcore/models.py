@@ -205,7 +205,7 @@ class GentityAltCode(models.Model):
     type = models.ForeignKey(GentityAltCodeType)
     value = models.CharField(max_length=100)
     def __unicode__(self):
-        return self.type.descr+' '+self.type.value
+        return self.type.descr+' '+self.value
     @property
     def related_station(self):
         try:
