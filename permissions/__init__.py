@@ -170,7 +170,7 @@ class Group(MetaObject):
             if not self.has_row_perm(instance, perm):
                 return False
             content_type = ContentType.objects.get_for_model(instance)
-            objects = Permission.objects.filter(user=self, content_type__pk=content_type.id, object_id=instance.id, name=perm)
+            objects = Permission.objects.filter(group=self, content_type__pk=content_type.id, object_id=instance.id, name=perm)
             objects.delete()
         return True
 
