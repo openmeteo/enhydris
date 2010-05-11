@@ -401,16 +401,10 @@ class Command(BaseCommand):
                  ' dumps and saves them locally.'),
         make_option('--work-dir', '-w', dest='cwd', default='/tmp',
             help='Define the temp dir in which all temp files will be stored'),
-        make_option('--no-backups', '-N', dest='bkp', default=False,
+        make_option('--full', '-F', dest='full', default=False,
             action='store_true',
-            help='Default behaviour is to take a backup of the local db'\
-                 ' before doing any changes. This overrides this behavior.'),
-        make_option('--skip', '-s', dest='skip', default=False,
-            action='store_true',
-            help='If skip is specified, then syncing will skip any problems'\
-                 ' continue execution. Default behavior is to halt on all'\
-                 ' errors.',),
-        make_option('--resume', '-R', dest='resume', default=False,
+            help='Bypasses last sync date and syncs all of the db again'),
+                make_option('--resume', '-R', dest='resume', default=False,
             action='store_true',
             help='With resume, no files are fetched but the local ones are used'),
         make_option('--silent', '-S', dest='verbose', default=True,
@@ -439,10 +433,10 @@ class Command(BaseCommand):
         ask = options.get('ask')
         interactive = options.get('interactive')
         clean = options.get('clean')
+        full = options.get('full')
         no_backup = options.get('bkp')
         verbose = options.get('verbose')
         fetch = options.get('fetch')
-        skip = options.get('skip')
         resume = options.get('resume')
         cwd = options.get('cwd')
 
@@ -520,7 +514,7 @@ class Command(BaseCommand):
                 request_url = ('http://%s:%s/api/%s/' %
                                  (remote, str(port),model.__name__))
                 try:
-                    if DB.last_sync:
+                    if DB.last_sync and not full:
                         timestamp = urlquote(str(DB.last_sync))
                         req = urllib2.Request("%sdate/%s/" % (request_url,
                                                                 timestamp))
@@ -566,8 +560,7 @@ class Command(BaseCommand):
                 fd = file(model+'.json', 'r')
             except IOError:
                 ERRMSG("Error opening file %s." % (model+'.json'))
-                if not skip:
-                    gracefull_exit(1)
+                gracefull_exit(1)
 
             MSG("Installing fixtures from file %s.json" % model)
 
@@ -578,8 +571,7 @@ class Command(BaseCommand):
                 ERRMSG("Error deserializing objects for class %s." % \
                         model)
                 objects = None
-                if not skip:
-                    gracefull_exit(1)
+                gracefull_exit(1)
 
             # handle each deserialized object
             for obj in objects:
