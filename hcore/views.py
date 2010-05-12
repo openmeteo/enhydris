@@ -335,7 +335,11 @@ def get_subdivision(request, division_id):
     """Ajax call to refresh divisions in filter table"""
     response = HttpResponse(content_type='text/plain;charset=utf8',
                             mimetype='application/json')
-    div = PoliticalDivision.objects.get(pk=division_id)
+    try:
+        div = PoliticalDivision.objects.get(pk=division_id)
+    except:
+        response.write("[]")
+        return response
     parent_divs = PoliticalDivision.objects.filter(Q(name=div.name)&
                                                  Q(name_alt=div.name_alt)&
                                                  Q(short_name=div.short_name)&
