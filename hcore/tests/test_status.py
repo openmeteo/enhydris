@@ -13,13 +13,22 @@ class SmokeTestCase(unittest.TestCase):
                 '/stations/l/',
                 '/accounts/login/',
                 '/accounts/logout/',
+                '/accounts/register/',
+                '/accounts/password/reset/',
+                '/accounts/password/reset/done/',
                 '/admin/',
                 '/map/',
+                '/help/',
+                '/contact/',
                 ],
             404: [
-                '/foob4r/',
-                '/stations/foob4r/',
+                '/nonexistent/',
                 '/stations/d/',
+                '/stations/d/nonexistent/',
+                '/timeseries/d/',
+                '/timeseries/d/nonexistent/',
+                '/instruments/d/',
+                '/instruments/d/nonexistent/',
                 '/account/foob4r/',]}
 
     def testStatusCode(self):
