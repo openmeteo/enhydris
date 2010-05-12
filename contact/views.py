@@ -49,16 +49,16 @@ def contactview(request):
                                         RequestContext(request))
 
         else:
-
             (captcha, hash) = createcapcha(request)
+            captcha_img = hash+'.jpg'
             return render_to_response('contact/contact.html',
                                     {'form': ContactForm(),
-                                    'captcha': captcha, 'hash':hash,
+                                    'captcha': captcha_img, 'hash':hash,
                                     'message':'Wrong captcha'},
                                     RequestContext(request))
 
 
-    hash = createcapcha(request)
+    (captcha, hash) = createcapcha(request)
     captcha_img = hash+'.jpg'
 
     return render_to_response('contact/contact.html', {'form': ContactForm(),
@@ -83,4 +83,4 @@ def createcapcha(request):
     temp = IMAGE_URL + imghash + '.jpg'
     im.save(temp, "JPEG")
 
-    return imghash
+    return (imgtext,imghash)
