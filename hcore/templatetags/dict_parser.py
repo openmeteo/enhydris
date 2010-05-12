@@ -11,4 +11,16 @@ def dict_get(value, arg):
 
     return None
 
+def list_empty(list):
+    """
+    Check if list is empty
+    """
+
+    for item in list:
+        if item:
+            return False
+    return True
+
+
 register.filter('dict_get',dict_get)
+register.filter('list_empty',list_empty)

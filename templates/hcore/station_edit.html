@@ -87,7 +87,7 @@
 		<li class="noborder"><a href="#tabs-1">Station</a></li>
 	{% if form.instance.pk %}  
 	{% for key,formset in formsets.items %}
-		<li class="noborder"><a href="#tabs-{{forloop.counter|add:"1"}}">{% if err_dict|dict_get:key %}<span style='color:red'>*&nbsp;</span>{% endif %}{{formset.prefix|title}}</a></li>
+		<li class="noborder"><a href="#tabs-{{forloop.counter|add:"1"}}">{% if not formset.errors|list_empty  %}<span style='color:#C27878'>*&nbsp;</span>{% endif %}{{formset.prefix|title}}</a></li>
 	{% endfor %}
 	{% endif %}
 	</ul>
@@ -105,6 +105,12 @@
 		{% if form.errors %}
 			<p class="fielderrors">{% trans "Please correct the errors below: " %}{{ form.non_field_errors }}</p>
 		{% endif %}
+
+		{% for key,formset in formsets.items %}
+			{% if not formset.errors|list_empty  %}
+				<p class="fielderrors">{% trans "There were some errors in one of the forms. Please correct them and click the submit button again." %}</p>
+			{% endif %}
+		{% endfor %}
 
 		<table class="table_container">
 			<tbody>
@@ -137,7 +143,7 @@
     					add new {{ formset.prefix|title }}
     				</a>
 				</p>
-	{% if err_dict|dict_get:key %}
+	{% if not formset.errors|list_empty %}
 		<p class="fielderrors">{% trans "Please correct the errors below: " %}{{ formset.non_field_errors }}</p>
 	{% endif %}
 			<table class='tablesorter table_container'>

@@ -732,6 +732,7 @@ def _station_edit_or_create(request,station_id=None):
             formsets["Overseer"]  = OverseerFormset(prefix='Overseer')
             formsets["Instrument"]  = InstrumentFormset(prefix='Instrument')
             formsets["Timeseries"]  = TimeseriesFormset(prefix='Timeseries')
+
     return render_to_response('hcore/station_edit.html', {'form': form,
                             'formsets':formsets, },
                             context_instance=RequestContext(request))
