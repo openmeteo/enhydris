@@ -75,7 +75,7 @@
 		{% if user.is_superuser %}
 			<p class="anchor_override">{% trans "As a superuser, you can edit all the stations. To find the station you are looking for, go to the" %} <a href="/stations/l/">{% trans "station list." %}</a></p>
 		{% else %} 
-			{% if user.created_stations %}
+			{% if user.created_stations.all %}
 				<h3>{% trans "You have created the following stations: " %}</h3>
 				<table class="tablesorter table_container">
 				<thead>
@@ -103,10 +103,10 @@
 				</tbody>
 				</table>
 			{% else %} 
-				<p>{% trans "It seems that you haven't created any stations yet." %}</p>
+				<p> * {% trans "It seems that you haven't created any stations yet." %}</p>
 			{% endif %}
 
-			{% if user.maintaining_stations %} 
+			{% if user.maintaining_stations.all %} 
 				<h3>{% trans "You have permission to edit the following stations: " %}</h3>
 				<table class="tablesorter table_container">
 				<thead>
@@ -134,7 +134,7 @@
 				</tbody>
 				</table>
 			{% else %} 
-				<p>{% trans "It seems that you don't have permission to edit any station." %}</p>
+				<p>* {% trans "It seems that you don't have permission to edit any station." %}</p>
 			{% endif %}
 
 			<h3>{% trans "Management Actions:" %}</h3>

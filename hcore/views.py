@@ -903,7 +903,7 @@ def _gentityfile_edit_or_create(request,gfile_id=None,station_id=None):
     if gfile_id and not station_id:
         # Editing
         try:
-            station = gfile.gentity
+            station = gfile.related_station
         except:
             # GentityFile doesn't have a relative station.
             # This shouldn't happen. Admin should fix such cases
@@ -1001,7 +1001,7 @@ def _gentityevent_edit_or_create(request,gevent_id=None,station_id=None):
     if gevent_id and not station_id:
         # Editing
         try:
-            station = gevent.gentity
+            station = gevent.related_station
         except:
             # GentityEvent doesn't have a relative station.
             # This shouldn't happen. Admin should fix such cases
@@ -1099,7 +1099,7 @@ def _gentityaltcode_edit_or_create(request,galtcode_id=None,station_id=None):
     if galtcode_id and not station_id:
         # Editing
         try:
-            station = galtcode.gentity
+            station = galtcode.related_station
         except:
             # GentityAltCode doesn't have a relative station.
             # This shouldn't happen. Admin should fix such cases
@@ -1401,7 +1401,8 @@ Generic model creation
 ALLOWED_TO_EDIT = ('waterbasin', 'waterdivision', 'person', 'organization',
                    'stationtype', 'lentity','gentity', 'variable', 'timezone',
                    'politicaldivision','instrumenttype', 'unitofmeasurement',
-                   'filetype','eventtype','gentityaltcodetype','timestep')
+                   'filetype','eventtype','gentityaltcodetype','timestep',
+                   'gentityaltcode', 'gentityfile', 'gentityevent')
 
 @login_required
 def model_add(request, model_name=''):
