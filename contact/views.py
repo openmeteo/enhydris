@@ -29,11 +29,14 @@ def contactview(request):
     if subject and message and from_email:
         # copy data so we can manipulate them
         data = request.POST.copy()
-        remove(IMAGE_URL+data['hash']+".jpg")
+        try:
+            remove(IMAGE_URL+data['hash']+".jpg")
+        except:
+            # maybe it got removed in the meantime. we don't care
+            pass
 
         # check captcha
         if data['hash'] == sha.new(SALT+data['captcha']).hexdigest():
-
 
             # format the email
             rendered_message = render_to_string('contact/email_body.txt',

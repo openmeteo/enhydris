@@ -82,7 +82,7 @@ $(document).ready(function() {
   </tr>
         </table>
         <p>
-          <label>Have you read and accepted the <a id="terms" href="{% url terms %}" class="iframe">terms of service?</a></label>
+          <label>Have you read and accepted the <a id="terms" title="{% trans "Terms of Service"%}" href="{% url terms %}" class="iframe">terms of service?</a></label>
           
           {{ form.tos }} I agree.
           </p> 
