@@ -8,19 +8,21 @@ from enhydris.hcore.models import *
 
 class PermissionsTestCase(unittest.TestCase):
 
+
     def setUp(self):
         self.client = Client()
         # setup all models that take part in the sync
         try:
-            call_command('loaddata', 'dbsync/testdata.json')
+            call_command('loaddata', 'api/testdata.json')
         except Exception, e:
             print e
-
+#
 
     def tearDown(self):
         pass
 
     def testEventType(self):
+
 
         # Generic call
         url = "/api/EventType/"
