@@ -646,8 +646,8 @@ def _station_edit_or_create(request,station_id=None):
     if station_id:
         # User is editing a station
         station = get_object_or_404(Station, id=station_id)
-        if not user.has_row_perm(station, 'edit')\
-            and not user.has_perm('hcore.change_station'):
+        if not (user.has_row_perm(station, 'edit')\
+          and user.has_perm('hcore.change_station')):
             response = render_to_response('403.html',
                     RequestContext(request))
             response.status_code = 403
@@ -1402,7 +1402,7 @@ ALLOWED_TO_EDIT = ('waterbasin', 'waterdivision', 'person', 'organization',
                    'stationtype', 'lentity','gentity', 'variable', 'timezone',
                    'politicaldivision','instrumenttype', 'unitofmeasurement',
                    'filetype','eventtype','gentityaltcodetype','timestep',
-                   'gentityaltcode', 'gentityfile', 'gentityevent')
+                   'gentityaltcode', 'gentityfile', 'gentityevent',)
 
 @login_required
 def model_add(request, model_name=''):

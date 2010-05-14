@@ -143,11 +143,11 @@ class StationForm(GpointForm, GentityForm):
         exclude = ('overseers','creator')
 
     political_division = forms.ModelChoiceField(PoliticalDivision.objects,
-                                widget=SelectWithPop(model_name='politicaldivision'))
+                                widget=SelectWithPop(model_name='politicaldivision'),required=False)
     water_basin = forms.ModelChoiceField(WaterBasin.objects,
-                                widget=SelectWithPop(model_name='waterbasin'))
+                                widget=SelectWithPop(model_name='waterbasin'),required=False)
     water_division = forms.ModelChoiceField(WaterDivision.objects,
-                                widget=SelectWithPop(model_name='waterdivision'))
+                                widget=SelectWithPop(model_name='waterdivision'),required=False)
     # owner should be modified to allow either Person or Organization add
     owner = forms.ModelChoiceField(Lentity.objects,
                                 widget=SelectWithPop(model_name='lentity'))

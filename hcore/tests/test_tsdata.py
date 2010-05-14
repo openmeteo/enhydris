@@ -28,6 +28,7 @@ class TsTestCase(unittest.TestCase):
         self.tz.save()
         self.station = Station.objects.create(name='station', type=self.stype,
             owner=self.organization)
+        self.station.save()
         self.ts = Timeseries(name="tstest", gentity=self.station,
             time_zone=self.tz, unit_of_measurement=self.unit, variable=self.var)
         self.ts.save()
@@ -36,7 +37,13 @@ class TsTestCase(unittest.TestCase):
         self.user.save()
 
     def tearDown(self):
-        pass
+        self.stype.delete()
+        self.organization.delete()
+        self.var.delete()
+        self.unit.delete()
+        self.tz.delete()
+        self.ts.delete()
+        self.user.delete()
 
     def testTimeseriesData(self):
         """Test that the timeseries data upload/download is correct"""
@@ -67,8 +74,8 @@ class TsTestCase(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
         else:
             self.assertEqual(response.status_code, 302)
-            self.client.post('/accounts/login/', {'username':'test',
-                                        'password':'test'})
+            self.assertEquals(self.client.login(username='test',
+                            password='test'), True)
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
 
@@ -78,3 +85,5 @@ class TsTestCase(unittest.TestCase):
         lines = lines - sum(1 for s in start.next())
 
         self.assertEqual(lines,12872)
+
+        self.client.logout()
