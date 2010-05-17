@@ -88,8 +88,8 @@ SECRET_KEY = 'yy)g)w2jqkpyv9$w39i9$7(6wb+$h(_+x3gj#=@fzs2tmuj$#='
 AUTH_PROFILE_MODULE = 'hcore.UserProfile'
 
 # Session Timeout
-SESSION_COOKIE_AGE=3600
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+# SESSION_COOKIE_AGE=3600
+# SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # GentityFile upload directory (must be relative path and it'll be created
 # under site_media dir)
