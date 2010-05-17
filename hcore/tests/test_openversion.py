@@ -12,9 +12,10 @@ class OpenVTestCase(TestCase):
     fixtures = ['hcore/initial_data/groups.json',]
 
     def setUp(self):
-        # change settings
-        self.old_setting = settings.USERS_CAN_ADD_CONTENT
-        settings.USERS_CAN_ADD_CONTENT = True
+
+        self.assertEqual(settings.USERS_CAN_ADD_CONTENT, True, ("You need to"
+        " have USERS_CAN_ADD_CONTENT=True in your settings for this test to"
+        " run"))
         # create user and add him to editors group
         self.user = User.objects.create_user('opentest', 'opentest@test.com', 'opentest')
         self.editors = Group.objects.get(name='editors')
@@ -35,7 +36,6 @@ class OpenVTestCase(TestCase):
         self.ts.save()
 
     def tearDown(self):
-        settings.USERS_CAN_ADD_CONTENT = self.old_setting
         self.user.delete()
         self.stype.delete()
         self.organization.delete()
