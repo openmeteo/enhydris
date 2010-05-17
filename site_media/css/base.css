@@ -308,8 +308,7 @@ table.formset td {
     z-index:999; width:125px; position:absolute;} 
 #menu #help {z-index:999;} 
 /* search */ 
-.searchContainer div { background-color:#fff; display:inline; padding:5px;-moz-border-radius: 5px;
--webkit-border-radius: 5px;} 
+.searchContainer div { background-color:#000; padding:0px; margin:0px;height:45px; }
 .searchContainer input[type="text"] {border:none; } 
 .searchContainer img { vertical-align:middle;}
 
@@ -431,3 +430,18 @@ div#menu_bar {
 .mgmt_button { 
     border: 0;
 }
+
+
+#global-search-form input {
+background-image:url(../images/icons/magnifier.png);
+background-position: right center;
+background-repeat:no-repeat;
+font-size:14px;
+line-height: 20px;
+margin-top: 0px;
+width: 150px;
+padding:3px 20px 3px 5px;
+}
+
+#global-search-form input.placeholder { color:#bbb; font-style:italic;}
+#global-search-form button  { display: none !important; }
