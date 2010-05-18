@@ -45,7 +45,8 @@ class Lentity(models.Model):
 
     remarks = models.TextField(blank=True)
     remarks_alt = models.TextField(blank=True)
-    ordering_string = models.CharField(max_length=255, null=True, blank=True)
+    ordering_string = models.CharField(max_length=255, null=True,
+                        blank=True,editable=False)
 
     class Meta:
         verbose_name_plural="Lentities"
