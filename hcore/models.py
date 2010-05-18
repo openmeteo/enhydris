@@ -2,6 +2,7 @@ from django.db import connection as db_connection
 from django.db import models
 from django.contrib.auth.models import User, Group
 from django.conf import settings
+from django.db.models.signals import post_syncdb, post_save
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import signals
@@ -25,6 +26,17 @@ class Lookup(models.Model):
         return self.descr or self.descr_alt
 
 # Lentity and descendants
+def post_save_person_or_organization(sender, **kwargs):
+    instance = kwargs['instance']
+    try:
+        string = instance.name
+    except:
+        string = instance.last_name + instance.first_name
+    lentity = instance.lentity_ptr
+    lentity.ordering_string = string
+    super(Lentity, lentity).save()
+
+
 class Lentity(models.Model):
     # for db sync issues
     original_id = models.IntegerField(null=True, blank=True, editable=False)
@@ -33,8 +45,11 @@ class Lentity(models.Model):
 
     remarks = models.TextField(blank=True)
     remarks_alt = models.TextField(blank=True)
+    ordering_string = models.CharField(max_length=255, null=True, blank=True)
+
     class Meta:
         verbose_name_plural="Lentities"
+        ordering = ('ordering_string',)
     def __unicode__(self):
         return (self.remarks or self.remarks_alt or self.name_any or str(self.id))
 
@@ -43,7 +58,7 @@ class Lentity(models.Model):
         len_name = ""
         try:
             lentity = Person.objects.get(pk=self.id)
-            len_name = lentity.first_name+" "+lentity.last_name
+            len_name = lentity.last_name+" "+lentity.first_name
         except Person.DoesNotExist:
             try:
                 lentity = Organization.objects.get(pk=self.id)
@@ -68,6 +83,8 @@ class Person(Lentity):
     def __unicode__(self):
         return self.last_name + ' ' + self.initials
 
+post_save.connect(post_save_person_or_organization, sender=Person)
+
 class Organization(Lentity):
     name = models.CharField(max_length=200, blank=True)
     acronym = models.CharField(max_length=50, blank=True)
@@ -81,6 +98,8 @@ class Organization(Lentity):
     def __unicode__(self):
         if self.acronym: return self.acronym
         return str(self.id)
+
+post_save.connect(post_save_person_or_organization, sender=Organization)
 
 # Gentity and direct descendants
 class Gentity(models.Model):
@@ -543,6 +562,6 @@ if hasattr(settings, 'USERS_CAN_ADD_CONTENT')\
     and settings.USERS_CAN_ADD_CONTENT:
         signals.post_save.connect(make_user_editor, User)
 
-from django.db.models.signals import post_syncdb
+
 import enhydris.hcore.signals
 post_syncdb.connect(enhydris.hcore.signals.after_syncdb)
