@@ -344,10 +344,13 @@ def get_subdivision(request, division_id):
                                            Q(short_name_alt=div.short_name_alt))
     divisions = PoliticalDivision.objects.filter(parent__in=[p.id for p in parent_divs])
     response.write("[")
+    added = []
     for num,div in enumerate(divisions):
-        response.write(simplejson.dumps({"name": div.name,"id": div.pk}))
-        if num < divisions.count()-1:
-            response.write(',')
+        if not div.name in added:
+            response.write(simplejson.dumps({"name": div.name,"id": div.pk}))
+            added.append(div.name)
+            if num < divisions.count()-1:
+                response.write(',')
     response.write("]")
     return response
 
