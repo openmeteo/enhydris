@@ -75,6 +75,10 @@ function station_search() {
 	if ( wb_v.val() > 0 && ! wb_v.is(':disabled') ) { 
 		query += '&water_basin=' + wb_v.val();
 	} 
+	t_v = $('#variable');
+	if ( t_v.val() > 0 && ! t_v.is(':disabled') ) { 
+		query += '&variable=' + t_v.val();
+	}
 	o_v = $('#owner');
 	if ( o_v.val() > 0 && ! o_v.is(':disabled') ) { 
 		query += '&owner=' + o_v.val();

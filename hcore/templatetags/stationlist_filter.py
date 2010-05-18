@@ -52,6 +52,7 @@ def filter_table(request, help_inline):
                 PoliticalDivision.objects.filter(parent=None),
             'district': [],
             'prefecture': [],
+            'variable':uniquify_query(Variable.objects.all().order_by('descr',)),
             'water_division': uniquify_query(WaterDivision.objects.all()),
             'water_basin': uniquify_query(WaterBasin.objects.all()),
             'owner': uniquify_query([ l for l in Lentity.objects.all()

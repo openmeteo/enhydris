@@ -122,7 +122,7 @@ TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS=False
 # instance and can ogly view existing data. Also, in order to download the
 # data, the REMOTE_INSTANCE_CREDENTIALS should be set for the instance that all
 # the data came from.
-STORE_TSDATA_LOCALLY=True
+STORE_TSDATA_LOCALLY=False
 
 # Domain-specific credentials for instance authentication.
 # Used primarily when the 'STORE_TSDATA_LOCALLY=False' in order to pull

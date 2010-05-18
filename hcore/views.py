@@ -26,8 +26,6 @@ from enhydris.hcore.models import *
 from enhydris.hcore.decorators import *
 from enhydris.hcore.forms import *
 
-
-
 ####################################################
 # VIEWS
 
@@ -56,7 +54,7 @@ def station_detail(request, *args, **kwargs):
 
 #FIXME: Now you must keep the "political_division" FIRST in order
 @filter_by(('political_division','owner', 'type', 'water_basin',
-            'water_division',))
+            'water_division','variable',))
 @sort_by
 def station_list(request, queryset, *args, **kwargs):
 
@@ -111,7 +109,7 @@ def station_list(request, queryset, *args, **kwargs):
 # user wants to sort the table. The fields represent model fields and are
 # written the same way in this list.
 SORTING_DICT= ('id', 'id', 'name', 'water_basin', 'water_division',
-                            'political_division', 'owner', 'type')
+               'political_division', 'owner', 'type',)
 
 def station_info(request, *args, **kwargs):
     """
@@ -278,7 +276,7 @@ def instrument_detail(request, queryset, object_id, *args, **kwargs):
 
 
 @filter_by(('political_division','owner', 'type', 'water_basin',
-            'water_division',))
+            'water_division','variable',))
 @sort_by
 def map_view(request, stations='',  *args, **kwargs):
 

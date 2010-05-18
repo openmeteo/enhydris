@@ -63,6 +63,12 @@ def filter_by(filter_list):
                         queryset = queryset.filter(
                                   Q(water_basin__name=term) |
                                   Q(water_basin__name_alt=term))
+                    elif arg == "variable":
+                        obj = Variable.objects.get(pk=value)
+                        term = obj.__unicode__()
+                        queryset = queryset.filter(
+                                  Q(timeseries__variable__descr=term))
+
 
             return f(request, queryset, *args, **nkwargs)
         return _dec

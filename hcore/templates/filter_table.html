@@ -179,6 +179,34 @@
 		</tr>
 		<tr>
 			<th>
+				{% trans 'Variable' %}
+			</th>
+			<td>
+			{% if get_vars.variable %}
+				<select name="variable" class="hide_disable" id="variable">
+			{% else %}
+				<select name="variable" class="hide_disable" id="variable" disabled="disabled">
+			{% endif %}
+			<option value="0" selected="selected" disabled="disabled">{% trans "Select an Variable" %}</option>
+				{% for v in variable %}
+				  {% if get_vars.variable %}
+					  {% with get_vars.variable|intvalue as id_int %}
+						{% ifequal v.id id_int %}
+						  <option value="{{ v.id }}" selected="selected">{{ v }}</option>
+						{% else %}
+						  <option value="{{ v.id }}">{{ v }}</option>
+						{% endifequal %}
+					  {% endwith %}
+				  {% else %}
+					<option value="{{ v.id }}">{{ v }}</option>
+				  {% endif %}
+				{% endfor %}
+				</select>
+			</td>
+			<td><a class="hide_disable_toggler"> On/Off </a></td>
+		</tr>
+		<tr>
+			<th>
 				{% trans 'Owner' %}
 			</th>
 			<td>
@@ -192,13 +220,13 @@
 				  {% if get_vars.owner %}
 					  {% with get_vars.owner|intvalue as id_int %}
 						{% ifequal s.id id_int %}
-						  <option value="{{ s.id }}" selected="selected">{{ s }}</option>
+						  <option value="{{ s.id }}" selected="selected">{{ s.descr }}</option>
 						{% else %}
-						  <option value="{{ s.id }}">{{ s }}</option>
+						  <option value="{{ s.id }}">{{ s.descr }}</option>
 						{% endifequal %}
 					  {% endwith %}
 				  {% else %}
-					<option value="{{ s.id }}">{{ s }}</option>
+					<option value="{{ s.id }}">{{ s.descr }}</option>
 				  {% endif %}
 				{% endfor %}
 				</select>
