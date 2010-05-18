@@ -10,6 +10,7 @@
 
 {% block extra_head %}
   <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.qtip-1.0.0-rc2.min.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.scrollTo-min.js"></script>
   <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.minified.js"></script>
 
   <script type="text/javascript">
@@ -22,6 +23,14 @@
       $(document).ready(function(){
 		$(".verification_required").click(function(){
 			return confirmPost();
+		});
+
+		$("#instruments_ct").click(function() {
+			setTimeout("$.scrollTo('#instruments_ct',200)",1000)
+		});
+
+		$("#timeseries_ct").click(function() {
+			setTimeout("$.scrollTo('#timeseries_ct',200)",1000)
 		});
 		
 		$('.tiptip').tipTip({defaultPosition:"top"});
@@ -316,7 +325,7 @@
                 <th>{% trans 'Station (Gentity) Events' %}</th>
                 {% if station.gentityevent_set.count %}
                 <td>
-                    <a class="collapse_toggler">
+                    <a class="collapse_toggler" id="gentityevents_ct">
                             <img src="{{ MEDIA_URL }}images/icons/folder_open.png" />
                     </a>
                 </td>
@@ -368,7 +377,7 @@
                 <th>{% trans 'Instruments' %}</th>
                 {% if station.instrument_set.count %}
                 <td> 
-                    <a class="collapse_toggler">
+                    <a class="collapse_toggler" id="instruments_ct">
                         <img src="{{ MEDIA_URL }}images/icons/folder_open.png" />
                     </a>
                 </td>
@@ -431,7 +440,7 @@
                 <th>{% trans 'Timeseries' %}</th>
                 {% if station.timeseries.count %}
                 <td>
-                    <a class="collapse_toggler">
+                    <a class="collapse_toggler" id="timeseries_ct">
                         <img src="{{ MEDIA_URL }}images/icons/folder_open.png" />
                     </a>
                 </td>
