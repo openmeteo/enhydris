@@ -37,37 +37,55 @@ def filter_by(filter_list):
                     # This is a HACK for the self relation table
                     # political division
                     if arg == "political_division":
-                        queryset = Station.objects.get_by_political_division(value)
+                        try:
+                            queryset = Station.objects.get_by_political_division(value)
+                        except:
+                            queryset = queryset.none()
                     elif arg == "owner":
-                        obj = Lentity.objects.get(pk=value)
-                        term = obj.__unicode__()
-                        queryset = queryset.filter(
+                        try:
+                            obj = Lentity.objects.get(pk=value)
+                            term = obj.__unicode__()
+                            queryset = queryset.filter(
                                   Q(owner__organization__name=term) |
                                   Q(owner__person__first_name=term) &
                                   Q(owner__person__last_name=term))
+                        except:
+                            queryset = queryset.none()
                     elif arg == "type":
-                        obj = StationType.objects.get(pk=value)
-                        term = obj.__unicode__()
-                        queryset = queryset.filter(
+                        try:
+                            obj = StationType.objects.get(pk=value)
+                            term = obj.__unicode__()
+                            queryset = queryset.filter(
                                           Q(type__descr=term) |
                                           Q(type__descr_alt=term))
+                        except:
+                            queryset = queryset.none()
                     elif arg == "water_division":
-                        obj = WaterDivision.objects.get(pk=value)
-                        term = obj.__unicode__()
-                        queryset = queryset.filter(
+                        try:
+                            obj = WaterDivision.objects.get(pk=value)
+                            term = obj.__unicode__()
+                            queryset = queryset.filter(
                                       Q(water_division__name=term) |
                                       Q(water_division__name_alt=term))
+                        except:
+                            queryset = queryset.none()
                     elif arg == "water_basin":
-                        obj = WaterBasin.objects.get(pk=value)
-                        term = obj.__unicode__()
-                        queryset = queryset.filter(
+                        try:
+                            obj = WaterBasin.objects.get(pk=value)
+                            term = obj.__unicode__()
+                            queryset = queryset.filter(
                                   Q(water_basin__name=term) |
                                   Q(water_basin__name_alt=term))
+                        except:
+                            queryset = queryset.none()
                     elif arg == "variable":
-                        obj = Variable.objects.get(pk=value)
-                        term = obj.__unicode__()
-                        queryset = queryset.filter(
+                        try:
+                            obj = Variable.objects.get(pk=value)
+                            term = obj.__unicode__()
+                            queryset = queryset.filter(
                                   Q(timeseries__variable__descr=term))
+                        except:
+                            queryset = queryset.none()
 
 
             return f(request, queryset, *args, **nkwargs)

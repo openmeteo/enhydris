@@ -14,7 +14,7 @@
                 {% endif %}
                 {% with country.0 as cur_country %}
 				{% if not country.0 %} 
-				<option value="0" selected="selected" disabled="disabled">Select a Country</option>
+				<option value="-1" selected="selected" disabled="disabled">Select a Country</option>
                     {% for s in political_division %}
                       {% if get_vars.political_division %}
                         {% with get_vars.political_division|intvalue as id_int %}
@@ -74,7 +74,7 @@
 			{% else %}
 				<select name="district" class="hide_disable" id="district" disabled="disabled">
 			{% endif %}
-			<option value="0" selected="selected" disabled="disabled">Select a {{ subdiv1 }}</option>
+			<option value="-1" selected="selected" disabled="disabled">Select a {{ subdiv1 }}</option>
 				{% for s in district %}
 				  {% if get_vars.district %}
 					{% with get_vars.district|intvalue as id_int %}
@@ -102,7 +102,7 @@
 			{% else %}
 				<select name="prefecture" class="hide_disable" id="prefecture" disabled="disabled">
 			{% endif %}
-			<option value="0" selected="selected" disabled="disabled">Select a {{ subdiv2 }} </option>
+			<option value="-1" selected="selected" disabled="disabled">Select a {{ subdiv2 }} </option>
 				{% for s in prefecture %}
 				  {% if get_vars.prefecture %}
 					{% with get_vars.prefecture|intvalue as id_int %}
@@ -131,7 +131,7 @@
 			{% else %}
 				<select name="water_division" class="hide_disable" id="water_division" disabled="disabled">
 			{% endif %}
-			<option value="0" selected="selected" disabled="disabled">Select a Water Division</option>
+			<option value="-1" selected="selected" disabled="disabled">Select a Water Division</option>
 				{% for s in water_division %}
 				  {% if get_vars.water_division %}
 					{% with get_vars.water_division|intvalue as id_int %}
@@ -159,7 +159,7 @@
 			{% else %}
 				  <select name="water_basin" class="hide_disable" id="water_basin" disabled="disabled">
 			{% endif %}
-			<option value="0" selected="selected" disabled="disabled">Select a Water Basin</option>
+			<option value="-1" selected="selected" disabled="disabled">Select a Water Basin</option>
 				{% for s in water_basin %}
 				  {% if get_vars.water_basin %}
 					  {% with get_vars.water_basin|intvalue as id_int %}
@@ -187,7 +187,7 @@
 			{% else %}
 				<select name="variable" class="hide_disable" id="variable" disabled="disabled">
 			{% endif %}
-			<option value="0" selected="selected" disabled="disabled">{% trans "Select an Variable" %}</option>
+			<option value="-1" selected="selected" disabled="disabled">{% trans "Select an Variable" %}</option>
 				{% for v in variable %}
 				  {% if get_vars.variable %}
 					  {% with get_vars.variable|intvalue as id_int %}
@@ -215,7 +215,7 @@
 			{% else %}
 				<select name="owner" class="hide_disable" id="owner" disabled="disabled">
 			{% endif %}
-			<option value="0" selected="selected" disabled="disabled">Select an Owner</option>
+			<option value="-1" selected="selected" disabled="disabled">Select an Owner</option>
 				{% for s in owner %}
 				  {% if get_vars.owner %}
 					  {% with get_vars.owner|intvalue as id_int %}
@@ -243,7 +243,7 @@
 			{% else %}
 				<select name="type" class="hide_disable" id="type" disabled="disabled">
 			{% endif %}
-			<option value="0" selected="selected" disabled="disabled">Select an Station Type</option>
+			<option value="-1" selected="selected" disabled="disabled">Select an Station Type</option>
 				{% for s in type %}
 				  {% if get_vars.type %}
 					  {% with get_vars.type|intvalue as id_int %}
