@@ -436,6 +436,7 @@ div#menu_bar {
 background-image:url(../images/icons/magnifier.png);
 background-position: right center;
 background-repeat:no-repeat;
+background-color: #fff;
 font-size:14px;
 line-height: 20px;
 margin-top: 0px;
