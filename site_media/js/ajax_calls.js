@@ -53,12 +53,12 @@ function station_search() {
 	p_v = $('#prefecture'); 
 	d_v = $('#district');
     
-	if ( pd_v.val() > 0 ){ 
-		if ( p_v.val() > 0 && ! p_v.is(':disabled')) { 
+	if ( pd_v.val() > -1 ){ 
+		if ( p_v.val() > -1 && ! p_v.is(':disabled')) { 
 			query += '&political_division=' + p_v.val();
 			query += '&district=' + d_v.val();
 			query += '&prefecture='+ p_v.val();
-		} else if ( d_v.val() > 0 && ! d_v.is(':disabled')) { 
+		} else if ( d_v.val() > -1 && ! d_v.is(':disabled')) { 
 			query += '&political_division=' + d_v.val();
 			query += '&district=' + d_v.val();
 		} else if (! pd_v.is(':disabled')) {
@@ -67,24 +67,24 @@ function station_search() {
 	} 
 	
 	wd_v = $('#water_division');
-	if ( wd_v.val() > 0 && ! wd_v.is(':disabled') ) { 
+	if ( wd_v.val() > -1 && ! wd_v.is(':disabled') ) { 
 		query += '&water_division='+ wd_v.val();
 	} 
 
 	wb_v = $('#water_basin');
-	if ( wb_v.val() > 0 && ! wb_v.is(':disabled') ) { 
+	if ( wb_v.val() > -1 && ! wb_v.is(':disabled') ) { 
 		query += '&water_basin=' + wb_v.val();
 	} 
 	t_v = $('#variable');
-	if ( t_v.val() > 0 && ! t_v.is(':disabled') ) { 
+	if ( t_v.val() > -1 && ! t_v.is(':disabled') ) { 
 		query += '&variable=' + t_v.val();
 	}
 	o_v = $('#owner');
-	if ( o_v.val() > 0 && ! o_v.is(':disabled') ) { 
+	if ( o_v.val() > -1 && ! o_v.is(':disabled') ) { 
 		query += '&owner=' + o_v.val();
 	} 
 	t_v = $('#type');
-	if ( t_v.val() > 0 && ! t_v.is(':disabled') ) { 
+	if ( t_v.val() > -1 && ! t_v.is(':disabled') ) { 
 		query += '&type=' + t_v.val();
 	} 
     
