@@ -55,7 +55,7 @@ class OverseerForm(ModelForm):
         if user and not user.is_superuser:
             perms = user.get_rows_with_permission(Station(), 'edit')
             ids = [ p.object_id for p in perms]
-            self.fields["station"].queryset = Gentity.objects.filter(
+            self.fields["station"].queryset = Station.objects.filter(
                                                 id__in=ids)
 
 
@@ -76,7 +76,7 @@ class GentityFileForm(ModelForm):
         if user and not user.is_superuser:
             perms = user.get_rows_with_permission(Station(), 'edit')
             ids = [ p.object_id for p in perms]
-            self.fields["gentity"].queryset = Gentity.objects.filter(
+            self.fields["gentity"].queryset = Station.objects.filter(
                                                 id__in=ids)
 
 class GentityAltCodeForm(ModelForm):
@@ -94,7 +94,7 @@ class GentityAltCodeForm(ModelForm):
         if user and not user.is_superuser:
             perms = user.get_rows_with_permission(Station(), 'edit')
             ids = [ p.object_id for p in perms]
-            self.fields["gentity"].queryset = Gentity.objects.filter(
+            self.fields["gentity"].queryset = Station.objects.filter(
                                                 id__in=ids)
 
 
@@ -113,7 +113,7 @@ class GentityEventForm(ModelForm):
         if user and not user.is_superuser:
             perms = user.get_rows_with_permission(Station(), 'edit')
             ids = [ p.object_id for p in perms]
-            self.fields["gentity"].queryset = Gentity.objects.filter(
+            self.fields["gentity"].queryset = Station.objects.filter(
                                                 id__in=ids)
 
 
@@ -218,8 +218,8 @@ class TimeseriesForm(ModelForm):
     which a user may upload additional data.
     """
 
-    gentity = forms.ModelChoiceField(Gentity.objects.all(),
-                widget=SelectWithPop(model_name='gentity'))
+    gentity = forms.ModelChoiceField(Station.objects.all(),
+                                widget=SelectWithPop(model_name='station'),label='Station')
     variable = forms.ModelChoiceField(Variable.objects,
                                 widget=SelectWithPop(model_name='variable'))
     unit_of_measurement = forms.ModelChoiceField(UnitOfMeasurement.objects,
@@ -241,7 +241,7 @@ class TimeseriesForm(ModelForm):
         if user and not user.is_superuser:
             perms = user.get_rows_with_permission(Station(), 'edit')
             ids = [ p.object_id for p in perms]
-            self.fields["gentity"].queryset = Gentity.objects.filter(
+            self.fields["gentity"].queryset = Station.objects.filter(
                                                 id__in=ids)
 
 
