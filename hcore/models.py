@@ -21,6 +21,7 @@ class Lookup(models.Model):
     descr_alt = models.CharField(max_length=200, blank=True)
     class Meta:
         abstract = True
+        ordering = ('descr',)
 
     def __unicode__(self):
         return self.descr or self.descr_alt
@@ -366,6 +367,10 @@ class Overseer(models.Model):
 class InstrumentType(Lookup): pass
 
 class Instrument(models.Model):
+
+    class Meta:
+        ordering = ('name',)
+
     # for db sync issues
     original_id = models.IntegerField(null=True, blank=True, editable=False)
     original_db = models.ForeignKey(Database, null=True, editable=False)
@@ -387,8 +392,8 @@ class Instrument(models.Model):
         #return self.name or self.name_alt or self.type.descr or str(self.id)
         return self.name or str(self.id)
 
-# Time series and related models
 
+# Time series and related models
 class Variable(Lookup): pass
 
 class UnitOfMeasurement(Lookup):
