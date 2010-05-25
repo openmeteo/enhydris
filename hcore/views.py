@@ -707,12 +707,6 @@ def _station_edit_or_create(request,station_id=None):
                         # Give perms to the creator
                         user.add_row_perm(station, 'edit')
                         user.add_row_perm(station, 'delete')
-                    # Handle maintainers
-                    if old_maintainers:
-                        for m_old in old_maintainers:
-                            m_old.del_row_perm(station,'edit')
-                    for m_new in station.maintainers.all():
-                        m_new.add_row_perm(station,'edit')
             station.save()
             for type in formsets:
                 formsets[type].save()
@@ -769,8 +763,8 @@ def station_delete(request,station_id):
     (handled by django.contrib.auth)
     """
     station = Station.objects.get(id=station_id)
-    if ( request.user.has_row_perm(station,'delete') or
-         request.user.has_perm('hcore.delete_station')):
+    if request.user.has_row_perm(station,'delete') and\
+         request.user.has_perm('hcore.delete_station'):
         station.delete()
         ref = request.META.get('HTTP_REFERER', None)
         if ref and not ref.endswith(reverse('station_detail',args=[station_id])):
@@ -872,7 +866,8 @@ def timeseries_delete(request, timeseries_id):
     tseries = get_object_or_404(Timeseries, id=timeseries_id)
     related_station = tseries.related_station
     if tseries and related_station:
-        if request.user.has_row_perm(related_station, 'edit'):
+        if request.user.has_row_perm(related_station, 'edit') and\
+         request.user.has_perm('hcore.delete_timeseries'):
             ts = pthelma.timeseries.Timeseries(int(timeseries_id))
             ts.delete_from_db(django.db.connection)
             tseries.delete()
@@ -977,7 +972,8 @@ def gentityfile_delete(request, gentityfile_id):
     gfile = get_object_or_404(GentityFile, id=gentityfile_id)
     related_station = gfile.related_station
     if gfile and related_station:
-        if request.user.has_row_perm(related_station, 'edit'):
+        if request.user.has_row_perm(related_station, 'edit') and\
+         request.user.has_perm('hcore.delete_gentityfile'):
             gfile.delete()
             ref = request.META.get('HTTP_REFERER', None)
             if ref:
@@ -1075,7 +1071,8 @@ def gentityevent_delete(request, gentityevent_id):
     gevent = get_object_or_404(GentityEvent, id=gentityevent_id)
     related_station = gevent.related_station
     if gevent and related_station:
-        if request.user.has_row_perm(related_station, 'edit'):
+        if request.user.has_row_perm(related_station, 'edit') and\
+         request.user.has_perm('hcore.delete_gentityevent'):
             gevent.delete()
             ref = request.META.get('HTTP_REFERER', None)
             if ref:
@@ -1173,7 +1170,8 @@ def gentityaltcode_delete(request, gentityaltcode_id):
     galtcode = get_object_or_404(GentityAltCode, id=gentityaltcode_id)
     related_station = galtcode.related_station
     if galtcode and related_station:
-        if request.user.has_row_perm(related_station, 'edit'):
+        if request.user.has_row_perm(related_station, 'edit') and\
+         request.user.has_perm('hcore.delete_gentityaltcode'):
             galtcode.delete()
             ref = request.META.get('HTTP_REFERER', None)
             if ref:
@@ -1275,7 +1273,8 @@ def overseer_delete(request, overseer_id):
     overseer = get_object_or_404(Overseer, id=overseer_id)
     related_station = overseer.station
     if overseer and related_station:
-        if request.user.has_row_perm(related_station, 'edit'):
+        if request.user.has_row_perm(related_station, 'edit') and\
+         request.user.has_perm('hcore.delete_overseer'):
             overseer.delete()
             ref = request.META.get('HTTP_REFERER', None)
             if ref:
@@ -1379,7 +1378,8 @@ def instrument_delete(request, instrument_id):
     instrument = get_object_or_404(Instrument, id=instrument_id)
     related_station = instrument.station
     if instrument and related_station:
-        if request.user.has_row_perm(related_station, 'edit'):
+        if request.user.has_row_perm(related_station, 'edit') and\
+         request.user.has_perm('hcore.delete_instrument'):
             instrument.delete()
             ref = request.META.get('HTTP_REFERER', None)
             if ref and not ref.endswith(reverse('instrument_detail',args=[instrument_id])):

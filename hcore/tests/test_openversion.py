@@ -16,10 +16,15 @@ class OpenVTestCase(TestCase):
         self.assertEqual(settings.USERS_CAN_ADD_CONTENT, True, ("You need to"
         " have USERS_CAN_ADD_CONTENT=True in your settings for this test to"
         " run"))
-        # create user and add him to editors group
+        # create user and add him to editors group. this'll be the
+        # creator/owner to check permissions
         self.user = User.objects.create_user('opentest', 'opentest@test.com', 'opentest')
+        # another user who won't have permissions over the tested objects to
+        # verify that permission handling works as expected.
+        self.user2 = User.objects.create_user('fail', 'fail@faildom.com', 'fail')
         self.editors = Group.objects.get(name='editors')
         self.editors.user_set.add(self.user)
+        self.editors.user_set.add(self.user2)
 
         # create a station, instrument and timeseries to check permissions
         self.stype = StationType.objects.create(descr='stype')
@@ -104,7 +109,7 @@ class OpenVTestCase(TestCase):
 
         # edit my station. this should work
         url = "/stations/edit/%s/" % str(s.pk)
-        resp = self.client.get(url, follow=True)
+        resp = self.client.get(url)
         self.assertEquals(resp.status_code, 200)
         self.assertTemplateUsed(resp, "hcore/station_edit.html")
 
@@ -119,7 +124,52 @@ class OpenVTestCase(TestCase):
         resp = self.client.get(url)
         self.assertEquals(resp.status_code, 403)
 
+        # try to delete a random station. this should fail
+        url = "/stations/delete/%s/" % str(self.station.pk)
+        resp = self.client.get(url)
+        self.assertEquals(resp.status_code, 403)
+
+        # recreate again for further tests
+        url = "/stations/add/"
+        resp = self.client.post(url, post_data)
+        self.assertEquals(resp.status_code, 302)
+
+        s = Station.objects.get(name='station_test')
+
         self.client.logout()
+
+        # login as another user to check 403 perms
+        self.assertEquals(self.client.login(username='fail',
+                password='fail'), True)
+
+        # edit station. this shouldn't work
+        url = "/stations/edit/%s/" % str(s.pk)
+        resp = self.client.get(url)
+        self.assertEquals(resp.status_code, 403)
+
+        # delete station. this shouldn't work
+        url = "/stations/delete/%s/" % str(s.pk)
+        resp = self.client.get(url)
+        self.assertEquals(resp.status_code, 403)
+
+        # add user to maintainers and check if it's fixed.
+        s.maintainers.add(self.user2)
+        s.save()
+
+        # edit maintaining station. this should work
+        url = "/stations/edit/%s/" % str(s.pk)
+        resp = self.client.get(url)
+        self.assertEquals(resp.status_code, 200)
+        self.assertTemplateUsed(resp, "hcore/station_edit.html")
+
+        # delete maintaining station. this shouldn't work
+        url = "/stations/delete/%s/" % str(s.pk)
+        resp = self.client.get(url, follow=True)
+        self.assertEquals(resp.status_code, 403)
+
+        self.client.logout()
+        s.delete()
+
 
     def testTimeseriesPermissions(self):
         """
@@ -165,17 +215,56 @@ class OpenVTestCase(TestCase):
 
         # edit my timeseries. this should work
         url = "/timeseries/edit/%s/" % str(t.pk)
-        resp = self.client.get(url, follow=True)
+        resp = self.client.get(url)
         self.assertEquals(resp.status_code, 200)
         self.assertTemplateUsed(resp, "hcore/timeseries_edit.html")
 
-        # delete my station. this should work
+        # delete my timeseries. this should work
         url = "/timeseries/delete/%s/" % str(t.pk)
         resp = self.client.get(url, follow=True)
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(Station.objects.filter(name='timeseries_test').count(),0)
 
+        # recreate deleted timeseries for further tests
+        url = "/timeseries/add/"
+        resp = self.client.post(url, post_data)
+        t = Timeseries.objects.get(name="timeseries_test")
+        self.assertEquals(resp.status_code, 302)
+
         self.client.logout()
+
+        # login as another user to check 403 perms
+        self.assertEquals(self.client.login(username='fail',
+                password='fail'), True)
+
+        # edit my timeseries. this shouldn't work
+        url = "/timeseries/edit/%s/" % str(t.pk)
+        resp = self.client.get(url)
+        self.assertEquals(resp.status_code, 403)
+
+        # delete my timeseries. this shouldn't work
+        url = "/timeseries/delete/%s/" % str(t.pk)
+        resp = self.client.get(url, follow=True)
+        self.assertEquals(resp.status_code, 403)
+
+        # add user to maintainers and check if it's fixed.
+        s.maintainers.add(self.user2)
+        s.save()
+
+        # edit maintaining timeseries. this should work
+        url = "/timeseries/edit/%s/" % str(t.pk)
+        resp = self.client.get(url)
+        self.assertEquals(resp.status_code, 200)
+        self.assertTemplateUsed(resp, "hcore/timeseries_edit.html")
+
+        # delete maintaining timeseries, this should work
+        url = "/timeseries/delete/%s/" % str(t.pk)
+        resp = self.client.get(url, follow=True)
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(Station.objects.filter(name='timeseries_test').count(),0)
+
+
+        s.delete()
 
     def testInstrumentPermissions(self):
         """
@@ -230,7 +319,46 @@ class OpenVTestCase(TestCase):
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(Station.objects.filter(name='instrument_test').count(),0)
 
+        # recreate deleted instrument for further tests
+        url = "/instrument/add/"
+        resp = self.client.post(url, post_data)
+        self.assertEquals(resp.status_code, 302)
+
+        i = Instrument.objects.get(name="instrument_test")
+
         self.client.logout()
+
+        # login as another user to check 403 perms
+        self.assertEquals(self.client.login(username='fail',
+                password='fail'), True)
+
+        # edit my instrument. this shouldn't work
+        url = "/instrument/edit/%s/" % str(i.pk)
+        resp = self.client.get(url, follow=True)
+        self.assertEquals(resp.status_code, 403)
+
+        # delete my instrument. this shouldn't work
+        url = "/instrument/delete/%s/" % str(i.pk)
+        resp = self.client.get(url, follow=True)
+        self.assertEquals(resp.status_code, 403)
+
+        # add user to maintainers and check if it's fixed.
+        s.maintainers.add(self.user2)
+        s.save()
+
+        # edit my instrument. this should work
+        url = "/instrument/edit/%s/" % str(i.pk)
+        resp = self.client.get(url, follow=True)
+        self.assertEquals(resp.status_code, 200)
+        self.assertTemplateUsed(resp, "hcore/instrument_edit.html")
+
+        # delete my station. this should work
+        url = "/instrument/delete/%s/" % str(i.pk)
+        resp = self.client.get(url, follow=True)
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(Station.objects.filter(name='instrument_test').count(),0)
+
+
 
     def testGenericModelCreation(self):
         """

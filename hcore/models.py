@@ -299,6 +299,28 @@ class StationManager(models.Manager):
         leaves = PoliticalDivision.objects.get_leaf_subdivisions(political_division)
         return Station.objects.filter(political_division__in=leaves)
 
+def handle_maintainer_permissions(sender, instance, **kwargs):
+    from enhydris.permissions import Permission
+    from django.contrib.contenttypes.models import ContentType
+
+
+    if hasattr(settings, 'USERS_CAN_ADD_CONTENT')\
+        and settings.USERS_CAN_ADD_CONTENT:
+            old_perms = Permission.objects.filter(
+                            object_id=instance.pk,
+                            content_type=ContentType.objects.get_for_model(Station))
+
+            old_users = [ p.user for p in old_perms ]
+            new_users = instance.maintainers.all()
+            # remove all old perms for maintainers. keep for creator
+            for p in old_perms:
+                if not p.user == instance.creator:
+                    p.delete()
+
+            # add new perms
+            [ u.add_row_perm(instance,'edit') for u in new_users ]
+    else:
+        pass
 
 class Station(Gpoint):
     owner = models.ForeignKey(Lentity, related_name="owned_stations")
@@ -324,6 +346,8 @@ class Station(Gpoint):
     def show_overseers(self):
         return " ".join([i.__unicode__() for i in self.overseers.all()])
     show_overseers.short_description = "List of Overseers"
+
+signals.post_save.connect(handle_maintainer_permissions, Station)
 
 class Overseer(models.Model):
     # for db sync issues

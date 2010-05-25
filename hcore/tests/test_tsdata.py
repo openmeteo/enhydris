@@ -5,8 +5,7 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection as dj_connection
 from django.test.client import Client
-from enhydris.hcore.models import (Station, StationType, Organization, Timeseries,
-                            TimeZone, Variable, UnitOfMeasurement)
+from enhydris.hcore.models import *
 from enhydris.hcore.forms import TimeseriesDataForm
 
 class TsTestCase(unittest.TestCase):
