@@ -495,7 +495,10 @@ class Timeseries(models.Model):
             " '^(.*?),'), 'YYYY-MM-DD HH24:MI')::timestamp FROM ts_records"
             " WHERE id=%d;" % (ts.id)
         )
-        r = c.fetchone()
+        try:
+            r = c.fetchone()
+        except:
+            return None
 
         c.close()
         return r[0]
@@ -512,7 +515,10 @@ class Timeseries(models.Model):
             " 'YYYY-MM-DD HH24:MI')::timestamp FROM ts_records"
             " WHERE id=%d;" % (ts.id)
         )
-        r = c.fetchone()
+        try:
+            r = c.fetchone()
+        except:
+            return None
 
         c.close()
         return r[0]
