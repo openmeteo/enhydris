@@ -11,10 +11,10 @@ Emitter.register('default', JSONEmitter, 'application/json; charset=utf-8')
 Emitter.register('json', CFEmitter, 'application/json; charset=utf-8')
 # hts emitter for remote hts file downloading (incl. http authentication)
 Emitter.register('hts', TSEmitter, 'text/vnd.openmeteo.timeseries;charset=iso-8859-7')
-auth = RemoteInstanceAuthentication(realm="Timeseries realm")
+ts_auth = RemoteInstanceAuthentication(realm="Timeseries realm")
 # Emitter for gfd (aka GenityFileData)
 Emitter.register('gfd', GFEmitter )
-auth = RemoteInstanceAuthentication(realm="GentityFile realm")
+gf_auth = RemoteInstanceAuthentication(realm="GentityFile realm")
 
 # Used for gis
 station_handler = Resource(StationHandler)
@@ -52,8 +52,8 @@ TimeStep_Resource = Resource(TimeStep_Handler)
 Timeseries_Resource = Resource(Timeseries_Handler)
 
 # Used for timeseries data
-TSDATA_Resource = Resource(handler=TSDATA_Handler, authentication=auth)
-GFDATA_Resource = Resource(handler=GFDATA_Handler, authentication=auth)
+TSDATA_Resource = Resource(handler=TSDATA_Handler, authentication=ts_auth)
+GFDATA_Resource = Resource(handler=GFDATA_Handler, authentication=gf_auth)
 
 # urls
 urlpatterns = patterns('',
