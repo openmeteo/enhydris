@@ -39,7 +39,7 @@
   <div id="header">
 	<ul id="menu"> 
 		<li class="logo"> 
-			<a href='/'>
+			<a href='{% url index %}'>
 			<img style="float:left;border:0;" alt="" src="{{ MEDIA_URL}}images/menu_left.png" /> 
 			</a>
 			<ul id="main"> 
@@ -153,13 +153,15 @@
 	</div>
 	    <div id="content">
 		<div id="body">
-        {% if notifications %}
+		<!--
+	    {% if notifications %}
         <ul class="notifications">
                 {% for message in notifications %}
                 <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
                 {% endfor %}
         </ul>
         {% endif %}
+        -->
 		  {% block content %}
 			<div id="body_main">
 			  {% block messages %}
