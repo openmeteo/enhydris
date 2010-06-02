@@ -712,7 +712,8 @@ def _station_edit_or_create(request,station_id=None):
                 formsets[type].save()
             if not station_id:
                 station_id = str(station.id)
-            return HttpResponseRedirect('/stations/d/'+station_id)
+            return HttpResponseRedirect(reverse('station_detail',
+                                kwargs={'object_id':station_id}))
     else:
         if station:
             form = StationForm(instance=station)
@@ -831,7 +832,8 @@ def _timeseries_edit_or_create(request,tseries_id=None,station_id=None):
             tseries.save()
             if not tseries_id:
                 tseries_id=str(tseries.id)
-            return HttpResponseRedirect('/timeseries/d/'+tseries_id)
+            return HttpResponseRedirect(reverse('timeseries_detail',
+                                        kwargs={'object_id':tseries_id}))
     else:
         if tseries:
             form = TimeseriesDataForm(instance=tseries,user=user)
@@ -937,7 +939,8 @@ def _gentityfile_edit_or_create(request,gfile_id=None,station_id=None):
             gfile.save()
             if not gfile_id:
                 gfile_id=str(gfile.id)
-            return HttpResponseRedirect('/stations/d/'+str(gfile.gentity.id))
+            return HttpResponseRedirect(reverse('station_detail',
+                                 kwargs={'object_id': str(gfile.gentity.id)}))
     else:
         if gfile:
             form = GentityFileForm(instance=gfile,user=user)
@@ -1036,7 +1039,9 @@ def _gentityevent_edit_or_create(request,gevent_id=None,station_id=None):
             gevent.save()
             if not gevent_id:
                 gevent_id=str(gevent.id)
-            return HttpResponseRedirect('/stations/d/'+str(gevent.gentity.id))
+
+            return HttpResponseRedirect(reverse('station_detail',
+                        kwargs={'object_id': str(gevent.gentity.id)}))
     else:
         if gevent:
             form = GentityEventForm(instance=gevent,user=user)
@@ -1135,7 +1140,8 @@ def _gentityaltcode_edit_or_create(request,galtcode_id=None,station_id=None):
             galtcode.save()
             if not galtcode_id:
                 galtcode_id=str(galtcode.id)
-            return HttpResponseRedirect('/stations/d/'+str(galtcode.gentity.id))
+            return HttpResponseRedirect(reverse('station_detail',
+                        kwargs={'object_id': str(galtcode.gentity.id)}))
     else:
         if galtcode:
             form = GentityAltCodeForm(instance=galtcode,user=user)
@@ -1238,7 +1244,8 @@ def _overseer_edit_or_create(request,overseer_id=None,station_id=None):
             overseer.save()
             if not overseer_id:
                 overseer_id=str(overseer.id)
-            return HttpResponseRedirect('/stations/d/'+str(overseer.station.id))
+            return HttpResponseRedirect(reverse('station_detail',
+                        kwargs={'object_id':str(overseer.station.id)}))
     else:
         if overseer:
             form = OverseerForm(instance=overseer,user=user)
@@ -1343,7 +1350,8 @@ def _instrument_edit_or_create(request,instrument_id=None,station_id=None):
             instrument.save()
             if not instrument_id:
                 instrument_id=str(instrument.id)
-            return HttpResponseRedirect('/instruments/d/'+instrument_id)
+            return HttpResponseRedirect(reverse('instrument_detail',
+                        kwargs={'object_id':instrument_id}))
     else:
         if instrument:
             form = InstrumentForm(instance=instrument,user=user)
@@ -1439,7 +1447,8 @@ def model_add(request, model_name=''):
                  'opener.dismissAddAnotherPopup(window,"%s","%s");</script>'\
                  % (escape(newObject._get_pk_val()), escape(newObject)))
     return create_object(request, model,
-                post_save_redirect="/add/"+lower(model.__name__)+"/?_complete=1",
+                post_save_redirect=reverse('model_add',
+                    kwargs={'model_name':lower(model.__name__)})+"?_complete=1",
                 template_name='hcore/model_add.html',
                 form_class= TimeStepForm if model.__name__=='TimeStep' else None,
                 extra_context={'form_prefix': model.__name__,})
