@@ -113,13 +113,7 @@
             </sup>
         {% endif %}
     </h2>
-        {% if notifications %}
-        <ul class="notifications">
-                {% for message in notifications %}
-                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                {% endfor %}
-        </ul>
-        {% endif %}
+
         {% if timeseries %}
         <div style="float:left;max-width:600px;min-width:450px;">
         {% if user.is_authenticated or anonymous_can_download_data %}

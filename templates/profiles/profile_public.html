@@ -53,7 +53,7 @@
 				{% for station in profile.user.created_stations.all %}
 				{% url station_detail station_id as station_url %}
 				  <tr class="{% cycle 'odd' 'even' %}">
-					<td class="anchor_override"><a href="/stations/d/{{ station.id }}/">{{ station.id }}</a></td>
+					<td class="anchor_override"><a href="{% url station_detail station.id %}">{{ station.id }}</a></td>
 					<td>{{ station.name }}</td>
 					<td>{{ station.water_basin }}</td>
 					<td>{{ station.water_division }}</td>

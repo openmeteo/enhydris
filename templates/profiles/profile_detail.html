@@ -57,7 +57,7 @@
 		<h3>Profile Management:</h3>
 		<div class="anchor_override">
 			<img src="{{MEDIA_URL}}images/icons/user_edit.png" />
-			<a href="/profile/edit/">{% trans "Edit your user profile" %}</a></div>
+			<a href="{% url profiles_edit_profile %}">{% trans "Edit your user profile" %}</a></div>
 		<div class="anchor_override">
 		
 			<img src="{{MEDIA_URL}}images/icons/key.png" />
@@ -65,7 +65,7 @@
 		{% if user.is_staff %}
 		<div class="anchor_override">
 			<img src="{{MEDIA_URL}}images/icons/lock_open.png" />
-			<a href="/admin/">{% trans "Access the admin panel" %}</a></div>
+			<a href="{% url admin:index %}">{% trans "Access the admin panel" %}</a></div>
 		{% endif %}
 	</div>
 	{% if user_enabled_content %} 
@@ -73,7 +73,9 @@
 
 		
 		{% if user.is_superuser %}
-			<p class="anchor_override">{% trans "As a superuser, you can edit all the stations. To find the station you are looking for, go to the" %} <a href="/stations/l/">{% trans "station list." %}</a></p>
+			<p class="anchor_override">{% trans "As a superuser, you can edit
+			all the stations. To find the station you are looking for, go to
+			the" %} <a href="{% url station_list %}">{% trans "station list." %}</a></p>
 		{% else %} 
 			{% if user.created_stations.all %}
 				<h3>{% trans "You have created the following stations: " %}</h3>
@@ -92,7 +94,7 @@
 				{% for station in user.created_stations.all %}
 				{% url station_detail station_id as station_url %}
 				  <tr class="{% cycle 'odd' 'even' %}">
-					<td class="anchor_override"><a href="/stations/d/{{ station.id }}/">{{ station.id }}</a></td>
+					<td class="anchor_override"><a href="{% url station_detail station.id %}">{{ station.id }}</a></td>
 					<td>{{ station.name }}</td>
 					<td>{{ station.water_basin }}</td>
 					<td>{{ station.water_division }}</td>
@@ -123,7 +125,7 @@
 				{% for station in user.maintaining_stations.all %}
 				{% url station_detail station_id as station_url %}
 				  <tr class="{% cycle 'odd' 'even' %}">
-					<td class="anchor_override"><a href="/stations/d/{{ station.id }}/">{{ station.id }}</a></td>
+					<td class="anchor_override"><a href="{% url station_detail station.id %}">{{ station.id }}</a></td>
 					<td>{{ station.name }}</td>
 					<td>{{ station.water_basin }}</td>
 					<td>{{ station.water_division }}</td>

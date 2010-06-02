@@ -82,7 +82,7 @@
 {% block content %}
 
 <form method="post" action="" class="wide">
-    
+{% csrf_token %} 
 <div id="tabs">
 	<ul>
 		<li class="noborder"><a href="#tabs-1">Station</a></li>

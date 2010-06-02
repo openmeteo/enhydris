@@ -119,9 +119,12 @@ TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS=False
 
 # Options for timeseries data
 # If this is set to false then users cannot upload timeseries data to this
-# instance and can ogly view existing data. Also, in order to download the
+# instance and can only view existing data. Also, in order to download the
 # data, the REMOTE_INSTANCE_CREDENTIALS should be set for the instance that all
 # the data came from.
+#
+# NOTE: NEVER ENABLE STORE_TSDATA_LOCALLY and USERS_CAN_ADD_CONTENT at the same
+# time!!!
 STORE_TSDATA_LOCALLY=True
 
 # Domain-specific credentials for instance authentication.
@@ -163,6 +166,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.gzip.GZipMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django_notify.middleware.NotificationsMiddleware',
     'pagination.middleware.PaginationMiddleware',
     'django_sorting.middleware.SortingMiddleware',

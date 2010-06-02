@@ -110,7 +110,9 @@
 				<img style="float:left" alt="" src="{{ MEDIA_URL }}images/top_menu_left.png"/>
 			</li>
 			<li id="userinfo">
-            {% blocktrans with user.username as user_username %}Welcome <a href="/profile/{{ user_username }}">{{ user_username }}</a>!{% endblocktrans %}&nbsp;
+			{% with user.username as user_username %}
+            {% trans "Welcome" %}&nbsp;<a href="{% url profiles_profile_detail user_username %}">{{ user_username }}</a>!&nbsp;
+            {% endwith %}
 			</li>
 
 			<li><a href="{% url auth_logout %}">Logout</a> 
@@ -129,6 +131,7 @@
 			<li>
 			{% url django.views.i18n.set_language as set_language_url %}
 				<form action="{{ set_language_url }}" method="post">
+				{% csrf_token %}
 				<p style="display: inline;">
 					<input name="next" type="hidden" value="{{ request.path }}" />
 						<select name="language">
@@ -150,6 +153,13 @@
 	</div>
 	    <div id="content">
 		<div id="body">
+        {% if notifications %}
+        <ul class="notifications">
+                {% for message in notifications %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+        </ul>
+        {% endif %}
 		  {% block content %}
 			<div id="body_main">
 			  {% block messages %}

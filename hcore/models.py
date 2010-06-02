@@ -135,8 +135,8 @@ class Gpoint(Gentity):
     altitude = models.FloatField(null=True, blank=True)
     asrid = models.IntegerField(null=True, blank=True)
     f_dependencies = ['Gentity']
-    def save(self, force_insert=False, force_update=False):
-        super(Gpoint, self).save(force_insert, force_update)
+    def save(self, force_insert=False, force_update=False, *args, **kwargs):
+        super(Gpoint, self).save(force_insert, force_update, *args, **kwargs)
 
 class Gline(Gentity):
     gpoint1 = models.ForeignKey(Gpoint, null=True, blank=True, related_name='glines1')
@@ -450,10 +450,10 @@ class TimeStep(Lookup):
         return "(0,0)"
 
         return "(%d, %d)" % (self.length_minutes, self.length_months)
-    def save(self, force_insert=False, force_update=False):
+    def save(self, force_insert=False, force_update=False, *args, **kwargs):
         if not _int_xor(self.length_minutes, self.length_months):
             raise Exception(_("%s is not a valid time step; exactly one of minutes and months must be zero") % self.__unicode__())
-        super(TimeStep, self).save(force_insert, force_update)
+        super(TimeStep, self).save(force_insert, force_update, *args, **kwargs)
 
 # Function to call on Timeseries predelete to remove ts_records
 def delete_ts_records(sender, instance, **kwargs):
@@ -530,7 +530,7 @@ class Timeseries(models.Model):
             return None
     def __unicode__(self):
         return self.name
-    def save(self, force_insert=False, force_update=False):
+    def save(self, force_insert=False, force_update=False, *args, **kwargs):
         if not self.time_step:
             if self.nominal_offset_minutes or self.nominal_offset_months \
             or self.actual_offset_minutes or self.actual_offset_months:
@@ -544,7 +544,7 @@ class Timeseries(models.Model):
                         or (self.nominal_offset_minutes is not None
                                     and self.nominal_offset_months is None):
                 raise Exception(_("Invalid time step: nominal offsets must be both null or both not null"))
-        super(Timeseries, self).save(force_insert, force_update)
+        super(Timeseries, self).save(force_insert, force_update, *args, **kwargs)
 
 signals.pre_delete.connect(delete_ts_records, Timeseries)
 

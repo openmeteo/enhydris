@@ -28,6 +28,7 @@ $(document).ready(function() {
       <h3>{% trans "Create an account" %}</h3>
      
       <form method="post" action="" class="wide">
+		{% csrf_token %}
         <table>  
             <tr>
         <th align="right">    
@@ -96,7 +97,7 @@ $(document).ready(function() {
     <p>{% trans "Please fill out the form (all fields are required), and your account will be created." %}<br>
     {% trans "You'll then be sent an email with instructions on how to finish your registration." %}</p>
     
-    <p>{% trans "If you already have an account, you can" %} <a href="/accounts/login/">{% trans "login here" %}</a>.</p>
+    <p>{% trans "If you already have an account, you can" %} <a href="{% url auth_login %}">{% trans "login here" %}</a>.</p>
     
     {% endblock %}
     
