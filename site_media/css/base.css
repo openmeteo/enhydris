@@ -308,7 +308,7 @@ table.formset td {
     z-index:999; width:125px; position:absolute;} 
 #menu #help {z-index:999;} 
 /* search */ 
-.searchContainer div { background-color:#000; padding:0px; margin:0px;height:45px; }
+.searchContainer div { background-color:#172322; padding:0px; margin:0px;height:45px; }
 .searchContainer input[type="text"] {border:none; } 
 .searchContainer img { vertical-align:middle;}
 
