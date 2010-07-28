@@ -11,7 +11,6 @@
     {% else %}
     <form method="post" action=".">
    {% endif %}
-   {% csrf_token %} 
    {{ form.as_p }}
    <input type="submit" value="Post" />
    </form>

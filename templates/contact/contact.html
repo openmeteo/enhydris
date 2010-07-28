@@ -24,7 +24,6 @@
 
 
 <form id="ajax-contact-form" action="." style="padding:1em;" method="post">
-{% csrf_token %}
 <div><input type="hidden" value="{{ hash }}" name="hash" /></div>
 <div><label for="cname">Name</label><input id="cname" class="textbox required" type="text" name="name" value="" /><br /></div>
 

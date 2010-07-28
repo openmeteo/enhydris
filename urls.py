@@ -44,11 +44,11 @@ urlpatterns = patterns('',
     # help page
     (r'^help/$', help,{}, 'help'),
 
-    # inter/ationalization
+    # internationalization
     (r'^i18n/', include('django.conf.urls.i18n')),
 
     # Uncomment the next line to enable the admin:
-    (r'^admin/', include(admin.site.urls)),
+    (r'^admin/(.*)', admin.site.root),
     (r'^grappelli/', include('grappelli.urls')),
     (r'^ajax/', include('ajax_select.urls')),
     (r'^api/', include('enhydris.api.urls')),
