@@ -253,7 +253,7 @@ class TimeseriesForm(ModelForm):
         ts = timeseries.Timeseries()
         try:
             ts.read_file(self.cleaned_data['data'])
-        except Exception as e:
+        except Exception, e:
             raise forms.ValidationError(str(e))
 
         return self.cleaned_data['data']
@@ -309,7 +309,7 @@ class TimeseriesForm(ModelForm):
             if self.cleaned_data['data_policy'] == 'A':
                 try:
                     ts.append_to_db(db.connection, transaction=db.transaction)
-                except Exception as e:
+                except Exception, e:
                     raise forms.ValidationError(_(e.message))
 
         return self.cleaned_data
