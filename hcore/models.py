@@ -491,9 +491,10 @@ class Timeseries(models.Model):
         # This should be removed if ticket #112 gets resolved
         c = db_connection.cursor()
         c.execute(
-            "SELECT to_timestamp(substring(coalesce(top,bottom) from"
+            "SELECT to_timestamp(substring("
+            " CASE WHEN top='' OR top IS NULL THEN bottom ELSE top END from"
             " '^(.*?),'), 'YYYY-MM-DD HH24:MI')::timestamp FROM ts_records"
-            " WHERE id=%d;" % (ts.id)
+            " WHERE id=%s" , (ts.id,)
         )
         try:
             r = c.fetchone()
@@ -511,9 +512,9 @@ class Timeseries(models.Model):
         # This should be removed if ticket #112 gets resolved
         c = db_connection.cursor()
         c.execute(
-            "SELECT to_timestamp(substring(bottom from E'([^,]*?),[^]*?]?$'),"
+            "SELECT to_timestamp(substring(bottom from E'\n([^,]*?),[^\n]*?\n?$'),"
             " 'YYYY-MM-DD HH24:MI')::timestamp FROM ts_records"
-            " WHERE id=%d;" % (ts.id)
+            " WHERE id=%s" , (ts.id,)
         )
         try:
             r = c.fetchone()
