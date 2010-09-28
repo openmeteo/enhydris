@@ -30,7 +30,9 @@ def after_syncdb(sender, **kwargs):
                 retvalue timestamp;
             BEGIN
                 SELECT INTO retvalue
-                    to_timestamp(substring(coalesce(top,bottom) from '^(.*?),'),
+                    to_timestamp(substring(CASE WHEN top='' OR top IS
+                                            NULL THEN bottom ELSE top END 
+                        from '^(.*?),'),
                         'YYYY-MM-DD HH24:MI')::timestamp
                 FROM ts_records
                 WHERE id=aid;
@@ -40,7 +42,7 @@ def after_syncdb(sender, **kwargs):
         transaction.commit()
     except:
         sys.stderr.write(
-            "ts_records creation failed; presumably it already existed\n")
+            "timeseries_start_date creation failed; maybe it already existed\n")
         transaction.rollback()
 
     sys.stderr.write("Creating database function timeseries_end_date...\n")
