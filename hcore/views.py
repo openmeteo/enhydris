@@ -5,6 +5,7 @@ import mimetypes
 import os
 import django.db
 import pthelma.timeseries
+from pthelma.timeseries import IntervalType as it
 from string import lower, split
 from django.http import (HttpResponse, HttpResponseRedirect,
                             HttpResponseForbidden, Http404)
@@ -503,15 +504,17 @@ def download_timeseries(request, object_id):
                                             else 0,
                 length_months = t.time_step.length_months if t.time_step
                                             else 0,
-                nominal_offset =
-                    None if None in
-                        (t.nominal_offset_minutes, t.nominal_offset_months)
-                    else (t.nominal_offset_minutes, t.nominal_offset_months),
-                actual_offset =
-                    (t.actual_offset_minutes, t.actual_offset_months)
-                    if t.actual_offset_minutes and t.actual_offset_months
-                    else (0,0),
-                interval_type = t.interval_type.value
+                nominal_offset = None if None in
+                            (t.nominal_offset_minutes, t.nominal_offset_months)
+                       else (t.nominal_offset_minutes, t.nominal_offset_months),
+                actual_offset = None if None in
+                            (t.actual_offset_minutes, t.actual_offset_months)
+                       else (t.actual_offset_minutes, t.actual_offset_months),
+                interval_type = None if not t.interval_type else\
+                        {'sum': it.SUM, 'average': it.AVERAGE,\
+                         'vector_average': it.VECTOR_AVERAGE,\
+                         'minimum': it.MINIMUM,\
+                         'maximum': it.MAXIMUM}[t.interval_type.value.lower()]
             ),
             unit = t.unit_of_measurement.symbol,
             title = t.name,
