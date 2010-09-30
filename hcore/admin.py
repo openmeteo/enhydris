@@ -59,6 +59,9 @@ class InstrumentTypeAdmin(admin.ModelAdmin):
 class VariableAdmin(admin.ModelAdmin):
     list_display = [f.name for f in Variable._meta.fields]
 
+class IntervalTypeAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in IntervalType._meta.fields]
+
 class UnitOfMeasurementAdmin(admin.ModelAdmin):
     list_display = [f.name for f in UnitOfMeasurement._meta.fields]
 
@@ -92,6 +95,7 @@ admin.site.register(Variable, VariableAdmin)
 admin.site.register(UnitOfMeasurement, UnitOfMeasurementAdmin)
 admin.site.register(TimeStep, TimeStepAdmin)
 admin.site.register(TimeZone, TimeZoneAdmin)
+admin.site.register(IntervalType, IntervalTypeAdmin)
 admin.site.register(UserProfile, UserProfileAdmin)
 
 ##########################################
@@ -161,7 +165,7 @@ class TimeseriesAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'remarks', 'gentity', 'variable', 
         'unit_of_measurement', 'precision', 'time_zone', 'instrument',
         'time_step', 'nominal_offset_minutes', 'nominal_offset_months', 
-        'actual_offset_minutes', 'actual_offset_months')
+        'interval_type', 'actual_offset_minutes', 'actual_offset_months')
     list_filter = ('unit_of_measurement','precision', 'time_zone', 
                     'nominal_offset_minutes', 'nominal_offset_months',
                     'actual_offset_minutes', 'actual_offset_months')

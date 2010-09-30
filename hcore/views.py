@@ -510,7 +510,8 @@ def download_timeseries(request, object_id):
                 actual_offset =
                     (t.actual_offset_minutes, t.actual_offset_months)
                     if t.actual_offset_minutes and t.actual_offset_months
-                    else (0,0)
+                    else (0,0),
+                interval_type = t.interval_type.value
             ),
             unit = t.unit_of_measurement.symbol,
             title = t.name,

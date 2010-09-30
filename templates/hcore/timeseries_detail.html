@@ -173,10 +173,6 @@
                 <td>None</td>
 				{% endif %}
             </tr>
-            <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Time Step' %}</th>
-                <td>{{ timeseries.time_step }}</td>
-            </tr>
 			<tr class="{% cycle rowalts %}">
                 <th>{% trans 'Start Date' %}</th>
                 <td>{{ timeseries.start_date }}</td>
@@ -186,22 +182,54 @@
                 <td>{{ timeseries.end_date }}</td>
             </tr>
 
+			<tr class="{% cycle rowalts %}">
+                <td colspan="2" align="center"><strong>Time stamps properties</strong></th></tr>
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Nominal Offset Minutes' %}</th>
-                <td>{{ timeseries.nominal_offset_minutes }}</td>
+                <th>{% trans 'Time scale' %}</th>
+                <td>{% if not timeseries.time_step %}
+                        {% trans 'Variable step' %}
+                    {% else %}
+                        {{ timeseries.time_step }}
+                    {% endif %}
+                </td>
             </tr>
+            {% ifequal timeseries.nominal_offset_minutes NULL %}
+                <tr class="{% cycle rowalts %}">
+                    <th>{% trans 'Time stamps regularity' %}</th>
+                    <td>{% trans 'Time step is not strict' %}</td>
+                </tr>
+            {% else %}
+                <tr class="{% cycle rowalts %}">
+                    <th>{% trans 'Time stamps regularity' %}</th>
+                    <td>{% trans 'Time step is strict' %}</td>
+                </tr>
+                <tr class="{% cycle rowalts %}">
+                    <th>{% trans ' Time stamps nominal offset' %}</th>
+                    <td>{{ timeseries.nominal_offset_minutes }} 
+                        {% trans 'minutes' %}, 
+                        {{ timeseries.nominal_offset_months }}
+                        {% trans 'months' %}
+                    </td>
+                </tr>
+            {% endifequal %}
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Nominal Offset Months' %}</th>
-                <td>{{ timeseries.nominal_offset_months }}</td>
+                <th>{% trans 'Time stamps reference' %}</th>
+                <td>{% if not timeseries.interval_type %}
+                        {% trans 'Instantaneous values' %}
+                    {% else %}
+                        {% trans 'Interval, '%}{{ timeseries.interval_type }}
+                    {% endif %}</td>
             </tr>
-            <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Actual Offset Minutes' %}</th>
-                <td>{{ timeseries.actual_offset_minutes }}</td>
-            </tr>
-            <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Actual Offset Months' %}</th>
-                <td>{{ timeseries.actual_offset_months }}</td>
-            </tr>
+            {% ifnotequal timeseries.actual_offset_months NULL %}
+                <tr class="{% cycle rowalts %}">
+                    <th>{% trans 'Actual offset of reference' %}</th>
+                    <td>{{ timeseries.actual_offset_minutes }} 
+                        {% trans 'minutes' %}, 
+                        {{ timeseries.actual_offset_months }}
+                        {% trans 'months' %}
+                    </td>
+                </tr>
+            {% endifnotequal %}
         </table>
         </div>
 		<img src="{{MEDIA_URL}}images/vertical.gif" style="margin: 40px 20px;" />

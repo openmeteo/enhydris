@@ -425,18 +425,24 @@ class TimeStep(Lookup):
         """
         Return timestep descriptions in a more human readable format
         """
-
-        hours = self.length_minutes / 60
-        minutes = self.length_minutes - 60 * hours
+        days = self.length_minutes / 1440
+        hours = self.length_minutes / 60 - 24 * days
+        minutes = self.length_minutes - 60 * hours - 1440 * days
         years = self.length_months / 12
         months = self.length_months - years*12
-        desc = ""
+        if self.descr<>"":
+            desc = self.descr+" - "
+        else:
+            desc = ""
         link = ""
         if years:
             desc += "%d year(s)" % years
             link = ','
         if months:
             desc += link+"%d month(s)" % months
+            link = ','
+        if days:
+            desc += link+"%d day(s)" % days
             link = ','
         if hours:
             desc += link+"%d hour(s)" % hours
@@ -446,14 +452,16 @@ class TimeStep(Lookup):
             link = ','
         if desc:
             return desc
-
         return "(0,0)"
-
-        return "(%d, %d)" % (self.length_minutes, self.length_months)
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         if not _int_xor(self.length_minutes, self.length_months):
             raise Exception(_("%s is not a valid time step; exactly one of minutes and months must be zero") % self.__unicode__())
         super(TimeStep, self).save(force_insert, force_update, *args, **kwargs)
+
+class IntervalType(Lookup):
+    value = models.CharField(max_length=50)
+    def __unicode__(self):
+        return self.descr
 
 # Function to call on Timeseries predelete to remove ts_records
 def delete_ts_records(sender, instance, **kwargs):
@@ -477,6 +485,7 @@ class Timeseries(models.Model):
     remarks_alt = models.TextField(blank=True, default='')
     instrument = models.ForeignKey(Instrument, null=True, blank=True)
     time_step = models.ForeignKey(TimeStep, null=True, blank=True)
+    interval_type = models.ForeignKey(IntervalType, null=True, blank=True)
     nominal_offset_minutes = models.PositiveIntegerField(null=True, blank=True)
     nominal_offset_months = models.PositiveSmallIntegerField(null=True, blank=True)
     actual_offset_minutes = models.IntegerField(null=True, blank=True)
