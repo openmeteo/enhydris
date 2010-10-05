@@ -3,6 +3,7 @@ import json
 import math
 import mimetypes
 import os
+from tempfile import mkstemp
 import django.db
 import pthelma.timeseries
 from pthelma.timeseries import IntervalType as it
@@ -478,6 +479,33 @@ def download_gentityfile(request, gf_id):
 
     return response
 
+@gentityfile_permission
+def download_gentitygenericdata(request, gg_id):
+    """
+    This function handles requests for gentitygenericdata downloads and serves the
+    content to the user.
+    """
+    ggenericdata = get_object_or_404(GentityGenericData, pk=int(gg_id))
+    try:
+        s = ggenericdata.content
+        if s.find('\r')<0:
+            s = s.replace('\n', '\r\n')
+        (afile_handle, afilename) = mkstemp()
+        os.write(afile_handle, s)
+        afile = open(afilename, 'r')
+        wrapper  = FileWrapper(afile)
+    except:
+        raise Http404
+    download_name = 'GenericData-id_%s.%s'%(gg_id, ggenericdata.data_type.file_extension) 
+    content_type = 'text/plain' 
+    response = HttpResponse(content_type=content_type)
+    response['Content-Length'] = os.fstat(afile_handle).st_size
+    response['Content-Disposition'] = "attachment; filename=%s"%download_name
+    for chunk in wrapper:
+        response.write(chunk)
+    return response
+
+
 TS_ERROR = ("There seems to be some problem with our internal infrastuctrure. The"
 " admins have been notified of this and will try to resolve the matter as soon as"
 " possible.  Please try again later.")
@@ -890,7 +918,7 @@ def timeseries_delete(request, timeseries_id):
 
 
 """
-GentityFile/Event Views
+GentityFile/GenericData/Event Views
 """
 
 def _gentityfile_edit_or_create(request,gfile_id=None,station_id=None):
@@ -993,6 +1021,115 @@ def gentityfile_delete(request, gentityfile_id):
     response.status_code = 403
     return response
 
+
+"""
+GentityGenericData View
+"""
+
+def _gentitygenericdata_edit_or_create(request,ggenericdata_id=None,station_id=None):
+    if ggenericdata_id:
+        # Edit
+        ggenericdata = get_object_or_404(GentityGenericData, id=ggenericdata_id)
+    else:
+        # Add
+        ggenericdata = None
+
+
+    if ggenericdata_id and not station_id:
+        # Editing
+        try:
+            station = ggenericdata.related_station
+        except:
+            # GentityGenericData doesn't have a relative station.
+            # This shouldn't happen. Admin should fix such cases
+            response = render_to_response('404.html',
+                       RequestContext(request))
+            response.status_code = 404
+            return response
+        else:
+            # Check perms
+            if not request.user.has_row_perm(station,'edit'):
+                response = render_to_response('403.html',
+                               RequestContext(request))
+                response.status_code = 403
+                return response
+
+    if station_id and not ggenericdata_id:
+        # Adding new
+        station = get_object_or_404(Station, id=station_id)
+        if not request.user.has_row_perm(station,'edit'):
+            response = render_to_response('403.html',
+                           RequestContext(request))
+            response.status_code = 403
+            return response
+
+    user = request.user
+    # Done with checks
+    if request.method == 'POST':
+        if ggenericdata:
+            form = GentityGenericDataForm(request.POST,request.FILES,instance=ggenericdata,user=user)
+        else:
+            form = GentityGenericDataForm(request.POST,request.FILES,user=user)
+        if form.is_valid():
+            ggenericdata = form.save()
+            # do stuff
+            ggenericdata.save()
+            if not ggenericdata_id:
+                ggenericdata_id=str(ggenericdata.id)
+            return HttpResponseRedirect(reverse('station_detail',
+                                 kwargs={'object_id': str(ggenericdata.gentity.id)}))
+    else:
+        if ggenericdata:
+            form = GentityGenericDataForm(instance=ggenericdata,user=user)
+        else:
+            form = GentityGenericDataForm(user=user)
+
+    return render_to_response('hcore/gentitygenericdata_edit.html', {'form': form},
+                    context_instance=RequestContext(request))
+
+@permission_required('hcore.add_gentityfile')
+def gentitygenericdata_add(request):
+    """
+    Create new gentitygenericdata. GentityGenericData can only be added as part of an existing
+    station.
+    """
+    return _gentitygenericdata_edit_or_create(request)
+
+@login_required
+def gentitygenericdata_edit(request,ggenericdata_id):
+    """
+    Edit existing gentitygenericdata. Permissions are checked against the relative
+    station that the gentitygenericdata is part of.
+    """
+    return _gentitygenericdata_edit_or_create(request, ggenericdata_id=ggenericdata_id)
+
+@login_required
+def gentitygenericdata_delete(request, ggenericdata_id):
+    """
+    Delete existing gentitygenericdata. Permissions are checked against the relative
+    station that the gentitygenericdata is part of.
+    """
+    ggenericdata = get_object_or_404(GentityGenericData, id=ggenericdata_id)
+    related_station = ggenericdata.related_station
+    if ggenericdata and related_station:
+        if request.user.has_row_perm(related_station, 'edit') and\
+         request.user.has_perm('hcore.delete_gentityfile'):
+            ggenericdata.delete()
+            ref = request.META.get('HTTP_REFERER', None)
+            if ref:
+                return HttpResponseRedirect(ref)
+            return render_to_response('success.html',
+                    {'msg': 'GentityGenericData deleted successfully',},
+                    context_instance=RequestContext(request))
+    response = render_to_response('403.html',
+                   RequestContext(request))
+    response.status_code = 403
+    return response
+
+
+"""
+GentityEvent View
+"""
 
 def _gentityevent_edit_or_create(request,gevent_id=None,station_id=None):
     if gevent_id:
@@ -1415,7 +1552,8 @@ ALLOWED_TO_EDIT = ('waterbasin', 'waterdivision', 'person', 'organization',
                    'stationtype', 'lentity','gentity', 'variable', 'timezone',
                    'politicaldivision','instrumenttype', 'unitofmeasurement',
                    'filetype','eventtype','gentityaltcodetype','timestep',
-                   'gentityaltcode', 'gentityfile', 'gentityevent',)
+                   'gentityaltcode', 'gentityfile', 'gentityevent',
+                   'gentitygenericdata')
 
 @login_required
 def model_add(request, model_name=''):

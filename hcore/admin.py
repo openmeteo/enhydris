@@ -41,11 +41,17 @@ class WaterBasinAdmin(GareaAdmin):
 class GentityFileAdmin(admin.ModelAdmin):
     list_display = [f.name for f in GentityFile._meta.fields]
 
+class GentityGenericDataAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in GentityGenericData._meta.fields]
+
 class GentityAltCodeTypeAdmin(admin.ModelAdmin):
     list_display = [f.name for f in GentityAltCodeType._meta.fields]
 
 class FileTypeAdmin(admin.ModelAdmin):
     list_display = ('id', 'mime_type', 'descr',)
+
+class GentityGenericDataTypeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'descr', 'file_extension', )
 
 class EventTypeAdmin(admin.ModelAdmin):
     list_display = ('id', 'descr',)
@@ -87,7 +93,9 @@ admin.site.register(WaterBasin, WaterBasinAdmin)
 
 admin.site.register(GentityAltCodeType, GentityAltCodeTypeAdmin)
 admin.site.register(GentityFile, GentityFileAdmin)
+admin.site.register(GentityGenericData, GentityGenericDataAdmin)
 admin.site.register(FileType, FileTypeAdmin)
+admin.site.register(GentityGenericDataType, GentityGenericDataTypeAdmin)
 admin.site.register(EventType, EventTypeAdmin)
 admin.site.register(StationType, StationTypeAdmin)
 admin.site.register(InstrumentType, InstrumentTypeAdmin)

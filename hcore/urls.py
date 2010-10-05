@@ -48,6 +48,9 @@ urlpatterns = patterns('',
     (r'^gentityfile/(?P<gf_id>\d+)/download/$',
      views.download_gentityfile, {}, 'gentityfile_dl'),
 
+    (r'^gentitygenericdata/(?P<gg_id>\d+)/download/$',
+     views.download_gentitygenericdata, {}, 'gentitygenericdata_dl'),
+
     (r'^site_media/'+settings.GENTITYFILE_DIR+'/.*$',
      views.protect_gentityfile, {}, ''),
 )
@@ -75,10 +78,18 @@ if settings.USERS_CAN_ADD_CONTENT:
     (r'^gentityfile/edit/(?P<gentityfile_id>\d+)/$',
      views.gentityfile_edit, {} , 'gentityfile_edit'),
 
+    (r'^gentitygenericdata/edit/(?P<ggenericdata_id>\d+)/$',
+     views.gentitygenericdata_edit, {} , 'gentitygenericdata_edit'),
+
     (r'^gentityfile/add/$', views.gentityfile_add, {}, 'gentityfile_add'),
+    
+    (r'^gentitygenericdata/add/$', views.gentitygenericdata_add, {}, 'gentitygenericdata_add'),
 
     (r'^gentityfile/delete/(?P<gentityfile_id>\d+)/$',
      views.gentityfile_delete, {} , 'gentityfile_delete'),
+
+    (r'^gentitygenericdata/delete/(?P<ggenericdata_id>\d+)/$',
+     views.gentitygenericdata_delete, {} , 'gentitygenericdata_delete'),
 
     (r'^gentityevent/edit/(?P<gentityevent_id>\d+)/$',
      views.gentityevent_edit, {} , 'gentityevent_edit'),

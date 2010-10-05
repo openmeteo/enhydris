@@ -234,6 +234,31 @@ class GentityAltCode(models.Model):
         except:
             return None
 
+class GentityGenericDataType(Lookup):
+    file_extension = models.CharField(max_length=16)
+
+class GentityGenericData(models.Model):
+    # for db sync issues
+    original_id = models.IntegerField(null=True, blank=True, editable=False)
+    original_db = models.ForeignKey(Database, null=True, editable=False)
+    last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
+
+    gentity = models.ForeignKey(Gentity)
+    descr = models.CharField(max_length=100)
+    remarks = models.TextField(blank=True)
+    descr_alt = models.CharField(max_length=100)
+    remarks_alt = models.TextField(blank=True)
+    content = models.TextField(blank=True)
+    data_type = models.ForeignKey(GentityGenericDataType)
+    def __unicode__(self):
+        return self.descr or self.descr_alt or str(self.id)
+    @property
+    def related_station(self):
+        try:
+            return Station.objects.get(id=self.gentity.id)
+        except:
+            return None
+
 class FileType(Lookup):
     mime_type = models.CharField(max_length=64)
     def __unicode__(self):

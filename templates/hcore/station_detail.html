@@ -74,6 +74,8 @@
 					/
 					<span class="menu_options"><a href="{% url gentityfile_add %}">Add new File</a></span>	
 					/
+					<span class="menu_options"><a href="{% url gentitygenericdata_add %}">Add new Generic Item</a></span>	
+					/
 					<span class="menu_options"><a href="{% url gentityevent_add %}">Add new Event</a></span>	
 					/
 					<span class="menu_options"><a href="{% url gentityaltcode_add %}">Add new Alt Code</a></span>	
@@ -306,6 +308,64 @@
 								<td style="text-align:center;">
 								<a href="{% url gentityfile_edit file.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
 								<a href="{% url gentityfile_delete file.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
+								</td>
+								{% endif %}
+							{% endif %}
+						</tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </td>
+                {% else %}
+                <td colspan="2">
+                    {% trans "No data available" %}
+                </td>
+                {% endif %}
+            </tr>
+            <!-- Gentity Generic data table -->
+            <tr>
+                <th>{% trans 'Station (Gentity) Generic data' %}</th>
+                {% if station.gentitygenericdata_set.count %}
+                <td>
+                    <a class="collapse_toggler">
+                        <img src="{{ MEDIA_URL }}images/icons/folder_open.png" />
+                    </a>
+                </td>
+                <td>
+                    <table class="tablesorter" style='text-align:right;width:100%;'>
+                        <thead>
+                            <tr>
+                                <th>{% trans 'ID' %}</th>
+                                <th>{% trans 'Data Type' %}</th>
+                                <th>{% trans 'Description' %}</th>
+                                <th>{% trans 'Remarks' %}</th>
+								<th>{% trans 'Request File' %}</th>
+								{% if enabled_user_content %}
+									{% if request.user|can_edit:station %}
+									<th>{% trans "Management" %}</th>
+									{% endif %}
+								{% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for genericdata in station.gentitygenericdata_set.all %}
+                        <tr class="{% cycle 'odd' 'even' %}">
+                            <td>{{ genericdata.id }}</td>
+                            <td>{{ genericdata.data_type }}</td>
+                            <td>{{ genericdata.descr }}</td>
+                            <td>{{ genericdata.remarks }}</td>
+							<td>
+							{% if request.user.is_authenticated %}  
+								<a href="{% url gentitygenericdata_dl genericdata.id %}"><img style="border:none" src="{{MEDIA_URL}}images/icons/download.png"></a>
+							{% else %} 
+								<i>N/A</i>
+							{% endif %} 
+							</td>
+							{% if enabled_user_content %}
+								{% if request.user|can_edit:station %}
+								<td style="text-align:center;">
+								<a href="{% url gentitygenericdata_edit genericdata.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url gentitygenericdata_delete genericdata.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
 								</td>
 								{% endif %}
 							{% endif %}
