@@ -226,7 +226,7 @@ def timeseries_data(request, *args, **kwargs):
                 break
             pos += step
             if math.isnan(v):
-                v=0
+                v='null'
             chart_data.append([calendar.timegm(k.timetuple())*1000, v])
 
         if chart_data:
