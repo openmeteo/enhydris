@@ -243,7 +243,6 @@ def timeseries_data(request, *args, **kwargs):
             step = fine_step * 50
         pos=start_pos
         amax=''
-        print start_pos
         while pos < start_pos+length:
             s = linecache.getline(afilename, pos)
             pos+=fine_step
