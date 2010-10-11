@@ -3,11 +3,13 @@ import json
 import math
 import mimetypes
 import os
+import linecache
 from tempfile import mkstemp
 import django.db
 import pthelma.timeseries
+from pthelma.timeseries import datetime_from_iso
 from pthelma.timeseries import IntervalType as it
-from string import lower, split
+from string import lower, split, find
 from django.http import (HttpResponse, HttpResponseRedirect,
                             HttpResponseForbidden, Http404)
 from django.shortcuts import render_to_response, get_object_or_404
@@ -212,23 +214,53 @@ def timeseries_data(request, *args, **kwargs):
         response = HttpResponse(content_type='text/plain;charset=utf8')
         response.status_code = 200
         object_id = request.GET['object_id']
-        ts = pthelma.timeseries.Timeseries(int(object_id))
-        ts.read_from_db(django.db.connection)
+        afilename = '/var/tmp/enhydris-timeseries/%d.hts'%int(object_id)
+        if not os.path.exists(afilename):
+            ts = pthelma.timeseries.Timeseries(int(object_id))
+            ts.read_from_db(django.db.connection)
+            if not os.path.exists('/var/tmp/enhydris-timeseries/'):
+                os.mkdir('/var/tmp/enhydris-timeseries/')
+            afile = open(afilename, 'w')
+            ts.write_file(afile)
+            afile.close()
+        start_pos=2
+        with open(afilename) as afile:
+            s = afile.readline()
+            while not s.isspace():
+                if find(lower(s), 'count')>-1:
+                    length = int(split(s,'=')[1])
+                start_pos+=1
+                s = afile.readline()
+        afile.closed
         chart_data = []
-        pos = 0
-        ts_list = ts.items()
-        length =  len(ts_list)
-        step = int(length/250) or 1
-        while pos < length:
-            try:
-                k,v = ts_list[pos]
-            except IndexError:
-                break
-            pos += step
-            if math.isnan(v):
-                v='null'
-            chart_data.append([calendar.timegm(k.timetuple())*1000, v])
-
+        if request.GET.has_key('start_pos') and request.GET.has_key('end_pos'):
+            start_pos = int(request.GET['start_pos'])
+            end_pos = int(request.GET['end_pos'])
+            length = end_pos - start_pos + 1
+        step = int(length/200) or 1
+        fine_step= int(step/50) or 1
+        if not step%fine_step==0:
+            step = fine_step * 50
+        pos=start_pos
+        amax=''
+        print start_pos
+        while pos < start_pos+length:
+            s = linecache.getline(afilename, pos)
+            pos+=fine_step
+            if s.isspace():
+                continue 
+            t = s.split(',') 
+            k = datetime_from_iso(t[0])
+            v = t[1]
+            if not v=='':
+                if amax=='':
+                    amax = v
+                else:
+                    amax = max(amax, v)
+            if (pos-start_pos)%step==0:
+                if amax == '': amax = 'null'
+                chart_data.append([calendar.timegm(k.timetuple())*1000, amax, pos])
+                amax = ''
         if chart_data:
             response.content = json.dumps(chart_data)
         else:
