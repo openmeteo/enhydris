@@ -210,16 +210,28 @@ def station_info(request, *args, **kwargs):
 
 
 def timeseries_data(request, *args, **kwargs):
+    if hasattr(settings, 'TS_GRAPH_BIG_STEP_DENOMINATOR'):
+        step_denom = settings.TS_GRAPH_BIG_STEP_DENOMINATOR
+    else:
+        step_denom = 200
+    if hasattr(settings, 'TS_GRAPH_FINE_STEP_DENOMINATOR'):
+        fine_step_denom = settings.TS_GRAPH_FINE_STEP_DENOMINATOR
+    else:
+        fine_step_denom = 50
+    if hasattr(settings, 'TS_GRAPH_CACHE_DIR'):
+        cache_dir = settings.TS_GRAPH_CACHE_DIR
+    else:
+        cache_dir = '/var/tmp/enhydris-timeseries/'
     if request.method == "GET" and request.GET.has_key('object_id'):
         response = HttpResponse(content_type='text/plain;charset=utf8')
         response.status_code = 200
         object_id = request.GET['object_id']
-        afilename = '/var/tmp/enhydris-timeseries/%d.hts'%int(object_id)
+        afilename = cache_dir+'%d.hts'%int(object_id)
         if not os.path.exists(afilename):
             ts = pthelma.timeseries.Timeseries(int(object_id))
             ts.read_from_db(django.db.connection)
-            if not os.path.exists('/var/tmp/enhydris-timeseries/'):
-                os.mkdir('/var/tmp/enhydris-timeseries/')
+            if not os.path.exists(cache_dir):
+                os.mkdir(cache_dir)
             afile = open(afilename, 'w')
             ts.write_file(afile)
             afile.close()
@@ -237,10 +249,10 @@ def timeseries_data(request, *args, **kwargs):
             start_pos = int(request.GET['start_pos'])
             end_pos = int(request.GET['end_pos'])
             length = end_pos - start_pos + 1
-        step = int(length/200) or 1
-        fine_step= int(step/50) or 1
+        step = int(length/step_denom) or 1
+        fine_step= int(step/fine_step_denom) or 1
         if not step%fine_step==0:
-            step = fine_step * 50
+            step = fine_step * fine_step_denom
         pos=start_pos
         amax=''
         while pos < start_pos+length:
@@ -251,14 +263,14 @@ def timeseries_data(request, *args, **kwargs):
             t = s.split(',') 
             k = datetime_from_iso(t[0])
             v = t[1]
-            if not v=='':
+            if v!='':
                 if amax=='':
-                    amax = v
+                    amax = float(v)
                 else:
-                    amax = max(amax, v)
+                    amax = float(v) if float(v)>amax else amax 
             if (pos-start_pos)%step==0:
                 if amax == '': amax = 'null'
-                chart_data.append([calendar.timegm(k.timetuple())*1000, amax, pos])
+                chart_data.append([calendar.timegm(k.timetuple())*1000, str(amax), pos])
                 amax = ''
         if chart_data:
             response.content = json.dumps(chart_data)
