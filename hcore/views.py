@@ -232,9 +232,8 @@ def timeseries_data(request, *args, **kwargs):
             ts.read_from_db(django.db.connection)
             if not os.path.exists(cache_dir):
                 os.mkdir(cache_dir)
-            afile = open(afilename, 'w')
-            ts.write_file(afile)
-            afile.close()
+            with open(afilename, 'w') as afile:
+                ts.write_file(afile)
         start_pos=2
         with open(afilename) as afile:
             s = afile.readline()
@@ -243,7 +242,6 @@ def timeseries_data(request, *args, **kwargs):
                     length = int(split(s,'=')[1])
                 start_pos+=1
                 s = afile.readline()
-        afile.closed
         chart_data = []
         if request.GET.has_key('start_pos') and request.GET.has_key('end_pos'):
             start_pos = int(request.GET['start_pos'])
@@ -255,23 +253,44 @@ def timeseries_data(request, *args, **kwargs):
             step = fine_step * fine_step_denom
         pos=start_pos
         amax=''
-        while pos < start_pos+length:
-            s = linecache.getline(afilename, pos)
-            pos+=fine_step
-            if s.isspace():
-                continue 
-            t = s.split(',') 
-            k = datetime_from_iso(t[0])
-            v = t[1]
-            if v!='':
-                if amax=='':
-                    amax = float(v)
-                else:
-                    amax = float(v) if float(v)>amax else amax 
-            if (pos-start_pos)%step==0:
-                if amax == '': amax = 'null'
-                chart_data.append([calendar.timegm(k.timetuple())*1000, str(amax), pos])
-                amax = ''
+        prev_pos=-1
+        try:
+            linecache.checkcache(afilename)
+            while pos < start_pos+length:
+                s = linecache.getline(afilename, pos)
+                pos+=fine_step
+                if s.isspace():
+                    continue 
+                t = s.split(',') 
+# Use the following exception handling to catch incoplete
+# reads from cache. Tries only one time, next time if
+# the error on the same line persists, it raises.
+                try:
+                    k = datetime_from_iso(t[0])
+                    v = t[1]
+                except:
+                    if pos>prev_pos:
+                        prev_pos = pos
+                        pos-=fine_step
+                        linecache.checkcache(afilename)
+                        continue
+                    else:
+                        raise
+                if v!='':
+                    if amax=='':
+                        amax = float(v)
+                    else:
+                        amax = float(v) if float(v)>amax else amax 
+                if (pos-start_pos)%step==0:
+                    if amax == '': amax = 'null'
+                    chart_data.append([calendar.timegm(k.timetuple())*1000, str(amax), pos])
+                    amax = ''
+# Some times linecache tries to read a file being written (from 
+# timeseries.write_file). So every 5000 lines refresh the cache.
+                if (pos-start_pos)%5000==0:
+                    linecache.checkcache(afilename)
+        finally:
+            linecache.clearcache()
         if chart_data:
             response.content = json.dumps(chart_data)
         else:
