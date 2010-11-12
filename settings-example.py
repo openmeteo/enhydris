@@ -77,3 +77,6 @@ TS_GRAPH_FINE_STEP_DENOMINATOR=50
 TS_GRAPH_CACHE_DIR="/var/tmp/enhydris-timeseries/"
 
 #REMOTE_INSTANCE_CREDENTIALS = {'kyy.hydroscope.gr': ('myusername', 'mypassword')}
+
+CAPTCHA_ROOT='site_media/captchas/'
+CAPTCHA_FONT='site_media/arizona.ttf'
