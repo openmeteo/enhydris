@@ -1,0 +1,79 @@
+# Django settings for enhydris project.
+# coding=UTF-8
+from django.utils.translation import ugettext_lazy as _
+
+ENHYDRIS_PROGRAM_DIR = '.'
+
+# Leave following three lines as they are, to import several Django settings.
+import sys
+import os.path
+execfile(os.path.join(ENHYDRIS_PROGRAM_DIR, 'settings-base.py'))
+
+DEBUG = True
+TEMPLATE_DEBUG = False
+STATIC_SERVE = True
+
+ADMINS = (
+    # ('Your Name', 'your_email@domain.com'),
+)
+
+MANAGERS = ADMINS
+
+DATABASE_ENGINE = 'postgresql_psycopg2'
+DATABASE_NAME = 'enhydris_test'
+DATABASE_USER = 'enhydris'
+DATABASE_PASSWORD = 'changeme'
+DATABASE_HOST = 'localhost'
+DATABASE_PORT = '5432'
+
+TIME_ZONE = 'Europe/Athens'
+
+SITE_ID = 1
+SITE_URL = "hydroscope.gr"
+
+MEDIA_ROOT = 'site_media/'
+MEDIA_URL = '/site_media/'
+ADMIN_MEDIA_PREFIX = '/media/'
+
+GRAPPELLI_ADMIN_TITLE = 'Enhydris Administration'
+
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = 'yy)g)w2jqkpyv9$w39i9$7(6wb+$h(_+x3gj#=@fzs2tmuj$#='
+
+# GentityFile upload directory (must be relative path and it'll be created
+# under site_media dir)
+GENTITYFILE_DIR = 'gentityfile'
+
+# GIS Configuration
+GIS_SERVER=""
+
+# Options for django-registration
+ACCOUNT_ACTIVATION_DAYS=7
+EMAIL_USE_TLS = True
+EMAIL_PORT=587
+EMAIL_HOST='smtp.my.domain'
+EMAIL_HOST_USER='automaticsender@my.domain'
+EMAIL_HOST_PASSWORD='mypassword'
+
+# Options for political divisions
+FILTER_DEFAULT_COUNTRY= 'GREECE'
+FILTER_POLITICAL_SUBDIVISION1_NAME= _('District')
+FILTER_POLITICAL_SUBDIVISION2_NAME= _('Prefecture')
+
+USERS_CAN_ADD_CONTENT=False
+SITE_CONTENT_IS_FREE=False
+TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS=False
+STORE_TSDATA_LOCALLY=True
+
+# Chart options for time series details page
+# The big step represents the max num of data points to be ploted, 
+# default is 200.
+# The fine step are the max num of points betwen main data points to
+# search for a maxima, default is 50. 
+# Cache dir is used to store time series data files to show graphs,
+# default is "/var/tmp/enhydris-timeseries/"
+TS_GRAPH_BIG_STEP_DENOMINATOR=200
+TS_GRAPH_FINE_STEP_DENOMINATOR=50
+TS_GRAPH_CACHE_DIR="/var/tmp/enhydris-timeseries/"
+
+#REMOTE_INSTANCE_CREDENTIALS = {'kyy.hydroscope.gr': ('myusername', 'mypassword')}
