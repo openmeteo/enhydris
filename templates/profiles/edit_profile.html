@@ -14,6 +14,7 @@
     {% else %}
     <form method="post" action=".">
     {% endif %}
+    {% csrf_token %} 
     <table class="table_container">
 	<tbody>
     {{ form.as_table }}

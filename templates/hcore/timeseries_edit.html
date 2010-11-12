@@ -20,6 +20,7 @@
 {% block content %}
 
 <form method="post" action="" class="wide" enctype="multipart/form-data">
+    {% csrf_token %} 
     {% if form.instance.pk %}
             <h3>
                 {% trans "Edit timeseries details for " %}
@@ -38,6 +39,7 @@
         <p class="fielderrors">{% trans "Please correct the errors below: " %}{{ form.field_errors }}</p>
     {% endif %}
 	<form method="post" action="" class="wide">
+        {% csrf_token %} 
 		<table class="table_container">
 			<tbody>
 				{% form_as_table_rows form  %}

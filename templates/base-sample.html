@@ -131,6 +131,7 @@
 			<li>
 			{% url django.views.i18n.set_language as set_language_url %}
 				<form action="{{ set_language_url }}" method="post">
+                                {% csrf_token %}
 				<p style="display: inline;">
 					<input name="next" type="hidden" value="{{ request.path }}" />
 						<select name="language">
