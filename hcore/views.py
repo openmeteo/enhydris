@@ -43,10 +43,7 @@ def protect_gentityfile(request):
     This view is used to disallow users to be able to browse through the
     uploaded gentity files which is the default behaviour of django.
     """
-    response = render_to_response('404.html',
-                  RequestContext(request))
-    response.status_code = 404
-    return response
+    raise Http404
 
 def station_detail(request, *args, **kwargs):
     stat = get_object_or_404(Station, pk=kwargs["object_id"])
@@ -297,10 +294,7 @@ def timeseries_data(request, *args, **kwargs):
             response.content = json.dumps("")
         return response
     else:
-        response = render_to_response('404.html',
-                      RequestContext(request))
-        response.status_code = 404
-        return response
+        raise Http404
 
 def timeseries_detail(request, queryset, object_id, *args, **kwargs):
     """Return the details for a specific timeseries object."""
@@ -742,19 +736,13 @@ def _station_edit_or_create(request,station_id=None):
         # User is editing a station
         station = get_object_or_404(Station, id=station_id)
         if not (user.has_row_perm(station, 'edit')\
-          and user.has_perm('hcore.change_station')):
-            response = render_to_response('403.html',
-                    RequestContext(request))
-            response.status_code = 403
-            return response
+                                and user.has_perm('hcore.change_station')):
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
     else:
         # User is creating a new station
         station = None
         if not user.has_perm('hcore.add_station'):
-            p = render_to_response('403.html',
-                   RequestContext(request))
-            resp.status_code = 403
-            return resp
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
     OverseerFormset = inlineformset_factory(Station, Overseer,
                                             extra=1)
@@ -867,10 +855,7 @@ def station_delete(request,station_id):
         return render_to_response('success.html',
             {'msg': 'Station deleted successfully',},
             context_instance=RequestContext(request))
-    response = render_to_response('403.html',
-                   RequestContext(request))
-    response.status_code = 403
-    return response
+    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
 
 """
@@ -886,32 +871,16 @@ def _timeseries_edit_or_create(request,tseries_id=None,station_id=None):
         tseries = None
 
     if tseries_id and not station_id:
-        # Editing
-        try:
-            station = tseries.related_station
-        except:
-            # Timeseries doesn't have a relative station.
-            # This shouldn't happen. Admin should fix such cases
-            response = render_to_response('404.html',
-                       RequestContext(request))
-            response.status_code = 404
-            return response
-        else:
-            # Check perms
-            if not request.user.has_row_perm(station,'edit'):
-                response = render_to_response('403.html',
-                               RequestContext(request))
-                response.status_code = 403
-                return response
+        station = tseries.related_station
+        # Check perms
+        if not request.user.has_row_perm(station,'edit'):
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
     if station_id and not tseries_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            response = render_to_response('403.html',
-                           RequestContext(request))
-            response.status_code = 403
-            return response
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
     user = request.user
     # Done with checks
@@ -973,10 +942,7 @@ def timeseries_delete(request, timeseries_id):
             return render_to_response('success.html',
                     {'msg': 'Timeseries deleted successfully',},
                     context_instance=RequestContext(request))
-    response = render_to_response('403.html',
-                   RequestContext(request))
-    response.status_code = 403
-    return response
+    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
 
 """
@@ -993,32 +959,15 @@ def _gentityfile_edit_or_create(request,gfile_id=None,station_id=None):
 
 
     if gfile_id and not station_id:
-        # Editing
-        try:
-            station = gfile.related_station
-        except:
-            # GentityFile doesn't have a relative station.
-            # This shouldn't happen. Admin should fix such cases
-            response = render_to_response('404.html',
-                       RequestContext(request))
-            response.status_code = 404
-            return response
-        else:
-            # Check perms
-            if not request.user.has_row_perm(station,'edit'):
-                response = render_to_response('403.html',
-                               RequestContext(request))
-                response.status_code = 403
-                return response
+        station = gfile.related_station
+        if not request.user.has_row_perm(station,'edit'):
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
     if station_id and not gfile_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            response = render_to_response('403.html',
-                           RequestContext(request))
-            response.status_code = 403
-            return response
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
     user = request.user
     # Done with checks
@@ -1078,10 +1027,7 @@ def gentityfile_delete(request, gentityfile_id):
             return render_to_response('success.html',
                     {'msg': 'GentityFile deleted successfully',},
                     context_instance=RequestContext(request))
-    response = render_to_response('403.html',
-                   RequestContext(request))
-    response.status_code = 403
-    return response
+    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
 
 """
@@ -1098,32 +1044,15 @@ def _gentitygenericdata_edit_or_create(request,ggenericdata_id=None,station_id=N
 
 
     if ggenericdata_id and not station_id:
-        # Editing
-        try:
-            station = ggenericdata.related_station
-        except:
-            # GentityGenericData doesn't have a relative station.
-            # This shouldn't happen. Admin should fix such cases
-            response = render_to_response('404.html',
-                       RequestContext(request))
-            response.status_code = 404
-            return response
-        else:
-            # Check perms
-            if not request.user.has_row_perm(station,'edit'):
-                response = render_to_response('403.html',
-                               RequestContext(request))
-                response.status_code = 403
-                return response
+        station = ggenericdata.related_station
+        if not request.user.has_row_perm(station,'edit'):
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
     if station_id and not ggenericdata_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            response = render_to_response('403.html',
-                           RequestContext(request))
-            response.status_code = 403
-            return response
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
     user = request.user
     # Done with checks
@@ -1183,10 +1112,7 @@ def gentitygenericdata_delete(request, ggenericdata_id):
             return render_to_response('success.html',
                     {'msg': 'GentityGenericData deleted successfully',},
                     context_instance=RequestContext(request))
-    response = render_to_response('403.html',
-                   RequestContext(request))
-    response.status_code = 403
-    return response
+    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
 
 """
@@ -1202,32 +1128,15 @@ def _gentityevent_edit_or_create(request,gevent_id=None,station_id=None):
         gevent = None
 
     if gevent_id and not station_id:
-        # Editing
-        try:
-            station = gevent.related_station
-        except:
-            # GentityEvent doesn't have a relative station.
-            # This shouldn't happen. Admin should fix such cases
-            response = render_to_response('404.html',
-                       RequestContext(request))
-            response.status_code = 404
-            return response
-        else:
-            # Check perms
-            if not request.user.has_row_perm(station,'edit'):
-                response = render_to_response('403.html',
-                               RequestContext(request))
-                response.status_code = 403
-                return response
+        station = gevent.related_station
+        if not request.user.has_row_perm(station,'edit'):
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
     if station_id and not gevent_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            response = render_to_response('403.html',
-                           RequestContext(request))
-            response.status_code = 403
-            return response
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
     user = request.user
     # Done with checks
@@ -1288,10 +1197,7 @@ def gentityevent_delete(request, gentityevent_id):
             return render_to_response('success.html',
                     {'msg': 'GentityEvent deleted successfully',},
                     context_instance=RequestContext(request))
-    response = render_to_response('403.html',
-                   RequestContext(request))
-    response.status_code = 403
-    return response
+    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
 
 def _gentityaltcode_edit_or_create(request,galtcode_id=None,station_id=None):
@@ -1303,32 +1209,15 @@ def _gentityaltcode_edit_or_create(request,galtcode_id=None,station_id=None):
         galtcode = None
 
     if galtcode_id and not station_id:
-        # Editing
-        try:
-            station = galtcode.related_station
-        except:
-            # GentityAltCode doesn't have a relative station.
-            # This shouldn't happen. Admin should fix such cases
-            response = render_to_response('404.html',
-                       RequestContext(request))
-            response.status_code = 404
-            return response
-        else:
-            # Check perms
-            if not request.user.has_row_perm(station,'edit'):
-                response = render_to_response('403.html',
-                               RequestContext(request))
-                response.status_code = 403
-                return response
+        station = galtcode.related_station
+        if not request.user.has_row_perm(station,'edit'):
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
     if station_id and not galtcode_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            response = render_to_response('403.html',
-                           RequestContext(request))
-            response.status_code = 403
-            return response
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
     user = request.user
     # Done with checks
@@ -1388,10 +1277,7 @@ def gentityaltcode_delete(request, gentityaltcode_id):
             return render_to_response('success.html',
                     {'msg': 'GentityAltCode deleted successfully',},
                     context_instance=RequestContext(request))
-    response = render_to_response('403.html',
-                   RequestContext(request))
-    response.status_code = 403
-    return response
+    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
 """
 Overseer Views
@@ -1407,32 +1293,15 @@ def _overseer_edit_or_create(request,overseer_id=None,station_id=None):
 
 
     if overseer_id and not station_id:
-        # Editing
-        try:
-            station = overseer.station
-        except:
-            # Overseer doesn't have a relative station.
-            # This shouldn't happen. Admin should fix such cases
-            response = render_to_response('404.html',
-                       RequestContext(request))
-            response.status_code = 404
-            return response
-        else:
-            # Check perms
-            if not request.user.has_row_perm(station,'edit'):
-                response = render_to_response('403.html',
-                               RequestContext(request))
-                response.status_code = 403
-                return response
+        station = overseer.station
+        if not request.user.has_row_perm(station,'edit'):
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
     if station_id and not overseer_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            response = render_to_response('403.html',
-                           RequestContext(request))
-            response.status_code = 403
-            return response
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
     user = request.user
     # Done with checks
@@ -1492,10 +1361,7 @@ def overseer_delete(request, overseer_id):
             return render_to_response('success.html',
                     {'msg': 'Overseer deleted successfully',},
                     context_instance=RequestContext(request))
-    response = render_to_response('403.html',
-                   RequestContext(request))
-    response.status_code = 403
-    return response
+    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
 
 
@@ -1513,32 +1379,14 @@ def _instrument_edit_or_create(request,instrument_id=None,station_id=None):
         instrument = None
 
     if instrument_id and not station_id:
-        # Editing
-        try:
-            station = instrument.station
-        except:
-            # Instrument doesn't have a relative station.
-            # This shouldn't happen. Admin should fix such cases
-            response = render_to_response('404.html',
-                       RequestContext(request))
-            response.status_code = 404
-            return response
-        else:
-            # Check perms
-            if not request.user.has_row_perm(station,'edit'):
-                response = render_to_response('403.html',
-                               RequestContext(request))
-                response.status_code = 403
-                return response
+        station = instrument.station
+        if not request.user.has_row_perm(station,'edit'):
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
     if station_id and not instrument_id:
-        # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            response = render_to_response('403.html',
-                           RequestContext(request))
-            response.status_code = 403
-            return response
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
     user = request.user
     # Done with checks
@@ -1598,10 +1446,7 @@ def instrument_delete(request, instrument_id):
             return render_to_response('success.html',
                     {'msg': 'Instrument deleted successfully',},
                     context_instance=RequestContext(request))
-    response = render_to_response('403.html',
-                   RequestContext(request))
-    response.status_code = 403
-    return response
+    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
 
 
@@ -1624,24 +1469,15 @@ def model_add(request, model_name=''):
         if request.GET['_popup'] == '1':
             popup = True
     if not popup and request.method == 'GET'\
-        and not '_complete' in request.GET:
-        response = render_to_response('404.html',
-                   RequestContext(request))
-        response.status_code = 404
-        return response
+                                    and not '_complete' in request.GET:
+        raise Http404
     try:
         model = ContentType.objects.get(model=model_name).model_class()
     except (ContentType.DoesNotExist, ContentType.MultipleObjectsReturned):
-        response = render_to_response('404.html',
-                   RequestContext(request))
-        response.status_code = 404
-        return response
+        raise Http404
     if not model_name in ALLOWED_TO_EDIT\
        or not request.user.has_perm('hcore.add_'+model_name):
-            response = render_to_response('403.html',
-                   RequestContext(request))
-            response.status_code = 403
-            return response
+            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
     if '_complete' in request.GET:
         if request.GET['_complete'] == '1':
             newObject = model.objects.order_by('-pk')[0]
