@@ -357,11 +357,11 @@ class Station(Gpoint):
     end_date = models.DateField(null=True, blank=True)
     overseers = models.ManyToManyField(Person, through='Overseer',
                                     related_name='stations_overseen')
-    if hasattr(settings, 'USERS_CAN_ADD_CONTENT')\
-        and settings.USERS_CAN_ADD_CONTENT:
-            creator = models.ForeignKey(User, null=True, blank=True,
+    # The following two fields are only useful when USERS_CAN_ADD_CONTENT
+    # is set.
+    creator = models.ForeignKey(User, null=True, blank=True,
                      related_name='created_stations')
-            maintainers = models.ManyToManyField(User,
+    maintainers = models.ManyToManyField(User,
                      related_name='maintaining_stations', null=True,blank=True)
 
 

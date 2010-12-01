@@ -290,7 +290,7 @@ class Migration:
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'is_automatic': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'maintainers': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.User']", 'null': 'True', 'blank': 'True'}),
-            'overseers': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['hcore.Person']"}),
+            'overseers': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'stations_overseen'", 'symmetrical': 'False', 'through': "orm['hcore.Overseer']", 'to': "orm['hcore.Person']"}),
             'owner': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'owned_stations'", 'to': "orm['hcore.Lentity']"}),
             'start_date': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['hcore.StationType']"})
