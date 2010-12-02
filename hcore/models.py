@@ -504,6 +504,7 @@ class Timeseries(models.Model):
     unit_of_measurement = models.ForeignKey(UnitOfMeasurement)
     name = models.CharField(max_length=200, blank=True)
     name_alt = models.CharField(max_length=200, blank=True, default='')
+    hidden = models.BooleanField(null=False, blank=False, default=False)
     precision = models.SmallIntegerField(null=True, blank=True)
     time_zone = models.ForeignKey(TimeZone)
     remarks = models.TextField(blank=True)
