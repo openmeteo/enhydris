@@ -2,11 +2,11 @@
 
 {% block content %}
 
-<p>Select event:</p>
-<blockquote>
-{% for e in events %}
+{% for y in eventgroups %}
+  <h1>{{ y }}</h1>
+  {% for e in eventgroups.y %}
   <p>{{ e.start_date|date:"Y-m-d H:i" }} - {{ e.end_date|date:"Y-m-d H:i" }}</p>
+  {% endfor %}
 {% endfor %}
-</blockquote>
 
 {% endblock %}

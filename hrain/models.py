@@ -7,7 +7,8 @@ class Event(models.Model):
     end_date = models.DateTimeField()
 
     def __unicode__(self):
-        return "%s - %s" % (start_date.isoformat(), end_date.isoformat())
+        return "%s - %s" % (self.start_date.isoformat(),
+                                                self.end_date.isoformat())
 
 
 def refresh_events():
