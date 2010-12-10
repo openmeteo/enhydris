@@ -4,12 +4,8 @@
 
 <p>Select event:</p>
 <blockquote>
-{% for event in events %}
-    {% for d in event %}
-        {% if forloop.first %} <p> {% else %} - {% endif %}
-        {{ d|date:"Y-m-d H:i" }}
-        {% if forloop.last %} </p> {% endif %}
-    {% endfor %}
+{% for e in events %}
+  <p>{{ e.start_date|date:"Y-m-d H:i" }} - {{ e.end_date|date:"Y-m-d H:i" }}</p>
 {% endfor %}
 </blockquote>
 
