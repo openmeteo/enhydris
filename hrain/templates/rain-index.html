@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<p>Select event:</p>
+<blockquote>
+{% for event in events %}
+    {% for d in event %}
+        {% if forloop.first %} <p> {% else %} - {% endif %}
+        {{ d|date:"Y-m-d H:i" }}
+        {% if forloop.last %} </p> {% endif %}
+    {% endfor %}
+{% endfor %}
+</blockquote>
+
+{% endblock %}
