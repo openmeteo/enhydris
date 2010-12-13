@@ -11,7 +11,7 @@
         </td><td style="padding-left: 3em">
       {% endif %}
     {% endifchanged %}
-      <a href="{% url enhydris.hrain.views.event e.start_date.year e.start_date.month e.start_date.day e.start_date.hour e.start_date.minute %}">{{ e.start_date|date:"Y-m-d H:i" }} -
+      <a href="{% url enhydris.hrain.views.event e.id %}">{{ e.start_date|date:"Y-m-d H:i" }} -
       {{ e.end_date|date:"Y-m-d H:i" }}</a><br />
   {% endfor %}
   </td></tr></table>

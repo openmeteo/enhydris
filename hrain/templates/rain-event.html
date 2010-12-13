@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<p><strong>Start of event:</strong> {{ event.start_date|date:"Y-m-d H:i" }}</p>
+<p><strong>End of event:</strong> {{ event.end_date|date:"Y-m-d H:i" }}</p>
+<p><strong>Total rainfall per station:</strong></p>
+<table>
+  {% for t in event.timeseriesevent_set.all %}
+    <tr>
+      <th style="text-align: left">{{ t.timeseries.gentity.name }}:</th>
+      <td style="text-align: right">{{ t.total_precipitation }}</td>
+    </tr>
+  {% endfor %}
+</table>
+
+{% endblock %}
