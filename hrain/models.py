@@ -1,5 +1,5 @@
 from django.db import models, connection
-import settings
+from django.conf import settings
 
 
 class Event(models.Model):
