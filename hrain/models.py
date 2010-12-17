@@ -7,6 +7,7 @@ class Event(models.Model):
     id = models.PositiveIntegerField(primary_key=True)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
+    max_measurement = models.FloatField()
 
     def __unicode__(self):
         return "%s - %s" % (self.start_date.isoformat(),
@@ -25,6 +26,9 @@ def refresh_events():
     from pthelma.timeseries import Timeseries, identify_events
     from StringIO import StringIO
     import fpconst
+    from glob import glob
+    import os
+    import os.path
     ts_list = [Timeseries(id=x) for x in settings.HRAIN_TIMESERIES]
     for x in ts_list:
         x.read_from_db(connection) 
@@ -36,10 +40,13 @@ def refresh_events():
     fp = StringIO('')
     teid = 1
     for i, event in enumerate(events, start=1):
-        e = Event(id=i, start_date=event[0], end_date=event[1])
+        e = Event(id=i, start_date=event[0], end_date=event[1],
+                                                            max_measurement=0)
         e.save()
         for x in ts_list:
             total=x.sum(e.start_date, e.end_date)
+            e.max_measurement = max(e.max_measurement,
+                                            x.max(e.start_date, e.end_date))
             if fpconst.isNaN(total): total = None
             fp.truncate(0)
             x.write(fp, e.start_date, e.end_date)
@@ -48,3 +55,6 @@ def refresh_events():
                        id=x.id), total_precipitation=total, data=fp.getvalue())
             te.save()
             teid += 1
+        e.save() # We save again so that max_measurement is stored.
+    for path in glob(os.path.join(settings.HRAIN_STATIC_CACHE_PATH, 'hrain*')):
+        os.unlink(path)
