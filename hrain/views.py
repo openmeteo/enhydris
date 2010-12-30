@@ -1,8 +1,17 @@
+from StringIO import StringIO
+from pyproj import Proj, transform
+import os.path
+
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.conf import settings
-from enhydris.hrain import models
+
 from pthelma.timeseries import Timeseries
+from enhydris.hrain import models
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 
 def index(request):
@@ -21,19 +30,56 @@ def index(request):
 def _datetime_to_ordinal(dt):
     return dt.toordinal() + dt.hour/24.0 + dt.minute/1440.0
 
-import matplotlib
-matplotlib.use('Agg')
+
+def _create_contour_map(ev):
+    """Check whether a contour for a specified event exists, and if it doesn't,
+    create it."""
+    from scipy.interpolate import Rbf
+    import numpy as np
+
+    # Return immediately if file is already there
+    filename = os.path.join(settings.HRAIN_STATIC_CACHE_PATH,
+                                            'hrain-e%04d.png' % (ev.id,))
+    if os.path.exists(filename): return
+
+    # Calculate array a = [(x1, y1, z1), ...], where each triplet is the
+    # co-ordinates of the point and the total rainfall.
+    a = []
+    for tsev in ev.timeseriesevent_set.all():
+        gp = tsev.timeseries.gentity.gpoint
+        p1 = Proj(init='epsg:%d' % (gp.srid,))
+        p2 = Proj(init='epsg:%d' % (settings.HRAIN_CONTOUR_SRID,))
+        (x, y) = transform(p1, p2, gp.abscissa, gp.ordinate)
+        a.append((x, y, tsev.total_precipitation))
+
+    # Define the grid and interpolate
+    x = [i[0] for i in a]
+    y = [i[1] for i in a]
+    z = [i[2] for i in a]
+    rbfi = Rbf(x, y, z, function='linear')
+    (x0, y0, x1, y1) = settings.HRAIN_CONTOUR_CHART_BOUNDS
+    dx, dy = (x1-x0)/100.0, (y1-y0)/100.0
+    xx = np.arange(x0, x1+dx, dx)
+    yy = np.arange(y0, y1+dy, dy)
+    zz = np.empty([101, 101])
+    for i in xrange(0, 100):
+        for j in xrange(0, 100):
+            zz[i][j] = rbfi(xx[i], yy[j])
+
+
+    # Create the chart
+    fig = plt.figure()
+    plt.contour(xx, yy, zz)
+
+    fig.savefig(filename)
+
 
 def _create_chart(tsev):
     """Check whether a chart for specified event and timeseries exists, and
     if it doesn't, create it."""
-    import matplotlib.pyplot as plt
     from matplotlib.dates import DateFormatter, HourLocator, MinuteLocator
     from matplotlib.lines import TICKDOWN
     from matplotlib.figure import SubplotParams
-
-    from StringIO import StringIO
-    import os.path
 
     # Return immediately if file is already there
     filename = os.path.join(settings.HRAIN_STATIC_CACHE_PATH,
@@ -81,6 +127,7 @@ def _create_chart(tsev):
 
 def event(request, event_id):
     ev = get_object_or_404(models.Event, id=event_id)
+    _create_contour_map(ev)
     for tsev in ev.timeseriesevent_set.all():
         _create_chart(tsev)
     return render_to_response('rain-event.html', { 'event': ev, 

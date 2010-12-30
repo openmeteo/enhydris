@@ -20,6 +20,8 @@ Rainfall event analysis - {{ event.start_date|date:"Y-m-d H:i" }}
   {% endfor %}
 </table>
 
+<img src="{{ HRAIN_STATIC_CACHE_URL }}/hrain-e{{ event.id|stringformat:"04d" }}.png" />
+
 <h2>Rainfall evolution per station</h2>
 <table style="border-collapse: collapse; border: hidden;">
   {% for t in event.timeseriesevent_set.all %}
