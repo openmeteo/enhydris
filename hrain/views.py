@@ -50,26 +50,30 @@ def _create_contour_map(ev):
         p1 = Proj(init='epsg:%d' % (gp.srid,))
         p2 = Proj(init='epsg:%d' % (settings.HRAIN_CONTOUR_SRID,))
         (x, y) = transform(p1, p2, gp.abscissa, gp.ordinate)
-        a.append((x, y, tsev.total_precipitation))
+        a.append((x, y, tsev.total_precipitation, gp.name))
 
     # Define the grid and interpolate
+    GRANULARITY=100
     x = [i[0] for i in a]
     y = [i[1] for i in a]
     z = [i[2] for i in a]
     rbfi = Rbf(x, y, z, function='linear')
     (x0, y0, x1, y1) = settings.HRAIN_CONTOUR_CHART_BOUNDS
-    dx, dy = (x1-x0)/100.0, (y1-y0)/100.0
+    dx, dy = (x1-x0)/GRANULARITY, (y1-y0)/GRANULARITY
     xx = np.arange(x0, x1+dx, dx)
     yy = np.arange(y0, y1+dy, dy)
-    zz = np.empty([101, 101])
-    for i in xrange(0, 100):
-        for j in xrange(0, 100):
-            zz[i][j] = rbfi(xx[i], yy[j])
-
+    zz = np.empty([GRANULARITY+1, GRANULARITY+1])
+    for i in xrange(0, GRANULARITY):
+        for j in xrange(0, GRANULARITY):
+            zz[j][i] = rbfi(xx[i], yy[j])
 
     # Create the chart
     fig = plt.figure()
-    plt.contour(xx, yy, zz)
+    for x, y, z, name in a:
+        plt.plot(x, y, marker='x', linestyle='None', color='black')
+        plt.text(x, y, name)
+    cs = plt.contour(xx, yy, zz)
+    plt.clabel(cs, inline=1, fontsize=10, fmt="%1.0f")
 
     fig.savefig(filename)
 
