@@ -7,18 +7,13 @@
 {% block content %}
 
 {% for group in eventgroups %}
-  <table><tr><th colspan="2" style="text-align: left">{{ group.year }}</th></tr>
-  <tr style="vertical-align: top"><td>
+  <h2>{{ group.year }}</h2>
+  <p>
   {% for e in group.events %}
-    {% ifchanged %}
-      {% if forloop.counter > forloop.revcounter %}
-        </td><td style="padding-left: 3em">
-      {% endif %}
-    {% endifchanged %}
-      <a href="{% url enhydris.hrain.views.event e.id %}">{{ e.start_date|date:"Y-m-d H:i" }} -
-      {{ e.end_date|date:"Y-m-d H:i" }}</a><br />
+      <span style="font-size: {{ e.fontsize }}pt">
+      <a href="{% url enhydris.hrain.views.event e.id %}">{{ e.start_date|date:"Y-m-d_H:i" }}-{{ e.end_date|date:"H:i" }}</a></span>
   {% endfor %}
-  </td></tr></table>
+  </p>
 {% endfor %}
 
 {% endblock %}
