@@ -8,6 +8,7 @@ class Event(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     max_measurement = models.FloatField()
+    average_precipitation_depth = models.FloatField()
 
     def __unicode__(self):
         return "%s - %s" % (self.start_date.isoformat(),
@@ -41,13 +42,16 @@ def refresh_events():
     teid = 1
     for i, event in enumerate(events, start=1):
         e = Event(id=i, start_date=event[0], end_date=event[1],
-                                                            max_measurement=0)
+                              max_measurement=0, average_precipitation_depth=0)
         e.save()
         for x in ts_list:
             total=x.sum(e.start_date, e.end_date)
             e.max_measurement = max(e.max_measurement,
                                             x.max(e.start_date, e.end_date))
-            if fpconst.isNaN(total): total = None
+            if fpconst.isNaN(total):
+                total = None
+            else:
+                e.average_precipitation_depth += total/len(ts_list)
             fp.truncate(0)
             x.write(fp, e.start_date, e.end_date)
             te = TimeseriesEvent(id=teid, event=e,
@@ -55,6 +59,6 @@ def refresh_events():
                        id=x.id), total_precipitation=total, data=fp.getvalue())
             te.save()
             teid += 1
-        e.save() # We save again so that max_measurement is stored.
+        e.save()    # Save max_measurement and average_precipitation_depth
     for path in glob(os.path.join(settings.HRAIN_STATIC_CACHE_PATH, 'hrain*')):
         os.unlink(path)
