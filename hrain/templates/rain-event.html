@@ -10,17 +10,21 @@ Rainfall event analysis - {{ event.start_date|date:"Y-m-d H:i" }}
 <p><strong>Start of event:</strong> {{ event.start_date|date:"Y-m-d H:i" }}</p>
 <p><strong>End of event:</strong> {{ event.end_date|date:"Y-m-d H:i" }}</p>
 
-<h2>Total rainfall per station</h2>
 <table>
-  {% for t in event.timeseriesevent_set.all %}
-    <tr>
-      <th style="text-align: left">{{ t.timeseries.gentity.name }}:</th>
-      <td style="text-align: right">{{ t.total_precipitation }}</td>
-    </tr>
-  {% endfor %}
+<tr style="vertical-align: top"><td>
+  <h2>Total rainfall per station</h2>
+  <table>
+    {% for t in event.timeseriesevent_set.all %}
+      <tr>
+        <th style="text-align: left">{{ t.timeseries.gentity.name }}:</th>
+        <td style="text-align: right">{{ t.total_precipitation }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+</td><td>
+  <img src="{{ HRAIN_STATIC_CACHE_URL }}/hrain-e{{ event.id|stringformat:"04d" }}.png" />
+</td></tr>
 </table>
-
-<img src="{{ HRAIN_STATIC_CACHE_URL }}/hrain-e{{ event.id|stringformat:"04d" }}.png" />
 
 <h2>Rainfall evolution per station</h2>
 <table style="border-collapse: collapse; border: hidden;">
