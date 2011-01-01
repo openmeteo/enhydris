@@ -12,6 +12,7 @@ from enhydris.hrain import models
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib import cm
 
 
 def index(request):
@@ -72,7 +73,9 @@ def _create_contour_map(ev):
     for x, y, z, name in a:
         plt.plot(x, y, marker='x', linestyle='None', color='black')
         plt.text(x, y, name)
-    cs = plt.contour(xx, yy, zz)
+    im = plt.imshow(zz, interpolation='bilinear', origin='lower',
+        cmap=cm.winter_r, extent=(x0, x1, y0, y1))
+    cs = plt.contour(zz, extent=(x0, x1, y0, y1), colors="k")
     plt.clabel(cs, inline=1, fontsize=10, fmt="%1.0f")
 
     fig.savefig(filename)
