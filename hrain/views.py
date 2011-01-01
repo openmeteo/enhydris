@@ -18,7 +18,7 @@ from matplotlib import cm
 def index(request):
     eventgroups = []
     year = 0
-    for e in models.Event.objects.order_by('id').all():
+    for e in models.Event.objects.order_by('-id').all():
         if e.start_date.year != year:
             year = e.start_date.year
             eventgroups.append({ 'year': year, 'events': [] })
