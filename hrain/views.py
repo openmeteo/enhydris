@@ -69,10 +69,18 @@ def _create_contour_map(ev):
             zz[j][i] = rbfi(xx[i], yy[j])
 
     # Create the chart
-    fig = plt.figure()
+    chart_large_dimension = 500 # pixels
+    chart_small_dimension = chart_large_dimension*min(y1-y0, x1-x0)/max(
+                                                                y1-y0, x1-x0)
+    if x1-x0>y1-y0:
+        x_dim, y_dim = chart_large_dimension, chart_small_dimension
+    else:
+        x_dim, y_dim = chart_small_dimension, chart_large_dimension
+    fig = plt.figure(figsize=(x_dim/96.0, y_dim/96.0), dpi=96)
     for x, y, z, name in a:
         plt.plot(x, y, marker='x', linestyle='None', color='black')
         plt.text(x, y, name)
+    plt.axis('off')
     im = plt.imshow(zz, interpolation='bilinear', origin='lower',
         cmap=cm.winter_r, extent=(x0, x1, y0, y1))
     cs = plt.contour(zz, extent=(x0, x1, y0, y1), colors="k")
