@@ -19,13 +19,15 @@ def index(request):
     from django.db.models import Max
     eventgroups = []
     year = 0
+    small, big = settings.HRAIN_EVENT_CLOUD_FONTSIZE_RANGE
     max_precipitation = models.Event.objects.aggregate(
         Max('average_precipitation_depth'))['average_precipitation_depth__max']
     for e in models.Event.objects.order_by('-id').all():
         if e.start_date.year != year:
             year = e.start_date.year
             eventgroups.append({ 'year': year, 'events': [] })
-        e.fontsize = max(e.average_precipitation_depth/max_precipitation*30, 6)
+        e.fontsize = small + \
+                    e.average_precipitation_depth/max_precipitation*(big-small)
         eventgroups[-1]['events'].append(e)
     return render_to_response('rain-index.html',
                                     { 'eventgroups': eventgroups },
