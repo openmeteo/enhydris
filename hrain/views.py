@@ -170,6 +170,14 @@ def _create_chart(tsev):
 
 
 def event(request, event_id):
+    event_id = int(event_id)
+    if event_id<0:
+        from django.core.urlresolvers import reverse
+        from django.db.models import Max
+        from django.http import HttpResponseRedirect
+        max_id = models.Event.objects.aggregate(Max('id'))['id__max']
+        nid = max_id + 1 + event_id
+        return HttpResponseRedirect(reverse('event', args=[nid]))
     ev = get_object_or_404(models.Event, id=event_id)
     _create_contour_map(ev)
     for tsev in ev.timeseriesevent_set.all():
