@@ -798,7 +798,9 @@ def _station_edit_or_create(request,station_id=None):
                                 kwargs={'object_id':station_id}))
     else:
         if station:
-            form = StationForm(instance=station)
+            form = StationForm(instance=station,
+                               initial={'abscissa': station.gis_abscissa,
+                                        'ordinate': station.gis_ordinate})
             formsets["Overseer"]  = OverseerFormset(instance=station,
                                                          prefix='Overseer')
             formsets["Instrument"]  = InstrumentFormset(instance=station,
