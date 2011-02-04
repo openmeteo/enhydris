@@ -1,0 +1,18 @@
+{% extends "base-map.html" %}
+{% load i18n %}
+{% block js-globals %}
+    <script type="text/javascript">var map_mode=1;</script>
+{% endblock %}
+{% block extracss %}
+    <style type="text/css">
+    #map {
+        width: 640px;
+        height: 480px;
+        border: 1px solid #eee;
+        z-index: 1;
+    }
+    </style>
+{% endblock %}
+{% block content_main %}
+    <div id="map" style="float: left;"></div>
+{% endblock %}

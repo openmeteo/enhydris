@@ -134,7 +134,6 @@ class Gpoint(Gentity):
     asrid = models.IntegerField(null=True, blank=True)
     f_dependencies = ['Gentity']
     point = models.PointField(null=True, blank=True)
-    objects = models.GeoManager()
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         super(Gpoint, self).save(force_insert, force_update, *args, **kwargs)
     def gis_abscissa(self):
@@ -321,7 +320,7 @@ class GentityEvent(models.Model):
 # Station and its related models
 class StationType(Lookup): pass
 
-class StationManager(models.Manager):
+class StationManager(models.GeoManager):
     """Default manager enhanced with utility methods."""
 
     def get_by_political_division(self, political_division):

@@ -1,11 +1,26 @@
-{% extends "base.html" %}
+{% extends "base-map.html" %}
 {% load i18n %}
 {% load permissions %}
+{% block title %} {% trans 'Enhydris - Station' %} - {%if station %}{{ station.name }} {% endif %}
+{% endblock %}
+{% block js-globals %}
+    <script type="text/javascript">var map_mode=2;
+      {% if station %}agentity_id={{station.id}}{% endif %}
+    </script>
+{% endblock %}
 
 {% block extracss %}
     <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
     <link type="text/css" href="{{ MEDIA_URL }}css/tipTip.css" rel="stylesheet" />
     <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
+    <style type="text/css">
+    #map {
+        width: 480px;
+        height: 420px;
+        border: 1px solid #eee;
+        z-index: 1;
+    }
+    </style>
 {% endblock %}
 
 {% block extra_head %}
@@ -97,6 +112,9 @@
         {% endif %}
 
         {% if station %}
+        <div>
+            {% if station.point %}<div id="map" style="float: right;"></div>{% endif %}
+        <div style"float: left;">    
         <table class="definition tablesorter table_container">
             <tr class="{% cycle 'odd' 'even' as rowalts %}">
                 <th>{% trans 'ID' %}</th>
@@ -210,7 +228,8 @@
                     {% endif %}
                 </td>
             </tr>
-
+            </table></div></div>
+            <table class="definition tablesorter table_container">
             <!-- Gentity Alternative Codes table -->
             <tr>
                 <th>{% trans 'Station (Gentity) Alternative Codes' %}</th>

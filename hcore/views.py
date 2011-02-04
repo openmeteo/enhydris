@@ -19,6 +19,8 @@ from django.views.generic import list_detail
 from django.views.generic.create_update import create_object
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.gis.shortcuts import render_to_kml
+from django.contrib.gis.geos import Polygon
 from django.conf import settings
 from django.db.models import Q
 from django.core.servers.basehttp import FileWrapper
@@ -52,6 +54,14 @@ def station_detail(request, *args, **kwargs):
         "enabled_user_content":settings.USERS_CAN_ADD_CONTENT}
     kwargs["request"] = request
     return list_detail.object_detail(*args, **kwargs)
+
+def station_brief(request, object_id):
+    return list_detail.object_detail(request,
+                                     queryset=Station.objects.all(),
+                                     object_id = object_id,
+                                     template_object_name = "station",
+                                     template_name = "hcore/station_brief.html")
+
 
 #FIXME: Now you must keep the "political_division" FIRST in order
 @filter_by(('political_division','owner', 'type', 'water_basin',
@@ -331,6 +341,10 @@ def instrument_detail(request, queryset, object_id, *args, **kwargs):
     kwargs["extra_context"] = {'related_station': related_station,
                                'enabled_user_content':enabled_user_content}
     return list_detail.object_detail(request, queryset, object_id, *args, **kwargs)
+
+def testmap_view(request, *args, **kwargs):
+    return render_to_response('hcore/testmap.html', {},
+        context_instance=RequestContext(request))
 
 
 @filter_by(('political_division','owner', 'type', 'water_basin',
@@ -1507,3 +1521,49 @@ def profile_view(request, username):
         return render_to_response('profiles/profile_public.html',
             { 'profile': user.get_profile()} ,
             context_instance=RequestContext(request))
+
+def kml(request, layer):
+    try:
+        bbox=request.GET.get('BBOX', request.GET.get('bbox', None))
+        agentity_id = request.GET.get('gentity_id', request.GET.get('GENTITY_ID', None));
+    except Exception, e:
+        raise Http404
+    if bbox:
+        try:
+            minx, miny, maxx, maxy=[float(i) for i in bbox.split(',')]
+            geom=Polygon(((minx,miny),(minx,maxy),(maxx,maxy),(maxx,miny),(minx,miny)),srid=4326)
+        except Exception, e:
+            raise Http404
+    try:
+        queryres = Station.objects.all().filter(point__isnull=False)
+        if agentity_id:
+            queryres = queryres.filter(id=agentity_id)
+        if bbox:
+            queryres = queryres.filter(point__contained=geom)
+    except Exception, e:
+        raise Http404
+    for arow in queryres:
+        if arow.point: 
+            arow.kml = arow.point.kml
+    response = render_to_kml("hcore/placemarks.kml", {'places': queryres})
+    return response
+
+def bound(request):
+    try:
+        agentity_id = request.GET.get('gentity_id', request.GET.get('GENTITY_ID', None));
+    except Exception, e:
+        raise Http404
+    try:
+        queryres = Station.objects.all()
+        if agentity_id:
+            queryres = queryres.filter(id=agentity_id)
+    except Exception, e:
+        raise Http404
+    extent = list(queryres.extent())
+    if abs(extent[2]-extent[0])<0.04:
+        extent[2]+=0.020
+        extent[0]-=0.020
+    if abs(extent[3]-extent[1])<0.04:
+        extent[3]+=0.020
+        extent[1]-=0.020
+    return HttpResponse(','.join([str(e) for e in extent]), mimetype='text/plain')
