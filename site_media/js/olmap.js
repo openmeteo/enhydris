@@ -61,7 +61,7 @@ function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor){
         var params = {};
     }
     else if(map_mode==2){
-        var params = {'gentity_id': agentity_id,};
+        var params = {'gentity_id': agentity_id};
     }
     var labelvalue = "";
     var labeling_opts = {
@@ -99,7 +99,7 @@ function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor){
                         externalGraphic: MEDIA_URL+'images/marker.png',
                         graphicWidth: 21, graphicHeight:25, graphicXOffset:-10,
                         graphicYOffset: -25, fillOpacity: 0.7}, 
-                        OpenLayers.Feature.Vector.style["select"])),
+                        OpenLayers.Feature.Vector.style["select"]))
         })
     } );
     alayer.events.register("loadstart", alayer,
