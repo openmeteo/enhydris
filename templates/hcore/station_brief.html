@@ -1,6 +1,6 @@
 {% load i18n %}
-<p style="color: #554400; font-size:11pt">{{ station.name }}</h3>
-<p style="color: #000044; font-size: 9pt">
+<p style="color: #884400; font-size:12pt; font-weight:bold; margin: 3px;">{{ station.name }}</h3>
+<p style="color: #000044; font-size: 9pt; margin: 3px;">
     {{ station.type }}<br />
     {% trans 'Owner: ' %}{{ station.owner }}<br />
     {% if station.is_active %}{% trans 'Active, ' %}{% else %}{% trans 'Not active, ' %}{% endif %}

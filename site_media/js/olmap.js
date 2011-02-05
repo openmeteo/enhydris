@@ -44,9 +44,9 @@ function InvokePopup(afeature) {
     $.get("/stations/b/"+afeature.attributes["id"]+'/', {}, function(data){
         var amessage = '';
         amessage=data;
-        apopup = new OpenLayers.Popup(afeature.attributes["name"], apoint, new OpenLayers.Size(220,180), amessage, true);
+        apopup = new OpenLayers.Popup(afeature.attributes["name"], apoint, new OpenLayers.Size(190,150), amessage, true);
         apopup.setBorder("2px solid");  
-        apopup.setBackgroundColor('#FFEEEE');
+        apopup.setBackgroundColor('#E0E0B0');
         map.addPopup(apopup, true);
     });
 }
@@ -59,7 +59,7 @@ function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor){
     }
     var labelvalue = "";
     var labeling_opts = {
-            label : labelvalue, fontColor: "#604050",
+            label : labelvalue, fontColor: "#504065",
             fontSize: "9px", fontFamily: "Verdana, Arial",
             fontWeight: "bold", labelAlign: "cm" 
     };
@@ -135,11 +135,24 @@ function init() {
     map.addControl(pzb);
     map.addControl(new OpenLayers.Control.MousePosition());
     map.addControl(new OpenLayers.Control.OverviewMap());
-    map.addControl(new OpenLayers.Control.LayerSwitcher());
+    ls = new OpenLayers.Control.LayerSwitcher();
+    map.addControl(ls);
     map.addLayer(ocm);
     map.addLayer(osm);
     map.addLayer(ktimatologio);
     map.addLayers(categories);
+    ls.baseLbl.innerHTML='Base layers';
+    ls.dataLbl.innerHTML='Data layers';
+    var labelButton = new OpenLayers.Control.Button({ type: OpenLayers.Control.TYPE_TOGGLE,
+        title: "Show labels", displayClass: "LabelButtonClass" , trigger: function(){}});  
+    labelButton.events.register("activate", labelButton,
+        function() { setLayersLabels(true); } );
+    labelButton.events.register("deactivate", labelButton,
+        function() { setLayersLabels(false); } );
+    var panel = new OpenLayers.Control.Panel({displayClass: 'olControlShowLabels' });  
+    panel.addControls([labelButton]);  
+    panel.activateControl(labelButton);  
+    map.addControl(panel); 
     var agentity_id_repr='';
     if(map_mode==2)
     {
@@ -168,16 +181,14 @@ function init() {
 }
 
 function ShowProgress(name){
-   return;
-   var aprogress = document.getElementById("progress_"+name);
+   var aprogress = document.getElementById("map_progress");
    if(aprogress==null)return;
    aprogress.innerHTML=
-       "<img src='/site_media/wait16.gif'>";
+       "<img src='"+MEDIA_URL+"images/wait16.gif'>";
 }
 
 function HideProgress(name){
-   return;
-   var aprogress = document.getElementById("progress_"+name);
+   var aprogress = document.getElementById("map_progress");
    if(aprogress==null)return;
    aprogress.innerHTML="";
 }
@@ -200,7 +211,7 @@ function setLayersLabels(value){
         var layer = categories[i];
         var defaultStyle = layer.styleMap.styles["default"].defaultStyle;
         if(value)
-            defaultStyle["label"]="${sitecode}";
+            defaultStyle["label"]="${name}";
         else
             defaultStyle["label"]="";
         layer.styleMap.styles["default"].setDefaultStyle(defaultStyle);
