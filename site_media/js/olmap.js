@@ -50,6 +50,12 @@ function InvokePopup(afeature) {
         map.addPopup(apopup, true);
     });
 }
+function InvokeTooltip(atitle){
+    document.getElementById("map").title = atitle;
+}
+function HideTooltip(atitle){
+    document.getElementById("map").title = '';
+}
 function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor){
     if(map_mode==1){
         var params = {};
@@ -87,7 +93,13 @@ function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor){
                         externalGraphic: MEDIA_URL+'images/selected_marker.png',
                         graphicWidth: 21, graphicHeight:25, graphicXOffset:-10,
                         graphicYOffset: -25, fillOpacity: 1}, 
-                        OpenLayers.Feature.Vector.style["select"]))
+                        OpenLayers.Feature.Vector.style["select"])),
+            "temporary": new OpenLayers.Style(
+                  OpenLayers.Util.applyDefaults({
+                        externalGraphic: MEDIA_URL+'images/marker.png',
+                        graphicWidth: 21, graphicHeight:25, graphicXOffset:-10,
+                        graphicYOffset: -25, fillOpacity: 0.7}, 
+                        OpenLayers.Feature.Vector.style["select"])),
         })
     } );
     alayer.events.register("loadstart", alayer,
@@ -167,13 +179,24 @@ function init() {
     var SelectControl = new OpenLayers.Control.SelectFeature(categories, {
           clickout: true, togle: false, multiple: false,
           hover: false});
+    var HoverControl = new OpenLayers.Control.SelectFeature(categories, {
+          clickout: false, togle: false, multiple: false,
+          hover: true, highlightOnly: true, renderIntent: "temporary",
+          eventListeners: { beforefeaturehighlighted: function(e){},
+                            featurehighlighted: function(e){InvokeTooltip(e.feature.attributes["name"])},
+                            featureunhighlighted: function(e){HideTooltip(e.feature.attributes["name"])}
+                          }});
     map.addControl(SelectControl);
+    map.addControl(HoverControl);
+    HoverControl.activate();
     SelectControl.activate();
     ANavToolBar.controls[0].events.on({
         "activate": function(){
+            HoverControl.activate();
             SelectControl.activate();
         },
         "deactivate": function(){
+            HoverControl.deactivate();
             SelectControl.deactivate();
         }
     });
