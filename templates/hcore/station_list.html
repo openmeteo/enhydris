@@ -4,8 +4,19 @@
 {% load sorting_tags %}
 {% load stationlist_filter %}
 
+{% block js-globals %}
+    <script type="text/javascript">var map_mode=1;</script>
+{% endblock %}
 {% block extracss %}
-
+    {% if use_open_layers %}
+    <style type="text/css">
+    #map {
+        width: 560px;
+        height: 440px;
+        border: 1px solid #eee;
+        z-index: 1;
+    }
+    </style>{% endif %}
 {% endblock %}
 
 {% block extrajs %}
@@ -81,7 +92,15 @@
         </ul>
 
         <div id="tabs-1" >
-            <div>
+    {% if use_open_layers %}
+          <div>
+           <div style="float: right;">
+                <div id="map" style="float: left;">
+                <div id="map_progress" style="position: absolute; margin-top:212px; margin-left: 272px; z-index: 5000;"></div></div>
+           </div>
+           <div style="float: left;">
+    {% endif %}
+             <div>
                   <h3>{% trans 'Searching' %}</h3>
 					<div class="searchform">
 					  <form action="." method="get">
@@ -113,7 +132,7 @@
                         </div>
                     </div>
                     {% endif %}
-            </div>
+             </div>
 
 
            <h3 style="font-size:14pt;font-weight:200;">
@@ -130,9 +149,14 @@
                 </p>
                 {% endif %}
             {% endif %}
+      
+    {% if use_open_layers %}
+         </div>
+        </div>
+    {% endif %}
 
             {% if station_list %}
-			<span style="float:right"> 
+			<span style="float:right; clear: both;"> 
 				<img class="decreaseFont" style="cursor:pointer" alt="Decrease font size" src="{{MEDIA_URL}}images/icons/user-decrease.png" />
 				<img class="resetFont" style="cursor:pointer" alt="Decrease font size" src="{{MEDIA_URL}}images/icons/user-reset.png" />
 				<img class="increaseFont" style="cursor:pointer" alt="Decrease font size" src="{{MEDIA_URL}}images/icons/user-increase.png" />

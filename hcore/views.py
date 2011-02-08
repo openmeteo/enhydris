@@ -28,6 +28,7 @@ from django.core.urlresolvers import reverse
 from django.utils import simplejson
 from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
+from django.db.models import Count
 from enhydris.hcore.models import *
 from enhydris.hcore.decorators import *
 from enhydris.hcore.forms import *
@@ -51,7 +52,9 @@ def station_detail(request, *args, **kwargs):
     stat = get_object_or_404(Station, pk=kwargs["object_id"])
     owner = stat.owner
     kwargs["extra_context"] = {"owner":owner,
-        "enabled_user_content":settings.USERS_CAN_ADD_CONTENT}
+        "enabled_user_content":settings.USERS_CAN_ADD_CONTENT,
+        "use_open_layers": settings.USE_OPEN_LAYERS,
+        "base_template": ("base-map.html" if settings.USE_OPEN_LAYERS else "base.html")}
     kwargs["request"] = request
     return list_detail.object_detail(*args, **kwargs)
 
@@ -62,6 +65,26 @@ def station_brief(request, object_id):
                                      template_object_name = "station",
                                      template_name = "hcore/station_brief.html")
 
+def get_search_query(search_terms):
+    query = Q()
+    for term in search_terms:
+        query &= (Q(name__icontains=term) | Q(name_alt__icontains=term) |
+                  Q(short_name__icontains=term )|
+                  Q(short_name_alt__icontains=term) |
+                  Q(remarks__icontains=term) |
+                  Q(remarks_alt__icontains=term)|
+                  Q(water_basin__name__icontains=term) |
+                  Q(water_basin__name_alt__icontains=term) |
+                  Q(water_division__name__icontains=term) |
+                  Q(water_division__name_alt__icontains=term) |
+                  Q(political_division__name__icontains=term) |
+                  Q(political_division__name_alt__icontains=term) |
+                  Q(type__descr__icontains=term) |
+                  Q(type__descr_alt__icontains=term) |
+                  Q(owner__organization__name__icontains=term) |
+                  Q(owner__person__first_name__icontains=term) |
+                  Q(owner__person__last_name__icontains=term))
+    return query
 
 #FIXME: Now you must keep the "political_division" FIRST in order
 @filter_by(('political_division','owner', 'type', 'water_basin',
@@ -69,38 +92,21 @@ def station_brief(request, object_id):
 @sort_by
 def station_list(request, queryset, *args, **kwargs):
 
+    kwargs["extra_context"] = { "use_open_layers": settings.USE_OPEN_LAYERS,
+        "base_template": ("base-map.html" if settings.USE_OPEN_LAYERS else "base.html")}
     if request.GET.has_key("ts_only") and request.GET["ts_only"]=="True":
-        from django.db.models import Count
         tmpset = queryset.annotate(tsnum=Count('timeseries'))
         queryset = tmpset.exclude(tsnum=0)
 
     if request.GET.has_key("check") and request.GET["check"]=="search":
         # The case we got a simple search request
-        kwargs["extra_context"] = {"search":True}
+        kwargs["extra_context"].update({"search":True})
         query_string = request.GET.get('q', "")
         search_terms = query_string.split()
         results = queryset
 
         if search_terms:
-            query = Q()
-            for term in search_terms:
-                query &= (Q(name__icontains=term) | Q(name_alt__icontains=term) |
-                          Q(short_name__icontains=term )|
-                          Q(short_name_alt__icontains=term) |
-                          Q(remarks__icontains=term) |
-                          Q(remarks_alt__icontains=term)|
-                          Q(water_basin__name__icontains=term) |
-                          Q(water_basin__name_alt__icontains=term) |
-                          Q(water_division__name__icontains=term) |
-                          Q(water_division__name_alt__icontains=term) |
-                          Q(political_division__name__icontains=term) |
-                          Q(political_division__name_alt__icontains=term) |
-                          Q(type__descr__icontains=term) |
-                          Q(type__descr_alt__icontains=term) |
-                          Q(owner__organization__name__icontains=term) |
-                          Q(owner__person__first_name__icontains=term) |
-                          Q(owner__person__last_name__icontains=term))
-            results = results.filter(query).distinct()
+            results = results.filter(get_search_query(search_terms)).distinct()
             queryset = results
         else:
             results = []
@@ -353,7 +359,6 @@ def testmap_view(request, *args, **kwargs):
 def map_view(request, stations='',  *args, **kwargs):
 
     if request.GET.has_key("ts_only") and request.GET["ts_only"]=="True":
-        from django.db.models import Count
         tmpset = stations.annotate(tsnum=Count('timeseries'))
         stations = tmpset.exclude(tsnum=0)
 
@@ -365,25 +370,7 @@ def map_view(request, stations='',  *args, **kwargs):
         results = stations
 
         if search_terms:
-            query = Q()
-            for term in search_terms:
-                query &= (Q(name__icontains=term) | Q(name_alt__icontains=term) |
-                          Q(short_name__icontains=term )|
-                          Q(short_name_alt__icontains=term) |
-                          Q(remarks__icontains=term) |
-                          Q(remarks_alt__icontains=term)|
-                          Q(water_basin__name__icontains=term) |
-                          Q(water_basin__name_alt__icontains=term) |
-                          Q(water_division__name__icontains=term) |
-                          Q(water_division__name_alt__icontains=term) |
-                          Q(political_division__name__icontains=term) |
-                          Q(political_division__name_alt__icontains=term) |
-                          Q(type__descr__icontains=term) |
-                          Q(type__descr_alt__icontains=term) |
-                          Q(owner__organization__name__icontains=term) |
-                          Q(owner__person__first_name__icontains=term) |
-                          Q(owner__person__last_name__icontains=term))
-            results = results.filter(query).distinct()
+            results = results.filter(get_search_query(search_terms)).distinct()
             stations = results
         else:
             results = []
@@ -1522,6 +1509,19 @@ def profile_view(request, username):
             { 'profile': user.get_profile()} ,
             context_instance=RequestContext(request))
 
+def clean_kml_request(tuppleitems):
+    try:
+        items = {}
+        for item in tuppleitems:
+            items[item[0].lower()] = item[1] 
+        klist = ('service', 'version', 'request', 'srs', 'bbox')
+        for key in klist:
+            if items.has_key(key):
+                items.pop(key)
+        return items
+    except Exception, e:
+        raise Http404
+
 def kml(request, layer):
     try:
         bbox=request.GET.get('BBOX', request.GET.get('bbox', None))
@@ -1535,11 +1535,37 @@ def kml(request, layer):
         except Exception, e:
             raise Http404
     try:
+        getparams = clean_kml_request(request.GET.items())
         queryres = Station.objects.all().filter(point__isnull=False)
-        if agentity_id:
-            queryres = queryres.filter(id=agentity_id)
-        if bbox:
-            queryres = queryres.filter(point__contained=geom)
+        if getparams.has_key('check') and getparams['check']=='search':
+            query_string = request.GET.get('q', request.GET.get('Q', ""))
+            search_terms = query_string.split()
+            if search_terms:
+                queryres = queryres.filter(get_search_query(search_terms)).distinct()
+        else:
+            if agentity_id:
+                queryres = queryres.filter(id=agentity_id)
+            if bbox:
+                queryres = queryres.filter(point__contained=geom)
+            if getparams.has_key('owner'):
+                queryres = queryres.filter(owner__id=getparams['owner'])
+            if getparams.has_key('type'):
+                queryres = queryres.filter(type__id=getparams['type'])
+            if getparams.has_key('political_division'):
+                leaves = PoliticalDivision.objects.get_leaf_subdivisions(\
+                                  PoliticalDivision.objects.filter(id=getparams['political_division']))
+                queryres = queryres.filter(political_division__in=leaves)
+            if getparams.has_key('water_basin'):
+                queryres = queryres.filter(Q(water_basin__id=getparams['water_basin']) | \
+                                           Q(water_basin__parent=getparams['water_basin']))
+            if getparams.has_key('water_division'):
+                queryres = queryres.filter(water_division__id=getparams['water_division'])
+            if getparams.has_key('variable'):
+                queryres = queryres.filter(id__in=\
+                      Timeseries.objects.all().filter(variable__id=getparams['variable']).values_list('gentity', flat=True))
+        if getparams.has_key('ts_only'):
+            tmpset = queryres.annotate(tsnum=Count('timeseries'))
+            queryres = tmpset.exclude(tsnum=0)
     except Exception, e:
         raise Http404
     for arow in queryres:
@@ -1554,16 +1580,45 @@ def bound(request):
     except Exception, e:
         raise Http404
     try:
+        getparams = clean_kml_request(request.GET.items())
         queryres = Station.objects.all()
-        if agentity_id:
-            queryres = queryres.filter(id=agentity_id)
+        if getparams.has_key('check') and getparams['check']=='search':
+            query_string = request.GET.get('q', request.GET.get('Q', ""))
+            search_terms = query_string.split()
+            if search_terms:
+                queryres = queryres.filter(get_search_query(search_terms))
+        else:
+            if agentity_id:
+                queryres = queryres.filter(id=agentity_id)
+            if getparams.has_key('owner'):
+                queryres = queryres.filter(owner__id=getparams['owner'])
+            if getparams.has_key('type'):
+                queryres = queryres.filter(type__id=getparams['type'])
+            if getparams.has_key('political_division'):
+                leaves = PoliticalDivision.objects.get_leaf_subdivisions(\
+                                  PoliticalDivision.objects.filter(id=getparams['political_division']))
+                queryres = queryres.filter(political_division__in=leaves)
+            if getparams.has_key('water_basin'):
+                queryres = queryres.filter(Q(water_basin__id=getparams['water_basin']) | \
+                                           Q(water_basin__parent=getparams['water_basin']))
+            if getparams.has_key('water_division'):
+                queryres = queryres.filter(water_division__id=getparams['water_division'])
+            if getparams.has_key('variable'):
+                queryres = queryres.filter(id__in=\
+                      Timeseries.objects.all().filter(variable__id=getparams['variable']).values_list('gentity', flat=True))
+        if getparams.has_key('ts_only'):
+            tmpset = queryres.annotate(tsnum=Count('timeseries'))
+            queryres = tmpset.exclude(tsnum=0)
+        extent = list(queryres.extent())
+        min_viewport = settings.MIN_VIEWPORT_IN_DEGS
+        min_viewport_half = 0.5*min_viewport
+        if abs(extent[2]-extent[0])<min_viewport:
+            extent[2]+=min_viewport_half
+            extent[0]-=min_viewport_half
+        if abs(extent[3]-extent[1])<min_viewport:
+            extent[3]+=min_viewport_half
+            extent[1]-=min_viewport_half
+        return HttpResponse(','.join([str(e) for e in extent]), mimetype='text/plain')
     except Exception, e:
+        print e
         raise Http404
-    extent = list(queryres.extent())
-    if abs(extent[2]-extent[0])<0.04:
-        extent[2]+=0.020
-        extent[0]-=0.020
-    if abs(extent[3]-extent[1])<0.04:
-        extent[3]+=0.020
-        extent[1]-=0.020
-    return HttpResponse(','.join([str(e) for e in extent]), mimetype='text/plain')

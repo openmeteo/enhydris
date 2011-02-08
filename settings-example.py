@@ -80,3 +80,7 @@ TS_GRAPH_CACHE_DIR="/var/tmp/enhydris-timeseries/"
 
 CAPTCHA_ROOT='site_media/captchas/'
 CAPTCHA_FONT='site_media/arizona.ttf'
+
+#Open layers - Geodjango section
+USE_OPEN_LAYERS = True
+MIN_VIEWPORT_IN_DEGS = 0.04
