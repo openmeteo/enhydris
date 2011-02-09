@@ -179,7 +179,11 @@ def event(request, event_id):
         from django.http import HttpResponseRedirect
         max_id = models.Event.objects.aggregate(Max('id'))['id__max']
         nid = max_id + 1 + event_id
-        return HttpResponseRedirect(reverse('event', args=[nid]))
+        target_url = reverse('event', args=[nid])
+        g = request.GET
+        if len(g):
+            target_url += '?' + '&'.join(['%s=%s' % (x, g[x]) for x in g])
+        return HttpResponseRedirect(target_url)
     ev = get_object_or_404(models.Event, id=event_id)
     _create_contour_map(ev)
     for tsev in ev.timeseriesevent_set.all():
