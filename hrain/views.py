@@ -99,7 +99,7 @@ def _create_contour_map(ev):
     zz = zz[GRANULARITY:2*GRANULARITY+1, GRANULARITY:2*GRANULARITY+1]
 
     # Create the chart
-    chart_large_dimension = 500 # pixels
+    chart_large_dimension = 400 # pixels
     chart_small_dimension = chart_large_dimension*min(y1-y0, x1-x0)/max(
                                                                 y1-y0, x1-x0)
     if x1-x0>y1-y0:
@@ -107,11 +107,14 @@ def _create_contour_map(ev):
     else:
         x_dim, y_dim = chart_small_dimension, chart_large_dimension
     fig = plt.figure(figsize=(x_dim/96.0, y_dim/96.0), dpi=96)
+    ax = plt.axes([0.0, 0.0, 1.0, 1.0]) # Axes should occupy no space
+    ax.set_xticks([])
+    ax.set_yticks([])
+    plt.axis('off')
     for x, y, z, name in a:
         if name=='virtual': continue
         plt.plot(x, y, marker='x', linestyle='None', color='black')
         plt.text(x, y, name, color='black')
-    plt.axis('off')
     im = plt.imshow(zz, interpolation='bilinear', origin='lower',
         cmap=cm.winter_r, extent=(x0, x1, y0, y1))
     cs = plt.contour(zz, extent=(x0, x1, y0, y1), colors="red")
