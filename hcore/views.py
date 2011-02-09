@@ -1620,5 +1620,4 @@ def bound(request):
             extent[1]-=min_viewport_half
         return HttpResponse(','.join([str(e) for e in extent]), mimetype='text/plain')
     except Exception, e:
-        print e
         raise Http404
