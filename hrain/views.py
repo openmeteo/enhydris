@@ -3,8 +3,9 @@ from pyproj import Proj, transform
 import os.path
 
 from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext
+from django.template import RequestContext, TemplateDoesNotExist
 from django.conf import settings
+from django.http import Http404, HttpResponse
 
 from pthelma.timeseries import Timeseries
 from enhydris.hrain import models
@@ -183,6 +184,12 @@ def event(request, event_id):
     _create_contour_map(ev)
     for tsev in ev.timeseriesevent_set.all():
         _create_chart(tsev)
-    return render_to_response('rain-event.html', { 'event': ev, 
-        'HRAIN_STATIC_CACHE_URL': settings.HRAIN_STATIC_CACHE_URL},
-        context_instance=RequestContext(request))
+    t = request.GET.get('template', None)
+    template_name = t if t and t.startswith('rain-event') else 'rain-event.html'
+    try:
+        from django.template.loader import get_template
+        template = get_template(template_name)
+    except TemplateDoesNotExist:
+        template = get_template('rain-event.html')
+    return HttpResponse(template.render(RequestContext(request, { 'event': ev, 
+            'HRAIN_STATIC_CACHE_URL': settings.HRAIN_STATIC_CACHE_URL})))
