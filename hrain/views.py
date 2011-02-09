@@ -55,6 +55,7 @@ def _create_contour_map(ev):
     # co-ordinates of the point and the total rainfall.
     a = []
     for tsev in ev.timeseriesevent_set.all():
+        if tsev.total_precipitation is None: continue
         gp = tsev.timeseries.gentity.gpoint
         p1 = Proj(init='epsg:%d' % (gp.srid,))
         p2 = Proj(init='epsg:%d' % (settings.HRAIN_CONTOUR_SRID,))
