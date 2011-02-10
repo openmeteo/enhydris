@@ -352,6 +352,10 @@ def testmap_view(request, *args, **kwargs):
     return render_to_response('hcore/testmap.html', {},
         context_instance=RequestContext(request))
 
+def embedmap_view(request, *args, **kwargs):
+    return render_to_response('hcore/embedmap.html', {},
+        context_instance=RequestContext(request))
+
 
 @filter_by(('political_division','owner', 'type', 'water_basin',
             'water_division','variable',))

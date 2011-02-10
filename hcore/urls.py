@@ -36,6 +36,9 @@ urlpatterns = patterns('',
     (r'^testmap/$',
         views.testmap_view, {}, 'testmap_view'),
 
+    (r'^embedmap/$',
+        views.embedmap_view, {}, 'embedmap_view'),
+
     (r'^get_subdivision/(?P<division_id>\d+)/$',
      views.get_subdivision, {}, 'get_subdivision'),
 
