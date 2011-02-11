@@ -1,11 +1,27 @@
-{% extends "base.html" %}
+{% extends base_template %}
 {% load i18n %}
 {% load permissions %}
+{% block title %} {% trans 'Enhydris - Station' %} - {%if station %}{{ station.name }} {% endif %}
+{% endblock %}
+{% block js-globals %}
+    <script type="text/javascript">var map_mode=2;
+      {% if station %}agentity_id={{station.id}}{% endif %}
+    </script>
+{% endblock %}
 
 {% block extracss %}
     <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
     <link type="text/css" href="{{ MEDIA_URL }}css/tipTip.css" rel="stylesheet" />
     <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
+    <style type="text/css">
+    {% if use_open_layers %}
+    #map {
+        width: 480px;
+        height: 420px;
+        border: 1px solid #eee;
+        z-index: 1;
+    }{% endif %}
+    </style>
 {% endblock %}
 
 {% block extra_head %}
@@ -97,6 +113,12 @@
         {% endif %}
 
         {% if station %}
+        {% if use_open_layers %}
+        <div>
+            {% if station.point %}<div id="map" style="float: right;">
+            <div id="map_progress" style="position: absolute; margin-top:202px; margin-left: 232px; z-index: 5000;"></div>
+            </div>{% endif %}
+        <div>{% endif %} {# if use_open_layers #}    
         <table class="definition tablesorter table_container">
             <tr class="{% cycle 'odd' 'even' as rowalts %}">
                 <th>{% trans 'ID' %}</th>
@@ -128,11 +150,11 @@
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Abscissa' %}</th>
-                <td colspan='2'>{{ station.abscissa }}</td>
+                <td colspan='2'>{{ station.gis_abscissa }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Ordinate' %}</th>
-                <td colspan='2'>{{ station.ordinate }}</td>
+                <td colspan='2'>{{ station.gis_ordinate }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'SRID' %}</th>
@@ -210,7 +232,8 @@
                     {% endif %}
                 </td>
             </tr>
-
+            </table>{%if use_open_layers %}</div></div>{% endif %}
+            <table class="definition tablesorter table_container">
             <!-- Gentity Alternative Codes table -->
             <tr>
                 <th>{% trans 'Station (Gentity) Alternative Codes' %}</th>

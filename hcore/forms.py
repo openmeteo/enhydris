@@ -6,6 +6,7 @@ from pthelma import timeseries
 from django import forms, db
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.gis.geos import Point
 from django.forms import ModelForm
 from django.utils.translation import ugettext_lazy as _
 from registration.forms import RegistrationForm
@@ -143,8 +144,34 @@ class GentityForm(ModelForm):
         model = Gentity
 
 class GpointForm(GentityForm):
+    abscissa = forms.FloatField(required=False)
+    ordinate = forms.FloatField(required=False)
+    srid = forms.IntegerField(required=False)
+
     class Meta:
         model = Gpoint
+        exclude = ('point',)
+
+    @db.transaction.commit_on_success
+    def save(self, commit=True, *args,**kwargs):
+
+        gpoint = super(GpointForm,self).save(commit=False)
+        abscissa = self.cleaned_data['abscissa']
+        ordinate = self.cleaned_data['ordinate']
+        srid = self.cleaned_data['srid']
+
+        if (abscissa == None) or (ordinate == None):
+            gpoint.point = None
+        else:
+            if srid == None:
+                srid = 4326
+            gpoint.point = Point(x=abscissa, y=ordinate, srid=srid)
+
+        # This may not be a good idea !
+        if commit:
+            gpoint.save()
+
+        return gpoint
 
 class StationForm(GpointForm, GentityForm):
     """
@@ -159,7 +186,7 @@ class StationForm(GpointForm, GentityForm):
     """
     class Meta:
         model = Station
-        exclude = ('overseers','creator')
+        exclude = ('overseers','creator','point')
 
     political_division = forms.ModelChoiceField(PoliticalDivision.objects,
                                 widget=SelectWithPop(model_name='politicaldivision'),required=False)

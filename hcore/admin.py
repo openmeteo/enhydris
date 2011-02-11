@@ -147,7 +147,7 @@ class StationAdmin(admin.ModelAdmin):
     form = StationAdminForm
     # ChangeList format
     list_display = ('id', 'name', 'short_name', 'remarks', 'water_basin',
-        'water_division', 'political_division', 'abscissa', 'ordinate', 'srid',
+        'water_division', 'political_division', 'srid',
         'approximate', 'altitude', 'asrid', 'owner', 'type', 'is_active',
         'is_automatic', 'start_date', 'end_date','show_overseers' )
     list_filter = ('is_active', 'is_automatic', 'end_date',)

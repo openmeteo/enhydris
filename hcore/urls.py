@@ -27,8 +27,14 @@ urlpatterns = patterns('',
     (r'^stations/d/(?P<object_id>\d+)/$',
      views.station_detail, stations, 'station_detail'),
 
+    (r'^stations/b/(?P<object_id>\d+)/$',
+     views.station_brief, {}, 'station_brief'),
+
     (r'^map/$',
         views.map_view, stations , 'map_view'),
+
+    (r'^testmap/$',
+        views.testmap_view, {}, 'testmap_view'),
 
     (r'^get_subdivision/(?P<division_id>\d+)/$',
      views.get_subdivision, {}, 'get_subdivision'),
@@ -53,6 +59,11 @@ urlpatterns = patterns('',
 
     (r'^site_media/'+settings.GENTITYFILE_DIR+'/.*$',
      views.protect_gentityfile, {}, ''),
+
+    (r'^(?P<layer>[^/]+)/kml/$',
+     views.kml, {}), 
+
+    (r'^bound/$', views.bound, {}),
 )
 
 # If users can modify content, enable these views

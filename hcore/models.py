@@ -1,5 +1,5 @@
 from django.db import connection as db_connection
-from django.db import models
+from django.contrib.gis.db import models
 from django.contrib.auth.models import User, Group
 from django.conf import settings
 from django.db.models.signals import post_syncdb, post_save
@@ -128,15 +128,18 @@ class Gentity(models.Model):
             or self.name_alt or str(self.id)
 
 class Gpoint(Gentity):
-    abscissa = models.FloatField(null=True, blank=True)
-    ordinate = models.FloatField(null=True, blank=True)
     srid = models.IntegerField(null=True, blank=True)
     approximate = models.BooleanField()
     altitude = models.FloatField(null=True, blank=True)
     asrid = models.IntegerField(null=True, blank=True)
     f_dependencies = ['Gentity']
+    point = models.PointField(null=True, blank=True)
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         super(Gpoint, self).save(force_insert, force_update, *args, **kwargs)
+    def gis_abscissa(self):
+        return self.point.transform(self.srid, clone=True)[0] if self.point else None;
+    def gis_ordinate(self):
+        return self.point.transform(self.srid, clone=True)[1] if self.point else None;
 
 class Gline(Gentity):
     gpoint1 = models.ForeignKey(Gpoint, null=True, blank=True, related_name='glines1')
@@ -317,7 +320,7 @@ class GentityEvent(models.Model):
 # Station and its related models
 class StationType(Lookup): pass
 
-class StationManager(models.Manager):
+class StationManager(models.GeoManager):
     """Default manager enhanced with utility methods."""
 
     def get_by_political_division(self, political_division):

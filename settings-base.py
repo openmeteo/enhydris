@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.sites',
     'django.contrib.humanize',
+    'django.contrib.gis',
 
     # Debugging Apps
     'django_extensions',
@@ -70,3 +71,4 @@ AJAX_LOOKUP_CHANNELS = {
 
 LOGIN_REDIRECT_URL = '/'
 AUTH_PROFILE_MODULE = 'hcore.UserProfile'
+USE_OPEN_LAYERS = False 
