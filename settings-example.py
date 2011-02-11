@@ -45,7 +45,8 @@ SECRET_KEY = 'yy)g)w2jqkpyv9$w39i9$7(6wb+$h(_+x3gj#=@fzs2tmuj$#='
 GENTITYFILE_DIR = 'gentityfile'
 
 # GIS Configuration
-GIS_SERVER=""
+GIS_SERVER="" # This is an obsolete setting, do not use
+MIN_VIEWPORT_IN_DEGS = 0.04
 
 # Options for django-registration
 ACCOUNT_ACTIVATION_DAYS=7
@@ -81,6 +82,3 @@ TS_GRAPH_CACHE_DIR="/var/tmp/enhydris-timeseries/"
 CAPTCHA_ROOT='site_media/captchas/'
 CAPTCHA_FONT='site_media/arizona.ttf'
 
-#Open layers - Geodjango section
-USE_OPEN_LAYERS = True
-MIN_VIEWPORT_IN_DEGS = 0.04
