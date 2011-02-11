@@ -86,6 +86,23 @@ def get_search_query(search_terms):
                   Q(owner__person__last_name__icontains=term))
     return query
 
+_station_list_csv_headers = ['id', 'Name', 'Alternative name', 'Short name',
+    'Alt short name', 'Type', 'Owner', 'Start date', 'End date', 'Abscissa',
+    'Ordinate', 'SRID', 'Approximate', 'Altitude', 'SRID', 'Water basin',
+    'Water division', 'Political division', 'Active', 'Automatic', 'Remarks',
+    'Alternative remarks', 'Creator', 'Last modified']
+
+def _station_csv(s):
+    abscissa, ordinate = s.point.transform(s.srid, clone=True)
+    return [s.id, s.name, s.name_alt, s.short_name, s.short_name_alt,
+            s.type.descr if s.type else "", s.owner, s.start_date, s.end_date,
+            abscissa, ordinate, s.srid, s.approximate, s.altitude, s.asrid,
+            s.water_basin.name if s.water_basin else "",
+            s.water_division.name if s.water_division else "",
+            s.political_division.name if s.political_division else "",
+            s.is_active, s.is_automatic, s.remarks, s.remarks_alt,
+            s.creator.username if s.creator else "", s.last_modified]
+
 #FIXME: Now you must keep the "political_division" FIRST in order
 @filter_by(('political_division','owner', 'type', 'water_basin',
             'water_division','variable',))
@@ -119,6 +136,16 @@ def station_list(request, queryset, *args, **kwargs):
             kwargs["extra_context"].update({'enabled_user_content':
                                     settings.USERS_CAN_ADD_CONTENT})
 
+    if request.GET.get("format", "").lower()=="csv":
+        import csv
+        response = HttpResponse(mimetype='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=stations.csv'
+        writer = csv.writer(response)
+        writer.writerow(_station_list_csv_headers)
+        for station in queryset:
+            writer.writerow(_station_csv(station))
+        return response
+    
     return list_detail.object_list(request,queryset=queryset, *args, **kwargs )
 
 

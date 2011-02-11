@@ -98,8 +98,7 @@ class Organization(Lentity):
         ordering = ('name',)
 
     def __unicode__(self):
-        if self.acronym: return self.acronym
-        return str(self.id)
+        return self.acronym if self.acronym else self.name
 
 post_save.connect(post_save_person_or_organization, sender=Organization)
 
