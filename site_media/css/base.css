@@ -154,7 +154,13 @@ ul li, ol li {
   font-size: 0.9em;
 }
 
-input, textarea {
+input {
+  font-family: sans-serif;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+}
+
+textarea {
   font-family: sans-serif;
   border: 1px solid #aaa;
   -moz-border-radius: 2px;
