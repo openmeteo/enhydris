@@ -1,5 +1,4 @@
 from StringIO import StringIO
-from pyproj import Proj, transform
 import os.path
 
 from django.shortcuts import render_to_response, get_object_or_404
@@ -57,9 +56,7 @@ def _create_contour_map(ev):
     for tsev in ev.timeseriesevent_set.all():
         if tsev.total_precipitation is None: continue
         gp = tsev.timeseries.gentity.gpoint
-        p1 = Proj(init='epsg:%d' % (gp.srid,))
-        p2 = Proj(init='epsg:%d' % (settings.HRAIN_CONTOUR_SRID,))
-        (x, y) = transform(p1, p2, gp.abscissa, gp.ordinate)
+        (x, y) = gp.point.transform(settings.HRAIN_CONTOUR_SRID, clone=True)
         a.append((x, y, tsev.total_precipitation, gp.name))
 
     # Get the grid parameters
