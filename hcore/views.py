@@ -105,7 +105,7 @@ def _station_csv(s):
 
 #FIXME: Now you must keep the "political_division" FIRST in order
 @filter_by(('political_division','owner', 'type', 'water_basin',
-            'water_division','variable',))
+            'water_division','variable','bounded',))
 @sort_by
 def station_list(request, queryset, *args, **kwargs):
 
@@ -129,7 +129,9 @@ def station_list(request, queryset, *args, **kwargs):
             results = []
         kwargs["extra_context"].update({'query': query_string,
                                         'terms': search_terms, })
-
+    else:
+        if len(request.GET.items())>0:
+            kwargs["extra_context"].update({"advanced_search":True})
 
     if hasattr(settings, 'USERS_CAN_ADD_CONTENT'):
         if settings.USERS_CAN_ADD_CONTENT:
@@ -1615,6 +1617,15 @@ def bound(request):
             search_terms = query_string.split()
             if search_terms:
                 queryres = queryres.filter(get_search_query(search_terms))
+        elif getparams.has_key('bounded'):
+            minx, miny, maxx, maxy=[float(i) for i in getparams['bounded'].split(',')]
+            dx = (maxx-minx)/2000
+            dy = (maxy-miny)/2000
+            minx+=dx
+            miny-=dx
+            miny+=dy
+            maxy-=dy
+            return HttpResponse("%f,%f,%f,%f"%(minx,miny,maxx,maxy), mimetype='text/plain') 
         else:
             if agentity_id:
                 queryres = queryres.filter(id=agentity_id)

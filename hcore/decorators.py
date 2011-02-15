@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Q
+from django.contrib.gis.geos import Polygon
 from enhydris.hcore.models import *
 
 #############################################################
@@ -84,6 +85,13 @@ def filter_by(filter_list):
                             term = obj.__unicode__()
                             queryset = queryset.filter(
                                   Q(timeseries__variable__descr=term))
+                        except:
+                            queryset = queryset.none()
+                    elif arg == "bounded":
+                        try:
+                            minx, miny, maxx, maxy=[float(i) for i in value.split(',')]
+                            geom=Polygon(((minx,miny),(minx,maxy),(maxx,maxy),(maxx,miny),(minx,miny)),srid=4326)
+                            queryset = queryset.filter( Q(point__contained=geom))
                         except:
                             queryset = queryset.none()
 

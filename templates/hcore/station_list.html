@@ -77,7 +77,19 @@
 
     });
 
-
+    function GetRectAreaResults(){
+        var aurl=window.location.pathname;
+        var urlparams = getUrlVars();
+        urlparams['bounded']=map.getExtent().transform(new
+        OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326")).toBBOX(7);
+        var aarray = [];
+        var i = 0;
+        for(param in urlparams){
+            aarray[i] = param+"="+urlparams[param];
+            i++;
+        }
+        window.location=encodeURI(aurl+'?'+aarray.join('&'));
+    }
     </script>
 {% endblock %}
 
@@ -152,6 +164,7 @@
       
     {% if use_open_layers %}
          </div>
+         <button type="button" onclick="GetRectAreaResults();">{% trans 'Filter results by map viewport' %}</button>
         </div>
     {% endif %}
 
