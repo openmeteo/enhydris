@@ -1608,9 +1608,6 @@ def kml(request, layer):
 def bound(request):
     try:
         agentity_id = request.GET.get('gentity_id', request.GET.get('GENTITY_ID', None));
-    except Exception, e:
-        raise Http404
-    try:
         getparams = clean_kml_request(request.GET.items())
         queryres = Station.objects.all()
         if getparams.has_key('check') and getparams['check']=='search':
@@ -1651,4 +1648,4 @@ def bound(request):
             extent[1]-=min_viewport_half
         return HttpResponse(','.join([str(e) for e in extent]), mimetype='text/plain')
     except Exception, e:
-        raise Http404
+        return HttpResponse(','.join([str(e) for e in settings.MAP_DEFAULT_VIEWPORT]), mimetype='text/plain')

@@ -46,7 +46,11 @@ GENTITYFILE_DIR = 'gentityfile'
 
 # GIS Configuration
 GIS_SERVER="" # This is an obsolete setting, do not use
+#Uncoment to hide open layers map
+#USE_OPEN_LAYERS = False
 MIN_VIEWPORT_IN_DEGS = 0.04
+#Map default area (minlong, minlat, maxlong, maxlat)
+MAP_DEFAULT_VIEWPORT = (19.3, 34.75, 29.65, 41.8)
 
 # Options for django-registration
 ACCOUNT_ACTIVATION_DAYS=7
