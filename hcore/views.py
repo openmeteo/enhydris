@@ -53,8 +53,7 @@ def station_detail(request, *args, **kwargs):
     owner = stat.owner
     kwargs["extra_context"] = {"owner":owner,
         "enabled_user_content":settings.USERS_CAN_ADD_CONTENT,
-        "use_open_layers": settings.USE_OPEN_LAYERS,
-        "base_template": ("base-map.html" if settings.USE_OPEN_LAYERS else "base.html")}
+        "use_open_layers": settings.USE_OPEN_LAYERS }
     kwargs["request"] = request
     return list_detail.object_detail(*args, **kwargs)
 
@@ -109,8 +108,7 @@ def _station_csv(s):
 @sort_by
 def station_list(request, queryset, *args, **kwargs):
 
-    kwargs["extra_context"] = { "use_open_layers": settings.USE_OPEN_LAYERS,
-        "base_template": ("base-map.html" if settings.USE_OPEN_LAYERS else "base.html")}
+    kwargs["extra_context"] = { "use_open_layers": settings.USE_OPEN_LAYERS }
     if request.GET.has_key("ts_only") and request.GET["ts_only"]=="True":
         tmpset = queryset.annotate(tsnum=Count('timeseries'))
         queryset = tmpset.exclude(tsnum=0)
