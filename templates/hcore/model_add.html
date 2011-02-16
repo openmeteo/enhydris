@@ -1,10 +1,11 @@
 {% load i18n %}
 {% load form_as_table %} 
+{% load admin_media %}
 <html>
 <head>
 	<title>	Add New {{ form_prefix }} </title>
-	<script type="text/javascript" src="/media/js/admin/RelatedObjectLookups.js"></script> 
-    <link media="screen" href="/site_media/css/base.css" type="text/css" rel="stylesheet"> 
+	<script type="text/javascript" src="{% admin_media_prefix %}js/admin/RelatedObjectLookups.js"></script> 
+    <link media="screen" href="{{ MEDIA_URL }}css/base.css" type="text/css" rel="stylesheet"> 
     <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
 
 </head>

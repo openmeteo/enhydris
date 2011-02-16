@@ -24,7 +24,7 @@
 	$(document).ready(function() {
 		
 		$("#data_holder").hide()	
-		$("#progress").append("<img style=\"margin: auto;\" src=\"/site_media/images/icons/progress.gif\">");
+		$("#progress").append("<img style=\"margin: auto;\" src=\""+MEDIA_URL+"images/icons/progress.gif\">");
 
 		 $.getJSON('/timeseries/data/', {object_id:{{timeseries.id}},}, function(chart_data){
 			
@@ -75,7 +75,7 @@
                     break;
                 }
             }
-		    $("#placeholder").append("<img style=\"margin: auto;\" src=\"/site_media/images/icons/progress.gif\">");
+		    $("#placeholder").append("<img style=\"margin: auto;\" src=\""+MEDIA_URL+"images/icons/progress.gif\">");
             $.getJSON('/timeseries/data/', {object_id:{{timeseries.id}},
                 start_pos:from_pos, end_pos:to_pos}, function(chart_data){
                 d = chart_data			
