@@ -20,7 +20,7 @@ var apopup = null;
 function InvokePopup(afeature) {
     apoint = afeature.geometry.getBounds().getCenterLonLat();
     map.panTo(apoint);
-    $.get("/stations/b/"+afeature.attributes["id"]+'/', {}, function(data){
+    $.get(ENHYDRIS_ROOT_URL+"stations/b/"+afeature.attributes["id"]+'/', {}, function(data){
         var amessage = '';
         amessage=data;
         apopup = new OpenLayers.Popup(afeature.attributes["name"], apoint, new OpenLayers.Size(190,150), amessage, true);
@@ -55,7 +55,7 @@ function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor){
             graphicYOffset: -25, fillOpacity: 1
     };
     general_opts = Object.extend(general_opts, labeling_opts);
-    AURL = "/"+ObjectName+"/kml/";
+    AURL = ENHYDRIS_ROOT_URL+ObjectName+"/kml/";
     var alayer = new OpenLayers.Layer.WFS(AName, AURL, params,
     {   projection: new OpenLayers.Projection("EPSG:4326"),
         format: OpenLayers.Format.KML,
@@ -140,7 +140,7 @@ function init() {
     }
     var getboundoptions =  {'gentity_id': agentity_id_repr}; 
     Object.extend(getboundoptions, getUrlVars());
-    $.ajax({url: "/bound/", data: getboundoptions, method: 'get', 
+    $.ajax({url: BOUND_URL, data: getboundoptions, method: 'get', 
         success: function(data){
             bounds = OpenLayers.Bounds.fromString(data);
             bounds.transform(new OpenLayers.Projection("EPSG:4326"), new

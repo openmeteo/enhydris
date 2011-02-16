@@ -24,6 +24,8 @@
   </script>
   <script type="text/javascript">
     var MEDIA_URL = "{{ MEDIA_URL }}";
+    var ENHYDRIS_ROOT_URL = "{% url enhydris.hcore.views.index %}";
+    var BOUND_URL = "{% url enhydris.hcore.views.bound %}";
     $(document).ready(function() {
 		$("#search_input").placeholder();
 	});
@@ -36,7 +38,6 @@
      <script type="text/javascript" src="{{ MEDIA_URL}}js/olmap.js"></script>
   {% endif %}
   {% endblock %}
-  {% block mapjs %}{% endblock %}
   {% block shortcut_icon %}{% endblock %}
   {% block extracss %}{% endblock %}
   {% block extrajs %}{% endblock %}
