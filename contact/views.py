@@ -39,7 +39,7 @@ def contactview(request):
         if data['hash'] == sha.new(SALT+data['captcha']).hexdigest():
 
             # format the email
-            rendered_message = render_to_string('contact/email_body.txt',
+            rendered_message = render_to_string('email_body.txt',
                                                     {'user': name,
                                                      'email': from_email,
                                                      'message': message,})
@@ -48,13 +48,12 @@ def contactview(request):
             except BadHeaderError:
                 return HttpResponse('Invalid header found.')
 
-            return render_to_response('contact/thankyou.html',
-                                        RequestContext(request))
+            return render_to_response('thankyou.html', RequestContext(request))
 
         else:
             (captcha, hash) = createcapcha(request)
             captcha_img = hash+'.jpg'
-            return render_to_response('contact/contact.html',
+            return render_to_response('contact.html',
                                     {'form': ContactForm(),
                                     'captcha': captcha_img, 'hash':hash,
                                     'message':'Wrong captcha'},
@@ -64,7 +63,7 @@ def contactview(request):
     (captcha, hash) = createcapcha(request)
     captcha_img = hash+'.jpg'
 
-    return render_to_response('contact/contact.html', {'form': ContactForm(),
+    return render_to_response('contact.html', {'form': ContactForm(),
                                     'captcha': captcha_img, 'hash':hash},
                                     RequestContext(request))
 
