@@ -359,7 +359,7 @@ def timeseries_detail(request, queryset, object_id, *args, **kwargs):
                               'enabled_user_content':enabled_user_content,
                               'anonymous_can_download_data':
                                     anonymous_can_download_data}
-
+    kwargs["template_name"] = "timeseries_detail.html"
     return list_detail.object_detail(request, queryset, object_id, *args, **kwargs)
 
 
@@ -375,6 +375,7 @@ def instrument_detail(request, queryset, object_id, *args, **kwargs):
     related_station = instrument.station
     kwargs["extra_context"] = {'related_station': related_station,
                                'enabled_user_content':enabled_user_content}
+    kwargs["template_name"] = "instrument_detail.html"
     return list_detail.object_detail(request, queryset, object_id, *args, **kwargs)
 
 def testmap_view(request, *args, **kwargs):
