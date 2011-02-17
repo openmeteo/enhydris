@@ -48,7 +48,8 @@ GENTITYFILE_DIR = 'gentityfile'
 GIS_SERVER="" # This is an obsolete setting, do not use
 #Uncoment to hide open layers map
 #USE_OPEN_LAYERS = False
-MIN_VIEWPORT_IN_DEGS = 0.04
+#Uncoment to alter the default value of min viewport
+#MIN_VIEWPORT_IN_DEGS = 0.04
 #Map default area (minlong, minlat, maxlong, maxlat)
 MAP_DEFAULT_VIEWPORT = (19.3, 34.75, 29.65, 41.8)
 
