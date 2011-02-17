@@ -1606,55 +1606,55 @@ def kml(request, layer):
     return response
 
 def bound(request):
-    try:
-        agentity_id = request.GET.get('gentity_id', request.GET.get('GENTITY_ID', None));
-        getparams = clean_kml_request(request.GET.items())
-        queryres = Station.objects.all()
-        if getparams.has_key('check') and getparams['check']=='search':
-            query_string = request.GET.get('q', request.GET.get('Q', ""))
-            search_terms = query_string.split()
-            if search_terms:
-                queryres = queryres.filter(get_search_query(search_terms))
-        elif getparams.has_key('bounded'):
-            minx, miny, maxx, maxy=[float(i) for i in getparams['bounded'].split(',')]
-            dx = (maxx-minx)/2000
-            dy = (maxy-miny)/2000
-            minx+=dx
-            miny-=dx
-            miny+=dy
-            maxy-=dy
-            return HttpResponse("%f,%f,%f,%f"%(minx,miny,maxx,maxy), mimetype='text/plain') 
-        else:
-            if agentity_id:
-                queryres = queryres.filter(id=agentity_id)
-            if getparams.has_key('owner'):
-                queryres = queryres.filter(owner__id=getparams['owner'])
-            if getparams.has_key('type'):
-                queryres = queryres.filter(type__id=getparams['type'])
-            if getparams.has_key('political_division'):
-                leaves = PoliticalDivision.objects.get_leaf_subdivisions(\
-                                  PoliticalDivision.objects.filter(id=getparams['political_division']))
-                queryres = queryres.filter(political_division__in=leaves)
-            if getparams.has_key('water_basin'):
-                queryres = queryres.filter(Q(water_basin__id=getparams['water_basin']) | \
-                                           Q(water_basin__parent=getparams['water_basin']))
-            if getparams.has_key('water_division'):
-                queryres = queryres.filter(water_division__id=getparams['water_division'])
-            if getparams.has_key('variable'):
-                queryres = queryres.filter(id__in=\
-                      Timeseries.objects.all().filter(variable__id=getparams['variable']).values_list('gentity', flat=True))
-        if getparams.has_key('ts_only'):
-            tmpset = queryres.annotate(tsnum=Count('timeseries'))
-            queryres = tmpset.exclude(tsnum=0)
-        extent = list(queryres.extent())
-        min_viewport = settings.MIN_VIEWPORT_IN_DEGS
-        min_viewport_half = 0.5*min_viewport
-        if abs(extent[2]-extent[0])<min_viewport:
-            extent[2]+=min_viewport_half
-            extent[0]-=min_viewport_half
-        if abs(extent[3]-extent[1])<min_viewport:
-            extent[3]+=min_viewport_half
-            extent[1]-=min_viewport_half
-        return HttpResponse(','.join([str(e) for e in extent]), mimetype='text/plain')
-    except Exception, e:
-        return HttpResponse(','.join([str(e) for e in settings.MAP_DEFAULT_VIEWPORT]), mimetype='text/plain')
+    agentity_id = request.GET.get('gentity_id', request.GET.get('GENTITY_ID', None));
+    getparams = clean_kml_request(request.GET.items())
+    queryres = Station.objects.all()
+    if getparams.has_key('check') and getparams['check']=='search':
+        query_string = request.GET.get('q', request.GET.get('Q', ""))
+        search_terms = query_string.split()
+        if search_terms:
+            queryres = queryres.filter(get_search_query(search_terms))
+    elif getparams.has_key('bounded'):
+        minx, miny, maxx, maxy=[float(i) for i in getparams['bounded'].split(',')]
+        dx = (maxx-minx)/2000
+        dy = (maxy-miny)/2000
+        minx+=dx
+        miny-=dx
+        miny+=dy
+        maxy-=dy
+        return HttpResponse("%f,%f,%f,%f"%(minx,miny,maxx,maxy), mimetype='text/plain') 
+    else:
+        if agentity_id:
+            queryres = queryres.filter(id=agentity_id)
+        if getparams.has_key('owner'):
+            queryres = queryres.filter(owner__id=getparams['owner'])
+        if getparams.has_key('type'):
+            queryres = queryres.filter(type__id=getparams['type'])
+        if getparams.has_key('political_division'):
+            leaves = PoliticalDivision.objects.get_leaf_subdivisions(\
+                              PoliticalDivision.objects.filter(id=getparams['political_division']))
+            queryres = queryres.filter(political_division__in=leaves)
+        if getparams.has_key('water_basin'):
+            queryres = queryres.filter(Q(water_basin__id=getparams['water_basin']) | \
+                                       Q(water_basin__parent=getparams['water_basin']))
+        if getparams.has_key('water_division'):
+            queryres = queryres.filter(water_division__id=getparams['water_division'])
+        if getparams.has_key('variable'):
+            queryres = queryres.filter(id__in=\
+                  Timeseries.objects.all().filter(variable__id=getparams['variable']).values_list('gentity', flat=True))
+    if getparams.has_key('ts_only'):
+        tmpset = queryres.annotate(tsnum=Count('timeseries'))
+        queryres = tmpset.exclude(tsnum=0)
+    if queryres.count()<1:
+        return HttpResponse(','.join([str(e) for e in\
+                            settings.MAP_DEFAULT_VIEWPORT]), mimetype='text/plain')
+    extent = list(queryres.extent())
+    min_viewport = settings.MIN_VIEWPORT_IN_DEGS
+    min_viewport_half = 0.5*min_viewport
+    if abs(extent[2]-extent[0])<min_viewport:
+        extent[2]+=min_viewport_half
+        extent[0]-=min_viewport_half
+    if abs(extent[3]-extent[1])<min_viewport:
+        extent[3]+=min_viewport_half
+        extent[1]-=min_viewport_half
+    return HttpResponse(','.join([str(e) for e in extent]), mimetype='text/plain')
