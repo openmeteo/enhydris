@@ -55,6 +55,7 @@ def station_detail(request, *args, **kwargs):
         "enabled_user_content":settings.USERS_CAN_ADD_CONTENT,
         "use_open_layers": settings.USE_OPEN_LAYERS }
     kwargs["request"] = request
+    kwargs["template_name"] = "station_detail.html"
     return list_detail.object_detail(*args, **kwargs)
 
 def station_brief(request, object_id):
@@ -62,7 +63,7 @@ def station_brief(request, object_id):
                                      queryset=Station.objects.all(),
                                      object_id = object_id,
                                      template_object_name = "station",
-                                     template_name = "hcore/station_brief.html")
+                                     template_name = "station_brief.html")
 
 def get_search_query(search_terms):
     query = Q()
@@ -109,6 +110,7 @@ def _station_csv(s):
 def station_list(request, queryset, *args, **kwargs):
 
     kwargs["extra_context"] = { "use_open_layers": settings.USE_OPEN_LAYERS }
+    kwargs["template_name"] = "station_list.html"
     if request.GET.has_key("ts_only") and request.GET["ts_only"]=="True":
         tmpset = queryset.annotate(tsnum=Count('timeseries'))
         queryset = tmpset.exclude(tsnum=0)
@@ -376,11 +378,11 @@ def instrument_detail(request, queryset, object_id, *args, **kwargs):
     return list_detail.object_detail(request, queryset, object_id, *args, **kwargs)
 
 def testmap_view(request, *args, **kwargs):
-    return render_to_response('hcore/testmap.html', {},
+    return render_to_response('testmap.html', {},
         context_instance=RequestContext(request))
 
 def embedmap_view(request, *args, **kwargs):
-    return render_to_response('hcore/embedmap.html', {},
+    return render_to_response('embedmap.html', {},
         context_instance=RequestContext(request))
 
 
@@ -416,7 +418,7 @@ def map_view(request, stations='',  *args, **kwargs):
     kwargs["extra_context"].update({'station_list': [ s.id for s in stations]},)
 
 
-    return render_to_response('hcore/station_map.html', kwargs["extra_context"],
+    return render_to_response('station_map.html', kwargs["extra_context"],
              context_instance=RequestContext(request))
 
 def get_subdivision(request, division_id):
@@ -845,7 +847,7 @@ def _station_edit_or_create(request,station_id=None):
             formsets["Instrument"]  = InstrumentFormset(prefix='Instrument')
             formsets["Timeseries"]  = TimeseriesFormset(prefix='Timeseries')
 
-    return render_to_response('hcore/station_edit.html', {'form': form,
+    return render_to_response('station_edit.html', {'form': form,
                             'formsets':formsets, },
                             context_instance=RequestContext(request))
 
@@ -937,7 +939,7 @@ def _timeseries_edit_or_create(request,tseries_id=None,station_id=None):
         else:
             form = TimeseriesForm(user=user)
 
-    return render_to_response('hcore/timeseries_edit.html', {'form': form},
+    return render_to_response('timeseries_edit.html', {'form': form},
                     context_instance=RequestContext(request))
 
 @permission_required('hcore.add_timeseries')
@@ -1024,7 +1026,7 @@ def _gentityfile_edit_or_create(request,gfile_id=None,station_id=None):
         else:
             form = GentityFileForm(user=user)
 
-    return render_to_response('hcore/gentityfile_edit.html', {'form': form},
+    return render_to_response('gentityfile_edit.html', {'form': form},
                     context_instance=RequestContext(request))
 
 @permission_required('hcore.add_gentityfile')
@@ -1109,7 +1111,7 @@ def _gentitygenericdata_edit_or_create(request,ggenericdata_id=None,station_id=N
         else:
             form = GentityGenericDataForm(user=user)
 
-    return render_to_response('hcore/gentitygenericdata_edit.html', {'form': form},
+    return render_to_response('gentitygenericdata_edit.html', {'form': form},
                     context_instance=RequestContext(request))
 
 @permission_required('hcore.add_gentityfile')
@@ -1194,7 +1196,7 @@ def _gentityevent_edit_or_create(request,gevent_id=None,station_id=None):
         else:
             form = GentityEventForm(user=user)
 
-    return render_to_response('hcore/gentityevent_edit.html', {'form': form},
+    return render_to_response('gentityevent_edit.html', {'form': form},
                     context_instance=RequestContext(request))
 
 @permission_required('hcore.add_gentityevent')
@@ -1274,7 +1276,7 @@ def _gentityaltcode_edit_or_create(request,galtcode_id=None,station_id=None):
         else:
             form = GentityAltCodeForm(user=user)
 
-    return render_to_response('hcore/gentityaltcode_edit.html', {'form': form},
+    return render_to_response('gentityaltcode_edit.html', {'form': form},
                     context_instance=RequestContext(request))
 
 @permission_required('hcore.add_gentityaltcode')
@@ -1358,7 +1360,7 @@ def _overseer_edit_or_create(request,overseer_id=None,station_id=None):
         else:
             form = OverseerForm(user=user)
 
-    return render_to_response('hcore/overseer_edit.html', {'form': form},
+    return render_to_response('overseer_edit.html', {'form': form},
                     context_instance=RequestContext(request))
 
 @permission_required('hcore.add_overseer')
@@ -1443,7 +1445,7 @@ def _instrument_edit_or_create(request,instrument_id=None,station_id=None):
         else:
             form = InstrumentForm(user=user)
 
-    return render_to_response('hcore/instrument_edit.html', {'form': form},
+    return render_to_response('instrument_edit.html', {'form': form},
                     context_instance=RequestContext(request))
 
 @permission_required('hcore.add_instrument')
@@ -1523,7 +1525,7 @@ def model_add(request, model_name=''):
     return create_object(request, model,
                 post_save_redirect=reverse('model_add',
                     kwargs={'model_name':lower(model.__name__)})+"?_complete=1",
-                template_name='hcore/model_add.html',
+                template_name='model_add.html',
                 form_class= TimeStepForm if model.__name__=='TimeStep' else None,
                 extra_context={'form_prefix': model.__name__,})
 
@@ -1602,7 +1604,7 @@ def kml(request, layer):
     for arow in queryres:
         if arow.point: 
             arow.kml = arow.point.kml
-    response = render_to_kml("hcore/placemarks.kml", {'places': queryres})
+    response = render_to_kml("placemarks.kml", {'places': queryres})
     return response
 
 def bound(request):

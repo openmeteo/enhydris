@@ -24,7 +24,7 @@ class SelectWithPop(forms.Select):
         if not self.model_name:
             self.model_name = name
         html = super(SelectWithPop, self).render(name, *args, **kwargs)
-        popupplus = render_to_string("hcore/form/popplus.html",
+        popupplus = render_to_string("form/popplus.html",
                                                     {'field': self.model_name,
                                                      'orig_name': name})
         return html+popupplus
