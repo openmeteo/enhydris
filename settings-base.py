@@ -28,10 +28,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django_notify.context_processors.notifications',
 )
 
-TEMPLATE_DIRS = (
-    os.path.join(os.path.dirname(sys.modules[__name__].__file__),
-                                                        'templates'),
-)
+TEMPLATE_DIRS = (os.path.join(ENHYDRIS_PROGRAM_DIR, 'templates'),)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
