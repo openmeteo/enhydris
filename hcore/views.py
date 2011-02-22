@@ -90,27 +90,31 @@ _station_list_csv_headers = ['id', 'Name', 'Alternative name', 'Short name',
     'Alt short name', 'Type', 'Owner', 'Start date', 'End date', 'Abscissa',
     'Ordinate', 'SRID', 'Approximate', 'Altitude', 'SRID', 'Water basin',
     'Water division', 'Political division', 'Active', 'Automatic', 'Remarks',
-    'Alternative remarks', 'Creator', 'Last modified']
+    'Alternative remarks', 'Last modified']
 
 def _station_csv(s):
     abscissa, ordinate = s.point.transform(s.srid, clone=True)
-    return [s.id, s.name, s.name_alt, s.short_name, s.short_name_alt,
+    return [unicode(x).encode('utf-8') for x in
+           [s.id, s.name, s.name_alt, s.short_name, s.short_name_alt,
             s.type.descr if s.type else "", s.owner, s.start_date, s.end_date,
             abscissa, ordinate, s.srid, s.approximate, s.altitude, s.asrid,
             s.water_basin.name if s.water_basin else "",
             s.water_division.name if s.water_division else "",
             s.political_division.name if s.political_division else "",
             s.is_active, s.is_automatic, s.remarks, s.remarks_alt,
-            s.creator.username if s.creator else "", s.last_modified]
+            s.last_modified]
+           ]
 
 _instrument_list_csv_headers = ['id', 'Station', 'Type', 'Name',
     'Alternative name', 'Manufacturer', 'Model', 'Start date', 'End date',
     'Active', 'Remarks', 'Alternative remarks']
 
 def _instrument_csv(i):
-    return [i.id, i.station.id, i.type.descr if i.type else "", i.name,
-        i.name_alt, i.manufacturer, i.model, i.start_date, i.end_date,
-        i.is_active, i.remarks, i.remarks_alt]
+    return [unicode(x).encode('utf-8') for x in
+           [i.id, i.station.id, i.type.descr if i.type else "", i.name,
+            i.name_alt, i.manufacturer, i.model, i.start_date, i.end_date,
+            i.is_active, i.remarks, i.remarks_alt]
+           ]
 
 _timeseries_list_csv_headers = ['id', 'Station', 'Instrument', 'Variable',
     'Unit', 'Name', 'Alternative name', 'Precision', 'Time zone', 'Time step',
@@ -118,10 +122,13 @@ _timeseries_list_csv_headers = ['id', 'Station', 'Instrument', 'Variable',
     'Act. Offs.  Mon.', 'Remarks', 'Alternative Remarks']
 
 def _timeseries_csv(t):
-    return [t.id, t.gentity.id, t.instrument.id if t.instrument else "",
-    t.variable.descr, t.unit_of_measurement.symbol, t.name, t.name_alt,
-    t.precision, t.time_zone.code, t.time_step.descr, t.nominal_offset_minutes,
-    t.nominal_offset_months, t.actual_offset_minutes, t.actual_offset_months]
+    return [unicode(x).encode('utf-8') for x in
+           [t.id, t.gentity.id, t.instrument.id if t.instrument else "",
+            t.variable.descr, t.unit_of_measurement.symbol, t.name,
+            t.name_alt, t.precision, t.time_zone.code, t.time_step.descr,
+            t.nominal_offset_minutes, t.nominal_offset_months,
+            t.actual_offset_minutes, t.actual_offset_months]
+           ]
 
 def _prepare_csv(queryset):
     import tempfile, csv, os, os.path
