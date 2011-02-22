@@ -103,6 +103,30 @@ def _station_csv(s):
             s.is_active, s.is_automatic, s.remarks, s.remarks_alt,
             s.creator.username if s.creator else "", s.last_modified]
 
+def _prepare_csv(queryset):
+    import tempfile, csv, os, os.path
+    from zipfile import ZipFile, ZIP_DEFLATED
+    tempdir = tempfile.mkdtemp()
+    zipfilename = os.path.join(tempdir, 'data.zip')
+    zipfile = ZipFile(zipfilename, 'w', ZIP_DEFLATED)
+
+    try:
+        stationsfilename = os.path.join(tempdir, 'stations.csv')
+        stationsfile = open(stationsfilename, 'w')
+        try:
+            csvwriter = csv.writer(stationsfile)
+            csvwriter.writerow(_station_list_csv_headers)
+            for station in queryset:
+                csvwriter.writerow(_station_csv(station))
+        finally:
+            stationsfile.close()
+        zipfile.write(stationsfilename, 'stations.csv')
+    finally:
+        zipfile.close()
+        os.remove(stationsfilename)
+
+    return zipfilename
+    
 #FIXME: Now you must keep the "political_division" FIRST in order
 @filter_by(('political_division','owner', 'type', 'water_basin',
             'water_division','variable','bounded',))
@@ -139,15 +163,14 @@ def station_list(request, queryset, *args, **kwargs):
                                     settings.USERS_CAN_ADD_CONTENT})
 
     if request.GET.get("format", "").lower()=="csv":
-        import csv
-        response = HttpResponse(mimetype='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=stations.csv'
-        writer = csv.writer(response)
-        writer.writerow(_station_list_csv_headers)
-        for station in queryset:
-            writer.writerow(_station_csv(station))
+        import os.path
+        zipfilename = _prepare_csv(queryset)
+        response = HttpResponse(file(zipfilename, 'rb').read(),
+                                        content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename=data.zip'
+        response['Content-Length'] = str(os.path.getsize(zipfilename))
         return response
-    
+
     return list_detail.object_list(request,queryset=queryset, *args, **kwargs )
 
 
