@@ -124,8 +124,9 @@ _timeseries_list_csv_headers = ['id', 'Station', 'Instrument', 'Variable',
 def _timeseries_csv(t):
     return [unicode(x).encode('utf-8') for x in
            [t.id, t.gentity.id, t.instrument.id if t.instrument else "",
-            t.variable.descr, t.unit_of_measurement.symbol, t.name,
-            t.name_alt, t.precision, t.time_zone.code, t.time_step.descr,
+            t.variable.descr if t.variable else "",
+            t.unit_of_measurement.symbol, t.name, t.name_alt, t.precision,
+            t.time_zone.code, t.time_step.descr if t.time_step else "",
             t.nominal_offset_minutes, t.nominal_offset_months,
             t.actual_offset_minutes, t.actual_offset_months]
            ]
