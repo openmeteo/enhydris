@@ -112,6 +112,17 @@ def _instrument_csv(i):
         i.name_alt, i.manufacturer, i.model, i.start_date, i.end_date,
         i.is_active, i.remarks, i.remarks_alt]
 
+_timeseries_list_csv_headers = ['id', 'Station', 'Instrument', 'Variable',
+    'Unit', 'Name', 'Alternative name', 'Precision', 'Time zone', 'Time step',
+    'Nom. Offs. Min.', 'Nom. Offs. Mon.', 'Act. Offs. Min.',
+    'Act. Offs.  Mon.', 'Remarks', 'Alternative Remarks']
+
+def _timeseries_csv(t):
+    return [t.id, t.gentity.id, t.instrument.id if t.instrument else "",
+    t.variable.descr, t.unit_of_measurement.symbol, t.name, t.name_alt,
+    t.precision, t.time_zone.code, t.time_step.descr, t.nominal_offset_minutes,
+    t.nominal_offset_months, t.actual_offset_minutes, t.actual_offset_months]
+
 def _prepare_csv(queryset):
     import tempfile, csv, os, os.path
     from zipfile import ZipFile, ZIP_DEFLATED
@@ -119,33 +130,45 @@ def _prepare_csv(queryset):
     zipfilename = os.path.join(tempdir, 'data.zip')
     zipfile = ZipFile(zipfilename, 'w', ZIP_DEFLATED)
 
+    stationsfilename = os.path.join(tempdir, 'stations.csv')
+    stationsfile = open(stationsfilename, 'w')
     try:
-        stationsfilename = os.path.join(tempdir, 'stations.csv')
-        stationsfile = open(stationsfilename, 'w')
-        try:
-            csvwriter = csv.writer(stationsfile)
-            csvwriter.writerow(_station_list_csv_headers)
-            for station in queryset:
-                csvwriter.writerow(_station_csv(station))
-        finally:
-            stationsfile.close()
-        zipfile.write(stationsfilename, 'stations.csv')
-
-        instrumentsfilename = os.path.join(tempdir, 'instruments.csv')
-        instrumentsfile = open(instrumentsfilename, 'w')
-        try:
-            csvwriter = csv.writer(instrumentsfile)
-            csvwriter.writerow(_instrument_list_csv_headers)
-            for station in queryset:
-                for instrument in station.instrument_set.all():
-                    csvwriter.writerow(_instrument_csv(instrument))
-        finally:
-            instrumentsfile.close()
-        zipfile.write(instrumentsfilename, 'instruments.csv')
-
+        csvwriter = csv.writer(stationsfile)
+        csvwriter.writerow(_station_list_csv_headers)
+        for station in queryset:
+            csvwriter.writerow(_station_csv(station))
     finally:
-        zipfile.close()
-        os.remove(stationsfilename)
+        stationsfile.close()
+    zipfile.write(stationsfilename, 'stations.csv')
+
+    instrumentsfilename = os.path.join(tempdir, 'instruments.csv')
+    instrumentsfile = open(instrumentsfilename, 'w')
+    try:
+        csvwriter = csv.writer(instrumentsfile)
+        csvwriter.writerow(_instrument_list_csv_headers)
+        for station in queryset:
+            for instrument in station.instrument_set.all():
+                csvwriter.writerow(_instrument_csv(instrument))
+    finally:
+        instrumentsfile.close()
+    zipfile.write(instrumentsfilename, 'instruments.csv')
+
+    timeseriesfilename = os.path.join(tempdir, 'timeseries.csv')
+    timeseriesfile = open(timeseriesfilename, 'w')
+    try:
+        csvwriter = csv.writer(timeseriesfile)
+        csvwriter.writerow(_timeseries_list_csv_headers)
+        for station in queryset:
+            for timeseries in station.timeseries.order_by('instrument__id'):
+                csvwriter.writerow(_timeseries_csv(timeseries))
+    finally:
+        timeseriesfile.close()
+    zipfile.write(timeseriesfilename, 'timeseries.csv')
+
+    zipfile.close()
+    os.remove(stationsfilename)
+    os.remove(instrumentsfilename)
+    os.remove(timeseriesfilename)
 
     return zipfilename
     
