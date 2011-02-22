@@ -103,6 +103,15 @@ def _station_csv(s):
             s.is_active, s.is_automatic, s.remarks, s.remarks_alt,
             s.creator.username if s.creator else "", s.last_modified]
 
+_instrument_list_csv_headers = ['id', 'Station', 'Type', 'Name',
+    'Alternative name', 'Manufacturer', 'Model', 'Start date', 'End date',
+    'Active', 'Remarks', 'Alternative remarks']
+
+def _instrument_csv(i):
+    return [i.id, i.station.id, i.type.descr if i.type else "", i.name,
+        i.name_alt, i.manufacturer, i.model, i.start_date, i.end_date,
+        i.is_active, i.remarks, i.remarks_alt]
+
 def _prepare_csv(queryset):
     import tempfile, csv, os, os.path
     from zipfile import ZipFile, ZIP_DEFLATED
@@ -121,6 +130,19 @@ def _prepare_csv(queryset):
         finally:
             stationsfile.close()
         zipfile.write(stationsfilename, 'stations.csv')
+
+        instrumentsfilename = os.path.join(tempdir, 'instruments.csv')
+        instrumentsfile = open(instrumentsfilename, 'w')
+        try:
+            csvwriter = csv.writer(instrumentsfile)
+            csvwriter.writerow(_instrument_list_csv_headers)
+            for station in queryset:
+                for instrument in station.instrument_set.all():
+                    csvwriter.writerow(_instrument_csv(instrument))
+        finally:
+            instrumentsfile.close()
+        zipfile.write(instrumentsfilename, 'instruments.csv')
+
     finally:
         zipfile.close()
         os.remove(stationsfilename)
