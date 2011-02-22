@@ -165,10 +165,31 @@ def _prepare_csv(queryset):
         timeseriesfile.close()
     zipfile.write(timeseriesfilename, 'timeseries.csv')
 
+    import textwrap
+    readmefilename = os.path.join(tempdir, 'README')
+    readmefile = open(readmefilename, 'w')
+    readmefile.write(textwrap.dedent("""\
+        The functionality which provides you with CSV versions of the station,
+        instrument and time series list is a quick way to enable HUMANS to
+        examine these lists with tools such as spreadsheets. It is not
+        intended to be used by any automation tools: headings, columns, file
+        structure and everything is subject to change without notice.
+
+        If you are a developer and need to write automation tools, do not rely
+        on the CSV files. Instead, use the documented API
+        (http://openmeteo.org/doc/api.html), or contact us (the Enhydris
+        developers, not the web site maintainers) and insist that we support
+        one of these open standards appropriate for such information
+        interchange.
+        """))
+    readmefile.close()
+    zipfile.write(readmefilename, 'README')
+
     zipfile.close()
     os.remove(stationsfilename)
     os.remove(instrumentsfilename)
     os.remove(timeseriesfilename)
+    os.remove(readmefilename)
 
     return zipfilename
     
