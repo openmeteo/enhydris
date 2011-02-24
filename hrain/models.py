@@ -30,10 +30,12 @@ def refresh_events():
     from glob import glob
     import os
     import os.path
-    ts_list = [Timeseries(id=x) for x in settings.HRAIN_TIMESERIES]
+
+    ts_list = [(Timeseries(id=x[0]), x[1]) for x in settings.HRAIN_TIMESERIES]
     for x in ts_list:
-        x.read_from_db(connection) 
-    events = identify_events(ts_list, settings.HRAIN_START_THRESHOLD,
+        x[0].read_from_db(connection) 
+    events = identify_events([x[0] for x in ts_list],
+        settings.HRAIN_START_THRESHOLD,
         settings.HRAIN_NTIMESERIES_START_THRESHOLD,
         settings.HRAIN_TIME_SEPARATOR,
         settings.HRAIN_END_THRESHOLD, settings.HRAIN_NTIMESERIES_END_THRESHOLD)
@@ -44,21 +46,26 @@ def refresh_events():
         e = Event(id=i, start_date=event[0], end_date=event[1],
                               max_measurement=0, average_precipitation_depth=0)
         e.save()
+        weighted_total = 0.0
+        weighted_divider = 0.0
         for x in ts_list:
-            total=x.sum(e.start_date, e.end_date)
+            total=x[0].sum(e.start_date, e.end_date)
             e.max_measurement = max(e.max_measurement,
-                                            x.max(e.start_date, e.end_date))
+                                            x[0].max(e.start_date, e.end_date))
             if fpconst.isNaN(total):
                 total = None
             else:
-                e.average_precipitation_depth += total/len(ts_list)
+                weighted_total += total
+                weighted_divider += x[1]
             fp.truncate(0)
-            x.write(fp, e.start_date, e.end_date)
+            x[0].write(fp, e.start_date, e.end_date)
             te = TimeseriesEvent(id=teid, event=e,
                        timeseries=enhydris.hcore.models.Timeseries.objects.get(
-                       id=x.id), total_precipitation=total, data=fp.getvalue())
+                       id=x[0].id), total_precipitation=total,
+                       data=fp.getvalue())
             te.save()
             teid += 1
+        e.average_precipitation_depth += weighted_total/weighted_divider
         e.save()    # Save max_measurement and average_precipitation_depth
     for path in glob(os.path.join(settings.HRAIN_STATIC_CACHE_PATH, 'hrain*')):
         os.unlink(path)

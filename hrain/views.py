@@ -197,4 +197,10 @@ def event(request, event_id):
     except TemplateDoesNotExist:
         template = get_template('rain-event.html')
     return HttpResponse(template.render(RequestContext(request, { 'event': ev, 
+            'event_with_max_average': models.Event.objects.order_by(
+                                            '-average_precipitation_depth')[0],
+            'event_with_max_max': models.Event.objects.order_by(
+                                            '-max_measurement')[0],
             'HRAIN_STATIC_CACHE_URL': settings.HRAIN_STATIC_CACHE_URL})))
+            # FIXME: must create db indexes for average_precipitation_depth
+            # and max_measurement
