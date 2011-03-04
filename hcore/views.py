@@ -9,6 +9,7 @@ import django.db
 import pthelma.timeseries
 from pthelma.timeseries import datetime_from_iso
 from pthelma.timeseries import IntervalType as it
+from xreverse import xreverse
 from string import lower, split, find
 from django.http import (HttpResponse, HttpResponseRedirect,
                             HttpResponseForbidden, Http404)
@@ -347,6 +348,16 @@ def station_info(request, *args, **kwargs):
             unicode(station.type)] for station in stations[dstart:dstart+dlength]]})
     return HttpResponse(json, mimetype='application/json')
 
+def bufcount(filename):
+    lines = 0
+    with open(filename) as f:
+        buf_size = 1024 * 1024
+        read_f = f.read # loop optimization
+        buf = read_f(buf_size)
+        while buf:
+            lines += buf.count('\n')
+            buf = read_f(buf_size)
+    return lines
 
 def timeseries_data(request, *args, **kwargs):
     if hasattr(settings, 'TS_GRAPH_BIG_STEP_DENOMINATOR'):
@@ -366,21 +377,37 @@ def timeseries_data(request, *args, **kwargs):
         response.status_code = 200
         object_id = request.GET['object_id']
         afilename = cache_dir+'%d.hts'%int(object_id)
+        if os.path.exists(afilename):
+            if bufcount(afilename)<1:
+                os.remove(afilename)
+#Update the file in the case of logged data, if this is possible
+        if os.path.exists(afilename):
+            with open(afilename, 'r') as fileobject:
+                xr = xreverse(fileobject, 2048)
+                line = xr.next()
+            lastdate = datetime_from_iso(line.split(',')[0])
+            ts = pthelma.timeseries.Timeseries(int(object_id))
+            ts.read_from_db(django.db.connection, onlybottom=True)
+            if len(ts)>0:
+                db_start, db_end = ts.bounding_dates()
+                if db_start>lastdate:
+                    os.remove(afilename)
+                elif db_end>lastdate:
+                    lastindex = ts.index(lastdate)
+                    with open(afilename, 'a') as fileobject:
+                        ts.write(fileobject, start=ts.keys()[lastindex+1])
+#Check for tmmp file or else create it
         if not os.path.exists(afilename):
             ts = pthelma.timeseries.Timeseries(int(object_id))
             ts.read_from_db(django.db.connection)
             if not os.path.exists(cache_dir):
                 os.mkdir(cache_dir)
             with open(afilename, 'w') as afile:
-                ts.write_file(afile)
-        start_pos=2
-        with open(afilename) as afile:
-            s = afile.readline()
-            while not s.isspace():
-                if find(lower(s), 'count')>-1:
-                    length = int(split(s,'=')[1])
-                start_pos+=1
-                s = afile.readline()
+                ts.write(afile)
+#Read the temp file
+        length = bufcount(afilename)
+        start_pos= 1
+        end_pos= length
         chart_data = []
         if request.GET.has_key('start_pos') and request.GET.has_key('end_pos'):
             start_pos = int(request.GET['start_pos'])
@@ -397,8 +424,8 @@ def timeseries_data(request, *args, **kwargs):
             linecache.checkcache(afilename)
             while pos < start_pos+length:
                 s = linecache.getline(afilename, pos)
-                pos+=fine_step
                 if s.isspace():
+                    pos+=fine_step
                     continue 
                 t = s.split(',') 
 # Use the following exception handling to catch incoplete
@@ -410,7 +437,6 @@ def timeseries_data(request, *args, **kwargs):
                 except:
                     if pos>prev_pos:
                         prev_pos = pos
-                        pos-=fine_step
                         linecache.checkcache(afilename)
                         continue
                     else:
@@ -428,6 +454,10 @@ def timeseries_data(request, *args, **kwargs):
 # timeseries.write_file). So every 5000 lines refresh the cache.
                 if (pos-start_pos)%5000==0:
                     linecache.checkcache(afilename)
+                pos+=fine_step
+            if (pos-fine_step-start_pos)%step!=0:
+                if amax == '': amax = 'null'
+                chart_data.append([calendar.timegm(k.timetuple())*1000, str(amax), end_pos])
         finally:
             linecache.clearcache()
         if chart_data:

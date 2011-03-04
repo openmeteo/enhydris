@@ -15,6 +15,8 @@ from ajax_select.fields import (AutoCompleteSelectMultipleField,
 from enhydris.hcore.models import *
 from enhydris.hcore.widgets import *
 
+import os
+
 
 
 
@@ -380,6 +382,13 @@ class TimeseriesForm(ModelForm):
                 pass
                 # ts.append_to_db(db.connection, transaction=db.transaction)
             else:
+                if hasattr(settings, 'TS_GRAPH_CACHE_DIR'):
+                    cache_dir = settings.TS_GRAPH_CACHE_DIR
+                else:
+                    cache_dir = '/var/tmp/enhydris-timeseries/'
+                afilename = cache_dir+'%d.hts'%int(self.instance.id)
+                if os.path.exists(afilename):
+                    os.remove(afilename)
                 ts.write_to_db(db.connection, transaction=db.transaction)
 
         return tseries
