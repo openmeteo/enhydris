@@ -9,7 +9,7 @@ import django.db
 import pthelma.timeseries
 from pthelma.timeseries import datetime_from_iso
 from pthelma.timeseries import IntervalType as it
-from xreverse import xreverse
+from pthelma.xreverse import xreverse
 from string import lower, split, find
 from django.http import (HttpResponse, HttpResponseRedirect,
                             HttpResponseForbidden, Http404)
