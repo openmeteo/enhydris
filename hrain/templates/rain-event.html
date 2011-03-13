@@ -48,7 +48,7 @@ Rainfall event analysis - {{ event.start_date|date:"Y-m-d H:i" }}
     {% endif %}
     {% if d.month == event.start_date.month %}
       <tr>
-        <td>{{d.year}}-{{d.month}}
+        <td>{{d.year}}-{{d.month|stringformat:"02d"}}
         </td>
         <td>
           <div style="width: 5em; text-align:right">{{v|floatformat:1}}</div>
