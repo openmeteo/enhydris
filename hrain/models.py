@@ -55,7 +55,7 @@ def refresh_events():
             if fpconst.isNaN(total):
                 total = None
             else:
-                weighted_total += total
+                weighted_total += total*x[1]
                 weighted_divider += x[1]
             fp.truncate(0)
             x[0].write(fp, e.start_date, e.end_date)
