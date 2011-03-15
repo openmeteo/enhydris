@@ -1045,11 +1045,12 @@ def _timeseries_edit_or_create(request,tseries_id=None,station_id=None):
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+        tseries = Timeseries(gentity=station)
 
     user = request.user
     # Done with checks
     if request.method == 'POST':
-        if tseries:
+        if tseries and tseries.id:
             form = TimeseriesDataForm(request.POST,request.FILES,instance=tseries,user=user)
         else:
             form = TimeseriesForm(request.POST,request.FILES,user=user)
@@ -1062,10 +1063,10 @@ def _timeseries_edit_or_create(request,tseries_id=None,station_id=None):
             return HttpResponseRedirect(reverse('timeseries_detail',
                                         kwargs={'object_id':tseries_id}))
     else:
-        if tseries:
-            form = TimeseriesDataForm(instance=tseries,user=user)
+        if tseries and tseries.id:
+            form = TimeseriesDataForm(instance=tseries, user=user)
         else:
-            form = TimeseriesForm(user=user)
+            form = TimeseriesForm(instance=tseries, user=user)
 
     return render_to_response('timeseries_edit.html', {'form': form},
                     context_instance=RequestContext(request))
@@ -1076,7 +1077,8 @@ def timeseries_add(request):
     Create new timeseries. Timeseries can only be added as part of an existing
     station.
     """
-    return _timeseries_edit_or_create(request)
+    station_id = request.GET.get("station_id", "")
+    return _timeseries_edit_or_create(request, station_id=station_id)
 
 @login_required
 def timeseries_edit(request,timeseries_id):
