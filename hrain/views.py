@@ -172,6 +172,42 @@ def _create_chart(tsev):
     fig.savefig(filename)
 
 
+def _get_monthly_surface_timeseries():
+    from datetime import datetime
+
+    # Create a monthly timeseries spanning all event range, with all zeros 
+    result = Timeseries()
+    s = models.Event.objects.order_by('start_date')[0].start_date
+    e = models.Event.objects.order_by('-end_date')[0].end_date
+    start = datetime(s.year, s.month, 1)
+    end = datetime(e.year, e.month, 1)
+    d = start
+    while d<=end:
+        result[d] = 0.0
+        m, y = d.month, d.year
+        m += 1
+        if m>12:
+            m = 1
+            y += 1
+        d = datetime(y, m, 1)
+
+    # Fill it in
+    for ev in models.Event.objects.all():
+        s = ev.start_date
+        e = ev.end_date
+        depth = ev.average_precipitation_depth
+        if s.month == e.month:
+            result[datetime(s.year, s.month, 1)] += depth
+        else:
+            s_part = (datetime(e.year, e.month, 1) - s).seconds
+            e_part = (e - datetime(e.year, e.month, 1)).seconds
+            result[datetime(s.year, s.month, 1)] += depth*s_part/(s_part+e_part)
+            result[datetime(e.year, e.month, 1)] += depth*e_part/(s_part+e_part)
+
+    # Finito
+    return result
+
+
 def event(request, event_id):
     event_id = int(event_id)
     if event_id<0:
@@ -201,6 +237,7 @@ def event(request, event_id):
                                             '-average_precipitation_depth')[0],
             'event_with_max_max': models.Event.objects.order_by(
                                             '-max_measurement')[0],
+            'monthly_surface_timeseries': _get_monthly_surface_timeseries(),
             'HRAIN_STATIC_CACHE_URL': settings.HRAIN_STATIC_CACHE_URL})))
             # FIXME: must create db indexes for average_precipitation_depth
             # and max_measurement

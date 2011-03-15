@@ -36,4 +36,29 @@ Rainfall event analysis - {{ event.start_date|date:"Y-m-d H:i" }}
   {% endfor %}
 </table>
 
+<h2>Comparison of monthly areal rainfalls</h2>
+{% for d,v in monthly_surface_timeseries.items %}
+    {% if forloop.first %}
+      <table>
+      <thead>
+      <tr><th>Month</th>
+          <th>Total areal rainfall</th></tr>
+      </thead>
+      <tbody>
+    {% endif %}
+    {% if d.month == event.start_date.month %}
+      <tr>
+        <td>{{d.year}}-{{d.month|stringformat:"02d"}}
+        </td>
+        <td>
+          <div style="width: 5em; text-align:right">{{v|floatformat:1}}</div>
+        </td>
+      </tr>
+    {% endif %}
+    {% if forloop.last %}
+      </tbody></table>
+    {% endif %}
+{% endfor %}
+<p>(Data for last entry may be partial.)</p>
+
 {% endblock %}
