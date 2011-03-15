@@ -424,6 +424,7 @@ def timeseries_data(request, *args, **kwargs):
         pos=start_pos
         amax=''
         prev_pos=-1
+        tick_pos=-1
         try:
             linecache.checkcache(afilename)
             while pos < start_pos+length:
@@ -451,6 +452,7 @@ def timeseries_data(request, *args, **kwargs):
                     else:
                         amax = float(v) if float(v)>amax else amax 
                 if (pos-start_pos)%step==0:
+                    tick_pos=pos
                     if amax == '': amax = 'null'
                     chart_data.append([calendar.timegm(k.timetuple())*1000, str(amax), pos])
                     amax = ''
@@ -459,9 +461,10 @@ def timeseries_data(request, *args, **kwargs):
                 if (pos-start_pos)%5000==0:
                     linecache.checkcache(afilename)
                 pos+=fine_step
-            if (pos-fine_step-start_pos)%step!=0:
+            if tick_pos<end_pos:
+                print 'boo', tick_pos, end_pos
                 if amax == '': amax = 'null'
-                chart_data.append([calendar.timegm(k.timetuple())*1000, str(amax), end_pos])
+                chart_data[-1]=[calendar.timegm(k.timetuple())*1000, str(amax), end_pos]
         finally:
             linecache.clearcache()
         if chart_data:
