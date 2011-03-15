@@ -1,5 +1,9 @@
+from __future__ import with_statement 
 import calendar
-import json
+try:
+    import json
+except ImportError:
+    import simplejson as json
 import math
 import mimetypes
 import os
