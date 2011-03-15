@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load permissions %}
+{% block title %} {% trans 'Enhydris - Instrument' %} - {%if instrument %}{{ instrument.name }} - {{ instrument.type }}, {% trans 'Station:' %} {{ instrument.station }}{% endif %}
+{% endblock %}
 {% block extracss %}
     <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
     <script type="text/javascript">
