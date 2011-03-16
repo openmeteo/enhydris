@@ -462,7 +462,6 @@ def timeseries_data(request, *args, **kwargs):
                     linecache.checkcache(afilename)
                 pos+=fine_step
             if tick_pos<end_pos:
-                print 'boo', tick_pos, end_pos
                 if amax == '': amax = 'null'
                 chart_data[-1]=[calendar.timegm(k.timetuple())*1000, str(amax), end_pos]
         finally:
