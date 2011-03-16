@@ -382,7 +382,7 @@ def timeseries_data(request, *args, **kwargs):
         object_id = request.GET['object_id']
         afilename = cache_dir+'%d.hts'%int(object_id)
         if os.path.exists(afilename):
-            if bufcount(afilename)<1:
+            if os.path.getsize(afilename)<3:
                 os.remove(afilename)
 #Update the file in the case of logged data, if this is possible
         if os.path.exists(afilename):
@@ -409,14 +409,15 @@ def timeseries_data(request, *args, **kwargs):
             with open(afilename, 'w') as afile:
                 ts.write(afile)
 #Read the temp file
-        length = bufcount(afilename)
-        start_pos= 1
-        end_pos= length
         chart_data = []
         if request.GET.has_key('start_pos') and request.GET.has_key('end_pos'):
             start_pos = int(request.GET['start_pos'])
             end_pos = int(request.GET['end_pos'])
             length = end_pos - start_pos + 1
+        else:
+            length = bufcount(afilename)
+            start_pos= 1
+            end_pos= length
         step = int(length/step_denom) or 1
         fine_step= int(step/fine_step_denom) or 1
         if not step%fine_step==0:
