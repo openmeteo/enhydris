@@ -8,6 +8,8 @@ import math
 import mimetypes
 import os
 import linecache
+from calendar import monthrange
+from datetime import timedelta
 from tempfile import mkstemp
 import django.db
 import pthelma.timeseries
@@ -363,7 +365,46 @@ def bufcount(filename):
             buf = read_f(buf_size)
     return lines
 
+def inc_month(adate, months):
+    y = adate.year
+    m = adate.month+months
+    if m>12: (y, m)=(y+1, m-12)
+    if m<1: (y, m)=(y-1, m+12)
+    d = min(adate.day, monthrange(y, m)[1])
+    return adate.replace(year=y, month=m, day=d)
+
 def timeseries_data(request, *args, **kwargs):
+
+    def date_at_pos(pos):
+        s = linecache.getline(afilename, pos)
+        return datetime_from_iso(s.split(',')[0])
+
+    def timedeltadivide(a, b):
+        """Divide timedelta a by timedelta b."""
+        a = a.days*86400+a.seconds
+        b = b.days*86400+b.seconds
+        return float(a)/float(b)
+
+    def find_line_at_date(adatetime, totlines):
+        if totlines <2:
+            return totlines
+        i1, i2 = 1, totlines
+        d1=date_at_pos(i1)
+        d2=date_at_pos(i2)
+        if adatetime<=d1:
+            return i1
+        if adatetime>=d2:
+            return i2
+        while(True):
+            i = i1 + int( float(i2-i1)* timedeltadivide( adatetime-d1, d2-d1) )
+            d = date_at_pos(i)
+            if d==adatetime: return i
+            if (i==i1) or (i==i2): return i
+            if d<adatetime:
+                d1, i1 = d, i
+            if d>adatetime:
+                d2, i2 = d, i
+
     if hasattr(settings, 'TS_GRAPH_BIG_STEP_DENOMINATOR'):
         step_denom = settings.TS_GRAPH_BIG_STEP_DENOMINATOR
     else:
@@ -413,11 +454,23 @@ def timeseries_data(request, *args, **kwargs):
         if request.GET.has_key('start_pos') and request.GET.has_key('end_pos'):
             start_pos = int(request.GET['start_pos'])
             end_pos = int(request.GET['end_pos'])
-            length = end_pos - start_pos + 1
         else:
-            length = bufcount(afilename)
-            start_pos= 1
-            end_pos= length
+            end_pos = bufcount(afilename)
+            if request.GET.has_key('last'):
+                last_date = date_at_pos(end_pos)
+                if request.GET['last']=='day':
+                    first_date = last_date-timedelta(days=1)
+                elif request.GET['last']=='week':
+                    first_date = last_date-timedelta(weeks=1)
+                elif request.GET['last']=='month':
+                    first_date = inc_month(last_date, -1)
+                elif request.GET['last']=='year':
+                    first_date = inc_month(last_date, -12)
+                else: raise Http404
+                start_pos= find_line_at_date(first_date, end_pos)
+            else:
+                start_pos= 1
+        length = end_pos - start_pos + 1
         step = int(length/step_denom) or 1
         fine_step= int(step/fine_step_denom) or 1
         if not step%fine_step==0:
