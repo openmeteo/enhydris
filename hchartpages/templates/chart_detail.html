@@ -4,9 +4,117 @@
    {{ page.name }}
 {% endblock %}
 
+{% block extra_head %}
+  <!--[if IE]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+  <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.min.js"></script>
+  <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.selection.min.js"></script>
+  <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
+  <script type="text/javascript">
+
+    cd=[], vm=[], cm=[];
+    cc=0;
+
+    function addChart(options){
+        cm[cc]=options;
+        cm[cc]['iter']=cc;
+        vm[cc]=[];
+        cd[cc]=[];
+        cc++;
+    }
+
+    function addVariable(options){
+        var chart_id = options['chart_id'];
+        for(var i=0;i<cc;i++)
+            if(cm[i]['id']==chart_id)
+            {
+                var chart_i = i;
+                break;
+            }
+        var j = vm[chart_i].length;
+        vm[chart_i][j] = options;
+    }
+
+    function load_initial_data()
+    {
+        for(var i=0;i<cc;i++){
+            $("#data_holder"+cm[i]['id']).hide()	
+            $("#progress"+cm[i]['id']).append("<img style=\"margin: auto;\" src=\""+MEDIA_URL+"images/icons/progress.gif\">");
+            for(var j=0;j<vm[i].length;j++)
+                vm[i][j]['status']=false;
+            var achart_status=false;
+            for(var j=0;j<vm[i].length;j++)
+            {
+                $.getJSON('{% url timeseries_data %}', {object_id: vm[i][j]['series_id'], last: 'day'}, 
+                    (function(i,j){
+                    return function(chart_data){
+                    var astatus=true;
+                    if(chart_data){
+                        cd[i][j]=chart_data;
+                        vm[i][j]['status']=true;
+                    }
+                    for(var k=0;k<vm[i].length;k++)
+                        astatus = astatus && vm[i][k]['status'];
+                    if(astatus)
+                    {
+                        achart_status=true;
+                        $("#progress"+cm[i]['id']).hide()
+                        $("#data_holder"+cm[i]['id']).show()
+                        flot_init(i);
+                    }
+                }})(i,j));
+            }
+//            if(!achart_status)
+//                 $("#data_holder"+cm[i]['id']).html("<h3>No data locally available!</h3>");
+        }
+    }
+
+	$(document).ready(function() {
+
+        {% for chart in charts %}
+        addChart({id: {{chart.id}}, name: "{{chart.name}}", });
+        {% endfor %}
+
+        {% for var in variables %}
+        addVariable({id: {{var.id}}, name: "{{var.name}}",
+                     series_id: {{var.timeseries.id}}, chart_id: {{var.chart.id}},});
+        {% endfor %}
+
+        load_initial_data();
+	});
+	
+	function flot_init(i) {
+		var d = cd[i];
+        var from_x, to_x, tol;
+        from_x = d[0][0][0];
+        to_x = d[0][d[0].length-1][0];
+        tol = (to_x-from_x)*0.01;
+        from_x-=tol;
+        to_x+=tol;
+		var options = {
+			xaxis: { mode: "time", timeformat: "%y/%m/%d %H:%M",
+            min: from_x, max: to_x},
+			selection: { mode: "x" },
+		};
+
+		var plot = $.plot($("#placeholder"+cm[i]['id']), d, options);
+	}
+
+  </script>
+{% endblock %}
+
 {% block extracss %}
 {% endblock %}
 
 {% block content %}
-
+    {% for chart in charts %}
+        <div id="chartdiv{{chart.id}}" style="float:left;text-align:center;width:500px; height:330; clear:both;">
+			<div id="progress{{chart.id}}" style="text-align:center;padding-top:3em;">
+			</div>
+			<div id="data_holder{{chart.id}}">
+			<p style="text-align:center"> <b>{{chart.name}}</b></p>
+			<div id="placeholder{{chart.id}}" style="margin:0;width:480px;height:320px"></div>
+			</div>
+        </div>
+    <br>
+    {% endfor %}
 {% endblock %}
