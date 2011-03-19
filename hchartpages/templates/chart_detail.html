@@ -14,6 +14,18 @@
     cd=[], vm=[], cm=[];
     cc=0;
 
+    function gup( name )
+    {
+        name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+        var regexS = "[\\?&]"+name+"=([^&#]*)";
+        var regex = new RegExp( regexS );
+        var results = regex.exec( window.location.href );
+        if( results == null )
+            return "";
+        else
+            return results[1];
+    }
+
     function addChart(options){
         cm[cc]=options;
         cm[cc]['iter']=cc;
@@ -36,6 +48,10 @@
 
     function load_initial_data()
     {
+        var time_span;
+        time_span = gup('last');
+        if(!time_span)time_span="day";
+        $('a#'+time_span).each(function(){ $(this).replaceWith($(this).text()); });
         for(var i=0;i<cc;i++){
             $("#data_holder"+cm[i]['id']).hide()	
             $("#progress"+cm[i]['id']).append("<img style=\"margin: auto;\" src=\""+MEDIA_URL+"images/icons/progress.gif\">");
@@ -44,7 +60,7 @@
             var achart_status=false;
             for(var j=0;j<vm[i].length;j++)
             {
-                $.getJSON('{% url timeseries_data %}', {object_id: vm[i][j]['series_id'], last: 'day'}, 
+                $.getJSON('{% url timeseries_data %}', {object_id: vm[i][j]['series_id'], last: time_span}, 
                     (function(i,j){
                     return function(chart_data){
                     var astatus=true;
@@ -106,6 +122,12 @@
 {% endblock %}
 
 {% block content %}
+    <p><strong>Time span:</strong>
+    {% if page.option_annual %}<a href="{% url chartpage_detail page.url_name %}?last=year" id="year">year</a>{% endif %}
+    {% if page.option_monthly %}<a href="{% url chartpage_detail page.url_name %}?last=month" id="month">month</a>{% endif %}
+    {% if page.option_weekly %}<a href="{% url chartpage_detail page.url_name %}?last=week" id="week">week</a>{% endif %}
+    {% if page.option_daily %}<a href="{% url chartpage_detail page.url_name %}?last=day" id="day">day</a>{% endif %}
+    </p>
     {% for chart in charts %}
         <div id="chartdiv{{chart.id}}" style="float:left;text-align:center;width:500px; height:330; clear:both;">
 			<div id="progress{{chart.id}}" style="text-align:center;padding-top:3em;">
