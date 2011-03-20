@@ -6,6 +6,7 @@
 
 {% block extra_head %}
   <!--[if IE]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+  <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/excanvas.min.js"></script>
   <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.min.js"></script>
   <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.selection.min.js"></script>
   <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
@@ -27,8 +28,8 @@
 		$("#data_holder").hide()	
 		$("#progress").append("<img style=\"margin: auto;\" src=\""+MEDIA_URL+"images/icons/progress.gif\">");
 
-		 $.getJSON('{% url timeseries_data %}', {object_id:{{timeseries.id}},}, function(chart_data){
-			
+		 $.getJSON('{% url timeseries_data %}', {object_id:{{timeseries.id}}}, function(chart_data){
+		   
 			$("#progress").hide()
 			$("#data_holder").show()
 			if ( chart_data ) {
@@ -51,7 +52,7 @@
         to_x+=tol;
 		var options = {
 			xaxis: { mode: "time", min: from_x, max: to_x},
-			selection: { mode: "x" },
+			selection: { mode: "x" }
 		};
 
 		var plot = $.plot($("#placeholder"), [d], options);

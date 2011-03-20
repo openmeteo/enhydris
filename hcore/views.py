@@ -418,7 +418,7 @@ def timeseries_data(request, *args, **kwargs):
     else:
         cache_dir = '/var/tmp/enhydris-timeseries/'
     if request.method == "GET" and request.GET.has_key('object_id'):
-        response = HttpResponse(content_type='text/plain;charset=utf8')
+        response = HttpResponse(content_type='application/json')
         response.status_code = 200
         object_id = request.GET['object_id']
         afilename = cache_dir+'%d.hts'%int(object_id)

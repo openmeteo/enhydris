@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
    {{ page.name }}
@@ -6,6 +7,7 @@
 
 {% block extra_head %}
   <!--[if IE]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+  <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/excanvas.min.js"></script>
   <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.min.js"></script>
   <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.selection.min.js"></script>
   <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
@@ -13,6 +15,8 @@
 
     cd=[], vm=[], cm=[];
     cc=0;
+    zoneCorrection=0;
+    default_last="{% if page.option_daily %}day{% else %}{% if page.option_weekly %}week{% else %}{% if page.option_monthly %}month{% else %}year{%endif%}{%endif%}{%endif%}";
 
     function gup( name )
     {
@@ -48,9 +52,11 @@
 
     function load_initial_data()
     {
+        var d = new Date();
+        zoneCorrection=60000*d.getTimezoneOffset();
         var time_span;
         time_span = gup('last');
-        if(!time_span)time_span="day";
+        if(!time_span)time_span=default_last;
         $('a#'+time_span).each(function(){ $(this).replaceWith($(this).text()); });
         for(var i=0;i<cc;i++){
             $("#data_holder"+cm[i]['id']).hide()	
@@ -87,56 +93,172 @@
 	$(document).ready(function() {
 
         {% for chart in charts %}
-        addChart({id: {{chart.id}}, name: "{{chart.name}}", });
+        addChart({id:{{chart.id}}, name:"{{chart.name}}", 
+                  min:{{chart.display_min|lower}},
+                  max:{{chart.display_max|lower}},
+                  avg:{{chart.display_avg|lower}},
+                  has_stats:{{chart.has_stats|lower}}
+                 });
         {% endfor %}
 
         {% for var in variables %}
-        addVariable({id: {{var.id}}, name: "{{var.name}}",
-                     series_id: {{var.timeseries.id}}, chart_id: {{var.chart.id}},});
+        addVariable({id:{{var.id}}, name:"{{var.name}}",
+                     series_id:{{var.timeseries.id}},chart_id: {{var.chart.id}}});
         {% endfor %}
 
         load_initial_data();
 	});
-	
+
+    function calc_stats(d)
+    {
+        var result = {min: null, max: null, sum: null, avg: null,
+                      max_tstmp: null, min_tstmp: null,
+                      last: null, last_tstmp: null};
+        var acount=0;
+        var t,v;
+        for(var i = 0; i<d[0]['data'].length; i++){
+            v = d[0]['data'][i][1];
+            t = parseFloat(d[0]['data'][i][0]);
+            if(v!='null'){
+                v = parseFloat(v);
+                if(result['min']==null){
+                    result['min']=v;
+                    result['max']=v;
+                    result['sum']=0;
+                }
+                if(v<=result['min']){
+                    result['min'] = v;
+                    result['min_tstmp'] = t;
+                }
+                if(v>=result['max']){
+                    result['max'] = v;
+                    result['max_tstmp'] = t;
+                }
+                result['sum']+=v;
+                result['last']=v;
+                result['last_tstmp'] = t;
+                acount++;
+            }
+        }
+        if(acount>0)result['avg']=result['sum']/acount;
+        return result;
+    }
+
+    function format_date(timestamp){
+        if(timestamp==null)
+            return '-';
+        var hours, minutes;
+        adate = new Date(timestamp);
+        result = adate.getFullYear();
+        result = result+'/'+(adate.getMonth()+1)+'/'+adate.getDate()+' ';
+        hours = adate.getHours();
+        minutes = adate.getMinutes();
+        if(hours<10) hours='0'+hours;
+        if(minutes<10) minutes='0'+minutes;
+        result = result+hours+':'+minutes;
+        return result;
+    }
+
+    function format_float(avalue){
+        if(avalue==null)
+            return '-';
+        return avalue.toFixed(2);
+    }
+
 	function flot_init(i) {
-		var d = cd[i];
         var from_x, to_x, tol;
-        from_x = d[0][0][0];
-        to_x = d[0][d[0].length-1][0];
+        var d = [];
+        for(var j=0;j<cd[i].length;j++){
+            d[j] = {label: vm[i][j]['name'], data: cd[i][j]}
+            //Fix time zone UGLY
+            for(var k=0;k<d[j]['data'].length;k++)
+                d[j]['data'][k][0]+=zoneCorrection;
+        }
+        from_x = d[0]['data'][0][0];
+        to_x = d[0]['data'][d[0]['data'].length-1][0];
         tol = (to_x-from_x)*0.01;
         from_x-=tol;
         to_x+=tol;
+        var marking_opts = [];
+        if(cm[i]['has_stats']){
+            var stats=calc_stats(d);
+            var items = ['max', 'min', 'last', 'avg', 'sum'];
+            for(var item in items)
+                $('#'+items[item]+cm[i]['id']).text(format_float(stats[items[item]]));
+            items = items.slice(0,3);
+            for(item in items)
+                $('#'+items[item]+'_tstmp'+cm[i]['id']).text(format_date(stats[items[item]+'_tstmp']));
+            if(cm[i]['min'])
+                marking_opts = marking_opts.concat([ { yaxis: { from: stats['min'], to: stats['min'] } , color: "#8888aa"},  
+                        { xaxis: { from: stats['min_tstmp'], to: stats['min_tstmp'] } , color: "#ddddff"}]);
+            if(cm[i]['max'])
+                marking_opts = marking_opts.concat([ { yaxis: { from: stats['max'], to: stats['max'] } , color: "#aa8888"},  
+                        { xaxis: { from: stats['max_tstmp'], to: stats['max_tstmp'] } , color: "#ffdddd"}]);
+            if(cm[i]['avg'])
+                marking_opts.push( { yaxis: { from: stats['avg'], to: stats['avg'] } , color: "#88aa88"});
+        }
 		var options = {
 			xaxis: { mode: "time", timeformat: "%y/%m/%d %H:%M",
             min: from_x, max: to_x},
 			selection: { mode: "x" },
+            grid:{markings: marking_opts},
+            legend: {show: (d.length>1), position: 'nw'}
 		};
-
-		var plot = $.plot($("#placeholder"+cm[i]['id']), d, options);
+		var plot = $.plot($("#chartarea"+cm[i]['id']), d, options);
 	}
 
   </script>
 {% endblock %}
 
 {% block extracss %}
+<style>
+    span.max{ font-weight: bold; color: #aa8888; }
+    span.min{ font-weight: bold; color: #8888aa; }
+    span.avg{ font-weight: bold; color: #88aa88; }
+    span.sum{ font-weight: bold; color: #888888; }
+    div.textareas{ padding: 15px; float: right; border-width: 1px; border-style: dotted; border-color: #bbbbbb; background-color: #f7f7ff;}
+</style>
 {% endblock %}
 
 {% block content %}
-    <p><strong>Time span:</strong>
-    {% if page.option_annual %}<a href="{% url chartpage_detail page.url_name %}?last=year" id="year">year</a>{% endif %}
-    {% if page.option_monthly %}<a href="{% url chartpage_detail page.url_name %}?last=month" id="month">month</a>{% endif %}
-    {% if page.option_weekly %}<a href="{% url chartpage_detail page.url_name %}?last=week" id="week">week</a>{% endif %}
+    <h3>{{page.name}}</h3>
+    {% if page.description %}
+    <p>{{page.description}}</p>
+    {% endif %}
+    <p><strong>Time span:</strong>&nbsp;&nbsp;
+    {% if page.option_annual %}<a href="{% url chartpage_detail page.url_name %}?last=year" id="year">year</a>&nbsp;{% endif %}
+    {% if page.option_monthly %}<a href="{% url chartpage_detail page.url_name %}?last=month" id="month">month</a>&nbsp;{% endif %}
+    {% if page.option_weekly %}<a href="{% url chartpage_detail page.url_name %}?last=week" id="week">week</a>&nbsp;{% endif %}
     {% if page.option_daily %}<a href="{% url chartpage_detail page.url_name %}?last=day" id="day">day</a>{% endif %}
     </p>
     {% for chart in charts %}
-        <div id="chartdiv{{chart.id}}" style="float:left;text-align:center;width:500px; height:330; clear:both;">
-			<div id="progress{{chart.id}}" style="text-align:center;padding-top:3em;">
+        <div id="chartdiv{{chart.id}}" style="float:left; clear:both; background-color: #f9fff9; border-bottom: thin solid #eeeeee;">
+			<p style="margin-left: 240px; display:inline;"> <strong>{{chart.name}}</strong></p>
+			<div id="progress{{chart.id}}" style="text-align:center; width: 480px; height:320px;margin:10px;">
 			</div>
 			<div id="data_holder{{chart.id}}">
-			<p style="text-align:center"> <b>{{chart.name}}</b></p>
-			<div id="placeholder{{chart.id}}" style="margin:0;width:480px;height:320px"></div>
+    			<div id="chartarea{{chart.id}}" style="margin:10px;width:480px;height:320px;float:left;"></div>
+                {% if chart.has_info_box %}
+                <div id="textarea{{chart.id}}" class="textareas">
+                    {% if chart.display_max %}
+                    <p>{% trans "Maximum value: " %}<span class="max" id="max{{chart.id}}"></span>,  
+                       {% trans "at: " %}<span class="max" id="max_tstmp{{chart.id}}"></span></p>{% endif %}
+                    {% if chart.display_avg %}
+                    <p>{% trans "Average value: " %}<span class="avg" id="avg{{chart.id}}"></span></p>{% endif %}
+                    {% if chart.display_sum %}
+                    <p>{% trans "Sum: " %}<span class="sum" id="sum{{chart.id}}"></span></p>{% endif %}
+                    {% if chart.display_min %}
+                    <p>{% trans "Minimum value: " %}<span class="min" id="min{{chart.id}}"></span>,  
+                       {% trans "at: " %}<span class="min" id="min_tstmp{{chart.id}}"></span></p>{% endif %}
+                    {% if chart.display_lastvalue %}
+                    <p>{% trans "Last measurement: " %}<span class="sum" id="last{{chart.id}}"></span>,  
+                       {% trans "at: " %}<span class="sum" id="last_tstmp{{chart.id}}"></span></p>{% endif %}
+                    {% if chart.mainvar.link_to_timeseries %}
+                    <p><a href={% url enhydris.hcore.views.timeseries_detail chart.mainvar.timeseries.id %}>
+                       {% trans "Open time series page" %}</a></p>{% endif %}
+                </div>
+                {% endif %}
 			</div>
         </div>
-    <br>
     {% endfor %}
 {% endblock %}

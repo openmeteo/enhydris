@@ -24,6 +24,20 @@ class Chart(models.Model):
     display_lastvalue = models.BooleanField(default=False)
     chart_page = models.ForeignKey(ChartPage,
                                    related_name='chart_page')
+    def mainvar(self):
+        vars = Variable.objects.filter(chart=self,
+                  is_main_variable=True)
+        if len(vars)>0:
+            return vars[0]
+        else:
+            return None
+    def has_stats(self):
+        return (self.display_min or self.display_max or \
+                self.display_avg or self.display_sum or \
+                self.display_lastvalue)
+    def has_info_box(self):
+        return (self.has_stats() or\
+            (False if self.mainvar()==None else self.mainvar().link_to_timeseries))
     def __unicode__(self):
         return self.name
     #ToDo: Add axes formating - overrides
