@@ -216,7 +216,7 @@
     span.min{ font-weight: bold; color: #8888aa; }
     span.avg{ font-weight: bold; color: #88aa88; }
     span.sum{ font-weight: bold; color: #888888; }
-    div.textareas{ padding: 15px; float: right; border-width: 1px; border-style: dotted; border-color: #bbbbbb; background-color: #f7f7ff;}
+    div.textareas{ padding: 15px; float: left; border-width: 1px; border-style: dotted; border-color: #bbbbbb; background-color: #f7f7ff;}
 </style>
 {% endblock %}
 
@@ -232,7 +232,7 @@
     {% if page.option_daily %}<a href="{% url chartpage_detail page.url_name %}?last=day" id="day">day</a>{% endif %}
     </p>
     {% for chart in charts %}
-        <div id="chartdiv{{chart.id}}" style="float:left; clear:both; background-color: #f9fff9; border-bottom: thin solid #eeeeee;">
+        <div id="chartdiv{{chart.id}}" style="float:left; clear:both; background-color: #f9fff9; border-bottom: thin solid #eeeeee; width:99%;">
 			<p style="margin-left: 240px; display:inline;"> <strong>{{chart.name}}</strong></p>
 			<div id="progress{{chart.id}}" style="text-align:center; width: 480px; height:320px;margin:10px;">
 			</div>

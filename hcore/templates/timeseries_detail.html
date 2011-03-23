@@ -119,7 +119,7 @@
 {% endblock %}
 
 {% block content_main %}
-    <div>
+    <div style="width: 99%;">
     <h2>{% trans 'Timeseries Details' %}
         {% if enabled_user_content %}
             {% if request.user|can_edit:timeseries.related_station %}
@@ -133,7 +133,7 @@
     </h2>
 
         {% if timeseries %}
-        <div style="float:left;max-width:600px;min-width:450px;">
+        <div style="float:left;">
         {% if user.is_authenticated or anonymous_can_download_data %}
             <p>{% blocktrans %}
                     Download Timeseries in plain text from 
@@ -250,7 +250,7 @@
             {% endifnotequal %}
         </table>
         </div>
-		<img src="{{MEDIA_URL}}images/vertical.gif" style="margin: 40px 20px;" />
+		<img src="{{MEDIA_URL}}images/vertical.gif" style="margin: 40px 20px; float: left;" />
         <div id="chartdiv" style="float:right;text-align:center;width:450px;">
 			<div id="progress" style="text-align:center;padding-top:3em;">
 			</div>
