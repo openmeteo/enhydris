@@ -1,7 +1,7 @@
 from __future__ import with_statement 
 import os
 from pthelma.timeseries import Timeseries, datetime_from_iso
-from xreverse import xreverse
+from pthelma.xreverse import xreverse
 
 def update_ts_temp_file(cache_dir, connection, id):
     afilename = cache_dir+'%d.hts'%int(id)
