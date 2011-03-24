@@ -12,10 +12,9 @@ from calendar import monthrange
 from datetime import timedelta
 from tempfile import mkstemp
 import django.db
-import pthelma.timeseries
+from pthelma.timeseries import Timeseries, TimeStep
 from pthelma.timeseries import datetime_from_iso
 from pthelma.timeseries import IntervalType as it
-from pthelma.xreverse import xreverse
 from string import lower, split, find
 from django.http import (HttpResponse, HttpResponseRedirect,
                             HttpResponseForbidden, Http404)
@@ -39,6 +38,7 @@ from django.db.models import Count
 from enhydris.hcore.models import *
 from enhydris.hcore.decorators import *
 from enhydris.hcore.forms import *
+from enhydris.hcore.tstmpupd import update_ts_temp_file
 
 ####################################################
 # VIEWS
@@ -422,34 +422,7 @@ def timeseries_data(request, *args, **kwargs):
         response.status_code = 200
         object_id = request.GET['object_id']
         afilename = cache_dir+'%d.hts'%int(object_id)
-        if os.path.exists(afilename):
-            if os.path.getsize(afilename)<3:
-                os.remove(afilename)
-#Update the file in the case of logged data, if this is possible
-        if os.path.exists(afilename):
-            with open(afilename, 'r') as fileobject:
-                xr = xreverse(fileobject, 2048)
-                line = xr.next()
-            lastdate = datetime_from_iso(line.split(',')[0])
-            ts = pthelma.timeseries.Timeseries(int(object_id))
-            ts.read_from_db(django.db.connection, onlybottom=True)
-            if len(ts)>0:
-                db_start, db_end = ts.bounding_dates()
-                if db_start>lastdate:
-                    os.remove(afilename)
-                elif db_end>lastdate:
-                    lastindex = ts.index(lastdate)
-                    with open(afilename, 'a') as fileobject:
-                        ts.write(fileobject, start=ts.keys()[lastindex+1])
-#Check for tmmp file or else create it
-        if not os.path.exists(afilename):
-            ts = pthelma.timeseries.Timeseries(int(object_id))
-            ts.read_from_db(django.db.connection)
-            if not os.path.exists(cache_dir):
-                os.mkdir(cache_dir)
-            with open(afilename, 'w') as afile:
-                ts.write(afile)
-#Read the temp file
+        update_ts_temp_file(cache_dir, django.db.connection, object_id)
         chart_data = []
         if request.GET.has_key('start_pos') and request.GET.has_key('end_pos'):
             start_pos = int(request.GET['start_pos'])
@@ -803,9 +776,9 @@ def download_timeseries(request, object_id):
         settings.STORE_TSDATA_LOCALLY:
 
         t = timeseries # nickname, because we use it much in next statement
-        ts = pthelma.timeseries.Timeseries(
+        ts = Timeseries(
             id = int(object_id),
-            time_step = pthelma.timeseries.TimeStep(
+            time_step = TimeStep(
                 length_minutes = t.time_step.length_minutes if t.time_step
                                             else 0,
                 length_months = t.time_step.length_months if t.time_step
@@ -1159,7 +1132,7 @@ def timeseries_delete(request, timeseries_id):
     if tseries and related_station:
         if request.user.has_row_perm(related_station, 'edit') and\
          request.user.has_perm('hcore.delete_timeseries'):
-            ts = pthelma.timeseries.Timeseries(int(timeseries_id))
+            ts = Timeseries(int(timeseries_id))
             ts.delete_from_db(django.db.connection)
             tseries.delete()
             ref = request.META.get('HTTP_REFERER', None)
