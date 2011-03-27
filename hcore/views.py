@@ -405,6 +405,25 @@ def timeseries_data(request, *args, **kwargs):
             if d>adatetime:
                 d2, i2 = d, i
 
+    def add_to_stats(date, value):
+        if not gstats['max']:
+            gstats['max'] = value
+            gstats['min'] = value
+            gstats['sum'] = 0
+            gstats['count'] = 0
+        if value>=gstats['max']:
+            gstats['max'] = value
+            gstats['max_tstmp'] = date
+        if value<=gstats['min']:
+            gstats['min'] = value
+            gstats['min_tstmp'] = date
+        gstats['sum']+= value
+        gstats['last'] = value
+        gstats['last_tstmp'] = date
+        gstats['count']+=1
+            
+
+
     if hasattr(settings, 'TS_GRAPH_BIG_STEP_DENOMINATOR'):
         step_denom = settings.TS_GRAPH_BIG_STEP_DENOMINATOR
     else:
@@ -452,6 +471,11 @@ def timeseries_data(request, *args, **kwargs):
         amax=''
         prev_pos=-1
         tick_pos=-1
+        gstats = {'max': None, 'min': None, 'count': 0,
+                       'max_tstmp': None, 'min_tstmp': None,
+                       'sum': None, 'avg': None,
+                       'last': None, 'last_tstmp': None}
+        afloat = 0.01
         try:
             linecache.checkcache(afilename)
             while pos < start_pos+length:
@@ -474,10 +498,12 @@ def timeseries_data(request, *args, **kwargs):
                     else:
                         raise
                 if v!='':
+                    afloat = float(v)
+                    add_to_stats(k, afloat)
                     if amax=='':
-                        amax = float(v)
+                        amax = afloat
                     else:
-                        amax = float(v) if float(v)>amax else amax 
+                        amax = afloat if afloat>amax else amax 
                 if (pos-start_pos)%step==0:
                     tick_pos=pos
                     if amax == '': amax = 'null'
@@ -494,7 +520,11 @@ def timeseries_data(request, *args, **kwargs):
         finally:
             linecache.clearcache()
         if chart_data:
-            response.content = json.dumps(chart_data)
+            if gstats['count']>0:
+                gstats['avg'] = gstats['sum'] / gstats['count']
+                for item in ('max_tstmp', 'min_tstmp', 'last_tstmp'):
+                    gstats[item] = calendar.timegm(gstats[item].timetuple())*1000
+            response.content = json.dumps({'data': chart_data, 'stats': gstats})
         else:
             response.content = json.dumps("")
         return response

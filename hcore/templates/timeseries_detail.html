@@ -33,7 +33,7 @@
 			$("#progress").hide()
 			$("#data_holder").show()
 			if ( chart_data ) {
-				flot_init(chart_data);
+				flot_init(chart_data['data']);
 			} else {
 				$("#data_holder").html("<h3>No data locally available!</h3>");
 			}
@@ -89,7 +89,7 @@
 		    $("#placeholder").append("<img style=\"margin: auto;\" src=\""+MEDIA_URL+"images/icons/progress.gif\">");
             $.getJSON('{% url timeseries_data %}', {object_id:{{timeseries.id}},
                 start_pos:from_pos, end_pos:to_pos}, function(chart_data){
-                d = chart_data;
+                d = chart_data['data'];
                 var tol=(actual_xaxis_to-actual_xaxis_from)*0.01;
 			    plot = $.plot($("#placeholder"), [d],
     						  $.extend(true, {}, options, {

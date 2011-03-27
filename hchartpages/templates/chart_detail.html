@@ -13,7 +13,7 @@
   <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
   <script type="text/javascript">
 
-    cd=[], vm=[], cm=[];
+    cd=[], vm=[], cm=[], cs=[];
     cc=0;
     zoneCorrection=0;
     default_last="{% if page.option_daily %}day{% else %}{% if page.option_weekly %}week{% else %}{% if page.option_monthly %}month{% else %}year{%endif%}{%endif%}{%endif%}";
@@ -35,6 +35,7 @@
         cm[cc]['iter']=cc;
         vm[cc]=[];
         cd[cc]=[];
+        cs[cc]=[];
         cc++;
     }
 
@@ -71,7 +72,8 @@
                     return function(chart_data){
                     var astatus=true;
                     if(chart_data){
-                        cd[i][j]=chart_data;
+                        cd[i][j]=chart_data['data'];
+                        cs[i][j]=chart_data['stats'];
                         vm[i][j]['status']=true;
                     }
                     for(var k=0;k<vm[i].length;k++)
@@ -108,41 +110,6 @@
 
         load_initial_data();
 	});
-
-    function calc_stats(d)
-    {
-        var result = {min: null, max: null, sum: null, avg: null,
-                      max_tstmp: null, min_tstmp: null,
-                      last: null, last_tstmp: null};
-        var acount=0;
-        var t,v;
-        for(var i = 0; i<d[0]['data'].length; i++){
-            v = d[0]['data'][i][1];
-            t = parseFloat(d[0]['data'][i][0]);
-            if(v!='null'){
-                v = parseFloat(v);
-                if(result['min']==null){
-                    result['min']=v;
-                    result['max']=v;
-                    result['sum']=0;
-                }
-                if(v<=result['min']){
-                    result['min'] = v;
-                    result['min_tstmp'] = t;
-                }
-                if(v>=result['max']){
-                    result['max'] = v;
-                    result['max_tstmp'] = t;
-                }
-                result['sum']+=v;
-                result['last']=v;
-                result['last_tstmp'] = t;
-                acount++;
-            }
-        }
-        if(acount>0)result['avg']=result['sum']/acount;
-        return result;
-    }
 
     function format_date(timestamp){
         if(timestamp==null)
@@ -181,13 +148,15 @@
         to_x+=tol;
         var marking_opts = [];
         if(cm[i]['has_stats']){
-            var stats=calc_stats(d);
+            var stats= cs[i][0];
             var items = ['max', 'min', 'last', 'avg', 'sum'];
             for(var item in items)
                 $('#'+items[item]+cm[i]['id']).text(format_float(stats[items[item]]));
             items = items.slice(0,3);
-            for(item in items)
+            for(item in items){
+                stats[items[item]+'_tstmp']+=zoneCorrection;
                 $('#'+items[item]+'_tstmp'+cm[i]['id']).text(format_date(stats[items[item]+'_tstmp']));
+            }
             if(cm[i]['min'])
                 marking_opts = marking_opts.concat([ { yaxis: { from: stats['min'], to: stats['min'] } , color: "#8888aa"},  
                         { xaxis: { from: stats['min_tstmp'], to: stats['min_tstmp'] } , color: "#ddddff"}]);
