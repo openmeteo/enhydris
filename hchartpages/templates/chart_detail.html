@@ -137,9 +137,6 @@
         var d = [];
         for(var j=0;j<cd[i].length;j++){
             d[j] = {label: vm[i][j]['name'], data: cd[i][j]}
-            //Fix time zone UGLY
-            for(var k=0;k<d[j]['data'].length;k++)
-                d[j]['data'][k][0]+=zoneCorrection;
         }
         from_x = d[0]['data'][0][0];
         to_x = d[0]['data'][d[0]['data'].length-1][0];
@@ -154,6 +151,7 @@
                 $('#'+items[item]+cm[i]['id']).text(format_float(stats[items[item]]));
             items = items.slice(0,3);
             for(item in items){
+            //Fix time zone UGLY
                 stats[items[item]+'_tstmp']+=zoneCorrection;
                 $('#'+items[item]+'_tstmp'+cm[i]['id']).text(format_date(stats[items[item]+'_tstmp']));
             }
