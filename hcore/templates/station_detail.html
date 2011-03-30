@@ -31,7 +31,8 @@
 
   <script type="text/javascript">
   $(document).ready(function() {
-      $(".tablesorter").tablesorter();
+      $("table").tablesorter();
+      $("#eventstable").tablesorter( {sortList: [[1,1]]});
   });
   </script>
   <script type="text/javascript" src="{{ MEDIA_URL }}js/collapser.js"></script>
@@ -192,11 +193,11 @@
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Start Date' %}</th>
-                <td colspan='2'>{{ station.start_date }}</td>
+                <td colspan='2'>{{ station.start_date|date:"Y/m/d" }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'End Date' %}</th>
-                <td colspan='2'>{{ station.end_date }}</td>
+                <td colspan='2'>{{ station.end_date|date:"Y/m/d" }}</td>
             </tr>
 			{% if enabled_user_content %}
 			<tr class="{% cycle rowalts %}">
@@ -314,7 +315,7 @@
                         {% for file in station.gentityfile_set.all %}
                         <tr class="{% cycle 'odd' 'even' %}">
                             <td>{{ file.id }}</td>
-                            <td>{{ file.date }}</td>
+                            <td>{{ file.date|date:"Y/m/d" }}</td>
                             <td>{{ file.file_type }}</td>
                             <td>{{ file.content }}</td>
                             <td>{{ file.descr }}</td>
@@ -413,7 +414,7 @@
                     </a>
                 </td>
                 <td>
-                    <table class="tablesorter" style='text-align:right;width:100%;'>
+                    <table class="tablesorter" id="eventstable" style='text-align:right;width:100%;'>
                         <thead>
                             <tr>
                                 <th>{% trans 'ID' %}</th>
@@ -432,7 +433,7 @@
                         {% for event in station.gentityevent_set.all %}
                         <tr class="{% cycle 'odd' 'even' %}">
                             <td>{{ event.id }}</td>
-                            <td>{{ event.date }}</td>
+                            <td>{{ event.date|date:"Y/m/d" }}</td>
                             <td>{{ event.type }}</td>
                             <td>{{ event.user }}</td>
                             <td>{{ event.report }}</td>
@@ -496,8 +497,8 @@
                             <td>{{ instrument.manufacturer }}</td>
                             <td>{{ instrument.model }}</td>
                             <td>{{ instrument.is_active }}</td>
-                            <td>{{ instrument.start_date }}</td>
-                            <td>{{ instrument.end_date }}</td>
+                            <td>{{ instrument.start_date|date:"Y/m/d" }}</td>
+                            <td>{{ instrument.end_date|date:"Y/m/d" }}</td>
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">
@@ -564,8 +565,8 @@
                             <td>{{ t.unit_of_measurement }}</td>
                             <td>{{ t.remarks }}</td>
                             <td>{{ t.instrument }}</td>
-                            <td>{{ t.start_date }}</td>
-                            <td>{{ t.end_date }}</td>
+                            <td>{{ t.start_date|date:"Y/m/d H:i" }}</td>
+                            <td>{{ t.end_date|date:"Y/m/d H:i" }}</td>
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">
