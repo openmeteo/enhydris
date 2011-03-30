@@ -193,11 +193,11 @@
             </tr>
 			<tr class="{% cycle rowalts %}">
                 <th>{% trans 'Start Date' %}</th>
-                <td>{{ timeseries.start_date }}</td>
+                <td>{{ timeseries.start_date|date:"Y/m/d H:i" }}</td>
             </tr>
 			<tr class="{% cycle rowalts %}">
                 <th>{% trans 'End Date' %}</th>
-                <td>{{ timeseries.end_date }}</td>
+                <td>{{ timeseries.end_date|date:"Y/m/d H:i" }}</td>
             </tr>
 
 			<tr class="{% cycle rowalts %}">

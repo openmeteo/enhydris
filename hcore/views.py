@@ -563,8 +563,13 @@ def instrument_detail(request, queryset, object_id, *args, **kwargs):
 
     instrument = get_object_or_404(Instrument, id=object_id)
     related_station = instrument.station
+    try:
+        instrument_timeseries = Timeseries.objects.all().filter(instrument__id=object_id)
+    except:
+        instrument_timeseries = None
     kwargs["extra_context"] = {'related_station': related_station,
-                               'enabled_user_content':enabled_user_content}
+                               'enabled_user_content':enabled_user_content,
+                               'timeseries': instrument_timeseries}
     kwargs["template_name"] = "instrument_detail.html"
     return list_detail.object_detail(request, queryset, object_id, *args, **kwargs)
 
