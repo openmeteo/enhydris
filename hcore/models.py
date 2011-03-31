@@ -307,6 +307,8 @@ class GentityEvent(models.Model):
     user = models.CharField(max_length=64)
     report = models.TextField(blank=True)
     report_alt = models.TextField(blank=True)
+    class Meta:
+        ordering = ['-date']
     def __unicode__(self):
         return str(self.date)+' '+self.type.__unicode__()
     @property

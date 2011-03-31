@@ -26,7 +26,6 @@
       $("table").tablesorter();
   });
   </script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/collapser.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -100,12 +99,7 @@
             <tr>
                 <th>{% trans 'Timeseries' %}</th>
                 {% if timeseries.count %}
-                <td>
-                    <a class="collapse_toggler" id="timeseries_ct">
-                        <img src="{{ MEDIA_URL }}images/icons/folder_open.png" />
-                    </a>
-                </td>
-                <td>
+                <td colspan="2">
                     <table class="tablesorter" style='text-align:right;width:100%;'>
                         <thead>
                             <tr>

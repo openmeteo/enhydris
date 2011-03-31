@@ -21,6 +21,20 @@
         border: 1px solid #eee;
         z-index: 1;
     }{% endif %}
+    .expArrow{
+        padding-left: 20px;
+        font-weight: bold;
+        color: #000055;
+        background: url({{ MEDIA_URL }}images/arrow-down.png) no-repeat 0px 4px;
+        cursor: pointer;
+    }
+    .collArrow{
+        padding-left: 20px;
+        font-weight: bold;
+        color: #000055;
+        background: url({{ MEDIA_URL }}images/arrow-up.png) no-repeat 0px 4px;
+        cursor: pointer;
+    }
     </style>
 {% endblock %}
 
@@ -28,14 +42,32 @@
   <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.qtip-1.0.0-rc2.min.js"></script>
   <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.scrollTo-min.js"></script>
   <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.minified.js"></script>
-
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.collapser.mod.js"></script>
   <script type="text/javascript">
   $(document).ready(function() {
       $("table").tablesorter();
       $("#eventstable").tablesorter( {sortList: [[1,1]]});
+      var colopts ={
+        target: '.timeseries_rows',
+        effect: null,
+        expandHtml: '{% trans "More..." %}',
+        collapseHtml: '{% trans "Less..." %}',
+        expandClass: 'expArrow',
+        collapseClass: 'collArrow'
+      }
+      $('.timeseries_collapse').collapser(colopts);
+      colopts['target']='.events_rows';
+      $('.events_collapse').collapser(colopts);
+      colopts['target']='.instr_rows';
+      $('.instruments_collapse').collapser(colopts);
+      colopts['target']='.altcodes_rows';
+      $('.altcodes_collapse').collapser(colopts);
+      colopts['target']='.gfiles_rows';
+      $('.gfiles_collapse').collapser(colopts);
+      colopts['target']='.generics_rows';
+      $('.generics_collapse').collapser(colopts);
   });
   </script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/collapser.js"></script>
   <script type="text/javascript">
       $(document).ready(function(){
 		$(".verification_required").click(function(){
@@ -239,12 +271,7 @@
             <tr>
                 <th>{% trans 'Station (Gentity) Alternative Codes' %}</th>
                 {% if station.gentityaltcode_set.count %}
-                <td>
-                    <a class="collapse_toggler">
-                            <img src="{{ MEDIA_URL }}images/icons/folder_open.png" />
-                    </a>
-                </td>
-                <td>
+                <td colspan="2">
                     <table class="tablesorter" style='text-align:right;'>
                         <thead>
                             <tr>
@@ -260,7 +287,7 @@
                         </thead>
                         <tbody>
                         {% for code in station.gentityaltcode_set.all %}
-                        <tr class="{% cycle 'odd' 'even' %}">
+                        <tr class="{% cycle 'odd' 'even' %} {% if forloop.counter > 10 %}altcodes_rows" style="display: none;{% endif %}">
                             <td>{{ code.id }}</td>
                             <td>{{ code.type }}</td>
                             <td>{{ code.value }}</td>
@@ -277,6 +304,9 @@
                         {% endfor %}
                         </tbody>
                     </table>
+                    {% if station.gentityaltcode_set.count > 10 %}
+                      <p class="altcodes_collapse expArrow">More...</p>
+                    {% endif %}
                 </td>
                 {% else %}
                 <td colspan="2">
@@ -288,12 +318,7 @@
             <tr>
                 <th>{% trans 'Station (Gentity) Files' %}</th>
                 {% if station.gentityfile_set.count %}
-                <td>
-                    <a class="collapse_toggler">
-                        <img src="{{ MEDIA_URL }}images/icons/folder_open.png" />
-                    </a>
-                </td>
-                <td>
+                <td colspan="2">
                     <table class="tablesorter" style='text-align:right;width:100%;'>
                         <thead>
                             <tr>
@@ -313,7 +338,7 @@
                         </thead>
                         <tbody>
                         {% for file in station.gentityfile_set.all %}
-                        <tr class="{% cycle 'odd' 'even' %}">
+                        <tr class="{% cycle 'odd' 'even' %} {% if forloop.counter > 10 %}gfiles_rows" style="display: none;{% endif %}">
                             <td>{{ file.id }}</td>
                             <td>{{ file.date|date:"Y/m/d" }}</td>
                             <td>{{ file.file_type }}</td>
@@ -339,6 +364,9 @@
                         {% endfor %}
                         </tbody>
                     </table>
+                    {% if station.gentityfile_set.count > 10 %}
+                      <p class="gfiles_collapse expArrow">More...</p>
+                    {% endif %}
                 </td>
                 {% else %}
                 <td colspan="2">
@@ -350,12 +378,7 @@
             <tr>
                 <th>{% trans 'Station (Gentity) Generic data' %}</th>
                 {% if station.gentitygenericdata_set.count %}
-                <td>
-                    <a class="collapse_toggler">
-                        <img src="{{ MEDIA_URL }}images/icons/folder_open.png" />
-                    </a>
-                </td>
-                <td>
+                <td colspan="2">
                     <table class="tablesorter" style='text-align:right;width:100%;'>
                         <thead>
                             <tr>
@@ -373,7 +396,7 @@
                         </thead>
                         <tbody>
                         {% for genericdata in station.gentitygenericdata_set.all %}
-                        <tr class="{% cycle 'odd' 'even' %}">
+                        <tr class="{% cycle 'odd' 'even' %} {% if forloop.counter > 10 %}generics_rows" style="display: none;{% endif %}">
                             <td>{{ genericdata.id }}</td>
                             <td>{{ genericdata.data_type }}</td>
                             <td>{{ genericdata.descr }}</td>
@@ -397,6 +420,9 @@
                         {% endfor %}
                         </tbody>
                     </table>
+                    {% if station.gentitygenericdata_set.count > 10 %}
+                      <p class="generics_collapse expArrow">More...</p>
+                    {% endif %}
                 </td>
                 {% else %}
                 <td colspan="2">
@@ -408,12 +434,7 @@
             <tr>
                 <th>{% trans 'Station (Gentity) Events' %}</th>
                 {% if station.gentityevent_set.count %}
-                <td>
-                    <a class="collapse_toggler" id="gentityevents_ct">
-                            <img src="{{ MEDIA_URL }}images/icons/folder_open.png" />
-                    </a>
-                </td>
-                <td>
+                <td colspan="2">
                     <table class="tablesorter" id="eventstable" style='text-align:right;width:100%;'>
                         <thead>
                             <tr>
@@ -431,7 +452,7 @@
                         </thead>
                         <tbody>
                         {% for event in station.gentityevent_set.all %}
-                        <tr class="{% cycle 'odd' 'even' %}">
+                        <tr class="{% cycle 'odd' 'even' %} {% if forloop.counter > 10 %}events_rows" style="display: none;{% endif %}">
                             <td>{{ event.id }}</td>
                             <td>{{ event.date|date:"Y/m/d" }}</td>
                             <td>{{ event.type }}</td>
@@ -449,6 +470,9 @@
                         {% endfor %}
                         </tbody>
                     </table>
+                    {% if station.gentityevent_set.count > 10 %}
+                      <p class="events_collapse expArrow">More...</p>
+                    {% endif %}
                 </td>
                 {% else %}
                 <td colspan="2">
@@ -460,12 +484,7 @@
             <tr>
                 <th>{% trans 'Instruments' %}</th>
                 {% if station.instrument_set.count %}
-                <td>
-                    <a class="collapse_toggler" id="instruments_ct">
-                        <img src="{{ MEDIA_URL }}images/icons/folder_open.png" />
-                    </a>
-                </td>
-                <td>
+                <td colspan="2">
                     <table class="tablesorter" style='text-align:right;'>
                         <thead>
                             <tr>
@@ -489,7 +508,7 @@
                         {% for instrument in station.instrument_set.all %}
                         {% with instrument.id as instrument_id %}
                         {% url instrument_detail instrument_id as instrument_url %}
-                        <tr class="{% cycle 'odd' 'even' %}">
+                        <tr class="{% cycle 'odd' 'even' %} {% if forloop.counter > 10 %}instr_rows" style="display: none;{% endif %}">
                             <td><a href="{{ instrument_url }}">{{ instrument_id }}</a></td>
                             <td>{{ instrument.name }}</td>
                             <td>{{ instrument.type }}</td>
@@ -512,6 +531,9 @@
                         {% endfor %}
                         </tbody>
                     </table>
+                    {% if station.instrument_set.count > 10 %}
+                      <p class="instruments_collapse expArrow">More...</p>
+                    {% endif %}
                 </td>
                 {% else %}
                 <td colspan="2">
@@ -523,12 +545,7 @@
             <tr>
                 <th>{% trans 'Timeseries' %}</th>
                 {% if station.timeseries.count %}
-                <td>
-                    <a class="collapse_toggler" id="timeseries_ct">
-                        <img src="{{ MEDIA_URL }}images/icons/folder_open.png" />
-                    </a>
-                </td>
-                <td>
+                <td colspan="2">
                     <table class="tablesorter" style='text-align:right;width:100%;'>
                         <thead>
                             <tr>
@@ -553,7 +570,7 @@
                         {% if not t.hidden %}
                         {% with t.id as t_id %}
                         {% url timeseries_detail t_id as timeseries_url %}
-                        <tr>
+                        <tr {% if forloop.counter > 10 %}class='timeseries_rows' style='display: none;'{% endif %}>
                             <td><a href="{{ timeseries_url }}">{{ t_id }}</a></td>
                             <td>{{ t.name }}</td>
                             <td>{{ t.variable }}</td>
@@ -579,8 +596,12 @@
                         {% endwith %}
                         {% endif %}
                         {% endfor %}
+                        </td></tr>
                         </tbody>
                     </table>
+                    {% if station.timeseries.count > 10 %}
+                      <p class="timeseries_collapse expArrow">More...</p>
+                    {% endif %}
                 </td>
                 {% else %}
                 <td colspan="2">
@@ -590,4 +611,6 @@
             </tr>
         </table>
         {% endif %}
+
+
 {% endblock %}
