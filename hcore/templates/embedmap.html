@@ -19,6 +19,9 @@
   </script>
   <script type="text/javascript">
     var MEDIA_URL = "{{ MEDIA_URL }}";
+    var ENHYDRIS_ROOT_URL = "{% url enhydris.hcore.views.index %}";
+    var BOUND_URL = "{% url enhydris.hcore.views.bound %}";
+    var map_mode=1;
   </script>
 
         <script src="{{ MEDIA_URL}}js/openlayers/OpenLayers.js">
