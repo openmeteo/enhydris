@@ -157,10 +157,10 @@
             }
             if(cm[i]['min'])
                 marking_opts = marking_opts.concat([ { yaxis: { from: stats['min'], to: stats['min'] } , color: "#8888aa"},  
-                        { xaxis: { from: stats['min_tstmp'], to: stats['min_tstmp'] } , color: "#ddddff"}]);
+                        { xaxis: { from: stats['min_tstmp']-zoneCorrection, to: stats['min_tstmp']-zoneCorrection } , color: "#ddddff"}]);
             if(cm[i]['max'])
                 marking_opts = marking_opts.concat([ { yaxis: { from: stats['max'], to: stats['max'] } , color: "#aa8888"},  
-                        { xaxis: { from: stats['max_tstmp'], to: stats['max_tstmp'] } , color: "#ffdddd"}]);
+                        { xaxis: { from: stats['max_tstmp']-zoneCorrection, to: stats['max_tstmp']-zoneCorrection } , color: "#ffdddd"}]);
             if(cm[i]['avg'])
                 marking_opts.push( { yaxis: { from: stats['avg'], to: stats['avg'] } , color: "#88aa88"});
         }
