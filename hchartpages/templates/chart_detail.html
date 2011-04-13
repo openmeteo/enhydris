@@ -17,6 +17,7 @@
     cc=0;
     zoneCorrection=0;
     default_last="{% if page.option_daily %}day{% else %}{% if page.option_weekly %}week{% else %}{% if page.option_monthly %}month{% else %}year{%endif%}{%endif%}{%endif%}";
+    time_span = default_last;
 
     function gup( name )
     {
@@ -51,45 +52,64 @@
         vm[chart_i][j] = options;
     }
 
+    function get_data_from_server(i)
+    {
+        $("#chartarea"+cm[i]['id']).append("<img style=\"margin: auto; position: absolute; left: 240px; top: 100px; \" src=\""+MEDIA_URL+"images/icons/progress.gif\">");
+        for(var j=0;j<vm[i].length;j++)
+            vm[i][j]['status']=false;
+        var achart_status=false;
+        for(var j=0;j<vm[i].length;j++)
+        {
+            $.getJSON('{% url timeseries_data %}', {object_id: vm[i][j]['series_id'], last: time_span}, 
+                (function(i,j){
+                return function(chart_data){
+                var astatus=true;
+                if(chart_data){
+                    cd[i][j]=chart_data['data'];
+                    cs[i][j]=chart_data['stats'];
+                    vm[i][j]['status']=true;
+                }
+                for(var k=0;k<vm[i].length;k++)
+                    astatus = astatus && vm[i][k]['status'];
+                if(astatus)
+                {
+                    achart_status=true;
+                    $("#chartarea"+cm[i]['id']).remove(":contains('img style')");
+                    if(cm[i]['can_zoom'])$("#unzoom"+cm[i]['id']).hide();
+                    flot_init(i);
+                }
+            }})(i,j));
+        }
+//            if(!achart_status)
+//                 $("#data_holder"+cm[i]['id']).html("<h3>No data locally available!</h3>");
+
+    }
+    
+    function chartUnzoom(id)
+    {
+        var i, j;
+        i=-1;
+        for(j=0;j<cm.length;j++)
+            if(cm[j]['id']==id)
+            {
+                i = j;
+                break;
+            }
+        if(i>-1){
+            $("#chartarea"+cm[i]['id']).unbind();
+            get_data_from_server(i);    
+        }
+    }
+
     function load_initial_data()
     {
         var d = new Date();
         zoneCorrection=60000*d.getTimezoneOffset();
-        var time_span;
         time_span = gup('last');
         if(!time_span)time_span=default_last;
         $('a#'+time_span).each(function(){ $(this).replaceWith($(this).text()); });
-        for(var i=0;i<cc;i++){
-            $("#data_holder"+cm[i]['id']).hide()	
-            $("#progress"+cm[i]['id']).append("<img style=\"margin: auto;\" src=\""+MEDIA_URL+"images/icons/progress.gif\">");
-            for(var j=0;j<vm[i].length;j++)
-                vm[i][j]['status']=false;
-            var achart_status=false;
-            for(var j=0;j<vm[i].length;j++)
-            {
-                $.getJSON('{% url timeseries_data %}', {object_id: vm[i][j]['series_id'], last: time_span}, 
-                    (function(i,j){
-                    return function(chart_data){
-                    var astatus=true;
-                    if(chart_data){
-                        cd[i][j]=chart_data['data'];
-                        cs[i][j]=chart_data['stats'];
-                        vm[i][j]['status']=true;
-                    }
-                    for(var k=0;k<vm[i].length;k++)
-                        astatus = astatus && vm[i][k]['status'];
-                    if(astatus)
-                    {
-                        achart_status=true;
-                        $("#progress"+cm[i]['id']).hide()
-                        $("#data_holder"+cm[i]['id']).show()
-                        flot_init(i);
-                    }
-                }})(i,j));
-            }
-//            if(!achart_status)
-//                 $("#data_holder"+cm[i]['id']).html("<h3>No data locally available!</h3>");
-        }
+        for(var i=0;i<cc;i++)
+            get_data_from_server(i);
     }
 
 	$(document).ready(function() {
@@ -99,7 +119,8 @@
                   min:{{chart.display_min|lower}},
                   max:{{chart.display_max|lower}},
                   avg:{{chart.display_avg|lower}},
-                  has_stats:{{chart.has_stats|lower}}
+                  has_stats:{{chart.has_stats|lower}},
+                  can_zoom:{{chart.can_zoom|lower}}
                  });
         {% endfor %}
 
@@ -130,6 +151,56 @@
         if(avalue==null)
             return '-';
         return avalue.toFixed(2);
+    }
+
+    function get_zoomed_data(i, ranges, datas){
+        var from_pos, to_pos;
+        var actual_xaxis_from, actual_xaxis_to;
+        $("#chartarea"+cm[i]['id']).append("<img style=\"margin: auto; position: absolute; left: 240px; top: 100px; \" src=\""+MEDIA_URL+"images/icons/progress.gif\">");
+        for(var j=0;j<vm[i].length;j++)
+            vm[i][j]['status']=false;
+        var achart_status=false;
+        $("#chartarea"+cm[i]['id']).unbind();
+        for(var j=0;j<vm[i].length;j++)
+        {
+            var data = datas[j]['data'];
+            from_pos = data[0][2];
+            to_pos = data[data.length-1][2];
+            for(var k=0;k<data.length;k++){
+                if(ranges.xaxis.from<=data[k][0]){
+                    from_pos = data[k][2];
+                    actual_xaxis_from = data[k][0];
+                    break;
+                }
+            }
+            for(var k=data.length-1;k>=0;k--){
+                if(ranges.xaxis.to>=data[k][0]){
+                    to_pos = data[k][2];
+                    actual_xaxis_to = data[k][0];
+                    break;
+                }
+            }
+       
+            $.getJSON('{% url timeseries_data %}', {object_id: vm[i][j]['series_id'], start_pos:from_pos, end_pos:to_pos}, 
+                (function(i,j){
+                return function(chart_data){
+                var astatus=true;
+                if(chart_data){
+                    cd[i][j]=chart_data['data'];
+                    cs[i][j]=chart_data['stats'];
+                    vm[i][j]['status']=true;
+                }
+                for(var k=0;k<vm[i].length;k++)
+                    astatus = astatus && vm[i][k]['status'];
+                if(astatus)
+                {
+                    achart_status=true;
+                    $("#chartarea"+cm[i]['id']).remove(":contains('img style')");
+                    flot_init(i);
+                    if(cm[i]['can_zoom'])$("#unzoom"+cm[i]['id']).show();
+               }
+            }})(i,j));
+        }
     }
 
 	function flot_init(i) {
@@ -172,6 +243,11 @@
             legend: {show: (d.length>1), position: 'nw'}
 		};
 		var plot = $.plot($("#chartarea"+cm[i]['id']), d, options);
+        $("#chartarea"+cm[i]['id']).unbind();
+        if(cm[i]['can_zoom'])
+            $("#chartarea"+cm[i]['id']).bind("plotselected", function (event, ranges) {
+                get_zoomed_data(i, ranges, d);
+            });
 	}
 
   </script>
@@ -201,10 +277,8 @@
     {% for chart in charts %}
         <div id="chartdiv{{chart.id}}" style="float:left; clear:both; background-color: #f9fff9; border-bottom: thin solid #eeeeee; width:99%;">
 			<p style="margin-left: 240px; display:inline;"> <strong>{{chart.name}}</strong></p>
-			<div id="progress{{chart.id}}" style="text-align:center; width: 480px; height:320px;margin:10px;">
-			</div>
 			<div id="data_holder{{chart.id}}">
-    			<div id="chartarea{{chart.id}}" style="margin:10px;width:480px;height:320px;float:left;"></div>
+    			<div id="chartarea{{chart.id}}" style="margin:10px;width:480px;height:320px;float:left;position: relative;"></div>
                 {% if chart.has_info_box %}
                 <div id="textarea{{chart.id}}" class="textareas">
                     {% if chart.display_max %}
@@ -221,8 +295,12 @@
                     <p>{% trans "Last measurement: " %}<span class="sum" id="last{{chart.id}}"></span>,  
                        {% trans "at: " %}<span class="sum" id="last_tstmp{{chart.id}}"></span></p>{% endif %}
                     {% if chart.mainvar.link_to_timeseries %}
-                    <p><a href={% url enhydris.hcore.views.timeseries_detail chart.mainvar.timeseries.id %}>
+                    <p>
+                       <a href={% url enhydris.hcore.views.timeseries_detail chart.mainvar.timeseries.id %}>
                        {% trans "Open time series page" %}</a></p>{% endif %}
+                    {% if chart.can_zoom %}
+                    <p><span id="dragtozoom{{chart.id}}">{%trans "Drag on chart to zoom in" %}</span>
+                    <a href="javascript:chartUnzoom({{chart.id}});"  style="display: none;" id="unzoom{{chart.id}}"> - {% trans "Unzoom chart" %}</a>{% endif %}
                 </div>
                 {% endif %}
 			</div>
