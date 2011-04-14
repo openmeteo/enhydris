@@ -9,7 +9,7 @@ import mimetypes
 import os
 import linecache
 from calendar import monthrange
-from datetime import timedelta
+from datetime import timedelta, datetime
 from tempfile import mkstemp
 import django.db
 from pthelma.timeseries import Timeseries, TimeStep
@@ -427,7 +427,17 @@ def timeseries_data(request, *args, **kwargs):
         gstats['last_tstmp'] = date
         gstats['count']+=1
             
-
+    def inc_datetime(adate, unit, steps):
+        if unit=='day':
+            return adate+steps*timedelta(days=1)
+        elif unit=='week':
+            return adate+steps*timedelta(weeks=1)
+        elif unit=='month':
+            return inc_month(adate, steps)
+        elif request.GET['last']=='year':
+            return inc_month(adate, 12*steps)
+        else: raise Http404
+   
 
     if hasattr(settings, 'TS_GRAPH_BIG_STEP_DENOMINATOR'):
         step_denom = settings.TS_GRAPH_BIG_STEP_DENOMINATOR
@@ -453,18 +463,24 @@ def timeseries_data(request, *args, **kwargs):
             end_pos = int(request.GET['end_pos'])
         else:
             end_pos = bufcount(afilename)
+            tot_lines = end_pos
             if request.GET.has_key('last'):
-                last_date = date_at_pos(end_pos)
-                if request.GET['last']=='day':
-                    first_date = last_date-timedelta(days=1)
-                elif request.GET['last']=='week':
-                    first_date = last_date-timedelta(weeks=1)
-                elif request.GET['last']=='month':
-                    first_date = inc_month(last_date, -1)
-                elif request.GET['last']=='year':
-                    first_date = inc_month(last_date, -12)
-                else: raise Http404
-                start_pos= find_line_at_date(first_date, end_pos)
+                if request.GET.has_key('date') and request.GET['date']:
+                    datetimestr = request.GET['date']
+                    datetimefmt = '%Y-%m-%d'
+                    if request.GET.has_key('time') and request.GET['time']:
+                        datetimestr = datetimestr + ' '+request.GET['time']
+                        datetimefmt = datetimefmt + ' %H:%M'
+                    try:
+                        first_date = datetime.strptime(datetimestr, datetimefmt)
+                        last_date = inc_datetime(first_date, request.GET['last'], 1)
+                        end_pos = find_line_at_date(last_date, tot_lines)
+                    except ValueError:
+                        raise Http404
+                else:
+                    last_date = date_at_pos(end_pos)
+                    first_date = inc_datetime(last_date, request.GET['last'], -1)
+                start_pos= find_line_at_date(first_date, tot_lines)
             else:
                 start_pos= 1
         length = end_pos - start_pos + 1
