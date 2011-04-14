@@ -11,13 +11,17 @@
   <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.min.js"></script>
   <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.selection.min.js"></script>
   <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.timePicker.min.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.collapser.mod.js"></script>
   <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
   <link media="all" href="{{ MEDIA_URL }}css/timePicker.css" type="text/css" rel="stylesheet">
+  <style type="text/css" rel="stylesheet">
+      .expArrow{ font-weight: normal; }
+      .collArrow{ font-weight: normal; }
+  </style>
   <script type="text/javascript">
 
     cd=[], vm=[], cm=[], cs=[];
     cc=0;
-    zoneCorrection=0;
     default_last="{% if page.option_daily %}day{% else %}{% if page.option_weekly %}week{% else %}{% if page.option_monthly %}month{% else %}year{%endif%}{%endif%}{%endif%}";
     time_span = default_last;
 
@@ -63,8 +67,10 @@
         for(var j=0;j<vm[i].length;j++)
         {
             var url_params = {object_id: vm[i][j]['series_id'], last: time_span};
-            if(gup('date'))url_params['date'] = gup('date');
-            if(gup('time'))url_params['time'] = unescape(gup('time'));
+            if(gup('date'))
+            {   url_params['date'] = gup('date');
+                if(gup('time'))url_params['time'] = unescape(gup('time'));
+            }
             $.getJSON('{% url timeseries_data %}', url_params, 
                 (function(i,j){
                 return function(chart_data){
@@ -108,8 +114,6 @@
 
     function load_initial_data()
     {
-        var d = new Date();
-        zoneCorrection=60000*d.getTimezoneOffset();
         time_span = gup('last');
         if(!time_span)time_span=default_last;
         $('a#'+time_span).each(function(){ $(this).replaceWith($(this).text()); });
@@ -118,12 +122,25 @@
     }
 
 	$(document).ready(function() {
-
 		$("input.date").datepicker({ dateFormat: 'yy-mm-dd' });
         $("input.time").timePicker();
         $("input.date").val(gup('date'));
-        $("input.time").val(unescape(gup('time')));
+        if($("input.date").val())
+            $("input.time").val(unescape(gup('time')));
         $("input.last").val(gup('last'));
+        if($("input.date").val()||$("input.time").val())
+            $("#date_select_form").show();
+        $('.date_select').collapser({target: 'next', targetOnly: 'div',
+                                     effect: 'fade', changeText: true,
+                                     expandHtml: '{% trans "Show charts for a specific date" %}',
+                                     collapseHtml: '{% trans "Hide date selection - Show recent measurements" %}',
+                                     expandClass: 'expArrow', collapseClass: 'collArrow'},
+                                     function(){},
+                                     function(){
+                                         if($("#date_select").hasClass("expArrow"))
+                                             window.location="{% url chartpage_detail page.url_name %}?last="+gup('last');
+                                     });
+
         {% for chart in charts %}
         addChart({id:{{chart.id}}, name:"{{chart.name}}", 
                   min:{{chart.display_min|lower}},
@@ -145,7 +162,10 @@
     function format_date(timestamp){
         if(timestamp==null)
             return '-';
-        var hours, minutes;
+        var hours, minutes, zoneCorrection;
+        adate = new Date(timestamp);
+        zoneCorrection=60000*adate.getTimezoneOffset();
+        timestamp+=zoneCorrection;
         adate = new Date(timestamp);
         result = adate.getFullYear();
         result = result+'/'+(adate.getMonth()+1)+'/'+adate.getDate()+' ';
@@ -233,15 +253,14 @@
             items = items.slice(0,3);
             for(item in items){
             //Fix time zone UGLY
-                stats[items[item]+'_tstmp']+=zoneCorrection;
                 $('#'+items[item]+'_tstmp'+cm[i]['id']).text(format_date(stats[items[item]+'_tstmp']));
             }
             if(cm[i]['min'])
                 marking_opts = marking_opts.concat([ { yaxis: { from: stats['min'], to: stats['min'] } , color: "#8888aa"},  
-                        { xaxis: { from: stats['min_tstmp']-zoneCorrection, to: stats['min_tstmp']-zoneCorrection } , color: "#ddddff"}]);
+                        { xaxis: { from: stats['min_tstmp'], to: stats['min_tstmp'] } , color: "#ddddff"}]);
             if(cm[i]['max'])
                 marking_opts = marking_opts.concat([ { yaxis: { from: stats['max'], to: stats['max'] } , color: "#aa8888"},  
-                        { xaxis: { from: stats['max_tstmp']-zoneCorrection, to: stats['max_tstmp']-zoneCorrection } , color: "#ffdddd"}]);
+                        { xaxis: { from: stats['max_tstmp'], to: stats['max_tstmp'] } , color: "#ffdddd"}]);
             if(cm[i]['avg'])
                 marking_opts.push( { yaxis: { from: stats['avg'], to: stats['avg'] } , color: "#88aa88"});
         }
@@ -278,22 +297,23 @@
     {% if page.description %}
     <p>{{page.description}}</p>
     {% endif %}
-    <p><strong>Time span:</strong>&nbsp;&nbsp;
+    <div style="margin: 4px;">
+    <p style="display: block; float: left;"><strong>Time span:</strong>&nbsp;&nbsp;
     {% if page.option_annual %}<a href="{% url chartpage_detail page.url_name %}?last=year" id="year">year</a>&nbsp;{% endif %}
     {% if page.option_monthly %}<a href="{% url chartpage_detail page.url_name %}?last=month" id="month">month</a>&nbsp;{% endif %}
     {% if page.option_weekly %}<a href="{% url chartpage_detail page.url_name %}?last=week" id="week">week</a>&nbsp;{% endif %}
-    {% if page.option_daily %}<a href="{% url chartpage_detail page.url_name %}?last=day" id="day">day</a>{% endif %}
-    </p>
-    <p>
+    {% if page.option_daily %}<a href="{% url chartpage_detail page.url_name %}?last=day" id="day">day</a>{% endif %}</p>
+        <p class='date_select' id='date_select' style="margin-left: 3em; float: left;"></p> 
+        <div style="clear: left; border:1px solid gray; padding: 6px; margin: 3px; display: none;" id="date_select_form"><p>
         <form action="" method="get">
             {% trans "Date: " %}
             <input name="date" class="date" id="date" type="text" readonly="readonly"/>
             <input name="last" class="last" type="text" style="display:none;"/>
             {% trans "Time: " %}
-            <input name="time" class="time" id="time" type="text" size=8 readonly="readonly" />
-            <input type=submit value="submit" />
-        </form>
-    </p>
+            <input name="time" class="time" id="time" type="text" size=7 readonly="readonly" />
+            <input type=submit value="{% trans 'Submit' %}" />
+        </form></p></div>
+    </div>
     {% for chart in charts %}
         <div id="chartdiv{{chart.id}}" style="float:left; clear:both; background-color: #f9fff9; border-bottom: thin solid #eeeeee; width:99%;">
 			<p style="margin-left: 240px; display:inline;"> <strong>{{chart.name}}</strong></p>

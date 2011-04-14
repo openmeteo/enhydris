@@ -217,6 +217,22 @@ a.collapse_toggler{
   cursor: pointer;
 } 
 
+.expArrow{
+    padding-left: 20px;
+    font-weight: bold;
+    color: #000055;
+    background: url(../images/arrow-down.png) no-repeat 0px 4px;
+    cursor: pointer;
+}
+
+.collArrow{
+    padding-left: 20px;
+    font-weight: bold;
+    color: #000055;
+    background: url(../images/arrow-up.png) no-repeat 0px 4px;
+    cursor: pointer;
+}
+
 a.hide_disable_toggler { 
   cursor: pointer;
 }
