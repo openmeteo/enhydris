@@ -31,7 +31,7 @@
 </div>  
 {% endif %}
 
-<form method="post" action=".">
+<form method="post" action="{% url auth_login %}">
 {% csrf_token %} 
 <table style="margin:auto">
 <tr><td><label for="id_username">{% trans 'Username:' %}</label></td><td>{{ form.username }}</td></tr>

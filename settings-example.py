@@ -60,6 +60,9 @@ EMAIL_PORT=587
 EMAIL_HOST='smtp.my.domain'
 EMAIL_HOST_USER='automaticsender@my.domain'
 EMAIL_HOST_PASSWORD='mypassword'
+#Set login redirection as apropriate in the cases
+#of site installed on a subdirectory
+#LOGIN_REDIRECT_URL='http://my.site/my_dir/'
 
 # Options for political divisions
 FILTER_DEFAULT_COUNTRY= 'GREECE'
