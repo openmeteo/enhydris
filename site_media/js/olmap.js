@@ -17,13 +17,21 @@ Object.extend = function(destination, source) {
 
 var map = null;
 var apopup = null;
+function get_attribute(afeature, attrib)
+{
+    if(!afeature.cluster)
+        return afeature.attributes[attrib];
+    else
+        return afeature.cluster[0].attributes[attrib];
+}
+
 function InvokePopup(afeature) {
     apoint = afeature.geometry.getBounds().getCenterLonLat();
     map.panTo(apoint);
-    $.get(ENHYDRIS_ROOT_URL+"stations/b/"+afeature.attributes["id"]+'/', {}, function(data){
+    $.get(ENHYDRIS_ROOT_URL+"stations/b/"+get_attribute(afeature, "id")+'/', {}, function(data){
         var amessage = '';
         amessage=data;
-        apopup = new OpenLayers.Popup(afeature.attributes["name"], apoint, new OpenLayers.Size(190,150), amessage, true);
+        apopup = new OpenLayers.Popup(get_attribute(afeature, "name"), apoint, new OpenLayers.Size(190,150), amessage, true);
         apopup.setBorder("2px solid");  
         apopup.setBackgroundColor('#EEEEBB');
         map.addPopup(apopup, true);
@@ -43,6 +51,11 @@ function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor){
     else if(map_mode==2){
         var params = {'gentity_id': agentity_id};
     }
+    params['request'] = 'GetFeature';
+    params['srs'] = 'EPSG:4326';
+    params['version'] = '1.0.0';
+    params['service'] = 'WFS';
+    params['format'] = 'WFS';
     var labelvalue = "";
     var labeling_opts = {
             label : labelvalue, fontColor: "#504065",
@@ -50,32 +63,46 @@ function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor){
             fontWeight: "bold", labelAlign: "cm" 
     };
     var general_opts = {
-            externalGraphic: MEDIA_URL+'images/marker.png',
+            externalGraphic: MEDIA_URL+'images/drop_marker.png',
             graphicWidth: 21, graphicHeight:25, graphicXOffset:-10,
             graphicYOffset: -25, fillOpacity: 1
     };
     general_opts = Object.extend(general_opts, labeling_opts);
     AURL = ENHYDRIS_ROOT_URL+ObjectName+"/kml/";
-    var alayer = new OpenLayers.Layer.WFS(AName, AURL, params,
-    {   projection: new OpenLayers.Projection("EPSG:4326"),
-        format: OpenLayers.Format.KML,
+    var alayer = new OpenLayers.Layer.Vector(AName,
+    {
+        strategies: [
+                     new OpenLayers.Strategy.BBOX({ratio: 1.5,
+                     resFactor: 2}),
+                     new OpenLayers.Strategy.Cluster({distance: 15,
+                     threshold: 3})
+                     ],
+        protocol: new OpenLayers.Protocol.HTTP({
+                        url: AURL,
+                        format: new OpenLayers.Format.KML(),
+                        params: params}),
+        projection: new OpenLayers.Projection("EPSG:4326"),
         formatOptions: { extractAttributes:true },
         styleMap: new OpenLayers.StyleMap({
             "default": new OpenLayers.Style(
                   OpenLayers.Util.applyDefaults(general_opts,
-                        OpenLayers.Feature.Vector.style["default"])),
+                        OpenLayers.Feature.Vector.style["default"]),
+                        {context: {aname: function(feature) { return get_attribute(feature, "name"); }}}
+                        ),
             "select": new OpenLayers.Style(
                   OpenLayers.Util.applyDefaults({
-                        externalGraphic: MEDIA_URL+'images/selected_marker.png',
+                        externalGraphic: MEDIA_URL+'images/drop_marker_selected.png',
                         graphicWidth: 21, graphicHeight:25, graphicXOffset:-10,
                         graphicYOffset: -25, fillOpacity: 1}, 
-                        OpenLayers.Feature.Vector.style["select"])),
+                        OpenLayers.Feature.Vector.style["select"])
+                        ),
             "temporary": new OpenLayers.Style(
                   OpenLayers.Util.applyDefaults({
-                        externalGraphic: MEDIA_URL+'images/marker.png',
+                        externalGraphic: MEDIA_URL+'images/drop_marker.png',
                         graphicWidth: 21, graphicHeight:25, graphicXOffset:-10,
                         graphicYOffset: -25, fillOpacity: 0.7}, 
-                        OpenLayers.Feature.Vector.style["select"]))
+                        OpenLayers.Feature.Vector.style["select"])
+                        )
         })
     } );
     alayer.events.register("loadstart", alayer,
@@ -157,8 +184,8 @@ function init() {
           clickout: false, togle: false, multiple: false,
           hover: true, highlightOnly: true, renderIntent: "temporary",
           eventListeners: { beforefeaturehighlighted: function(e){},
-                            featurehighlighted: function(e){InvokeTooltip(e.feature.attributes["name"])},
-                            featureunhighlighted: function(e){HideTooltip(e.feature.attributes["name"])}
+                            featurehighlighted: function(e){InvokeTooltip(get_attribute(e.feature, "name"));},
+                            featureunhighlighted: function(e){HideTooltip(get_attribute(e.feature, "name"))}
                           }});
     map.addControl(SelectControl);
     map.addControl(HoverControl);
@@ -195,7 +222,7 @@ function setLayersLabels(value){
         var layer = categories[i];
         var defaultStyle = layer.styleMap.styles["default"].defaultStyle;
         if(value)
-            defaultStyle["label"]="${name}";
+            defaultStyle["label"]="${aname}";
         else
             defaultStyle["label"]="";
         layer.styleMap.styles["default"].setDefaultStyle(defaultStyle);
