@@ -49,3 +49,12 @@ var ocm = new OpenLayers.Layer.OSM.CycleMap("Υπόβαθρο \"Open Cycle Map\"
 
 /* Add base layers to this array by the order of apearance */
 var base_layers = [ocm, osm, wms1_base];
+
+//Set the markers for several station types
+//Maximum of categories: 4. The last row has a dummy id and the icon
+//for stations not belongin to the first 3 categories.
+//If you wish to use less than 4 categories, then use dummy ids in the
+//third or/and second category. 
+var marker_categories = {id: [11,1,3,0],
+                         icon: ['drop_marker_green.png', 'drop_marker_cyan.png',
+                                'drop_marker_orange.png', 'drop_marker.png']};

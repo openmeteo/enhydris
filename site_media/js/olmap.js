@@ -63,7 +63,7 @@ function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor){
             fontWeight: "bold", labelAlign: "cm" 
     };
     var general_opts = {
-            externalGraphic: MEDIA_URL+'images/drop_marker.png',
+            externalGraphic: MEDIA_URL+'images/'+"${aicon}",
             graphicWidth: 21, graphicHeight:25, graphicXOffset:-10,
             graphicYOffset: -25, fillOpacity: 1
     };
@@ -87,7 +87,18 @@ function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor){
             "default": new OpenLayers.Style(
                   OpenLayers.Util.applyDefaults(general_opts,
                         OpenLayers.Feature.Vector.style["default"]),
-                        {context: {aname: function(feature) { return get_attribute(feature, "name"); }}}
+                        {context: {aname: function(feature) { return get_attribute(feature, "name"); },
+                                   aicon: function(feature) {
+                                       if(get_attribute(feature, "type_id")==marker_categories['id'][0])
+                                           return marker_categories['icon'][0];
+                                       else if(get_attribute(feature, "type_id")==marker_categories['id'][1])
+                                           return marker_categories['icon'][1];
+                                       else if(get_attribute(feature, "type_id")==marker_categories['id'][2])
+                                           return marker_categories['icon'][2];
+                                       else 
+                                           return marker_categories['icon'][3];
+                                    }
+                                   }}
                         ),
             "select": new OpenLayers.Style(
                   OpenLayers.Util.applyDefaults({
@@ -98,7 +109,6 @@ function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor){
                         ),
             "temporary": new OpenLayers.Style(
                   OpenLayers.Util.applyDefaults({
-                        externalGraphic: MEDIA_URL+'images/drop_marker.png',
                         graphicWidth: 21, graphicHeight:25, graphicXOffset:-10,
                         graphicYOffset: -25, fillOpacity: 0.7}, 
                         OpenLayers.Feature.Vector.style["select"])
