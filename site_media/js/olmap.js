@@ -63,7 +63,7 @@ function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor){
             fontWeight: "bold", labelAlign: "cm" 
     };
     var general_opts = {
-            externalGraphic: MEDIA_URL+'images/'+"${aicon}",
+            externalGraphic: MEDIA_URL+"${aicon}",
             graphicWidth: 21, graphicHeight:25, graphicXOffset:-10,
             graphicYOffset: -25, fillOpacity: 1
     };

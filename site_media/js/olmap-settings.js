@@ -56,5 +56,7 @@ var base_layers = [ocm, osm, wms1_base];
 //If you wish to use less than 4 categories, then use dummy ids in the
 //third or/and second category. 
 var marker_categories = {id: [11,1,3,0],
-                         icon: ['drop_marker_green.png', 'drop_marker_cyan.png',
-                                'drop_marker_orange.png', 'drop_marker.png']};
+                         icon: ['images/drop_marker_green.png', 
+                                'images/drop_marker_cyan.png',
+                                'images/drop_marker_orange.png', 
+                                'images/drop_marker.png']};
