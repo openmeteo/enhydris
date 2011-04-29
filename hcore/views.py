@@ -390,6 +390,10 @@ def timeseries_data(request, *args, **kwargs):
         b = b.days*86400+b.seconds
         return float(a)/float(b)
 
+# Return the nearest record number to the specified date
+# The second argument is 0 for exact match, -1 if no
+# exact match and the date is after the record found,
+# 1 if no exact match and the date is before the record.
     def find_line_at_date(adatetime, totlines):
         if totlines <2:
             return totlines
@@ -397,14 +401,14 @@ def timeseries_data(request, *args, **kwargs):
         d1=date_at_pos(i1)
         d2=date_at_pos(i2)
         if adatetime<=d1:
-            return i1
+            return (i1, 0 if d1==adatetime else 1)
         if adatetime>=d2:
-            return i2
+            return (i2, 0 if d2==adatetime else -1)
         while(True):
-            i = i1 + int( float(i2-i1)* timedeltadivide( adatetime-d1, d2-d1) )
+            i = i1 + int(round( float(i2-i1)* timedeltadivide( adatetime-d1, d2-d1) ))
             d = date_at_pos(i)
-            if d==adatetime: return i
-            if (i==i1) or (i==i2): return i
+            if d==adatetime: return (i, 0)
+            if (i==i1) or (i==i2): return (i, -1 if i==i1 else 1)
             if d<adatetime:
                 d1, i1 = d, i
             if d>adatetime:
@@ -474,13 +478,13 @@ def timeseries_data(request, *args, **kwargs):
                     try:
                         first_date = datetime.strptime(datetimestr, datetimefmt)
                         last_date = inc_datetime(first_date, request.GET['last'], 1)
-                        end_pos = find_line_at_date(last_date, tot_lines)
+                        end_pos = find_line_at_date(last_date, tot_lines)[0]
                     except ValueError:
                         raise Http404
                 else:
                     last_date = date_at_pos(end_pos)
                     first_date = inc_datetime(last_date, request.GET['last'], -1)
-                start_pos= find_line_at_date(first_date, tot_lines)
+                start_pos= find_line_at_date(first_date, tot_lines)[0]
             else:
                 start_pos= 1
         length = end_pos - start_pos + 1
