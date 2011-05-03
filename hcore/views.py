@@ -12,7 +12,7 @@ from calendar import monthrange
 from datetime import timedelta, datetime
 from tempfile import mkstemp
 import django.db
-from pthelma.timeseries import Timeseries, TimeStep
+from pthelma.timeseries import Timeseries as TTimeseries, TimeStep as TTimeStep
 from pthelma.timeseries import datetime_from_iso
 from pthelma.timeseries import IntervalType as it
 from string import lower, split, find
@@ -836,9 +836,9 @@ def download_timeseries(request, object_id):
         settings.STORE_TSDATA_LOCALLY:
 
         t = timeseries # nickname, because we use it much in next statement
-        ts = Timeseries(
+        ts = TTimeseries(
             id = int(object_id),
-            time_step = TimeStep(
+            time_step = TTimeStep(
                 length_minutes = t.time_step.length_minutes if t.time_step
                                             else 0,
                 length_months = t.time_step.length_months if t.time_step
