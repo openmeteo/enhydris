@@ -105,7 +105,7 @@ _station_list_csv_headers = ['id', 'Name', 'Alternative name', 'Short name',
     'Alternative remarks', 'Last modified']
 
 def _station_csv(s):
-    abscissa, ordinate = s.point.transform(s.srid, clone=True)
+    abscissa, ordinate = s.point.transform(s.srid, clone=True) if s.point else (None, None)
     return [unicode(x).encode('utf-8') for x in
            [s.id, s.name, s.name_alt, s.short_name, s.short_name_alt,
             s.type.descr if s.type else "", s.owner, s.start_date, s.end_date,
@@ -438,8 +438,10 @@ def timeseries_data(request, *args, **kwargs):
             return adate+steps*timedelta(weeks=1)
         elif unit=='month':
             return inc_month(adate, steps)
-        elif request.GET['last']=='year':
+        elif unit=='year':
             return inc_month(adate, 12*steps)
+        elif unit=='moment':
+            return adate            
         else: raise Http404
    
 
@@ -478,7 +480,11 @@ def timeseries_data(request, *args, **kwargs):
                     try:
                         first_date = datetime.strptime(datetimestr, datetimefmt)
                         last_date = inc_datetime(first_date, request.GET['last'], 1)
-                        end_pos = find_line_at_date(last_date, tot_lines)[0]
+                        (end_pos, is_exact) = find_line_at_date(last_date, tot_lines)
+                        if request.GET.has_key('exact_datetime'):
+                            if request.GET['exact_datetime'] == 'true':
+                                if is_exact!=0:
+                                    raise Http404
                     except ValueError:
                         raise Http404
                 else:
@@ -539,7 +545,7 @@ def timeseries_data(request, *args, **kwargs):
                 if (pos-start_pos)%5000==0:
                     linecache.checkcache(afilename)
                 pos+=fine_step
-            if tick_pos<end_pos:
+            if length>0 and tick_pos<end_pos:
                 if amax == '': amax = 'null'
                 chart_data[-1]=[calendar.timegm(k.timetuple())*1000, str(amax), end_pos]
         finally:
