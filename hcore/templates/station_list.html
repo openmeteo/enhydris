@@ -4,6 +4,7 @@
 {% load pagination_tags %}
 {% load sorting_tags %}
 {% load stationlist_filter %}
+{% load adminmedia %}
 
 {% block js-globals %}
     <script type="text/javascript">var map_mode=1;</script>
@@ -116,7 +117,7 @@
              <div>
                   <h3>{% trans 'Searching' %}</h3>
 					<div class="searchform">
-					  <form action="." method="get">
+					  <form action="{% url station_list %}" method="get">
 						<p><label>{% trans "Find Stations by name, description, etc." %}</label></p>
 						<div><input type="hidden" name="check" value="search" /></div>
 						<div><input type="text" name="q" size="40" value="{{ query|escape }}" />
@@ -156,7 +157,7 @@
                 {% if perms.hcore.add_station %}
                 <p class="anchor_override" style="cursor:pointer;text-align:left">
                        <a href="{% url station_add %}">
-                          <img src="/media/img/admin/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
+                          <img src="{% admin_media_prefix %}img/admin/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
                           {% trans "Add a new station " %}
                       </a>
                 </p>

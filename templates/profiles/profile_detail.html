@@ -73,9 +73,7 @@
 
 		
 		{% if user.is_superuser %}
-			<p class="anchor_override">{% trans "As a superuser, you can edit
-			all the stations. To find the station you are looking for, go to
-			the" %} <a href="{% url station_list %}">{% trans "station list." %}</a></p>
+			<p class="anchor_override">{% trans "As a superuser, you can edit all the stations. To find the station you are looking for, go to the" %} <a href="{% url station_list %}">{% trans "station list." %}</a></p>
 		{% else %} 
 			{% if user.created_stations.all %}
 				<h3>{% trans "You have created the following stations: " %}</h3>

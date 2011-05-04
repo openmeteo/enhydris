@@ -76,7 +76,7 @@
 		</li>
 		<li class="searchContainer"> 
 			<div>
-		    <form id="global-search-form" class="col-6 last" action="/stations/l/" method="get">
+		    <form id="global-search-form" class="col-6 last" action="{% url station_list %}" method="get">
 		    	<input class="small" id="search_input" type="text" placeholder="search stations" name="q" value="{{ query|escape }}" />
 				<input type="hidden" name="check" value="search" />
 		    </form>
