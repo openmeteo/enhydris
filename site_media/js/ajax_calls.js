@@ -1,7 +1,7 @@
 // Functions to handle political division relations
 
 function render_dist_filter(data){ 
-	$.getJSON(ENHYDRIS_ROOT_URL+"/get_subdivision/" +data+"/",{}, function(j){
+	$.getJSON(ENHYDRIS_ROOT_URL+"get_subdivision/" +data+"/",{}, function(j){
 		var options = '';
         var dist=$(document).getUrlParam("district");  
 		if ( j.length == 0 ) {
@@ -24,7 +24,7 @@ function render_dist_filter(data){
 }
 
 function render_pref_filter(data){ 
-	$.getJSON(ENHYDRIS_ROOT_URL+"/get_subdivision/" +data+"/",{}, function(j){
+	$.getJSON(ENHYDRIS_ROOT_URL+"get_subdivision/" +data+"/",{}, function(j){
 		var options = '';
         var pref=$(document).getUrlParam("prefecture");
 		if ( j.length == 0 ) {
