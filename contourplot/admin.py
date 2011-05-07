@@ -13,14 +13,24 @@ class ChartPageAdmin(admin.ModelAdmin):
                      'chart_bounds_srid'),
                     ('show_mean_value'),
                     ('time_step', 'ts_offset_minutes', 
-                     'ts_offset_months'))}),)
+                     'ts_offset_months'),
+                    ('draw_contours', 'contours_font_size', 'contours_color'),
+                    ('draw_labels', 'labels_font_size', 'labels_format'),
+                    ('draw_markers', 'markers_style', 'markers_color'),
+                    ('color_map', 'reverse_color_map'),
+                    ('granularity'),
+                    ('compose_background', 'background_image',
+                     'compose_method', 'swap_bg_fg'),
+                    ('compose_alpha', 'compose_offset', 'mask_image'),
+                    ('always_refresh', 'default_dimension')
+                )}),)
 
     list_display = ('id', 'name', 'url_name')
 
 class CPointAdmin(admin.ModelAdmin):
     fieldsets = ( (None, {'fields': (('display_name', 'chart_page',
                    'point', 'timeseries', 'weight'),
-                   ('display_point_on_map', 'display_point_label'))
+                   )
                    }),)
 
     list_display = ('id', 'display_name', 'chart_page')
