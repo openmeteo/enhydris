@@ -33,6 +33,8 @@ class ChartPage(models.Model):
                                     default=1)
     ts_offset_minutes = models.IntegerField(default=0)
     ts_offset_months = models.IntegerField(default=0)
+    data_available_after_x_minutes = models.IntegerField(default=0)
+    utc_offset_minutes = models.IntegerField(default=0)
     draw_markers = models.BooleanField(default=True)
     draw_labels = models.BooleanField(default=True)
     contours_font_size = models.IntegerField(default=8)

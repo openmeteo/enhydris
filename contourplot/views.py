@@ -4,6 +4,7 @@ from enhydris.contourplot.models import ChartPage, CPoint
 from django.http import (HttpResponse, HttpResponseRedirect,
                             HttpResponseForbidden, Http404)
 from enhydris.hcore.views import inc_month, timeseries_data
+from enhydris.hcore.models import TimeStep as TTimeStep
 from enhydris.contourplot.cplot import plot_contours
 from datetime import datetime,timedelta
 from django.core.servers.basehttp import FileWrapper
@@ -14,6 +15,24 @@ try:
     import json
 except ImportError:
     import simplejson as json
+from pthelma.timeseries import TimeStep
+from datetime import datetime, timedelta
+from pytz import utc
+
+
+def get_concurent_timestamp(urlcode):
+    page = get_object_or_404(ChartPage, url_name = urlcode)
+    time_step = page.time_step
+    now = datetime.now(utc).replace(second=0, microsecond=0, tzinfo=None) 
+    now+= timedelta(minutes = page.utc_offset_minutes)
+    ts = TimeStep(length_minutes = time_step.length_minutes,
+                  length_months = time_step.length_months,
+                  nominal_offset = (page.ts_offset_minutes,
+                                    page.ts_offset_months))
+    tstamp = ts.down(now)
+    if now-tstamp<timedelta(minutes=page.data_available_after_x_minutes):
+        tstamp = ts.previous(tstamp)
+    return tstamp
 
 
 def contourpage_detail(request, urlcode, **kwargs):
@@ -32,11 +51,34 @@ def create_contours(imgurl):
         file_name, file_ext = imgurl.split('.')
         if file_ext.lower()!='png':
             raise
-        urlcode, datestr, chart_large_dimension = file_name.split('-')
-        filedate = datetime(*map(lambda x:int(datestr[x[0]:x[1]]), ((0,4),(4,6),(6,8),(8,10),(10,12))))
+        file_elements = file_name.split('-')
+        file_elements_count = len(file_elements)
+        if file_elements_count not in range(1,4):
+            raise
+        d = {'datestr': None, 'large_dimension': None}
+        d['urlcode'] = file_elements[0]
+        for i in range(1, file_elements_count):
+            if len(file_elements[i])==12:
+                d['datestr'] = file_elements[i]
+            else:
+                d['large_dimension'] = file_elements[i]
+        if not d['datestr']:
+            filedate = get_concurent_timestamp(d['urlcode'])
+            d['datestr'] = filedate.strftime('%Y%m%d%H%M')
+        else:
+            filedate = datetime(*map(lambda x:int(d['datestr'][x[0]:x[1]]), ((0,4),(4,6),(6,8),(8,10),(10,12))))
     except:
         raise Http404
+    urlcode = d['urlcode']
+    datestr = d['datestr']
     page = get_object_or_404(ChartPage, url_name = urlcode)
+    if not d['large_dimension']:
+        chart_large_dimension = str(page.default_dimension)
+    else:
+        chart_large_dimension = d['large_dimension']
+    filename = os.path.join(settings.CONTOURPLOT_STATIC_CACHE_PATH,
+               '.'.join(('-'.join((urlcode, datestr,
+                         chart_large_dimension)),'png')))
     if not (page.always_refresh or not os.path.exists(filename)):
         return filename
     filedate = filedate+timedelta(minutes=page.ts_offset_minutes)
@@ -50,11 +92,14 @@ def create_contours(imgurl):
         dummyrequest = DummyRequest('GET', {'object_id': point.timeseries.id,
                                     'date': filedate.strftime('%Y-%m-%d'),
                                     'time': filedate.strftime('%H:%M'),
-                                    'last': 'moment', 'exact': 'true'})
-        v = json.loads(timeseries_data(dummyrequest).content)[u'data'][0][1]
-        if v!=u'null':
-            v = float(v)
-        else:
+                                    'last': 'moment', 'exact_datetime': 'true'})
+        try:
+            v = json.loads(timeseries_data(dummyrequest).content)[u'data'][0][1]
+            if v!=u'null':
+                v = float(v)
+            else:
+                continue
+        except:
             continue
         a.append((x, y, v, point.display_name))
     db_opts_list = ('contours_font_size', 'labels_format', 'draw_contours',
