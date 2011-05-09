@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+   {{ page.name }}
+{% endblock %}
+
+
+{% block content %}
+    <h3>{{page.name}}</h3>
+    {% if page.description %}
+    <p>{{page.description}}</p>
+    {% endif %}
+    <img src="{% url image_serve page.url_name %}.png">
+    <p>
+    {% trans "Image update: " %}{{last_update}}</p>
+
+{% endblock %}

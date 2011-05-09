@@ -35,8 +35,19 @@ def get_concurent_timestamp(urlcode):
     return tstamp
 
 
+def last_update(request, urlcode, **kwargs):
+    return HttpResponse(get_concurent_timestamp(urlcode).strftime('%Y-%m-%d %H:%M'),
+        mimetype='text/plain')
+
+
 def contourpage_detail(request, urlcode, **kwargs):
-    return HttpResponse('Mr. John Foufotos page: '+urlcode, mimetype='text/plain')
+    kwargs["queryset"] = ChartPage.objects.all()
+    page = get_object_or_404(ChartPage, url_name = urlcode)
+    object_id = page.id
+    kwargs["template_name"] = "contours_detail.html"
+    kwargs["template_object_name"] = "page"
+    kwargs["extra_context"] = {'last_update': get_concurent_timestamp(urlcode),}
+    return list_detail.object_detail(request, object_id = object_id, **kwargs)
 
 
 class DummyRequest:

@@ -10,5 +10,7 @@ urlpatterns = patterns('',
      views.image_serve, {}, 'image_serve'),
     (r'^contours/thumbs/(?P<imgurl>[^/]+)$',
      views.thumb_serve, {}, 'thumb_serve'),
+    (r'^contours/last/(?P<urlcode>[^/]+)/$',
+     views.last_update, {}, 'last_update'),
      
 )
