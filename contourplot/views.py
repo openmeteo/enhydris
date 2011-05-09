@@ -121,8 +121,7 @@ def create_contours(imgurl):
     return filename
 
 
-def image_serve(request, imgurl, **kwargs):
-    filename = create_contours(imgurl)
+def push_image(filename, imgurl):
     try:
         wrapper  = FileWrapper(open(filename))
     except:
@@ -134,3 +133,37 @@ def image_serve(request, imgurl, **kwargs):
         response.write(chunk)
     return response
 
+
+def image_serve(request, imgurl, **kwargs):
+    filename = create_contours(imgurl)
+    return push_image(filename, imgurl)
+
+
+def thumb_serve(request, imgurl, **kwargs):
+    try:
+        file_name, file_ext = imgurl.split('.')
+        if file_ext.lower()!='png':
+            raise
+        img_name, thumb_size = file_name.split('_')
+    except:
+        raise Http404
+    img_filename = create_contours('.'.join((img_name, 'png')))
+    actual_imgurl = img_filename.split('/')[-1]
+    thumb_url = '_'.join( (actual_imgurl.split('.')[0], thumb_size) )
+    thumb_url = '.'.join( (thumb_url, 'png') )
+    thumb_filename = os.path.join(settings.CONTOURPLOT_STATIC_CACHE_PATH,
+                                  'thumbs', thumb_url)
+    if not os.path.exists(os.path.dirname(thumb_filename)):
+        os.mkdir(os.path.dirname(thumb_filename))
+    from stat import ST_MTIME
+    if not os.path.exists(thumb_filename) or \
+           os.stat(img_filename)[ST_MTIME] >\
+           os.stat(thumb_filename)[ST_MTIME]:
+        from PIL import Image
+        THUMBNAIL_SIZE = (int(thumb_size), int(thumb_size))
+        image = Image.open(img_filename)
+        if image.mode not in ('L', 'RGB'): 
+            image = image.convert('RGB') 
+        image.thumbnail(THUMBNAIL_SIZE, Image.ANTIALIAS)
+        image.save(thumb_filename)
+    return push_image(thumb_filename, imgurl)
