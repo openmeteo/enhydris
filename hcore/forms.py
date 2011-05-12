@@ -308,6 +308,7 @@ class TimeseriesForm(ModelForm):
 
         return self.cleaned_data['data']
 
+    @db.transaction.commit_manually
     def clean(self):
         """
         This function checks the timestep and offset values and reports
@@ -360,6 +361,7 @@ class TimeseriesForm(ModelForm):
                 try:
                     ts.append_to_db(db.connection, transaction=db.transaction)
                 except Exception, e:
+                    db.transaction.rollback()
                     raise forms.ValidationError(_(e.message))
 
         return self.cleaned_data
