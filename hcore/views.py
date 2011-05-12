@@ -1198,7 +1198,7 @@ def timeseries_delete(request, timeseries_id):
     if tseries and related_station:
         if request.user.has_row_perm(related_station, 'edit') and\
          request.user.has_perm('hcore.delete_timeseries'):
-            ts = Timeseries(int(timeseries_id))
+            ts = TTimeseries(int(timeseries_id))
             ts.delete_from_db(django.db.connection)
             tseries.delete()
             ref = request.META.get('HTTP_REFERER', None)
