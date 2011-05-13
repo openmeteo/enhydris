@@ -598,7 +598,7 @@ from pthelma.timeseries import IntervalType as it
 def ReadTimeStep(id, timeseries_instance = None):
     if timeseries_instance == None:
         from django.shortcuts import get_object_or_404
-        timeseries = get_object_or_404(Timeseries, pk=int(id))
+        timeseries_instance = get_object_or_404(Timeseries, pk=int(id))
     t = timeseries_instance
     return TTimeStep(
         length_minutes = t.time_step.length_minutes if t.time_step

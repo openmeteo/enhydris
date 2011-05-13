@@ -4,7 +4,7 @@ from pthelma.timeseries import Timeseries, datetime_from_iso
 from pthelma.xreverse import xreverse
 
 def update_ts_temp_file(cache_dir, connection, id):
-    afilename = cache_dir+'%d.hts'%int(id)
+    afilename = os.path.join(cache_dir, '%d.hts'%int(id))
     if os.path.exists(afilename):
         if os.path.getsize(afilename)<3:
             os.remove(afilename)
