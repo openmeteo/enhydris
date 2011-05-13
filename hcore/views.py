@@ -12,9 +12,8 @@ from calendar import monthrange
 from datetime import timedelta, datetime
 from tempfile import mkstemp
 import django.db
-from pthelma.timeseries import Timeseries as TTimeseries, TimeStep as TTimeStep
+from pthelma.timeseries import Timeseries as TTimeseries
 from pthelma.timeseries import datetime_from_iso
-from pthelma.timeseries import IntervalType as it
 from string import lower, split, find
 from django.http import (HttpResponse, HttpResponseRedirect,
                             HttpResponseForbidden, Http404)
@@ -844,23 +843,7 @@ def download_timeseries(request, object_id):
         t = timeseries # nickname, because we use it much in next statement
         ts = TTimeseries(
             id = int(object_id),
-            time_step = TTimeStep(
-                length_minutes = t.time_step.length_minutes if t.time_step
-                                            else 0,
-                length_months = t.time_step.length_months if t.time_step
-                                            else 0,
-                nominal_offset = None if None in
-                            (t.nominal_offset_minutes, t.nominal_offset_months)
-                       else (t.nominal_offset_minutes, t.nominal_offset_months),
-                actual_offset = None if None in
-                            (t.actual_offset_minutes, t.actual_offset_months)
-                       else (t.actual_offset_minutes, t.actual_offset_months),
-                interval_type = None if not t.interval_type else\
-                        {'sum': it.SUM, 'average': it.AVERAGE,\
-                         'vector_average': it.VECTOR_AVERAGE,\
-                         'minimum': it.MINIMUM,\
-                         'maximum': it.MAXIMUM}[t.interval_type.value.lower()]
-            ),
+            time_step = ReadTimeStep(object_id, t),
             unit = t.unit_of_measurement.symbol,
             title = t.name,
             timezone = '%s (UTC+%02d%02d)' % (t.time_zone.code,

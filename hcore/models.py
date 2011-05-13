@@ -591,6 +591,33 @@ def make_user_editor(sender, instance, **kwargs):
         group, created = Group.objects.get_or_create(name='editors')
         user.groups.add(group)
 
+#Read time step from Timeseries Object
+from pthelma.timeseries import TimeStep as TTimeStep
+from pthelma.timeseries import IntervalType as it
+
+def ReadTimeStep(id, timeseries_instance = None):
+    if timeseries_instance == None:
+        from django.shortcuts import get_object_or_404
+        timeseries = get_object_or_404(Timeseries, pk=int(id))
+    t = timeseries_instance
+    return TTimeStep(
+        length_minutes = t.time_step.length_minutes if t.time_step
+                                    else 0,
+        length_months = t.time_step.length_months if t.time_step
+                                    else 0,
+        nominal_offset = None if None in
+                    (t.nominal_offset_minutes, t.nominal_offset_months)
+               else (t.nominal_offset_minutes, t.nominal_offset_months),
+        actual_offset = None if None in
+                    (t.actual_offset_minutes, t.actual_offset_months)
+               else (t.actual_offset_minutes, t.actual_offset_months),
+        interval_type = None if not t.interval_type else\
+                {'sum': it.SUM, 'average': it.AVERAGE,\
+                 'vector_average': it.VECTOR_AVERAGE,\
+                 'minimum': it.MINIMUM,\
+                 'maximum': it.MAXIMUM}[t.interval_type.value.lower()])
+
+
 # Class for user profiles
 class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True, verbose_name=_('Username'))
