@@ -5,7 +5,7 @@ from django.http import (HttpResponse, HttpResponseRedirect,
                             HttpResponseForbidden, Http404)
 from enhydris.hcore.views import inc_month, timeseries_data
 from enhydris.hcore.models import TimeStep as TTimeStep
-from enhydris.contourplot.cplot import plot_contours
+from pthelma.cplot import plot_contours
 from datetime import datetime,timedelta
 from django.core.servers.basehttp import FileWrapper
 from django.conf import settings
