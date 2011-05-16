@@ -31,6 +31,7 @@ def refresh_events():
     import os
     import os.path
 
+    # Retrieve all time series and calculate the events
     ts_list = [(Timeseries(id=x[0]), x[1]) for x in settings.HRAIN_TIMESERIES]
     for x in ts_list:
         x[0].read_from_db(connection) 
@@ -39,13 +40,30 @@ def refresh_events():
         settings.HRAIN_NTIMESERIES_START_THRESHOLD,
         settings.HRAIN_TIME_SEPARATOR,
         settings.HRAIN_END_THRESHOLD, settings.HRAIN_NTIMESERIES_END_THRESHOLD)
+
+    # If configuration says so, ignore any ongoing event
+    try:
+        if settings.HRAIN_IGNORE_ONGOING_EVENT:
+            from datetime import datetime, timedelta
+            event_end_date = events[-1][1]
+            data_end_date = max([t.bounding_dates()[1] for t in ts_list])
+            if data_end_date - event_end_date<settings.HRAIN_TIME_SEPARATOR:
+                events = events[:-1]
+    except AttributeError:
+        # FIXME: We shouldn't do this with try-except, but with default setting
+        pass
+
+    # Discard relevant information in database and store the newly calculated
     Event.objects.all().delete()
     fp = StringIO('')
     teid = 1
     for i, event in enumerate(events, start=1):
+        # Create and save Event with the available event information
         e = Event(id=i, start_date=event[0], end_date=event[1],
                               max_measurement=0, average_precipitation_depth=0)
         e.save()
+
+        # Calculate max measurement and average depth and save again
         weighted_total = 0.0
         weighted_divider = 0.0
         for x in ts_list:
@@ -66,6 +84,8 @@ def refresh_events():
             te.save()
             teid += 1
         e.average_precipitation_depth += weighted_total/weighted_divider
-        e.save()    # Save max_measurement and average_precipitation_depth
+        e.save()
+
+    # Clear cached plots
     for path in glob(os.path.join(settings.HRAIN_STATIC_CACHE_PATH, 'hrain*')):
         os.unlink(path)
