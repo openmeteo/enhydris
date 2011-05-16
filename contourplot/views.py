@@ -127,6 +127,7 @@ def create_contours(imgurl):
         options[item] = getattr(page, item)
     if page.reverse_color_map:
         options['color_map']+='_r'
+    options['backgrounds_path']=settings.CONTOURPLOT_BACKGROUNDS_PATH
     options['chart_large_dimension']=chart_large_dimension
     plot_contours(filename, a, options)
     return filename

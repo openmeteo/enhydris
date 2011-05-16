@@ -3,7 +3,6 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib import cm
-from django.conf import settings
 
 def plot_contours(filename, points, options):
     from scipy.interpolate import Rbf
@@ -88,12 +87,12 @@ def plot_contours(filename, points, options):
         contours = Image.open(filename)
         cmethod = options['compose_method']
         size = contours.size
-        background = Image.open(os.path.join(settings.CONTOURPLOT_BACKGROUNDS_PATH, options['background_image']))
+        background = Image.open(os.path.join(options['backgrounds_path'], options['background_image']))
         background_size = background.size
         if size!=background_size:
             background = background.resize(size)
         if cmethod=='composite':
-            mask = Image.open(os.path.join(settings.CONTOURPLOT_BACKGROUNDS_PATH, options['mask_image']))
+            mask = Image.open(os.path.join(options['backgrounds_path'], options['mask_image']))
             mask_size = mask.size
             if size!=mask_size:
                 mask = mask.resize(size)
@@ -108,4 +107,3 @@ def plot_contours(filename, points, options):
             args.append(mask)
         contours = getattr(ImageChops, cmethod)(*args)
         contours.save(filename)
-
