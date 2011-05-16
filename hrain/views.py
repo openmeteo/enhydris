@@ -155,6 +155,9 @@ def _create_chart(tsev):
     ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d\n%H:%M'))
     ax.xaxis.set_major_locator(HourLocator())
     ax.xaxis.set_minor_locator(MinuteLocator(interval=10))
+    # FIXME: The following line hangs and eternally increases memory
+    # consumption in the (very unlikely) case that the event consists of only
+    # one time stamp.
     majticks = ax.xaxis.get_major_ticks()
     for tick in majticks:
         tick.tick2On = tick.label1On = tick.label2On = False

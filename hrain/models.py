@@ -43,15 +43,16 @@ def refresh_events():
 
     # If configuration says so, ignore any ongoing event
     try:
-        if settings.HRAIN_IGNORE_ONGOING_EVENT:
-            from datetime import datetime, timedelta
-            event_end_date = events[-1][1]
-            data_end_date = max([t.bounding_dates()[1] for t in ts_list])
-            if data_end_date - event_end_date<settings.HRAIN_TIME_SEPARATOR:
-                events = events[:-1]
+        ign = settings.HRAIN_IGNORE_ONGOING_EVENT
     except AttributeError:
         # FIXME: We shouldn't do this with try-except, but with default setting
-        pass
+        ign = False
+    if ign:
+        from datetime import datetime
+        event_end_date = events[-1][1]
+        data_end_date = max([t[0].bounding_dates()[1] for t in ts_list])
+        if data_end_date - event_end_date < settings.HRAIN_TIME_SEPARATOR:
+            events.pop()
 
     # Discard relevant information in database and store the newly calculated
     Event.objects.all().delete()
