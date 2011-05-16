@@ -42,12 +42,7 @@ def refresh_events():
         settings.HRAIN_END_THRESHOLD, settings.HRAIN_NTIMESERIES_END_THRESHOLD)
 
     # If configuration says so, ignore any ongoing event
-    try:
-        ign = settings.HRAIN_IGNORE_ONGOING_EVENT
-    except AttributeError:
-        # FIXME: We shouldn't do this with try-except, but with default setting
-        ign = False
-    if ign:
+    if settings.HRAIN_IGNORE_ONGOING_EVENT:
         from datetime import datetime
         event_end_date = events[-1][1]
         data_end_date = max([t[0].bounding_dates()[1] for t in ts_list])
