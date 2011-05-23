@@ -268,6 +268,8 @@ class TimeseriesForm(ModelForm):
 
     gentity = forms.ModelChoiceField(Station.objects.all(),
                                 widget=SelectWithPop(model_name='station'),label='Station')
+    instrument = forms.ModelChoiceField(Instrument.objects.all(),
+                                widget=SelectWithPop(model_name='instrument'),label='Instrument')
     variable = forms.ModelChoiceField(Variable.objects,
                                 widget=SelectWithPop(model_name='variable'))
     unit_of_measurement = forms.ModelChoiceField(UnitOfMeasurement.objects,
@@ -286,6 +288,8 @@ class TimeseriesForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
+        gentity_id = kwargs.pop('gentity_id', None)
+        instrument_id = kwargs.pop('instrument_id', None)
         super(TimeseriesForm, self).__init__(*args, **kwargs)
 
         if user and not user.is_superuser:
@@ -293,6 +297,11 @@ class TimeseriesForm(ModelForm):
             ids = [ p.object_id for p in perms]
             self.fields["gentity"].queryset = Station.objects.filter(
                                                 id__in=ids)
+        if gentity_id:
+            self.fields["gentity"].queryset = Station.objects.filter(
+                                                id=gentity_id)
+            self.fields["instrument"].queryset = Instrument.objects.filter(
+                                                station__id=gentity_id)
 
 
     def clean_data(self):

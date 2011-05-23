@@ -1127,7 +1127,7 @@ def _timeseries_edit_or_create(request,tseries_id=None,station_id=None):
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
-        tseries = Timeseries(gentity=station)
+        tseries = Timeseries()
 
     user = request.user
     # Done with checks
@@ -1146,9 +1146,11 @@ def _timeseries_edit_or_create(request,tseries_id=None,station_id=None):
                                         kwargs={'object_id':tseries_id}))
     else:
         if tseries and tseries.id:
-            form = TimeseriesDataForm(instance=tseries, user=user)
+            form = TimeseriesDataForm(instance=tseries, user=user,
+                                      gentity_id=station_id)
         else:
-            form = TimeseriesForm(instance=tseries, user=user)
+            form = TimeseriesForm(instance=tseries, user=user,
+                                      gentity_id=station_id)
 
     return render_to_response('timeseries_edit.html', {'form': form},
                     context_instance=RequestContext(request))
