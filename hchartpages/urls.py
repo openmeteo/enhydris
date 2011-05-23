@@ -4,7 +4,7 @@ from enhydris.hchartpages import views
 
 urlpatterns = patterns('',
 
-    (r'^chart/(?P<urlcode>[^/]+)/$',
+    (r'^(?P<urlcode>[^/]+)/$',
      views.chartpage_detail, {}, 'chartpage_detail'),
      
 )
