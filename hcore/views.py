@@ -1127,7 +1127,7 @@ def _timeseries_edit_or_create(request,tseries_id=None,station_id=None):
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
-        tseries = Timeseries()
+        tseries = Timeseries(gentity=station)
 
     user = request.user
     # Done with checks
@@ -1370,6 +1370,8 @@ GentityEvent View
 """
 
 def _gentityevent_edit_or_create(request,gevent_id=None,station_id=None):
+    if request.GET.has_key('station_id'):
+        station_id=request.GET['station_id']
     if gevent_id:
         # Edit
         gevent = get_object_or_404(GentityEvent, id=gevent_id)
@@ -1379,6 +1381,7 @@ def _gentityevent_edit_or_create(request,gevent_id=None,station_id=None):
 
     if gevent_id and not station_id:
         station = gevent.related_station
+        station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
@@ -1387,6 +1390,7 @@ def _gentityevent_edit_or_create(request,gevent_id=None,station_id=None):
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+        gevent = GentityEvent(gentity=station)
 
     user = request.user
     # Done with checks
@@ -1406,9 +1410,10 @@ def _gentityevent_edit_or_create(request,gevent_id=None,station_id=None):
                         kwargs={'object_id': str(gevent.gentity.id)}))
     else:
         if gevent:
-            form = GentityEventForm(instance=gevent,user=user)
+            form = GentityEventForm(instance=gevent,user=user, 
+                                    gentity_id = station_id)
         else:
-            form = GentityEventForm(user=user)
+            form = GentityEventForm(user=user, gentity_id = station_id)
 
     return render_to_response('gentityevent_edit.html', {'form': form},
                     context_instance=RequestContext(request))

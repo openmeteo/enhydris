@@ -105,17 +105,17 @@
 					<span style="color:#A0A095">More: </span>
 					<span class="menu_options"><a href="{% url timeseries_add %}?station_id={{ station.id }}">Add new Timeseries</a></span>
 					/
-					<span class="menu_options"><a href="{% url instrument_add %}">Add new Instrument</a></span>
+					<span class="menu_options"><a href="{% url instrument_add %}?station_id={{ station.id }}">Add new Instrument</a></span>
 					/
-					<span class="menu_options"><a href="{% url gentityfile_add %}">Add new File</a></span>
+					<span class="menu_options"><a href="{% url gentityfile_add %}?station_id={{ station.id }}">Add new File</a></span>
 					/
-					<span class="menu_options"><a href="{% url gentitygenericdata_add %}">Add new Generic Item</a></span>
+					<span class="menu_options"><a href="{% url gentitygenericdata_add %}?station_id={{ station.id }}">Add new Generic Item</a></span>
 					/
-					<span class="menu_options"><a href="{% url gentityevent_add %}">Add new Event</a></span>
+					<span class="menu_options"><a href="{% url gentityevent_add %}?station_id={{ station.id }}">Add new Event</a></span>
 					/
-					<span class="menu_options"><a href="{% url gentityaltcode_add %}">Add new Alt Code</a></span>
+					<span class="menu_options"><a href="{% url gentityaltcode_add %}?station_id={{ station.id }}">Add new Alt Code</a></span>
 					/
-					<span class="menu_options"><a href="{% url overseer_add %}">Add new Overseer</a></span>
+					<span class="menu_options"><a href="{% url overseer_add %}?station_id={{ station.id }}">Add new Overseer</a></span>
 				<li>
 			</ul>
 			<br />
