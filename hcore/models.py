@@ -136,9 +136,17 @@ class Gpoint(Gentity):
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         super(Gpoint, self).save(force_insert, force_update, *args, **kwargs)
     def gis_abscissa(self):
-        return self.point.transform(self.srid, clone=True)[0] if self.point else None;
+        if self.point:
+            (x, y) = self.point.transform(self.srid, clone=True)
+            return round(x, 2) if abs(x)>180 and abs(y)>90 else x
+        else:
+            return None
     def gis_ordinate(self):
-        return self.point.transform(self.srid, clone=True)[1] if self.point else None;
+        if self.point:
+            (x, y) = self.point.transform(self.srid, clone=True)
+            return round(y, 2) if abs(x)>180 and abs(y)>90 else y
+        else:
+            return None
 
 class Gline(Gentity):
     gpoint1 = models.ForeignKey(Gpoint, null=True, blank=True, related_name='glines1')

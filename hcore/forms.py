@@ -122,7 +122,8 @@ class GentityAltCodeForm(ModelForm):
 
 class GentityEventForm(ModelForm):
 
-    gentity = forms.ModelChoiceField(Station.objects.all(),label='Station')
+    gentity = forms.ModelChoiceField(Station.objects.all(),label='Station',
+                                     empty_label=None)
     type = forms.ModelChoiceField(EventType.objects,
                                 widget=SelectWithPop(model_name='eventtype'))
 
@@ -142,14 +143,12 @@ class GentityEventForm(ModelForm):
         if gentity_id:
             self.fields["gentity"].queryset = Station.objects.filter(
                                                 id=gentity_id)
-            
-
-
 
 
 class GentityForm(ModelForm):
     class Meta:
         model = Gentity
+
 
 class GpointForm(GentityForm):
     abscissa = forms.FloatField(required=False)

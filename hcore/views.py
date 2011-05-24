@@ -1369,7 +1369,8 @@ def gentitygenericdata_delete(request, ggenericdata_id):
 GentityEvent View
 """
 
-def _gentityevent_edit_or_create(request,gevent_id=None,station_id=None):
+def _gentityevent_edit_or_create(request,gevent_id=None):
+    station_id=None
     if request.GET.has_key('station_id'):
         station_id=request.GET['station_id']
     if gevent_id:
@@ -1379,7 +1380,7 @@ def _gentityevent_edit_or_create(request,gevent_id=None,station_id=None):
         # Add
         gevent = None
 
-    if gevent_id and not station_id:
+    if gevent_id:
         station = gevent.related_station
         station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
