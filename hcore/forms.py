@@ -45,6 +45,8 @@ Model forms.
 
 class OverseerForm(ModelForm):
 
+    station = forms.ModelChoiceField(Station.objects.all(),label='Station',
+                                     empty_label=None)
     person = forms.ModelChoiceField(Person.objects,
                                 widget=SelectWithPop(model_name='person'))
 
@@ -53,6 +55,7 @@ class OverseerForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
+        gentity_id = kwargs.pop('gentity_id', None)
         super(OverseerForm, self).__init__(*args, **kwargs)
 
         if user and not user.is_superuser:
@@ -60,12 +63,17 @@ class OverseerForm(ModelForm):
             ids = [ p.object_id for p in perms]
             self.fields["station"].queryset = Station.objects.filter(
                                                 id__in=ids)
+        if gentity_id:
+            self.fields["station"].queryset = Station.objects.filter(
+                                                id=gentity_id)
 
 
 
 
 class GentityFileForm(ModelForm):
 
+    gentity = forms.ModelChoiceField(Station.objects.all(),label='Station',
+                                     empty_label=None)
     file_type = forms.ModelChoiceField(FileType.objects,
                                 widget=SelectWithPop(model_name='filetype'))
 
@@ -74,6 +82,7 @@ class GentityFileForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
+        gentity_id = kwargs.pop('gentity_id', None)
         super(GentityFileForm, self).__init__(*args, **kwargs)
 
         if user and not user.is_superuser:
@@ -81,11 +90,16 @@ class GentityFileForm(ModelForm):
             ids = [ p.object_id for p in perms]
             self.fields["gentity"].queryset = Station.objects.filter(
                                                 id__in=ids)
+        if gentity_id:
+            self.fields["gentity"].queryset = Station.objects.filter(
+                                                id=gentity_id)
 
 
 class GentityGenericDataForm(ModelForm):
 
-    genericdata_type = forms.ModelChoiceField(GentityGenericDataType.objects,
+    gentity = forms.ModelChoiceField(Station.objects.all(),label='Station',
+                                     empty_label=None)
+    data_type = forms.ModelChoiceField(GentityGenericDataType.objects, label='Data type',
                                 widget=SelectWithPop(model_name='gentitygenericdatatype'))
 
     class Meta:
@@ -93,6 +107,7 @@ class GentityGenericDataForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
+        gentity_id = kwargs.pop('gentity_id', None)
         super(GentityGenericDataForm, self).__init__(*args, **kwargs)
 
         if user and not user.is_superuser:
@@ -100,9 +115,14 @@ class GentityGenericDataForm(ModelForm):
             ids = [ p.object_id for p in perms]
             self.fields["gentity"].queryset = Station.objects.filter(
                                                 id__in=ids)
+        if gentity_id:
+            self.fields["gentity"].queryset = Station.objects.filter(
+                                                id=gentity_id)
 
 class GentityAltCodeForm(ModelForm):
 
+    gentity = forms.ModelChoiceField(Station.objects.all(),label='Station',
+                                     empty_label=None)
     type = forms.ModelChoiceField(GentityAltCodeType.objects,
                       widget=SelectWithPop(model_name='gentityaltcodetype'))
 
@@ -111,6 +131,7 @@ class GentityAltCodeForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
+        gentity_id = kwargs.pop('gentity_id', None)
         super(GentityAltCodeForm, self).__init__(*args, **kwargs)
 
         if user and not user.is_superuser:
@@ -118,6 +139,9 @@ class GentityAltCodeForm(ModelForm):
             ids = [ p.object_id for p in perms]
             self.fields["gentity"].queryset = Station.objects.filter(
                                                 id__in=ids)
+        if gentity_id:
+            self.fields["gentity"].queryset = Station.objects.filter(
+                                                id=gentity_id)
 
 
 class GentityEventForm(ModelForm):
@@ -221,7 +245,8 @@ class StationForm(GpointForm, GentityForm):
         return self.cleaned_data['altitude']
 
 class InstrumentForm(ModelForm):
-    station = forms.ModelChoiceField(Station.objects.all())
+    station = forms.ModelChoiceField(Station.objects.all(), label='Stations',
+                                     empty_label=None)
     type = forms.ModelChoiceField(InstrumentType.objects,
                                 widget=SelectWithPop(model_name='instrumenttype'))
     class Meta:
@@ -229,6 +254,7 @@ class InstrumentForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
+        gentity_id = kwargs.pop('gentity_id', None)
         super(InstrumentForm, self).__init__(*args, **kwargs)
 
         if user and not user.is_superuser:
@@ -236,6 +262,9 @@ class InstrumentForm(ModelForm):
             ids = [ p.object_id for p in perms]
             self.fields["station"].queryset = Station.objects.filter(
                                                 id__in=ids)
+        if gentity_id:
+            self.fields["station"].queryset = Station.objects.filter(
+                                                id=gentity_id)
 
 
 def _int_xor(i1, i2):

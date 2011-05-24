@@ -1199,7 +1199,10 @@ def timeseries_delete(request, timeseries_id):
 GentityFile/GenericData/Event Views
 """
 
-def _gentityfile_edit_or_create(request,gfile_id=None,station_id=None):
+def _gentityfile_edit_or_create(request,gfile_id=None):
+    station_id=None
+    if request.GET.has_key('station_id'):
+        station_id=request.GET['station_id']
     if gfile_id:
         # Edit
         gfile = get_object_or_404(GentityFile, id=gfile_id)
@@ -1208,8 +1211,9 @@ def _gentityfile_edit_or_create(request,gfile_id=None,station_id=None):
         gfile = None
 
 
-    if gfile_id and not station_id:
+    if gfile_id:
         station = gfile.related_station
+        station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
@@ -1218,6 +1222,7 @@ def _gentityfile_edit_or_create(request,gfile_id=None,station_id=None):
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+        gevent = GentityFile(gentity=station)
 
     user = request.user
     # Done with checks
@@ -1236,9 +1241,10 @@ def _gentityfile_edit_or_create(request,gfile_id=None,station_id=None):
                                  kwargs={'object_id': str(gfile.gentity.id)}))
     else:
         if gfile:
-            form = GentityFileForm(instance=gfile,user=user)
+            form = GentityFileForm(instance=gfile,user=user,
+                                   gentity_id = station_id)
         else:
-            form = GentityFileForm(user=user)
+            form = GentityFileForm(user=user, gentity_id = station_id)
 
     return render_to_response('gentityfile_edit.html', {'form': form},
                     context_instance=RequestContext(request))
@@ -1284,7 +1290,10 @@ def gentityfile_delete(request, gentityfile_id):
 GentityGenericData View
 """
 
-def _gentitygenericdata_edit_or_create(request,ggenericdata_id=None,station_id=None):
+def _gentitygenericdata_edit_or_create(request,ggenericdata_id=None):
+    station_id=None
+    if request.GET.has_key('station_id'):
+        station_id=request.GET['station_id']
     if ggenericdata_id:
         # Edit
         ggenericdata = get_object_or_404(GentityGenericData, id=ggenericdata_id)
@@ -1293,8 +1302,9 @@ def _gentitygenericdata_edit_or_create(request,ggenericdata_id=None,station_id=N
         ggenericdata = None
 
 
-    if ggenericdata_id and not station_id:
+    if ggenericdata_id:
         station = ggenericdata.related_station
+        station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
@@ -1303,6 +1313,7 @@ def _gentitygenericdata_edit_or_create(request,ggenericdata_id=None,station_id=N
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+        gevent = GentityGenericData(gentity=station)
 
     user = request.user
     # Done with checks
@@ -1321,9 +1332,10 @@ def _gentitygenericdata_edit_or_create(request,ggenericdata_id=None,station_id=N
                                  kwargs={'object_id': str(ggenericdata.gentity.id)}))
     else:
         if ggenericdata:
-            form = GentityGenericDataForm(instance=ggenericdata,user=user)
+            form = GentityGenericDataForm(instance=ggenericdata,user=user,
+                                          gentity_id=station_id)
         else:
-            form = GentityGenericDataForm(user=user)
+            form = GentityGenericDataForm(user=user, gentity_id=station_id)
 
     return render_to_response('gentitygenericdata_edit.html', {'form': form},
                     context_instance=RequestContext(request))
@@ -1456,7 +1468,10 @@ def gentityevent_delete(request, gentityevent_id):
     return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
 
-def _gentityaltcode_edit_or_create(request,galtcode_id=None,station_id=None):
+def _gentityaltcode_edit_or_create(request,galtcode_id=None):
+    station_id=None
+    if request.GET.has_key('station_id'):
+        station_id=request.GET['station_id']
     if galtcode_id:
         # Edit
         galtcode = get_object_or_404(GentityAltCode, id=galtcode_id)
@@ -1464,8 +1479,9 @@ def _gentityaltcode_edit_or_create(request,galtcode_id=None,station_id=None):
         # Add
         galtcode = None
 
-    if galtcode_id and not station_id:
+    if galtcode_id:
         station = galtcode.related_station
+        station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
@@ -1474,6 +1490,7 @@ def _gentityaltcode_edit_or_create(request,galtcode_id=None,station_id=None):
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+        gevent = GentityAltCode(gentity=station)
 
     user = request.user
     # Done with checks
@@ -1492,9 +1509,10 @@ def _gentityaltcode_edit_or_create(request,galtcode_id=None,station_id=None):
                         kwargs={'object_id': str(galtcode.gentity.id)}))
     else:
         if galtcode:
-            form = GentityAltCodeForm(instance=galtcode,user=user)
+            form = GentityAltCodeForm(instance=galtcode,user=user,
+                                      gentity_id = station_id)
         else:
-            form = GentityAltCodeForm(user=user)
+            form = GentityAltCodeForm(user=user, gentity_id = station_id)
 
     return render_to_response('gentityaltcode_edit.html', {'form': form},
                     context_instance=RequestContext(request))
@@ -1540,6 +1558,9 @@ Overseer Views
 """
 
 def _overseer_edit_or_create(request,overseer_id=None,station_id=None):
+    station_id=None
+    if request.GET.has_key('station_id'):
+        station_id=request.GET['station_id']
     if overseer_id:
         # Edit
         overseer = get_object_or_404(Overseer, id=overseer_id)
@@ -1548,8 +1569,9 @@ def _overseer_edit_or_create(request,overseer_id=None,station_id=None):
         overseer = None
 
 
-    if overseer_id and not station_id:
+    if overseer_id:
         station = overseer.station
+        station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
@@ -1558,6 +1580,7 @@ def _overseer_edit_or_create(request,overseer_id=None,station_id=None):
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+        overseer = Overseer(station=station)
 
     user = request.user
     # Done with checks
@@ -1576,9 +1599,10 @@ def _overseer_edit_or_create(request,overseer_id=None,station_id=None):
                         kwargs={'object_id':str(overseer.station.id)}))
     else:
         if overseer:
-            form = OverseerForm(instance=overseer,user=user)
+            form = OverseerForm(instance=overseer,user=user, 
+                                gentity_id = station_id)
         else:
-            form = OverseerForm(user=user)
+            form = OverseerForm(user=user, gentity_id = station_id)
 
     return render_to_response('overseer_edit.html', {'form': form},
                     context_instance=RequestContext(request))
@@ -1626,7 +1650,10 @@ def overseer_delete(request, overseer_id):
 Instument views
 """
 
-def _instrument_edit_or_create(request,instrument_id=None,station_id=None):
+def _instrument_edit_or_create(request,instrument_id=None):
+    station_id=None
+    if request.GET.has_key('station_id'):
+        station_id=request.GET['station_id']
     if instrument_id:
         # Edit
         instrument = get_object_or_404(Instrument, id=instrument_id)
@@ -1634,8 +1661,9 @@ def _instrument_edit_or_create(request,instrument_id=None,station_id=None):
         # Add
         instrument = None
 
-    if instrument_id and not station_id:
+    if instrument_id:
         station = instrument.station
+        station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
@@ -1643,6 +1671,7 @@ def _instrument_edit_or_create(request,instrument_id=None,station_id=None):
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+        instrument = Instrument(station=station)
 
     user = request.user
     # Done with checks
@@ -1661,9 +1690,10 @@ def _instrument_edit_or_create(request,instrument_id=None,station_id=None):
                         kwargs={'object_id':instrument_id}))
     else:
         if instrument:
-            form = InstrumentForm(instance=instrument,user=user)
+            form = InstrumentForm(instance=instrument,user=user,
+                                  gentity_id = station_id)
         else:
-            form = InstrumentForm(user=user)
+            form = InstrumentForm(user=user, gentity_id = station_id)
 
     return render_to_response('instrument_edit.html', {'form': form},
                     context_instance=RequestContext(request))
