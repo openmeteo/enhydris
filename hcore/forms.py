@@ -300,10 +300,10 @@ class TimeseriesForm(ModelForm):
     which a user may upload additional data.
     """
 
-    gentity = forms.ModelChoiceField(Station.objects.all(),
+    gentity = forms.ModelChoiceField(Station.objects.all(),empty_label=None,
                                 label='Station')
     instrument = forms.ModelChoiceField(Instrument.objects.all(),
-                                widget=SelectWithPop(model_name='instrument'),label='Instrument')
+                                required=False, label='Instrument')
     variable = forms.ModelChoiceField(Variable.objects,
                                 widget=SelectWithPop(model_name='variable'))
     unit_of_measurement = forms.ModelChoiceField(UnitOfMeasurement.objects,
@@ -312,8 +312,7 @@ class TimeseriesForm(ModelForm):
                                 widget=SelectWithPop(model_name='timezone'))
     time_step = forms.ModelChoiceField(TimeStep.objects,
                                 widget=SelectWithPop(model_name='timestep'),required=False)
-    interval_type = forms.ModelChoiceField(IntervalType.objects,
-                                widget=SelectWithPop(model_name='intervaltype'),required=False)
+    interval_type = forms.ModelChoiceField(IntervalType.objects, required=False)
 
 
     class Meta:
@@ -331,11 +330,19 @@ class TimeseriesForm(ModelForm):
             ids = [ p.object_id for p in perms]
             self.fields["gentity"].queryset = Station.objects.filter(
                                                 id__in=ids)
+            perms = user.get_rows_with_permission(Instrument(), 'edit')
+            ids = [ p.object_id for p in perms]
+            self.fields["instrument"].queryset = Instrument.objects.filter(
+                                                id__in=ids)
         if gentity_id:
             self.fields["gentity"].queryset = Station.objects.filter(
                                                 id=gentity_id)
             self.fields["instrument"].queryset = Instrument.objects.filter(
                                                 station__id=gentity_id)
+        if instrument_id:
+            self.fields["instrument"].queryset = Instrument.objects.filter(
+                                                id=instrument_id)
+            self.fields["instrument"].empty_label = None
 
 
     def clean_data(self):
@@ -388,6 +395,15 @@ class TimeseriesForm(ModelForm):
                 raise forms.ValidationError(_("Invalid offsets: Nominal"
                               " offsets must be both null or both not null!"))
 
+        #add a validation test for instrument in station:
+        instr = self.cleaned_data.get('instrument', None)
+        if instr:
+            stat = self.cleaned_data.get('gentity', None)
+            assert(stat)
+            if Instrument.objects.filter(id=instr.id, 
+                                         station__id=stat.id).count()<1:
+                raise forms.ValidationError(_("Selected instrument "
+                                              "not in selected station"))
 
         # XXX: This is not a good idea but it's the only way to handle append
         # errors. We save the data in the clean function instead of the save

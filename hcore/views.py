@@ -1108,26 +1108,35 @@ def station_delete(request,station_id):
 Timeseries views
 """
 
-def _timeseries_edit_or_create(request,tseries_id=None,station_id=None):
+def _timeseries_edit_or_create(request,tseries_id=None):
+    station_id = None
+    station = None
+    if request.GET.has_key('station_id'):
+        station_id=request.GET['station_id']
+    instrument_id = None
+    instrument = None
+    if request.GET.has_key('instrument_id'):
+        instrument_id=request.GET['instrument_id']
     if tseries_id:
         # Edit
         tseries = get_object_or_404(Timeseries, id=tseries_id)
     else:
         # Add
         tseries = None
-
-    if tseries_id and not station_id:
+    if tseries:
         station = tseries.related_station
-        # Check perms
-        if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
-
-    if station_id and not tseries_id:
-        # Adding new
+        station_id = station.id
+        if tseries.instrument: instrument = tseries.instrument
+    if instrument_id and not tseries:
+        instrument = get_object_or_404(Instrument, id=instrument_id)
+        station_id = instrument.station.id
+    if station_id and not tseries:
         station = get_object_or_404(Station, id=station_id)
+    if station:
         if not request.user.has_row_perm(station,'edit'):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
-        tseries = Timeseries(gentity=station)
+    if station and not tseries:
+        tseries = Timeseries(gentity=station, instrument=instrument)
 
     user = request.user
     # Done with checks
@@ -1147,10 +1156,12 @@ def _timeseries_edit_or_create(request,tseries_id=None,station_id=None):
     else:
         if tseries and tseries.id:
             form = TimeseriesDataForm(instance=tseries, user=user,
-                                      gentity_id=station_id)
+                                      gentity_id=station_id,
+                                      instrument_id=instrument_id)
         else:
             form = TimeseriesForm(instance=tseries, user=user,
-                                      gentity_id=station_id)
+                                      gentity_id=station_id,
+                                      instrument_id=instrument_id)
 
     return render_to_response('timeseries_edit.html', {'form': form},
                     context_instance=RequestContext(request))
@@ -1161,8 +1172,7 @@ def timeseries_add(request):
     Create new timeseries. Timeseries can only be added as part of an existing
     station.
     """
-    station_id = request.GET.get("station_id", "")
-    return _timeseries_edit_or_create(request, station_id=station_id)
+    return _timeseries_edit_or_create(request)
 
 @login_required
 def timeseries_edit(request,timeseries_id):
@@ -1746,7 +1756,7 @@ ALLOWED_TO_EDIT = ('waterbasin', 'waterdivision', 'person', 'organization',
                    'politicaldivision','instrumenttype', 'unitofmeasurement',
                    'filetype','eventtype','gentityaltcodetype','timestep',
                    'gentityaltcode', 'gentityfile', 'gentityevent',
-                   'gentitygenericdata')
+                   'gentitygenericdatatype')
 
 @login_required
 def model_add(request, model_name=''):
@@ -1758,7 +1768,8 @@ def model_add(request, model_name=''):
                                     and not '_complete' in request.GET:
         raise Http404
     try:
-        model = ContentType.objects.get(model=model_name).model_class()
+       model = ContentType.objects.get(model=model_name,
+                                       app_label='hcore').model_class()
     except (ContentType.DoesNotExist, ContentType.MultipleObjectsReturned):
         raise Http404
     if not model_name in ALLOWED_TO_EDIT\
