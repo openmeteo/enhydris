@@ -185,7 +185,7 @@
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Altitude' %}</th>
-                <td colspan='2'>{{ station.altitude }}</td>
+                <td colspan='2'>{{ station.altitude|floatformat:2 }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'ASRID' %}</th>
