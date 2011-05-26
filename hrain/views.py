@@ -63,14 +63,14 @@ def _create_contour_map(ev):
     (x0, y0, x1, y1) = [float(x) for x in settings.HRAIN_CONTOUR_CHART_BOUNDS]
     (backgrounds_path, background_filename, mask_filename) = (None,
                                                               None, None)
-    if hasattr(settings, HRAIN_BACKGROUNDS_PATH):
+    if hasattr(settings, 'HRAIN_BACKGROUNDS_PATH'):
         backgrounds_path = settings.HRAIN_BACKGROUNDS_PATH
-        if hasattr(settings, HRAIN_BACKGROUND_IMAGE):
+        if hasattr(settings, 'HRAIN_BACKGROUND_IMAGE'):
             background_filename = os.path.join(backgrounds_path,
-                                               HRAIN_BACKGROUND_IMAGE)
-        if hasattr(settings, HRAIN_MASK_IMAGE):
+                                               settings.HRAIN_BACKGROUND_IMAGE)
+        if hasattr(settings, 'HRAIN_MASK_IMAGE'):
             mask_filename = os.path.join(backgrounds_path,
-                                         HRAIN_MASK_IMAGE)
+                                         settings.HRAIN_MASK_IMAGE)
     options ={'contours_font_size': 10, 'labels_format': '%1.0f',
               'draw_contours': True, 'color_map': 'winter_r',
               'labels_font_size': 10, 'text_color': 'black',
