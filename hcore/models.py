@@ -531,6 +531,7 @@ class Timeseries(models.Model):
     class Meta:
         verbose_name = "Time Series"
         verbose_name_plural = "Time Series"
+        ordering = ('hidden',)
     @property
     def start_date(self):
         try:
