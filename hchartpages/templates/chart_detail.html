@@ -330,8 +330,8 @@
     {% if page.option_monthly %}<a href="{% url chartpage_detail page.url_name %}?last=month" id="month">month</a>&nbsp;{% endif %}
     {% if page.option_weekly %}<a href="{% url chartpage_detail page.url_name %}?last=week" id="week">week</a>&nbsp;{% endif %}
     {% if page.option_daily %}<a href="{% url chartpage_detail page.url_name %}?last=day" id="day">day</a>{% endif %}</p>
-        <p class='date_select' id='date_select' style="margin-left: 3em; float: left;"></p> 
-        <div style="clear: left; border:1px solid gray; padding: 6px; margin: 3px; display: none;" id="date_select_form"><p>
+        <p class='date_select' id='date_select' style="margin-left: 3em; margin-bottom: 2.5em; float: left;"></p> 
+        <div style="clear: left; border:1px solid gray; padding: 6px; margin: 1.5em 3px; display: none;" id="date_select_form"><p>
         <form action="" method="get">
             {% trans "Date: " %}
             <input name="date" class="date" id="date" type="text" readonly="readonly"/>

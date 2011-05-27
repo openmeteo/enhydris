@@ -6,6 +6,8 @@ class ChartPage(models.Model):
     name = models.CharField(max_length=80)
     description = models.TextField()
     url_name = models.CharField(max_length=50, unique=True)
+    url_int_alias = models.IntegerField(blank=True, null=True,
+                                        default=None)
     option_daily = models.BooleanField(default=True)
     option_weekly = models.BooleanField(default=False)
     option_monthly = models.BooleanField(default=False)
@@ -37,7 +39,8 @@ class Chart(models.Model):
                 self.display_lastvalue)
     def has_info_box(self):
         return (self.has_stats() or\
-            (False if self.mainvar()==None else self.mainvar().link_to_timeseries))
+            (False if self.mainvar()==None else self.mainvar().link_to_timeseries) or\
+            self.can_zoom)
     def __unicode__(self):
         return self.name
     #ToDo: Add axes formating - overrides
@@ -59,6 +62,3 @@ class Variable(models.Model):
     def __unicode__(self):
         return self.name
     #ToDo: Add formating options
-
-
-

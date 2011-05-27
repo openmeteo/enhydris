@@ -1,5 +1,7 @@
 from django.views.generic import list_detail
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponsePermanentRedirect
+from django.core.urlresolvers import reverse
 from enhydris.hchartpages.models import ChartPage, Chart, Variable
 
 def chartpage_detail(request, urlcode, **kwargs):
@@ -12,3 +14,9 @@ def chartpage_detail(request, urlcode, **kwargs):
     kwargs["template_object_name"] = "page"
     kwargs["extra_context"] = { 'charts': charts, 'variables': variables}
     return list_detail.object_detail(request, object_id = object_id, **kwargs)
+
+def url_redir(request, url_id):
+    page = get_object_or_404(ChartPage, url_int_alias=url_id)
+    urlcode = page.url_name
+    return HttpResponsePermanentRedirect(reverse('enhydris.hchartpages.views.chartpage_detail', args=[urlcode,]))
+
