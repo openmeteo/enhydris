@@ -18,8 +18,8 @@
       .expArrow{ font-weight: normal; }
       .collArrow{ font-weight: normal; }
   </style>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/tooltip.js"></script>
   <script type="text/javascript">
-
     cd=[], vm=[], cm=[], cs=[];
     cc=0;
     default_last="{% if page.option_daily %}day{% else %}{% if page.option_weekly %}week{% else %}{% if page.option_monthly %}month{% else %}year{%endif%}{%endif%}{%endif%}";
@@ -107,7 +107,8 @@
                 break;
             }
         if(i>-1){
-            $("#chartarea"+cm[i]['id']).unbind();
+            $("#chartarea"+cm[i]['id']).unbind("plotselected");
+            $("#chartarea"+cm[i]['id']).unbind("plothover");
             get_data_from_server(i);    
         }
     }
@@ -140,7 +141,11 @@
                                          if($("#date_select").hasClass("expArrow"))
                                              window.location="{% url chartpage_detail page.url_name %}?last="+gup('last');
                                      });
-
+        var tooltipopts = {
+                           position: 'bottom right',
+                           offset: [-65, 10],
+                           effect: 'fade'
+        };
         {% for chart in charts %}
         addChart({id:{{chart.id}}, name:"{{chart.name}}", 
                   min:{{chart.display_min|lower}},
@@ -149,6 +154,7 @@
                   has_stats:{{chart.has_stats|lower}},
                   can_zoom:{{chart.can_zoom|lower}}
                  });
+        $("#chartarea{{chart.id}}").tooltip(tooltipopts);
         {% endfor %}
 
         {% for var in variables %}
@@ -190,7 +196,8 @@
         for(var j=0;j<vm[i].length;j++)
             vm[i][j]['status']=false;
         var achart_status=false;
-        $("#chartarea"+cm[i]['id']).unbind();
+        $("#chartarea"+cm[i]['id']).unbind("plotselected");
+        $("#chartarea"+cm[i]['id']).unbind("plothover");
         for(var j=0;j<vm[i].length;j++)
         {
             var data = datas[j]['data'];
@@ -266,17 +273,25 @@
         }
 		var options = {
 			xaxis: { mode: "time", timeformat: "%y/%m/%d %H:%M",
-            min: from_x, max: to_x},
+            min: from_x, max: to_x, ticks: 5},
 			selection: { mode: "x" },
-            grid:{markings: marking_opts},
+            grid:{markings: marking_opts, hoverable: true,
+                  autoHighlight: false},
             legend: {show: (d.length>1), position: 'nw'}
 		};
 		var plot = $.plot($("#chartarea"+cm[i]['id']), d, options);
-        $("#chartarea"+cm[i]['id']).unbind();
+        $("#chartarea"+cm[i]['id']).unbind("plotselected");
+        $("#chartarea"+cm[i]['id']).unbind("plothover");
         if(cm[i]['can_zoom'])
             $("#chartarea"+cm[i]['id']).bind("plotselected", function (event, ranges) {
                 get_zoomed_data(i, ranges, d);
             });
+        $("#chartarea"+cm[i]['id']).bind("plothover", function(event, pos, item){
+            $("#charttooltip"+cm[i]['id']).html('<div>'+format_date(pos.x)+'</div>');
+        });
+        $("#chartarea"+cm[i]['id']).mouseout(function(){
+            $("#charttooltip"+cm[i]['id']).html('');
+        });
 	}
 
   </script>
@@ -289,6 +304,18 @@
     span.avg{ font-weight: bold; color: #88aa88; }
     span.sum{ font-weight: bold; color: #888888; }
     div.textareas{ padding: 15px; float: left; border-width: 1px; border-style: dotted; border-color: #bbbbbb; background-color: #f7f7ff;}
+    .tooltip {
+        display:none;
+        background-color: #fff;
+        border-color: #00a;
+        border-width: 1px;
+        border-style: dotted;
+        font-size:0.9em;
+        height:1.4em;
+        width:112px;
+        padding:5px;
+        color:#000; 
+    }
 </style>
 {% endblock %}
 
@@ -319,6 +346,7 @@
 			<p style="margin-left: 240px; display:inline;"> <strong>{{chart.name}}</strong></p>
 			<div id="data_holder{{chart.id}}">
     			<div id="chartarea{{chart.id}}" style="margin:10px;width:480px;height:320px;float:left;position: relative;"></div>
+                <div id="charttooltip{{chart.id}}" class="tooltip"></div>
                 {% if chart.has_info_box %}
                 <div id="textarea{{chart.id}}" class="textareas">
                     {% if chart.display_max %}
