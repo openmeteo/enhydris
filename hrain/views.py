@@ -63,14 +63,12 @@ def _create_contour_map(ev):
     (x0, y0, x1, y1) = [float(x) for x in settings.HRAIN_CONTOUR_CHART_BOUNDS]
     (backgrounds_path, background_filename, mask_filename) = (None,
                                                               None, None)
-    if hasattr(settings, HRAIN_BACKGROUNDS_PATH):
+    if hasattr(settings, 'HRAIN_BACKGROUNDS_PATH'):
         backgrounds_path = settings.HRAIN_BACKGROUNDS_PATH
-        if hasattr(settings, HRAIN_BACKGROUND_IMAGE):
-            background_filename = os.path.join(backgrounds_path,
-                                               HRAIN_BACKGROUND_IMAGE)
-        if hasattr(settings, HRAIN_MASK_IMAGE):
-            mask_filename = os.path.join(backgrounds_path,
-                                         HRAIN_MASK_IMAGE)
+        if hasattr(settings, 'HRAIN_BACKGROUND_IMAGE'):
+            background_filename = settings.HRAIN_BACKGROUND_IMAGE
+        if hasattr(settings, 'HRAIN_BACKGROUND_MASK'):
+            mask_filename = settings.HRAIN_BACKGROUND_MASK
     options ={'contours_font_size': 10, 'labels_format': '%1.0f',
               'draw_contours': True, 'color_map': 'winter_r',
               'labels_font_size': 10, 'text_color': 'black',
@@ -83,7 +81,7 @@ def _create_contour_map(ev):
               'compose_background': (background_filename is not None),
               'background_image': background_filename,
               'mask_image': mask_filename,
-              'compose_method': ('composite' if mask_filename else 'multiply'),
+              'compose_method': ('composite' if mask_filename is not None else 'multiply'),
               'swap_bg_fg': False, 'compose_alpha': 0.5, 
               'compose_offset': 0, 'chart_large_dimension': 400,
               'backgrounds_path': backgrounds_path }
