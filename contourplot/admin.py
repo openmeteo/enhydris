@@ -5,8 +5,13 @@ class CPointInline(admin.TabularInline):
     model = CPoint
     extra = 1
 
+class OtherPageInline(admin.TabularInline):
+    model = OtherPlot
+    fk_name = 'page'
+    raw_id_fields = ('rpage',)
+
 class ChartPageAdmin(admin.ModelAdmin):
-    inlines = [CPointInline,]
+    inlines = [CPointInline, OtherPageInline]
     fieldsets = ( (None, {'fields': (('name', 'url_name', 'description'),
                     ('chart_bounds_bl_x', 'chart_bounds_bl_y',
                      'chart_bounds_tr_x', 'chart_bounds_tr_y',
@@ -22,7 +27,10 @@ class ChartPageAdmin(admin.ModelAdmin):
                     ('compose_background', 'background_image',
                      'compose_method', 'swap_bg_fg'),
                     ('compose_alpha', 'compose_offset', 'mask_image'),
-                    ('always_refresh', 'default_dimension')
+                    ('always_refresh', 'default_dimension'),
+                    ('side_text'),
+                    ('boundary_distance_factor', 'boundary_value',
+                     'boundary_mode'),
                 )}),)
 
     list_display = ('id', 'name', 'url_name')

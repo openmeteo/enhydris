@@ -5,14 +5,43 @@
    {{ page.name }}
 {% endblock %}
 
-
 {% block content %}
     <h3>{{page.name}}</h3>
     {% if page.description %}
     <p>{{page.description}}</p>
     {% endif %}
-    <img src="{% url image_serve page.url_name %}.png">
+    <div style="clear: both; padding: 5px;">
+    <img src="{% url image_serve page.url_name %}.png" style="float: left">
+    {% autoescape off %}
+    {% if page.side_text %}
+    <div style="float: left; clear: right">
+    {{ page.side_text }}
+    </div>
+    {% endif %}
+    {% endautoescape %}
+    </div>
+    <div style="clear: left; padding: 5px;">
     <p>
     {% trans "Image update: " %}{{last_update}}</p>
-
+    {% if other_pages %}
+        <hr style="width:98%;height:1px; text-align: left; border-width: 1px; border-color: #ccc;">
+        <h3>
+        {% trans "Related contour plots" %}
+        </h3>
+        {% for item in other_pages %}
+           <div style="padding: 15px; float: left;">
+               <a href="{% url contourpage_detail item.rpage.url_name %}">
+               <img src="{% url thumb_serve item.rpage.url_name %}_140.png" style="border-width: 0px;"></a>
+               <p style="display: block; width: 140px;">
+                   <strong>
+                     <a href="{% url contourpage_detail item.rpage.url_name %}">{{ item.rpage.name }}</a>
+                   </strong><br>
+                   {% trans "Time step: " %}<br>{{ item.rpage.time_step }}<br>
+                   {% trans "Last updated: " %}<br>
+                   {{ item.rpage.get_concurent_timestamp_str }}
+               </p>
+           </div>
+        {% endfor %}
+    {% endif %}
+    </div>
 {% endblock %}

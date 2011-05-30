@@ -1,4 +1,7 @@
 from django.db import models
+from datetime import datetime, timedelta
+from pytz import utc
+from pthelma.timeseries import TimeStep
 
 import enhydris.hcore.models
 
@@ -15,6 +18,10 @@ AVAILABLE_COMPOSE_METHODS = ( ('lighter', 'lighter'),
     ('multiply', 'multiply'), ('screen', 'screen'),
     ('add', 'add'), ('subtract', 'subtract'), ('blend', 'blend'),
     ('composite', 'composite'),)
+
+AVAILABLE_BOUNDARY_MODES = ( (0, 'Constant value on boundary' ),
+                             (1, 'Value on boundary is a ratio of the '
+                                 'mean value'),)
 
 class ChartPage(models.Model):
     name = models.CharField(max_length=80)
@@ -69,8 +76,44 @@ class ChartPage(models.Model):
                  help_text='Used only in add or subtract composition mode')
     always_refresh = models.BooleanField(default=False)
     default_dimension = models.IntegerField(default=480)
+    side_text = models.TextField(null=False, blank=True)
+    boundary_distance_factor = models.FloatField(default=1.0)
+    boundary_value = models.FloatField(default=0.0)
+    boundary_mode = models.IntegerField(default=0,
+                                        choices = AVAILABLE_BOUNDARY_MODES)
+
     def __unicode__(self):
         return self.name
+
+    def get_concurent_timestamp(self):
+        time_step = self.time_step
+        now = datetime.now(utc).replace(second=0, microsecond=0, tzinfo=None) 
+        now+= timedelta(minutes = self.utc_offset_minutes)
+        ts = TimeStep(length_minutes = time_step.length_minutes,
+                      length_months = time_step.length_months,
+                      nominal_offset = (self.ts_offset_minutes,
+                                        self.ts_offset_months))
+        tstamp = ts.down(now)
+        if now-tstamp<timedelta(minutes=self.data_available_after_x_minutes):
+            tstamp = ts.previous(tstamp)
+        return tstamp
+
+    def get_concurent_timestamp_str(self):
+        return self.get_concurent_timestamp().strftime('%Y-%m-%d %H:%M')+\
+                    ' (UTC'+"%+03d%02d"%((abs(self.utc_offset_minutes)/60)* \
+                      (-1 if self.utc_offset_minutes<0 else 1),
+                      (abs(self.utc_offset_minutes)%60),)+')'
+
+class OtherPlot(models.Model):
+    page = models.ForeignKey(ChartPage)
+    sequence = models.PositiveSmallIntegerField()
+    rpage = models.ForeignKey(ChartPage, related_name="rpage_set")
+    def __unicode__(self):
+        return str(self.page)
+    class Meta:
+        ordering = ("page", "sequence")
+        unique_together = (("page", "rpage"),
+                           ("page", "sequence"))
 
 class CTimeseries(enhydris.hcore.models.Timeseries):
     class Meta:

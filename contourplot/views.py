@@ -1,6 +1,6 @@
 from django.views.generic import list_detail
 from django.shortcuts import get_object_or_404
-from enhydris.contourplot.models import ChartPage, CPoint
+from enhydris.contourplot.models import ChartPage, CPoint, OtherPlot
 from django.http import (HttpResponse, HttpResponseRedirect,
                             HttpResponseForbidden, Http404)
 from enhydris.hcore.views import inc_month, timeseries_data
@@ -17,36 +17,28 @@ except ImportError:
     import simplejson as json
 from pthelma.timeseries import TimeStep
 from datetime import datetime, timedelta
-from pytz import utc
-
-
-def get_concurent_timestamp(urlcode):
-    page = get_object_or_404(ChartPage, url_name = urlcode)
-    time_step = page.time_step
-    now = datetime.now(utc).replace(second=0, microsecond=0, tzinfo=None) 
-    now+= timedelta(minutes = page.utc_offset_minutes)
-    ts = TimeStep(length_minutes = time_step.length_minutes,
-                  length_months = time_step.length_months,
-                  nominal_offset = (page.ts_offset_minutes,
-                                    page.ts_offset_months))
-    tstamp = ts.down(now)
-    if now-tstamp<timedelta(minutes=page.data_available_after_x_minutes):
-        tstamp = ts.previous(tstamp)
-    return tstamp
 
 
 def last_update(request, urlcode, **kwargs):
-    return HttpResponse(get_concurent_timestamp(urlcode).strftime('%Y-%m-%d %H:%M'),
-        mimetype='text/plain')
+    page = get_object_or_404(ChartPage, url_name = urlcode)
+    return HttpResponse(page.get_concurent_timestamp_str(),
+                        mimetype='text/plain')
 
 
 def contourpage_detail(request, urlcode, **kwargs):
     kwargs["queryset"] = ChartPage.objects.all()
     page = get_object_or_404(ChartPage, url_name = urlcode)
     object_id = page.id
+    last_update = page.get_concurent_timestamp_str()
+    other_pages = None
+    try:
+        other_pages = OtherPlot.objects.filter(page__id=page.id)
+    except OtherPlot.DoesNotExist:
+        pass
     kwargs["template_name"] = "contours_detail.html"
     kwargs["template_object_name"] = "page"
-    kwargs["extra_context"] = {'last_update': get_concurent_timestamp(urlcode),}
+    kwargs["extra_context"] = {'last_update': last_update,
+                               'other_pages': other_pages}
     return list_detail.object_detail(request, object_id = object_id, **kwargs)
 
 
@@ -74,7 +66,8 @@ def create_contours(imgurl):
             else:
                 d['large_dimension'] = file_elements[i]
         if not d['datestr']:
-            filedate = get_concurent_timestamp(d['urlcode'])
+            page = get_object_or_404(ChartPage, url_name = d['urlcode'])
+            filedate = page.get_concurent_timestamp()
             d['datestr'] = filedate.strftime('%Y%m%d%H%M')
         else:
             filedate = datetime(*map(lambda x:int(d['datestr'][x[0]:x[1]]), ((0,4),(4,6),(6,8),(8,10),(10,12))))
@@ -121,7 +114,9 @@ def create_contours(imgurl):
                     'chart_bounds_tr_x', 'chart_bounds_tr_y',
                     'chart_bounds_srid', 'compose_background',
                     'background_image', 'mask_image', 'compose_method',
-                    'swap_bg_fg', 'compose_alpha', 'compose_offset')
+                    'swap_bg_fg', 'compose_alpha', 'compose_offset',
+                    'boundary_distance_factor', 'boundary_value',
+                    'boundary_mode')
     options = {}
     for item in db_opts_list:
         options[item] = getattr(page, item)
