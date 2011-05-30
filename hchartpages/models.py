@@ -7,7 +7,7 @@ class ChartPage(models.Model):
     description = models.TextField()
     url_name = models.CharField(max_length=50, unique=True)
     url_int_alias = models.IntegerField(blank=True, null=True,
-                                        default=None)
+                                        default=None, unique=True)
     option_daily = models.BooleanField(default=True)
     option_weekly = models.BooleanField(default=False)
     option_monthly = models.BooleanField(default=False)
