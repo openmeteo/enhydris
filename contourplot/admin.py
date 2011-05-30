@@ -28,7 +28,7 @@ class ChartPageAdmin(admin.ModelAdmin):
                      'compose_method', 'swap_bg_fg'),
                     ('compose_alpha', 'compose_offset', 'mask_image'),
                     ('always_refresh', 'default_dimension'),
-                    ('side_text'),
+                    ('side_text', 'timestamp_notice'),
                     ('boundary_distance_factor', 'boundary_value',
                      'boundary_mode'),
                 )}),)

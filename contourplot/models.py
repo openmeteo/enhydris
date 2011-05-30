@@ -81,6 +81,8 @@ class ChartPage(models.Model):
     boundary_value = models.FloatField(default=0.0)
     boundary_mode = models.IntegerField(default=0,
                                         choices = AVAILABLE_BOUNDARY_MODES)
+    timestamp_notice = models.CharField(max_length=80, null=False,
+                                        blank=True)
 
     def __unicode__(self):
         return self.name

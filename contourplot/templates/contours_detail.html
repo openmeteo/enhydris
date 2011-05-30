@@ -23,8 +23,7 @@
     </div>
     <div style="clear: left; padding: 5px;">
     <p>
-    {% trans "Image update: " %}{{last_update}}. 
-    {% trans "Displayed data correspond to a time interval ending on the update time and has length equal to the time step." %}
+    {% trans "Image nominal timestamp: " %}{{last_update}}. {{ page.timestamp_notice }}
     </p>
     {% if other_pages %}
         <hr style="width:98%;height:1px; text-align: left; border-width: 1px; border-color: #ccc;">
@@ -40,7 +39,7 @@
                      <a href="{% url contourpage_detail item.rpage.url_name %}">{{ item.rpage.name }}</a>
                    </strong><br>
                    {% trans "Time step: " %}<br>{{ item.rpage.time_step }}<br>
-                   {% trans "Last updated: " %}<br>
+                   {% trans "Nominal timestamp:" %}<br>
                    {{ item.rpage.get_concurent_timestamp_str }}
                </p>
            </div>
