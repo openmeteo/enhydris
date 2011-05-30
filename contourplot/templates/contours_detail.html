@@ -7,6 +7,7 @@
 
 {% block content %}
     <h3>{{page.name}}</h3>
+    <p><em><strong>{% trans "Time step: " %}{{ page.time_step }}</strong></em></p>
     {% if page.description %}
     <p>{{page.description}}</p>
     {% endif %}
@@ -22,7 +23,9 @@
     </div>
     <div style="clear: left; padding: 5px;">
     <p>
-    {% trans "Image update: " %}{{last_update}}</p>
+    {% trans "Image update: " %}{{last_update}}. 
+    {% trans "Displayed data correspond to a time interval ending on the update time and has length equal to the time step." %}
+    </p>
     {% if other_pages %}
         <hr style="width:98%;height:1px; text-align: left; border-width: 1px; border-color: #ccc;">
         <h3>
