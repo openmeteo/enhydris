@@ -96,6 +96,11 @@ class ChartPage(models.Model):
                       nominal_offset = (self.ts_offset_minutes,
                                         self.ts_offset_months))
         tstamp = ts.down(now)
+#########WARNING!!! This is a temp work-arround!!! Find a more general ########
+#########Solution. Stefanos 2011-05-31  #######################################
+        if time_step.length_months>=1:
+		tstamp = ts.previous(tstamp)
+###############################################################################
         if now-tstamp<timedelta(minutes=self.data_available_after_x_minutes):
             tstamp = ts.previous(tstamp)
         return tstamp
