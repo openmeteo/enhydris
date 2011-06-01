@@ -50,7 +50,7 @@ class CTimeseries(enhydris.hcore.models.Timeseries):
         proxy = True
         ordering = ["id"]
     def __unicode__(self):
-        return 'id:%d - %s'%(self.id, self.name)
+        return '%d (id) - %s'%(self.id, self.name)
 
 class Variable(models.Model):
     name = models.CharField(max_length=80, blank=True)

@@ -31,7 +31,7 @@ class CTimeseries(enhydris.hcore.models.Timeseries):
         ordering = ["id"]
         verbose_name = "Timeseries"
     def __unicode__(self):
-        return 'id:%d - %s'%(self.id, self.name)
+        return '%d (id) - %s'%(self.id, self.name)
 
 
 class ProcessUnit(models.Model):
