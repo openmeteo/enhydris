@@ -61,10 +61,16 @@ def station_detail(request, *args, **kwargs):
         anonymous_can_download_data = True
     stat = get_object_or_404(Station, pk=kwargs["object_id"])
     owner = stat.owner
+    chart_exists = False
+    if hasattr(settings, 'INSTALLED_APPS'):
+        if 'enhydris.hchartpages' in settings.INSTALLED_APPS:
+            from enhydris.hchartpages.models import ChartPage
+            chart_exists = ChartPage.objects.filter(url_int_alias=stat.id).exists()
     kwargs["extra_context"] = {"owner":owner,
         "enabled_user_content":settings.USERS_CAN_ADD_CONTENT,
         "use_open_layers": settings.USE_OPEN_LAYERS,
-        "anonymous_can_download_data": anonymous_can_download_data}
+        "anonymous_can_download_data": anonymous_can_download_data,
+        "chart_exists": chart_exists}
     kwargs["request"] = request
     kwargs["template_name"] = "station_detail.html"
     return list_detail.object_detail(*args, **kwargs)
