@@ -12,7 +12,7 @@
     <p>{{page.description}}</p>
     {% endif %}
     <div style="clear: both; padding: 5px;">
-    <img src="{% url image_serve page.url_name %}.png" style="float: left">
+    <img src="{% url image_serve page.url_name %}.png" style="float: left; width: {{ x_dim }}px; height: {{y_dim }}px;" alt="{{page.description}}">
     {% autoescape off %}
     {% if page.side_text %}
     <div style="float: left; clear: right">
@@ -33,7 +33,7 @@
         {% for item in other_pages %}
            <div style="padding: 15px; float: left;">
                <a href="{% url contourpage_detail item.rpage.url_name %}">
-               <img src="{% url thumb_serve item.rpage.url_name %}_140.png" style="border-width: 0px;"></a>
+               <img src="{% url thumb_serve item.rpage.url_name %}_140.png" style="border-width: 0px; width: {{x_thumb}}px; height {{y_thumb}}px;" alt="{{item.rpage.description}}"></a>
                <p style="display: block; width: 140px;">
                    <strong>
                      <a href="{% url contourpage_detail item.rpage.url_name %}">{{ item.rpage.name }}</a>

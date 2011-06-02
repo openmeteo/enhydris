@@ -29,6 +29,19 @@ def contourpage_detail(request, urlcode, **kwargs):
     kwargs["queryset"] = ChartPage.objects.all()
     page = get_object_or_404(ChartPage, url_name = urlcode)
     object_id = page.id
+    large_dimension = page.default_dimension
+    (x0, y0, x1, y1) = [getattr(page, x) for x in ('chart_bounds_bl_x', 
+                               'chart_bounds_bl_y','chart_bounds_tr_x', 
+                                                   'chart_bounds_tr_y')]
+    width, height = x1-x0, y1-y0
+    small_dimension = int(round(large_dimension*min(height, width)/max(
+                                                        height, width)))
+    if width>height:
+        x_dim, y_dim = large_dimension, small_dimension
+    else:
+        x_dim, y_dim = small_dimension, large_dimension
+    x_thumb = 140
+    y_thumb = x_thumb*y_dim/x_dim
     last_update = page.get_concurent_timestamp_str()
     other_pages = None
     try:
@@ -38,7 +51,9 @@ def contourpage_detail(request, urlcode, **kwargs):
     kwargs["template_name"] = "contours_detail.html"
     kwargs["template_object_name"] = "page"
     kwargs["extra_context"] = {'last_update': last_update,
-                               'other_pages': other_pages}
+                               'other_pages': other_pages,
+                               'x_dim': x_dim, 'y_dim': y_dim,
+                               'x_thumb': x_thumb, 'y_thumb': y_thumb}
     return list_detail.object_detail(request, object_id = object_id, **kwargs)
 
 
