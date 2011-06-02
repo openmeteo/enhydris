@@ -69,6 +69,10 @@ def _create_contour_map(ev):
             background_filename = settings.HRAIN_BACKGROUND_IMAGE
         if hasattr(settings, 'HRAIN_BACKGROUND_MASK'):
             mask_filename = settings.HRAIN_BACKGROUND_MASK
+        if hasattr(settings, 'HRAIN_CHART_LARGE_DIMENSION'):
+            chart_large_dimension = settings.HRAIN_CHART_LARGE_DIMENSION
+        else:
+            chart_large_dimension = 480
     options ={'contours_font_size': 10, 'labels_format': '%1.0f',
               'draw_contours': True, 'color_map': 'winter_r',
               'labels_font_size': 10, 'text_color': 'black',
@@ -83,7 +87,7 @@ def _create_contour_map(ev):
               'mask_image': mask_filename,
               'compose_method': ('composite' if mask_filename is not None else 'multiply'),
               'swap_bg_fg': False, 'compose_alpha': 0.5, 
-              'compose_offset': 0, 'chart_large_dimension': 400,
+              'compose_offset': 0, 'chart_large_dimension': chart_large_dimension,
               'backgrounds_path': backgrounds_path }
     plot_contours(filename, a, options)
 
