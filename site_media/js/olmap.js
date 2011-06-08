@@ -140,7 +140,7 @@ function init() {
         'numZoomLevels' :   15,
         'sphericalMercator': true,
         'maxExtent': bounds,
-        'projection'    :   new OpenLayers.Projection("EPSG:9009313"),
+        'projection'    :   new OpenLayers.Projection("EPSG:900913"),
         'displayProjection':    new OpenLayers.Projection("EPSG:4326")
     };
     map = new OpenLayers.Map('map', options);
