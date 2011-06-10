@@ -58,6 +58,7 @@ ACCOUNT_ACTIVATION_DAYS=7
 EMAIL_USE_TLS = True
 EMAIL_PORT=587
 EMAIL_HOST='smtp.my.domain'
+DEFAULT_FROM_EMAIL = 'user@host.domain'
 EMAIL_HOST_USER='automaticsender@my.domain'
 EMAIL_HOST_PASSWORD='mypassword'
 #Set login redirection as apropriate in the cases
