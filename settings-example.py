@@ -65,6 +65,11 @@ EMAIL_HOST_PASSWORD='mypassword'
 #of site installed on a subdirectory
 #LOGIN_REDIRECT_URL='http://my.site/my_dir/'
 
+#Change SESSION_COOKIE_NAME if more than one django
+#sites on a single domain, or other sites with
+# sessionid is already set (defaul: sessionid)
+#SESSION_COOKIE_NAME='sessionid'
+
 # Options for political divisions
 FILTER_DEFAULT_COUNTRY= 'GREECE'
 FILTER_POLITICAL_SUBDIVISION1_NAME= _('District')
