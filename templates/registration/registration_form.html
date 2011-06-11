@@ -81,6 +81,18 @@ $(document).ready(function() {
           {% endif %}
       </td>
   </tr>
+  <tr>
+      <th align="right">
+          <label for="captcha">{% trans "Captcha, type the letters in the box:" %}</label>
+      </th>
+      <td>
+           {{ form.captcha }}<img alt="Captcha" src="{{MEDIA_URL}}captchas/{{ form.captcha_img }}.jpg" />
+           {% if form.captcha.errors %}
+               <p class="fielderrors" style="display:inline;color: #FF3333" >{{ form.captcha.errors.as_text }}</p>
+           {% endif %}
+           <div style="display:none;">{{ form.hash }}</div>
+      </td>
+  </tr>
         </table>
         <p>
           <label>Have you read and accepted the <a id="terms" title="{% trans "Terms of Service"%}" href="{% url terms %}" class="iframe">terms of service?</a></label>

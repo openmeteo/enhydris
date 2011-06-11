@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.geos import Point
 from django.forms import ModelForm
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from registration.forms import RegistrationForm
 from ajax_select.fields import (AutoCompleteSelectMultipleField,
@@ -16,8 +17,13 @@ from enhydris.hcore.models import *
 from enhydris.hcore.widgets import *
 
 import os
+import glob
+import sha
+import time
 
-
+# global salt var
+SALT = settings.SECRET_KEY[:5]
+IMAGE_URL = settings.CAPTCHA_ROOT
 
 
 attrs_dict = { 'class': 'required' }
@@ -31,6 +37,9 @@ class HcoreRegistrationForm(RegistrationForm):
                 label=_(u'I have read and agree to the Terms of Service'),
                 error_messages={ 'required': _("You must agree to the terms to register") })
 
+    captcha = forms.CharField(required=True)
+    hash = forms.CharField()
+
     def clean_email(self):
         """
         Validate that the supplied email address is unique for the site.
@@ -38,6 +47,62 @@ class HcoreRegistrationForm(RegistrationForm):
         if User.objects.filter(email__iexact=self.cleaned_data['email']):
             raise forms.ValidationError(_("This email address is already in use. Please supply a different email address."))
         return self.cleaned_data['email']
+
+    def clean(self):
+        """
+        Validate captcha text
+        """
+        cleaned_data = self.cleaned_data
+        if not ('captcha' in cleaned_data) or \
+                         cleaned_data['hash'] != sha.new(SALT+cleaned_data['captcha']).hexdigest():
+            self._errors["captcha"] = self.error_class(["Text displayed in the box and user"
+                                                        "text input don't match."])
+            if 'captcha' in cleaned_data: del cleaned_data["captcha"]
+        super(HcoreRegistrationForm, self).clean()
+        return cleaned_data
+
+    def __init__(self, *args, **kwargs):
+        super(HcoreRegistrationForm, self).__init__(*args, **kwargs)
+        if not ('hash' in self.data):
+            self.imgtext, self.imghash = createcapcha()
+            self.fields['hash'].initial = self.imghash
+        else:
+            self.imghash = self.data['hash']
+
+    def captcha_img(self):
+        return self.imghash
+
+def createcapcha():
+    """
+    This is a simple view which creates a captcha image and returns the name of
+    the image to pass to the template.
+    """
+    from random import choice
+    # PIL elements, sha for hash
+    import Image, ImageDraw, ImageFont
+
+    imgtext = ''.join([choice('QWERTYUOPASDFGHJKLZXCVBNM1234567890qdatre@$%&?+') for i in range(5)])
+    imghash = sha.new(SALT+imgtext).hexdigest()
+    im = Image.new("RGB", (90,20), (600,600,600))
+    draw=ImageDraw.Draw(im)
+    font=ImageFont.truetype(settings.CAPTCHA_FONT, 18)
+    draw.text((3,0),imgtext, font=font, fill=(000,000,50))
+    try:
+        now = time.time()
+        #Delete capthcas files older than 15 minutes
+        fifteen = 60*15
+        for item in glob.glob(os.path.join(IMAGE_URL, '*.jpg')):
+            m = os.stat(item)[7]
+            if now - m < fifteen:
+                continue
+            os.remove(item)
+    except Exception, e:
+        pass
+    temp = IMAGE_URL + imghash + '.jpg'
+    im.save(temp, "JPEG")
+
+    return (imgtext,imghash)
+
 
 """
 Model forms.
