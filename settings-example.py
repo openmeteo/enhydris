@@ -61,9 +61,14 @@ EMAIL_HOST='smtp.my.domain'
 DEFAULT_FROM_EMAIL = 'user@host.domain'
 EMAIL_HOST_USER='automaticsender@my.domain'
 EMAIL_HOST_PASSWORD='mypassword'
+
 #Set login redirection as apropriate in the cases
 #of site installed on a subdirectory
-#LOGIN_REDIRECT_URL='http://my.site/my_dir/'
+#for http://my.site/my_dir/ set it to /my_dir/
+#LOGIN_REDIRECT_URL='/my_dir/'
+#If you uncomment the above line, please uncomment
+#the line bellow as well to update LOGIN_URL correctly
+#LOGIN_URL=LOGIN_REDIRECT_URL+'accounts/login'
 
 #Change SESSION_COOKIE_NAME if more than one django
 #sites on a single domain, or other sites with

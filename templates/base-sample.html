@@ -123,13 +123,13 @@
             {% endwith %}
 			</li>
 
-			<li><a href="{% url auth_logout %}">Logout</a> 
+			<li><a href="{% url auth_logout %}?next={{ request.path }}">Logout</a> 
 			</li> 
 		{% else %}
 			<li style="background:transparent;margin:0;padding:0;">
 			<img style="float:left" alt="" src="{{ MEDIA_URL }}images/top_menu_left_bw.png"/>
 			</li>
-			<li><a class="loginform" href="{% url auth_login %}">Login</a></li> 
+			<li><a class="loginform" href="{% url auth_login %}?next={{request.path}}">Login</a></li> 
 
 			<li><a href="{% url registration_register %}">Register</a></li> 
 
