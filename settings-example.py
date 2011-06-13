@@ -75,6 +75,10 @@ EMAIL_HOST_PASSWORD='mypassword'
 # sessionid is already set (defaul: sessionid)
 #SESSION_COOKIE_NAME='sessionid'
 
+#Set custom cookies expiration (default is 2 weeks
+#that is 1209600 seconds).
+#SESSION_COOKIE_AGE=2419200
+
 # Options for political divisions
 FILTER_DEFAULT_COUNTRY= 'GREECE'
 FILTER_POLITICAL_SUBDIVISION1_NAME= _('District')
