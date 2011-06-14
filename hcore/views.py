@@ -1040,6 +1040,7 @@ def _station_edit_or_create(request,station_id=None):
                         user.add_row_perm(station, 'edit')
                         user.add_row_perm(station, 'delete')
             station.save()
+            form.save_m2m()
             for type in formsets:
                 formsets[type].save()
             if not station_id:
@@ -1914,6 +1915,7 @@ def bound(request):
     if getparams.has_key('ts_only'):
         tmpset = queryres.annotate(tsnum=Count('timeseries'))
         queryres = tmpset.exclude(tsnum=0)
+    print queryres.count()
     if queryres.count()<1:
         return HttpResponse(','.join([str(e) for e in\
                             settings.MAP_DEFAULT_VIEWPORT]), mimetype='text/plain')
