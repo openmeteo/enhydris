@@ -248,6 +248,27 @@ class GpointForm(GentityForm):
         model = Gpoint
         exclude = ('point',)
 
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        if bool('abscissa' in cleaned_data and cleaned_data['abscissa']) ^ \
+                bool('ordinate' in cleaned_data and cleaned_data['ordinate']):
+            raise forms.ValidationError(_("Both coordinates (abscissa, "
+                                          "ordinate) should be "
+                                          "provided. If position is "
+                                          "undefined, leave both empty."))
+        if ('abscissa' in cleaned_data and cleaned_data['abscissa']) and not \
+                ('srid' in cleaned_data and cleaned_data['srid']):
+            self._errors['srid'] =\
+                self.error_class(["Since you have provided coordinates, "
+                                  "a srid should be provided as well. "
+                                  "If you don't know about srid settings, "
+                                  "see http://en.wikipedia.org/wiki/Srid/ . "
+                                  "If you wish to enter geographical "
+                                  "coordinates in WGS-84, you may "
+                                  "enter a value of 4326 for srid."])
+        super(GpointForm, self).clean()
+        return cleaned_data
+
     @db.transaction.commit_on_success
     def save(self, commit=True, *args,**kwargs):
 
