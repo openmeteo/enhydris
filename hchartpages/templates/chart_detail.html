@@ -152,7 +152,8 @@
                   max:{{chart.display_max|lower}},
                   avg:{{chart.display_avg|lower}},
                   has_stats:{{chart.has_stats|lower}},
-                  can_zoom:{{chart.can_zoom|lower}}
+                  can_zoom:{{chart.can_zoom|lower}},
+                  is_vector:{{chart.is_vector|lower}}
                  });
         $("#chartarea{{chart.id}}").tooltip(tooltipopts);
         {% endfor %}
@@ -246,6 +247,27 @@
         for(var j=0;j<cd[i].length;j++){
             d[j] = {label: vm[i][j]['name'], data: cd[i][j]}
         }
+        if(cm[i]['is_vector'])
+        {
+            var x0, x1, y0, y1, t0, t1, u0, u1;
+            for(var k=d[0]['data'].length-1;k>0;k--)
+            {
+                y0 = d[0]['data'][k-1][1], y1 = d[0]['data'][k][1];
+                if(y0=='null' || y1=='null')
+                    continue;
+                if(Math.abs(y1-y0)>180)
+                {
+                    x0 = d[0]['data'][k-1][0], x1 = d[0]['data'][k][0];
+                    t0 = d[0]['data'][k-1][2], t1 = d[0]['data'][k][2];
+                    u0=360, u1=0;
+                    if(y0<y1)
+                        u0=360, u1=0;
+                    d[0]['data'].splice(k, 0, [x0+0.25*(x1-x0), u0, t0], [0.5*(x0+x1), 'null', t1],
+                                              [x1-0.25*(x1-x0), u1, t1]);
+                }
+
+            }
+        }
         from_x = d[0]['data'][0][0];
         to_x = d[0]['data'][d[0]['data'].length-1][0];
         tol = (to_x-from_x)*0.01;
@@ -279,6 +301,11 @@
                   autoHighlight: false},
             legend: {show: (d.length>1), position: 'nw'}
 		};
+        if(cm[i]['is_vector'])
+            options['yaxes'] = [ {position: "left", min:0, max:360, show: true},
+                {position: "right", ticks: [[0, 'N'], [45, 'NE'], [90, 'E'],
+                      [135, 'SE'], [180, 'S'], [225, 'SW'],
+                      [270, 'W'], [315, 'NW'], [360, 'N']], show: true}]
 		var plot = $.plot($("#chartarea"+cm[i]['id']), d, options);
         $("#chartarea"+cm[i]['id']).unbind("plotselected");
         $("#chartarea"+cm[i]['id']).unbind("plothover");

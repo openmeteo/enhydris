@@ -18,7 +18,7 @@ class ChartAdmin(admin.ModelAdmin):
                   ('name', 'order', 'chart_page',
                   'can_zoom', ('display_min', 'display_max'), 
                   ('display_avg', 'display_sum'),
-                  'display_lastvalue')}), )
+                  'display_lastvalue', 'is_vector',)}), )
 
     inlines = [VariableInline,]
     list_display = ('id', 'name', 'chart_page', 'order')

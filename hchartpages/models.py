@@ -24,6 +24,7 @@ class Chart(models.Model):
     display_avg = models.BooleanField(default=False)
     display_sum = models.BooleanField(default=False)
     display_lastvalue = models.BooleanField(default=False)
+    is_vector = models.BooleanField(default=False)
     chart_page = models.ForeignKey(ChartPage,
                                    related_name='chart_page')
     def mainvar(self):
