@@ -1024,12 +1024,6 @@ def _station_edit_or_create(request,station_id=None):
             if formsets[type].is_valid():
                 forms_validated+=1
         if form.is_valid() and forms_validated == len(formsets):
-            if station:
-                om = station.maintainers.all()
-                # To bypass djangos lazy fetching
-                old_maintainers = list(om)
-            else:
-                old_maintainers = None
             station = form.save()
             if hasattr(settings, 'USERS_CAN_ADD_CONTENT')\
                 and settings.USERS_CAN_ADD_CONTENT:
@@ -1040,7 +1034,10 @@ def _station_edit_or_create(request,station_id=None):
                         user.add_row_perm(station, 'edit')
                         user.add_row_perm(station, 'delete')
             station.save()
+            #Save maintainers, many2many, then save again to
+            #set correctly row permissions
             form.save_m2m()
+            station.save()
             for type in formsets:
                 formsets[type].save()
             if not station_id:

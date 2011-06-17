@@ -133,7 +133,7 @@
     </h2>
 
         {% if timeseries %}
-        <div style="float:left;">
+        <div style="float:left; width: 500px;">
         {% if user.is_authenticated or anonymous_can_download_data %}
             <p>{% blocktrans %}
                     Download Timeseries in plain text from 
@@ -250,8 +250,8 @@
             {% endifnotequal %}
         </table>
         </div>
-		<img src="{{MEDIA_URL}}images/vertical.gif" style="margin: 40px 20px; float: left;" />
-        <div id="chartdiv" style="float:right;text-align:center;width:450px;">
+		<img src="{{MEDIA_URL}}images/vertical.gif" style="margin: 20px 10px; float: left;" />
+        <div id="chartdiv" style="float:left;text-align:center;width:450px;">
 			<div id="progress" style="text-align:center;padding-top:3em;">
 			</div>
 			<div id="data_holder">
