@@ -8,12 +8,14 @@ AVAILABLE_METHODS = ( ('HeatIndex', 'Heat index calculation'),
                       ('IDM_annual', 'Martone index (annual)'),
                       ('Aggregation', 'Time series aggregation'),
                       ('Tsupdate', 'Time series cache update'),
+                      ('BaromFormula','Barometric formula'),
                     )
 
 AVAILABLE_TS_SPECS = ( ('irrelevant', 'Irrelevant'),
                        ('temp', 'Temperature'),
                        ('rh', 'Relative Humidity'),
                        ('precip', 'Precipitation'),
+                       ('press', 'Barometric pressure'),
                      )
 
 
@@ -40,14 +42,18 @@ class ProcessUnit(models.Model):
     method = models.CharField(max_length=16, 
                               choices = AVAILABLE_METHODS)
     order = models.IntegerField(default=0, 
-                               help_text= 'Order of execution, '
-                                          'Starts from smaller values '
-                                          'going to larger')
+                       help_text= 'Order of execution, '
+                                  'Starts from smaller values '
+                                  'going to larger')
     append_only = models.BooleanField(default = True)
     output_timeseries = models.ForeignKey(CTimeseries)
     aggregation_missing_allowed = models.FloatField(default=0.0,
-                               help_text= 'Has meaning only if '
-                                          'method = Aggregation')
+                       help_text= 'Has meaning only if '
+                                  'method = Aggregation, '
+                                  'or Altitude diff if '
+                                  'barometric formula.',
+                       verbose_name= 'Aggregation missing allowed '
+                                     'or altitude diff')
     aggregation_missing_flag = models.CharField(max_length=16,
                                default='MISSING',
                                help_text= 'Has meaning only if '

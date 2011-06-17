@@ -33,6 +33,8 @@ def multi_ts_process(job):
     options = {}
     if job.append_only:
         options['append_only']=True
+    if job.method == 'BaromFormula':
+        options['hdiff'] = job.aggregation_missing_allowed
     MultiTimeseriesProcessDb(method=job.method, timeseries_arg=timeseries_arg, 
                              out_timeseries_id=job.output_timeseries.id,
                              db=db.connection, transaction=db.transaction,
@@ -64,7 +66,7 @@ def process_batch(batch):
     jobs = jobs.order_by('order')
     for job in jobs:
         if job.method in ('HeatIndex', 'SSI', 'IDM_monthly',
-                          'IDM_annual', ):
+                          'IDM_annual', 'BaromFormula' ):
             multi_ts_process(job)
         elif job.method == 'Aggregation':
             ts_aggregation(job)
