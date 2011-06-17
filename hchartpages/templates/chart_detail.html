@@ -301,7 +301,8 @@
             legend: {show: (d.length>1), position: 'nw'}
 		};
         if(cm[i]['is_vector'])
-            options['yaxes'] = [ {position: "left", min:0, max:360, show: true},
+            options['yaxes'] = [ {position: "left", min:0, max:360, show: true,
+            ticks: [0, 45, 90, 135, 180, 225, 270, 315, 360]},
                 {position: "right", ticks: [[0, 'N'], [45, 'NE'], [90, 'E'],
                       [135, 'SE'], [180, 'S'], [225, 'SW'],
                       [270, 'W'], [315, 'NW'], [360, 'N']], show: true}]
