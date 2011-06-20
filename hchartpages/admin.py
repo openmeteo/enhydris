@@ -11,7 +11,7 @@ class ChartInline(admin.TabularInline):
 
 class ChartPageAdmin(admin.ModelAdmin):
     inlines = [ChartInline,]
-    list_display = ('id', 'name', 'url_name', 'url_int_alias')
+    list_display = ('id', 'name', 'url_name', 'url_int_alias',)
 
 class ChartAdmin(admin.ModelAdmin):
     fieldsets = ( (None, {'fields':

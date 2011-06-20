@@ -24,6 +24,8 @@
     cc=0;
     default_last="{% if page.option_daily %}day{% else %}{% if page.option_weekly %}week{% else %}{% if page.option_monthly %}month{% else %}year{%endif%}{%endif%}{%endif%}";
     time_span = default_last;
+    auto_refresh = {{ page.auto_refresh|lower }};
+    auto_refresh_interval = {{ page.auto_refresh_interval }}*1000;
 
     function gup( name )
     {
@@ -40,6 +42,7 @@
     function addChart(options){
         cm[cc]=options;
         cm[cc]['iter']=cc;
+        cm[cc]['is_zoomed']=false;
         vm[cc]=[];
         cd[cc]=[];
         cs[cc]=[];
@@ -110,6 +113,21 @@
             $("#chartarea"+cm[i]['id']).unbind("plotselected");
             $("#chartarea"+cm[i]['id']).unbind("plothover");
             get_data_from_server(i);    
+            cm[i]['is_zoomed']=false;
+        }
+    }
+
+    function refresh_chart()
+    {
+        if(gup('date')||gup('time'))
+            return;
+        for(var i=0;i<cc;i++)
+        {
+            if(cm[i]['is_zoomed'])
+                continue;
+            $("#chartarea"+cm[i]['id']).unbind("plotselected");
+            $("#chartarea"+cm[i]['id']).unbind("plothover");
+            get_data_from_server(i);
         }
     }
 
@@ -120,6 +138,8 @@
         $('a#'+time_span).each(function(){ $(this).replaceWith($(this).text()); });
         for(var i=0;i<cc;i++)
             get_data_from_server(i);
+        if(auto_refresh)
+            setInterval("refresh_chart()", auto_refresh_interval)
     }
 
 	$(document).ready(function() {
@@ -239,6 +259,7 @@
                }
             }})(i,j));
         }
+        cm[i]['is_zoomed']=true;
     }
 
 	function flot_init(i) {

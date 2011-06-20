@@ -8,6 +8,10 @@ class ChartPage(models.Model):
     url_name = models.CharField(max_length=50, unique=True)
     url_int_alias = models.IntegerField(blank=True, null=True,
                                         default=None, unique=True)
+    auto_refresh = models.BooleanField(default=False)
+    auto_refresh_interval = models.IntegerField(default=300,
+                 verbose_name='Auto refresh interval in seconds',
+                 help_text='Refresh charts every x seconds.')
     option_daily = models.BooleanField(default=True)
     option_weekly = models.BooleanField(default=False)
     option_monthly = models.BooleanField(default=False)
