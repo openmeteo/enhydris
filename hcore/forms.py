@@ -53,6 +53,16 @@ class HcoreRegistrationForm(RegistrationForm):
         Validate captcha text
         """
         cleaned_data = self.cleaned_data
+        if 'captcha' in cleaned_data and cleaned_data['captcha']:
+            try:
+                cleaned_data['captcha'].decode('ascii')
+            except UnicodeEncodeError, UnicodeDecodeError:
+                self._errors["captcha"] = self.error_class(["Invalid (non latin - non ascii) "
+                                                        "characters entered. Please check your "
+                                                        "input language setting."])
+                del cleaned_data["captcha"]
+                super(HcoreRegistrationForm, self).clean()
+                return cleaned_data
         if not ('captcha' in cleaned_data) or \
                          cleaned_data['hash'] != sha.new(SALT+cleaned_data['captcha']).hexdigest():
             self._errors["captcha"] = self.error_class(["Text displayed in the box and user"
