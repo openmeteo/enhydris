@@ -81,7 +81,7 @@ def createcapcha():
     # PIL elements, sha for hash
     import Image, ImageDraw, ImageFont
 
-    imgtext = ''.join([choice('QWERTYUOPASDFGHJKLZXCVBNM234567890qdatre@$%&?+') for i in range(5)])
+    imgtext = ''.join([choice('QWERTYUIOPASDFGHJKLZXCVBNM234567890@$%&?+') for i in range(5)])
     imghash = sha.new(SALT+imgtext).hexdigest()
     im = Image.new("RGB", (90,20), (600,600,600))
     draw=ImageDraw.Draw(im)
