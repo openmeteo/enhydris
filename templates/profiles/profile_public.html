@@ -19,11 +19,13 @@
 				<th align="left">{% trans "Name" %}</th>
 				<td>{{profile.full_name}} </td>
 			</tr>
-
-			<tr>
+            
+            {% if profile.email_is_public %}
+  			<tr>
 				<th align="left">{% trans "Email" %}</th>
 				<td>{{profile.email}} </td>
 			</tr>
+            {% endif %}
 			   
 			<tr>
 				<th align="left">{% trans "Address" %}</th>

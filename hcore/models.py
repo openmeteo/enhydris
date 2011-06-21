@@ -634,6 +634,7 @@ class UserProfile(models.Model):
     lname = models.CharField(_('Last Name'),null=True,blank=True, max_length=30)
     address = models.CharField(_('Location'),null=True,blank=True,max_length=100)
     organization = models.CharField(_('Organization'),null=True,blank=True,max_length=100)
+    email_is_public = models.BooleanField(default=False)
 
     def __unicode__(self):
         name = self.user.get_full_name()
