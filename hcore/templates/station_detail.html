@@ -326,7 +326,7 @@
                         <tr class="{% cycle 'odd' 'even' %} {% if forloop.counter > 10 %}gfiles_rows" style="display: none;{% endif %}">
                             <td>{{ file.id }}</td>
                             <td>{{ file.date|date:"Y/m/d" }}</td>
-                            <td>{{ file.file_type }}</td>
+                            <td>{{ file.file_type.descr }}</td>
                             <td>{{ file.content }}</td>
                             <td>{{ file.descr }}</td>
                             <td>{{ file.remarks }}</td>
