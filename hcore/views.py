@@ -1146,9 +1146,11 @@ def _timeseries_edit_or_create(request,tseries_id=None):
     # Done with checks
     if request.method == 'POST':
         if tseries and tseries.id:
-            form = TimeseriesDataForm(request.POST,request.FILES,instance=tseries,user=user)
+            form = TimeseriesDataForm(request.POST,request.FILES,instance=tseries,user=user,
+                                      gentity_id=station_id, instrument_id=instrument_id)
         else:
-            form = TimeseriesForm(request.POST,request.FILES,user=user)
+            form = TimeseriesForm(request.POST,request.FILES,user=user, gentity_id=station_id,
+                                      instrument_id=instrument_id)
         if form.is_valid():
             tseries = form.save()
             # do stuff
