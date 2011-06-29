@@ -13,6 +13,14 @@
 
 {% block title %}{% trans "Login" %}{% endblock %}
 
+{% block extrajs %}
+<script type='text/javascript'>
+$(document).ready(function(){
+    $('a.loginform').attr('href', '{% url auth_login %}')
+}
+);
+</script>
+{% endblock %}
 
 {% block content %}
 
