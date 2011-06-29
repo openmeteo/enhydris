@@ -84,7 +84,7 @@ def filter_by(filter_list):
                             obj = Variable.objects.get(pk=value)
                             term = obj.__unicode__()
                             queryset = queryset.filter(
-                                  Q(timeseries__variable__descr=term))
+                                  Q(timeseries__variable__descr=term)).distinct()
                         except:
                             queryset = queryset.none()
                     elif arg == "bounded":

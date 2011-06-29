@@ -852,8 +852,9 @@ def download_timeseries(request, object_id):
             time_step = ReadTimeStep(object_id, t),
             unit = t.unit_of_measurement.symbol,
             title = t.name,
-            timezone = '%s (UTC+%02d%02d)' % (t.time_zone.code,
-                t.time_zone.utc_offset / 60, t.time_zone.utc_offset % 60),
+            timezone = '%s (UTC%+03d%02d)' % (t.time_zone.code,
+                (abs(t.time_zone.utc_offset) / 60)* (-1 if t.time_zone.utc_offset<0 else 1), 
+                abs(t.time_zone.utc_offset % 60),),
             variable = t.variable.descr,
             precision = t.precision,
             comment = '%s\n\n%s' % (t.gentity.name, t.remarks)
@@ -1862,7 +1863,7 @@ def kml(request, layer):
                 queryres = queryres.filter(water_division__id=getparams['water_division'])
             if getparams.has_key('variable'):
                 queryres = queryres.filter(id__in=\
-                      Timeseries.objects.all().filter(variable__id=getparams['variable']).values_list('gentity', flat=True))
+                      Timeseries.objects.all().filter(variable__id=getparams['variable']).values_list('gentity', flat=True)).distinct()
         if getparams.has_key('ts_only'):
             tmpset = queryres.annotate(tsnum=Count('timeseries'))
             queryres = tmpset.exclude(tsnum=0)

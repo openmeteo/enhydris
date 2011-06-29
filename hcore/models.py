@@ -449,8 +449,11 @@ class TimeZone(models.Model):
     code = models.CharField(max_length=50)
     utc_offset = models.SmallIntegerField()
     def __unicode__(self):
-        return '%s (UTC+%02d%02d)' % (self.code,
-                self.utc_offset / 60, self.utc_offset % 60,)
+        return '%s (UTC%+03d%02d)' % (self.code,
+                (abs(self.utc_offset) / 60)* (-1 if self.utc_offset<0 else 1), 
+                abs(self.utc_offset % 60),)
+    class Meta:
+        ordering = ('utc_offset',)
 
 def _int_xor(i1, i2):
     """Return True if one and only one of i1 and i2 is zero."""
