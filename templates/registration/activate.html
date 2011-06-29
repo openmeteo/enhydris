@@ -3,6 +3,15 @@
 
 {% block title %}Account activation{% endblock %}
 
+{% block extrajs %}
+<script type='text/javascript'>
+$(document).ready(function(){
+    $('a.loginform').attr('href', '{% url auth_login %}')
+}
+);
+</script>
+{% endblock %}
+
 {% block content %}
   {% load humanize %}
   {% if account %}
