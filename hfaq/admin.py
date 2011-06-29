@@ -11,7 +11,7 @@ class TopicAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'slug', 'order')
     
 class ItemAdmin(admin.ModelAdmin):
-    list_display = ('id', 'question', 'order')
+    list_display = ('id', 'question', 'topic', 'order')
 
 admin.site.register(Item, ItemAdmin)
 admin.site.register(Topic, TopicAdmin)
