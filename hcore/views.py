@@ -59,6 +59,8 @@ def station_detail(request, *args, **kwargs):
     if hasattr(settings, 'TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS') and\
             settings.TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
         anonymous_can_download_data = True
+    display_copyright = hasattr(settings, 'DISPLAY_COPYRIGHT_INFO') and\
+        settings.DISPLAY_COPYRIGHT_INFO
     stat = get_object_or_404(Station, pk=kwargs["object_id"])
     owner = stat.owner
     chart_exists = False
@@ -70,6 +72,7 @@ def station_detail(request, *args, **kwargs):
         "enabled_user_content":settings.USERS_CAN_ADD_CONTENT,
         "use_open_layers": settings.USE_OPEN_LAYERS,
         "anonymous_can_download_data": anonymous_can_download_data,
+        "display_copyright": display_copyright,
         "chart_exists": chart_exists}
     kwargs["request"] = request
     kwargs["template_name"] = "station_detail.html"
@@ -574,6 +577,8 @@ def timeseries_detail(request, queryset, object_id, *args, **kwargs):
     if hasattr(settings, 'USERS_CAN_ADD_CONTENT'):
         if settings.USERS_CAN_ADD_CONTENT:
             enabled_user_content = True
+    display_copyright = hasattr(settings, 'DISPLAY_COPYRIGHT_INFO') and\
+        settings.DISPLAY_COPYRIGHT_INFO
 
     anonymous_can_download_data = False
     if hasattr(settings, 'TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS') and\
@@ -583,6 +588,7 @@ def timeseries_detail(request, queryset, object_id, *args, **kwargs):
     related_station = tseries.related_station
     kwargs["extra_context"] = {'related_station': related_station,
                               'enabled_user_content':enabled_user_content,
+                              'display_copyright': display_copyright,
                               'anonymous_can_download_data':
                                     anonymous_can_download_data}
     kwargs["template_name"] = "timeseries_detail.html"

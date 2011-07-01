@@ -594,6 +594,13 @@
                 {% endif %}
             </tr>
         </table>
+        {% if display_copyright %}
+        <p style="font-size: 8pt">
+                         {% trans "Station " %}&quot;{{station.name}}&quot;, 
+                         {% trans "Copyright (c) " %}{{ station.copyright_years }},
+                         {{ station.copyright_holder }}.
+        </p>
+        {% endif %}
         {% endif %}
 
 

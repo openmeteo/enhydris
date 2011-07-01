@@ -105,3 +105,7 @@ TS_GRAPH_CACHE_DIR="/var/tmp/enhydris-timeseries/"
 CAPTCHA_ROOT='site_media/captchas/'
 CAPTCHA_FONT='site_media/arizona.ttf'
 
+#Display copyright information on web pages (station detail and time
+#series detail)
+
+DISPLAY_COPYRIGHT_INFO=False

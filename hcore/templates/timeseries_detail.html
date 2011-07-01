@@ -249,6 +249,12 @@
                 </tr>
             {% endifnotequal %}
         </table>
+        {% if display_copyright and  timeseries.related_station %}
+        <p style="font-size: 8pt">
+                         {% trans "Station " %}&quot;{{ timeseries.related_station.name }}&quot;, 
+                         {% trans "Copyright (c) " %}{{ timeseries.related_station.copyright_years }},
+                         {{ timeseries.related_station.copyright_holder }}.
+        {% endif %}
         </div>
 		<img src="{{MEDIA_URL}}images/vertical.gif" style="margin: 20px 10px; float: left;" />
         <div id="chartdiv" style="float:left;text-align:center;width:450px;">

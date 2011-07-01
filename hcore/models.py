@@ -369,6 +369,8 @@ class Station(Gpoint):
     end_date = models.DateField(null=True, blank=True)
     overseers = models.ManyToManyField(Person, through='Overseer',
                                     related_name='stations_overseen')
+    copyright_holder = models.TextField()
+    copyright_years = models.CharField(max_length=10)
     # The following two fields are only useful when USERS_CAN_ADD_CONTENT
     # is set.
     creator = models.ForeignKey(User, null=True, blank=True,
