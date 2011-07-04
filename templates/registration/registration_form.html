@@ -83,7 +83,7 @@ $(document).ready(function() {
   </tr>
   <tr>
       <th align="right">
-          <label for="captcha">{% trans "Type the characters shown" %}</label>
+          <label for="captcha">{% trans "Type the characters shown:" %}</label>
       </th>
       <td>
            {{ form.captcha }}<img alt="Captcha" src="{{MEDIA_URL}}captchas/{{ form.captcha_img }}.jpg" />
