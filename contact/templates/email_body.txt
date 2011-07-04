@@ -1,7 +1,14 @@
-user {{user}} sent and email with the following context:
+A user with name: {{user}}, 
+sent an email with the following context:
 
-#############################################################################
+
+--Message from here--
+
 {{message}}
-#############################################################################
 
-You can reach user {{user}} at the following email: {{email}}
+--End of message--
+
+
+You can reach user with name: {{user}} 
+at the following e-mail address:
+{{email}}

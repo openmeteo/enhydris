@@ -20,11 +20,21 @@ def contactview(request):
     This is the main view that renders the contact form and sends the email
     when the form is submitted.
     """
+    user = request.user
+    is_authenticated = user and user.is_authenticated()
+
+    if is_authenticated and request.method == 'GET':
+        form = ContactForm(initial={'email': user.email,})
+        return render_to_response('contact.html', {'form': form},
+                                  context_instance=RequestContext(request))
+
     subject = request.POST.get('subject', '')
     name = request.POST.get('name', '')
     message = request.POST.get('message', '')
     from_email = request.POST.get('email', '')
-
+    if is_authenticated:
+        subject = 'topic: "%s" [from logged in user: %s]'%(subject,
+                                                   user.username)
     # send the mail
     if subject and message and from_email:
         # copy data so we can manipulate them
@@ -36,7 +46,7 @@ def contactview(request):
             pass
 
         # check captcha
-        if data['hash'] == sha.new(SALT+data['captcha']).hexdigest():
+        if is_authenticated or (data['hash'] == sha.new(SALT+data['captcha']).hexdigest()):
 
             # format the email
             rendered_message = render_to_string('email_body.txt',
