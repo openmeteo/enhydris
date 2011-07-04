@@ -59,6 +59,7 @@ EMAIL_USE_TLS = True
 EMAIL_PORT=587
 EMAIL_HOST='smtp.my.domain'
 DEFAULT_FROM_EMAIL = 'user@host.domain'
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 EMAIL_HOST_USER='automaticsender@my.domain'
 EMAIL_HOST_PASSWORD='mypassword'
 
