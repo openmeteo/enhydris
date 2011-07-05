@@ -437,12 +437,16 @@ def timeseries_data(request, *args, **kwargs):
             gstats['min'] = value
             gstats['min_tstmp'] = date
         if is_vector:
+            value2 = value
+            if value2>=360: value2-=360
+            if value2<0: value2+=360
+            if value2<0 or value2>360: return
             # reversed order of x, y since atan2 definition is
             # math.atan2(y, x)
-            gstats['vsum'][1]+=math.cos(value)
-            gstats['vsum'][0]+=math.sin(value)
-            value2 = value+22.5 if value<337.5 else value-337.5
-            gstats['vectors'][int(value/45)]+=1
+            gstats['vsum'][1]+=math.cos(value2*math.pi/180)
+            gstats['vsum'][0]+=math.sin(value2*math.pi/180)
+            value2 = value2+22.5 if value2<337.5 else value2-337.5
+            gstats['vectors'][int(value2/45)]+=1
         gstats['sum']+= value
         gstats['last'] = value
         gstats['last_tstmp'] = date
@@ -575,7 +579,8 @@ def timeseries_data(request, *args, **kwargs):
                 gstats['avg'] = gstats['sum'] / gstats['count']
                 if is_vector:
                     gstats['vavg']=math.atan2(*gstats['vsum'])*180/math.pi
-                    gstats['vavg']+=360 if gstats['vavg']<0
+                    if gstats['vavg']<0: 
+                        gstats['vavg']+=360 
                 for item in ('max_tstmp', 'min_tstmp', 'last_tstmp'):
                     gstats[item] = calendar.timegm(gstats[item].timetuple())*1000
             response.content = json.dumps({'data': chart_data, 'stats': gstats})
