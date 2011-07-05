@@ -427,13 +427,22 @@ def timeseries_data(request, *args, **kwargs):
             gstats['max'] = value
             gstats['min'] = value
             gstats['sum'] = 0
+            gstats['vsum'] = [0.0, 0.0]
             gstats['count'] = 0
+            gstats['vectors'] = [0]*8
         if value>=gstats['max']:
             gstats['max'] = value
             gstats['max_tstmp'] = date
         if value<=gstats['min']:
             gstats['min'] = value
             gstats['min_tstmp'] = date
+        if is_vector:
+            # reversed order of x, y since atan2 definition is
+            # math.atan2(y, x)
+            gstats['vsum'][1]+=math.cos(value)
+            gstats['vsum'][0]+=math.sin(value)
+            value2 = value+22.5 if value<337.5 else value-337.5
+            gstats['vectors'][int(value/45)]+=1
         gstats['sum']+= value
         gstats['last'] = value
         gstats['last_tstmp'] = date
@@ -510,10 +519,13 @@ def timeseries_data(request, *args, **kwargs):
         amax=''
         prev_pos=-1
         tick_pos=-1
+        is_vector = request.GET.has_key('vector') and request.GET['vector'] == 'true'
         gstats = {'max': None, 'min': None, 'count': 0,
                        'max_tstmp': None, 'min_tstmp': None,
                        'sum': None, 'avg': None,
-                       'last': None, 'last_tstmp': None}
+                       'vsum': None, 'vavg': None,
+                       'last': None, 'last_tstmp': None, 
+                       'vectors': None}
         afloat = 0.01
         try:
             linecache.checkcache(afilename)
@@ -561,6 +573,9 @@ def timeseries_data(request, *args, **kwargs):
         if chart_data:
             if gstats['count']>0:
                 gstats['avg'] = gstats['sum'] / gstats['count']
+                if is_vector:
+                    gstats['vavg']=math.atan2(*gstats['vsum'])*180/math.pi
+                    gstats['vavg']+=360 if gstats['vavg']<0
                 for item in ('max_tstmp', 'min_tstmp', 'last_tstmp'):
                     gstats[item] = calendar.timegm(gstats[item].timetuple())*1000
             response.content = json.dumps({'data': chart_data, 'stats': gstats})
