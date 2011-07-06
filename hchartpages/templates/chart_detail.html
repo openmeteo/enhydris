@@ -10,6 +10,8 @@
   <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/excanvas.min.js"></script>
   <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.min.js"></script>
   <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.selection.min.js"></script>
+  <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.highlighter.js"></script>
+  <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.spider.js"></script>
   <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.timePicker.min.js"></script>
   <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.collapser.mod.js"></script>
   <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
@@ -74,6 +76,8 @@
             {   url_params['date'] = gup('date');
                 if(gup('time'))url_params['time'] = unescape(gup('time'));
             }
+            if(cm[i]['is_vector'])
+                url_params['vector']="true";
             $.getJSON('{% url timeseries_data %}', url_params, 
                 (function(i,j){
                 return function(chart_data){
@@ -238,8 +242,11 @@
                     break;
                 }
             }
-       
-            $.getJSON('{% url timeseries_data %}', {object_id: vm[i][j]['series_id'], start_pos:from_pos, end_pos:to_pos}, 
+            var urlparams = {object_id: vm[i][j]['series_id'],
+                             start_pos:from_pos, end_pos:to_pos}; 
+            if(cm[i]['is_vector'])
+                urlparams['vector']='true';
+            $.getJSON('{% url timeseries_data %}', urlparams, 
                 (function(i,j){
                 return function(chart_data){
                 var astatus=true;
@@ -296,6 +303,8 @@
         var marking_opts = [];
         if(cm[i]['has_stats']){
             var stats= cs[i][0];
+            if(cm[i]['is_vector'])
+                stats['avg'] = stats['vavg']
             var items = ['max', 'min', 'last', 'avg', 'sum'];
             for(var item in items)
                 $('#'+items[item]+cm[i]['id']).text(format_float(stats[items[item]]));
@@ -326,7 +335,7 @@
             ticks: [0, 45, 90, 135, 180, 225, 270, 315, 360]},
                 {position: "right", ticks: [[0, 'N'], [45, 'NE'], [90, 'E'],
                       [135, 'SE'], [180, 'S'], [225, 'SW'],
-                      [270, 'W'], [315, 'NW'], [360, 'N']], show: true}]
+                      [270, 'W'], [315, 'NW'], [360, 'N']], show: true}];
 		var plot = $.plot($("#chartarea"+cm[i]['id']), d, options);
         $("#chartarea"+cm[i]['id']).unbind("plotselected");
         $("#chartarea"+cm[i]['id']).unbind("plothover");
@@ -340,6 +349,23 @@
         $("#chartarea"+cm[i]['id']).mouseout(function(){
             $("#charttooltip"+cm[i]['id']).html('');
         });
+        if(cm[i]['is_vector'])
+        {
+            var d1=[];
+            for(j=0;j<8;j++){
+                d1[j]=[];   
+                d1[j][0]=j, d1[j][1]=cs[i][0]['vectors'][j];
+            }
+            var data=[{data: d1, spider: {show: true}}];
+            var rose = $.plot($("#rosearea"+cm[i]['id']),data,
+                                { series: { spider: {active: true,
+                                  scaleMode: 'all',
+                                  legs: { data: [{label: 'N'}, {label: 'NE'},
+                                  {label: 'E'}, {label: 'SE'}, {label: 'S'},
+                                  {label: 'SW'}, {label: 'W'}, {label: 'NW'}],
+                                  legStartAngle: 270, fillStyle: "blue"},
+                                  grid: {mode: "radar"}}}});
+        }
 	}
 
   </script>
@@ -416,9 +442,12 @@
                        {% trans "Open time series page" %}</a></p>{% endif %}
                     {% if chart.can_zoom %}
                     <p><span id="dragtozoom{{chart.id}}">{%trans "Drag on chart to zoom in" %}</span>
-                    <a href="javascript:chartUnzoom({{chart.id}});"  style="display: none;" id="unzoom{{chart.id}}"> - {% trans "Unzoom chart" %}</a>{% endif %}
+                    <a href="javascript:chartUnzoom({{chart.id}});" style="display: none;" id="unzoom{{chart.id}}"> - {% trans "Unzoom chart" %}</a>{% endif %}
                 </div>
                 {% endif %}
+                {% if chart.is_vector %}
+    			<div id="rosearea{{chart.id}}" style="margin:10px;width:320px;height:320px;float:left;position: relative;clear:right;"></div>
+                {%endif%}
 			</div>
         </div>
     {% endfor %}
