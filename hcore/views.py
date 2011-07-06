@@ -1941,7 +1941,6 @@ def bound(request):
     if getparams.has_key('ts_only'):
         tmpset = queryres.annotate(tsnum=Count('timeseries'))
         queryres = tmpset.exclude(tsnum=0)
-    print queryres.count()
     if queryres.count()<1:
         return HttpResponse(','.join([str(e) for e in\
                             settings.MAP_DEFAULT_VIEWPORT]), mimetype='text/plain')
