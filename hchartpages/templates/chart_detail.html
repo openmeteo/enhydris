@@ -351,12 +351,21 @@
         });
         if(cm[i]['is_vector'])
         {
-            var d1=[];
-            for(j=0;j<8;j++){
-                d1[j]=[];   
-                d1[j][0]=j, d1[j][1]=cs[i][0]['vectors'][j];
+            var alabel = '';
+            var data = [];
+            var d = [];
+            for(k=0;k<cs[i].length;k++)
+            {
+                d[k]=[];
+                for(j=0;j<8;j++)
+                {
+                    d[k][j] = [];   
+                    d[k][j][0]=j, d[k][j][1]=cs[i][k]['vectors'][j];
+                }
+                if(cs[i].length>1)
+                    alabel =  vm[i][k]['name'];
+                data[k]={data: d[k], spider: {show: true}, label: alabel};
             }
-            var data=[{data: d1, spider: {show: true}}];
             var rose = $.plot($("#rosearea"+cm[i]['id']),data,
                                 { series: { spider: {active: true,
                                   scaleMode: 'all',
