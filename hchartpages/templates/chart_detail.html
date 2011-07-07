@@ -352,21 +352,21 @@
         if(cm[i]['is_vector'])
         {
             var alabel = '';
-            var data = [];
-            var d = [];
+            var data2 = [];
+            var d2 = [];
             for(k=0;k<cs[i].length;k++)
             {
-                d[k]=[];
+                d2[k]=[];
                 for(j=0;j<8;j++)
                 {
-                    d[k][j] = [];   
-                    d[k][j][0]=j, d[k][j][1]=cs[i][k]['vectors'][j];
+                    d2[k][j] = [];   
+                    d2[k][j][0]=j, d2[k][j][1]=cs[i][k]['vectors'][j];
                 }
                 if(cs[i].length>1)
                     alabel =  vm[i][k]['name'];
-                data[k]={data: d[k], spider: {show: true}, label: alabel};
+                data2[k]={data: d2[k], spider: {show: true}, label: alabel};
             }
-            var rose = $.plot($("#rosearea"+cm[i]['id']),data,
+            var rose = $.plot($("#rosearea"+cm[i]['id']),data2,
                                 { series: { spider: {active: true,
                                   scaleMode: 'all',
                                   legs: { data: [{label: 'N'}, {label: 'NE'},
