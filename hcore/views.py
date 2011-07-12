@@ -23,9 +23,11 @@ from django.template.loader import render_to_string
 from django.views.generic import list_detail
 from django.views.generic.create_update import create_object
 from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.views import login as auth_login
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.shortcuts import render_to_kml
 from django.contrib.gis.geos import Polygon
+from django.contrib import messages
 from django.conf import settings
 from django.db.models import Q
 from django.core.servers.basehttp import FileWrapper
@@ -41,6 +43,15 @@ from enhydris.hcore.tstmpupd import update_ts_temp_file
 
 ####################################################
 # VIEWS
+
+def login(request, *args, **kwargs):
+    if request.user.is_authenticated():
+        redir_url = request.GET.get('next', reverse('index'))
+        messages.info(request, 'You are already logged on; '
+                               'logout to log in again.')
+        return HttpResponseRedirect(redir_url)
+    else:
+        return auth_login(request, *args, **kwargs)
 
 def index(request):
     return render_to_response('index.html', {},

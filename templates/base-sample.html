@@ -161,7 +161,6 @@
 	</div>
 	    <div id="content">
 		<div id="body">
-		<!--
 	    {% if notifications %}
         <ul class="notifications">
                 {% for message in notifications %}
@@ -169,18 +168,17 @@
                 {% endfor %}
         </ul>
         {% endif %}
-        -->
-		  {% block content %}
-			<div id="body_main">
 			  {% block messages %}
 				{% if messages %}
 					<div class="messages">
 					{% for message in messages %}
-						<span class="i16 tip message">{{ message }}</span> 
+						<span class="i16 tip message" style="font-size:0.8em">{{ message }}</span> 
 					{% endfor %}
 					</div>
 				{% endif %}
 			  {% endblock %}
+		  {% block content %}
+			<div id="body_main">
 			{% block content_main %}
             {% endblock %}
 			</div>

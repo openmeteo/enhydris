@@ -6,11 +6,12 @@ from django.views.generic.simple import direct_to_template
 from registration.views import register
 from profiles.views import create_profile, edit_profile, profile_detail
 from enhydris.hcore.forms import HcoreRegistrationForm
-from enhydris.hcore.views import help, terms, profile_view
+from enhydris.hcore.views import help, terms, profile_view, login
 
 admin.autodiscover()
 
 urlpatterns = patterns('',
+    (r'^accounts/login/$', login, {'template_name': 'registration/login.html'}),
     (r'^accounts/register/$', register, {'form_class':
         HcoreRegistrationForm}, 'registration_register'),
     (r'^accounts/password/reset/$', password_reset, {'template_name':

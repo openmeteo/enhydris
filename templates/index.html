@@ -7,13 +7,15 @@
 {% endblock %}
 
 {% block content_main %}
+        {% comment %}
         {% if notifications %}
         <ul class="notifications">
                 {% for message in notifications %}
                 <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
                 {% endfor %}
         </ul>
-        {% endif %}
+        {% endif %} 
+        {% endcomment %}
 
     <div id="frontpage_text">
         <h2>{% trans "Welcome to Enhydris" %}</h2>
