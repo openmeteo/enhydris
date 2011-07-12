@@ -586,6 +586,9 @@ def timeseries_data(request, *args, **kwargs):
             response.content = json.dumps({'data': chart_data, 'stats': gstats})
         else:
             response.content = json.dumps("")
+        callback = request.GET.get("jsoncallback", None)    
+        if callback:
+            response.content = '%s(%s)'%(callback, response.content,)
         return response
     else:
         raise Http404
