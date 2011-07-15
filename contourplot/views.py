@@ -65,15 +65,16 @@ def contourpage_detail(request, urlcode, **kwargs):
     x_thumb = 140
     y_thumb = x_thumb*y_dim/x_dim
     last_update = page.get_concurent_timestamp_str()
+    last_update_tstmp = page.get_concurent_timestamp()
     if page.display_station_values:
         mean_value = 0.0
         count = 0
         points = CPoint.objects.filter(chart_page__id=page.id)
         for point in points:
-            point.setattr('value', fetch_value(point, last_update))
+            point.value= fetch_value(point, last_update_tstmp)
             if point.value is not None:
                 mean_value+=point.value*point.weight
-                count+=weight
+                count+=point.weight
         if count>0:
             mean_value/=count
     other_pages = None

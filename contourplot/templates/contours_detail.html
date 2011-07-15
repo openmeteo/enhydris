@@ -25,6 +25,33 @@
     <p>
     {% trans "Image nominal timestamp: " %}{{last_update}}. {{ page.timestamp_notice }}
     </p>
+    {% if page.display_station_values %}
+        <hr style="width:98%;height:1px; text-align: left; border-width: 1px; border-color: #ccc;">
+        <p>
+            <table>
+                <thead>
+                    <tr>
+                    <th>{% trans "Station" %}</th>
+                    <th>{% trans "Weight" %}</th>
+                    <th>{% trans "Value" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for point in points %}
+                    <tr>
+                    <td>{{ point.display_name }}</td>
+                    <td>{{ point.weight|floatformat:2 }}</td>
+                    <td>{{ point.value|floatformat:2 }}</td>
+                    </tr>
+                {% endfor %}
+                <tfoot>
+                    <tr>
+                    <th colspan=2>Mean</th><th>{{ mean_value|floatformat:2 }}</th>
+                    </tr>
+                </tfoot> 
+            </table>
+        </p>
+    {% endif %}
     {% if other_pages %}
         <hr style="width:98%;height:1px; text-align: left; border-width: 1px; border-color: #ccc;">
         <h3>

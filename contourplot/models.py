@@ -110,7 +110,9 @@ class ChartPage(models.Model):
         if time_step.length_months>=1:
     		tstamp = ts.previous(tstamp)
 ###############################################################################
-        if now-tstamp<timedelta(minutes=self.data_available_after_x_minutes):
+        tstamp2 = tstamp
+        if self.up_timestamp: tstamp2 = ts.previous(tstamp2)
+        if now-tstamp2<timedelta(minutes=self.data_available_after_x_minutes):
             tstamp = ts.previous(tstamp)
         return tstamp
 
