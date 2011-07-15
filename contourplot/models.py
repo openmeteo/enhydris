@@ -83,6 +83,13 @@ class ChartPage(models.Model):
                                         choices = AVAILABLE_BOUNDARY_MODES)
     timestamp_notice = models.CharField(max_length=80, null=False,
                                         blank=True)
+    up_timestamp = models.BooleanField(default=False,
+                  help_text='By default down timestamp is used. '
+                            'Use up timestamp for the cases of '
+                            'incomplete time intervalas, containing '
+                            'current date / time.')
+    display_station_values = models.BooleanField(default=False,
+                  help_text='Display station values on page')
 
     def __unicode__(self):
         return self.name
@@ -91,15 +98,17 @@ class ChartPage(models.Model):
         time_step = self.time_step
         now = datetime.now(utc).replace(second=0, microsecond=0, tzinfo=None) 
         now+= timedelta(minutes = self.utc_offset_minutes)
+############################
+# Maybe nominal_offset should be that of the time_step..
         ts = TimeStep(length_minutes = time_step.length_minutes,
                       length_months = time_step.length_months,
                       nominal_offset = (self.ts_offset_minutes,
                                         self.ts_offset_months))
-        tstamp = ts.down(now)
+        tstamp = ts.down(now) if not self.up_timestamp else ts.up(now)
 #########WARNING!!! This is a temp work-arround!!! Find a more general ########
 #########Solution. Stefanos 2011-05-31  #######################################
         if time_step.length_months>=1:
-		tstamp = ts.previous(tstamp)
+    		tstamp = ts.previous(tstamp)
 ###############################################################################
         if now-tstamp<timedelta(minutes=self.data_available_after_x_minutes):
             tstamp = ts.previous(tstamp)

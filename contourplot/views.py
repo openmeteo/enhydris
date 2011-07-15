@@ -25,6 +25,28 @@ def last_update(request, urlcode, **kwargs):
                         mimetype='text/plain')
 
 
+class DummyRequest:
+    def __init__(self, method, GET):
+        self.method = method
+        self.GET = GET
+
+
+def fetch_value(point, date):
+    dummyrequest = DummyRequest('GET', {'object_id': point.timeseries.id,
+                                'date': date.strftime('%Y-%m-%d'),
+                                'time': date.strftime('%H:%M'),
+                                'last': 'moment', 'exact_datetime': 'true'})
+    try:
+        v = json.loads(timeseries_data(dummyrequest).content)[u'data'][0][1]
+        if v!=u'null':
+            v = float(v)
+        else:
+            v = None
+    except:
+        v = None
+    return v
+
+
 def contourpage_detail(request, urlcode, **kwargs):
     kwargs["queryset"] = ChartPage.objects.all()
     page = get_object_or_404(ChartPage, url_name = urlcode)
@@ -43,6 +65,17 @@ def contourpage_detail(request, urlcode, **kwargs):
     x_thumb = 140
     y_thumb = x_thumb*y_dim/x_dim
     last_update = page.get_concurent_timestamp_str()
+    if page.display_station_values:
+        mean_value = 0.0
+        count = 0
+        points = CPoint.objects.filter(chart_page__id=page.id)
+        for point in points:
+            point.setattr('value', fetch_value(point, last_update))
+            if point.value is not None:
+                mean_value+=point.value*point.weight
+                count+=weight
+        if count>0:
+            mean_value/=count
     other_pages = None
     try:
         other_pages = OtherPlot.objects.filter(page__id=page.id)
@@ -54,13 +87,10 @@ def contourpage_detail(request, urlcode, **kwargs):
                                'other_pages': other_pages,
                                'x_dim': x_dim, 'y_dim': y_dim,
                                'x_thumb': x_thumb, 'y_thumb': y_thumb}
+    if page.display_station_values:
+        kwargs["extra_context"]['points'] = points
+        kwargs["extra_context"]['mean_value'] = mean_value
     return list_detail.object_detail(request, object_id = object_id, **kwargs)
-
-
-class DummyRequest:
-    def __init__(self, method, GET):
-        self.method = method
-        self.GET = GET
 
 
 def create_contours(imgurl):
@@ -100,6 +130,7 @@ def create_contours(imgurl):
                          chart_large_dimension)),'png')))
     if not (page.always_refresh or not os.path.exists(filename)):
         return filename
+# The two following lines may be useless and erroneous. Check please.
     filedate = filedate+timedelta(minutes=page.ts_offset_minutes)
     filedate = inc_month(filedate, page.ts_offset_months)
     page_id = page.id
@@ -108,17 +139,8 @@ def create_contours(imgurl):
     s =''
     for point in points:
         (x, y) = point.point.point.transform(page.chart_bounds_srid , clone=True)
-        dummyrequest = DummyRequest('GET', {'object_id': point.timeseries.id,
-                                    'date': filedate.strftime('%Y-%m-%d'),
-                                    'time': filedate.strftime('%H:%M'),
-                                    'last': 'moment', 'exact_datetime': 'true'})
-        try:
-            v = json.loads(timeseries_data(dummyrequest).content)[u'data'][0][1]
-            if v!=u'null':
-                v = float(v)
-            else:
-                continue
-        except:
+        v = fetch_value(point, filedate)
+        if v is None:
             continue
         a.append((x, y, v, point.display_name))
     db_opts_list = ('contours_font_size', 'labels_format', 'draw_contours',

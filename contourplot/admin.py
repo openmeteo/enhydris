@@ -31,6 +31,7 @@ class ChartPageAdmin(admin.ModelAdmin):
                     ('side_text', 'timestamp_notice'),
                     ('boundary_distance_factor', 'boundary_value',
                      'boundary_mode'),
+                    ('up_timestamp','display_station_values'),
                 )}),)
 
     list_display = ('id', 'name', 'url_name')
