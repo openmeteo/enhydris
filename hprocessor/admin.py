@@ -23,7 +23,8 @@ class ProcessUnitAdmin(admin.ModelAdmin):
                   'method', 'output_timeseries',
                   'append_only',
                   ('aggregation_missing_allowed',
-                  'aggregation_missing_flag'))} ),)
+                  'aggregation_missing_flag',
+                  'aggregation_last_incomplete'))} ),)
 
     inlines = [VariableInline,]
     list_display = ('id', 'batch', 'order', 'method', 'name')

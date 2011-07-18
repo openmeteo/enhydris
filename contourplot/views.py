@@ -132,8 +132,10 @@ def create_contours(imgurl):
     if not (page.always_refresh or not os.path.exists(filename)):
         return filename
 # The two following lines may be useless and erroneous. Check please.
-    filedate = filedate+timedelta(minutes=page.ts_offset_minutes)
-    filedate = inc_month(filedate, page.ts_offset_months)
+# Commenting the following two lines, prety sure errors,
+# Stefanos 2011-07-18
+#    filedate = filedate+timedelta(minutes=page.ts_offset_minutes)
+#    filedate = inc_month(filedate, page.ts_offset_months)
     page_id = page.id
     points = CPoint.objects.filter(chart_page=page_id)
     a = []
