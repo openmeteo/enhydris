@@ -19,12 +19,16 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DATABASE_ENGINE = 'postgresql_psycopg2'
-DATABASE_NAME = 'enhydris_test'
-DATABASE_USER = 'enhydris'
-DATABASE_PASSWORD = 'changeme'
-DATABASE_HOST = 'localhost'
-DATABASE_PORT = '5432'
+DATABASES =  {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'enhydris_test',
+        'USER': 'enhydris',
+        'PASSWORD': 'changeme',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
 
 TIME_ZONE = 'Europe/Athens'
 
