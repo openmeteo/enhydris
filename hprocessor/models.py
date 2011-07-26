@@ -58,6 +58,11 @@ class ProcessUnit(models.Model):
                                default='MISSING',
                                help_text= 'Has meaning only if '
                                           'method = Aggregation')
+    aggregation_last_incomplete = models.BooleanField(default = False,
+                     help_text= 'Last aggregated time series record '
+                                'could be derived from an incomplete '
+                                'month, or year etc.')
+
     def __unicode__(self):
         return '%s - %s - %s'%(unicode(self.batch), self.method,
                                self.name)
