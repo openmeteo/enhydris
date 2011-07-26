@@ -79,9 +79,11 @@ def station_detail(request, *args, **kwargs):
         if 'enhydris.hchartpages' in settings.INSTALLED_APPS:
             from enhydris.hchartpages.models import ChartPage
             chart_exists = ChartPage.objects.filter(url_int_alias=stat.id).exists()
+    use_open_layers = settings.USE_OPEN_LAYERS and\
+                      stat.srid and stat.point
     kwargs["extra_context"] = {"owner":owner,
         "enabled_user_content":settings.USERS_CAN_ADD_CONTENT,
-        "use_open_layers": settings.USE_OPEN_LAYERS,
+        "use_open_layers": use_open_layers,
         "anonymous_can_download_data": anonymous_can_download_data,
         "display_copyright": display_copyright,
         "chart_exists": chart_exists}
