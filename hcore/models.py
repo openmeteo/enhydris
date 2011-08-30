@@ -506,11 +506,6 @@ class IntervalType(Lookup):
     def __unicode__(self):
         return self.descr
 
-# Function to call on Timeseries predelete to remove ts_records
-def delete_ts_records(sender, instance, **kwargs):
-    ts = timeseries.Timeseries(int(instance.id))
-    ts.delete_from_db(db_connection)
-
 class Timeseries(models.Model):
     # for db sync issues
     original_id = models.IntegerField(null=True, blank=True, editable=False)
@@ -594,7 +589,28 @@ class Timeseries(models.Model):
                 raise Exception(_("Invalid time step: nominal offsets must be both null or both not null"))
         super(Timeseries, self).save(force_insert, force_update, *args, **kwargs)
 
-signals.pre_delete.connect(delete_ts_records, Timeseries)
+
+# The ts_records table was never intended to be a Django model; in fact it was
+# originally created by plain SQL; however, this caused some problems (see
+# ticket #245), and therefore it was changed to be a Django model. However, it
+# should not be used as a Django model; it should be manipulated through
+# pthelma.timeseries.Timeseries methods read_from_db(), write_to_db(), and
+# append_to_db(). (Besides, in the future the internal are very likely to
+# change, and the ts_records table is likely to be removed, and instead there
+# will be a FileField in the Timeseries model.)
+
+class BlobField(models.Field):
+    def db_type(self, connection):
+        return 'bytea'
+
+class TsRecords(models.Model):
+    id = models.ForeignKey(Timeseries, primary_key=True, db_column='id')
+    top = models.TextField(blank=True)
+    middle = BlobField(null=True, blank=True)
+    bottom = models.TextField()
+    class Meta:
+        db_table = 'ts_records'
+
 
 # Profile creation upon user registration
 def user_post_save(sender, instance, **kwargs):

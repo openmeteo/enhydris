@@ -7,21 +7,6 @@ def after_syncdb(sender, **kwargs):
     if sender.__name__!='enhydris.hcore.models': return
     cursor = connection.cursor()
 
-    sys.stderr.write("Creating table ts_records...\n")
-    try:
-        cursor.execute("""CREATE TABLE ts_records
-            (id INTEGER NOT NULL PRIMARY KEY,
-            top TEXT NOT NULL, middle BYTEA, bottom TEXT NOT NULL,
-            CONSTRAINT ts_records_id FOREIGN KEY (id)
-                REFERENCES hcore_timeseries(id)
-                DEFERRABLE INITIALLY IMMEDIATE
-            )""")
-        transaction.commit()
-    except:
-        sys.stderr.write(
-            "ts_records creation failed; presumably it already existed\n")
-        transaction.rollback()
-
     sys.stderr.write("Creating database function timeseries_start_date...\n")
     try:
         cursor.execute("""CREATE FUNCTION timeseries_start_date(aid INTEGER) 
