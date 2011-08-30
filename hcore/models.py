@@ -603,6 +603,9 @@ class BlobField(models.Field):
     def db_type(self, connection):
         return 'bytea'
 
+from south.modelsinspector import add_introspection_rules
+add_introspection_rules([], ["^enhydris\.hcore\.models\.BlobField"])
+
 class TsRecords(models.Model):
     id = models.ForeignKey(Timeseries, primary_key=True, db_column='id')
     top = models.TextField(blank=True)
