@@ -1,1 +1,402 @@
-[{"pk": 1, "model": "hcore.lentity", "fields": {"remarks": "Test Owner", "remarks_alt": "", "last_modified": "2010-05-10 14:21:11", "original_id": null, "original_db": null}}, {"pk": 2, "model": "hcore.lentity", "fields": {"remarks": "", "remarks_alt": "", "last_modified": "2010-05-10 14:26:01", "original_id": null, "original_db": null}}, {"pk": 3, "model": "hcore.lentity", "fields": {"remarks": "", "remarks_alt": "", "last_modified": "2010-05-10 14:26:22", "original_id": null, "original_db": null}}, {"pk": 3, "model": "hcore.person", "fields": {"first_name": "", "last_name": "Test Person", "last_name_alt": "", "first_name_alt": "", "middle_names": "", "middle_names_alt": "", "initials_alt": "", "initials": ""}}, {"pk": 2, "model": "hcore.organization", "fields": {"acronym": "", "acronym_alt": "", "name": "Test Organization", "name_alt": ""}}, {"pk": 5, "model": "hcore.gentity", "fields": {"original_db": null, "short_name": "", "water_division": null, "political_division": null, "remarks_alt": "", "name_alt": "", "last_modified": "2010-05-10 14:23:51", "water_basin": null, "short_name_alt": "", "remarks": "", "original_id": null, "name": "Test Garea"}}, {"pk": 6, "model": "hcore.gentity", "fields": {"original_db": null, "short_name": "", "water_division": null, "political_division": null, "remarks_alt": "", "name_alt": "", "last_modified": "2010-05-10 14:24:08", "water_basin": null, "short_name_alt": "", "remarks": "", "original_id": null, "name": "Test Gentity"}}, {"pk": 3, "model": "hcore.gentity", "fields": {"original_db": null, "short_name": "", "water_division": null, "political_division": null, "remarks_alt": "", "name_alt": "", "last_modified": "2010-05-10 14:20:58", "water_basin": null, "short_name_alt": "", "remarks": "", "original_id": null, "name": "Test Political Division"}}, {"pk": 4, "model": "hcore.gentity", "fields": {"original_db": null, "short_name": "", "water_division": 2, "political_division": 3, "remarks_alt": "", "name_alt": "", "last_modified": "2010-05-10 14:21:31", "water_basin": 1, "short_name_alt": "", "remarks": "", "original_id": null, "name": "Test Station"}}, {"pk": 1, "model": "hcore.gentity", "fields": {"original_db": null, "short_name": "", "water_division": null, "political_division": null, "remarks_alt": "", "name_alt": "", "last_modified": "2010-05-10 14:20:41", "water_basin": null, "short_name_alt": "", "remarks": "", "original_id": null, "name": "Test Water Basin"}}, {"pk": 2, "model": "hcore.gentity", "fields": {"original_db": null, "short_name": "", "water_division": null, "political_division": null, "remarks_alt": "", "name_alt": "", "last_modified": "2010-05-10 14:20:49", "water_basin": null, "short_name_alt": "", "remarks": "", "original_id": null, "name": "Test Water Division"}}, {"pk": 4, "model": "hcore.gpoint", "fields": {"abscissa": null, "altitude": null, "asrid": null, "approximate": false, "ordinate": null, "srid": null}}, {"pk": 5, "model": "hcore.garea", "fields": {"area": null}}, {"pk": 3, "model": "hcore.garea", "fields": {"area": null}}, {"pk": 1, "model": "hcore.garea", "fields": {"area": null}}, {"pk": 2, "model": "hcore.garea", "fields": {"area": null}}, {"pk": 3, "model": "hcore.politicaldivision", "fields": {"code": "", "parent": null}}, {"pk": 2, "model": "hcore.waterdivision", "fields": {}}, {"pk": 1, "model": "hcore.waterbasin", "fields": {"parent": null, "water_division": null}}, {"pk": 1, "model": "hcore.gentityaltcodetype", "fields": {"descr_alt": "", "last_modified": "2010-05-10 14:24:18", "original_id": null, "original_db": null, "descr": "Test Gentity Alt Code Type"}}, {"pk": 1, "model": "hcore.filetype", "fields": {"original_db": null, "descr": "Test File Type", "descr_alt": "", "last_modified": "2010-05-10 14:20:11", "original_id": null, "mime_type": "text/plain"}}, {"pk": 1, "model": "hcore.gentityfile", "fields": {"original_db": null, "descr": "Test Gentity File", "file_type": 1, "gentity": 4, "content": "gentityfile/test.txt", "remarks": "", "descr_alt": "Test Gentity File", "last_modified": "2010-05-10 14:25:20", "original_id": null, "date": null, "remarks_alt": ""}}, {"pk": 1, "model": "hcore.eventtype", "fields": {"descr_alt": "", "last_modified": "2010-05-10 14:19:36", "original_id": null, "original_db": null, "descr": "Test Event Type"}}, {"pk": 1, "model": "hcore.stationtype", "fields": {"descr_alt": "", "last_modified": "2010-05-10 14:21:20", "original_id": null, "original_db": null, "descr": "Test Station Type"}}, {"pk": 4, "model": "hcore.station", "fields": {"end_date": null,  "is_active": false, "is_automatic": false, "owner": 1, "type": 1, "start_date": null}}, {"pk": 1, "model": "hcore.instrumenttype", "fields": {"descr_alt": "", "last_modified": "2010-05-10 14:25:31", "original_id": null, "original_db": null, "descr": "Test Instrument Type"}}, {"pk": 1, "model": "hcore.instrument", "fields": {"original_db": null, "end_date": null, "is_active": false, "name_alt": "", "name": "Test Instrument", "station": 4, "original_id": null, "last_modified": "2010-05-10 14:25:50", "remarks": "", "remarks_alt": "", "model": "", "type": 1, "start_date": null, "manufacturer": ""}}, {"pk": 1, "model": "hcore.variable", "fields": {"descr_alt": "", "last_modified": "2010-05-10 14:21:46", "original_id": null, "original_db": null, "descr": "Test Variable"}}, {"pk": 1, "model": "hcore.unitofmeasurement", "fields": {"original_db": null, "descr": "Test Unit Of Measurement", "symbol": "+", "descr_alt": "", "last_modified": "2010-05-10 14:22:21", "original_id": null, "variables": [1]}}, {"pk": 1, "model": "hcore.timezone", "fields": {"code": "Test Time Zone", "utc_offset": 2, "last_modified": "2010-05-10 14:22:29", "original_id": null, "original_db": null}}, {"pk": 1, "model": "hcore.timestep", "fields": {"original_db": null, "descr": "Test Time Step", "length_minutes": 5, "descr_alt": "", "last_modified": "2010-05-10 14:23:00", "original_id": null, "length_months": 0}}, {"pk": 1, "model": "hcore.timeseries", "fields": {"unit_of_measurement": 1, "original_db": null, "nominal_offset_minutes": null, "instrument": null, "gentity": 4, "precision": null, "time_zone": 1, "remarks": "", "actual_offset_months": null, "last_modified": "2010-05-10 14:22:32", "original_id": null, "nominal_offset_months": null, "variable": 1, "time_step": null, "actual_offset_minutes": null, "name": "Test Timeseries"}}]
+[
+    {   "pk": 1,
+        "model": "hcore.lentity",
+        "fields": {
+            "remarks": "Test Owner",
+            "remarks_alt": "",
+            "last_modified": "2010-05-10 14:21:11",
+            "original_id": null,
+            "original_db": null
+        }
+    },
+
+    {   "pk": 2,
+        "model": "hcore.lentity",
+        "fields": {
+            "remarks": "",
+            "remarks_alt": "",
+            "last_modified": "2010-05-10 14:26:01",
+            "original_id": null,
+            "original_db": null
+        }
+    },
+
+    {   "pk": 3,
+        "model": "hcore.lentity",
+        "fields": {
+            "remarks": "",
+            "remarks_alt": "",
+            "last_modified": "2010-05-10 14:26:22",
+            "original_id": null,
+            "original_db": null
+        }
+    },
+
+    {   "pk": 3,
+        "model": "hcore.person",
+        "fields": {
+            "first_name": "",
+            "last_name": "Test Person",
+            "last_name_alt": "",
+            "first_name_alt": "",
+            "middle_names": "",
+            "middle_names_alt": "",
+            "initials_alt": "",
+            "initials": ""
+        }
+    },
+
+    {   "pk": 2,
+        "model": "hcore.organization",
+        "fields": {
+            "acronym": "",
+            "acronym_alt": "",
+            "name": "Test Organization",
+            "name_alt": ""
+        }
+    },
+
+    {   "pk": 5,
+        "model": "hcore.gentity",
+        "fields": {
+            "original_db": null,
+            "short_name": "",
+            "water_division": null,
+            "political_division": null,
+            "remarks_alt": "",
+            "name_alt": "",
+            "last_modified": "2010-05-10 14:23:51",
+            "water_basin": null,
+            "short_name_alt": "",
+            "remarks": "",
+            "original_id": null,
+            "name": "Test Garea"
+        }
+    },
+
+    {   "pk": 6,
+        "model": "hcore.gentity",
+        "fields": {
+            "original_db": null,
+            "short_name": "",
+            "water_division": null,
+            "political_division": null,
+            "remarks_alt": "",
+            "name_alt": "",
+            "last_modified": "2010-05-10 14:24:08",
+            "water_basin": null,
+            "short_name_alt": "",
+            "remarks": "",
+            "original_id": null,
+            "name": "Test Gentity"
+        }
+    },
+
+    {   "pk": 3,
+        "model": "hcore.gentity",
+        "fields": {
+            "original_db": null,
+            "short_name": "",
+            "water_division": null,
+            "political_division": null,
+            "remarks_alt": "",
+            "name_alt": "",
+            "last_modified": "2010-05-10 14:20:58",
+            "water_basin": null,
+            "short_name_alt": "",
+            "remarks": "",
+            "original_id": null,
+            "name": "Test Political Division"
+        }
+    },
+
+    {   "pk": 4,
+        "model": "hcore.gentity",
+        "fields": {
+            "original_db": null,
+            "short_name": "",
+            "water_division": 2,
+            "political_division": 3,
+            "remarks_alt": "",
+            "name_alt": "",
+            "last_modified": "2010-05-10 14:21:31",
+            "water_basin": 1,
+            "short_name_alt": "",
+            "remarks": "",
+            "original_id": null,
+            "name": "Test Station"
+        }
+    },
+
+    {   "pk": 1,
+        "model": "hcore.gentity",
+        "fields": {
+            "original_db": null,
+            "short_name": "",
+            "water_division": null,
+            "political_division": null,
+            "remarks_alt": "",
+            "name_alt": "",
+            "last_modified": "2010-05-10 14:20:41",
+            "water_basin": null,
+            "short_name_alt": "",
+            "remarks": "",
+            "original_id": null,
+            "name": "Test Water Basin"
+        }
+    },
+
+    {   "pk": 2,
+        "model": "hcore.gentity",
+        "fields": {
+            "original_db": null,
+            "short_name": "",
+            "water_division": null,
+            "political_division": null,
+            "remarks_alt": "",
+            "name_alt": "",
+            "last_modified": "2010-05-10 14:20:49",
+            "water_basin": null,
+            "short_name_alt": "",
+            "remarks": "",
+            "original_id": null,
+            "name": "Test Water Division"
+        }
+    },
+
+    {   "pk": 4,
+        "model": "hcore.gpoint",
+        "fields": {
+            "abscissa": null,
+            "altitude": null,
+            "asrid": null,
+            "approximate": false,
+            "ordinate": null,
+            "srid": null
+        }
+    },
+
+    {   "pk": 5,
+        "model": "hcore.garea",
+        "fields": {
+            "area": null
+        }
+    },
+
+    {   "pk": 3,
+        "model": "hcore.garea",
+        "fields": {
+            "area": null
+        }
+    },
+
+    {   "pk": 1,
+        "model": "hcore.garea",
+        "fields": {
+            "area": null
+        }
+    },
+
+    {   "pk": 2,
+        "model": "hcore.garea",
+        "fields": {
+            "area": null
+        }
+    },
+
+    {   "pk": 3,
+        "model": "hcore.politicaldivision",
+        "fields": {
+            "code": "",
+            "parent": null
+        }
+    },
+
+    {   "pk": 2,
+        "model": "hcore.waterdivision",
+        "fields": {}
+    },
+
+    {   "pk": 1,
+        "model": "hcore.waterbasin",
+        "fields": {
+            "parent": null,
+            "water_division": null
+        }
+    },
+
+    {   "pk": 1,
+        "model": "hcore.gentityaltcodetype",
+        "fields": {
+            "descr_alt": "",
+            "last_modified": "2010-05-10 14:24:18",
+            "original_id": null,
+            "original_db": null,
+            "descr": "Test Gentity Alt Code Type"
+        }
+    },
+
+    {   "pk": 1,
+        "model": "hcore.filetype",
+        "fields": {
+            "original_db": null,
+            "descr": "Test File Type",
+            "descr_alt": "",
+            "last_modified": "2010-05-10 14:20:11",
+            "original_id": null,
+            "mime_type": "text/plain"
+        }
+    },
+
+    {   "pk": 1,
+        "model": "hcore.gentityfile",
+        "fields": {
+            "original_db": null,
+            "descr": "Test Gentity File",
+            "file_type": 1,
+            "gentity": 4,
+            "content": "gentityfile/test.txt",
+            "remarks": "",
+            "descr_alt": "Test Gentity File",
+            "last_modified": "2010-05-10 14:25:20",
+            "original_id": null,
+            "date": null,
+            "remarks_alt": ""
+        }
+    },
+
+    {   "pk": 1,
+        "model": "hcore.eventtype",
+        "fields": {
+            "descr_alt": "",
+            "last_modified": "2010-05-10 14:19:36",
+            "original_id": null,
+            "original_db": null,
+            "descr": "Test Event Type"
+        }
+    },
+
+    {   "pk": 1,
+        "model": "hcore.stationtype",
+        "fields": {
+            "descr_alt": "",
+            "last_modified": "2010-05-10 14:21:20",
+            "original_id": null,
+            "original_db": null,
+            "descr": "Test Station Type"
+        }
+    },
+
+    {   "pk": 4,
+        "model": "hcore.station",
+        "fields": {
+            "end_date": null,
+            "is_active": false,
+            "is_automatic": false,
+            "owner": 1,
+            "type": 1,
+            "start_date": null
+        }
+    },
+
+    {   "pk": 1,
+        "model": "hcore.instrumenttype",
+        "fields": {
+            "descr_alt": "",
+            "last_modified": "2010-05-10 14:25:31",
+            "original_id": null,
+            "original_db": null,
+            "descr": "Test Instrument Type"
+        }
+    },
+
+    {   "pk": 1,
+        "model": "hcore.instrument",
+        "fields": {
+            "original_db": null,
+            "end_date": null,
+            "is_active": false,
+            "name_alt": "",
+            "name": "Test Instrument",
+            "station": 4,
+            "original_id": null,
+            "last_modified": "2010-05-10 14:25:50",
+            "remarks": "",
+            "remarks_alt": "",
+            "model": "",
+            "type": 1,
+            "start_date": null,
+            "manufacturer": ""
+        }
+    },
+
+    {   "pk": 1,
+        "model": "hcore.variable",
+        "fields": {
+            "descr_alt": "",
+            "last_modified": "2010-05-10 14:21:46",
+            "original_id": null,
+            "original_db": null,
+            "descr": "Test Variable"
+        }
+    },
+
+    {   "pk": 1,
+        "model": "hcore.unitofmeasurement",
+        "fields": {
+            "original_db": null,
+            "descr": "Test Unit Of Measurement",
+            "symbol": "+",
+            "descr_alt": "",
+            "last_modified": "2010-05-10 14:22:21",
+            "original_id": null,
+            "variables": [1]
+        }
+    },
+
+    {   "pk": 1,
+        "model": "hcore.timezone",
+        "fields": {
+            "code": "Test Time Zone",
+            "utc_offset": 2,
+            "last_modified": "2010-05-10 14:22:29",
+            "original_id": null,
+            "original_db": null
+        }
+    },
+
+    {   "pk": 1,
+        "model": "hcore.timestep",
+        "fields": {
+            "original_db": null,
+            "descr": "Test Time Step",
+            "length_minutes": 5,
+            "descr_alt": "",
+            "last_modified": "2010-05-10 14:23:00",
+            "original_id": null,
+            "length_months": 0
+        }
+    },
+
+    {   "pk": 1,
+        "model": "hcore.timeseries",
+        "fields": {
+            "unit_of_measurement": 1,
+            "original_db": null,
+            "nominal_offset_minutes": null,
+            "instrument": null,
+            "gentity": 4,
+            "precision": null,
+            "time_zone": 1,
+            "remarks": "",
+            "actual_offset_months": null,
+            "last_modified": "2010-05-10 14:22:32",
+            "original_id": null,
+            "nominal_offset_months": null,
+            "variable": 1,
+            "time_step": null,
+            "actual_offset_minutes": null,
+            "name": "Test Timeseries"
+        }
+    }
+]
