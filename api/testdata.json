@@ -167,12 +167,11 @@
     {   "pk": 4,
         "model": "hcore.gpoint",
         "fields": {
-            "abscissa": null,
             "altitude": null,
             "asrid": null,
             "approximate": false,
-            "ordinate": null,
-            "srid": null
+            "srid": null,
+            "point": null
         }
     },
 
