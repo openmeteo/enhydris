@@ -1,4 +1,3 @@
-from itertools import takewhile
 import unittest
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -79,10 +78,13 @@ class TsTestCase(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
 
         # check fiLe
-        lines = sum(1 for line in response.content.split('\n'))
-        start = takewhile(lambda x: not x=='', response.content.split('\n'))
-        lines = lines - sum(1 for s in start.next())
+        from itertools import takewhile
+        lines = response.content.splitlines()
+        linecount = len(lines)
+        headerlinecount = sum([1 for x in takewhile(lambda x: x!='', lines)]
+                                                                        ) + 1
+        datalinecount = linecount - headerlinecount
 
-        self.assertEqual(lines,12872)
+        self.assertEqual(datalinecount,12872)
 
         self.client.logout()
