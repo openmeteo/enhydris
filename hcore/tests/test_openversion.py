@@ -111,7 +111,7 @@ class OpenVTestCase(TestCase):
         url = "/stations/edit/%s/" % str(s.pk)
         resp = self.client.get(url)
         self.assertEquals(resp.status_code, 200)
-        self.assertTemplateUsed(resp, "hcore/station_edit.html")
+        self.assertTemplateUsed(resp, "station_edit.html")
 
         # delete my station. this should work
         url = "/stations/delete/%s/" % str(s.pk)
@@ -160,7 +160,7 @@ class OpenVTestCase(TestCase):
         url = "/stations/edit/%s/" % str(s.pk)
         resp = self.client.get(url)
         self.assertEquals(resp.status_code, 200)
-        self.assertTemplateUsed(resp, "hcore/station_edit.html")
+        self.assertTemplateUsed(resp, "station_edit.html")
 
         # delete maintaining station. this shouldn't work
         url = "/stations/delete/%s/" % str(s.pk)
@@ -217,7 +217,7 @@ class OpenVTestCase(TestCase):
         url = "/timeseries/edit/%s/" % str(t.pk)
         resp = self.client.get(url)
         self.assertEquals(resp.status_code, 200)
-        self.assertTemplateUsed(resp, "hcore/timeseries_edit.html")
+        self.assertTemplateUsed(resp, "timeseries_edit.html")
 
         # delete my timeseries. this should work
         url = "/timeseries/delete/%s/" % str(t.pk)
@@ -255,7 +255,7 @@ class OpenVTestCase(TestCase):
         url = "/timeseries/edit/%s/" % str(t.pk)
         resp = self.client.get(url)
         self.assertEquals(resp.status_code, 200)
-        self.assertTemplateUsed(resp, "hcore/timeseries_edit.html")
+        self.assertTemplateUsed(resp, "timeseries_edit.html")
 
         # delete maintaining timeseries, this should work
         url = "/timeseries/delete/%s/" % str(t.pk)
@@ -311,7 +311,7 @@ class OpenVTestCase(TestCase):
         url = "/instrument/edit/%s/" % str(i.pk)
         resp = self.client.get(url, follow=True)
         self.assertEquals(resp.status_code, 200)
-        self.assertTemplateUsed(resp, "hcore/instrument_edit.html")
+        self.assertTemplateUsed(resp, "instrument_edit.html")
 
         # delete my station. this should work
         url = "/instrument/delete/%s/" % str(i.pk)
@@ -350,7 +350,7 @@ class OpenVTestCase(TestCase):
         url = "/instrument/edit/%s/" % str(i.pk)
         resp = self.client.get(url, follow=True)
         self.assertEquals(resp.status_code, 200)
-        self.assertTemplateUsed(resp, "hcore/instrument_edit.html")
+        self.assertTemplateUsed(resp, "instrument_edit.html")
 
         # delete my station. this should work
         url = "/instrument/delete/%s/" % str(i.pk)
@@ -371,7 +371,7 @@ class OpenVTestCase(TestCase):
             url = "/add/%s/?_popup=1" % model
             resp = self.client.get(url)
             self.assertEquals(resp.status_code, 200, "Error in page %s." % url)
-            self.assertTemplateUsed(resp, "hcore/model_add.html")
+            self.assertTemplateUsed(resp, "model_add.html")
 
         self.client.logout()
 
