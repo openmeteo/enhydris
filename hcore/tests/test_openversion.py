@@ -4,6 +4,7 @@ from django.test import TestCase
 from enhydris.hcore.views import ALLOWED_TO_EDIT
 from enhydris.hcore.models import *
 
+
 class OpenVTestCase(TestCase):
     """
     Test that the behaviour of the site when USERS_CAN_ADD_CONTENT is set to
@@ -12,7 +13,6 @@ class OpenVTestCase(TestCase):
     fixtures = ['hcore/initial_data/groups.json',]
 
     def setUp(self):
-
         self.assertEqual(settings.USERS_CAN_ADD_CONTENT, True, ("You need to"
         " have USERS_CAN_ADD_CONTENT=True in your settings for this test to"
         " run"))
@@ -77,7 +77,6 @@ class OpenVTestCase(TestCase):
                 (page_url, page.status_code, 200))
 
         self.client.logout()
-
 
     def testStationPermissions(self):
         """
@@ -169,7 +168,6 @@ class OpenVTestCase(TestCase):
 
         self.client.logout()
         s.delete()
-
 
     def testTimeseriesPermissions(self):
         """
@@ -358,8 +356,6 @@ class OpenVTestCase(TestCase):
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(Station.objects.filter(name='instrument_test').count(),0)
 
-
-
     def testGenericModelCreation(self):
         """
         Test the generic model forms
@@ -374,5 +370,3 @@ class OpenVTestCase(TestCase):
             self.assertTemplateUsed(resp, "model_add.html")
 
         self.client.logout()
-
-
