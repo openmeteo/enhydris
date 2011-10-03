@@ -656,7 +656,8 @@ def testmap_view(request, *args, **kwargs):
         context_instance=RequestContext(request))
 
 def embedmap_view(request, *args, **kwargs):
-    return render_to_response('embedmap.html', {},
+    return render_to_response('embedmap.html', 
+                              {'use_open_layers': settings.USE_OPEN_LAYERS,},
         context_instance=RequestContext(request))
 
 
