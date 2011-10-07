@@ -62,6 +62,12 @@ class ProcessUnit(models.Model):
                      help_text= 'Last aggregated time series record '
                                 'could be derived from an incomplete '
                                 'month, or year etc.')
+    aggregation_all_incomplete = models.BooleanField(default = False,
+                     help_text= 'Last aggregated time series record '
+                                'could be derived from an incomplete '
+                                'month, or year etc. Then all '
+                                'aggregated records are incomplete '
+                                'to the same position')
 
     def __unicode__(self):
         return '%s - %s - %s'%(unicode(self.batch), self.method,

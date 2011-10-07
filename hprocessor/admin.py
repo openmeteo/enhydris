@@ -24,7 +24,8 @@ class ProcessUnitAdmin(admin.ModelAdmin):
                   'append_only',
                   ('aggregation_missing_allowed',
                   'aggregation_missing_flag',
-                  'aggregation_last_incomplete'))} ),)
+                  'aggregation_last_incomplete',
+                  'aggregation_all_incomplete'))} ),)
 
     inlines = [VariableInline,]
     list_display = ('id', 'batch', 'order', 'method', 'name')

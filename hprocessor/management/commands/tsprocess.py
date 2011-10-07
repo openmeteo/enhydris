@@ -53,7 +53,8 @@ def ts_aggregation(job):
                           missing_allowed=job.aggregation_missing_allowed,
                           missing_flag=job.aggregation_missing_flag,
                           append_only=job.append_only,
-                          last_incomplete=job.aggregation_last_incomplete)
+                          last_incomplete=job.aggregation_last_incomplete,
+                          all_incomplete=job.aggregation_all_incomplete)
     if not job.append_only:
         clear_timeseries_cache(job.output_timeseries.id)
 
