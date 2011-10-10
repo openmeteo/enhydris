@@ -104,8 +104,9 @@ def contourpage_detail(request, urlcode, **kwargs):
                 if v2 is not None:
                     mean_value2+=v2*point.weight
                     count2+=point.weight
-            if count>0:
+            if count1>0:
                 mean_value1/=count1
+            if count2>0:
                 mean_value2/=count2
             old_values_meta.append({'ts':atstmp, 'mv1':mean_value1, 
                                     'mv2':mean_value2})
