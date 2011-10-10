@@ -31,8 +31,10 @@ class DummyRequest:
         self.GET = GET
 
 
-def fetch_value(point, date):
-    dummyrequest = DummyRequest('GET', {'object_id': point.timeseries.id,
+def fetch_value(point, date, secondary=False):
+    timeseries = getattr(point, ('timeseries',
+                                  'secondary_timeseries')[secondary])
+    dummyrequest = DummyRequest('GET', {'object_id': timeseries.id,
                                 'date': date.strftime('%Y-%m-%d'),
                                 'time': date.strftime('%H:%M'),
                                 'last': 'moment', 'exact_datetime': 'true'})
@@ -71,12 +73,42 @@ def contourpage_detail(request, urlcode, **kwargs):
         count = 0
         points = CPoint.objects.filter(chart_page__id=page.id)
         for point in points:
+            point.old_values=[]
             point.value= fetch_value(point, last_update_tstmp)
             if point.value is not None:
                 mean_value+=point.value*point.weight
                 count+=point.weight
         if count>0:
             mean_value/=count
+        atstmp = last_update_tstmp
+        old_values_meta=[]
+        secondary_timeseries_exist = False
+        for it in range(page.display_station_old_values):
+            mean_value1 = 0.0
+            mean_value2 = 0.0
+            count1 = 0
+            count2 = 0
+            atstmp+= timedelta(minutes=-page.old_values_step_minutes)
+            atstmp = inc_month(atstmp, -page.old_values_step_months)
+            for point in points:
+                if point.secondary_timeseries:
+                    v2 = fetch_value(point, atstmp, True)
+                    secondary_timeseries_exist = True
+                else:
+                    v2 = None
+                v1 = fetch_value(point, atstmp)
+                point.old_values.append({'v1':v1, 'v2':v2})
+                if v1 is not None:
+                    mean_value1+=v1*point.weight
+                    count1+=point.weight
+                if v2 is not None:
+                    mean_value2+=v2*point.weight
+                    count2+=point.weight
+            if count>0:
+                mean_value1/=count1
+                mean_value2/=count2
+            old_values_meta.append({'ts':atstmp, 'mv1':mean_value1, 
+                                    'mv2':mean_value2})
     other_pages = None
     try:
         other_pages = OtherPlot.objects.filter(page__id=page.id)
@@ -91,6 +123,9 @@ def contourpage_detail(request, urlcode, **kwargs):
     if page.display_station_values:
         kwargs["extra_context"]['points'] = points
         kwargs["extra_context"]['mean_value'] = mean_value
+        kwargs["extra_context"]['old_values_meta'] = old_values_meta
+        kwargs["extra_context"]['secondary_timeseries_exist'] = \
+                                secondary_timeseries_exist
     return list_detail.object_detail(request, object_id = object_id, **kwargs)
 
 

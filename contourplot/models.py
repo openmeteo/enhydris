@@ -90,6 +90,11 @@ class ChartPage(models.Model):
                             'current date / time.')
     display_station_values = models.BooleanField(default=False,
                   help_text='Display station values on page')
+    display_station_old_values = models.IntegerField(default=0,
+                  help_text='Display historical values on page. '
+                            'Specify the number of old values.')
+    old_values_step_minutes = models.IntegerField(default=0)
+    old_values_step_months  = models.IntegerField(default=0)
 
     def __unicode__(self):
         return self.name
@@ -146,6 +151,9 @@ class CPoint(models.Model):
                                    related_name="cpoint_gpoint")
     timeseries = models.ForeignKey(CTimeseries,
                                    related_name='variable_timeseries')
+    secondary_timeseries = models.ForeignKey(CTimeseries,
+                                   null=True, blank=True,
+                                   related_name="variable_2nd_Timeseries")
     chart_page = models.ForeignKey(ChartPage)
     weight = models.FloatField(default=1)
     display_name = models.CharField(max_length=80, blank=True)

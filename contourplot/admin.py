@@ -32,13 +32,17 @@ class ChartPageAdmin(admin.ModelAdmin):
                     ('boundary_distance_factor', 'boundary_value',
                      'boundary_mode'),
                     ('up_timestamp','display_station_values'),
+                    ('display_station_old_values',
+                     'old_values_step_minutes',
+                     'old_values_step_months',),
                 )}),)
 
     list_display = ('id', 'name', 'url_name')
 
 class CPointAdmin(admin.ModelAdmin):
     fieldsets = ( (None, {'fields': (('display_name', 'chart_page',
-                   'point', 'timeseries', 'weight'),
+                   'point', 'timeseries', 'secondary_timeseries',
+                   'weight',),
                    )
                    }),)
 

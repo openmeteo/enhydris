@@ -34,6 +34,9 @@
                     <th>{% trans "Station" %}</th>
                     <th>{% trans "Weight" %}</th>
                     <th>{% trans "Value" %}</th>
+                    {% for old_value_meta in old_values_meta %}
+                        <th>{{ old_value_meta.ts|date:"Y/m" }}</th>
+                    {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
@@ -42,11 +45,24 @@
                     <td>{{ point.display_name }}</td>
                     <td>{{ point.weight|floatformat:2 }}</td>
                     <td>{{ point.value|floatformat:2 }}</td>
+                    {% for old_value in point.old_values %}
+                        <td>
+                            {{ old_value.v1|floatformat:2 }}
+                            {% if secondary_timeseries_exist %}/
+                            {{ old_value.v2|floatformat:2 }}{% endif %}
+                        </td>
+                    {% endfor %}
                     </tr>
                 {% endfor %}
                 <tfoot>
                     <tr>
                     <th colspan=2>Mean</th><th>{{ mean_value|floatformat:2 }}</th>
+                    {% for old_value_meta in old_values_meta %}
+                        <th>{{ old_value_meta.mv1|floatformat:2 }}
+                        {% if secondary_timeseries_exist %}/
+                        {{ old_value_meta.mv2|floatformat:2 }}
+                        {% endif %}</th>
+                    {% endfor %}
                     </tr>
                 </tfoot> 
             </table>
