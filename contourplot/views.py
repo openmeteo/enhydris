@@ -49,6 +49,14 @@ def fetch_value(point, date, secondary=False):
     return v
 
 
+def format_date(date, format):
+    if format!='%l':
+        return date.strftime(format)
+    else:
+        date2 = inc_month(date, 12)
+        return '%s-%s'%(date.strftime('%Y'),date2.strftime('%y'),)
+
+
 def contourpage_detail(request, urlcode, **kwargs):
     kwargs["queryset"] = ChartPage.objects.all()
     page = get_object_or_404(ChartPage, url_name = urlcode)
@@ -108,7 +116,9 @@ def contourpage_detail(request, urlcode, **kwargs):
                 mean_value1/=count1
             if count2>0:
                 mean_value2/=count2
-            old_values_meta.append({'ts':atstmp, 'mv1':mean_value1, 
+            old_values_meta.append({'ts':format_date(atstmp,
+                                page.old_values_date_format), 
+                                    'mv1':mean_value1, 
                                     'mv2':mean_value2})
     other_pages = None
     try:

@@ -5,6 +5,17 @@
    {{ page.name }}
 {% endblock %}
 
+{% block extracss %}
+    <style type="text/css">
+        table td, th{padding-left: 15px; padding-right: 20px; text-align: center;} 
+        tr.odd{background-color:#eeeeee;}
+        tr.even{background-color:#cccccc;}
+        tr.headers{background-color:#ddddff;}
+    </style>
+}
+{% endblock %}
+
+
 {% block content %}
     <h3>{{page.name}}</h3>
     <p><em><strong>{% trans "Time step: " %}{{ page.time_step }}</strong></em></p>
@@ -27,24 +38,27 @@
     </p>
     {% if page.display_station_values %}
         <hr style="width:98%;height:1px; text-align: left; border-width: 1px; border-color: #ccc;">
+        {% if page.old_values_title %}
+            <h3>{{ page.old_values_title }}</h3>
+        {% endif %}
         <p>
             <table>
                 <thead>
-                    <tr>
+                    <tr class="headers">
                     <th>{% trans "Station" %}</th>
                     <th>{% trans "Weight" %}</th>
                     <th>{% trans "Value" %}</th>
                     {% for old_value_meta in old_values_meta %}
-                        <th>{{ old_value_meta.ts|date:"Y/m" }}</th>
+                        <th>{{ old_value_meta.ts }}</th>
                     {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
                 {% for point in points %}
-                    <tr>
-                    <td>{{ point.display_name }}</td>
+                    <tr class="{% cycle 'odd' 'even' %}">
+                    <td><strong>{{ point.display_name }}</strong></td>
                     <td>{{ point.weight|floatformat:2 }}</td>
-                    <td>{{ point.value|floatformat:2 }}</td>
+                    <td><strong>{{ point.value|floatformat:2 }}</strong></td>
                     {% for old_value in point.old_values %}
                         <td>
                             {{ old_value.v1|floatformat:2 }}
@@ -55,7 +69,7 @@
                     </tr>
                 {% endfor %}
                 <tfoot>
-                    <tr>
+                    <tr class="headers">
                     <th colspan=2>Mean</th><th>{{ mean_value|floatformat:2 }}</th>
                     {% for old_value_meta in old_values_meta %}
                         <th>{{ old_value_meta.mv1|floatformat:2 }}
@@ -66,6 +80,10 @@
                     </tr>
                 </tfoot> 
             </table>
+        {% if page.old_values_main_value_title and page.old_values_secondary_value_title %}
+            </p><p style="text-align: right;">
+            {{ page.old_values_main_value_title }} / {{ page.old_values_secondary_value_title }}
+        {% endif %}
         </p>
     {% endif %}
     {% if other_pages %}

@@ -54,7 +54,10 @@ def login(request, *args, **kwargs):
         return auth_login(request, *args, **kwargs)
 
 def index(request):
-    return render_to_response('index.html', {},
+    from enhydris.hrain.models import Event
+    last_event = Event.objects.order_by('-id')[0]
+    return render_to_response('index.html', {"event": last_event,
+       'HRAIN_STATIC_CACHE_URL': settings.HRAIN_STATIC_CACHE_URL},
         context_instance=RequestContext(request))
 
 
@@ -81,8 +84,10 @@ def station_detail(request, *args, **kwargs):
             chart_exists = ChartPage.objects.filter(url_int_alias=stat.id).exists()
     use_open_layers = settings.USE_OPEN_LAYERS and\
                       stat.srid and stat.point
+    img_exists = os.path.exists(os.path.join(settings.MEDIA_ROOT, 'images', 'stations', str(stat.id), str(stat.id) + '_main.jpg'))
     kwargs["extra_context"] = {"owner":owner,
         "enabled_user_content":settings.USERS_CAN_ADD_CONTENT,
+        "img_exists":img_exists,
         "use_open_layers": use_open_layers,
         "anonymous_can_download_data": anonymous_can_download_data,
         "display_copyright": display_copyright,
@@ -1917,6 +1922,11 @@ def kml(request, layer):
             arow.kml = arow.point.kml
     response = render_to_kml("placemarks.kml", {'places': queryres})
     return response
+
+#Hydrologic Observatories
+def lastvalues(request):
+    return render_to_response('ho/lastvalues.html', {},
+        context_instance=RequestContext(request))
 
 def bound(request):
     agentity_id = request.GET.get('gentity_id', request.GET.get('GENTITY_ID', None));

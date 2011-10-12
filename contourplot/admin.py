@@ -34,7 +34,11 @@ class ChartPageAdmin(admin.ModelAdmin):
                     ('up_timestamp','display_station_values'),
                     ('display_station_old_values',
                      'old_values_step_minutes',
-                     'old_values_step_months',),
+                     'old_values_step_months',
+                     'old_values_title',
+                     'old_values_main_value_title',
+                     'old_values_secondary_value_title',
+                     'old_values_date_format',),
                 )}),)
 
     list_display = ('id', 'name', 'url_name')

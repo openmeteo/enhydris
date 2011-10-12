@@ -95,6 +95,10 @@ class ChartPage(models.Model):
                             'Specify the number of old values.')
     old_values_step_minutes = models.IntegerField(default=0)
     old_values_step_months  = models.IntegerField(default=0)
+    old_values_title = models.CharField(max_length=80, blank=True)
+    old_values_main_value_title = models.CharField(max_length=40, blank=True)
+    old_values_secondary_value_title = models.CharField(max_length=40, blank=True)
+    old_values_date_format = models.CharField(max_length=16, blank=True)
 
     def __unicode__(self):
         return self.name
