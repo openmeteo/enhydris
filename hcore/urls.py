@@ -142,11 +142,6 @@ if settings.USERS_CAN_ADD_CONTENT:
      views.model_add, {} , 'model_add'),
 )
 
-# Hydrologic Observatories
-urlpatterns += patterns('',
-    (r'^lastvalues/$', views.lastvalues, {}, 'lastvalues'),
-    )
-
 if settings.STATIC_SERVE:
     urlpatterns += patterns('',
         (r'^site_media/(?P<path>.*)$', 'django.views.static.serve',
