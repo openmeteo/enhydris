@@ -76,6 +76,23 @@ def contourpage_detail(request, urlcode, **kwargs):
     y_thumb = x_thumb*y_dim/x_dim
     last_update = page.get_concurent_timestamp_str()
     last_update_tstmp = page.get_concurent_timestamp()
+    image_filename = page.url_name
+    if request.GET.has_key("date") and request.GET['date']:
+        datetimestr = request.GET['date']
+        datetimefmt = '%Y-%m-%d'
+        if request.GET.has_key('time') and request.GET['time']:
+            datetimestr = datetimestr + ' '+ request.GET['time']
+            datetimefmt = datetimefmt + ' %H:%M'
+        try:
+            adate = datetime.strptime(datetimestr, datetimefmt)
+            last_update_tstmp = page.get_nominal_timestamp(adate)
+            last_update = last_update_tstmp.strftime('%Y-%m-%d %H:%M')+\
+                          ' (UTC'+"%+03d%02d"%((abs(page.utc_offset_minutes)/60)* \
+                               (-1 if page.utc_offset_minutes<0 else 1),
+                               (abs(page.utc_offset_minutes)%60),)+')'
+            image_filename+= '-'+last_update_tstmp.strftime('%Y%m%d%H%M')
+        except ValueError:
+            raise Http404
     if page.display_station_values:
         mean_value = 0.0
         count = 0
@@ -118,6 +135,10 @@ def contourpage_detail(request, urlcode, **kwargs):
                 mean_value2/=count2
             old_values_meta.append({'ts':format_date(atstmp,
                                 page.old_values_date_format), 
+                                    'date':format_date(atstmp,
+                                           '%Y-%m-%d'),
+                                    'time':format_date(atstmp,
+                                           '%H:%M'),
                                     'mv1':mean_value1, 
                                     'mv2':mean_value2})
     other_pages = None
@@ -130,7 +151,8 @@ def contourpage_detail(request, urlcode, **kwargs):
     kwargs["extra_context"] = {'last_update': last_update,
                                'other_pages': other_pages,
                                'x_dim': x_dim, 'y_dim': y_dim,
-                               'x_thumb': x_thumb, 'y_thumb': y_thumb}
+                               'x_thumb': x_thumb, 'y_thumb': y_thumb,
+                               'image_filename': image_filename,}
     if page.display_station_values:
         kwargs["extra_context"]['points'] = points
         kwargs["extra_context"]['mean_value'] = mean_value

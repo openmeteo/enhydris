@@ -86,7 +86,7 @@ class ChartPage(models.Model):
     up_timestamp = models.BooleanField(default=False,
                   help_text='By default down timestamp is used. '
                             'Use up timestamp for the cases of '
-                            'incomplete time intervalas, containing '
+                            'incomplete time intervals, containing '
                             'current date / time.')
     display_station_values = models.BooleanField(default=False,
                   help_text='Display station values on page')
@@ -102,6 +102,16 @@ class ChartPage(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def get_nominal_timestamp(self, timestamp):
+        time_step = self.time_step
+############################
+# Maybe nominal_offset should be that of the time_step..
+        ts = TimeStep(length_minutes = time_step.length_minutes,
+                      length_months = time_step.length_months,
+                      nominal_offset = (self.ts_offset_minutes,
+                                        self.ts_offset_months))
+        return ts.down(timestamp)
 
     def get_concurent_timestamp(self):
         time_step = self.time_step
