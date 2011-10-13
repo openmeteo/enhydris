@@ -38,7 +38,8 @@ class ChartPageAdmin(admin.ModelAdmin):
                      'old_values_title',
                      'old_values_main_value_title',
                      'old_values_secondary_value_title',
-                     'old_values_date_format',),
+                     'old_values_date_format',
+                     'old_values_explanation_note'),
                 )}),)
 
     list_display = ('id', 'name', 'url_name')

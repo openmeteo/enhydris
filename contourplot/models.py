@@ -99,6 +99,7 @@ class ChartPage(models.Model):
     old_values_main_value_title = models.CharField(max_length=40, blank=True)
     old_values_secondary_value_title = models.CharField(max_length=40, blank=True)
     old_values_date_format = models.CharField(max_length=16, blank=True)
+    old_values_explanation_note = models.CharField(max_length=70, blank=True)
 
     def __unicode__(self):
         return self.name

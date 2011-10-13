@@ -5,6 +5,17 @@
    {{ page.name }}
 {% endblock %}
 
+{% block extra_head %}
+  <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.timePicker.min.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.collapser.mod.js"></script>
+  <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
+  <link media="all" href="{{ MEDIA_URL }}css/timePicker.css" type="text/css" rel="stylesheet">
+  <style type="text/css" rel="stylesheet">
+      .expArrow{ font-weight: normal; }
+      .collArrow{ font-weight: normal; }
+  </style>
+{% endblock %}
+
 {% block extracss %}
     <style type="text/css">
         table td, th{padding-left: 15px; padding-right: 20px; text-align: center;} 
@@ -12,15 +23,57 @@
         tr.even{background-color:#cccccc;}
         tr.headers{background-color:#ddddff;}
     </style>
+    <script language="javascript" type="text/javascript">
+    function gup( name )
+    {
+        name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+        var regexS = "[\\?&]"+name+"=([^&#]*)";
+        var regex = new RegExp( regexS );
+        var results = regex.exec( window.location.href );
+        if( results == null )
+            return "";
+        else
+            return results[1];
+    }
+	$(document).ready(function() {
+		$("input.date").datepicker({ dateFormat: 'yy-mm-dd' });
+        $("input.time").timePicker();
+        $("input.date").val(gup('date'));
+        if($("input.date").val())
+            $("input.time").val(unescape(gup('time')));
+        $("input.last").val(gup('last'));
+        if($("input.date").val()||$("input.time").val())
+            $("#date_select_form").show();
+        $('.date_select').collapser({target: 'next', targetOnly: 'div',
+                                     effect: 'fade', changeText: true,
+                                     expandHtml: '{% trans "Display data for a specific period" %}',
+                                     collapseHtml: '{% trans "Hide period selection - Display last completed period" %}',
+                                     expandClass: 'expArrow', collapseClass: 'collArrow'},
+                                     function(){},
+                                     function(){
+                                         if($("#date_select").hasClass("expArrow"))
+                                             window.location="{% url contourpage_detail page.url_name %}";
+                                     });
+    });
+    </script>
 }
 {% endblock %}
 
-
 {% block content %}
     <h3>{{page.name}}</h3>
-    <p><em><strong>{% trans "Time step: " %}{{ page.time_step }}</strong></em></p>
+    <p style="float: left;"><em><strong>{% trans "Time step: " %}{{ page.time_step }}</strong></em></p>
+        <p class='date_select' id='date_select' style="margin-left: 3em; margin-bottom: 0.8em; float: left; clear: right;"></p> 
+        <div style="clear: left; border:1px solid gray; padding: 6px; margin: 1.5em 3px; display: none;" id="date_select_form"><p>
+        <form action="" method="get">
+            {% trans "Date: " %}
+            <input name="date" class="date" id="date" type="text" readonly="readonly"/>
+            <input name="last" class="last" type="text" style="display:none;"/>
+            {% trans "Time: " %}
+            <input name="time" class="time" id="time" type="text" size=7 readonly="readonly" />
+            <input type=submit value="{% trans 'Submit' %}" />
+        </form></p></div>
     {% if page.description %}
-    <p>{{page.description}}</p>
+    <p style="clear: left;">{{page.description}}</p>
     {% endif %}
     <div style="clear: both; padding: 5px;">
     <img src="{% url image_serve image_filename %}.png" style="float: left; width: {{ x_dim }}px; height: {{y_dim }}px;" alt="{{page.description}}">
@@ -81,11 +134,17 @@
                     </tr>
                 </tfoot> 
             </table>
-        {% if page.old_values_main_value_title and page.old_values_secondary_value_title %}
-            </p><p style="text-align: right;">
-            {{ page.old_values_main_value_title }} / {{ page.old_values_secondary_value_title }}
-        {% endif %}
         </p>
+        {% if page.old_values_explanation_note %}
+            <p style="text-align: left; font-size: 8pt; float: left; clear: left;">
+            {{ page.old_values_explanation_note }}
+            </p>      
+        {% endif %}
+        {% if page.old_values_main_value_title and page.old_values_secondary_value_title %}
+            <p style="text-align: right; font-size: 8pt;">
+            {{ page.old_values_main_value_title }} / {{ page.old_values_secondary_value_title }}
+            </p>
+        {% endif %}
     {% endif %}
     {% if other_pages %}
         <hr style="width:98%;height:1px; text-align: left; border-width: 1px; border-color: #ccc;">
