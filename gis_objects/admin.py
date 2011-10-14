@@ -1,4 +1,4 @@
-from gis_objects.models import *
+from enhydris.gis_objects.models import *
 from django.contrib import admin
 
 admin.site.register(GISEntityType, admin.ModelAdmin)
