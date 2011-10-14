@@ -112,7 +112,7 @@
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Type:' %}</th>
-                <td colspan='2'>{{ object.type }}</td>
+                <td colspan='2'>{{ object.entity_type }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Q' %}</th>
@@ -128,7 +128,7 @@
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Gentity id' %}</th>
-                <td colspan='2'>{{ object.gentity_id }}</td>
+                <td colspan='2'>{{ object.original_gentity_id }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Type name' %}</th>
