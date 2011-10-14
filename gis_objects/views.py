@@ -70,11 +70,12 @@ def gis_objects_brief(request, *args, **kwargs):
         if models[model][0].objects.filter(id=object_id).exists():
             kwargs["extra_context"] = {'type': models[model][1],}
             found = True
+            amodel = model
             break
     if not found:
         raise Http404;
     return list_detail.object_detail(request,
-                                     queryset=GISEntity.objects.all(),
+                                     queryset=models[amodel][0].objects.all(),
                                      template_object_name = "object",
                                      template_name = "gis_objects_brief.html",
                                      **kwargs)
@@ -87,6 +88,7 @@ def gis_objects_detail(request, *args, **kwargs):
         if models[model][0].objects.filter(id=object_id).exists():
             found = True
             amodel = model
+            break
     if not found:
         raise Http404;
     return list_detail.object_detail(request,
