@@ -153,10 +153,12 @@ class Gline(Gentity):
     gpoint2 = models.ForeignKey(Gpoint, null=True, blank=True, related_name='glines2')
     length = models.FloatField(null=True, blank=True)
     f_dependecies = ['Gentity']
+    linestring = models.LineStringField(null=True, blank=True)
 
 class Garea(Gentity):
     area = models.FloatField(null=True, blank=True)
     f_dependencies = ['Gentity']
+    mpoly = models.MultiPolygonField(null=True, blank=True)
     def __unicode__(self):
         if self.area: return str(self.id)+" ("+str(self.area)+")"
         return str(self.id)

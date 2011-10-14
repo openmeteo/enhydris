@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load permissions %}
+{% block title %} {% trans 'Enhydris - Pump' %} - {%if object %}{{ object.name }} {% endif %}
+{% endblock %}
+{% block js-globals %}
+    <script type="text/javascript">var map_mode=12;
+      {% if object %}agentity_id={{object.id}}{% endif %}
+    </script>
+{% endblock %}
+
+{% block extracss %}
+    <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
+    <link type="text/css" href="{{ MEDIA_URL }}css/tipTip.css" rel="stylesheet" />
+    <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
+    <style type="text/css">
+    {% if use_open_layers %}
+    #map {
+        width: 480px;
+        height: 420px;
+        border: 1px solid #eee;
+        z-index: 1;
+    }{% endif %}
+    </style>
+{% endblock %}
+
+{% block extra_head %}
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.scrollTo-min.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.minified.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.collapser.mod.js"></script>
+  <script type="text/javascript">
+  $(document).ready(function() {
+      $("table").tablesorter();
+      $("#eventstable").tablesorter( {sortList: [[1,1]]});
+      var colopts ={
+        target: '.timeseries_rows',
+        effect: null,
+        expandHtml: '{% trans "More..." %}',
+        collapseHtml: '{% trans "Less..." %}',
+        expandClass: 'expArrow',
+        collapseClass: 'collArrow'
+      }
+      $('.timeseries_collapse').collapser(colopts);
+      colopts['target']='.events_rows';
+      $('.events_collapse').collapser(colopts);
+      colopts['target']='.instr_rows';
+      $('.instruments_collapse').collapser(colopts);
+      colopts['target']='.altcodes_rows';
+      $('.altcodes_collapse').collapser(colopts);
+      colopts['target']='.gfiles_rows';
+      $('.gfiles_collapse').collapser(colopts);
+      colopts['target']='.generics_rows';
+      $('.generics_collapse').collapser(colopts);
+  });
+  </script>
+  <script type="text/javascript">
+      $(document).ready(function(){
+		$(".verification_required").click(function(){
+			return confirmPost();
+		});
+
+		$("#instruments_ct").click(function() {
+			setTimeout("$.scrollTo('#instruments_ct',200)",1000)
+		});
+
+		$("#timeseries_ct").click(function() {
+			setTimeout("$.scrollTo('#timeseries_ct',200)",1000)
+		});
+
+		$('.tiptip').tipTip({defaultPosition:"top"});
+      });
+
+	function confirmPost(){
+	var agree=confirm("Are you sure you want to delete this object?");
+	if (agree)
+		return true ;
+	else
+		return false ;
+	}
+
+  </script>
+{% endblock %}
+
+{% block content %}
+
+    <p><h2>{% trans "Pump Details" %}
+    </h2></p>
+
+		{% if notifications %}
+        <ul class="notifications">
+                {% for message in notifications %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if object %}
+        {% if use_open_layers %}
+        <div>
+            {% if object.point %}<div id="map" style="float: right;">
+            <div id="map_progress" style="position: absolute; margin-top:202px; margin-left: 232px; z-index: 5000;"></div>
+            </div>{% endif %}
+        <div>{% endif %} {# if use_open_layers #}    
+        <table class="definition tablesorter table_container">
+            <tr class="{% cycle 'odd' 'even' as rowalts %}">
+                <th>{% trans 'ID' %}</th>
+                <td colspan='2'>{{ object.id }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Name' %}</th>
+                <td colspan='2'>{{ object.name }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Code:' %}</th>
+                <td colspan='2'>{{ object.code }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Type' %}</th>
+                <td colspan='2'>{{ object.type }}</td>
+            </tr>
+        </table>
+
+        {% endif %}
+
+
+{% endblock %}

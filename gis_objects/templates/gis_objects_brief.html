@@ -1,0 +1,7 @@
+{% load i18n %}
+<p style="color: #884400; font-size:12pt; font-weight:bold; margin: 3px;">{{ object.name }}</h3>
+<p style="color: #000044; font-size: 9pt; margin: 3px;">
+{% trans "Object type: " %}{{ type }}<br />
+    {% url other_gis_detail object.id as object_url %}
+    <a href=" {{object_url}} ">{% trans 'View more details...' %}</a>
+</p>

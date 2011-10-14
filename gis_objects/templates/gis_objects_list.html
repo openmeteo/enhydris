@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %} {% trans 'Enhydris - GIS Objects' %}{% endblock %}
+{% load pagination_tags %}
+{% load sorting_tags %}
+{% load adminmedia %}
+
+{% block js-globals %}
+    <script type="text/javascript">var map_mode=1;
+    </script>
+{% endblock %}
+{% block extracss %}
+    <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
+    {% if use_open_layers %}
+    <style type="text/css">
+    #map {
+        width: 560px;
+        height: 440px;
+        border: 1px solid #eee;
+        z-index: 1;
+    }
+    </style>{% endif %}
+{% endblock %}
+{% block extra_head %}
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.scrollTo-min.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.minified.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.collapser.mod.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+      $("table").tablesorter();
+      });
+</script>
+{% endblock %}
+
+{% block extrajs %}
+{% endblock %}
+
+{% block content %}
+    
+
+    {% if use_open_layers %}
+          <div>
+           <div style="float: right;">
+                <div id="map" style="float: left;">
+                <div id="map_progress" style="position: absolute; margin-top:212px; margin-left: 272px; z-index: 5000;"></div></div>
+           </div>
+           <div style="float: left;">
+    {% endif %}
+<div>
+<h2>
+GIS Objects list
+</h2>
+
+
+<table class="definition tablesorter table_container">
+<thead>
+<tr>
+<th>{% trans "ID" %}</th>
+<th>{% trans "Name" %}</th>
+<th>{% trans "Type" %}</th>
+</tr>
+</thead>
+<tbody>
+{% for object in object_list %}
+            <tr class="{% cycle 'odd' 'even' as rowalts %}">
+                <td>
+                <a href="{% url other_gis_detail object.id %}">
+                {{ object.id }}</a>
+                </td>
+                <td>{{ object.name }}</td>
+                <td>{{ object.gtype.descr }}</td>
+            </tr>
+{% endfor %}
+</tbody>
+</table>
+
+</div>
+
+{% endblock %}
