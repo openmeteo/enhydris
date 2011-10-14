@@ -64,7 +64,7 @@ GIS Objects list
 {% for object in object_list %}
             <tr class="{% cycle 'odd' 'even' as rowalts %}">
                 <td>
-                <a href="{% url other_gis_detail object.id %}">
+                <a href="{% url gis_objects_detail object.id %}">
                 {{ object.id }}</a>
                 </td>
                 <td>{{ object.name }}</td>
