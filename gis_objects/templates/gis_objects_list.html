@@ -62,14 +62,16 @@ GIS Objects list
 </thead>
 <tbody>
 {% for object in object_list %}
+    {% with object.gis_model as gentity %}
             <tr class="{% cycle 'odd' 'even' as rowalts %}">
                 <td>
-                <a href="{% url gis_objects_detail object.id %}">
-                {{ object.id }}</a>
+                <a href="{% url gis_objects_detail gentity.id %}">
+                {{ gentity.id }}</a>
                 </td>
-                <td>{{ object.name }}</td>
+                <td>{{ gentity.name }}</td>
                 <td>{{ object.gtype.descr }}</td>
             </tr>
+    {% endwith %}
 {% endfor %}
 </tbody>
 </table>

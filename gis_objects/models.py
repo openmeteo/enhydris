@@ -1,10 +1,21 @@
 from django.contrib.gis.db import models
 from enhydris.hcore.models import Gpoint, Gline, Garea
+import sys
+
+models_lst = ['GISBorehole', 'GISPump', 'GISRefinery',
+              'GISSpring', 'GISAqueductNode',
+              'GISAqueductLine', 'GISReservoir',]
 
 class GISEntity(models.Model):
     gis_id = models.IntegerField(blank=True, null=True)
     original_gentity_id = models.IntegerField(blank=True, null=True)
     gtype = models.ForeignKey('GISEntityType', blank=True, null=True)
+    def gis_model(self):
+        model = getattr(sys.modules[__name__], models_lst[self.gtype.id-1])
+        try:
+            return model.objects.get(gisentity_ptr=self.id)
+        except model.DoesNotExist:
+            return None
 
 class GISEntityType(models.Model):
     descr = models.CharField(max_length=100, blank=False)
