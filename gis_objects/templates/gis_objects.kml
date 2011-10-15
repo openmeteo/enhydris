@@ -3,7 +3,7 @@
   <Placemark>
     <name>{% if place.name %}{{ place.name }}{% else %}{{ place }}{% endif %}</name>
     <id>{{ place.id }}</id>
-    <other_gis>yes</other_gis>
+    <gis_objects>yes</gis_objects>
     {{ place.kml|safe }}
   </Placemark>{% endfor %}{% endblock %}
 

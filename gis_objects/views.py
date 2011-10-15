@@ -10,8 +10,9 @@ models = {'boreholes'       : [GISBorehole,_('Borehole')],
           'pumps'           : [GISPump,_('Pump')],
           'refineries'      : [GISRefinery,_('Refinery')],
           'springs'         : [GISSpring,_('Spring')],
-          'aqueduct_nodes'  :   [GISAqueductNode,_('Aqueduct node')],
-          'aqueduct_lines'  :   [GISAqueductLine,_('Aqueduct segment')],
+          'aqueduct_nodes'  : [GISAqueductNode,_('Aqueduct node')],
+          'aqueduct_lines'  : [GISAqueductLine,_('Aqueduct segment')],
+          'reservoirs'      : [GISReservoir,_('Reservoir')],
           }
 
 geom_type={ 'boreholes'         : 'point',
@@ -20,6 +21,7 @@ geom_type={ 'boreholes'         : 'point',
             'springs'           : 'point',
             'aqueduct_nodes'    : 'point',
             'aqueduct_lines'    : 'linestring',
+            'reservoirs'        : 'mpoly',
           }
 
 templates = {   'boreholes'     : 'borehole_detail.html',
@@ -28,6 +30,7 @@ templates = {   'boreholes'     : 'borehole_detail.html',
                 'springs'       : 'spring_detail.html',
                 'aqueduct_nodes': 'aqueduct_node_detail.html',
                 'aqueduct_lines': 'aqueduct_segment_detail.html',
+                'reservoirs'    : 'reservoir_detail.html',
             }
 
 def kml(request, layer):
@@ -50,6 +53,9 @@ def kml(request, layer):
                 queryres = queryres.filter(point__contained=geom)
             elif geom_type[layer]=='linestring':
                 queryres = queryres.filter(linestring__contained=geom)
+            elif geom_type[layer]=='mpoly':
+                pass
+#                queryres = queryres.filter(mpoly__bboverlaps=geom)
             else:
                 assert(False)
     except Exception, e:
