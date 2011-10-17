@@ -6,6 +6,16 @@ models_lst = ['GISBorehole', 'GISPump', 'GISRefinery',
               'GISSpring', 'GISAqueductNode',
               'GISAqueductLine', 'GISReservoir',]
 
+class Lookup(models.Model):
+    descr = models.CharField(max_length=200, blank=True)
+    descr_alt = models.CharField(max_length=200, blank=True)
+    class Meta:
+        abstract = True
+        ordering = ('descr',)
+
+    def __unicode__(self):
+        return self.descr or self.descr_alt
+
 class GISEntity(models.Model):
     gis_id = models.IntegerField(blank=True, null=True)
     original_gentity_id = models.IntegerField(blank=True, null=True)
@@ -17,13 +27,12 @@ class GISEntity(models.Model):
         except model.DoesNotExist:
             return None
 
-class GISEntityType(models.Model):
-    descr = models.CharField(max_length=100, blank=False)
-    descr_alt = models.CharField(max_length=100, blank=False)
-    def __unicode__(self):
-        return self.descr
+class GISEntityType(Lookup): pass
 
-class GISBorehole(Gpoint, GISEntity):
+class GISBoreholeSpring(Gpoint):
+    pass
+
+class GISBorehole(GISBoreholeSpring, GISEntity):
     code = models.IntegerField(blank=True)
     group = models.CharField(max_length=80, blank=True)
     objects = models.GeoManager()
@@ -50,7 +59,7 @@ class GISRefinery(Gpoint, GISEntity):
         self.gtype = GISEntityType.objects.get(pk=3)
         super(GISRefinery, self).save(*args, **kwargs)
 
-class GISSpring(Gpoint, GISEntity):
+class GISSpring(GISBoreholeSpring, GISEntity):
     objects = models.GeoManager()
     def __unicode__(self):
         return self.name or 'id=%d'%(self.id,)

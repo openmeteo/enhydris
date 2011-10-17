@@ -44,11 +44,15 @@ class Migration(DataMigration):
             'type_name': ('django.db.models.fields.CharField', [], {'max_length': '80', 'blank': 'True'})
         },
         'gis_objects.gisborehole': {
-            'Meta': {'ordering': "('name',)", 'object_name': 'GISBorehole', '_ormbases': ['hcore.Gpoint', 'gis_objects.GISEntity']},
+            'Meta': {'ordering': "('name',)", 'object_name': 'GISBorehole', '_ormbases': ['gis_objects.GISBoreholeSpring', 'gis_objects.GISEntity']},
             'code': ('django.db.models.fields.IntegerField', [], {'blank': 'True'}),
+            'gisboreholespring_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['gis_objects.GISBoreholeSpring']", 'unique': 'True', 'primary_key': 'True'}),
             'gisentity_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['gis_objects.GISEntity']", 'unique': 'True'}),
-            'gpoint_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['hcore.Gpoint']", 'unique': 'True', 'primary_key': 'True'}),
             'group': ('django.db.models.fields.CharField', [], {'max_length': '80', 'blank': 'True'})
+        },
+        'gis_objects.gisboreholespring': {
+            'Meta': {'ordering': "('name',)", 'object_name': 'GISBoreholeSpring', '_ormbases': ['hcore.Gpoint']},
+            'gpoint_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['hcore.Gpoint']", 'unique': 'True', 'primary_key': 'True'})
         },
         'gis_objects.gisentity': {
             'Meta': {'object_name': 'GISEntity'},
@@ -58,9 +62,9 @@ class Migration(DataMigration):
             'original_gentity_id': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'})
         },
         'gis_objects.gisentitytype': {
-            'Meta': {'object_name': 'GISEntityType'},
-            'descr': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'descr_alt': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'Meta': {'ordering': "('descr',)", 'object_name': 'GISEntityType'},
+            'descr': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
+            'descr_alt': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'gis_objects.gispump': {
@@ -81,9 +85,9 @@ class Migration(DataMigration):
             'gisentity_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['gis_objects.GISEntity']", 'unique': 'True'})
         },
         'gis_objects.gisspring': {
-            'Meta': {'ordering': "('name',)", 'object_name': 'GISSpring', '_ormbases': ['hcore.Gpoint', 'gis_objects.GISEntity']},
-            'gisentity_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['gis_objects.GISEntity']", 'unique': 'True'}),
-            'gpoint_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['hcore.Gpoint']", 'unique': 'True', 'primary_key': 'True'})
+            'Meta': {'ordering': "('name',)", 'object_name': 'GISSpring', '_ormbases': ['gis_objects.GISBoreholeSpring', 'gis_objects.GISEntity']},
+            'gisboreholespring_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['gis_objects.GISBoreholeSpring']", 'unique': 'True', 'primary_key': 'True'}),
+            'gisentity_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['gis_objects.GISEntity']", 'unique': 'True'})
         },
         'hcore.garea': {
             'Meta': {'ordering': "('name',)", 'object_name': 'Garea', '_ormbases': ['hcore.Gentity']},
