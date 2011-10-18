@@ -30,7 +30,17 @@ class GISEntity(models.Model):
 class GISEntityType(Lookup): pass
 
 class GISBoreholeSpring(Gpoint):
-    pass
+    water_use = models.ForeignKey('GISBoreholeSpringWaterUse',
+                                  blank=True, null=True)
+    water_user = models.ForeignKey('GISBoreholeSpringWaterUser',
+                                  blank=True, null=True)
+    land_use = models.ForeignKey('GISBoreholeSpringLandUse',
+                                  blank=True, null=True)
+    continuous_flow = models.FloatField(blank=True, null=True)
+
+class GISBoreholeSpringWaterUse(Lookup):  pass
+class GISBoreholeSpringWaterUser(Lookup): pass
+class GISBoreholeSpringLandUse(Lookup):   pass
 
 class GISBorehole(GISBoreholeSpring, GISEntity):
     code = models.IntegerField(blank=True)
@@ -65,12 +75,20 @@ class GISRefinery(Gpoint, GISEntity):
         super(GISRefinery, self).save(*args, **kwargs)
 
 class GISSpring(GISBoreholeSpring, GISEntity):
+    dstype = models.ForeignKey('GISSpringDstype', 
+                               null=True, blank=True)
+    hgeo_info = models.ForeignKey('GISSpringHgeoInfo',
+                               null=True, blank=True)
+    is_continuous = models.BooleanField(default=False)
     objects = models.GeoManager()
     def __unicode__(self):
         return self.name or 'id=%d'%(self.id,)
     def save(self, *args, **kwargs):
         self.gtype = GISEntityType.objects.get(pk=4)
         super(GISSpring, self).save(*args, **kwargs)
+
+class GISSpringDstype(Lookup): pass
+class GISSpringHgeoInfo(Lookup): pass
 
 class GISAqueductNode(Gpoint, GISEntity):
     entity_type = models.IntegerField(blank=True)
