@@ -3,6 +3,7 @@ from django.contrib.gis.geos import Polygon
 from django.http import Http404
 from django.views.generic import list_detail
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 from enhydris.hcore.views import clean_kml_request
 from enhydris.gis_objects.models import *
 
@@ -87,8 +88,13 @@ def gis_objects_brief(request, *args, **kwargs):
                                      **kwargs)
 
 def gis_objects_detail(request, *args, **kwargs):
+    anonymous_can_download_data = False
+    if hasattr(settings, 'TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS') and\
+            settings.TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
+        anonymous_can_download_data = True
     object_id = kwargs['object_id']
-    kwargs['extra_context']={'use_open_layers': True,}
+    kwargs['extra_context']={'use_open_layers': True,
+        "anonymous_can_download_data": anonymous_can_download_data,}
     found = False
     for model in models:
         if models[model][0].objects.filter(id=object_id).exists():
