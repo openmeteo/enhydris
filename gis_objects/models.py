@@ -52,6 +52,11 @@ class GISPump(Gpoint, GISEntity):
         super(GISPump, self).save(*args, **kwargs)
 
 class GISRefinery(Gpoint, GISEntity):
+    capacity = models.FloatField(blank=True, null=True)
+    peak_capacity = models.FloatField(blank=True, null=True)
+    storage = models.FloatField(blank=True, null=True)
+    overflow_stage = models.FloatField(blank=True, null=True)
+    outlet_level = models.FloatField(blank=True, null=True)
     objects = models.GeoManager()
     def __unicode__(self):
         return self.name or 'id=%d'%(self.id,)
