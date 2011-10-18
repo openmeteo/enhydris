@@ -53,13 +53,28 @@ class GISBorehole(GISBoreholeSpring, GISEntity):
         super(GISBorehole, self).save(*args, **kwargs)
 
 class GISPump(Gpoint, GISEntity):
-    entity_type = models.IntegerField(blank=True)
+    entity_type = models.IntegerField(blank=True, null=True)
+    pump_type = models.ForeignKey('GISPumpType', blank=True, null=True);
+    is_irrig = models.BooleanField(default=False)
+    is_pump = models.BooleanField(default=False)
+    pump_active = models.BooleanField(default=False)
+    is_generator = models.BooleanField(default=False)
+    generator_active = models.BooleanField(default=False)
+    pump_num = models.IntegerField(blank=True, null=True)
+    pump_discharge = models.FloatField(blank=True, null=True)
+    generator_num = models.IntegerField(blank=True, null=True)
+    total_power = models.FloatField(blank=True, null=True)
+    generator_discharge = models.FloatField(blank=True, null=True)
+    pump_energy = models.FloatField(blank=True, null=True)
+    generator_energy = models.FloatField(blank=True, null=True)
     objects = models.GeoManager()
     def __unicode__(self):
         return self.name or 'id=%d'%(self.id,)
     def save(self, *args, **kwargs):
         self.gtype = GISEntityType.objects.get(pk=2)
         super(GISPump, self).save(*args, **kwargs)
+
+class GISPumpType(Lookup): pass
 
 class GISRefinery(Gpoint, GISEntity):
     capacity = models.FloatField(blank=True, null=True)

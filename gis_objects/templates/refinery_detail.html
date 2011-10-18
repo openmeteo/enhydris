@@ -37,7 +37,7 @@
                 <th>{% trans 'Name' %}</th>
                 <td colspan='2'>{{ object.name }}</td>
             </tr>
-              <tr class="{% cycle rowalts %}">
+            <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Short Name' %}</th>
                 <td colspan='2'>{{ object.short_name }}</td>
             </tr>
@@ -82,23 +82,23 @@
                 <td colspan='2'>{{ object.asrid }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Capacity' %}</th>
+                <th>{% trans 'Capacity (m3/h)' %}</th>
                 <td colspan='2'>{{ object.capacity }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Peak capacity' %}</th>
+                <th>{% trans 'Peak capacity (m3/h)' %}</th>
                 <td colspan='2'>{{ object.peak_capacity }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Storage' %}</th>
+                <th>{% trans 'Storage (m3)' %}</th>
                 <td colspan='2'>{{ object.storage }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Overflow stage' %}</th>
+                <th>{% trans 'Overflow stage (m)' %}</th>
                 <td colspan='2'>{{ object.overflow_stage }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Overflow level' %}</th>
+                <th>{% trans 'Overflow level (m)' %}</th>
                 <td colspan='2'>{{ object.overflow_level }}</td>
             </tr>
       </table>

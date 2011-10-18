@@ -102,12 +102,12 @@
                 <td colspan='2'>{{ object.land_use.descr }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Continuous flow' %}</th>
-                <td colspan='2'>{{ object.continuous_flow }}</td>
+                <th>{% trans 'Flow is continuous' %}</th>
+                <td colspan='2'>{{ object.is_continuous|yesno:_("Yes,No") }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Is continous' %}</th>
-                <td colspan='2'>{{ object.is_continuous }}</td>
+                <th>{% trans 'Continuous flow (m3/h)' %}</th>
+                <td colspan='2'>{{ object.continuous_flow }}</td>
             </tr>
         </table>
 
