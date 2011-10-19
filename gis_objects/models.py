@@ -43,7 +43,7 @@ class GISBoreholeSpringWaterUser(Lookup): pass
 class GISBoreholeSpringLandUse(Lookup):   pass
 
 class GISBorehole(GISBoreholeSpring, GISEntity):
-    code = models.IntegerField(blank=True)
+    code = models.IntegerField(blank=True, null=True)
     group = models.CharField(max_length=80, blank=True)
     objects = models.GeoManager()
     def __unicode__(self):
@@ -106,7 +106,7 @@ class GISSpringDstype(Lookup): pass
 class GISSpringHgeoInfo(Lookup): pass
 
 class GISAqueductNode(Gpoint, GISEntity):
-    entity_type = models.IntegerField(blank=True)
+    entity_type = models.IntegerField(blank=True, null=True)
     type_name = models.CharField(max_length=80, blank=True)
     objects = models.GeoManager()
     def __unicode__(self):
@@ -116,9 +116,9 @@ class GISAqueductNode(Gpoint, GISEntity):
         super(GISAqueductNode, self).save(*args, **kwargs)
 
 class GISAqueductLine(Gline, GISEntity):
-    entity_type = models.IntegerField(blank=True)
-    q = models.FloatField(blank=True)
-    exs = models.IntegerField(blank=True)
+    entity_type = models.IntegerField(blank=True, null=True)
+    q = models.FloatField(blank=True, null=True)
+    exs = models.IntegerField(blank=True, null=True)
     remarks = models.TextField(blank=True)
     type_name = models.CharField(max_length=80, blank=True)
     objects = models.GeoManager()
@@ -129,7 +129,15 @@ class GISAqueductLine(Gline, GISEntity):
         super(GISAqueductLine, self).save(*args, **kwargs)
 
 class GISReservoir(Garea, GISEntity):
-    entity_type = models.IntegerField(blank=True)
+    entity_type = models.IntegerField(blank=True, null=True)
+    inflow_mean = models.FloatField(blank=True, null=True)
+    inflow_max = models.FloatField(blank=True, null=True)
+    inflow_min = models.FloatField(blank=True, null=True)
+    runoff_mean = models.FloatField(blank=True, null=True)
+    runoff_max = models.FloatField(blank=True, null=True)
+    runoff_min = models.FloatField(blank=True, null=True)
+    volume_max = models.FloatField(blank=True, null=True)
+    dead_volume = models.FloatField(blank=True, null=True)
     def __unicode__(self):
         return self.name or 'id=%d'%(self.id,)
     def save(self, *args, **kwargs):
