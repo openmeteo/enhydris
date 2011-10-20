@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from django.utils.translation import ugettext_lazy as _
 from enhydris.hcore.models import Gpoint, Gline, Garea
 import sys
 
@@ -77,6 +78,8 @@ class GISBorehole(GISBoreholeSpring, GISEntity):
     def save(self, *args, **kwargs):
         self.gtype = GISEntityType.objects.get(pk=1)
         super(GISBorehole, self).save(*args, **kwargs)
+    def extra_info(self):
+        return _('Borehole group: ')+self.group
 
 class GISBoreholePmeterType(Lookup): pass
 class GISBoreholeDrillType(Lookup): pass
@@ -103,6 +106,8 @@ class GISPump(Gpoint, GISEntity):
     def save(self, *args, **kwargs):
         self.gtype = GISEntityType.objects.get(pk=2)
         super(GISPump, self).save(*args, **kwargs)
+    def extra_info(self):
+        return _('Pump active') if self.pump_active else ''
 
 class GISPumpType(Lookup): pass
 
@@ -118,6 +123,8 @@ class GISRefinery(Gpoint, GISEntity):
     def save(self, *args, **kwargs):
         self.gtype = GISEntityType.objects.get(pk=3)
         super(GISRefinery, self).save(*args, **kwargs)
+    def extra_info(self):
+        return _('Capacity: ')+str(self.capacity)
 
 class GISSpring(GISBoreholeSpring, GISEntity):
     dstype = models.ForeignKey('GISSpringDstype', 
@@ -131,6 +138,8 @@ class GISSpring(GISBoreholeSpring, GISEntity):
     def save(self, *args, **kwargs):
         self.gtype = GISEntityType.objects.get(pk=4)
         super(GISSpring, self).save(*args, **kwargs)
+    def extra_info(self):
+        return _('Spring type: ')+self.dstype.descr
 
 class GISSpringDstype(Lookup): pass
 class GISSpringHgeoInfo(Lookup): pass
@@ -144,6 +153,8 @@ class GISAqueductNode(Gpoint, GISEntity):
     def save(self, *args, **kwargs):
         self.gtype = GISEntityType.objects.get(pk=5)
         super(GISAqueductNode, self).save(*args, **kwargs)
+    def extra_info(self):
+        return _('Node type: ')+self.type_name
 
 class GISAqueductLine(Gline, GISEntity):
     entity_type = models.IntegerField(blank=True, null=True)
@@ -157,6 +168,8 @@ class GISAqueductLine(Gline, GISEntity):
     def save(self, *args, **kwargs):
         self.gtype = GISEntityType.objects.get(pk=6)
         super(GISAqueductLine, self).save(*args, **kwargs)
+    def extra_info(self):
+        return _('Aqueduct type: ')+self.type_name
 
 class GISReservoir(Garea, GISEntity):
     entity_type = models.IntegerField(blank=True, null=True)
@@ -173,4 +186,6 @@ class GISReservoir(Garea, GISEntity):
     def save(self, *args, **kwargs):
         self.gtype = GISEntityType.objects.get(pk=7)
         super(GISReservoir, self).save(*args, **kwargs)
+    def extra_info(self):
+        return _('Area: ')+str(self.area)
 

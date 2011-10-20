@@ -90,6 +90,9 @@ def gis_objects_brief(request, *args, **kwargs):
             break
     if not found:
         raise Http404;
+    kwargs['object_id'] = getattr(models[amodel][0].objects.get(\
+                                  gisentity_ptr = kwargs['object_id']), 
+                            models_parent_id[amodel])
     return list_detail.object_detail(request,
                                      queryset=models[amodel][0].objects.all(),
                                      template_object_name = "object",
