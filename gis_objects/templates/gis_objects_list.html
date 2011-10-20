@@ -52,6 +52,28 @@
 <h2>
 GIS Objects list
 </h2>
+<fieldset style="margin: inherit auto; width: 50%;" class="compact">
+    <form action="" method="get">
+    <table class="definition">
+    <tr><th><label for="gtype">{% trans "Entity type" %}</label>
+    </th><td>
+    <select name="gtype" id="gtype">
+         <option value="">---------</option>
+         {% for item in gtypes %}
+         <option value="{{ item.id }}" {% ifequal item.id|stringformat:'s' request.GET.gtype %}selected="selected"{% endifequal %}>
+         {{item.descr}}</option>
+         {% endfor %}
+    </select></td></tr>
+    <tr><th><label for"timeseries">{% trans "Display entities with time series only" %}</label>
+    </th><td>
+    <input type="checkbox" name="timeseries" value="True" {% ifequal 'true' request.GET.timeseries|lower %}checked="checked"{% endifequal %}/>
+    </td></tr>
+    <tr><td></td>
+    <td><input type="submit" class="i16 submit" value="Submit"/></td>
+    </tr>
+  </table>
+  </form>
+</fieldset>
 
 
 <table class="definition tablesorter table_container">

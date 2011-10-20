@@ -127,7 +127,9 @@ def gis_objects_detail(request, *args, **kwargs):
 @sort_by
 @filter_by
 def gis_objects_list(request, queryset, *args, **kwargs):
-    kwargs["extra_context"] = { "use_open_layers": True }
+    gtypes = GISEntityType.objects.all()
+    kwargs["extra_context"] = { "use_open_layers": True,
+                                "gtypes": gtypes}
     kwargs["template_name"] = "gis_objects_list.html"
     return list_detail.object_list(request, queryset, *args, **kwargs )
     
