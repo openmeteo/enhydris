@@ -27,6 +27,8 @@ class GISEntity(models.Model):
             return model.objects.get(gisentity_ptr=self.id)
         except model.DoesNotExist:
             return None
+    def name(self):
+        self.gis_model().name
 
 class GISEntityType(Lookup): pass
 

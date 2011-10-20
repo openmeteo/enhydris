@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from enhydris.hcore.views import clean_kml_request
 from enhydris.gis_objects.models import *
+from enhydris.gis_objects.decorators import *
 
 models = {'boreholes'       : [GISBorehole,_('Borehole')],
           'pumps'           : [GISPump,_('Pump')],
@@ -123,7 +124,8 @@ def gis_objects_detail(request, *args, **kwargs):
                                      template_object_name = "object",
                                      template_name = templates[amodel],
                                      **kwargs)
-
+@sort_by
+@filter_by
 def gis_objects_list(request, queryset, *args, **kwargs):
     kwargs["extra_context"] = { "use_open_layers": True }
     kwargs["template_name"] = "gis_objects_list.html"
