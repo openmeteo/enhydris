@@ -25,6 +25,15 @@ geom_type={ 'boreholes'         : 'point',
             'reservoirs'        : 'mpoly',
           }
 
+models_parent_id={ 'boreholes'  : 'gisboreholespring_ptr_id',
+            'pumps'             : 'gpoint_ptr_id',
+            'refineries'        : 'gpoint_ptr_id',
+            'springs'           : 'gisboreholespring_ptr_id',
+            'aqueduct_nodes'    : 'gpoint_ptr_id',
+            'aqueduct_lines'    : 'gline_ptr_id',
+            'reservoirs'        : 'garea_ptr_id',
+          }
+
 templates = {   'boreholes'     : 'borehole_detail.html',
                 'pumps'         : 'pump_detail.html',
                 'refineries'    : 'refinery_detail.html',
@@ -103,6 +112,9 @@ def gis_objects_detail(request, *args, **kwargs):
             break
     if not found:
         raise Http404;
+    kwargs['object_id'] = getattr(models[amodel][0].objects.get(\
+                                  gisentity_ptr = kwargs['object_id']), 
+                            models_parent_id[amodel])
     return list_detail.object_detail(request,
                                      queryset=models[amodel][0].objects.all(),
                                      template_object_name = "object",

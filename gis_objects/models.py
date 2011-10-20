@@ -46,11 +46,41 @@ class GISBorehole(GISBoreholeSpring, GISEntity):
     code = models.IntegerField(blank=True, null=True)
     group = models.CharField(max_length=80, blank=True)
     objects = models.GeoManager()
+    has_pmeter = models.BooleanField(default=False)
+    pmeter_type = models.ForeignKey('GISBoreholePmeterType',
+                                    blank=True, null=True)
+    pmeter_length = models.FloatField(blank=True, null=True)
+    pmeter_diameter = models.FloatField(blank=True, null=True)
+    borehole_depth = models.FloatField(blank=True, null=True)
+    pipe_depth = models.FloatField(blank=True, null=True)
+    water_depth = models.FloatField(blank=True, null=True)
+    value_t = models.FloatField(blank=True, null=True)
+    value_s = models.FloatField(blank=True, null=True)
+    value_b = models.FloatField(blank=True, null=True)
+    value_k = models.FloatField(blank=True, null=True)
+    threshold_a = models.FloatField(blank=True, null=True)
+    threshold_b = models.FloatField(blank=True, null=True)
+    continuous_stage = models.FloatField(blank=True, null=True)
+    test_flow = models.FloatField(blank=True, null=True)
+    test_stage = models.FloatField(blank=True, null=True)
+    begin_works = models.DateTimeField(blank=True, null=True)
+    end_works = models.DateTimeField(blank=True, null=True)
+    drill_type = models.ForeignKey('GISBoreholeDrillType',
+                                   blank=True, null=True)
+    pipe_mat = models.ForeignKey('GISBoreholePipeMat',
+                                 blank=True, null=True)
+    pump_discharge = models.FloatField(blank=True, null=True)
+    pump_ratio = models.FloatField(blank=True, null=True)
+
     def __unicode__(self):
         return self.name or 'id=%d'%(self.id,)
     def save(self, *args, **kwargs):
         self.gtype = GISEntityType.objects.get(pk=1)
         super(GISBorehole, self).save(*args, **kwargs)
+
+class GISBoreholePmeterType(Lookup): pass
+class GISBoreholeDrillType(Lookup): pass
+class GISBoreholePipeMat(Lookup): pass
 
 class GISPump(Gpoint, GISEntity):
     entity_type = models.IntegerField(blank=True, null=True)

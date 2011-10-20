@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "common_detail.html" %}
 {% load i18n %}
 {% load permissions %}
 {% block title %} {% trans 'Enhydris - Borehole' %} - {%if object %}{{ object.name }} {% endif %}
@@ -8,80 +8,7 @@
       {% if object %}agentity_id={{object.id}}{% endif %}
     </script>
 {% endblock %}
-
-{% block extracss %}
-    <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
-    <link type="text/css" href="{{ MEDIA_URL }}css/tipTip.css" rel="stylesheet" />
-    <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
-    <style type="text/css">
-    {% if use_open_layers %}
-    #map {
-        width: 480px;
-        height: 420px;
-        border: 1px solid #eee;
-        z-index: 1;
-    }{% endif %}
-    </style>
-{% endblock %}
-
-{% block extra_head %}
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.scrollTo-min.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.minified.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.collapser.mod.js"></script>
-  <script type="text/javascript">
-  $(document).ready(function() {
-      $("table").tablesorter();
-      $("#eventstable").tablesorter( {sortList: [[1,1]]});
-      var colopts ={
-        target: '.timeseries_rows',
-        effect: null,
-        expandHtml: '{% trans "More..." %}',
-        collapseHtml: '{% trans "Less..." %}',
-        expandClass: 'expArrow',
-        collapseClass: 'collArrow'
-      }
-      $('.timeseries_collapse').collapser(colopts);
-      colopts['target']='.events_rows';
-      $('.events_collapse').collapser(colopts);
-      colopts['target']='.instr_rows';
-      $('.instruments_collapse').collapser(colopts);
-      colopts['target']='.altcodes_rows';
-      $('.altcodes_collapse').collapser(colopts);
-      colopts['target']='.gfiles_rows';
-      $('.gfiles_collapse').collapser(colopts);
-      colopts['target']='.generics_rows';
-      $('.generics_collapse').collapser(colopts);
-  });
-  </script>
-  <script type="text/javascript">
-      $(document).ready(function(){
-		$(".verification_required").click(function(){
-			return confirmPost();
-		});
-
-		$("#instruments_ct").click(function() {
-			setTimeout("$.scrollTo('#instruments_ct',200)",1000)
-		});
-
-		$("#timeseries_ct").click(function() {
-			setTimeout("$.scrollTo('#timeseries_ct',200)",1000)
-		});
-
-		$('.tiptip').tipTip({defaultPosition:"top"});
-      });
-
-	function confirmPost(){
-	var agree=confirm("Are you sure you want to delete this object?");
-	if (agree)
-		return true ;
-	else
-		return false ;
-	}
-
-  </script>
-{% endblock %}
-
-{% block content %}
+{% block  gis_objects_section %}
 
     <p><h2>{% trans "Borehole Details" %}
     </h2></p>
@@ -110,17 +37,167 @@
                 <th>{% trans 'Name' %}</th>
                 <td colspan='2'>{{ object.name }}</td>
             </tr>
+              <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Short Name' %}</th>
+                <td colspan='2'>{{ object.short_name }}</td>
+            </tr>
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Code:' %}</th>
+                <th>{% trans 'Remarks' %}</th>
+                <td colspan='2'>{{ object.remarks }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Water Basin' %}</th>
+                <td colspan='2'>{{ object.water_basin.name }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Water Division' %}</th>
+                <td colspan='2'>{{ object.water_division.name }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Political Division' %}</th>
+                <td colspan='2'>{{ object.political_division.name }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Abscissa' %}</th>
+                <td colspan='2'>{{ object.gis_abscissa }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Ordinate' %}</th>
+                <td colspan='2'>{{ object.gis_ordinate }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'SRID' %}</th>
+                <td colspan='2'>{{ object.srid }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Approximate' %}</th>
+                <td colspan='2'>{{ object.approximate }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Altitude' %}</th>
+                <td colspan='2'>{{ object.altitude|floatformat:2 }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'ASRID' %}</th>
+                <td colspan='2'>{{ object.asrid }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Code (Imported from GIS)' %}</th>
                 <td colspan='2'>{{ object.code }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Group' %}</th>
+                <th>{% trans 'Group (Imported from GIS)' %}</th>
                 <td colspan='2'>{{ object.group }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Water use' %}</th>
+                <td colspan='2'>{{ object.water_use.descr }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Water user' %}</th>
+                <td colspan='2'>{{ object.water_user.descr }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Land use' %}</th>
+                <td colspan='2'>{{ object.land_use.descr }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Drill type' %}</th>
+                <td colspan='2'>{{ object.drill_type.descr }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Piping material' %}</th>
+                <td colspan='2'>{{ object.pipe_mat.descr }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Continuous flow (m3/h)' %}</th>
+                <td colspan='2'>{{ object.continuous_flow }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Installed with pressure meter' %}</th>
+                <td colspan='2'>{{ object.has_pmeter|yesno:_("Yes,No") }}</td>
+            </tr>
+            {% if object.has_pmeter %}
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Pressure meter type' %}</th>
+                <td colspan='2'>{{ object.pmeter_type.descr }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Pressure meter diameter (in)' %}</th>
+                <td colspan='2'>{{ object.pmeter_diameter }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Pressure meter length (m)' %}</th>
+                <td colspan='2'>{{ object.pmeter_length }}</td>
+            </tr>
+            {% endif %}
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Borehole depth (m)' %}</th>
+                <td colspan='2'>{{ object.borehole_depth }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Pipe depth (m)' %}</th>
+                <td colspan='2'>{{ object.pipe_depth }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Water depth (m)' %}</th>
+                <td colspan='2'>{{ object.water_depth }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 't Parameter' %}</th>
+                <td colspan='2'>{{ object.value_t }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 's Parameter' %}</th>
+                <td colspan='2'>{{ object.value_s }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'b Parameter' %}</th>
+                <td colspan='2'>{{ object.value_b }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'k Parameter' %}</th>
+                <td colspan='2'>{{ object.value_k }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Threshold a' %}</th>
+                <td colspan='2'>{{ object.threshold_a }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Threshold b' %}</th>
+                <td colspan='2'>{{ object.threshold_b }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Continuous stage (m)' %}</th>
+                <td colspan='2'>{{ object.continuous_stage }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Test flow (m3/s)' %}</th>
+                <td colspan='2'>{{ object.test_flow }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Test stage (m)' %}</th>
+                <td colspan='2'>{{ object.test_stage }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Begining of works' %}</th>
+                <td colspan='2'>{{ object.begin_works }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Ending of works' %}</th>
+                <td colspan='2'>{{ object.end_works }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Pump discharge (m3/s)' %}</th>
+                <td colspan='2'>{{ object.pump_discharge }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Pump ratio' %}</th>
+                <td colspan='2'>{{ object.pimp_ratio }}</td>
             </tr>
         </table>
 
         {% endif %}
 
 
-{% endblock %}
+{% endblock gis_objects_section %}
