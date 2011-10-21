@@ -1,11 +1,24 @@
+from django.contrib.gis import admin
 from enhydris.gis_objects.models import *
-from django.contrib import admin
+from enhydris.hcore.admin import (GentityAltCodeInline, 
+               GentityFileInline, GentityGenericDataInline, 
+               GentityEventInline, TimeseriesInline,)
 
-admin.site.register(GISEntityType, admin.ModelAdmin)
-admin.site.register(GISBorehole, admin.ModelAdmin)
-admin.site.register(GISPump, admin.ModelAdmin)
-admin.site.register(GISSpring, admin.ModelAdmin)
-admin.site.register(GISRefinery, admin.ModelAdmin)
-admin.site.register(GISAqueductNode, admin.ModelAdmin)
-admin.site.register(GISAqueductLine, admin.ModelAdmin)
-admin.site.register(GISReservoir, admin.ModelAdmin)
+for model in (GISBoreholeSpringWaterUse, GISBoreholeSpringWaterUser,
+              GISBoreholeSpringLandUse, GISBoreholePmeterType,
+              GISBoreholeDrillType, GISBoreholePipeMat,
+              GISPumpType, GISSpringDstype, GISSpringHgeoInfo,
+              GISEntityType):
+    admin.site.register(model, admin.ModelAdmin)
+
+class EntitiesAdmin(admin.GeoModelAdmin):
+    list_display = ('id', 'name', 'gis_id', 'original_gentity_id')
+    exclude = ('gtype', )
+    inlines = (GentityAltCodeInline, GentityFileInline, 
+               GentityGenericDataInline, GentityEventInline,
+               TimeseriesInline,)
+
+for model in (GISBorehole, GISPump, GISSpring, GISRefinery,
+              GISAqueductNode, GISAqueductLine, GISReservoir,):
+    admin.site.register(model, EntitiesAdmin)
+

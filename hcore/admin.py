@@ -116,6 +116,10 @@ class GentityFileInline(admin.TabularInline):
     model = GentityFile
     extra = 1
 
+class GentityGenericDataInline(admin.TabularInline):
+    model = GentityGenericData
+    extra = 1
+ 
 class GentityEventInline(admin.TabularInline):
     model = GentityEvent
     extra = 1
@@ -154,7 +158,8 @@ class StationAdmin(admin.ModelAdmin):
     date_hierarchy = 'start_date'
 
     # Inlines for m2m relationships
-    inlines = (GentityAltCodeInline, GentityFileInline, GentityEventInline,
+    inlines = (GentityAltCodeInline, GentityFileInline, 
+                GentityGenericDataInline, GentityEventInline,
                 OverseerInline, InstrumentInline, TimeseriesInline,)
 
 admin.site.register(Station, StationAdmin)
