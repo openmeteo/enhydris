@@ -4,6 +4,7 @@ from django.http import Http404
 from django.views.generic import list_detail
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
+from enhydris.hcore.models import Timeseries
 from enhydris.hcore.views import clean_kml_request
 from enhydris.gis_objects.models import *
 from enhydris.gis_objects.decorators import *
@@ -48,6 +49,7 @@ def kml(request, layer):
     try:
         bbox=request.GET.get('BBOX', request.GET.get('bbox', None))
         other_id=request.GET.get('OTHER_ID', request.GET.get('other_id', None))
+        has_timeseries=request.GET.get('TIMESERIES', request.GET.get('timeseries', None))
     except Exception, e:
         raise Http404
     if bbox:
@@ -69,6 +71,9 @@ def kml(request, layer):
 #                queryres = queryres.filter(mpoly__bboverlaps=geom)
             else:
                 assert(False)
+        if has_timeseries and has_timeseries in ('True', 'TRUE', 'true'):
+            queryres = queryres.filter(gentity_ptr__in=\
+                         Timeseries.objects.all().values("gentity").query)
     except Exception, e:
         raise Http404
     if other_id:
