@@ -111,12 +111,84 @@
                 <td colspan='2'>{{ object.name }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Node type:' %}</th>
+                <th>{% trans 'Short Name' %}</th>
+                <td colspan='2'>{{ object.short_name }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Remarks' %}</th>
+                <td colspan='2'>{{ object.remarks }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Water Basin' %}</th>
+                <td colspan='2'>{{ object.water_basin.name }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Water Division' %}</th>
+                <td colspan='2'>{{ object.water_division.name }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Political Division' %}</th>
+                <td colspan='2'>{{ object.political_division.name }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Abscissa' %}</th>
+                <td colspan='2'>{{ object.gis_abscissa }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Ordinate' %}</th>
+                <td colspan='2'>{{ object.gis_ordinate }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'SRID' %}</th>
+                <td colspan='2'>{{ object.srid }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Approximate' %}</th>
+                <td colspan='2'>{{ object.approximate }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Altitude' %}</th>
+                <td colspan='2'>{{ object.altitude|floatformat:2 }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'ASRID' %}</th>
+                <td colspan='2'>{{ object.asrid }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Node type (Imported from GIS)' %}</th>
                 <td colspan='2'>{{ object.entity_type }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Type name' %}</th>
+                <th>{% trans 'Type name (Imported from GIS)' %}</th>
                 <td colspan='2'>{{ object.type_name }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Aqueduct group' %}</th>
+                <td colspan='2'>{{ object.group.descr }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Device type' %}</th>
+                <td colspan='2'>{{ object.duct_segment_type.descr }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Device status' %}</th>
+                <td colspan='2'>{{ object.duct_status.descr }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Stage is measured' %}</th>
+                <td colspan='2'>{{ object.measure_stage|yesno:_("Yes,No") }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Discharge is measured' %}</th>
+                <td colspan='2'>{{ object.measure_discharge|yesno:_("Yes,No") }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Start position (km)' %}</th>
+                <td colspan='2'>{{ object.start_position }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'End position (km)' %}</th>
+                <td colspan='2'>{{ object.end_position }}</td>
             </tr>
         </table>
 

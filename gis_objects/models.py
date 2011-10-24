@@ -1,5 +1,6 @@
 from django.contrib.gis.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 from enhydris.hcore.models import Gpoint, Gline, Garea
 import sys
 
@@ -149,6 +150,18 @@ class GISSpringHgeoInfo(Lookup): pass
 class GISAqueductNode(Gpoint, GISEntity):
     entity_type = models.IntegerField(blank=True, null=True)
     type_name = models.CharField(max_length=80, blank=True)
+    measure_discharge = models.BooleanField(default=False)
+    measure_stage = models.BooleanField(default=False)
+    start_position = models.FloatField(blank=True, null=True)
+    end_position = models.FloatField(blank=True, null=True)
+    duct_segment_type = models.ForeignKey('GISDuctSegmentType',
+                                          blank=True, null=True)
+    duct_status = models.ForeignKey('GISDuctStatusType',
+                                    blank=True, null=True)
+    repers = models.CharField(max_length=40, blank=True)
+    repers_en = models.CharField(max_length=40, blank=True)
+    group = models.ForeignKey('GISAqueductGroup', blank=True,
+                              null=True)
     objects = models.GeoManager()
     def __unicode__(self):
         return self.name or 'id=%d'%(self.id,)
@@ -164,6 +177,36 @@ class GISAqueductLine(Gline, GISEntity):
     exs = models.IntegerField(blank=True, null=True)
     remarks = models.TextField(blank=True)
     type_name = models.CharField(max_length=80, blank=True)
+    group = models.ForeignKey('GISAqueductGroup', blank=True,
+                              null=True)
+    xsection = models.ForeignKey('GISXSection', blank=True,
+                                 null=True)
+    area = models.FloatField(blank=True, null=True)
+    width = models.FloatField(blank=True, null=True)
+    depth = models.FloatField(blank=True, null=True)
+    slope = models.FloatField(blank=True, null=True)
+    roughness_coef = models.FloatField(blank=True, null=True)
+    roughness_coef_type = models.ForeignKey('GISRoughnessCoefType',
+                                            blank=True, null=True)
+    bank_slope = models.FloatField(blank=True, null=True)
+    leakage_coef = models.FloatField(blank=True, null=True)
+    measure_discharge = models.BooleanField(default=False)
+    measure_stage = models.BooleanField(default=False)
+    start_position = models.FloatField(blank=True, null=True)
+    end_position = models.FloatField(blank=True, null=True)
+    duct_segment_type = models.ForeignKey('GISDuctSegmentType',
+                                          blank=True, null=True)
+    discharge_capacity = models.FloatField(blank=True, null=True)
+    duct_flow_type = models.ForeignKey('GISDuctFlowType',
+                                       blank=True, null=True)
+    duct_status = models.ForeignKey('GISDuctStatusType',
+                                    blank=True, null=True)
+    repers = models.CharField(max_length=40, blank=True)
+    repers_en = models.CharField(max_length=40, blank=True)
+    pipe_mat = models.ForeignKey('GISBoreholePipeMat',
+                                 blank=True, null=True)
+    alt1 = models.FloatField(blank=True, null=True)
+    alt2 = models.FloatField(blank=True, null=True)
     objects = models.GeoManager()
     def __unicode__(self):
         return self.name or 'id=%d'%(self.id,)
@@ -172,6 +215,22 @@ class GISAqueductLine(Gline, GISEntity):
         super(GISAqueductLine, self).save(*args, **kwargs)
     def extra_info(self):
         return _('Aqueduct type: ')+self.type_name
+
+GENTITYFILEDIR = settings.GENTITYFILE_DIR
+
+class GISXSection(models.Model):
+    xsection_type = models.ForeignKey('GISXSectionType', blank=True,
+                                      null=True)
+    closed = models.BooleanField(default=False)
+    dimensions = models.CharField(blank=True, max_length=40)
+    drawing_file = models.FileField(upload_to=GENTITYFILEDIR)
+
+class GISAqueductGroup(Lookup): pass
+class GISXSectionType(Lookup): pass
+class GISDuctSegmentType(Lookup): pass
+class GISDuctFlowType(Lookup): pass
+class GISDuctStatusType(Lookup): pass
+class GISRoughnessCoefType(Lookup): pass
 
 class GISReservoir(Garea, GISEntity):
     entity_type = models.IntegerField(blank=True, null=True)

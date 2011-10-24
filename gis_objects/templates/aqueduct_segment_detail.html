@@ -101,6 +101,11 @@
             <div id="map_progress" style="position: absolute; margin-top:202px; margin-left: 232px; z-index: 5000;"></div>
             </div>{% endif %}
         <div>{% endif %} {# if use_open_layers #}    
+        {% if object.xsection %}
+            {% if object.xsection.drawing_file %}
+        <img src="{{ MEDIA_URL }}{{ object.xsection.drawing_file }}" />
+            {% endif %}
+        {% endif %}
         <table class="definition tablesorter table_container">
             <tr class="{% cycle 'odd' 'even' as rowalts %}">
                 <th>{% trans 'ID' %}</th>
@@ -111,28 +116,148 @@
                 <td colspan='2'>{{ object.name }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Type:' %}</th>
-                <td colspan='2'>{{ object.entity_type }}</td>
-            </tr>
-            <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Q' %}</th>
-                <td colspan='2'>{{ object.q }}</td>
-            </tr>
-            <tr class="{% cycle rowalts %}">
-                <th>{% trans 'EXS' %}</th>
-                <td colspan='2'>{{ object.exs }}</td>
+                <th>{% trans 'Short Name' %}</th>
+                <td colspan='2'>{{ object.short_name }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Remarks' %}</th>
+                <td colspan='2'>{{ object.gentity.remarks }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Water Basin' %}</th>
+                <td colspan='2'>{{ object.water_basin.name }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Water Division' %}</th>
+                <td colspan='2'>{{ object.water_division.name }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Political Division' %}</th>
+                <td colspan='2'>{{ object.political_division.name }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Length (m)' %}</th>
+                <td colspan='2'>{{ object.length }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Type (Imported from GIS)' %}</th>
+                <td colspan='2'>{{ object.entity_type }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Q (Imported from GIS)' %}</th>
+                <td colspan='2'>{{ object.q }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'EXS (Imported from GIS)' %}</th>
+                <td colspan='2'>{{ object.exs }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Remarks (Imported from GIS)' %}</th>
                 <td colspan='2'>{{ object.remarks }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Gentity id' %}</th>
+                <th>{% trans 'Original Gentity id (from GIS)' %}</th>
                 <td colspan='2'>{{ object.original_gentity_id }}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Type name' %}</th>
+                <th>{% trans 'Type name (Imported from GIS)' %}</th>
                 <td colspan='2'>{{ object.type_name }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Aqueduct group' %}</th>
+                <td colspan='2'>{{ object.group.descr }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Device type' %}</th>
+                <td colspan='2'>{{ object.duct_segment_type.descr }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Device status' %}</th>
+                <td colspan='2'>{{ object.duct_status.descr }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Flow type' %}</th>
+                <td colspan='2'>{{ object.duct_flow_type.descr }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Cross section type' %}</th>
+                <td colspan='2'>{{ object.xsection.xsection_type.descr }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Cross section is closed' %}</th>
+                <td colspan='2'>{{ object.xsection.closed|yesno:_("Yes,No") }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Cross section dimensions' %}</th>
+                <td colspan='2'>{{ object.xsection.dimensions }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Start position (km)' %}</th>
+                <td colspan='2'>{{ object.start_position }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'End position (km)' %}</th>
+                <td colspan='2'>{{ object.end_position }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Start altitude (m)' %}</th>
+                <td colspan='2'>{{ object.alt1 }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'End altitude (m)' %}</th>
+                <td colspan='2'>{{ object.alt2 }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Stage is measured' %}</th>
+                <td colspan='2'>{{ object.measure_stage|yesno:_("Yes,No") }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Discharge is measured' %}</th>
+                <td colspan='2'>{{ object.measure_discharge|yesno:_("Yes,No") }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Section area (m2)' %}</th>
+                <td colspan='2'>{{ object.area }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Section width (m)' %}</th>
+                <td colspan='2'>{{ object.width }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Section depth (m)' %}</th>
+                <td colspan='2'>{{ object.depth }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Slope' %}</th>
+                <td colspan='2'>{{ object.slope }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Roughness coefficient' %}</th>
+                <td colspan='2'>{{ object.roughness_coef }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Roughness coefficient type' %}</th>
+                <td colspan='2'>{{ object.roughness_coef_type.descr }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Bank slope' %}</th>
+                <td colspan='2'>{{ object.bank_slope }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Leakage coefficient' %}</th>
+                <td colspan='2'>{{ object.leakage_coef }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Discharge capacity' %}</th>
+                <td colspan='2'>{{ object.discharge_capacity }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Repers' %}</th>
+                <td colspan='2'>{{ object.repers }}</td>
+            </tr>
+            <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Piping material' %}</th>
+                <td colspan='2'>{{ object.pipe_mat.descr }}</td>
             </tr>
         </table>
 
