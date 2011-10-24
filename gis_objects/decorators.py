@@ -7,8 +7,8 @@ extra_field = { 'GISBorehole'       : 'group',
                 'GISPump'           : 'pump_active', 
                 'GISRefinery'       : 'capacity',
                 'GISSpring'         : 'dstype__descr', 
-                'GISAqueductNode'   : 'type_name',
-                'GISAqueductLine'   : 'type_name',
+                'GISAqueductNode'   : 'group__descr',
+                'GISAqueductLine'   : 'group__descr',
                 'GISReservoir'      : 'area',
               }
 

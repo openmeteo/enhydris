@@ -169,7 +169,10 @@ class GISAqueductNode(Gpoint, GISEntity):
         self.gtype = GISEntityType.objects.get(pk=5)
         super(GISAqueductNode, self).save(*args, **kwargs)
     def extra_info(self):
-        return _('Node type: ')+self.type_name
+        if self.group:
+            return _('In aqueduct group: ')+self.group.descr
+        else:
+            return ''
 
 class GISAqueductLine(Gline, GISEntity):
     entity_type = models.IntegerField(blank=True, null=True)
@@ -214,7 +217,10 @@ class GISAqueductLine(Gline, GISEntity):
         self.gtype = GISEntityType.objects.get(pk=6)
         super(GISAqueductLine, self).save(*args, **kwargs)
     def extra_info(self):
-        return _('Aqueduct type: ')+self.type_name
+        if self.group:
+            return _('In aqueduct group: ')+self.group.descr
+        else:
+            return ''
 
 GENTITYFILEDIR = settings.GENTITYFILE_DIR
 
