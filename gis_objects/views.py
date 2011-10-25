@@ -73,14 +73,21 @@ models_extra_search_fields = {'gisborehole' : ('group',),
                                                  'repers', 
                                                  'repers_en'),}
                                                 
-def get_search_query(search_terms):
+def get_search_query(search_terms, model_name=''):
     query = Q()
     for term in search_terms:
-        for model in models_extra_search_fields:
+        if model_name=='':
+            model_lst = models_extra_search_fields.keys()
+        else:
+            model_lst = [model_name,]
+        for model in model_lst:
             for field in standard_search_fields +\
                          models_extra_search_fields[model]:
                 akwarg={}
-                akwarg['%s__%s__icontains'%(model, field,)]=term
+                if model_name=='':
+                    akwarg['%s__%s__icontains'%(model, field,)]=term
+                else:
+                    akwarg['%s__icontains'%(field,)]=term
                 query |= Q(**akwarg)
     return query
 
@@ -99,11 +106,12 @@ def kml(request, layer):
     try:
         getparams = clean_kml_request(request.GET.items())
         queryres = models[layer][0].objects.all()
-        if getparams.has_key('check') and getparams['check']=='search':
-            query_string = request.GET.get('q', request.GET.get('Q', ""))
+        if getparams.has_key('scheck') and getparams['scheck']=='search':
+            query_string = request.GET.get('sq', request.GET.get('SQ', ""))
             search_terms = query_string.split()
             if search_terms:
-                queryres = queryres.filter(get_search_query(search_terms)).distinct()
+                queryres = queryres.filter(get_search_query(search_terms,
+                                           str.lower(models[layer][0]().__class__.__name__))).distinct()
         else:
             if bbox:
                 if geom_type[layer]=='point':
@@ -176,10 +184,12 @@ def gis_objects_detail(request, *args, **kwargs):
 @sort_by
 @filter_by
 def gis_objects_list(request, queryset, *args, **kwargs):
-    if request.GET.has_key("check") and request.GET["check"]=="search":
+    gtypes = GISEntityType.objects.all()
+    kwargs["extra_context"] =      { "use_open_layers": True,
+                                     "gtypes": gtypes, }
+    if request.GET.has_key("scheck") and request.GET["scheck"]=="search":
         # The case we got a simple search request
-#        kwargs["extra_context"].update({"search":True})
-        query_string = request.GET.get('q', "")
+        query_string = request.GET.get('sq', "")
         search_terms = query_string.split()
         results = queryset
         if search_terms:
@@ -187,11 +197,7 @@ def gis_objects_list(request, queryset, *args, **kwargs):
             queryset = results
         else:
             results = []
-#        kwargs["extra_context"].update({'query': query_string,
-#                                        'terms': search_terms, })
-    gtypes = GISEntityType.objects.all()
-    kwargs["extra_context"] = { "use_open_layers": True,
-                                "gtypes": gtypes}
+        kwargs["extra_context"]['squery'] = query_string
     kwargs["template_name"] = "gis_objects_list.html"
     return list_detail.object_list(request, queryset, *args, **kwargs )
     
