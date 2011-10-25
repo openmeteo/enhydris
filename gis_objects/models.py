@@ -230,6 +230,9 @@ class GISXSection(models.Model):
     closed = models.BooleanField(default=False)
     dimensions = models.CharField(blank=True, max_length=40)
     drawing_file = models.FileField(upload_to=GENTITYFILEDIR)
+    def __unicode__(self):
+        return 'XSection with id=%d, %s, %s'%(self.id, 
+                            self.xsection_type.descr, self.dimensions)
 
 class GISAqueductGroup(Lookup): pass
 class GISXSectionType(Lookup): pass

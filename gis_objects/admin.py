@@ -8,7 +8,10 @@ for model in (GISBoreholeSpringWaterUse, GISBoreholeSpringWaterUser,
               GISBoreholeSpringLandUse, GISBoreholePmeterType,
               GISBoreholeDrillType, GISBoreholePipeMat,
               GISPumpType, GISSpringDstype, GISSpringHgeoInfo,
-              GISEntityType):
+              GISEntityType, GISAqueductGroup, GISXSectionType,
+              GISDuctSegmentType, GISDuctFlowType,
+              GISDuctStatusType, GISRoughnessCoefType,
+              GISXSection):
     admin.site.register(model, admin.ModelAdmin)
 
 class EntitiesAdmin(admin.GeoModelAdmin):
