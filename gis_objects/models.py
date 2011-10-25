@@ -22,6 +22,8 @@ class GISEntity(models.Model):
     gis_id = models.IntegerField(blank=True, null=True)
     original_gentity_id = models.IntegerField(blank=True, null=True)
     gtype = models.ForeignKey('GISEntityType', blank=True, null=True)
+#   Geo manager is needed for some geo filtering operations
+    objects = models.GeoManager()
     def gis_model(self):
         model = getattr(sys.modules[__name__], models_lst[self.gtype.id-1])
         try:

@@ -1,7 +1,8 @@
 from django.db.models import Count
+from django.db.models import Q
+from django.contrib.gis.geos import Polygon
 from enhydris.gis_objects.models import *
 from enhydris.hcore.models import Timeseries
-
 
 extra_field = { 'GISBorehole'       : 'group', 
                 'GISPump'           : 'pump_active', 
@@ -11,6 +12,14 @@ extra_field = { 'GISBorehole'       : 'group',
                 'GISAqueductLine'   : 'group__descr',
                 'GISReservoir'      : 'area',
               }
+
+models_geo_search_field = {'gisborehole' :'point__contained',
+                           'gispump'     : 'point__contained',
+                           'gisrefinery' : 'point__contained',
+                           'gisspring'   : 'point__contained',
+                           'gisaqueductnode': 'point__contained',
+                           'gisaqueductline': 'linestring__contained',
+                          }
 
 def sort_by(f):
     def _dec(request, queryset, *args, **kwargs):
@@ -51,6 +60,19 @@ def filter_by(f):
             gtype = request.GET['gtype']
         if gtype:
             queryset = queryset.filter(gtype=gtype)
+        if request.GET.__contains__('bounded'):
+            try:
+                minx, miny, maxx, maxy=[float(i) for i in request.GET['bounded'].split(',')]
+                geom=Polygon(((minx,miny),(minx,maxy),(maxx,maxy),(maxx,miny),(minx,miny)),srid=4326)
+                query = Q()
+                for model in models_geo_search_field:
+                    skwarg = {}
+                    skwarg['%s__%s'%(model, 
+                                     models_geo_search_field[model],)]=geom
+                    query |= Q(**skwarg)
+                queryset = queryset.filter(query)
+            except:
+                queryset = queryset.none()
         has_timeseries = False
         if request.GET.__contains__('timeseries'):
             has_timeseries = True if\
