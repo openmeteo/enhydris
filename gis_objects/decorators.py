@@ -19,6 +19,7 @@ models_geo_search_field = {'gisborehole' :'point__contained',
                            'gisspring'   : 'point__contained',
                            'gisaqueductnode': 'point__contained',
                            'gisaqueductline': 'linestring__contained',
+                           'gisreservoir': 'mpoly__bboverlaps',
                           }
 
 def sort_by(f):

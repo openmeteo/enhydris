@@ -94,7 +94,9 @@ Structures list
       <input class="i16 magnifier long" type="submit" value="{% trans "Search" %}" />
   </form>
 </fieldset>
+{% if request.GET.gtype %}
 <button type="button" onclick="GetRectAreaResults();">{% trans 'Filter results by map viewport' %}</button>
+{% endif %}
 </div><div style="float: left; clear: both;">
 
 <table class="definition tablesorter table_container">
