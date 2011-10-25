@@ -4,6 +4,7 @@ from django.http import Http404
 from django.views.generic import list_detail
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
+from django.db.models import Q
 from enhydris.hcore.models import Timeseries
 from enhydris.hcore.views import clean_kml_request
 from enhydris.gis_objects.models import *
@@ -45,11 +46,48 @@ templates = {   'boreholes'     : 'borehole_detail.html',
                 'reservoirs'    : 'reservoir_detail.html',
             }
 
+standard_search_fields = ('name', 'name_alt', 'short_name', 
+                          'short_name_alt', 'gentity_ptr__remarks', 'remarks_alt',
+                          'water_basin__name',
+                          'water_basin__name_alt',
+                          'water_division__name',
+                          'water_division__name_alt',
+                          'political_division__name',
+                          'political_division__name_alt',)
+
+models_extra_search_fields = {'gisborehole' : ('group',),
+                              'gispump'     : ('pump_type__descr',
+                                               'pump_type__descr_alt'),
+                              'gisreservoir': (),
+                              'gisrefinery' : (),
+                              'gisspring'   : ('dstype__descr',
+                                               'dstype__descr_alt'),
+                              'gisaqueductnode': ('group__descr',
+                                                  'group__descr_alt',
+                                                  'type_name',
+                                                 'repers','repers_en'),
+                              'gisaqueductline': ('group__descr',
+                                                  'group__descr_alt',
+                                                  'remarks',
+                                                  'type_name',
+                                                 'repers', 
+                                                 'repers_en'),}
+                                                
+def get_search_query(search_terms):
+    query = Q()
+    for term in search_terms:
+        for model in models_extra_search_fields:
+            for field in standard_search_fields +\
+                         models_extra_search_fields[model]:
+                akwarg={}
+                akwarg['%s__%s__icontains'%(model, field,)]=term
+                query |= Q(**akwarg)
+    return query
+
 def kml(request, layer):
     try:
         bbox=request.GET.get('BBOX', request.GET.get('bbox', None))
         other_id=request.GET.get('OTHER_ID', request.GET.get('other_id', None))
-        has_timeseries=request.GET.get('TIMESERIES', request.GET.get('timeseries', None))
     except Exception, e:
         raise Http404
     if bbox:
@@ -61,23 +99,29 @@ def kml(request, layer):
     try:
         getparams = clean_kml_request(request.GET.items())
         queryres = models[layer][0].objects.all()
-        if bbox:
-            if geom_type[layer]=='point':
-                queryres = queryres.filter(point__contained=geom)
-            elif geom_type[layer]=='linestring':
-                queryres = queryres.filter(linestring__contained=geom)
-            elif geom_type[layer]=='mpoly':
-                pass
-#                queryres = queryres.filter(mpoly__bboverlaps=geom)
-            else:
-                assert(False)
-        if has_timeseries and has_timeseries in ('True', 'TRUE', 'true'):
-            queryres = queryres.filter(gentity_ptr__in=\
-                         Timeseries.objects.all().values("gentity").query)
+        if getparams.has_key('check') and getparams['check']=='search':
+            query_string = request.GET.get('q', request.GET.get('Q', ""))
+            search_terms = query_string.split()
+            if search_terms:
+                queryres = queryres.filter(get_search_query(search_terms)).distinct()
+        else:
+            if bbox:
+                if geom_type[layer]=='point':
+                    queryres = queryres.filter(point__contained=geom)
+                elif geom_type[layer]=='linestring':
+                    queryres = queryres.filter(linestring__contained=geom)
+                elif geom_type[layer]=='mpoly':
+                    pass
+    #                queryres = queryres.filter(mpoly__bboverlaps=geom)
+                else:
+                    assert(False)
+            if getparams.has_key('timeseries'):
+                queryres = queryres.filter(gentity_ptr__in=\
+                             Timeseries.objects.all().values("gentity").query)
     except Exception, e:
         raise Http404
-    if other_id:
-        queryres = queryres.filter(id=other_id)
+    if getparams.has_key('other_id'):
+        queryres = queryres.filter(id=getparams['other_id'])
     for arow in queryres:
         if getattr(arow, geom_type[layer]): 
             arow.kml = getattr(arow, geom_type[layer]).kml
@@ -132,6 +176,19 @@ def gis_objects_detail(request, *args, **kwargs):
 @sort_by
 @filter_by
 def gis_objects_list(request, queryset, *args, **kwargs):
+    if request.GET.has_key("check") and request.GET["check"]=="search":
+        # The case we got a simple search request
+#        kwargs["extra_context"].update({"search":True})
+        query_string = request.GET.get('q', "")
+        search_terms = query_string.split()
+        results = queryset
+        if search_terms:
+            results = results.filter(get_search_query(search_terms)).distinct()
+            queryset = results
+        else:
+            results = []
+#        kwargs["extra_context"].update({'query': query_string,
+#                                        'terms': search_terms, })
     gtypes = GISEntityType.objects.all()
     kwargs["extra_context"] = { "use_open_layers": True,
                                 "gtypes": gtypes}
