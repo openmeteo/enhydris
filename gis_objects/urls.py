@@ -15,5 +15,6 @@ urlpatterns = patterns('',
     (r'^d/(?P<object_id>\d+)/$',
      views.gis_objects_detail, {}, 'gis_objects_detail'),
     (r'^(?P<layer>[^/]+)/kml/$', views.kml, {}),
+    (r'^bound/$', views.bound, {}),
      
 )

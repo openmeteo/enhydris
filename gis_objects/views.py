@@ -1,6 +1,6 @@
 from django.contrib.gis.shortcuts import render_to_kml
 from django.contrib.gis.geos import Polygon
-from django.http import Http404
+from django.http import (Http404, HttpResponse,)
 from django.views.generic import list_detail
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
@@ -119,8 +119,7 @@ def kml(request, layer):
                 elif geom_type[layer]=='linestring':
                     queryres = queryres.filter(linestring__contained=geom)
                 elif geom_type[layer]=='mpoly':
-                    pass
-    #                queryres = queryres.filter(mpoly__bboverlaps=geom)
+                    queryres = queryres.filter(mpoly__bboverlaps=geom)
                 else:
                     assert(False)
             if getparams.has_key('timeseries'):
@@ -136,6 +135,61 @@ def kml(request, layer):
     response = render_to_kml('gis_objects.kml', {'places': queryres})
     return response
 
+def bound(request):
+    getparams = clean_kml_request(request.GET.items())
+    if getparams.has_key('bounded'):
+        minx, miny, maxx, maxy=[float(i) for i in getparams['bounded'].split(',')]
+        dx = (maxx-minx)/2000
+        dy = (maxy-miny)/2000
+        minx+=dx
+        miny-=dx
+        miny+=dy
+        maxy-=dy
+        return HttpResponse("%f,%f,%f,%f"%(minx,miny,maxx,maxy), mimetype='text/plain') 
+    extent = None
+    for model in models:
+        if getparams.has_key('gtype'):
+            gtype = getparams['gtype']
+            if gtype.isdigit(): gtype = int(gtype)-1
+            if gtype in range(7):
+                if models.keys()[gtype] == model:
+                    continue
+        queryres = models[model][0].objects.all()
+        if getparams.has_key('scheck') and getparams['scheck']=='search':
+            query_string = request.GET.get('sq', request.GET.get('SQ', ""))
+            search_terms = query_string.split()
+            if search_terms:
+                queryres = queryres.filter(get_search_query(search_terms,
+                                           str.lower(models[model][0]().__class__.__name__))).distinct()
+        else:
+            if getparams.has_key('timeseries'):
+                queryres = queryres.filter(gentity_ptr__in=\
+                             Timeseries.objects.all().values("gentity").query)
+        if getparams.has_key('other_id'):
+            queryres = queryres.filter(id=getparams['other_id'])
+        if queryres.count()<1:
+            continue
+        else:
+            local_extent = list(queryres.extent())
+        if not extent: 
+            extent = local_extent
+        else:
+            extent = [min(extent[0], local_extent[0]),
+                      min(extent[1], local_extent[1]),
+                      max(extent[2], local_extent[2]),
+                      max(extent[3], local_extent[3]),]
+    if not extent:
+        return HttpResponse(','.join([str(e) for e in\
+                            settings.MAP_DEFAULT_VIEWPORT]), mimetype='text/plain')
+    min_viewport = settings.MIN_VIEWPORT_IN_DEGS
+    min_viewport_half = 0.5*min_viewport
+    if abs(extent[2]-extent[0])<min_viewport:
+        extent[2]+=min_viewport_half
+        extent[0]-=min_viewport_half
+    if abs(extent[3]-extent[1])<min_viewport:
+        extent[3]+=min_viewport_half
+        extent[1]-=min_viewport_half
+    return HttpResponse(','.join([str(e) for e in extent]), mimetype='text/plain')
 
 def gis_objects_brief(request, *args, **kwargs):
     object_id = kwargs['object_id']

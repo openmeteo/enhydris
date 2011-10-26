@@ -253,6 +253,7 @@ class GISReservoir(Garea, GISEntity):
     runoff_min = models.FloatField(blank=True, null=True)
     volume_max = models.FloatField(blank=True, null=True)
     dead_volume = models.FloatField(blank=True, null=True)
+    objects = models.GeoManager()
     def __unicode__(self):
         return self.name or 'id=%d'%(self.id,)
     def save(self, *args, **kwargs):
