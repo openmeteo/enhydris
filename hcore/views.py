@@ -1928,7 +1928,8 @@ def bound(request):
         if search_terms:
             queryres = queryres.filter(get_search_query(search_terms))
     elif getparams.has_key('bounded'):
-        minx, miny, maxx, maxy=[float(i) for i in getparams['bounded'].split(',')]
+        bound_str = getparams['bounded'].replace('%2C',',').replace('%2c',',')
+        minx, miny, maxx, maxy=[float(i) for i in bound_str.split(',')]
         dx = (maxx-minx)/2000
         dy = (maxy-miny)/2000
         minx+=dx

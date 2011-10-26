@@ -19,6 +19,9 @@ models = {'boreholes'       : [GISBorehole,_('Borehole')],
           'reservoirs'      : [GISReservoir,_('Reservoir')],
           }
 
+models_names =('boreholes', 'pumps', 'refineries', 'springs',
+               'aqueduct_nodes', 'aqueduct_lines', 'reservoirs')
+
 geom_type={ 'boreholes'         : 'point',
             'pumps'             : 'point',
             'refineries'        : 'point',
@@ -106,6 +109,9 @@ def kml(request, layer):
     try:
         getparams = clean_kml_request(request.GET.items())
         queryres = models[layer][0].objects.all()
+        akwarg = {}
+        akwarg[geom_type[layer]+'__isnull']=True
+        queryres = queryres.exclude(**akwarg)
         if getparams.has_key('scheck') and getparams['scheck']=='search':
             query_string = request.GET.get('sq', request.GET.get('SQ', ""))
             search_terms = query_string.split()
@@ -138,7 +144,8 @@ def kml(request, layer):
 def bound(request):
     getparams = clean_kml_request(request.GET.items())
     if getparams.has_key('bounded'):
-        minx, miny, maxx, maxy=[float(i) for i in getparams['bounded'].split(',')]
+        bound_str = getparams['bounded'].replace('%2C',',').replace('%2c',',')
+        minx, miny, maxx, maxy=[float(i) for i in bound_str.split(',')]
         dx = (maxx-minx)/2000
         dy = (maxy-miny)/2000
         minx+=dx
@@ -152,15 +159,18 @@ def bound(request):
             gtype = getparams['gtype']
             if gtype.isdigit(): gtype = int(gtype)-1
             if gtype in range(7):
-                if models.keys()[gtype] == model:
+                if models_names[gtype] != model:
                     continue
         queryres = models[model][0].objects.all()
+        akwarg = {}
+        akwarg[geom_type[model]+'__isnull']=True
+        queryres = queryres.exclude(**akwarg)
         if getparams.has_key('scheck') and getparams['scheck']=='search':
             query_string = request.GET.get('sq', request.GET.get('SQ', ""))
             search_terms = query_string.split()
             if search_terms:
                 queryres = queryres.filter(get_search_query(search_terms,
-                                           str.lower(models[model][0]().__class__.__name__))).distinct()
+                                           str.lower(models[model][0]().__class__.__name__)))
         else:
             if getparams.has_key('timeseries'):
                 queryres = queryres.filter(gentity_ptr__in=\
