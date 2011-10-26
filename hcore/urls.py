@@ -21,9 +21,6 @@ urlpatterns = patterns('',
     (r'^stations/l/$',
      views.station_list, stations, 'station_list'),
 
-    (r'^stations/info/$',
-     views.station_info, {}, 'station_info'),
-
     (r'^stations/d/(?P<object_id>\d+)/$',
      views.station_detail, stations, 'station_detail'),
 
@@ -31,10 +28,7 @@ urlpatterns = patterns('',
      views.station_brief, {}, 'station_brief'),
 
     (r'^map/$',
-        views.map_view, stations , 'map_view'),
-
-    (r'^testmap/$',
-        views.testmap_view, {}, 'testmap_view'),
+        views.map_view, {}, 'map_view'),
 
     (r'^embedmap/$',
         views.embedmap_view, {}, 'embedmap_view'),

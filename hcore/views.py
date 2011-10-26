@@ -281,105 +281,6 @@ def station_list(request, queryset, *args, **kwargs):
     return list_detail.object_list(request,queryset=queryset, *args, **kwargs )
 
 
-# This list represents all the columns of the map table and is used when the
-# user wants to sort the table. The fields represent model fields and are
-# written the same way in this list.
-SORTING_DICT= ('id', 'id', 'name', 'water_basin', 'water_division',
-               'political_division', 'owner', 'type',)
-
-def station_info(request, *args, **kwargs):
-    """
-    This function takes care of serving station data via AJAX for the map
-    table.
-    """
-    from django.utils import simplejson
-    from django.core import serializers
-#    if settings.DEBUG:
-#       print 'iDisplayStart: %s' % request.POST.get('iDisplayStart','')
-#       print 'iDisplayLength: %s' % request.POST.get('iDisplayLength','')
-#       print 'sSearch: "%s"' % request.POST.get('sSearch','')
-#       print 'bEscapeRegex: %s' % request.POST.get('bEscapeRegex','')
-#       print 'iColumns: %s' % request.POST.get('iColumns','')
-#       print 'iSortingCols: %s' % request.POST.get('iSortingCols','')
-#       print 'iSortCol_0: %s' % request.POST.get('iSortCol_0','')
-#       print 'sSortDir_0: %s' % request.POST.get('sSortDir_0','')
-#       print 'iSortCol_1: %s' % request.POST.get('iSortCol_1','')
-#       print 'sSortDir_1: %s' % request.POST.get('sSortDir_1','')
-#       print 'sEcho: %s' % request.POST.get('sEcho','')
-
-
-
-    sids = ""
-    if request.POST.has_key('sids'):
-        sids = request.POST['sids']
-
-    if request.POST and request.POST.has_key('station_list'):
-        ids = split(request.POST['station_list'],",")
-        stations = Station.objects.filter(id__in=ids)
-    else:
-        stations = Station.objects.all()
-
-
-
-    # for search
-    sSearch = request.POST.get('sSearch','')
-    if not sSearch == '':
-        query = Q()
-        for term in sSearch.split(' '):
-            query &= (Q(name__icontains=term) | Q(name_alt__icontains=term) |
-                      Q(short_name__icontains=term )|
-                      Q(short_name_alt__icontains=term) |
-                      Q(remarks__icontains=term) |
-                      Q(remarks_alt__icontains=term)|
-                      Q(water_basin__name__icontains=term) |
-                      Q(water_basin__name_alt__icontains=term) |
-                      Q(water_division__name__icontains=term) |
-                      Q(water_division__name_alt__icontains=term) |
-                      Q(political_division__name__icontains=term) |
-                      Q(political_division__name_alt__icontains=term) |
-                      Q(type__descr__icontains=term) |
-                      Q(type__descr_alt__icontains=term) |
-                      Q(owner__organization__name__icontains=term) |
-                      Q(owner__person__first_name__icontains=term) |
-                      Q(owner__person__last_name__icontains=term))
-        stations = stations.filter(query).distinct()
-
-
-
-    # for sorting
-
-    scols = request.POST.get('iSortingCols', '0')
-    for i in range(0,int(scols)):
-
-        if request.POST.has_key('iSortCol_'+str(i)):
-            col = int(request.POST.get('iSortCol_'+str(i)))
-            if request.POST.has_key('sSortDir_'+str(i)) and \
-                request.POST['sSortDir_'+str(i)] == 'asc':
-                stations=stations.order_by(SORTING_DICT[col])
-            else:
-                stations=stations.order_by(SORTING_DICT[col]).reverse()
-
-    # for items displayed
-    dlength = int(request.POST.get('iDisplayLength','10'))
-    dstart = int(request.POST.get('iDisplayStart','0'))
-
-
-    json = simplejson.dumps({
-        'sEcho': request.POST.get('sEcho','1'),
-        'iTotalRecords': stations.count(),
-        'iTotalDisplayRecords': stations.count(),
-        'aaData': [
-            [render_to_string("select_box.html", {'station':station,
-                                    'sids':sids}),
-            '<a href="/stations/d/'+str(station.id)+'">'+str(station.id)+'</a>',
-            unicode(station),
-            unicode(station.water_division),
-            unicode(station.water_basin),
-            unicode(station.political_division),
-            unicode(station.owner),
-            unicode(station.type)] for station in stations[dstart:dstart+dlength]]})
-    return HttpResponse(json, mimetype='application/json')
-
 def bufcount(filename):
     lines = 0
     with open(filename) as f:
@@ -651,50 +552,15 @@ def instrument_detail(request, queryset, object_id, *args, **kwargs):
     kwargs["template_name"] = "instrument_detail.html"
     return list_detail.object_detail(request, queryset, object_id, *args, **kwargs)
 
-def testmap_view(request, *args, **kwargs):
-    return render_to_response('testmap.html', {},
-        context_instance=RequestContext(request))
-
 def embedmap_view(request, *args, **kwargs):
     return render_to_response('embedmap.html', 
                               {'use_open_layers': settings.USE_OPEN_LAYERS,},
         context_instance=RequestContext(request))
 
-
-@filter_by(('political_division','owner', 'type', 'water_basin',
-            'water_division','variable',))
-@sort_by
-def map_view(request, stations='',  *args, **kwargs):
-
-    if request.GET.has_key("ts_only") and request.GET["ts_only"]=="True":
-        tmpset = stations.annotate(tsnum=Count('timeseries'))
-        stations = tmpset.exclude(tsnum=0)
-
-    if request.GET.has_key("check") and request.GET["check"]=="search":
-        # The case we got a simple search request
-        kwargs["extra_context"] = {"search":True}
-        query_string = request.GET.get('q', "")
-        search_terms = query_string.split()
-        results = stations
-
-        if search_terms:
-            results = results.filter(get_search_query(search_terms)).distinct()
-            stations = results
-        else:
-            results = []
-        kwargs["extra_context"].update({'query': query_string,
-                                        'terms': search_terms, })
-    try:
-        gis = settings.GIS_SERVER
-    except AttributeError:
-        gis = None
-    kwargs["extra_context"].update({'gis_server':gis},)
-
-    kwargs["extra_context"].update({'station_list': [ s.id for s in stations]},)
-
-
-    return render_to_response('station_map.html', kwargs["extra_context"],
-             context_instance=RequestContext(request))
+def map_view(request, *args, **kwargs):
+    return render_to_response('map_page.html', 
+                              {'use_open_layers': settings.USE_OPEN_LAYERS,},
+        context_instance=RequestContext(request))
 
 def get_subdivision(request, division_id):
     """Ajax call to refresh divisions in filter table"""

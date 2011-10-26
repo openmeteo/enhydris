@@ -48,8 +48,6 @@ SECRET_KEY = 'yy)g)w2jqkpyv9$w39i9$7(6wb+$h(_+x3gj#=@fzs2tmuj$#='
 # under site_media dir)
 GENTITYFILE_DIR = 'gentityfile'
 
-# GIS Configuration
-GIS_SERVER="" # This is an obsolete setting, do not use
 #Uncoment to hide open layers map
 #USE_OPEN_LAYERS = False
 #Uncoment to alter the default value of min viewport
