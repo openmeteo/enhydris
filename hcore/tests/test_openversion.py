@@ -1,21 +1,35 @@
 from django.conf import settings
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User, Group, Permission
 from django.test import TestCase
 from enhydris.hcore.views import ALLOWED_TO_EDIT
 from enhydris.hcore.models import *
+
 
 class OpenVTestCase(TestCase):
     """
     Test that the behaviour of the site when USERS_CAN_ADD_CONTENT is set to
     TRUE is as expected.
     """
-    fixtures = ['hcore/initial_data/groups.json',]
 
     def setUp(self):
-
         self.assertEqual(settings.USERS_CAN_ADD_CONTENT, True, ("You need to"
         " have USERS_CAN_ADD_CONTENT=True in your settings for this test to"
         " run"))
+
+        # Create the editors group
+        permitted = ["eventtype", "filetype", "garea", "gentityaltcode",
+            "gentityaltcodetype", "gentityevent", "gentityfile", "gline",
+            "instrument", "instrumenttype", "overseer", "politicaldivision",
+            "station", "stationtype", "timeseries", "timestep", "timezone",
+            "unitofmeasurement", "userprofile", "variable", "waterbasin",
+            "waterdivision", "person", "organization", "gentitygenericdatatype"]
+        editors = Group(name='editors')
+        editors.save()
+        for x in ('add', 'change', 'delete'):
+            for y in permitted:
+                editors.permissions.add(
+                            Permission.objects.get(codename=x+'_'+y))
+
         # create user and add him to editors group. this'll be the
         # creator/owner to check permissions
         self.user = User.objects.create_user('opentest', 'opentest@test.com', 'opentest')
@@ -78,7 +92,6 @@ class OpenVTestCase(TestCase):
 
         self.client.logout()
 
-
     def testStationPermissions(self):
         """
         Check that edit forms honour the permissions.
@@ -92,6 +105,8 @@ class OpenVTestCase(TestCase):
             'type' : self.stype.pk,
             'owner' : self.organization.pk,
             'creator' : self.user.pk,
+            'copyright_holder': 'Copyright Holder',
+            'copyright_years': '1990-2011',
             'Overseer-TOTAL_FORMS': '1',
             'Instrument-TOTAL_FORMS': '1',
             'Timeseries-TOTAL_FORMS': '1',
@@ -111,7 +126,7 @@ class OpenVTestCase(TestCase):
         url = "/stations/edit/%s/" % str(s.pk)
         resp = self.client.get(url)
         self.assertEquals(resp.status_code, 200)
-        self.assertTemplateUsed(resp, "hcore/station_edit.html")
+        self.assertTemplateUsed(resp, "station_edit.html")
 
         # delete my station. this should work
         url = "/stations/delete/%s/" % str(s.pk)
@@ -160,7 +175,7 @@ class OpenVTestCase(TestCase):
         url = "/stations/edit/%s/" % str(s.pk)
         resp = self.client.get(url)
         self.assertEquals(resp.status_code, 200)
-        self.assertTemplateUsed(resp, "hcore/station_edit.html")
+        self.assertTemplateUsed(resp, "station_edit.html")
 
         # delete maintaining station. this shouldn't work
         url = "/stations/delete/%s/" % str(s.pk)
@@ -169,7 +184,6 @@ class OpenVTestCase(TestCase):
 
         self.client.logout()
         s.delete()
-
 
     def testTimeseriesPermissions(self):
         """
@@ -183,6 +197,8 @@ class OpenVTestCase(TestCase):
             'type' : self.stype.pk,
             'owner' : self.organization.pk,
             'creator' : self.user.pk,
+            'copyright_holder': 'Copyright Holder',
+            'copyright_years': '1990-2011',
             'Overseer-TOTAL_FORMS': '1',
             'Instrument-TOTAL_FORMS': '1',
             'Timeseries-INITIAL_FORMS': '0',
@@ -217,7 +233,7 @@ class OpenVTestCase(TestCase):
         url = "/timeseries/edit/%s/" % str(t.pk)
         resp = self.client.get(url)
         self.assertEquals(resp.status_code, 200)
-        self.assertTemplateUsed(resp, "hcore/timeseries_edit.html")
+        self.assertTemplateUsed(resp, "timeseries_edit.html")
 
         # delete my timeseries. this should work
         url = "/timeseries/delete/%s/" % str(t.pk)
@@ -255,7 +271,7 @@ class OpenVTestCase(TestCase):
         url = "/timeseries/edit/%s/" % str(t.pk)
         resp = self.client.get(url)
         self.assertEquals(resp.status_code, 200)
-        self.assertTemplateUsed(resp, "hcore/timeseries_edit.html")
+        self.assertTemplateUsed(resp, "timeseries_edit.html")
 
         # delete maintaining timeseries, this should work
         url = "/timeseries/delete/%s/" % str(t.pk)
@@ -279,6 +295,8 @@ class OpenVTestCase(TestCase):
             'type' : self.stype.pk,
             'owner' : self.organization.pk,
             'creator' : self.user.pk,
+            'copyright_holder': 'Copyright Holder',
+            'copyright_years': '1990-2011',
             'Overseer-TOTAL_FORMS': '1',
             'Instrument-TOTAL_FORMS': '1',
             'Timeseries-INITIAL_FORMS': '0',
@@ -311,7 +329,7 @@ class OpenVTestCase(TestCase):
         url = "/instrument/edit/%s/" % str(i.pk)
         resp = self.client.get(url, follow=True)
         self.assertEquals(resp.status_code, 200)
-        self.assertTemplateUsed(resp, "hcore/instrument_edit.html")
+        self.assertTemplateUsed(resp, "instrument_edit.html")
 
         # delete my station. this should work
         url = "/instrument/delete/%s/" % str(i.pk)
@@ -350,15 +368,13 @@ class OpenVTestCase(TestCase):
         url = "/instrument/edit/%s/" % str(i.pk)
         resp = self.client.get(url, follow=True)
         self.assertEquals(resp.status_code, 200)
-        self.assertTemplateUsed(resp, "hcore/instrument_edit.html")
+        self.assertTemplateUsed(resp, "instrument_edit.html")
 
         # delete my station. this should work
         url = "/instrument/delete/%s/" % str(i.pk)
         resp = self.client.get(url, follow=True)
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(Station.objects.filter(name='instrument_test').count(),0)
-
-
 
     def testGenericModelCreation(self):
         """
@@ -371,8 +387,6 @@ class OpenVTestCase(TestCase):
             url = "/add/%s/?_popup=1" % model
             resp = self.client.get(url)
             self.assertEquals(resp.status_code, 200, "Error in page %s." % url)
-            self.assertTemplateUsed(resp, "hcore/model_add.html")
+            self.assertTemplateUsed(resp, "model_add.html")
 
         self.client.logout()
-
-

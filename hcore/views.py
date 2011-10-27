@@ -1668,7 +1668,7 @@ Generic model creation
 """
 
 ALLOWED_TO_EDIT = ('waterbasin', 'waterdivision', 'person', 'organization',
-                   'stationtype', 'lentity','gentity', 'variable', 'timezone',
+                   'stationtype', 'variable', 'timezone',
                    'politicaldivision','instrumenttype', 'unitofmeasurement',
                    'filetype','eventtype','gentityaltcodetype','timestep',
                    'gentityaltcode', 'gentityfile', 'gentityevent',
