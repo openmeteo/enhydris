@@ -22,7 +22,7 @@ class OpenVTestCase(TestCase):
             "instrument", "instrumenttype", "overseer", "politicaldivision",
             "station", "stationtype", "timeseries", "timestep", "timezone",
             "unitofmeasurement", "userprofile", "variable", "waterbasin",
-            "waterdivision"]
+            "waterdivision", "person", "organization", "gentitygenericdatatype"]
         editors = Group(name='editors')
         editors.save()
         for x in ('add', 'change', 'delete'):
