@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User, Group, Permission
 from django.test import TestCase
 from enhydris.hcore.views import ALLOWED_TO_EDIT
 from enhydris.hcore.models import *
@@ -10,12 +10,26 @@ class OpenVTestCase(TestCase):
     Test that the behaviour of the site when USERS_CAN_ADD_CONTENT is set to
     TRUE is as expected.
     """
-    fixtures = ['hcore/initial_data/groups.json',]
 
     def setUp(self):
         self.assertEqual(settings.USERS_CAN_ADD_CONTENT, True, ("You need to"
         " have USERS_CAN_ADD_CONTENT=True in your settings for this test to"
         " run"))
+
+        # Create the editors group
+        permitted = ["eventtype", "filetype", "garea", "gentityaltcode",
+            "gentityaltcodetype", "gentityevent", "gentityfile", "gline",
+            "instrument", "instrumenttype", "overseer", "politicaldivision",
+            "station", "stationtype", "timeseries", "timestep", "timezone",
+            "unitofmeasurement", "userprofile", "variable", "waterbasin",
+            "waterdivision"]
+        editors = Group(name='editors')
+        editors.save()
+        for x in ('add', 'change', 'delete'):
+            for y in permitted:
+                editors.permissions.add(
+                            Permission.objects.get(codename=x+'_'+y))
+
         # create user and add him to editors group. this'll be the
         # creator/owner to check permissions
         self.user = User.objects.create_user('opentest', 'opentest@test.com', 'opentest')
