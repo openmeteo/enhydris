@@ -6,7 +6,8 @@ from enhydris.hcore.models import ReadTimeStep
 from enhydris.hprocessor.models import (ProcessBatch, ProcessUnit,
                                         ProcessInputVariable) 
 from pthelma.tsprocess import (MultiTimeseriesProcessDb,
-                               AggregateDbTimeseries) 
+                               AggregateDbTimeseries,
+                               InterpolateDbTimeseries) 
 from django.conf import settings
 
 
@@ -59,6 +60,23 @@ def ts_aggregation(job):
         clear_timeseries_cache(job.output_timeseries.id)
 
 
+@db.transaction.commit_on_success
+def ts_interpolation(job):
+    job_var = ProcessInputVariable.objects.filter(process_unit__id=job.id)[0]
+    InterpolateDbTimeseries(source_id=job_var.timeseries.id, 
+                            dest_id=job.output_timeseries.id, 
+                            db=db.connection, transaction=db.transaction,
+                            curve_type=job.interpol_method,
+                            curve_data=str(job.curve.content),
+                            data_columns=(job.independent_column,
+                                          job.dependent_column),
+                            logarithmic=job.aggregation_last_incomplete,
+                            offset=job.aggregation_missing_allowed,
+                            append_only=job.append_only)
+    if not job.append_only:
+        clear_timeseries_cache(job.output_timeseries.id)
+
+
 def ts_cache_update(id):
     update_ts_temp_file(get_cache_dir(), db.connection, id)
 
@@ -72,6 +90,8 @@ def process_batch(batch):
             multi_ts_process(job)
         elif job.method == 'Aggregation':
             ts_aggregation(job)
+        elif job.method == 'Interpolation':
+            ts_interpolation(job)
         elif job.method == 'Tsupdate':
             ts_cache_update(job.output_timeseries.id)
         else:
