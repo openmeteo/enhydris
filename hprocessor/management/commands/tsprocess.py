@@ -1,6 +1,8 @@
 import os
 from django.core.management.base import BaseCommand, CommandError
 from django import db
+from datetime import datetime
+from optparse import make_option
 from enhydris.hcore.tstmpupd import update_ts_temp_file
 from enhydris.hcore.models import ReadTimeStep
 from enhydris.hprocessor.models import (ProcessBatch, ProcessUnit,
@@ -81,10 +83,25 @@ def ts_cache_update(id):
     update_ts_temp_file(get_cache_dir(), db.connection, id)
 
 
-def process_batch(batch):
+def process_batch(batch, **options):
     jobs = ProcessUnit.objects.filter(batch__id=batch.id)
     jobs = jobs.order_by('order')
+    stout = options['handle'].stdout #should use this one instead of
+                                     #stdout
+    if options['verbosity']=='2' and options['refresh']==True:
+        stout.write('Full refresh of time series requested.\n'
+                    'All append_only settings will be overiden '
+                    'to "False"\n\n')
+    start_time = datetime.now()
     for job in jobs:
+        if options['refresh']==True:
+            job.append_only=False
+        if options['verbosity']=='2':
+            stout.write('Processing job id=%d, name: "%s", '
+                        'method: "%s", order=%d. '%(job.id, 
+                                    job.name, job.method, job.order))
+            stout.write('Append only setting for this job '
+                        'is "%s"\n'%(job.append_only,))
         if job.method in ('HeatIndex', 'SSI', 'IDM_monthly',
                           'IDM_annual', 'BaromFormula' ):
             multi_ts_process(job)
@@ -96,6 +113,10 @@ def process_batch(batch):
             ts_cache_update(job.output_timeseries.id)
         else:
             assert(False)
+    end_time = datetime.now()
+    if options['verbosity']=='2':
+        stout.write('End of processing, time elapsed=%s'
+                    '\n\n'%(end_time-start_time,))
 
 
 class Command(BaseCommand):
@@ -105,10 +126,20 @@ class Command(BaseCommand):
               interface. Call with the unique_name
               parameter as argument."""
 
+    option_list = BaseCommand.option_list + (
+        make_option('--refresh', '-r',
+            action='store_true',
+            dest='refresh',
+            default='False',
+            help='Refresh output timeseries by an explicit full write '
+                 'whatever is the append_only setting is. Running the '
+                 'process with refreshing, acts like append_only=File'),
+        )
     def handle(self, *args, **options):
+        options['handle'] = self
         for batch_name in args:
             try:
                 batch = ProcessBatch.objects.get(unique_name=batch_name)
-                process_batch(batch)
+                process_batch(batch, **options)
             except ProcessBatch.DoesNotExist:
                 raise CommandError('Batch "%s" does not exist' %(batch_name,))
