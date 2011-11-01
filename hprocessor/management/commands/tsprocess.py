@@ -41,7 +41,7 @@ def multi_ts_process(job):
     MultiTimeseriesProcessDb(method=job.method, timeseries_arg=timeseries_arg, 
                              out_timeseries_id=job.output_timeseries.id,
                              db=db.connection, transaction=db.transaction,
-                             options=options)
+                             read_tstep_func=ReadTimeStep, options=options)
     if not job.append_only:
         clear_timeseries_cache(job.output_timeseries.id)
 
