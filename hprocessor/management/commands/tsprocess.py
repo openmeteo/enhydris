@@ -103,7 +103,8 @@ def process_batch(batch, **options):
             stout.write('Append only setting for this job '
                         'is "%s"\n'%(job.append_only,))
         if job.method in ('HeatIndex', 'SSI', 'IDM_monthly',
-                          'IDM_annual', 'BaromFormula' ):
+                          'IDM_annual', 'BaromFormula',
+                          'OneStepDiff' ):
             multi_ts_process(job)
         elif job.method == 'Aggregation':
             ts_aggregation(job)

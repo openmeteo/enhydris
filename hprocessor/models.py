@@ -10,6 +10,7 @@ AVAILABLE_METHODS = ( ('HeatIndex', 'Heat index calculation'),
                       ('Tsupdate', 'Time series cache update'),
                       ('BaromFormula','Barometric formula'),
                       ('Interpolation', 'Curve interpolation'),
+                      ('OneStepDiff', 'One step difference'),
                     )
 
 AVAILABLE_TS_SPECS = ( ('irrelevant', 'Irrelevant'),
