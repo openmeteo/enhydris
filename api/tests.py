@@ -6,8 +6,8 @@ from django.contrib.auth.models import User, Group
 from django.test import Client
 from enhydris.hcore.models import *
 
-class PermissionsTestCase(unittest.TestCase):
 
+class PermissionsTestCase(unittest.TestCase):
 
     def setUp(self):
         self.client = Client()
@@ -16,14 +16,11 @@ class PermissionsTestCase(unittest.TestCase):
             call_command('loaddata', 'api/testdata.json')
         except Exception, e:
             print e
-#
 
     def tearDown(self):
         pass
 
     def testEventType(self):
-
-
         # Generic call
         url = "/api/EventType/"
         response = self.client.get(url)
@@ -51,7 +48,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testFileType(self):
-
         # Generic call
         url = "/api/FileType/"
         response = self.client.get(url)
@@ -79,7 +75,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testGarea(self):
-
         # Generic call
         url = "/api/Garea/"
         response = self.client.get(url)
@@ -107,7 +102,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testGpoint(self):
-
         # Generic call
         url = "/api/Gpoint/"
         response = self.client.get(url)
@@ -135,7 +129,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testGentity(self):
-
         # Generic call
         url = "/api/Gentity/"
         response = self.client.get(url)
@@ -218,7 +211,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testGentityFile(self):
-
         # Generic call
         url = "/api/GentityFile/"
         response = self.client.get(url)
@@ -273,7 +265,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testInstrumentType(self):
-
         # Generic call
         url = "/api/InstrumentType/"
         response = self.client.get(url)
@@ -301,7 +292,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testLentity(self):
-
         # Generic call
         url = "/api/Lentity/"
         response = self.client.get(url)
@@ -329,7 +319,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testPerson(self):
-
         # Generic call
         url = "/api/Person/"
         response = self.client.get(url)
@@ -357,7 +346,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testOrganization(self):
-
         # Generic call
         url = "/api/Organization/"
         response = self.client.get(url)
@@ -385,7 +373,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testPoliticalDivision(self):
-
         # Generic call
         url = "/api/PoliticalDivision/"
         response = self.client.get(url)
@@ -413,7 +400,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testStation(self):
-
         # Generic call
         url = "/api/Station/"
         response = self.client.get(url)
@@ -441,7 +427,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testStationType(self):
- 
         # Generic call
         url = "/api/StationType/"
         response = self.client.get(url)
@@ -469,7 +454,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testTimeSeries(self):
-    
         # Generic call
         url = "/api/Timeseries/"
         response = self.client.get(url)
@@ -498,7 +482,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testTimeZone(self):
- 
         # Generic call
         url = "/api/TimeZone/"
         response = self.client.get(url)
@@ -526,7 +509,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testTimeStep(self):
-
         # Generic call
         url = "/api/TimeStep/"
         response = self.client.get(url)
@@ -553,7 +535,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testVariable(self):
- 
         # Generic call
         url = "/api/Variable/"
         response = self.client.get(url)
@@ -581,7 +562,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testUnitOfMeasurements(self):
-
         # Generic call
         url = "/api/UnitOfMeasurement/"
         response = self.client.get(url)
@@ -608,7 +588,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testWaterBasin(self):
-
         # Generic call
         url = "/api/WaterBasin/"
         response = self.client.get(url)
@@ -637,7 +616,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testWaterDivision(self):
-
         # Generic call
         url = "/api/WaterDivision/"
         response = self.client.get(url)
@@ -662,4 +640,3 @@ class PermissionsTestCase(unittest.TestCase):
         url = "/api/WaterDivision/nonexistent/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
-
