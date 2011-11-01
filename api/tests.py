@@ -1,7 +1,7 @@
 import os.path
 import unittest
 from django.core.management import call_command
-from django.core.serializers import deserialize
+from django.core.serializers import serialize, deserialize
 from django.contrib.auth.models import User, Group
 from django.test import Client
 from enhydris.hcore.models import *
@@ -640,3 +640,37 @@ class PermissionsTestCase(unittest.TestCase):
         url = "/api/WaterDivision/nonexistent/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
+
+class WriteTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        # setup all models that take part in the sync
+        try:
+            call_command('loaddata', 'api/testdata.json')
+        except Exception, e:
+            print e
+
+    def tearDown(self):
+        pass
+
+    def testTimeSeries(self):
+        # Get an existing time series
+        obj = Timeseries.objects.filter(name='Test Timeseries')[0]
+        response = self.client.get("/api/Timeseries/%d/" % (obj.id,))
+        t = deserialize('json', response.content).next().object
+
+        # Change some of its attributes
+        t.id = None
+        t.name = "Test Timeseries 1221"
+        t.remarks = "Yet another timeseries test"
+
+        # Upload
+        d = serialize('json', [t])
+        response = self.client.post("/api/Timeseries/", data=d,
+                                            content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        # Was it created OK?
+        self.assertEqual(
+            Timeseries.objects.filter(name='Test Timeseries 1221').count(), 1)

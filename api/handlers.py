@@ -218,3 +218,16 @@ class TimeStep_Handler(GenericHandler):
 class Timeseries_Handler(GenericHandler):
     model = Timeseries
     exclude = ()
+
+    def create(self, request):
+        if request.content_type:
+            fields = request.data[0]['fields']
+            for x in ('unit_of_measurement', 'instrument', 'gentity',
+                        'interval_type', 'time_zone', 'time_step', 'variable'):
+                fields[x+'_id'] = fields[x]
+                del(fields[x])
+            t = self.model(**fields)
+            t.save()
+            return rc.CREATED
+        else:
+            super(Timeseries, self).create(request)
