@@ -57,7 +57,7 @@ class ProcessUnit(models.Model):
                               choices = AVAILABLE_METHODS)
     interpol_method = models.CharField(max_length=32,
                               choices = AVAILABLE_CURVE_METHODS,
-                              default='',
+                              default='', blank=True,
                        help_text= 'Set the desired interpolation '
                                   'method, has meaning only if '
                                   'method is "Curve Interpolation"',
@@ -72,7 +72,7 @@ class ProcessUnit(models.Model):
                        help_text= 'Dependent values column')
     append_only = models.BooleanField(default = True)
     output_timeseries = models.ForeignKey(CTimeseries)
-    curve = models.ForeignKey(CGeneric, null=True)
+    curve = models.ForeignKey(CGeneric, null=True, blank=True)
     aggregation_missing_allowed = models.FloatField(default=0.0,
                        help_text= 'Has meaning only if '
                                   'method = Aggregation, '
