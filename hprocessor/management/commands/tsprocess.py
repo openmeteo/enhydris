@@ -122,10 +122,10 @@ def process_batch(batch, **options):
 
 class Command(BaseCommand):
     args = '<batch_name batch_name ...>'
-    help = """Running processing batches defined
-              with the hprocessor administrative
-              interface. Call with the unique_name
-              parameter as argument."""
+    help = 'Running processing batches defined '\
+           'with the hprocessor administrative '\
+           'interface. Call with the unique_name '\
+           'parameter as argument.'
 
     option_list = BaseCommand.option_list + (
         make_option('--refresh', '-r',
