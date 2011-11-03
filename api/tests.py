@@ -643,7 +643,7 @@ class WriteTestCase(TestCase):
         t.name = "Test Timeseries 1221"
         t.remarks = "Yet another timeseries test"
 
-        # Upload
+        # Attempt to upload unauthenticated
         d = serialize('json', [t])
         response = self.client.post("/api/Timeseries/", data=d,
                                             content_type='application/json')
@@ -655,3 +655,19 @@ class WriteTestCase(TestCase):
         #self.assertEqual(response.status_code, 403)
         self.assertEqual(
             Timeseries.objects.filter(name='Test Timeseries 1221').count(), 0)
+
+        # Now try again, this time logged on as user 2; again should deny
+        self.assert_(self.client.login(username='user2', password='password2'))
+        response = self.client.post("/api/Timeseries/", data=d,
+                                            content_type='application/json')
+        self.assertEqual(
+            Timeseries.objects.filter(name='Test Timeseries 1221').count(), 0)
+        self.client.logout()
+
+        # Now try again, this time logged on as user 1; should accept
+        self.assert_(self.client.login(username='user1', password='password1'))
+        response = self.client.post("/api/Timeseries/", data=d,
+                                            content_type='application/json')
+        self.assertEqual(
+            Timeseries.objects.filter(name='Test Timeseries 1221').count(), 1)
+        self.client.logout()

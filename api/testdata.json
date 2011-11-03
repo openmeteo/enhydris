@@ -1,5 +1,37 @@
 [
     {   "pk": 1,
+        "model": "auth.user",
+        "fields": {
+            "username": "user1",
+            "password": "sha1$3b777$0a689fb5cc1cb8469cd1f48cda4beb41f67c8f69",
+            "first_name": "User1",
+            "last_name": "creator of Test Station",
+            "is_active": true,
+            "is_superuser": false,
+            "is_staff": false,
+            "last_login": "2010-05-10 14:21:11",
+            "email": "user1@nowhere.org",
+            "date_joined": "2010-05-10 14:21:11"
+        }
+    },
+        
+    {   "pk": 2,
+        "model": "auth.user",
+        "fields": {
+            "username": "user2",
+            "password": "sha1$dc43f$2b4e7f7cf3880020aab300cbc12baa1e90bb2dc2",
+            "first_name": "User2",
+            "last_name": "without special permissions",
+            "is_active": true,
+            "is_superuser": false,
+            "is_staff": false,
+            "last_login": "2010-05-10 14:21:11",
+            "email": "user2@nowhere.org",
+            "date_joined": "2010-05-10 14:21:11"
+        }
+    },
+        
+    {   "pk": 1,
         "model": "hcore.lentity",
         "fields": {
             "remarks": "Test Owner",
@@ -396,6 +428,16 @@
             "time_step": null,
             "actual_offset_minutes": null,
             "name": "Test Timeseries"
+        }
+    },
+
+    {   "pk": 1,
+        "model": "permissions.Permission",
+        "fields": {
+            "name": "edit",
+            "content_type": ["hcore", "station"],
+            "object_id": 4,
+            "user": 1
         }
     }
 ]
