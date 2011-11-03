@@ -1,5 +1,6 @@
 import string
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 from piston.handler import BaseHandler
 from piston.utils import rc
 from enhydris.hcore.models import *
@@ -233,6 +234,6 @@ class Timeseries_Handler(GenericHandler):
                 return response
             t = self.model(**fields)
             t.save()
-            return rc.CREATED
+            return HttpResponse(str(t.id), mimetype="text/plain")
         else:
             super(Timeseries, self).create(request)
