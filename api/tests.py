@@ -8,12 +8,6 @@ from enhydris.hcore.models import *
 class PermissionsTestCase(TestCase):
     fixtures = ['api/testdata.json']
 
-    def setUp(self):
-        self.client = Client()
-
-    def tearDown(self):
-        pass
-
     def testEventType(self):
         # Generic call
         url = "/api/EventType/"
@@ -637,12 +631,6 @@ class PermissionsTestCase(TestCase):
 
 class WriteTestCase(TestCase):
     fixtures = ['api/testdata.json']
-
-    def setUp(self):
-        self.client = Client()
-
-    def tearDown(self):
-        pass
 
     def testTimeSeries(self):
         # Get an existing time series
