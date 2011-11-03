@@ -221,19 +221,17 @@ class Timeseries_Handler(GenericHandler):
     exclude = ()
 
     def create(self, request):
-        if request.content_type:
-            fields = request.data[0]['fields']
-            for x in ('unit_of_measurement', 'instrument', 'gentity',
-                        'interval_type', 'time_zone', 'time_step', 'variable'):
-                fields[x+'_id'] = fields[x]
-                del(fields[x])
-            station = get_object_or_404(Station, id=fields['gentity_id'])
-            if not hasattr(request.user, 'has_row_perm'
-                        ) or not request.user.has_row_perm(station, 'edit'):
-                response = rc.FORBIDDEN
-                return response
-            t = self.model(**fields)
-            t.save()
-            return HttpResponse(str(t.id), mimetype="text/plain")
-        else:
-            super(Timeseries, self).create(request)
+        if not request.content_type:
+            return rc.FORBIDDEN
+        fields = request.data[0]['fields']
+        for x in ('unit_of_measurement', 'instrument', 'gentity',
+                    'interval_type', 'time_zone', 'time_step', 'variable'):
+            fields[x+'_id'] = fields[x]
+            del(fields[x])
+        station = get_object_or_404(Station, id=fields['gentity_id'])
+        if not hasattr(request.user, 'has_row_perm'
+                    ) or not request.user.has_row_perm(station, 'edit'):
+            return rc.FORBIDDEN
+        t = self.model(**fields)
+        t.save()
+        return HttpResponse(str(t.id), mimetype="text/plain")
