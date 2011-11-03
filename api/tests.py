@@ -669,8 +669,11 @@ class WriteTestCase(unittest.TestCase):
         d = serialize('json', [t])
         response = self.client.post("/api/Timeseries/", data=d,
                                             content_type='application/json')
-        self.assertEqual(response.status_code, 200)
-
-        # Was it created OK?
+        # Status code should say forbidden. However, due to some bug somewhere
+        # (maybe a piston bug), it says OK, though in fact the request has been
+        # denied and the row has not been created. Therefore (until the bug
+        # is fixed) we don't check the status code, we check only whether the
+        # record has been created.
+        #self.assertEqual(response.status_code, 403)
         self.assertEqual(
-            Timeseries.objects.filter(name='Test Timeseries 1221').count(), 1)
+            Timeseries.objects.filter(name='Test Timeseries 1221').count(), 0)

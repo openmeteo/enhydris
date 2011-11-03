@@ -226,6 +226,11 @@ class Timeseries_Handler(GenericHandler):
                         'interval_type', 'time_zone', 'time_step', 'variable'):
                 fields[x+'_id'] = fields[x]
                 del(fields[x])
+            station = get_object_or_404(Station, id=fields['gentity_id'])
+            if not hasattr(request.user, 'has_row_perm'
+                        ) or not request.user.has_row_perm(station, 'edit'):
+                response = rc.FORBIDDEN
+                return response
             t = self.model(**fields)
             t.save()
             return rc.CREATED
