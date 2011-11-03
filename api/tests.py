@@ -1,21 +1,15 @@
 import os.path
-import unittest
-from django.core.management import call_command
 from django.core.serializers import serialize, deserialize
 from django.contrib.auth.models import User, Group
-from django.test import Client
+from django.test import TestCase, Client
 from enhydris.hcore.models import *
 
 
-class PermissionsTestCase(unittest.TestCase):
+class PermissionsTestCase(TestCase):
+    fixtures = ['api/testdata.json']
 
     def setUp(self):
         self.client = Client()
-        # setup all models that take part in the sync
-        try:
-            call_command('loaddata', 'api/testdata.json')
-        except Exception, e:
-            print e
 
     def tearDown(self):
         pass
@@ -641,15 +635,11 @@ class PermissionsTestCase(unittest.TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
 
-class WriteTestCase(unittest.TestCase):
+class WriteTestCase(TestCase):
+    fixtures = ['api/testdata.json']
 
     def setUp(self):
         self.client = Client()
-        # setup all models that take part in the sync
-        try:
-            call_command('loaddata', 'api/testdata.json')
-        except Exception, e:
-            print e
 
     def tearDown(self):
         pass
