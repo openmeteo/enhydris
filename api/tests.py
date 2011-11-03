@@ -1,29 +1,14 @@
 import os.path
-import unittest
-from django.core.management import call_command
-from django.core.serializers import deserialize
+from django.core.serializers import serialize, deserialize
 from django.contrib.auth.models import User, Group
-from django.test import Client
+from django.test import TestCase, Client
 from enhydris.hcore.models import *
 
-class PermissionsTestCase(unittest.TestCase):
 
-
-    def setUp(self):
-        self.client = Client()
-        # setup all models that take part in the sync
-        try:
-            call_command('loaddata', 'api/testdata.json')
-        except Exception, e:
-            print e
-#
-
-    def tearDown(self):
-        pass
+class PermissionsTestCase(TestCase):
+    fixtures = ['api/testdata.json']
 
     def testEventType(self):
-
-
         # Generic call
         url = "/api/EventType/"
         response = self.client.get(url)
@@ -51,7 +36,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testFileType(self):
-
         # Generic call
         url = "/api/FileType/"
         response = self.client.get(url)
@@ -79,7 +63,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testGarea(self):
-
         # Generic call
         url = "/api/Garea/"
         response = self.client.get(url)
@@ -107,7 +90,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testGpoint(self):
-
         # Generic call
         url = "/api/Gpoint/"
         response = self.client.get(url)
@@ -135,7 +117,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testGentity(self):
-
         # Generic call
         url = "/api/Gentity/"
         response = self.client.get(url)
@@ -218,7 +199,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testGentityFile(self):
-
         # Generic call
         url = "/api/GentityFile/"
         response = self.client.get(url)
@@ -273,7 +253,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testInstrumentType(self):
-
         # Generic call
         url = "/api/InstrumentType/"
         response = self.client.get(url)
@@ -301,7 +280,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testLentity(self):
-
         # Generic call
         url = "/api/Lentity/"
         response = self.client.get(url)
@@ -329,7 +307,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testPerson(self):
-
         # Generic call
         url = "/api/Person/"
         response = self.client.get(url)
@@ -357,7 +334,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testOrganization(self):
-
         # Generic call
         url = "/api/Organization/"
         response = self.client.get(url)
@@ -385,7 +361,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testPoliticalDivision(self):
-
         # Generic call
         url = "/api/PoliticalDivision/"
         response = self.client.get(url)
@@ -413,7 +388,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testStation(self):
-
         # Generic call
         url = "/api/Station/"
         response = self.client.get(url)
@@ -441,7 +415,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testStationType(self):
- 
         # Generic call
         url = "/api/StationType/"
         response = self.client.get(url)
@@ -469,7 +442,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testTimeSeries(self):
-    
         # Generic call
         url = "/api/Timeseries/"
         response = self.client.get(url)
@@ -498,7 +470,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testTimeZone(self):
- 
         # Generic call
         url = "/api/TimeZone/"
         response = self.client.get(url)
@@ -526,7 +497,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testTimeStep(self):
-
         # Generic call
         url = "/api/TimeStep/"
         response = self.client.get(url)
@@ -553,7 +523,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testVariable(self):
- 
         # Generic call
         url = "/api/Variable/"
         response = self.client.get(url)
@@ -581,7 +550,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testUnitOfMeasurements(self):
-
         # Generic call
         url = "/api/UnitOfMeasurement/"
         response = self.client.get(url)
@@ -608,7 +576,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testWaterBasin(self):
-
         # Generic call
         url = "/api/WaterBasin/"
         response = self.client.get(url)
@@ -637,7 +604,6 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def testWaterDivision(self):
-
         # Generic call
         url = "/api/WaterDivision/"
         response = self.client.get(url)
@@ -663,3 +629,45 @@ class PermissionsTestCase(unittest.TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
 
+class WriteTestCase(TestCase):
+    fixtures = ['api/testdata.json']
+
+    def testTimeSeries(self):
+        # Get an existing time series
+        obj = Timeseries.objects.filter(name='Test Timeseries')[0]
+        response = self.client.get("/api/Timeseries/%d/" % (obj.id,))
+        t = deserialize('json', response.content).next().object
+
+        # Change some of its attributes
+        t.id = None
+        t.name = "Test Timeseries 1221"
+        t.remarks = "Yet another timeseries test"
+
+        # Attempt to upload unauthenticated
+        d = serialize('json', [t])
+        response = self.client.post("/api/Timeseries/", data=d,
+                                            content_type='application/json')
+        # Status code should say forbidden. However, due to some bug somewhere
+        # (maybe a piston bug), it says OK, though in fact the request has been
+        # denied and the row has not been created. Therefore (until the bug
+        # is fixed) we don't check the status code, we check only whether the
+        # record has been created.
+        #self.assertEqual(response.status_code, 403)
+        self.assertEqual(
+            Timeseries.objects.filter(name='Test Timeseries 1221').count(), 0)
+
+        # Now try again, this time logged on as user 2; again should deny
+        self.assert_(self.client.login(username='user2', password='password2'))
+        response = self.client.post("/api/Timeseries/", data=d,
+                                            content_type='application/json')
+        self.assertEqual(
+            Timeseries.objects.filter(name='Test Timeseries 1221').count(), 0)
+        self.client.logout()
+
+        # Now try again, this time logged on as user 1; should accept
+        self.assert_(self.client.login(username='user1', password='password1'))
+        response = self.client.post("/api/Timeseries/", data=d,
+                                            content_type='application/json')
+        self.assertEqual(
+            Timeseries.objects.filter(name='Test Timeseries 1221').count(), 1)
+        self.client.logout()

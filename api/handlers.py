@@ -1,5 +1,6 @@
 import string
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 from piston.handler import BaseHandler
 from piston.utils import rc
 from enhydris.hcore.models import *
@@ -104,204 +105,133 @@ class GenericHandler(BaseHandler):
 
 # Regular handlers for the rest of the models
 class Lookup_Handler(GenericHandler):
-    """
-    API handler for hcore model Lookup.
-    """
     model = Lookup
     exclude = ()
 
 class Lentity_Handler(GenericHandler):
-    """
-    API handler for hcore model Lentity.
-    """
     model = Lentity
     exclude = ()
 
 class Person_Handler(GenericHandler):
-    """
-    API handler for hcore model Person.
-    """
     model = Person
     exclude = ()
 
 class Organization_Handler(GenericHandler):
-    """
-    API handler for hcore model Organization.
-    """
     model = Organization
     exclude = ()
 
 class Gentity_Handler(GenericHandler):
-    """
-    API handler for hcore model Gentity.
-    """
     model = Gentity
     exclude = ()
 
 class Gpoint_Handler(GenericHandler):
-    """
-    API handler for hcore model Gpoint.
-    """
     model = Gpoint
     exclude = ()
 
 class Gline_Handler(GenericHandler):
-    """
-    API handler for hcore model Gline.
-    """
     model = Gline
     exclude = ()
 
 class Garea_Handler(GenericHandler):
-    """
-    API handler for hcore model Garea.
-    """
     model = Garea
     exclude = ()
 
 class PoliticalDivisionManager_Handler(GenericHandler):
-    """
-    API handler for hcore model PoliticalDivisionManager.
-    """
     model = PoliticalDivisionManager
     exclude = ()
 
 class PoliticalDivision_Handler(GenericHandler):
-    """
-    API handler for hcore model PoliticalDivision.
-    """
     model = PoliticalDivision
     exclude = ()
 
 class WaterDivision_Handler(GenericHandler):
-    """
-    API handler for hcore model WaterDivision.
-    """
     model = WaterDivision
     exclude = ()
 
 class WaterBasin_Handler(GenericHandler):
-    """
-    API handler for hcore model WaterBasin.
-    """
     model = WaterBasin
     exclude = ()
 
 class GentityAltCodeType_Handler(GenericHandler):
-    """
-    API handler for hcore model GentityAltCodeType.
-    """
     model = GentityAltCodeType
     exclude = ()
 
 class GentityAltCode_Handler(GenericHandler):
-    """
-    API handler for hcore model GentityAltCode.
-    """
     model = GentityAltCode
     exclude = ()
 
 class FileType_Handler(GenericHandler):
-    """
-    API handler for hcore model FileType.
-    """
     model = FileType
     exclude = ()
 
 class GentityFile_Handler(GenericHandler):
-    """
-    API handler for hcore model GentityFile.
-    """
     model = GentityFile
     exclude = ()
 
 class EventType_Handler(GenericHandler):
-    """
-    API handler for hcore model EventType.
-    """
     model = EventType
     exclude = ()
 
 class GentityEvent_Handler(GenericHandler):
-    """
-    API handler for hcore model GentityEvent.
-    """
     model = GentityEvent
     exclude = ()
 
 class StationType_Handler(GenericHandler):
-    """
-    API handler for hcore model StationType.
-    """
     model = StationType
     exclude = ()
 
 class StationManager_Handler(GenericHandler):
-    """
-    API handler for hcore model StationManager.
-    """
     model = StationManager
     exclude = ()
 
 class Station_Handler(GenericHandler):
-    """
-    API handler for hcore model Station.
-    """
     model = Station
     exclude = ('creator',)
 
 class Overseer_Handler(GenericHandler):
-    """
-    API handler for hcore model Overseer.
-    """
     model = Overseer
     exclude = ()
 
 class InstrumentType_Handler(GenericHandler):
-    """
-    API handler for hcore model InstrumentType.
-    """
     model = InstrumentType
     exclude = ()
 
 class Instrument_Handler(GenericHandler):
-    """
-    API handler for hcore model Instrument.
-    """
     model = Instrument
     exclude = ()
 
 class Variable_Handler(GenericHandler):
-    """
-    API handler for hcore model Variable.
-    """
     model = Variable
     exclude = ()
 
 class UnitOfMeasurement_Handler(GenericHandler):
-    """
-    API handler for hcore model UnitOfMeasurement.
-    """
     model = UnitOfMeasurement
     exclude = ()
 
 class TimeZone_Handler(GenericHandler):
-    """
-    API handler for hcore model TimeZone.
-    """
     model = TimeZone
     exclude = ()
 
 class TimeStep_Handler(GenericHandler):
-    """
-    API handler for hcore model TimeStep.
-    """
     model = TimeStep
     exclude = ()
 
 class Timeseries_Handler(GenericHandler):
-    """
-    API handler for hcore model Timeseries.
-    """
     model = Timeseries
     exclude = ()
+
+    def create(self, request):
+        if not request.content_type:
+            return rc.FORBIDDEN
+        fields = request.data[0]['fields']
+        for x in ('unit_of_measurement', 'instrument', 'gentity',
+                    'interval_type', 'time_zone', 'time_step', 'variable'):
+            fields[x+'_id'] = fields[x]
+            del(fields[x])
+        station = get_object_or_404(Station, id=fields['gentity_id'])
+        if not hasattr(request.user, 'has_row_perm'
+                    ) or not request.user.has_row_perm(station, 'edit'):
+            return rc.FORBIDDEN
+        t = self.model(**fields)
+        t.save()
+        return HttpResponse(str(t.id), mimetype="text/plain")
