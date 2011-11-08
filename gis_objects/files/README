@@ -1,0 +1,8 @@
+Enhydris GIS Objects
+Copyright (C) 2005-2011 National Technical University of Athens
+Copyright (c) 2011, Stefanos Kozanis
+
+In order to show objects in a map, please use the 
+javascript files contained in current folder
+instead of the standard olmap* files bundled
+in enhydris site_media/js directory structure.
