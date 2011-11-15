@@ -35,6 +35,6 @@ def update_ts_temp_file(cache_dir, connection, id):
         if not os.path.exists(cache_dir):
             os.mkdir(cache_dir)
         tempfile_handle, tempfile_name = tempfile.mkstemp()
-        with fdopen(tempfile_handle, 'w') as afile:
+        with os.fdopen(tempfile_handle, 'w') as afile:
             ts.write(afile)
         shutil.move(tempfile_name, afilename)
