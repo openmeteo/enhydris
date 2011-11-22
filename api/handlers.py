@@ -1,6 +1,7 @@
 import string
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from piston.handler import BaseHandler
 from piston.utils import rc
 from enhydris.hcore.models import *
