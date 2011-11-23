@@ -225,6 +225,16 @@ class Timeseries_Handler(GenericHandler):
         if not request.content_type:
             return rc.FORBIDDEN
         fields = request.data[0]['fields']
+
+        # The keys to fields must be strings, not unicode, for Python versions
+        # up to 2.6.4, because of http://bugs.python.org/issue4978, otherwise
+        # the statement "t = self.model(**fields)" below fails.
+        for x in fields:
+            if x.__class__==unicode:
+                val = fields[x]
+                del fields[x]
+                fields[str(x)] = val
+
         for x in ('unit_of_measurement', 'instrument', 'gentity',
                     'interval_type', 'time_zone', 'time_step', 'variable'):
             fields[x+'_id'] = fields[x]
