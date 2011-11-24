@@ -38,8 +38,6 @@ urlpatterns = patterns('',
                                  'profiles_profile_detail'),
 
 
-    # contact form
-    (r'^contact/$', include('enhydris.contact.urls')),
     # terms of usage
     (r'^terms/$', terms,{}, 'terms'),
     # help page

@@ -51,7 +51,6 @@ INSTALLED_APPS = (
     # Hydroscope Apps
     'enhydris.dbsync',
     'enhydris.hcore',
-    'enhydris.contact',
     'enhydris.api',
     'enhydris.permissions',
 )
