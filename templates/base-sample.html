@@ -53,7 +53,7 @@
 		</li> 
 				<li><a href="{% url station_list %}">{% trans "Stations" %}</a> 
 		</li>
-		<li><a href="{% url map_view %}">Map</a> 
+		<li><a href="{% url map_view %}">{% trans "Map" %}</a> 
 		</li>
 		<li class="searchContainer"> 
 			<div>
@@ -111,9 +111,9 @@
 			<li style="background:transparent;margin:0;padding:0;">
 			<img style="float:left" alt="" src="{{ MEDIA_URL }}images/top_menu_left_bw.png"/>
 			</li>
-			<li><a class="loginform" href="{% url auth_login %}?next={{request.path}}">Login</a></li> 
+			<li><a class="loginform" href="{% url auth_login %}?next={{request.path}}">{% trans "Login" %}</a></li> 
 
-			<li><a href="{% url registration_register %}">Register</a></li> 
+			<li><a href="{% url registration_register %}">{% trans "Register" %}</a></li> 
 
 
 		{% endif %}
