@@ -1,12 +1,12 @@
 # Django settings for enhydris project.
 # coding=UTF-8
 from django.utils.translation import ugettext_lazy as _
+import os.path
 
-ENHYDRIS_PROGRAM_DIR = '.'
+ENHYDRIS_PROGRAM_DIR = os.path.dirname(__file__)
 
 # Leave following three lines as they are, to import several Django settings.
 import sys
-import os.path
 execfile(os.path.join(ENHYDRIS_PROGRAM_DIR, 'settings-base.py'))
 
 DEBUG = True
