@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-24 13:34+0200\n"
+"POT-Creation-Date: 2011-11-24 16:34+0200\n"
 "PO-Revision-Date: 2011-11-24 14:33+0200\n"
 "Last-Translator: Antonis Christofides <anthony@itia.ntua.gr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,16 +34,16 @@ msgid ""
 "This email address is already in use. Please supply a different email "
 "address."
 msgstr ""
-"Αυτή η διεύθυνση email χρησιμοποιείται ήδη. Παρακαλώ προσδιορίστε "
-"άλλη διεύθυνση."
+"Αυτή η διεύθυνση email χρησιμοποιείται ήδη. Παρακαλώ προσδιορίστε άλλη "
+"διεύθυνση."
 
 #: forms.py:265
 msgid ""
 "Both coordinates (abscissa, ordinate) should be provided. If position is "
 "undefined, leave both empty."
 msgstr ""
-"Και οι δύο συντεταγμένες (τετμημένη και τεταγμένη) πρέπει να "
-"προσδιοριστούν. Αν δεν είναι γνωστή η θέση, αφήστε κενές και τις δύο."
+"Και οι δύο συντεταγμένες (τετμημένη και τεταγμένη) πρέπει να προσδιοριστούν. "
+"Αν δεν είναι γνωστή η θέση, αφήστε κενές και τις δύο."
 
 #: forms.py:387
 #, fuzzy
@@ -65,8 +65,8 @@ msgid ""
 "Invalid offset: If time step is not null, actual offset values must be "
 "provided!"
 msgstr ""
-"Μη έγκυρο χρονικό βήμα: αν το χρονικό βήμα δεν είναι κενό, πρέπει να "
-"οριστεί το actual offset."
+"Μη έγκυρο χρονικό βήμα: αν το χρονικό βήμα δεν είναι κενό, πρέπει να οριστεί "
+"το actual offset."
 
 #: forms.py:491
 #, fuzzy
@@ -101,14 +101,14 @@ msgstr ""
 msgid ""
 "Invalid time step: if time_step is not null, actual offsets must be provided"
 msgstr ""
-"Μη έγκυρο χρονικό βήμα: αν το χρονικό βήμα δεν είναι κενό, πρέπει να παρέχονται "
-"τα actual offsets"
+"Μη έγκυρο χρονικό βήμα: αν το χρονικό βήμα δεν είναι κενό, πρέπει να "
+"παρέχονται τα actual offsets"
 
 #: models.py:591
 msgid "Invalid time step: nominal offsets must be both null or both not null"
 msgstr ""
-"Μη έγκυρο χρονικό βήμα: αν το χρονικό βήμα δεν είναι κενό, πρέπει να "
-"οριστεί το actual offset."
+"Μη έγκυρο χρονικό βήμα: αν το χρονικό βήμα δεν είναι κενό, πρέπει να οριστεί "
+"το actual offset."
 
 #: models.py:659
 #, fuzzy
@@ -178,9 +178,9 @@ msgid ""
 "\t\t\t\t\t\t\t"
 msgstr ""
 "\n"
-"Σ' αυτή την καρτέλα μπορείτε να περιορίσετε τα αποτελέσματα. "
-"Αν ορίσετε χώρα, θα προβληθούν μόνο οι σταθμοί αυτής της χώρας. Αντίστοιχα "
-"μπορείτε να επιλέξετε περιφέρεια, νομό, είδος ή ιδιοκτήτη σταθμού κλπ."
+"Σ' αυτή την καρτέλα μπορείτε να περιορίσετε τα αποτελέσματα. Αν ορίσετε "
+"χώρα, θα προβληθούν μόνο οι σταθμοί αυτής της χώρας. Αντίστοιχα μπορείτε να "
+"επιλέξετε περιφέρεια, νομό, είδος ή ιδιοκτήτη σταθμού κλπ."
 
 #: templates/filter_table.html:126 templates/station_detail.html:162
 msgid "Water Division"
@@ -581,7 +581,7 @@ msgid "Station "
 msgstr "Σταθμός "
 
 #: templates/station_detail.html:600 templates/timeseries_detail.html:255
-msgid "Copyright (C) "
+msgid "Copyright (c) "
 msgstr ""
 
 #: templates/station_edit.html:76
@@ -612,12 +612,21 @@ msgstr ""
 
 #: templates/station_edit.html:131
 msgid "Create the station and then you'll be able to add more details."
-msgstr "Δημιουργήστε το σταθμό και μετά θα μπορείτε να προσθέσετε λεπτομέρειες."
+msgstr ""
+"Δημιουργήστε το σταθμό και μετά θα μπορείτε να προσθέσετε λεπτομέρειες."
 
 #: templates/station_list.html:3
 #, fuzzy
 msgid "Enhydris - Stations"
 msgstr "Ενυδρίς - Σταθμοί"
+
+#: templates/station_list.html:104
+msgid "List"
+msgstr "Κατάλογος"
+
+#: templates/station_list.html:105
+msgid "Advanced Search"
+msgstr "Προχωρημένη αναζήτηση"
 
 #: templates/station_list.html:118
 msgid "Searching"
@@ -697,8 +706,7 @@ msgid ""
 "                   You don't have permissions to download the time "
 "series!                   \n"
 "               "
-msgstr ""
-"Δεν έχετε τα δικαιώματα για να κατεβάσετε τις χρονοσειρές."
+msgstr "Δεν έχετε τα δικαιώματα για να κατεβάσετε τις χρονοσειρές."
 
 #: templates/timeseries_detail.html:175
 msgid "Precision"

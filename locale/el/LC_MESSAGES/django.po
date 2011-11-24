@@ -1,5 +1,4 @@
 # Enhydris general translation strings.
-
 # IMPORTANT: Do not include strings from applications in this file, as each
 # application has its own translation files. When creating translation files
 # for the top level enhydris directory, make sure you use the --ignore
@@ -7,7 +6,6 @@
 #  ./manage.py makemessages --locale el --ignore='[^st]*'
 # The above will include settings and templates but ignore all other files.
 # This will not work if an application name starts with s or t.
-
 # Copyright (C) 2007-2011 National Technical University of Athens
 # This file is distributed under the same license as Enhydris.
 # Seraphim Mellos, 2009.
@@ -18,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-24 15:48+0200\n"
+"POT-Creation-Date: 2011-11-24 16:31+0200\n"
 "PO-Revision-Date: 2011-11-24 16:15+0200\n"
 "Last-Translator: Antonis Christofides <anthony@itia.ntua.gr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,6 +41,10 @@ msgstr "Ενυδρίς"
 msgid "Stations"
 msgstr "Σταθμοί"
 
+#: templates/base-sample.html:56
+msgid "Map"
+msgstr "Χάρτης"
+
 #: templates/base-sample.html:68
 #, fuzzy
 msgid "search stations"
@@ -51,6 +53,16 @@ msgstr "Σταθμοί"
 #: templates/base-sample.html:104
 msgid "Welcome"
 msgstr "Καλώς ήρθατε"
+
+#: templates/base-sample.html:114 templates/registration/login.html:14
+#: templates/registration/login.html:28
+msgid "Login"
+msgstr "Σύνδεση"
+
+#: templates/base-sample.html:116
+#: templates/registration/registration_form.html:105
+msgid "Register"
+msgstr "Εγγραφή"
 
 #: templates/index.html:22
 #, fuzzy
@@ -100,7 +112,7 @@ msgid "was modifed at"
 msgstr ""
 
 #: templates/success.html:4 templates/success.html.py:7
-msgid "Επιτυχές!"
+msgid "Success!"
 msgstr ""
 
 #: templates/success.html:14
@@ -194,7 +206,6 @@ msgid ""
 msgstr ""
 
 #: templates/profiles/profile_detail.html:77
-#, fuzzy
 msgid "station list."
 msgstr ""
 
@@ -205,7 +216,6 @@ msgstr "Δημιουργήσατε τους παρακάτω σταθμούς: "
 #: templates/profiles/profile_detail.html:84
 #: templates/profiles/profile_detail.html:115
 #: templates/profiles/profile_public.html:46
-#, fuzzy
 msgid "Station ID"
 msgstr ""
 
@@ -289,10 +299,6 @@ msgstr "Ο λογαριασμός είναι ενεργοποιημένος"
 #: templates/registration/activate.html:20
 msgid "Account activation failed"
 msgstr "Η ενεργοποίηση του λογαριασμού απέτυχε"
-
-#: templates/registration/login.html:14 templates/registration/login.html:28
-msgid "Login"
-msgstr "Σύνδεση"
 
 #: templates/registration/login.html:32
 msgid "Your username and password didn't match. Please try again."
@@ -387,8 +393,8 @@ msgid ""
 "Forgotten your password? Enter your e-mail address, and we'll reset your "
 "password and e-mail the new one to you."
 msgstr ""
-"Αν ξεχάσατε το συνθηματικό σας, εισάγετε τη διεύθυνση e-mail σας. "
-"Θα αντικαταστήσουμε το συνθηματικό σας και θα σας στείλουμε το καινούργιο."
+"Αν ξεχάσατε το συνθηματικό σας, εισάγετε τη διεύθυνση e-mail σας. Θα "
+"αντικαταστήσουμε το συνθηματικό σας και θα σας στείλουμε το καινούργιο."
 
 #: templates/registration/password_reset.html:29
 msgid "Reset my password"
@@ -438,7 +444,8 @@ msgstr "για το λογαριασμό σας στο %(site_name)s"
 
 #: templates/registration/password_reset_email.html:5
 msgid "Please go to the following page and choose a new password:"
-msgstr "Παρακαλούμε πηγαίνετε στην εξής σελίδα και διαλέξτε καινούργιο συνθηματικό:"
+msgstr ""
+"Παρακαλούμε πηγαίνετε στην εξής σελίδα και διαλέξτε καινούργιο συνθηματικό:"
 
 #: templates/registration/password_reset_email.html:9
 msgid "Your username, in case you've forgotten:"
@@ -483,24 +490,21 @@ msgstr "Πληκτρολογήστε τους χαρακτήρες της εικ
 msgid "Terms of Service"
 msgstr "Όροι χρήσης"
 
-#: templates/registration/registration_form.html:105
-msgid "Register"
-msgstr "Εγγραφή"
-
 #: templates/registration/registration_form.html:109
 msgid ""
 "Please fill out the form (all fields are required), and your account will be "
 "created."
-msgstr "Παρακαλούμε συμπληρώστε τη φόρμα (απαιτούνται όλα τα πεδία) "
-"για να δημιουργηθεί ο λογαριασμός σας."
+msgstr ""
+"Παρακαλούμε συμπληρώστε τη φόρμα (απαιτούνται όλα τα πεδία) για να "
+"δημιουργηθεί ο λογαριασμός σας."
 
 #: templates/registration/registration_form.html:110
 msgid ""
 "You'll then be sent an email with instructions on how to finish your "
 "registration."
 msgstr ""
-"Στη συνέχεια θα λάβετε email με οδηγίες για το πώς να ολοκληρώσετε "
-"την εγγραφή σας."
+"Στη συνέχεια θα λάβετε email με οδηγίες για το πώς να ολοκληρώσετε την "
+"εγγραφή σας."
 
 #: templates/registration/registration_form.html:112
 msgid "If you already have an account, you can"
