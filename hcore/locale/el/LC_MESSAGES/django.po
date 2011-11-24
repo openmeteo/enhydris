@@ -177,6 +177,7 @@ msgid ""
 "\t\t\t\t\t\t\tor organization.), type of station etc.\n"
 "\t\t\t\t\t\t\t"
 msgstr ""
+"\n"
 "Σ' αυτή την καρτέλα μπορείτε να περιορίσετε τα αποτελέσματα. "
 "Αν ορίσετε χώρα, θα προβληθούν μόνο οι σταθμοί αυτής της χώρας. Αντίστοιχα "
 "μπορείτε να επιλέξετε περιφέρεια, νομό, είδος ή ιδιοκτήτη σταθμού κλπ."
@@ -652,7 +653,7 @@ msgstr "Πρόσθεση νέου σταθμού "
 
 #: templates/station_list.html:169
 msgid "Filter results by map viewport"
-msgstr "Περιορισμός αποτελεσμάτων με βάση περιοχή στο χάρτη"
+msgstr "Περιορισμός αποτελεσμάτων με βάση την ορατή περιοχή του χάρτη"
 
 #: templates/station_list.html:210
 msgid "No entries found."
