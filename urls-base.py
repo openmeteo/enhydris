@@ -6,7 +6,7 @@ from django.views.generic.simple import direct_to_template
 from registration.views import register
 from profiles.views import create_profile, edit_profile, profile_detail
 from enhydris.hcore.forms import HcoreRegistrationForm
-from enhydris.hcore.views import help, terms, profile_view, login
+from enhydris.hcore.views import terms, profile_view, login
 
 admin.autodiscover()
 
@@ -40,8 +40,6 @@ urlpatterns = patterns('',
 
     # terms of usage
     (r'^terms/$', terms,{}, 'terms'),
-    # help page
-    (r'^help/$', help,{}, 'help'),
 
     # internationalization
     (r'^i18n/', include('django.conf.urls.i18n')),
