@@ -1,647 +1,511 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Enhydris general translation strings.
+
+# IMPORTANT: Do not include strings from applications in this file, as each
+# application has its own translation files. When creating translation files
+# for the top level enhydris directory, make sure you use the --ignore
+# parameter, like this:
+#  ./manage.py makemessages --locale el --ignore='[^st]*'
+# The above will include settings and templates but ignore all other files.
+# This will not work if an application name starts with s or t.
+
+# Copyright (C) 2007-2011 National Technical University of Athens
+# This file is distributed under the same license as Enhydris.
+# Seraphim Mellos, 2009.
+# Antonis Christofides, 2011.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-11-20 12:28+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2011-11-24 15:48+0200\n"
+"PO-Revision-Date: 2011-11-24 16:15+0200\n"
+"Last-Translator: Antonis Christofides <anthony@itia.ntua.gr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: settings.py:88
+#: settings-example.py:87
 msgid "District"
 msgstr "Δ.Περιφέρεια"
 
-#: settings.py:89
+#: settings-example.py:88
 msgid "Prefecture"
 msgstr "Νομός"
 
-#: hcore/models.py:15 templates/profiles/profile_detail.html:9
+#: templates/base-sample.html:7
+msgid "Enhydris"
+msgstr "Ενυδρίς"
+
+#: templates/base-sample.html:54
+msgid "Stations"
+msgstr "Σταθμοί"
+
+#: templates/base-sample.html:68
+#, fuzzy
+msgid "search stations"
+msgstr "Σταθμοί"
+
+#: templates/base-sample.html:104
+msgid "Welcome"
+msgstr "Καλώς ήρθατε"
+
+#: templates/index.html:22
+#, fuzzy
+msgid "Welcome to Enhydris"
+msgstr "Καλώς ήρθατε στην Ενυδρίδα"
+
+#: templates/index.html:24
+msgid "If you want to take full advantage of our service, you could "
+msgstr ""
+
+#: templates/index.html:27
+msgid " if you're already a member!"
+msgstr ""
+
+#: templates/index.html:31
+msgid "Current Statistics"
+msgstr "Στατιστικά"
+
+#: templates/index.html:33 templates/index.html.py:34 templates/index.html:35
+#: templates/index.html.py:36
+msgid "Currently there are "
+msgstr "Αυτή τη στιγμή υπάρχουν "
+
+#: templates/index.html:33
+msgid "users registered on the site"
+msgstr "εγγεγραμμένοι χρήστες"
+
+#: templates/index.html:34
+#, fuzzy
+msgid "stations hosted on the site"
+msgstr "σταθμοί"
+
+#: templates/index.html:35
+msgid "instruments hosted on the site"
+msgstr "όργανα"
+
+#: templates/index.html:36
+msgid "timeseries hosted on the site"
+msgstr "χρονοσειρές"
+
+#: templates/index.html:40
+msgid "Recent Activity"
+msgstr "Πρόσφατες αλλαγές"
+
+#: templates/index.html:45
+msgid "was modifed at"
+msgstr ""
+
+#: templates/success.html:4 templates/success.html.py:7
+msgid "Επιτυχές!"
+msgstr ""
+
+#: templates/success.html:14
+#, python-format
+msgid "Here's a link to the <a href=\"%(index)s\">homepage</a>."
+msgstr "<a href=\"%(index)s\">Αρχική σελίδα</a>."
+
+#: templates/admin/hcore/timeseries/change_form.html:7
+msgid "History"
+msgstr "Ιστορικό"
+
+#: templates/admin/hcore/timeseries/change_form.html:8
+msgid "View on site"
+msgstr "Προβολή στο site"
+
+#: templates/admin/hcore/timeseries/change_form.html:19
+msgid "Please correct the error below."
+msgid_plural "Please correct the errors below."
+msgstr[0] "Παρακαλούμε διορθώστε το παρακάτω σφάλμα."
+msgstr[1] "Παρακαλούμε διορθώστε τα παρακάτω σφάλματα."
+
+#: templates/admin/hcore/timeseries/change_form.html:36
+msgid ""
+"In order to upload data, first create the timeseries and then try to edit "
+"them"
+msgstr "Για να ανεβάσετε δεδομένα, πρώτα δημιουργήστε την χρονοσειρά."
+
+#: templates/profiles/create_profile.html:7
+#: templates/profiles/edit_profile.html:10
+msgid "Sorry there are corrections needed in your form below:"
+msgstr "Παρακαλώ διορθώστε τη φόρμα:"
+
+#: templates/profiles/edit_profile.html:6
+#: templates/profiles/profile_detail.html:30
+msgid "User profile for"
+msgstr "Προτιμήσεις του χρήστη"
+
+#: templates/profiles/edit_profile.html:7
+msgid ""
+"You can change your personal information using the form below. Make any "
+"changes necessary and then click the 'Change' button."
+msgstr "Αλλάξτε τα προσωπικά σας στοιχεία παρακάτω και πατήστε \"Αλλαγή\"."
+
+#: templates/profiles/edit_profile.html:24
+#: templates/registration/password_change.html:26
+msgid "Change"
+msgstr "Αλλαγή"
+
+#: templates/profiles/profile_detail.html:33
+#: templates/profiles/profile_public.html:14
 #, fuzzy
 msgid "Username"
 msgstr "Όνομα χρήστη:"
 
-#: hcore/models.py:16
-#, fuzzy
-msgid "First Name"
-msgstr "Σύντομο Όνομα"
-
-#: hcore/models.py:17
-#, fuzzy
-msgid "Last Name"
-msgstr "Σύντομο Όνομα"
-
-#: hcore/models.py:18
-#, fuzzy
-msgid "Location"
-msgstr "Σταθμοί"
-
-#: hcore/models.py:19 templates/profiles/profile_detail.html:29
-msgid "Organization"
-msgstr ""
-
-#: hcore/models.py:30
-msgid "Profile"
-msgstr ""
-
-#: hcore/models.py:31 templates/profiles/profile_list.html:5
-msgid "Profiles"
-msgstr ""
-
-#: hcore/models.py:319
-#, python-format
-msgid ""
-"%s is not a valid time step; exactly one of minutes and months must be zero"
-msgstr ""
-"Το %s δεν είναι έγκυρο χρονικό βήμα: ακριβώς ένα από τα λεπτά και τους μήνες "
-"πρέπει να είναι μηδέν"
-
-#: hcore/models.py:345
-msgid "Invalid time step: if time_step is null, offsets must also be null"
-msgstr ""
-"Μη έγκυρο χρονικό βήμα: αν το time_step είναι null, τα offsets πρέπει να "
-"είναι επίσης null"
-
-#: hcore/models.py:349
-msgid ""
-"Invalid time step: if time_step is not null, actual offsets must be provided"
-msgstr ""
-"Μη έγκυρο χρονικό βήμα: αν το time_step δεν είναι null, πρέπει να παρέχονται "
-"τα actual offsets"
-
-#: hcore/models.py:354
-msgid "Invalid time step: nominal offsets must be both null or both not null"
-msgstr ""
-"Μη έγκυρο χρονικό βήμα: τα nominal offsets πρέπει ή να είναι και τα δύο null "
-"ή να μην είναι και τα δύο null"
-
-#: hcore/utils.py:5
-#, python-format
-msgid "%f is not a valid latitude"
-msgstr "Το %f δεν είναι έγκυρο γεωγραφικό πλάτος"
-
-#: hcore/utils.py:9
-#, python-format
-msgid "%f is not a valid longitude"
-msgstr "Το %f δεν είναι έγκυρο γεωγραφικό μήκος"
-
-#: hcore/utils.py:13
-#, python-format
-msgid "%f is not a valid altitude"
-msgstr "Το %f δεν είναι έγκυρο υψόμετρο"
-
-#: hcore/templates/filter_table.html:7
-msgid "Country"
-msgstr "Χώρα"
-
-#: hcore/templates/filter_table.html:100
-#: templates/hcore/station_detail.html:46
-msgid "Water Division"
-msgstr "Υδατικό διαμέρισμα"
-
-#: hcore/templates/filter_table.html:128
-#: templates/hcore/station_detail.html:42
-msgid "Water Basin"
-msgstr "Λεκάνη απορροής"
-
-#: hcore/templates/filter_table.html:156
-#: templates/hcore/station_detail.html:78
-msgid "Owner"
-msgstr "Ιδιοκτήτης"
-
-#: hcore/templates/filter_table.html:184
-#: templates/hcore/instrument_detail.html:17
-#: templates/hcore/station_detail.html:84
-#: templates/hcore/station_detail.html:131
-#: templates/hcore/station_detail.html:191
-#: templates/hcore/station_detail.html:222
-msgid "Type"
-msgstr "Τύπος"
-
-#: templates/403.html:4 templates/403.html.py:7
-msgid "Forbidden access"
-msgstr ""
-
-#: templates/403.html:12
-msgid ""
-"Looks like you do not have the necessary permissions for the required action."
-msgstr ""
-
-#: templates/403.html:15 templates/404.html:15
-#, python-format
-msgid "Here's a link to the <a href=\"%(index)s\">homepage</a>."
-msgstr ""
-
-#: templates/404.html:4 templates/404.html.py:7
-msgid "Page not found"
-msgstr ""
-
-#: templates/404.html:12
-msgid "Looks like you followed a bad link."
-msgstr ""
-
-#: templates/500.html:4 templates/500.html.py:7
-msgid "Page unavailable"
-msgstr ""
-
-#: templates/500.html:12
-msgid "We're sorry, but the requested page is currently unavailable."
-msgstr ""
-
-#: templates/500.html:14
-msgid "Please try again later."
-msgstr ""
-
-#: templates/base-sample.html:7
-msgid "Hydroscope"
-msgstr "Υδροσκόπιο"
-
-#: templates/base-sample.html:20
-#, fuzzy
-msgid "Go to station list"
-msgstr "Κατάλογος σταθμών"
-
-#: templates/base-sample.html:21
-#, fuzzy
-msgid "Go to map"
-msgstr "Μετάβαση στο χάρτη"
-
-#: templates/base-sample.html:52
-msgid "Sign out from the website"
-msgstr "Αποσύνδεση από τον ιστότοπο"
-
-#: templates/base-sample.html:52
-msgid "Sign out"
-msgstr "Αποσύνδεση"
-
-#: templates/base-sample.html:56
-#, python-format
-msgid "Welcome <a href=\"/profile/%(user_username)s\">%(user_username)s</a>!"
-msgstr ""
-"Καλωσορίσατε <a href=\"/profile/%(user_username)s\">%(user_username)s</a>!"
-
-#: templates/base-sample.html:60
-msgid "Sign in"
-msgstr "Είσοδος"
-
-#: templates/base-sample.html:62
-#: templates/registration/registration_form.html:76
-msgid "Register"
-msgstr ""
-
-#: templates/base-sample.html:68
-msgid "Go to start page"
-msgstr "Μετάβαση στην αρχική σελίδα"
-
-#: templates/base-sample.html:71
-msgid "Stations"
-msgstr "Σταθμοί"
-
-#: templates/base-sample.html:72
-msgid "Map"
-msgstr "Χάρτης"
-
-#: templates/index.html:9
-#, fuzzy
-msgid "Welcome to Hydroscope"
-msgstr "Υδροσκόπιο"
-
-#: templates/index.html:11
-msgid "Please choose an option from the menu above."
-msgstr "Παρακαλώ επιλέξτε ένα σύνδεσμο από το παραπάνω μενού."
-
-#: templates/hcore/instrument_detail.html:5
-msgid "Instrument Details"
-msgstr "Λεπτομέρειες Οργάνων"
-
-#: templates/hcore/instrument_detail.html:9
-#: templates/hcore/station_detail.html:26
-#: templates/hcore/station_detail.html:129
-#: templates/hcore/station_detail.html:156
-#: templates/hcore/station_detail.html:189
-#: templates/hcore/station_detail.html:220
-#: templates/hcore/station_detail.html:262
-#: templates/hcore/timeseries_detail.html:22
-msgid "ID"
-msgstr "ID"
-
-#: templates/hcore/instrument_detail.html:13
-#: templates/hcore/station_detail.html:30
-#: templates/hcore/station_detail.html:221
-#: templates/hcore/station_detail.html:263
-#: templates/hcore/timeseries_detail.html:26
-#: templates/profiles/profile_detail.html:14
+#: templates/profiles/profile_detail.html:38
+#: templates/profiles/profile_public.html:19
 msgid "Name"
 msgstr "Όνομα"
 
-#: templates/hcore/instrument_detail.html:21
-#: templates/hcore/station_detail.html:38
-#: templates/hcore/station_detail.html:161
-#: templates/hcore/station_detail.html:223
-#: templates/hcore/station_detail.html:268
-#: templates/hcore/timeseries_detail.html:46
-msgid "Remarks"
-msgstr "Παρατηρήσεις"
-
-#: templates/hcore/instrument_detail.html:25
-#: templates/hcore/station_detail.html:224
-msgid "Manufacturer"
-msgstr "Κατασκευαστής"
-
-#: templates/hcore/instrument_detail.html:29
-#: templates/hcore/station_detail.html:225
-msgid "Model"
-msgstr "Μοντέλο"
-
-#: templates/hcore/instrument_detail.html:33
-#: templates/hcore/station_detail.html:88
-#: templates/hcore/station_detail.html:226
-msgid "Is Active"
-msgstr "Είναι Ενεργό"
-
-#: templates/hcore/instrument_detail.html:37
-#: templates/hcore/station_detail.html:96
-#: templates/hcore/station_detail.html:227
-msgid "Start Date"
-msgstr "Ημερ/νία Έναρξης"
-
-#: templates/hcore/instrument_detail.html:41
-#: templates/hcore/station_detail.html:100
-#: templates/hcore/station_detail.html:228
-msgid "End Date"
-msgstr "Ημερ/νία Λήξης"
-
-#: templates/hcore/station_detail.html:15
-msgid "Click to expand/collapse"
-msgstr ""
-
-#: templates/hcore/station_detail.html:34
-msgid "Short Name"
-msgstr "Σύντομο Όνομα"
-
-#: templates/hcore/station_detail.html:50
-msgid "Political Division"
-msgstr "Διοικητική Υποδιαίρεση"
-
-#: templates/hcore/station_detail.html:54
-msgid "Abscissa"
-msgstr "Τετμημένη"
-
-#: templates/hcore/station_detail.html:58
-msgid "Ordinate"
-msgstr "Τεταγμένη"
-
-#: templates/hcore/station_detail.html:62
-msgid "SRID"
-msgstr "SRID"
-
-#: templates/hcore/station_detail.html:66
-msgid "Approximate"
-msgstr "Προσέγγιση"
-
-#: templates/hcore/station_detail.html:70
-msgid "Altitude"
-msgstr "Υψόμετρο"
-
-#: templates/hcore/station_detail.html:74
-msgid "ASRID"
-msgstr "ASRID"
-
-#: templates/hcore/station_detail.html:92
-msgid "Is Automatic"
-msgstr "Είναι αυτόματος"
-
-#: templates/hcore/station_detail.html:105
-msgid "Overseers"
-msgstr "Παρατηρητές"
-
-#: templates/hcore/station_detail.html:122
-msgid "Station (Gentity) Alternative Codes"
-msgstr "Εναλλακτικοί Κωδικοί Σταθμού"
-
-#: templates/hcore/station_detail.html:130
-#: templates/hcore/station_detail.html:157
-#: templates/hcore/station_detail.html:190
-msgid "Date"
-msgstr "Ημερομηνία"
-
-#: templates/hcore/station_detail.html:149
-msgid "Station (Gentity) Files"
-msgstr "Αρχεία Σταθμού"
-
-#: templates/hcore/station_detail.html:158
-msgid "File Type"
-msgstr "Τύπος Αρχείου"
-
-#: templates/hcore/station_detail.html:159
-msgid "Content"
-msgstr "Περιεχόμενο"
-
-#: templates/hcore/station_detail.html:160
-msgid "Description"
-msgstr "Περιγραφή"
-
-#: templates/hcore/station_detail.html:182
-msgid "Station (Gentity) Events"
-msgstr "Συμβάντα Σταθμού"
-
-#: templates/hcore/station_detail.html:192
-msgid "User"
-msgstr "Χρήστης"
-
-#: templates/hcore/station_detail.html:193
-msgid "Report"
-msgstr "Αναφορά"
-
-#: templates/hcore/station_detail.html:213
-msgid "Instruments"
-msgstr "Όργανα"
-
-#: templates/hcore/station_detail.html:255
-msgid "Timeseries"
-msgstr "Χρονοσειρές"
-
-#: templates/hcore/station_detail.html:264
-#: templates/hcore/timeseries_detail.html:30
-msgid "Variable"
-msgstr "Μεταβλητή"
-
-#: templates/hcore/station_detail.html:265
-#: templates/hcore/timeseries_detail.html:34
-msgid "Unit Of Measurement"
-msgstr "Μονάδα Μέτρησης"
-
-#: templates/hcore/station_detail.html:266
-#: templates/hcore/timeseries_detail.html:38
-msgid "Precision"
-msgstr "Ακρίβεια"
-
-#: templates/hcore/station_detail.html:267
-#: templates/hcore/timeseries_detail.html:42
-msgid "Time Zone"
-msgstr "Χρονική ζώνη"
-
-#: templates/hcore/station_detail.html:269
-#: templates/hcore/timeseries_detail.html:50
-msgid "Instrument"
-msgstr "Όργανο"
-
-#: templates/hcore/station_detail.html:270
-#: templates/hcore/timeseries_detail.html:54
-msgid "Time Step"
-msgstr "Χρονικό Βήμα"
-
-#: templates/hcore/station_detail.html:271
-#: templates/hcore/timeseries_detail.html:58
-msgid "Nominal Offset Minutes"
-msgstr "Nominal Offset Minutes"
-
-#: templates/hcore/station_detail.html:272
-#: templates/hcore/timeseries_detail.html:62
-msgid "Nominal Offset Months"
-msgstr "Nominal Offset Months"
-
-#: templates/hcore/station_detail.html:273
-#: templates/hcore/timeseries_detail.html:66
-msgid "Actual Offset Minutes"
-msgstr "Actual Offset Minutes"
-
-#: templates/hcore/station_detail.html:274
-#: templates/hcore/timeseries_detail.html:70
-msgid "Actual Offset Months"
-msgstr "Actual Offset Months"
-
-#: templates/hcore/station_list.html:40 templates/hcore/station_map.html:110
-msgid "Filter"
-msgstr "Φίλτρο"
-
-#: templates/hcore/station_list.html:44 templates/hcore/station_map.html:113
-msgid "Station Catalogue"
-msgstr "Κατάλογος Σταθμών"
-
-#: templates/hcore/station_list.html:88 templates/hcore/station_map.html:159
-msgid "No entries found."
-msgstr "Δεν βρέθηκαν εγγραφές"
-
-#: templates/hcore/station_list.html:89 templates/hcore/station_map.html:160
-msgid "You may want to try again with a different filter."
-msgstr "Προσπαθήστε ξανά με διαφορετικό φίλτρο."
-
-#: templates/hcore/station_map.html:26
-msgid "Click to hide the station list"
-msgstr "Απόκρυψη του καταλόγου σταθμών"
-
-#: templates/hcore/station_map.html:27
-msgid "Click to hide the map area"
-msgstr "Απόκρυψη του χάρτη"
-
-#: templates/hcore/station_map.html:28
-msgid "Click to expand the station list"
-msgstr "Εμφάνιση του καταλόγου σταθμών"
-
-#: templates/hcore/station_map.html:29
-msgid "Click to expand the map"
-msgstr "Εμφάνιση του χάρτη"
-
-#: templates/hcore/station_map.html:30
-msgid "Locate stations on the map"
-msgstr ""
-
-#: templates/hcore/station_map.html:31
-msgid "Select stations to locate on the map"
-msgstr ""
-
-#: templates/hcore/station_map.html:90
-#, fuzzy
-msgid "Locate Stations"
-msgstr "Σταθμοί"
-
-#: templates/hcore/station_map.html:94
-#, fuzzy
-msgid "List Stations"
-msgstr "Σταθμοί"
-
-#: templates/hcore/timeseries_detail.html:5
-msgid "Timeseries Details"
-msgstr "Λεπτομέρειες Χρονοσειρών"
-
-#: templates/hcore/timeseries_detail.html:8
-msgid ""
-"\n"
-"                    Download Timeseries in plain text from \n"
-"                "
-msgstr ""
-"\n"
-"                    Κατεβάστε τις Χρονοσειρές σε μορφή plain text \n"
-"                "
-
-#: templates/hcore/timeseries_detail.html:11
-#: templates/profiles/profile_detail.html:34
-#: templates/profiles/profile_detail.html:35
-msgid "here"
-msgstr "εδώ"
-
-#: templates/hcore/timeseries_detail.html:14
-msgid ""
-"\n"
-"                   You don't have permissions to download the time series "
-"in \n"
-"                   plain text format.\n"
-"               "
-msgstr ""
-"\n"
-"                   Δεν έχετε δικαιώματα να κατεβάσετε τις χρονοσειρές σε \n"
-"                   μορφή plain text.\n"
-"               "
-
-#: templates/profiles/create_profile.html:7
-#: templates/profiles/edit_profile.html:8
-msgid "Sorry there are corrections needed in your form below:"
-msgstr ""
-
-#: templates/profiles/edit_profile.html:6
-#: templates/profiles/profile_detail.html:6
-msgid "User profile for"
-msgstr ""
-
-#: templates/profiles/edit_profile.html:19
-msgid "Submit Changes"
-msgstr ""
-
-#: templates/profiles/profile_detail.html:19
+#: templates/profiles/profile_detail.html:43
+#: templates/profiles/profile_public.html:25
 msgid "Email"
 msgstr ""
 
-#: templates/profiles/profile_detail.html:24
+#: templates/profiles/profile_detail.html:48
+#: templates/profiles/profile_public.html:31
 msgid "Address"
+msgstr "Διεύθυνση"
+
+#: templates/profiles/profile_detail.html:53
+#: templates/profiles/profile_public.html:36
+msgid "Organization"
+msgstr "Οργανισμός"
+
+#: templates/profiles/profile_detail.html:61
+msgid "Edit your user profile"
+msgstr "Διόρθωση των προτιμήσεών σας"
+
+#: templates/profiles/profile_detail.html:65
+msgid "Change your password"
+msgstr "Αλλαγή συνθηματικού"
+
+#: templates/profiles/profile_detail.html:69
+msgid "Access the admin panel"
 msgstr ""
 
-#: templates/profiles/profile_detail.html:34
-msgid "Edit you user profile "
+#: templates/profiles/profile_detail.html:77
+msgid ""
+"As a superuser, you can edit all the stations. To find the station you are "
+"looking for, go to the"
 msgstr ""
 
-#: templates/profiles/profile_detail.html:35
-msgid "Reset your password "
+#: templates/profiles/profile_detail.html:77
+#, fuzzy
+msgid "station list."
 msgstr ""
 
-#: templates/registration/login.html:4 templates/registration/login.html:8
+#: templates/profiles/profile_detail.html:80
+msgid "You have created the following stations: "
+msgstr "Δημιουργήσατε τους παρακάτω σταθμούς: "
+
+#: templates/profiles/profile_detail.html:84
+#: templates/profiles/profile_detail.html:115
+#: templates/profiles/profile_public.html:46
+#, fuzzy
+msgid "Station ID"
+msgstr ""
+
+#: templates/profiles/profile_detail.html:85
+#: templates/profiles/profile_detail.html:116
+#: templates/profiles/profile_public.html:47
+#, fuzzy
+msgid "Station Name"
+msgstr "Όνομα"
+
+#: templates/profiles/profile_detail.html:86
+#: templates/profiles/profile_detail.html:117
+#: templates/profiles/profile_public.html:48
+msgid "Water Basin"
+msgstr "Λεκάνη απορροής"
+
+#: templates/profiles/profile_detail.html:87
+#: templates/profiles/profile_detail.html:118
+#: templates/profiles/profile_public.html:49
+msgid "Water Division"
+msgstr "Υδατικό διαμέρισμα"
+
+#: templates/profiles/profile_detail.html:88
+#: templates/profiles/profile_detail.html:119
+#: templates/profiles/profile_public.html:50
+msgid "Political Division"
+msgstr "Διοικητική Υποδιαίρεση"
+
+#: templates/profiles/profile_detail.html:89
+#: templates/profiles/profile_detail.html:120
+#: templates/profiles/profile_public.html:51
+msgid "Type"
+msgstr "Τύπος"
+
+#: templates/profiles/profile_detail.html:107
+msgid "It seems that you haven't created any stations yet."
+msgstr "Δεν έχετε ακόμα δημιουργήσει σταθμούς."
+
+#: templates/profiles/profile_detail.html:111
+msgid "You have permission to edit the following stations: "
+msgstr "Έχετε δικαίωμα να διορθώσετε τους παρακάτω σταθμούς: "
+
+#: templates/profiles/profile_detail.html:138
+msgid "It seems that you don't have permission to edit any station."
+msgstr "Δεν έχετε δικαίωμα διόρθωσης κανενός σταθμού."
+
+#: templates/profiles/profile_detail.html:141
+msgid "Management Actions:"
+msgstr "Ενέργειες διαχείρισης:"
+
+#: templates/profiles/profile_detail.html:146
+msgid "Add a new station "
+msgstr "Πρόσθεση νέου σταθμού"
+
+#: templates/profiles/profile_detail.html:154
+#, fuzzy
+msgid "Add a new instrument"
+msgstr "Πρόσθεση νέου οργάνου"
+
+#: templates/profiles/profile_detail.html:162
+#, fuzzy
+msgid "Add a new timeseries"
+msgstr "Πρόσθεση νέας χρονοσειράς"
+
+#: templates/profiles/profile_list.html:5
+msgid "Profiles"
+msgstr "Προτιμήσεις"
+
+#: templates/profiles/profile_public.html:11
+msgid "Public profile for"
+msgstr "Δημόσιες προτιμήσεις του χρήστη"
+
+#: templates/profiles/profile_public.html:42
+msgid "This user is the owner of the following stations: "
+msgstr "Ο χρήστης είναι ιδιοκτήτης των παρακάτω σταθμών: "
+
+#: templates/registration/activate.html:18
+msgid "Account activated"
+msgstr "Ο λογαριασμός είναι ενεργοποιημένος"
+
+#: templates/registration/activate.html:20
+msgid "Account activation failed"
+msgstr "Η ενεργοποίηση του λογαριασμού απέτυχε"
+
+#: templates/registration/login.html:14 templates/registration/login.html:28
 msgid "Login"
 msgstr "Σύνδεση"
 
-#: templates/registration/login.html:12
+#: templates/registration/login.html:32
 msgid "Your username and password didn't match. Please try again."
 msgstr ""
 "Το όνομα χρήστη και το συνθηματικό σας δεν ταιριάζουν. Παρακαλώ προσπαθήστε "
 "ξανά."
 
-#: templates/registration/login.html:18
+#: templates/registration/login.html:38
 #, python-format
 msgid "You are already logged in as \"%(user)s\"."
 msgstr "Είστε ήδη συνδεδεμένος ως \"%(user)s\"."
 
-#: templates/registration/login.html:25
-#: templates/registration/registration_form.html:18
+#: templates/registration/login.html:45
+#: templates/registration/registration_form.html:35
 msgid "Username:"
 msgstr "Όνομα χρήστη:"
 
-#: templates/registration/login.html:26
-#: templates/registration/registration_form.html:43
+#: templates/registration/login.html:46
+#: templates/registration/registration_form.html:60
 msgid "Password:"
 msgstr "Συνθηματικό:"
 
-#: templates/registration/logout.html:4 templates/registration/logout.html:9
+#: templates/registration/logout.html:4 templates/registration/logout.html:17
 msgid "Logged out"
 msgstr "Αποσυνδεδεμένος"
 
-#: templates/registration/logout.html:10
+#: templates/registration/logout.html:18
 msgid "You've been logged out."
 msgstr "Έχετε αποσυνδεθεί."
 
-#: templates/registration/logout.html:10
+#: templates/registration/logout.html:18
 msgid "Log in again"
 msgstr "Συνδεθείτε ξανά"
 
+#: templates/registration/password_change.html:5
+#: templates/registration/password_reset_confirm.html:5
+#, fuzzy
+msgid "Password change for"
+msgstr "Αλλαγή συνθηματικού για το χρήστη"
+
+#: templates/registration/password_change.html:18
+#: templates/registration/password_change_done.html:9
+#, fuzzy
+msgid "Password change"
+msgstr "Αλλαγή συνθηματικού:"
+
+#: templates/registration/password_change.html:19
+msgid ""
+"You can change your password from here. Please enter your new password twice "
+"so we can verify you typed it in correctly."
+msgstr "Εισάγετε το συνθηματικό δύο φορές."
+
+#: templates/registration/password_change_done.html:4
+#: templates/registration/password_reset_complete.html:4
+msgid "Password change successful"
+msgstr "Επιτυχής αλλαγή συνθηματικού"
+
+#: templates/registration/password_change_done.html:12
+msgid "Password change was successfull."
+msgstr "Η αλλαγή συνθηματικού ήταν επιτυχής."
+
+#: templates/registration/password_change_done.html:14
+msgid "Here's a link to the "
+msgstr ""
+
+#: templates/registration/password_change_done.html:16
+msgid "Login first in order to change password"
+msgstr "Συνδεθείτε πριν αλλάξετε συνθηματικό"
+
+#: templates/registration/password_expired.html:4
+msgid "Password key expired"
+msgstr "Το κλειδί του συνθηματικού έχει λήξει."
+
+#: templates/registration/password_expired.html:9
+msgid ""
+"The password key you're trying to use is expired. Please, request a new one."
+msgstr "Το κλειδί του συνθηματικού έχει λήξει. Παρακαλώ ζητήστε καινούργιο."
+
+#: templates/registration/password_reset.html:6
+#: templates/registration/password_reset_complete.html:9
+#: templates/registration/password_reset_confirm.html:19
+#, fuzzy
+msgid "Password reset"
+msgstr "Συνθηματικό:"
+
+#: templates/registration/password_reset.html:20
+msgid "Password reset form"
+msgstr "Μηδενισμός συνθηματικού"
+
+#: templates/registration/password_reset.html:21
+msgid ""
+"Forgotten your password? Enter your e-mail address, and we'll reset your "
+"password and e-mail the new one to you."
+msgstr ""
+"Αν ξεχάσατε το συνθηματικό σας, εισάγετε τη διεύθυνση e-mail σας. "
+"Θα αντικαταστήσουμε το συνθηματικό σας και θα σας στείλουμε το καινούργιο."
+
+#: templates/registration/password_reset.html:29
+msgid "Reset my password"
+msgstr "Αντικατάσταση συνθηματικού"
+
+#: templates/registration/password_reset_complete.html:11
+msgid "Your password has been set.  You may go ahead and log in now."
+msgstr "Έχει οριστεί το συνθηματικό σας. Μπορείτε τώρα να συνδεθείτε."
+
+#: templates/registration/password_reset_confirm.html:29
+msgid "Change password"
+msgstr "Αλλαγή συνθηματικού"
+
+#: templates/registration/password_reset_confirm.html:35
+msgid "Password reset unsuccessful"
+msgstr "Ανεπιτυχής αντικατάσταση συνθηματικού"
+
+#: templates/registration/password_reset_confirm.html:36
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a new password reset."
+msgstr ""
+"Ο σύνδεσμος μηδενισμού του συνθηματικού ήταν άκυρος, ίσως γιατί έχει ήδη "
+"χρησιμοποιηθεί. Παρακαλώ ζητήστε νέο μηδενισμό του συνθηματικού."
+
+#: templates/registration/password_reset_done.html:4
+#: templates/registration/password_reset_done.html:9
+msgid "Password reset successful"
+msgstr "Επιτυχής αντικατάσταση συνθηματικού"
+
+#: templates/registration/password_reset_done.html:10
+msgid ""
+"We've e-mailed you the instructions to obtain a new password. You should be "
+"receiving it shortly."
+msgstr ""
+"Σας στείλαμε οδηγίες για να λάβετε καινούργιο συνθηματικό. Θα πρέπει να τις "
+"λάβετε σύντομα."
+
 #: templates/registration/password_reset_email.html:2
 msgid "You're receiving this e-mail because you requested a password reset"
-msgstr ""
+msgstr "Λαμβάνετε αυτό το e-mail γιατί ζητήσατε μηδενισμό του συνθηματικού"
 
 #: templates/registration/password_reset_email.html:3
 #, python-format
 msgid "for your user account at %(site_name)s"
-msgstr ""
+msgstr "για το λογαριασμό σας στο %(site_name)s"
 
 #: templates/registration/password_reset_email.html:5
 msgid "Please go to the following page and choose a new password:"
-msgstr ""
+msgstr "Παρακαλούμε πηγαίνετε στην εξής σελίδα και διαλέξτε καινούργιο συνθηματικό:"
 
 #: templates/registration/password_reset_email.html:9
 msgid "Your username, in case you've forgotten:"
-msgstr ""
+msgstr "Το όνομα χρήστη σας είναι:"
 
 #: templates/registration/password_reset_email.html:11
 msgid "Thanks for using our site!"
-msgstr ""
+msgstr "Ευχαριστούμε που χρησιμοποιείτε το site μας."
 
 #: templates/registration/password_reset_email.html:13
 #, python-format
 msgid "The %(site_name)s team"
-msgstr ""
+msgstr "Η ομάδα του %(site_name)s"
 
-#: templates/registration/registration_form.html:4
+#: templates/registration/registration_form.html:20
 #, fuzzy
 msgid "Sign up"
 msgstr "Αποσύνδεση"
 
-#: templates/registration/registration_form.html:9
+#: templates/registration/registration_form.html:25
 msgid "Please correct the errors below: "
-msgstr ""
+msgstr "Παρακαλούμε διορθώστε τα παρακάτω σφάλματα: "
 
-#: templates/registration/registration_form.html:12
+#: templates/registration/registration_form.html:28
 msgid "Create an account"
-msgstr ""
+msgstr "Δημιουργία λογαριασμού"
 
-#: templates/registration/registration_form.html:30
+#: templates/registration/registration_form.html:47
 msgid "Email address:"
-msgstr ""
+msgstr "Διεύθυνση email:"
 
-#: templates/registration/registration_form.html:56
+#: templates/registration/registration_form.html:73
 #, fuzzy
 msgid "Password (again):"
-msgstr "Συνθηματικό:"
+msgstr "Συνθηματικό (ξανά):"
 
-#: templates/registration/registration_form.html:80
+#: templates/registration/registration_form.html:86
+msgid "Type the characters shown:"
+msgstr "Πληκτρολογήστε τους χαρακτήρες της εικόνας:"
+
+#: templates/registration/registration_form.html:98
+msgid "Terms of Service"
+msgstr "Όροι χρήσης"
+
+#: templates/registration/registration_form.html:105
+msgid "Register"
+msgstr "Εγγραφή"
+
+#: templates/registration/registration_form.html:109
 msgid ""
 "Please fill out the form (all fields are required), and your account will be "
 "created."
-msgstr ""
+msgstr "Παρακαλούμε συμπληρώστε τη φόρμα (απαιτούνται όλα τα πεδία) "
+"για να δημιουργηθεί ο λογαριασμός σας."
 
-#: templates/registration/registration_form.html:81
+#: templates/registration/registration_form.html:110
 msgid ""
 "You'll then be sent an email with instructions on how to finish your "
 "registration."
 msgstr ""
+"Στη συνέχεια θα λάβετε email με οδηγίες για το πώς να ολοκληρώσετε "
+"την εγγραφή σας."
 
-#: templates/registration/registration_form.html:83
+#: templates/registration/registration_form.html:112
 msgid "If you already have an account, you can"
-msgstr ""
+msgstr "Αν ήδη έχετε λογαριασμό, μπορείτε να"
 
-#: templates/registration/registration_form.html:83
+#: templates/registration/registration_form.html:112
 msgid "login here"
-msgstr ""
-
-#~ msgid "Welcome %(user_username)s!"
-#~ msgstr "Καλωσόρισες %(user_username)s!"
-
-#~ msgid "Filter By"
-#~ msgstr "Φιλτράρισμα"
-
-#~ msgid "Get in contact with us"
-#~ msgstr "Επικοινωνία"
+msgstr "συνδεθείτε"
