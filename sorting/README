@@ -1,9 +1,20 @@
+Overview
+========
+
 This is django_sorting (https://github.com/directeur/django-sorting).
 Because it is unmaintained, we have inserted its code in enhydris and
 renamed it to enhydris.sorting, so that we can maintain it instead.
+At the moment of this writing we are patching it with the code that
+makes it i18n/l10n;
+https://github.com/directeur/django-sorting/pull/10. See below for
+instructions on how to use the module (it's the original README,
+patched with the i18n/l10n feature).
 
-Copyright (C) 2009 Karim A. (aka Directeur)
-Copyright (C) 2011 National Technical University of Athens
+Copyright and license
+=====================
+
+Copyright (C) 2009 Karim A.
+Copyright (C) 2010 Stefan Foulis
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -30,3 +41,71 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+How to use enhydris.sorting
+===========================
+
+``enhydris.sorting`` allows for easy sorting, and sorting links generation 
+without modifying your views.
+
+There are really 5 steps to setting it up with your projects.
+
+1. List this application in the ``INSTALLED_APPS`` portion of your settings
+   file.  Your settings file might look something like::
+   
+       INSTALLED_APPS = (
+           # ...
+           'enhydris.sorting',
+       )
+
+2. Install the sorting middleware. Your settings file might look something
+   like::
+   
+       MIDDLEWARE_CLASSES = (
+           # ...
+           'enhydris.sorting.middleware.SortingMiddleware',
+       )
+
+3. If it's not already added in your setup, add the request context processor.
+   Note that context processors are set by default implicitly, so to set them
+   explicitly, you need to copy and paste this code into your under
+   the value TEMPLATE_CONTEXT_PROCESSORS::
+   
+        ("django.core.context_processors.auth",
+        "django.core.context_processors.debug",
+        "django.core.context_processors.i18n",
+        "django.core.context_processors.media",
+        "django.core.context_processors.request")
+
+4. Add this line at the top of your template to load the sorting tags:
+
+       {% load sorting_tags %}
+
+
+5. Decide on a variable that you would like to sort, and use the
+   autosort tag on that variable before iterating over it.    
+       
+       {% autosort object_list %}
+       
+   
+6. Now, you want to display different headers with links to sort 
+your objects_list:
+   
+    <tr>
+       <th>{% sort_anchor "first_name" "Name" %}</th>
+       <th>{% sort_anchor "creation_date" _("Creation") %}</th>
+        ...
+    </tr>
+
+    The first argument is a field of the objects list, and the second 
+    one(optional) is a title that would be displayed. Both arguments can be 
+    be context variables. The previous snippet will be rendered like this:
+
+    <tr>
+        <th><a href="/path/to/your/view/?sort=first_name" title="Name">Name</a></th>
+        <th><a href="/path/to/your/view/?sort=creation_date" title="Name">Erstellungsdatum</a></th>
+        ...
+    </tr>
+
+
+That's it!  
