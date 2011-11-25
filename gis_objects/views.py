@@ -249,8 +249,20 @@ def gis_objects_detail(request, *args, **kwargs):
 @filter_by
 def gis_objects_list(request, queryset, *args, **kwargs):
     gtypes = GISEntityType.objects.all()
-    kwargs["extra_context"] =      { "use_open_layers": True,
-                                     "gtypes": gtypes, }
+    kwargs["extra_context"] = {
+        "use_open_layers": True,
+        "gtypes": gtypes,
+        # The following is a hack because enhydris.sorting (aka
+        # django-sorting) sucks. I18N should be in the template, not
+        # here (but anyway the whole list needs revising, manual
+        # selecting of visible columns, reordering of columns, etc.)
+        "id_heading": _("id"),
+        "name_heading": _("Name"),
+        "water_basin_heading": _("Water basin"),
+        "political_division_heading": _("Political division"),
+        "gtype_heading": _("Type"),
+        "extra_info_heading": _("Extra information"),
+    }
     if request.GET.has_key("scheck") and request.GET["scheck"]=="search":
         # The case we got a simple search request
         query_string = request.GET.get('sq', "")
