@@ -240,7 +240,20 @@ def _prepare_csv(queryset):
 @sort_by
 def station_list(request, queryset, *args, **kwargs):
 
-    kwargs["extra_context"] = { "use_open_layers": settings.USE_OPEN_LAYERS }
+    kwargs["extra_context"] = {
+        "use_open_layers": settings.USE_OPEN_LAYERS,
+        # The following is a hack because enhydris.sorting (aka
+        # django-sorting) sucks. I18N should be in the template, not
+        # here (but anyway the whole list needs revising, manual
+        # selecting of visible columns, reordering of columns, etc.)
+        "id_heading": _("id"),
+        "name_heading": _("Name"),
+        "water_basin_heading": _("Water basin"),
+        "water_division_heading": _("Water division"),
+        "political_division_heading": _("Political division"),
+        "owner_heading": _("Owner"),
+        "type_heading": _("Type"),
+    }
     kwargs["template_name"] = "station_list.html"
     if request.GET.has_key("ts_only") and request.GET["ts_only"]=="True":
         tmpset = queryset.annotate(tsnum=Count('timeseries'))

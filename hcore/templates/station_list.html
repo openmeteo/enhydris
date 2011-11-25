@@ -180,13 +180,13 @@
             <table class="table_container tablesorter tablehighlighted data_table" style='width:100%;text-align:center'>
               <thead>
                 <tr>
-                  <th>{% anchor id 'ID' %}</th>
-                  <th>{% anchor name 'Name' %}</th>
-                  <th>{% anchor water_basin 'Water Basin' %}</th>
-                  <th>{% anchor water_division 'Water Division' %}</th>
-                  <th>{% anchor political_division 'Political Division' %}</th>
-                  <th>{% anchor owner 'Owner' %}</th>
-                  <th>{% anchor type 'Type' %}</th>
+                  <th>{% sort_anchor 'id' id_heading %}</th>
+                  <th>{% sort_anchor 'name' name_heading %}</th>
+                  <th>{% sort_anchor 'water_basin' water_basin_heading %}</th>
+                  <th>{% sort_anchor 'water_division' water_division_heading %}</th>
+                  <th>{% sort_anchor 'political_division' political_division_heading %}</th>
+                  <th>{% sort_anchor 'owner' owner_heading %}</th>
+                  <th>{% sort_anchor 'type' type_heading %}</th>
                 </tr>
               </thead>
               <tbody>
