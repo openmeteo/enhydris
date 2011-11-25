@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-24 14:56+0200\n"
+"POT-Creation-Date: 2011-11-25 15:49+0200\n"
 "PO-Revision-Date: 2011-11-24 15:30+0200\n"
 "Last-Translator: Antonis Christofides <anthony@itia.ntua.gr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -69,6 +69,35 @@ msgstr "Τμήμα υδραγωγείου"
 msgid "Reservoir"
 msgstr "Ταμιευτήρας"
 
+#: views.py:259
+msgid "id"
+msgstr ""
+
+#: views.py:260 templates/aqueduct_node_detail.html:37
+#: templates/aqueduct_segment_detail.html:42 templates/borehole_detail.html:37
+#: templates/common_detail.html:257 templates/pump_detail.html:37
+#: templates/refinery_detail.html:37 templates/reservoir_detail.html:37
+#: templates/spring_detail.html:37
+msgid "Name"
+msgstr "Όνομα"
+
+#: views.py:261
+msgid "Water basin"
+msgstr "Λεκάνη απορροής"
+
+#: views.py:262
+msgid "Political division"
+msgstr "Διοικητική υποδιαίρεση"
+
+#: views.py:263 templates/common_detail.html:97
+#: templates/common_detail.html.py:221
+msgid "Type"
+msgstr "Τύπος"
+
+#: views.py:264
+msgid "Extra information"
+msgstr "Περισσότερες πληροφορίες"
+
 #: templates/aqueduct_node_detail.html:4
 msgid "Enhydris - Aquduct node"
 msgstr "Ενυδρίς - Κόμβος υδραγωγείου"
@@ -86,14 +115,6 @@ msgstr "Λεπτομέρειες κόμβου υδραγωγείου"
 #: templates/spring_detail.html:33
 msgid "ID"
 msgstr ""
-
-#: templates/aqueduct_node_detail.html:37
-#: templates/aqueduct_segment_detail.html:42 templates/borehole_detail.html:37
-#: templates/common_detail.html:257 templates/pump_detail.html:37
-#: templates/refinery_detail.html:37 templates/reservoir_detail.html:37
-#: templates/spring_detail.html:37
-msgid "Name"
-msgstr "Όνομα"
 
 #: templates/aqueduct_node_detail.html:41
 #: templates/aqueduct_segment_detail.html:46 templates/borehole_detail.html:41
@@ -453,10 +474,6 @@ msgstr "Λιγότερα..."
 msgid "Gentity Alternative Codes"
 msgstr "Εναλλακτικοί κωδικοί"
 
-#: templates/common_detail.html:97 templates/common_detail.html.py:221
-msgid "Type"
-msgstr "Τύπος"
-
 #: templates/common_detail.html:98
 msgid "Value"
 msgstr "Τιμή"
@@ -554,6 +571,10 @@ msgstr "Περισσότερες λεπτομέρειες..."
 #: templates/gis_objects_list.html:3
 msgid "Enhydris - GIS Objects"
 msgstr "Ενυδρίς - Αντικείμενα GIS"
+
+#: templates/gis_objects_list.html:65
+msgid "Structures list"
+msgstr "Κατάλογος κατασκευών"
 
 #: templates/gis_objects_list.html:70
 msgid "Entity type"
