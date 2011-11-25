@@ -133,13 +133,11 @@ class SortAnchorNode(template.Node):
             urlappend = "&%s" % getvars.urlencode()
         else:
             urlappend = ''
-        if icon:
-            title_with_sort_ordering = "%s %s" % (title, icon)
-        else:
-            title_with_sort_ordering = title
-
         url = '%s?sort=%s%s' % (request.path, field, urlappend)
-        return '<a href="%s" title="%s">%s</a>' % (url, title, title_with_sort_ordering)
+        if icon:
+            return '<a href="%s" title="%s">%s %s</a>' % (url, title, title, icon)
+        else:
+            return '<a href="%s" title="%s">%s</a>' % (url, title, title)
 
 
 def autosort(parser, token):
