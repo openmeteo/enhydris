@@ -11,7 +11,6 @@
 # Seraphim Mellos, 2009.
 # Antonis Christofides, 2011.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
@@ -46,9 +45,8 @@ msgid "Map"
 msgstr "Χάρτης"
 
 #: templates/base-sample.html:68
-#, fuzzy
 msgid "search stations"
-msgstr "Σταθμοί"
+msgstr "αναζήτηση σταθμών"
 
 #: templates/base-sample.html:104
 msgid "Welcome"
@@ -65,7 +63,6 @@ msgid "Register"
 msgstr "Εγγραφή"
 
 #: templates/index.html:22
-#, fuzzy
 msgid "Welcome to Enhydris"
 msgstr "Καλώς ήρθατε στην Ενυδρίδα"
 
@@ -91,7 +88,6 @@ msgid "users registered on the site"
 msgstr "εγγεγραμμένοι χρήστες"
 
 #: templates/index.html:34
-#, fuzzy
 msgid "stations hosted on the site"
 msgstr "σταθμοί"
 
@@ -163,7 +159,6 @@ msgstr "Αλλαγή"
 
 #: templates/profiles/profile_detail.html:33
 #: templates/profiles/profile_public.html:14
-#, fuzzy
 msgid "Username"
 msgstr "Όνομα χρήστη:"
 
@@ -222,9 +217,8 @@ msgstr ""
 #: templates/profiles/profile_detail.html:85
 #: templates/profiles/profile_detail.html:116
 #: templates/profiles/profile_public.html:47
-#, fuzzy
 msgid "Station Name"
-msgstr "Όνομα"
+msgstr "Όνομα σταθμού"
 
 #: templates/profiles/profile_detail.html:86
 #: templates/profiles/profile_detail.html:117
@@ -271,12 +265,10 @@ msgid "Add a new station "
 msgstr "Πρόσθεση νέου σταθμού"
 
 #: templates/profiles/profile_detail.html:154
-#, fuzzy
 msgid "Add a new instrument"
 msgstr "Πρόσθεση νέου οργάνου"
 
 #: templates/profiles/profile_detail.html:162
-#, fuzzy
 msgid "Add a new timeseries"
 msgstr "Πρόσθεση νέας χρονοσειράς"
 
@@ -335,13 +327,11 @@ msgstr "Συνδεθείτε ξανά"
 
 #: templates/registration/password_change.html:5
 #: templates/registration/password_reset_confirm.html:5
-#, fuzzy
 msgid "Password change for"
 msgstr "Αλλαγή συνθηματικού για το χρήστη"
 
 #: templates/registration/password_change.html:18
 #: templates/registration/password_change_done.html:9
-#, fuzzy
 msgid "Password change"
 msgstr "Αλλαγή συνθηματικού:"
 
@@ -380,9 +370,8 @@ msgstr "Το κλειδί του συνθηματικού έχει λήξει. �
 #: templates/registration/password_reset.html:6
 #: templates/registration/password_reset_complete.html:9
 #: templates/registration/password_reset_confirm.html:19
-#, fuzzy
 msgid "Password reset"
-msgstr "Συνθηματικό:"
+msgstr "Μηδενισμός συνθηματικού"
 
 #: templates/registration/password_reset.html:20
 msgid "Password reset form"
@@ -461,7 +450,6 @@ msgid "The %(site_name)s team"
 msgstr "Η ομάδα του %(site_name)s"
 
 #: templates/registration/registration_form.html:20
-#, fuzzy
 msgid "Sign up"
 msgstr "Αποσύνδεση"
 
@@ -478,7 +466,6 @@ msgid "Email address:"
 msgstr "Διεύθυνση email:"
 
 #: templates/registration/registration_form.html:73
-#, fuzzy
 msgid "Password (again):"
 msgstr "Συνθηματικό (ξανά):"
 

@@ -2,12 +2,11 @@
 # Copyright (C) 2008-2011 National Technical University of Athens
 # This file is distributed under the same license as Enhydris.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-24 16:34+0200\n"
+"POT-Creation-Date: 2011-11-25 14:29+0200\n"
 "PO-Revision-Date: 2011-11-24 14:33+0200\n"
 "Last-Translator: Antonis Christofides <anthony@itia.ntua.gr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -46,21 +45,18 @@ msgstr ""
 "Αν δεν είναι γνωστή η θέση, αφήστε κενές και τις δύο."
 
 #: forms.py:387
-#, fuzzy
 msgid "Invalid timestep: exactly one of minutes and months must be zero"
 msgstr ""
 "Το %s δεν είναι έγκυρο χρονικό βήμα: ακριβώς ένα από τα λεπτά και τους μήνες "
 "πρέπει να είναι μηδέν"
 
 #: forms.py:478
-#, fuzzy
 msgid "Invalid Timestep: If time step is null, the offsets must also be null!"
 msgstr ""
 "Μη έγκυρο χρονικό βήμα: αν το χρονικό βήμα είναι κενό, τα offset πρέπει να "
 "είναι επίσης κενά."
 
 #: forms.py:484
-#, fuzzy
 msgid ""
 "Invalid offset: If time step is not null, actual offset values must be "
 "provided!"
@@ -69,7 +65,6 @@ msgstr ""
 "το actual offset."
 
 #: forms.py:491
-#, fuzzy
 msgid "Invalid offsets: Nominal offsets must be both null or both not null!"
 msgstr ""
 "Μη έγκυρο χρονικό βήμα: τα nominal offset πρέπει ή να είναι και τα δύο κενά "
@@ -111,22 +106,18 @@ msgstr ""
 "το actual offset."
 
 #: models.py:659
-#, fuzzy
 msgid "Username"
 msgstr "Όνομα χρήστη"
 
 #: models.py:660
-#, fuzzy
 msgid "First Name"
 msgstr "Όνομα"
 
 #: models.py:661
-#, fuzzy
 msgid "Last Name"
 msgstr "Επώνυμο"
 
 #: models.py:662
-#, fuzzy
 msgid "Location"
 msgstr "Τοποθεσία"
 
@@ -152,12 +143,46 @@ msgstr "Το %f δεν είναι έγκυρο γεωγραφικό πλάτος
 msgid "%f is not a valid longitude"
 msgstr "Το %f δεν είναι έγκυρο γεωγραφικό μήκος"
 
+#: views.py:249
+msgid "id"
+msgstr ""
+
+#: views.py:250 templates/instrument_detail.html:68
+#: templates/instrument_detail.html:107 templates/station_detail.html:146
+#: templates/station_detail.html.py:477 templates/station_detail.html:538
+#: templates/timeseries_detail.html:163
+msgid "Name"
+msgstr "Όνομα"
+
+#: views.py:251
+msgid "Water basin"
+msgstr "Λεκάνη απορροής"
+
+#: views.py:252
+msgid "Water division"
+msgstr "Υδατικό διαμέρισμα"
+
+#: views.py:253
+msgid "Political division"
+msgstr "Διοικητική υποδιαίρεση"
+
+#: views.py:254 templates/filter_table.html:210
+#: templates/station_detail.html:194
+msgid "Owner"
+msgstr "Ιδιοκτήτης"
+
+#: views.py:255 templates/filter_table.html:238
+#: templates/instrument_detail.html:72 templates/station_detail.html:200
+#: templates/station_detail.html.py:264 templates/station_detail.html:428
+#: templates/station_detail.html.py:478
+msgid "Type"
+msgstr "Τύπος"
+
 #: templates/filter_table.html:7
 msgid "Country"
 msgstr "Χώρα"
 
 #: templates/filter_table.html:44
-#, fuzzy
 msgid "Using Filters"
 msgstr "Φίλτρο"
 
@@ -196,31 +221,18 @@ msgid "Variable"
 msgstr "Μεταβλητή"
 
 #: templates/filter_table.html:190
-#, fuzzy
 msgid "Select an Variable"
 msgstr "Επιλέξτε μεταβλητή"
-
-#: templates/filter_table.html:210 templates/station_detail.html:194
-msgid "Owner"
-msgstr "Ιδιοκτήτης"
-
-#: templates/filter_table.html:238 templates/instrument_detail.html:72
-#: templates/station_detail.html:200 templates/station_detail.html.py:264
-#: templates/station_detail.html:428 templates/station_detail.html.py:478
-msgid "Type"
-msgstr "Τύπος"
 
 #: templates/filter_table.html:266 templates/station_list.html:127
 msgid "Display only stations with timeseries"
 msgstr "Προβολή μόνο σταθμών με χρονοσειρές"
 
 #: templates/gentityaltcode_edit.html:21 templates/gentityevent_edit.html:21
-#, fuzzy
 msgid "Edit Gentity Event"
 msgstr "Γεγονότα σταθμού"
 
 #: templates/gentityaltcode_edit.html:23 templates/gentityevent_edit.html:23
-#, fuzzy
 msgid "Add Gentity Event"
 msgstr "Πρόσθεση γεγονότος σταθμού"
 
@@ -250,12 +262,10 @@ msgid "Submit Changes"
 msgstr "Υποβολή αλλαγών"
 
 #: templates/gentityfile_edit.html:21
-#, fuzzy
 msgid "Edit Gentity File"
 msgstr "Διόρθωση αρχείων"
 
 #: templates/gentityfile_edit.html:23
-#, fuzzy
 msgid "Add Gentity File"
 msgstr "Πρόσθεση αρχείου"
 
@@ -284,12 +294,10 @@ msgid "Fill the gentity generic data details:"
 msgstr "Συμπληρώστε τις λεπτομέρειες για το γενικό πληροφοριακό στοιχείο:"
 
 #: templates/instrument_detail.html:4
-#, fuzzy
 msgid "Enhydris - Instrument"
-msgstr "Όργανο"
+msgstr "Ενυδρίς - Όργανο"
 
 #: templates/instrument_detail.html:4
-#, fuzzy
 msgid "Station:"
 msgstr "Σταθμός:"
 
@@ -306,15 +314,8 @@ msgid "ID"
 msgstr "ID"
 
 #: templates/instrument_detail.html:64 templates/timeseries_detail.html:155
-#, fuzzy
 msgid "Related Station"
 msgstr "Σχετικός σταθμός"
-
-#: templates/instrument_detail.html:68 templates/instrument_detail.html:107
-#: templates/station_detail.html:146 templates/station_detail.html.py:477
-#: templates/station_detail.html:538 templates/timeseries_detail.html:163
-msgid "Name"
-msgstr "Όνομα"
 
 #: templates/instrument_detail.html:76 templates/instrument_detail.html:111
 #: templates/station_detail.html:154 templates/station_detail.html.py:315
@@ -353,7 +354,6 @@ msgid "Timeseries"
 msgstr "Χρονοσειρές"
 
 #: templates/instrument_detail.html:109 templates/station_detail.html:540
-#, fuzzy
 msgid "Time step"
 msgstr "Χρονικό βήμα"
 
@@ -376,27 +376,22 @@ msgstr "Διαχείριση"
 
 #: templates/instrument_detail.html:132 templates/station_detail.html:563
 #: templates/timeseries_detail.html:208
-#, fuzzy
 msgid "Variable step"
 msgstr "Μεταβλητό βήμα"
 
 #: templates/instrument_edit.html:22
-#, fuzzy
 msgid "Edit Instrument"
 msgstr "Διόρθωση οργάνου"
 
 #: templates/instrument_edit.html:24
-#, fuzzy
 msgid "Add Instrument"
 msgstr "Πρόσθεση οργάνου"
 
 #: templates/instrument_edit.html:34
-#, fuzzy
 msgid "Edit instrument details for "
 msgstr "Λεπτομέρειες για το παρακάτω όργανο "
 
 #: templates/instrument_edit.html:43
-#, fuzzy
 msgid "Fill the instrument details:"
 msgstr "Συμπληρώστε τις λεπτομέρειες για το όργανο:"
 
@@ -405,17 +400,14 @@ msgid "Entities map"
 msgstr "Χάρτης οντοτήτων"
 
 #: templates/overseer_edit.html:21
-#, fuzzy
 msgid "Edit Overseer"
 msgstr "Διόρθωση παρατηρητή"
 
 #: templates/overseer_edit.html:23
-#, fuzzy
 msgid "Add Overseer"
 msgstr "Πρόσθεση παρατηρητή"
 
 #: templates/overseer_edit.html:33
-#, fuzzy
 msgid "Edit Overseer details:"
 msgstr "Λεπτομέρειες για τον παρατηρητή:"
 
@@ -424,12 +416,10 @@ msgid "Fill the Overseer details:"
 msgstr "Συμπληρώστε τις λεπτομέρειες για τον παρατηρητή:"
 
 #: templates/station_brief.html:5
-#, fuzzy
 msgid "Owner: "
 msgstr "Ιδιοκτήτης: "
 
 #: templates/station_brief.html:6
-#, fuzzy
 msgid "Active, "
 msgstr "Ενεργός,"
 
@@ -438,7 +428,6 @@ msgid "Not active, "
 msgstr "Μη ενεργός, "
 
 #: templates/station_brief.html:7
-#, fuzzy
 msgid "Automatic"
 msgstr "Αυτόματος"
 
@@ -451,7 +440,6 @@ msgid "Open station details"
 msgstr "Λεπτομέρειες σταθμού"
 
 #: templates/station_detail.html:4
-#, fuzzy
 msgid "Enhydris - Station"
 msgstr "Ενυδρίς - Σταθμός"
 
@@ -550,12 +538,10 @@ msgid "Request File"
 msgstr ""
 
 #: templates/station_detail.html:364
-#, fuzzy
 msgid "Station (Gentity) Generic data"
 msgstr "Γενικά πληροφοριακά στοιχεία"
 
 #: templates/station_detail.html:371
-#, fuzzy
 msgid "Data Type"
 msgstr "Τύπος"
 
@@ -576,7 +562,6 @@ msgid "Instruments"
 msgstr "Όργανα"
 
 #: templates/station_detail.html:599 templates/timeseries_detail.html:254
-#, fuzzy
 msgid "Station "
 msgstr "Σταθμός "
 
@@ -585,12 +570,10 @@ msgid "Copyright (c) "
 msgstr ""
 
 #: templates/station_edit.html:76
-#, fuzzy
 msgid "Edit Station"
 msgstr "Διόρθωση σταθμού"
 
 #: templates/station_edit.html:78
-#, fuzzy
 msgid "Add Station"
 msgstr "Πρόσθεση σταθμού"
 
@@ -599,7 +582,6 @@ msgid "Edit station details for "
 msgstr "Λεπτομέρειες σταθμού"
 
 #: templates/station_edit.html:103
-#, fuzzy
 msgid "Fill the station details:"
 msgstr "Συμπληρώστε τις λεπτομέρειες για το σταθμό:"
 
@@ -616,7 +598,6 @@ msgstr ""
 "Δημιουργήστε το σταθμό και μετά θα μπορείτε να προσθέσετε λεπτομέρειες."
 
 #: templates/station_list.html:3
-#, fuzzy
 msgid "Enhydris - Stations"
 msgstr "Ενυδρίς - Σταθμοί"
 
@@ -677,7 +658,6 @@ msgid "Filter"
 msgstr "Φίλτρο"
 
 #: templates/timeseries_detail.html:4
-#, fuzzy
 msgid "Enhydris - Time series"
 msgstr "Ενυδρίς - Χρονοσειρές"
 
@@ -700,13 +680,14 @@ msgid "here"
 msgstr "εδώ"
 
 #: templates/timeseries_detail.html:144
-#, fuzzy
 msgid ""
 "\n"
 "                   You don't have permissions to download the time "
 "series!                   \n"
 "               "
-msgstr "Δεν έχετε τα δικαιώματα για να κατεβάσετε τις χρονοσειρές."
+msgstr ""
+"\n"
+"Δεν έχετε τα δικαιώματα για να κατεβάσετε τις χρονοσειρές."
 
 #: templates/timeseries_detail.html:175
 msgid "Precision"
@@ -717,7 +698,6 @@ msgid "Time Zone"
 msgstr "Χρονική ζώνη"
 
 #: templates/timeseries_detail.html:206
-#, fuzzy
 msgid "Time scale"
 msgstr "Χρονική κλίμακα"
 
@@ -758,26 +738,21 @@ msgid "Interval, "
 msgstr "Διάστημα, "
 
 #: templates/timeseries_detail.html:243
-#, fuzzy
 msgid "Actual offset of reference"
-msgstr "Actual Offset Μήνες"
+msgstr ""
 
 #: templates/timeseries_edit.html:15
-#, fuzzy
 msgid "Edit Timeseries"
 msgstr "Διόρθωση χρονοσειράς"
 
 #: templates/timeseries_edit.html:17
-#, fuzzy
 msgid "Add Timeseries"
 msgstr "Πρόσθεση χρονοσειράς"
 
 #: templates/timeseries_edit.html:27
-#, fuzzy
 msgid "Edit timeseries details for "
 msgstr "Λεπτομέρειες χρονοσειράς"
 
 #: templates/timeseries_edit.html:36
-#, fuzzy
 msgid "Fill the timeseries details:"
 msgstr "Συμπληρώστε τις λεπτομέρειες για τη χρονοσειρά:"
