@@ -1,4 +1,5 @@
 USE_I18N = True
+LOCALE_PATHS = (os.path.join(ENHYDRIS_PROGRAM_DIR, 'locale'))
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
