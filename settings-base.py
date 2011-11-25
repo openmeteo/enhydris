@@ -9,7 +9,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.gzip.GZipMiddleware',
     'django_notify.middleware.NotificationsMiddleware',
     'pagination.middleware.PaginationMiddleware',
-    'django_sorting.middleware.SortingMiddleware',
+    'enhydris.sorting.middleware.SortingMiddleware',
 )
 
 ROOT_URLCONF = 'enhydris.urls'
@@ -43,7 +43,7 @@ INSTALLED_APPS = (
     # Dependencies
     'south',
     'pagination',
-    'django_sorting',
+    'enhydris.sorting',
     'profiles',
     'registration',
     'ajax_select',
