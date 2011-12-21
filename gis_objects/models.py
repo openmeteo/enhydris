@@ -112,9 +112,10 @@ class GISPump(Gpoint, GISEntity):
         self.gtype = GISEntityType.objects.get(pk=2)
         super(GISPump, self).save(*args, **kwargs)
     def extra_info(self):
-        return ', '.join( (_('Pump active') if self.pump_active else '',
-                           _('Generator') if self.is_generator else '',
-                        ))
+        if self.is_generator:
+            return _('Generator')
+        else:
+            return _('Pump active') if self.pump_active else ''
 
 class GISPumpType(Lookup): pass
 
