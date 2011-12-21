@@ -3,6 +3,9 @@
   <Placemark>
     <name>{% if place.name %}{{ place.name }}{% else %}{{ place }}{% endif %}</name>
     <id>{{ place.id }}</id>
+    {% if place.is_generator %}
+    <is_generator>yes</is_generator>
+    {% endif %}
     <gis_objects>yes</gis_objects>
     {{ place.kml|safe }}
   </Placemark>{% endfor %}{% endblock %}
