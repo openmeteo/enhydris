@@ -396,7 +396,7 @@ class TimeseriesForm(ModelForm):
     which a user may upload additional data.
     """
 
-    gentity = forms.ModelChoiceField(Station.objects.all(),empty_label=None,
+    gentity = forms.ModelChoiceField(Gentity.objects.all(),empty_label=None,
                                 label='Station')
     instrument = forms.ModelChoiceField(Instrument.objects.all(),
                                 required=False, label='Instrument')
