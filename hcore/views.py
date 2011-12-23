@@ -1838,7 +1838,11 @@ def bound(request):
     if queryres.count()<1:
         return HttpResponse(','.join([str(e) for e in\
                             settings.MAP_DEFAULT_VIEWPORT]), mimetype='text/plain')
-    extent = list(queryres.extent())
+    try:
+        extent = list(queryres.extent())
+    except TypeError:
+        return HttpResponse(','.join([str(e) for e in\
+                            settings.MAP_DEFAULT_VIEWPORT]), mimetype='text/plain')
     min_viewport = settings.MIN_VIEWPORT_IN_DEGS
     min_viewport_half = 0.5*min_viewport
     if abs(extent[2]-extent[0])<min_viewport:
