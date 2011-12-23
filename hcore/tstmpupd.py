@@ -34,7 +34,7 @@ def update_ts_temp_file(cache_dir, connection, id):
         ts.read_from_db(connection)
         if not os.path.exists(cache_dir):
             os.mkdir(cache_dir)
-        tempfile_handle, tempfile_name = tempfile.mkstemp()
+        tempfile_handle, tempfile_name = tempfile.mkstemp(dir=cache_dir)
         with os.fdopen(tempfile_handle, 'w') as afile:
             ts.write(afile)
         shutil.move(tempfile_name, afilename)
