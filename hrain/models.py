@@ -26,7 +26,7 @@ class TimeseriesEvent(models.Model):
 def refresh_events():
     from pthelma.timeseries import Timeseries, identify_events
     from StringIO import StringIO
-    import fpconst
+    import math
     from glob import glob
     import os
     import os.path
@@ -66,7 +66,7 @@ def refresh_events():
             total=x[0].sum(e.start_date, e.end_date)
             e.max_measurement = max(e.max_measurement,
                                             x[0].max(e.start_date, e.end_date))
-            if fpconst.isNaN(total):
+            if math.isnan(total):
                 total = None
             else:
                 weighted_total += total*x[1]
