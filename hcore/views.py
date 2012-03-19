@@ -390,6 +390,10 @@ def timeseries_data(request, *args, **kwargs):
             return inc_month(adate, 12*steps)
         elif unit=='moment':
             return adate            
+        elif unit=='hour':
+            return adate+steps*timedelta(minutes=60)
+        elif unit=='twohour':
+            return adate+steps*timedelta(minutes=120)
         else: raise Http404
    
 
@@ -438,6 +442,11 @@ def timeseries_data(request, *args, **kwargs):
                 else:
                     last_date = date_at_pos(end_pos)
                     first_date = inc_datetime(last_date, request.GET['last'], -1)
+# This is an almost bad workarround to exclude the first record from
+# sums, i.e. when we need the 144 10 minute values from a day.
+                    if request.GET.has_key('start_offset'):
+                        offset = float(request.GET['start_offset'])
+                        first_date+= timedelta(minutes=offset)
                 start_pos= find_line_at_date(first_date, tot_lines)[0]
             else:
                 start_pos= 1
