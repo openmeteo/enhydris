@@ -120,7 +120,10 @@ Model forms.
 
 class OverseerForm(ModelForm):
 
-    station = forms.ModelChoiceField(Station.objects.all(),label='Station',
+    station_objects = Station.objects.all()
+    if len(settings.SITE_STATION_FILTER)>0:
+        station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
+    station = forms.ModelChoiceField(station_objects,label='Station',
                                      empty_label=None)
     person = forms.ModelChoiceField(Person.objects,
                                 widget=SelectWithPop(model_name='person'))
@@ -147,7 +150,10 @@ class OverseerForm(ModelForm):
 
 class GentityFileForm(ModelForm):
 
-    gentity = forms.ModelChoiceField(Station.objects.all(),label='Station',
+    station_objects = Station.objects.all()
+    if len(settings.SITE_STATION_FILTER)>0:
+        station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
+    gentity = forms.ModelChoiceField(station_objects,label='Station',
                                      empty_label=None)
     file_type = forms.ModelChoiceField(FileType.objects,
                                 widget=SelectWithPop(model_name='filetype'))
@@ -172,7 +178,10 @@ class GentityFileForm(ModelForm):
 
 class GentityGenericDataForm(ModelForm):
 
-    gentity = forms.ModelChoiceField(Station.objects.all(),label='Station',
+    station_objects = Station.objects.all()
+    if len(settings.SITE_STATION_FILTER)>0:
+        station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
+    gentity = forms.ModelChoiceField(station_objects,label='Station',
                                      empty_label=None)
     data_type = forms.ModelChoiceField(GentityGenericDataType.objects, label='Data type',
                                 widget=SelectWithPop(model_name='gentitygenericdatatype'))
@@ -196,7 +205,10 @@ class GentityGenericDataForm(ModelForm):
 
 class GentityAltCodeForm(ModelForm):
 
-    gentity = forms.ModelChoiceField(Station.objects.all(),label='Station',
+    station_objects = Station.objects.all()
+    if len(settings.SITE_STATION_FILTER)>0:
+        station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
+    gentity = forms.ModelChoiceField(station_objects,label='Station',
                                      empty_label=None)
     type = forms.ModelChoiceField(GentityAltCodeType.objects,
                       widget=SelectWithPop(model_name='gentityaltcodetype'))
@@ -221,7 +233,10 @@ class GentityAltCodeForm(ModelForm):
 
 class GentityEventForm(ModelForm):
 
-    gentity = forms.ModelChoiceField(Station.objects.all(),label='Station',
+    station_objects = Station.objects.all()
+    if len(settings.SITE_STATION_FILTER)>0:
+        station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
+    gentity = forms.ModelChoiceField(station_objects,label='Station',
                                      empty_label=None)
     type = forms.ModelChoiceField(EventType.objects,
                                 widget=SelectWithPop(model_name='eventtype'))
@@ -341,7 +356,10 @@ class StationForm(GpointForm, GentityForm):
         return self.cleaned_data['altitude']
 
 class InstrumentForm(ModelForm):
-    station = forms.ModelChoiceField(Station.objects.all(), label='Stations',
+    station_objects = Station.objects.all()
+    if len(settings.SITE_STATION_FILTER)>0:
+        station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
+    station = forms.ModelChoiceField(station_objects, label='Stations',
                                      empty_label=None)
     type = forms.ModelChoiceField(InstrumentType.objects,
                                 widget=SelectWithPop(model_name='instrumenttype'))

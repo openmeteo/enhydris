@@ -27,7 +27,10 @@ class LastModifiedStations(Node):
 
     def render(self, context):
         try:
-            latest_stations = Station.objects.all().order_by('last_modified').reverse()[:self.number]
+            station_objects = Station.objects.all()
+            if len(settings.SITE_STATION_FILTER)>0:
+                station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
+            latest_stations = station_objects.all().order_by('last_modified').reverse()[:self.number]
         except ValueError:
             latest_stations = None
 

@@ -12,7 +12,11 @@ instruments = {'queryset': Instrument.objects.all(),
 timeseries = {'queryset': Timeseries.objects.all(),
               'template_object_name': 'timeseries',}
 
-stations = {'queryset': Station.objects.all(),
+station_objects = Station.objects.all()
+if len(settings.SITE_STATION_FILTER)>0:
+    station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
+
+stations = {'queryset': station_objects,
             'template_object_name': 'station',}
 
 urlpatterns = patterns('',

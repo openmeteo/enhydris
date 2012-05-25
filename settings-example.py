@@ -112,3 +112,7 @@ CAPTCHA_FONT='site_media/arizona.ttf'
 #series detail)
 
 DISPLAY_COPYRIGHT_INFO=False
+
+#This is a way to filter all station data site_wide with some
+#criteria.
+SITE_STATION_FILTER = {'owner__id__exact': '9',}

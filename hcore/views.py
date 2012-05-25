@@ -92,8 +92,11 @@ def station_detail(request, *args, **kwargs):
     return list_detail.object_detail(*args, **kwargs)
 
 def station_brief(request, object_id):
+    station_objects = Station.objects.all()
+    if len(settings.SITE_STATION_FILTER)>0:
+        station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
     return list_detail.object_detail(request,
-                                     queryset=Station.objects.all(),
+                                     queryset=station_objects,
                                      object_id = object_id,
                                      template_object_name = "station",
                                      template_name = "station_brief.html")
@@ -1765,7 +1768,10 @@ def kml(request, layer):
             raise Http404
     try:
         getparams = clean_kml_request(request.GET.items())
-        queryres = Station.objects.all().filter(point__isnull=False)
+        station_objects = Station.objects.all()
+        if len(settings.SITE_STATION_FILTER)>0:
+            station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
+        queryres = station_objects.filter(point__isnull=False)
         if getparams.has_key('check') and getparams['check']=='search':
             query_string = request.GET.get('q', request.GET.get('Q', ""))
             search_terms = query_string.split()
@@ -1806,7 +1812,10 @@ def kml(request, layer):
 def bound(request):
     agentity_id = request.GET.get('gentity_id', request.GET.get('GENTITY_ID', None));
     getparams = clean_kml_request(request.GET.items())
-    queryres = Station.objects.all()
+    station_objects = Station.objects.all()
+    if len(settings.SITE_STATION_FILTER)>0:
+        station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
+    queryres = station_objects
     if getparams.has_key('check') and getparams['check']=='search':
         query_string = request.GET.get('q', request.GET.get('Q', ""))
         search_terms = query_string.split()
