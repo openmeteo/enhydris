@@ -18,8 +18,6 @@ class SmokeTestCase(unittest.TestCase):
                 '/accounts/password/reset/done/',
                 '/admin/',
                 '/map/',
-                '/help/',
-                '/contact/',
                 ],
             404: [
                 '/nonexistent/',
