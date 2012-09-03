@@ -11,6 +11,7 @@ MIDDLEWARE_CLASSES = (
     'django_notify.middleware.NotificationsMiddleware',
     'pagination.middleware.PaginationMiddleware',
     'enhydris.sorting.middleware.SortingMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
 )
 
 ROOT_URLCONF = 'enhydris.urls'
