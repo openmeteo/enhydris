@@ -39,7 +39,6 @@ MEDIA_ROOT = 'site_media/'
 MEDIA_URL = '/site_media/'
 STATIC_ROOT = 'static/'
 STATIC_URL = '/enhydris-static/'
-ADMIN_MEDIA_PREFIX = '/media/'
 
 GRAPPELLI_ADMIN_TITLE = 'Enhydris Administration'
 

@@ -3,12 +3,12 @@
 {% load adminmedia %}
 
 {% block extracss %}
-    <link type="text/css" href="{{ MEDIA_URL }}css/smoothness/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
-    <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
+    <link type="text/css" href="{{ STATIC_URL }}css/smoothness/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
+    <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
 {% endblock %}
 
 {% block extra_head %}
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
 
     <script type="text/javascript">
         $(function() {
@@ -57,15 +57,15 @@
 		<br>
 		<h3>Profile Management:</h3>
 		<div class="anchor_override">
-			<img src="{{MEDIA_URL}}images/icons/user_edit.png" />
+			<img src="{{STATIC_URL}}images/icons/user_edit.png" />
 			<a href="{% url profiles_edit_profile %}">{% trans "Edit your user profile" %}</a></div>
 		<div class="anchor_override">
 		
-			<img src="{{MEDIA_URL}}images/icons/key.png" />
+			<img src="{{STATIC_URL}}images/icons/key.png" />
 	 		<a href="{% url password_change %}">{% trans "Change your password" %}</a></div>
 		{% if user.is_staff %}
 		<div class="anchor_override">
-			<img src="{{MEDIA_URL}}images/icons/lock_open.png" />
+			<img src="{{STATIC_URL}}images/icons/lock_open.png" />
 			<a href="{% url index %}admin/">{% trans "Access the admin panel" %}</a></div>
 		{% endif %}
 	</div>

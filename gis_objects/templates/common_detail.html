@@ -3,9 +3,9 @@
 {% load permissions %}
 
 {% block extracss %}
-    <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
-    <link type="text/css" href="{{ MEDIA_URL }}css/tipTip.css" rel="stylesheet" />
-    <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
+    <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
+    <link type="text/css" href="{{ STATIC_URL }}css/tipTip.css" rel="stylesheet" />
+    <link media="screen" href="{{ STATIC_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
     <style type="text/css">
     {% if use_open_layers %}
     #map {
@@ -18,9 +18,9 @@
 {% endblock %}
 
 {% block extra_head %}
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.scrollTo-min.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.minified.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.collapser.mod.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.scrollTo-min.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.tipTip.minified.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.collapser.mod.js"></script>
   <script type="text/javascript">
   $(document).ready(function() {
       $("table").tablesorter();
@@ -146,7 +146,7 @@
                             <td>{{ file.remarks }}</td>
 							<td>
 							{% if user.is_authenticated or anonymous_can_download_data %}
-								<a href="{% url gentityfile_dl file.id %}"><img style="border:none" src="{{MEDIA_URL}}images/icons/download.png"></a>
+								<a href="{% url gentityfile_dl file.id %}"><img style="border:none" src="{{STATIC_URL}}images/icons/download.png"></a>
 							{% else %}
 								<i>N/A</i>
 							{% endif %}
@@ -189,7 +189,7 @@
                             <td>{{ genericdata.remarks }}</td>
 							<td>
 							{% if request.user.is_authenticated or anonymous_can_download_data %}
-								<a href="{% url gentitygenericdata_dl genericdata.id %}"><img style="border:none" src="{{MEDIA_URL}}images/icons/download.png"></a>
+								<a href="{% url gentitygenericdata_dl genericdata.id %}"><img style="border:none" src="{{STATIC_URL}}images/icons/download.png"></a>
 							{% else %}
 								<i>N/A</i>
 							{% endif %}

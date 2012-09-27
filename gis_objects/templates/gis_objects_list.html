@@ -10,7 +10,7 @@
     </script>
 {% endblock %}
 {% block extracss %}
-    <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
+    <link media="screen" href="{{ STATIC_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
     {% if use_open_layers %}
     <style type="text/css">
     #map {
@@ -22,9 +22,9 @@
     </style>{% endif %}
 {% endblock %}
 {% block extra_head %}
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.scrollTo-min.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tipTip.minified.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.collapser.mod.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.scrollTo-min.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.tipTip.minified.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.collapser.mod.js"></script>
 <script type="text/javascript">
   $(document).ready(function() {
 //      $("table").tablesorter();

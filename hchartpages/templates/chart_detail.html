@@ -7,20 +7,20 @@
 
 {% block extra_head %}
   <!--[if IE]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
-  <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/excanvas.min.js"></script>
-  <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.min.js"></script>
-  <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.selection.min.js"></script>
-  <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.highlighter.js"></script>
-  <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.spider.js"></script>
-  <script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.timePicker.min.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.collapser.mod.js"></script>
-  <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
-  <link media="all" href="{{ MEDIA_URL }}css/timePicker.css" type="text/css" rel="stylesheet">
+  <script language="javascript" type="text/javascript" src="{{ STATIC_URL }}js/excanvas.min.js"></script>
+  <script language="javascript" type="text/javascript" src="{{ STATIC_URL }}js/jquery.flot.min.js"></script>
+  <script language="javascript" type="text/javascript" src="{{ STATIC_URL }}js/jquery.flot.selection.min.js"></script>
+  <script language="javascript" type="text/javascript" src="{{ STATIC_URL }}js/jquery.flot.highlighter.js"></script>
+  <script language="javascript" type="text/javascript" src="{{ STATIC_URL }}js/jquery.flot.spider.js"></script>
+  <script language="javascript" type="text/javascript" src="{{ STATIC_URL }}js/jquery.timePicker.min.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.collapser.mod.js"></script>
+  <link media="screen" href="{{ STATIC_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
+  <link media="all" href="{{ STATIC_URL }}css/timePicker.css" type="text/css" rel="stylesheet">
   <style type="text/css" rel="stylesheet">
       .expArrow{ font-weight: normal; }
       .collArrow{ font-weight: normal; }
   </style>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/tooltip.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/tooltip.js"></script>
   <script type="text/javascript">
     cd=[], vm=[], cm=[], cs=[];
     cc=0;
@@ -65,7 +65,7 @@
 
     function get_data_from_server(i)
     {
-        $("#chartarea"+cm[i]['id']).append("<img style=\"margin: auto; position: absolute; left: 240px; top: 100px; \" src=\""+MEDIA_URL+"images/icons/progress.gif\">");
+        $("#chartarea"+cm[i]['id']).append("<img style=\"margin: auto; position: absolute; left: 240px; top: 100px; \" src=\""+STATIC_URL+"images/icons/progress.gif\">");
         for(var j=0;j<vm[i].length;j++)
             vm[i][j]['status']=false;
         var achart_status=false;
@@ -217,7 +217,7 @@
     function get_zoomed_data(i, ranges, datas){
         var from_pos, to_pos;
         var actual_xaxis_from, actual_xaxis_to;
-        $("#chartarea"+cm[i]['id']).append("<img style=\"margin: auto; position: absolute; left: 240px; top: 100px; \" src=\""+MEDIA_URL+"images/icons/progress.gif\">");
+        $("#chartarea"+cm[i]['id']).append("<img style=\"margin: auto; position: absolute; left: 240px; top: 100px; \" src=\""+STATIC_URL+"images/icons/progress.gif\">");
         for(var j=0;j<vm[i].length;j++)
             vm[i][j]['status']=false;
         var achart_status=false;

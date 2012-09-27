@@ -71,7 +71,7 @@ function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor,
             fontWeight: "bold", labelAlign: "cm" 
     };
     var general_opts = {
-            externalGraphic: MEDIA_URL+"${aicon}",
+            externalGraphic: STATIC_URL+"${aicon}",
             graphicWidth: 21, graphicHeight:25, graphicXOffset:-10,
             graphicYOffset: -25, fillOpacity: 1,
             fillColor: AFillColor,
@@ -146,7 +146,7 @@ function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor,
                         ),
             "select": new OpenLayers.Style(
                   OpenLayers.Util.applyDefaults({
-                        externalGraphic: isStation?MEDIA_URL+'images/drop_marker_selected.png':MEDIA_URL+'custom/other_selected.png',
+                        externalGraphic: isStation?STATIC_URL+'images/drop_marker_selected.png':STATIC_URL+'custom/other_selected.png',
                         graphicWidth: 21, graphicHeight:25, graphicXOffset:-10,
                         graphicYOffset: isStation?-25:-12, fillOpacity: 1}, 
                         OpenLayers.Feature.Vector.style["select"])
@@ -291,7 +291,7 @@ function ShowProgress(name){
    var aprogress = document.getElementById("map_progress");
    if(aprogress==null)return;
    aprogress.innerHTML=
-       "<img src='"+MEDIA_URL+"images/wait16.gif'>";
+       "<img src='"+STATIC_URL+"images/wait16.gif'>";
 }
 
 function HideProgress(name){

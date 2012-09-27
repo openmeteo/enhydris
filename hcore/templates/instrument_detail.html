@@ -4,8 +4,8 @@
 {% block title %} {% trans 'Enhydris - Instrument' %} - {%if instrument %}{{ instrument.name }} - {{ instrument.type }}, {% trans 'Station:' %} {{ instrument.station }}{% endif %}
 {% endblock %}
 {% block extracss %}
-    <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
-    <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
+    <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
+    <link media="screen" href="{{ STATIC_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
     <script type="text/javascript">
 
     function confirmPost(){
@@ -141,8 +141,8 @@
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">
-								<a href="{% url timeseries_edit t.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{MEDIA_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url timeseries_delete t.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{MEDIA_URL}}images/icons/cross.png"</img></a>
+								<a href="{% url timeseries_edit t.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url timeseries_delete t.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
 								</td>
 								{% endif %}
 							{% endif %}

@@ -8,21 +8,21 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   {% block js-globals %}{% endblock %}
   {% block basecss %}
-  <link media="screen" href="{{ MEDIA_URL }}css/base.css" type="text/css" rel="stylesheet" />
-  <link media="screen" href="{{ MEDIA_URL }}css/tablesorter.css" type="text/css" rel="stylesheet" />
-  <link type="text/css" href="{{ MEDIA_URL }}css/smoothness/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
-  <link type="text/css" href="{{ MEDIA_URL }}css/ui_override.css" rel="stylesheet" />
+  <link media="screen" href="{{ STATIC_URL }}css/base.css" type="text/css" rel="stylesheet" />
+  <link media="screen" href="{{ STATIC_URL }}css/tablesorter.css" type="text/css" rel="stylesheet" />
+  <link type="text/css" href="{{ STATIC_URL }}css/smoothness/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
+  <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
   {% endblock %}
   {% block basejs %}
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.5.1.min.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tablesorter.min.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.placeholder-1.0.1.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/base.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.5.1.min.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.tablesorter.min.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.placeholder-1.0.1.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/base.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
   <script type="text/javascript">
   </script>
   <script type="text/javascript">
-    var MEDIA_URL = "{{ MEDIA_URL }}";
+    var STATIC_URL = "{{ STATIC_URL }}";
     var ENHYDRIS_ROOT_URL = "{% url enhydris.hcore.views.index %}";
     var BOUND_URL = "{% url enhydris.hcore.views.bound %}";
     $(document).ready(function() {
@@ -30,11 +30,11 @@
 	});
   </script>
   {% if use_open_layers %}
-     <link media="screen" href="{{ MEDIA_URL }}css/olmap.css" type="text/css" rel="stylesheet" />
-     <script src="{{ MEDIA_URL}}js/openlayers/OpenLayers.js"></script>
+     <link media="screen" href="{{ STATIC_URL }}css/olmap.css" type="text/css" rel="stylesheet" />
+     <script src="{{ STATIC_URL}}js/openlayers/OpenLayers.js"></script>
      <script type="text/javascript" src="http://openstreetmap.org/openlayers/OpenStreetMap.js"></script>
-     <script type="text/javascript" src="{{ MEDIA_URL}}js/olmap-settings.js"></script>
-     <script type="text/javascript" src="{{ MEDIA_URL}}js/olmap.js"></script>
+     <script type="text/javascript" src="{{ STATIC_URL}}js/olmap-settings.js"></script>
+     <script type="text/javascript" src="{{ STATIC_URL}}js/olmap.js"></script>
   {% endif %}
   {% endblock %}
   {% block shortcut_icon %}{% endblock %}
@@ -48,7 +48,7 @@
 	<ul id="menu"> 
 		<li class="logo"> 
 			<a href='{% url index %}'>
-			<img style="float:left;border:0;" alt="" src="{{ MEDIA_URL}}images/menu_left.png" /> 
+			<img style="float:left;border:0;" alt="" src="{{ STATIC_URL}}images/menu_left.png" /> 
 			</a>
 		</li> 
 				<li><a href="{% url station_list %}">{% trans "Stations" %}</a> 
@@ -72,23 +72,23 @@
 
 			<ul id="search"> 
 				<li>
-					<img class="corner_inset_left" alt="" src="{{ MEDIA_URL }}images/corner_inset_left.png"/> 
+					<img class="corner_inset_left" alt="" src="{{ STATIC_URL }}images/corner_inset_left.png"/> 
 					<a href="#">All</a> 
-					<img class="corner_inset_right" alt="" src="{{ MEDIA_URL }}images/corner_inset_right.png"/> 
+					<img class="corner_inset_right" alt="" src="{{ STATIC_URL }}images/corner_inset_right.png"/> 
 				</li>
 				<li><input id="Stations" type="checkbox" />Stations</li> 
 				<li><input id="Instruments" type="checkbox" />Instruments</li> 
 				<li><input id="Timeseries" type="checkbox" />Timeseries</li> 
 				<li class="last"> 
-					<img class="corner_left" alt="" src="{{ MEDIA_URL }}images/corner_left.png"/> 
-					<img class="middle" alt="" src="{{ MEDIA_URL }}images/dot.gif"/> 
-					<img class="corner_right" alt="" src="{{ MEDIA_URL }}images/corner_right.png"/> 
+					<img class="corner_left" alt="" src="{{ STATIC_URL }}images/corner_left.png"/> 
+					<img class="middle" alt="" src="{{ STATIC_URL }}images/dot.gif"/> 
+					<img class="corner_right" alt="" src="{{ STATIC_URL }}images/corner_right.png"/> 
 				</li> 
 			</ul>
 		-->
 		</li> 
 		<li style="background:transparent;margin:0;padding:0;">
-			<img style="float:left" alt="" src="{{ MEDIA_URL }}images/menu_right.png" />
+			<img style="float:left" alt="" src="{{ STATIC_URL }}images/menu_right.png" />
 		</li>
 	</ul> 
 
@@ -97,7 +97,7 @@
 		{% if user.is_authenticated %}
 
 			<li style="background:transparent;margin:0;padding:0;">
-				<img style="float:left" alt="" src="{{ MEDIA_URL }}images/top_menu_left.png"/>
+				<img style="float:left" alt="" src="{{ STATIC_URL }}images/top_menu_left.png"/>
 			</li>
 			<li id="userinfo">
 			{% with user.username as user_username %}
@@ -109,7 +109,7 @@
 			</li> 
 		{% else %}
 			<li style="background:transparent;margin:0;padding:0;">
-			<img style="float:left" alt="" src="{{ MEDIA_URL }}images/top_menu_left_bw.png"/>
+			<img style="float:left" alt="" src="{{ STATIC_URL }}images/top_menu_left_bw.png"/>
 			</li>
 			<li><a class="loginform" href="{% url auth_login %}?next={{request.path}}">{% trans "Login" %}</a></li> 
 
@@ -136,7 +136,7 @@
 
 			</li>
 			<li style="background:transparent;margin:0;padding:0;">
-			<img style="float:left" alt="" src="{{ MEDIA_URL }}images/menu_right.png"/>
+			<img style="float:left" alt="" src="{{ STATIC_URL }}images/menu_right.png"/>
 			</li>
 			
 	</ul>

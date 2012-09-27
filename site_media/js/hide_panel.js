@@ -3,10 +3,10 @@ jQuery(document).ready(function(){
     $("#hidePanel").click(function(){
         $("#leftofmap").hide();
         $("#mapcontent").show();
-        $("#hp").attr("src",MEDIA_URL+"images/icons/resultset_previous_disabled.png");
-        $("#sp").attr("src",MEDIA_URL+"images/icons/resultset_next.png");
-        $("#hm").attr("src",MEDIA_URL+"images/icons/resultset_next.png");
-        $("#sm").attr("src",MEDIA_URL+"images/icons/resultset_previous_disabled.png");
+        $("#hp").attr("src",STATIC_URL+"images/icons/resultset_previous_disabled.png");
+        $("#sp").attr("src",STATIC_URL+"images/icons/resultset_next.png");
+        $("#hm").attr("src",STATIC_URL+"images/icons/resultset_next.png");
+        $("#sm").attr("src",STATIC_URL+"images/icons/resultset_previous_disabled.png");
 		$("#leftofmap").css('width', '450px');
 		map.resize();
 		map.reposition();
@@ -18,8 +18,8 @@ jQuery(document).ready(function(){
         $("#leftofmap").show();
 		map.resize();
 		map.reposition();
-        $("#sp").attr("src",MEDIA_URL+"images/icons/resultset_next_disabled.png");
-        $("#hp").attr("src",MEDIA_URL+"images/icons/resultset_previous.png");
+        $("#sp").attr("src",STATIC_URL+"images/icons/resultset_next_disabled.png");
+        $("#hp").attr("src",STATIC_URL+"images/icons/resultset_previous.png");
         collapse_table();
     });
 
@@ -27,18 +27,18 @@ jQuery(document).ready(function(){
         $("#mapcontent").hide();
         $("#leftofmap").show();
 		$("#leftofmap").css('width', "auto");
-        $("#hm").attr("src",MEDIA_URL+"images/icons/resultset_next_disabled.png");
-        $("#sm").attr("src",MEDIA_URL+"images/icons/resultset_previous.png");
-        $("#sp").attr("src",MEDIA_URL+"images/icons/resultset_next_disabled.png");
-        $("#hp").attr("src",MEDIA_URL+"images/icons/resultset_previous.png");
+        $("#hm").attr("src",STATIC_URL+"images/icons/resultset_next_disabled.png");
+        $("#sm").attr("src",STATIC_URL+"images/icons/resultset_previous.png");
+        $("#sp").attr("src",STATIC_URL+"images/icons/resultset_next_disabled.png");
+        $("#hp").attr("src",STATIC_URL+"images/icons/resultset_previous.png");
         expand_table();
         $("#show_stations").attr("disabled","disabled");
     });
 
     $("#showMap").click(function(){
         $("#mapcontent").show();
-        $("#hm").attr("src",MEDIA_URL+"images/icons/resultset_next.png");
-        $("#sm").attr("src",MEDIA_URL+"images/icons/resultset_previous_disabled.png");
+        $("#hm").attr("src",STATIC_URL+"images/icons/resultset_next.png");
+        $("#sm").attr("src",STATIC_URL+"images/icons/resultset_previous_disabled.png");
         collapse_table();
 		$("#leftofmap").css('width', '450px');
 		map.resize();
