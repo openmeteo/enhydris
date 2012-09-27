@@ -6,7 +6,6 @@ from django.core.servers.basehttp import FileWrapper
 from django.db import connection as django_db_connection
 from django.http import HttpResponse
 from piston.emitters import Emitter
-from enhydris.hcore.models import Timeseries, TimeStep
 
 class CFEmitter(Emitter):
     """

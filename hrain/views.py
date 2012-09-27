@@ -4,7 +4,7 @@ import os.path
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext, TemplateDoesNotExist
 from django.conf import settings
-from django.http import Http404, HttpResponse
+from django.http import HttpResponse
 
 from pthelma.timeseries import Timeseries
 from pthelma.cplot import plot_contours
@@ -13,7 +13,6 @@ from enhydris.hrain import models
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from matplotlib import cm
 
 
 def index(request):
