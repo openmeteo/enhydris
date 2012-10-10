@@ -16,6 +16,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'enhydris.urls'
+APPEND_SLASH = True
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.debug',
