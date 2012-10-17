@@ -1,9 +1,9 @@
-{% load adminmedia %}
+{% load static %}
 <a
 	 href="{% url model_add field as target %}{{ target }}"
 	 class="add-another"
 	 id="add_id_{{ orig_name }}"
 	 onclick="return showAddAnotherPopup(this);">
-	 <img src="{% admin_media_prefix %}img/admin/icon_addlink.gif" width="10" height="10"
+	 <img src="{% get_static_prefix %}admin/img/icon_addlink.gif" width="10" height="10"
 	 alt="Add Another" border="0"/>
 </a>

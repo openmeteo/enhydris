@@ -4,7 +4,6 @@
 {% load pagination_tags %}
 {% load sorting_tags %}
 {% load stationlist_filter %}
-{% load adminmedia %}
 
 {% block js-globals %}
     <script type="text/javascript">var map_mode=1;</script>
@@ -159,7 +158,7 @@
                 {% if perms.hcore.add_station %}
                 <p class="anchor_override" style="cursor:pointer;text-align:left">
                        <a href="{% url station_add %}">
-                          <img src="{% admin_media_prefix %}img/admin/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
+                          <img src="{{STATIC_URL}}admin/img/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
                           {% trans "Add a new station " %}
                       </a>
                 </p>

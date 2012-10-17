@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% load adminmedia %}
 
 {% block extracss %}
     <link type="text/css" href="{{ STATIC_URL }}css/smoothness/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
@@ -142,7 +141,7 @@
 				{% if perms.hcore.add_station %}
                 <p class="anchor_override" style="cursor:pointer;text-align:left">
                        <a href="{% url station_add %}">
-                          <img src="{% admin_media_prefix %}img/admin/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
+                          <img src="{{ STATIC_URL }}admin/img/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
                           {% trans "Add a new station " %}
                       </a>
                 </p>
@@ -150,7 +149,7 @@
 				{% if perms.hcore.add_instrument %}
                 <p class="anchor_override" style="cursor:pointer;text-align:left">
                        <a href="{% url instrument_add %}">
-                          <img src="{% admin_media_prefix %}img/admin/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
+                          <img src="{{ STATIC_URL }}admin/img/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
                           {% trans "Add a new instrument" %}
                       </a>
                 </p>
@@ -158,7 +157,7 @@
 				{% if perms.hcore.add_timeseries %}
                 <p class="anchor_override" style="cursor:pointer;text-align:left">
                        <a href="{% url timeseries_add %}">
-                          <img src="{% admin_media_prefix %}img/admin/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
+                          <img src="{{ STATIC_URL }}admin/img/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
                           {% trans "Add a new timeseries" %}
                       </a>
                 </p>

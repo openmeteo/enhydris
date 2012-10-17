@@ -1710,10 +1710,11 @@ def model_add(request, model_name=''):
         if request.GET['_complete'] == '1':
             newObject = model.objects.order_by('-pk')[0]
             return HttpResponse('<script type="text/javascript"'
-                 'src="/media/js/admin/RelatedObjectLookups.js"></script>'
+                 'src="%(s)admin/js/admin/RelatedObjectLookups.js"></script>'
                  '<script type="text/javascript">'
                  'opener.dismissAddAnotherPopup(window,"%s","%s");</script>'\
-                 % (escape(newObject._get_pk_val()), escape(newObject)))
+                 % (settings.STATIC_URL, escape(newObject._get_pk_val()),
+                 escape(newObject)))
     return create_object(request, model,
                 post_save_redirect=reverse('model_add',
                     kwargs={'model_name':lower(model.__name__)})+"?_complete=1",

@@ -1,5 +1,5 @@
 {% extends "admin/change_form.html" %} 
-{% load i18n admin_modify adminmedia %} 
+{% load i18n admin_modify %} 
 
 {% block content %}<div id="content-main">
 {% block object-tools %}
@@ -33,7 +33,7 @@
 
 		    {% if not change %}
 				{% ifequal field.field.name "data" %}
-					<div class="form-row"><p><img src="{% admin_media_prefix %}img/admin/icon_alert.gif" >&nbsp;{% trans "In order to upload data, first create the timeseries and then try to edit them" %}</p>
+					<div class="form-row"><p><img src="{{ STATIC_URL }}admin/img/icon_alert.gif" >&nbsp;{% trans "In order to upload data, first create the timeseries and then try to edit them" %}</p>
 			    {% else %}
 				  	{% ifequal field.field.name "data_policy" %}
 				  	{% else  %}
