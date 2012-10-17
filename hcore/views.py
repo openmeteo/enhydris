@@ -1710,7 +1710,7 @@ def model_add(request, model_name=''):
         if request.GET['_complete'] == '1':
             newObject = model.objects.order_by('-pk')[0]
             return HttpResponse('<script type="text/javascript"'
-                 'src="%(s)admin/js/admin/RelatedObjectLookups.js"></script>'
+                 'src="%sadmin/js/admin/RelatedObjectLookups.js"></script>'
                  '<script type="text/javascript">'
                  'opener.dismissAddAnotherPopup(window,"%s","%s");</script>'\
                  % (settings.STATIC_URL, escape(newObject._get_pk_val()),
