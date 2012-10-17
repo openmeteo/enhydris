@@ -5,16 +5,19 @@ Hcore Forms.
 from pthelma import timeseries
 from django import forms, db
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.geos import Point
 from django.forms import ModelForm
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from registration.forms import RegistrationForm
-from ajax_select.fields import (AutoCompleteSelectMultipleField,
-                                    AutoCompleteSelectField)
-from enhydris.hcore.models import *
-from enhydris.hcore.widgets import *
+from ajax_select.fields import AutoCompleteSelectMultipleField
+from enhydris.hcore.models import (Station, Instrument, Person, Overseer,
+        FileType, GentityFile, GentityGenericDataType, GentityGenericData,
+        GentityAltCodeType, GentityAltCode, EventType, GentityEvent,
+        Gentity, Gpoint, PoliticalDivision, WaterBasin, WaterDivision,
+        Lentity, StationType, InstrumentType, TimeStep, Variable,
+        UnitOfMeasurement, TimeZone, IntervalType, Timeseries)
+from enhydris.hcore.widgets import SelectWithPop
 
 import os
 import glob
@@ -56,7 +59,7 @@ class HcoreRegistrationForm(RegistrationForm):
         if 'captcha' in cleaned_data and cleaned_data['captcha']:
             try:
                 cleaned_data['captcha'].decode('ascii')
-            except UnicodeEncodeError, UnicodeDecodeError:
+            except UnicodeError:
                 self._errors["captcha"] = self.error_class(["Invalid (non latin - non ascii) "
                                                         "characters entered. Please check your "
                                                         "input language setting."])
@@ -106,7 +109,7 @@ def createcapcha():
             if now - m < fifteen:
                 continue
             os.remove(item)
-    except Exception, e:
+    except Exception:
         pass
     temp = IMAGE_URL + imghash + '.jpg'
     im.save(temp, "JPEG")
@@ -294,7 +297,6 @@ class GpointForm(GentityForm):
         super(GpointForm, self).clean()
         return cleaned_data
 
-    @db.transaction.commit_on_success
     def save(self, commit=True, *args,**kwargs):
 
         gpoint = super(GpointForm,self).save(commit=False)
@@ -472,7 +474,6 @@ class TimeseriesForm(ModelForm):
 
         return self.cleaned_data['data']
 
-    @db.transaction.commit_manually
     def clean(self):
         """
         This function checks the timestep and offset values and reports
@@ -521,10 +522,10 @@ class TimeseriesForm(ModelForm):
 
         # XXX: This is not a good idea but it's the only way to handle append
         # errors. We save the data in the clean function instead of the save
-        # and if an error occurs we rollback the transaction and show the error
-        # in the form. Another way would be to write a try_append() function in
-        # pthelma.timeseries but this is specific to enhydris and should not be
-        # part of the pthelma module.
+        # and if an error occurs we show the error in the form. Another way
+        # would be to write a try_append() function in pthelma.timeseries but
+        # this is specific to enhydris and should not be part of the pthelma
+        # module.
 
         if 'data' in self.cleaned_data and self.cleaned_data['data']:
             ts = timeseries.Timeseries(int(self.instance.id))
@@ -532,14 +533,12 @@ class TimeseriesForm(ModelForm):
             ts.read_file(self.cleaned_data['data'])
             if self.cleaned_data['data_policy'] == 'A':
                 try:
-                    ts.append_to_db(db.connection, transaction=db.transaction)
+                    ts.append_to_db(db.connection, commit=False)
                 except Exception, e:
-                    db.transaction.rollback()
                     raise forms.ValidationError(_(e.message))
 
         return self.cleaned_data
 
-    @db.transaction.commit_on_success
     def save(self, commit=True, *args,**kwargs):
 
         tseries = super(TimeseriesForm,self).save(commit=False)
@@ -555,7 +554,7 @@ class TimeseriesForm(ModelForm):
             ts.read_file(self.cleaned_data['data'])
             if self.cleaned_data['data_policy'] == 'A':
                 pass
-                # ts.append_to_db(db.connection, transaction=db.transaction)
+                # ts.append_to_db(db.connection, commit=False)
             else:
                 if hasattr(settings, 'TS_GRAPH_CACHE_DIR'):
                     cache_dir = settings.TS_GRAPH_CACHE_DIR
@@ -564,7 +563,7 @@ class TimeseriesForm(ModelForm):
                 afilename = cache_dir+'%d.hts'%int(self.instance.id)
                 if os.path.exists(afilename):
                     os.remove(afilename)
-                ts.write_to_db(db.connection, transaction=db.transaction)
+                ts.write_to_db(db.connection, commit=False)
 
         return tseries
 
