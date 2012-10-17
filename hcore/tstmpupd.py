@@ -19,7 +19,7 @@ def update_ts_temp_file(cache_dir, connection, id):
             line = xr.next()
         lastdate = datetime_from_iso(line.split(',')[0])
         ts = Timeseries(int(id))
-        ts.read_from_db(connection, onlybottom=True)
+        ts.read_from_db(connection, bottom_only=True)
         if len(ts)>0:
             db_start, db_end = ts.bounding_dates()
             if db_start>lastdate:

@@ -50,6 +50,9 @@ urlpatterns = patterns('',
     (r'^timeseries/d/(?P<object_id>\d+)/download/$',
      views.download_timeseries, {}, 'timeseries_text'),
 
+    (r'^timeseries/d/(?P<object_id>\d+)/bottom/$',
+     views.timeseries_bottom, {}, 'timeseries_bottom'),
+
     (r'^gentityfile/(?P<gf_id>\d+)/download/$',
      views.download_gentityfile, {}, 'gentityfile_dl'),
 

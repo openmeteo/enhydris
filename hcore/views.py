@@ -896,6 +896,18 @@ def download_timeseries(request, object_id):
         response.write(tsdata)
         return response
 
+
+@timeseries_permission
+def timeseries_bottom(request, object_id):
+    if not settings.STORE_TSDATA_LOCALLY:
+        raise Http404
+    ts = TTimeseries(id = int(object_id))
+    ts.read_from_db(django.db.connection, bottom_only=True)
+    response = HttpResponse(mimetype='text/plain; charset=utf-8')
+    ts.write(response)
+    return response
+
+
 def terms(request):
     return render_to_response('terms.html', RequestContext(request,{}) )
 
