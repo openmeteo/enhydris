@@ -1,10 +1,9 @@
-from django.conf.urls.defaults import *
-from django.conf import settings
-from django.contrib.auth.views import password_reset, password_reset_done, password_change, password_change_done
+from django.conf.urls.defaults import include, patterns
+from django.contrib.auth.views import password_reset, password_reset_done, \
+                                      password_change, password_change_done
 from django.contrib import admin
-from django.views.generic.simple import direct_to_template
 from registration.views import register
-from profiles.views import create_profile, edit_profile, profile_detail
+from profiles.views import create_profile, edit_profile
 from enhydris.hcore.forms import HcoreRegistrationForm
 from enhydris.hcore.views import terms, profile_view, login
 
