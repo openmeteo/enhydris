@@ -1,7 +1,5 @@
 from django.conf import settings
-from django.conf.urls.defaults import *
-from django.http import Http404
-from django.views.generic import list_detail
+from django.conf.urls.defaults import patterns
 
 from enhydris.hcore import views
 from enhydris.hcore.models import (Instrument, Timeseries, Station)
