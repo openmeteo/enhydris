@@ -1697,10 +1697,7 @@ ALLOWED_TO_EDIT = ('waterbasin', 'waterdivision', 'person', 'organization',
 
 @login_required
 def model_add(request, model_name=''):
-    popup = False
-    if '_popup' in request.GET:
-        if request.GET['_popup'] == '1':
-            popup = True
+    popup = request.GET.get('_popup', 0) == '1'
     if not popup and request.method == 'GET'\
                                     and not '_complete' in request.GET:
         raise Http404
