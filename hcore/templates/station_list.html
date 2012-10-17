@@ -87,6 +87,8 @@
         var aarray = [];
         var i = 0;
         for(param in urlparams){
+            if(param=='page')
+                continue;
             aarray[i] = param+"="+urlparams[param];
             i++;
         }
