@@ -106,8 +106,9 @@ TS_GRAPH_CACHE_DIR="/var/tmp/enhydris-timeseries/"
 
 #REMOTE_INSTANCE_CREDENTIALS = {'kyy.hydroscope.gr': ('myusername', 'mypassword')}
 
-CAPTCHA_ROOT='site_media/captchas/'
-CAPTCHA_FONT='site_media/arizona.ttf'
+import os.path
+CAPTCHA_ROOT=os.path.join(MEDIA_ROOT, 'captchas')
+CAPTCHA_FONT=os.path.join(STATIC_ROOT, 'arizona.ttf')
 
 #Display copyright information on web pages (station detail and time
 #series detail)
@@ -116,4 +117,4 @@ DISPLAY_COPYRIGHT_INFO=False
 
 #This is a way to filter all station data site_wide with some
 #criteria.
-SITE_STATION_FILTER = {'owner__id__exact': '9',}
+#SITE_STATION_FILTER = {'owner__id__exact': '9',}
