@@ -81,7 +81,10 @@ def filter_station_ids(request, station_id=''):
 @register.filter
 def intvalue(value):
     """Return the integer of the argument."""
-    return int(value)
+    try:
+        return int(value)
+    except ValueError:
+        return None
 
 @register.filter
 def check_contains(dict, word):
