@@ -1,8 +1,6 @@
-import os.path
 from django.core.serializers import serialize, deserialize
-from django.contrib.auth.models import User, Group
-from django.test import TestCase, Client
-from enhydris.hcore.models import *
+from django.test import TestCase
+from enhydris.hcore import models
 
 
 class PermissionsTestCase(TestCase):
@@ -15,10 +13,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, EventType.objects.all().count())
+        self.assertEqual(num_obj, models.EventType.objects.all().count())
 
         # Call for specific object
-        object = EventType.objects.filter(descr='Test Event Type')[0]
+        object = models.EventType.objects.filter(descr='Test Event Type')[0]
         url = "/api/EventType/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -42,10 +40,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, FileType.objects.all().count())
+        self.assertEqual(num_obj, models.FileType.objects.all().count())
 
         # Call for specific object
-        object = FileType.objects.filter(descr='Test File Type')[0]
+        object = models.FileType.objects.filter(descr='Test File Type')[0]
         url = "/api/FileType/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -69,10 +67,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, Garea.objects.all().count())
+        self.assertEqual(num_obj, models.Garea.objects.all().count())
 
         # Call for specific object
-        object = Garea.objects.filter(name='Test Garea')[0]
+        object = models.Garea.objects.filter(name='Test Garea')[0]
         url = "/api/Garea/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -96,10 +94,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, Gpoint.objects.all().count())
+        self.assertEqual(num_obj, models.Gpoint.objects.all().count())
 
         # Call for specific object
-        object = Gpoint.objects.all()[0]
+        object = models.Gpoint.objects.all()[0]
         url = "/api/Gpoint/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -123,10 +121,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, Gentity.objects.all().count())
+        self.assertEqual(num_obj, models.Gentity.objects.all().count())
 
         # Call for specific object
-        object = Gentity.objects.filter(name='Test Gentity')[0]
+        object = models.Gentity.objects.filter(name='Test Gentity')[0]
         url = "/api/Gentity/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -178,10 +176,12 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, GentityAltCodeType.objects.all().count())
+        self.assertEqual(num_obj,
+                            models.GentityAltCodeType.objects.all().count())
 
         # Call for specific object
-        object = GentityAltCodeType.objects.filter(descr='Test Gentity Alt Code Type')[0]
+        object = models.GentityAltCodeType.objects.filter(
+                                        descr='Test Gentity Alt Code Type')[0]
         url = "/api/GentityAltCodeType/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -205,10 +205,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, GentityFile.objects.all().count())
+        self.assertEqual(num_obj, models.GentityFile.objects.all().count())
 
         # Call for specific object
-        object = GentityFile.objects.filter(descr='Test Gentity File')[0]
+        object = models.GentityFile.objects.filter(descr='Test Gentity File')[0]
         url = "/api/GentityFile/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -232,10 +232,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, Instrument.objects.all().count())
+        self.assertEqual(num_obj, models.Instrument.objects.all().count())
 
         # Call for specific object
-        object = Instrument.objects.filter(name='Test Instrument')[0]
+        object = models.Instrument.objects.filter(name='Test Instrument')[0]
         url = "/api/Instrument/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -259,10 +259,11 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, InstrumentType.objects.all().count())
+        self.assertEqual(num_obj, models.InstrumentType.objects.all().count())
 
         # Call for specific object
-        object = InstrumentType.objects.filter(descr='Test Instrument Type')[0]
+        object = models.InstrumentType.objects.filter(
+                                            descr='Test Instrument Type')[0]
         url = "/api/InstrumentType/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -286,10 +287,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, Lentity.objects.all().count())
+        self.assertEqual(num_obj, models.Lentity.objects.all().count())
 
         # Call for specific object
-        object = Lentity.objects.filter(remarks='Test Owner')[0]
+        object = models.Lentity.objects.filter(remarks='Test Owner')[0]
         url = "/api/Lentity/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -313,10 +314,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, Person.objects.all().count())
+        self.assertEqual(num_obj, models.Person.objects.all().count())
 
         # Call for specific object
-        object = Person.objects.filter(last_name='Test Person')[0]
+        object = models.Person.objects.filter(last_name='Test Person')[0]
         url = "/api/Person/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -340,10 +341,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, Organization.objects.all().count())
+        self.assertEqual(num_obj, models.Organization.objects.all().count())
 
         # Call for specific object
-        object = Organization.objects.filter(name='Test Organization')[0]
+        object = models.Organization.objects.filter(name='Test Organization')[0]
         url = "/api/Organization/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -367,10 +368,12 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, PoliticalDivision.objects.all().count())
+        self.assertEqual(num_obj,
+                            models.PoliticalDivision.objects.all().count())
 
         # Call for specific object
-        object = PoliticalDivision.objects.filter(name='Test Political Division')[0]
+        object = models.PoliticalDivision.objects.filter(
+                                            name='Test Political Division')[0]
         url = "/api/PoliticalDivision/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -394,10 +397,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, Station.objects.all().count())
+        self.assertEqual(num_obj, models.Station.objects.all().count())
 
         # Call for specific object
-        object = Station.objects.filter(name='Test Station')[0]
+        object = models.Station.objects.filter(name='Test Station')[0]
         url = "/api/Station/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -421,10 +424,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, StationType.objects.all().count())
+        self.assertEqual(num_obj, models.StationType.objects.all().count())
 
         # Call for specific object
-        object = StationType.objects.filter(descr='Test Station Type')[0]
+        object = models.StationType.objects.filter(descr='Test Station Type')[0]
         url = "/api/StationType/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -448,10 +451,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, Timeseries.objects.all().count())
+        self.assertEqual(num_obj, models.Timeseries.objects.all().count())
 
         # Call for specific object
-        object = Timeseries.objects.filter(name='Test Timeseries')[0]
+        object = models.Timeseries.objects.filter(name='Test Timeseries')[0]
         url = "/api/Timeseries/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -476,10 +479,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, TimeZone.objects.all().count())
+        self.assertEqual(num_obj, models.TimeZone.objects.all().count())
 
         # Call for specific object
-        object = TimeZone.objects.filter(code='Test Time Zone')[0]
+        object = models.TimeZone.objects.filter(code='Test Time Zone')[0]
         url = "/api/TimeZone/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -503,10 +506,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, TimeStep.objects.all().count())
+        self.assertEqual(num_obj, models.TimeStep.objects.all().count())
 
         # Call for specific object
-        object = TimeStep.objects.filter(descr='Test Time Step')[0]
+        object = models.TimeStep.objects.filter(descr='Test Time Step')[0]
         url = "/api/TimeStep/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -529,10 +532,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, Variable.objects.all().count())
+        self.assertEqual(num_obj, models.Variable.objects.all().count())
 
         # Call for specific object
-        object = Variable.objects.filter(descr='Test Variable')[0]
+        object = models.Variable.objects.filter(descr='Test Variable')[0]
         url = "/api/Variable/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -556,10 +559,12 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, UnitOfMeasurement.objects.all().count())
+        self.assertEqual(num_obj,
+                                models.UnitOfMeasurement.objects.all().count())
 
         # Call for specific object
-        object = UnitOfMeasurement.objects.filter(descr='Test Unit Of Measurement')[0]
+        object = models.UnitOfMeasurement.objects.filter(
+                                            descr='Test Unit Of Measurement')[0]
         url = "/api/UnitOfMeasurement/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -582,10 +587,10 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, WaterBasin.objects.all().count())
+        self.assertEqual(num_obj, models.WaterBasin.objects.all().count())
 
         # Call for specific object
-        object = WaterBasin.objects.filter(name='Test Water Basin')[0]
+        object = models.WaterBasin.objects.filter(name='Test Water Basin')[0]
         url = "/api/WaterBasin/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -610,10 +615,11 @@ class PermissionsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         objects = deserialize('json', response.content)
         num_obj = sum(1 for obj in objects)
-        self.assertEqual(num_obj, WaterDivision.objects.all().count())
+        self.assertEqual(num_obj, models.WaterDivision.objects.all().count())
 
         # Call for specific object
-        object = WaterDivision.objects.filter(name='Test Water Division')[0]
+        object = models.WaterDivision.objects.filter(
+                                                name='Test Water Division')[0]
         url = "/api/WaterDivision/%d/" % object.id
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -634,7 +640,7 @@ class WriteTestCase(TestCase):
 
     def testTimeSeries(self):
         # Get an existing time series
-        obj = Timeseries.objects.filter(name='Test Timeseries')[0]
+        obj = models.Timeseries.objects.filter(name='Test Timeseries')[0]
         response = self.client.get("/api/Timeseries/%d/" % (obj.id,))
         t = deserialize('json', response.content).next().object
 
@@ -653,21 +659,21 @@ class WriteTestCase(TestCase):
         # is fixed) we don't check the status code, we check only whether the
         # record has been created.
         #self.assertEqual(response.status_code, 403)
-        self.assertEqual(
-            Timeseries.objects.filter(name='Test Timeseries 1221').count(), 0)
+        self.assertEqual(models.Timeseries.objects.filter(
+                                    name='Test Timeseries 1221').count(), 0)
 
         # Now try again, this time logged on as user 2; again should deny
         self.assert_(self.client.login(username='user2', password='password2'))
         response = self.client.post("/api/Timeseries/", data=d,
                                             content_type='application/json')
-        self.assertEqual(
-            Timeseries.objects.filter(name='Test Timeseries 1221').count(), 0)
+        self.assertEqual(models.Timeseries.objects.filter(
+                                    name='Test Timeseries 1221').count(), 0)
         self.client.logout()
 
         # Now try again, this time logged on as user 1; should accept
         self.assert_(self.client.login(username='user1', password='password1'))
         response = self.client.post("/api/Timeseries/", data=d,
                                             content_type='application/json')
-        self.assertEqual(
-            Timeseries.objects.filter(name='Test Timeseries 1221').count(), 1)
+        self.assertEqual(models.Timeseries.objects.filter(
+                                    name='Test Timeseries 1221').count(), 1)
         self.client.logout()
