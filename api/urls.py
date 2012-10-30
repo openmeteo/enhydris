@@ -1,8 +1,8 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import patterns, url
 from piston.resource import Resource
 from piston.emitters import Emitter, JSONEmitter
 from enhydris.api.authentication import RemoteInstanceAuthentication
-from enhydris.api.handlers import *
+from enhydris.api import handlers
 from enhydris.api.emitters import CFEmitter, TSEmitter, GFEmitter
 
 # Default JSON emitter
@@ -17,48 +17,49 @@ Emitter.register('gfd', GFEmitter )
 gf_auth = RemoteInstanceAuthentication(realm="GentityFile realm")
 
 # Used for gis
-station_handler = Resource(StationHandler)
-station_list_handler = Resource(StationListHandler)
+station_handler = Resource(handlers.StationHandler)
+station_list_handler = Resource(handlers.StationListHandler)
 
 # Used for db sync
-Lookup_Resource = Resource(Lookup_Handler)
-Lentity_Resource = Resource(Lentity_Handler)
-Person_Resource = Resource(Person_Handler)
-Organization_Resource = Resource(Organization_Handler)
-Gentity_Resource = Resource(Gentity_Handler)
-Gpoint_Resource = Resource(Gpoint_Handler)
-Gline_Resource = Resource(Gline_Handler)
-Garea_Resource = Resource(Garea_Handler)
-PoliticalDivisionManager_Resource = Resource(PoliticalDivisionManager_Handler)
-PoliticalDivision_Resource = Resource(PoliticalDivision_Handler)
-WaterDivision_Resource = Resource(WaterDivision_Handler)
-WaterBasin_Resource = Resource(WaterBasin_Handler)
-GentityAltCodeType_Resource = Resource(GentityAltCodeType_Handler)
-GentityAltCode_Resource = Resource(GentityAltCode_Handler)
-FileType_Resource = Resource(FileType_Handler)
-GentityFile_Resource = Resource(GentityFile_Handler)
-EventType_Resource = Resource(EventType_Handler)
-GentityEvent_Resource = Resource(GentityEvent_Handler)
-StationType_Resource = Resource(StationType_Handler)
-StationManager_Resource = Resource(StationManager_Handler)
-Station_Resource = Resource(Station_Handler)
-Overseer_Resource = Resource(Overseer_Handler)
-InstrumentType_Resource = Resource(InstrumentType_Handler)
-Instrument_Resource = Resource(Instrument_Handler)
-Variable_Resource = Resource(Variable_Handler)
-UnitOfMeasurement_Resource = Resource(UnitOfMeasurement_Handler)
-TimeZone_Resource = Resource(TimeZone_Handler)
-TimeStep_Resource = Resource(TimeStep_Handler)
-Timeseries_Resource = Resource(Timeseries_Handler)
+Lookup_Resource = Resource(handlers.Lookup_Handler)
+Lentity_Resource = Resource(handlers.Lentity_Handler)
+Person_Resource = Resource(handlers.Person_Handler)
+Organization_Resource = Resource(handlers.Organization_Handler)
+Gentity_Resource = Resource(handlers.Gentity_Handler)
+Gpoint_Resource = Resource(handlers.Gpoint_Handler)
+Gline_Resource = Resource(handlers.Gline_Handler)
+Garea_Resource = Resource(handlers.Garea_Handler)
+PoliticalDivisionManager_Resource = Resource(
+                                    handlers.PoliticalDivisionManager_Handler)
+PoliticalDivision_Resource = Resource(handlers.PoliticalDivision_Handler)
+WaterDivision_Resource = Resource(handlers.WaterDivision_Handler)
+WaterBasin_Resource = Resource(handlers.WaterBasin_Handler)
+GentityAltCodeType_Resource = Resource(handlers.GentityAltCodeType_Handler)
+GentityAltCode_Resource = Resource(handlers.GentityAltCode_Handler)
+FileType_Resource = Resource(handlers.FileType_Handler)
+GentityFile_Resource = Resource(handlers.GentityFile_Handler)
+EventType_Resource = Resource(handlers.EventType_Handler)
+GentityEvent_Resource = Resource(handlers.GentityEvent_Handler)
+StationType_Resource = Resource(handlers.StationType_Handler)
+StationManager_Resource = Resource(handlers.StationManager_Handler)
+Station_Resource = Resource(handlers.Station_Handler)
+Overseer_Resource = Resource(handlers.Overseer_Handler)
+InstrumentType_Resource = Resource(handlers.InstrumentType_Handler)
+Instrument_Resource = Resource(handlers.Instrument_Handler)
+Variable_Resource = Resource(handlers.Variable_Handler)
+UnitOfMeasurement_Resource = Resource(handlers.UnitOfMeasurement_Handler)
+TimeZone_Resource = Resource(handlers.TimeZone_Handler)
+TimeStep_Resource = Resource(handlers.TimeStep_Handler)
+Timeseries_Resource = Resource(handlers.Timeseries_Handler)
 
 # Used for timeseries data
-TSDATA_Resource = Resource(handler=TSDATA_Handler, authentication=ts_auth)
-GFDATA_Resource = Resource(handler=GFDATA_Handler, authentication=gf_auth)
+TSDATA_Resource = Resource(handler=handlers.TSDATA_Handler,
+                                                    authentication=ts_auth)
+GFDATA_Resource = Resource(handler=handlers.GFDATA_Handler,
+                                                    authentication=gf_auth)
 
 # urls
 urlpatterns = patterns('',
-
-
     url(r'^Lookup/$', Lookup_Resource),
     url(r'^Lookup/(?P<id>\d+)/$', Lookup_Resource),
     url(r'^Lookup/date/(?P<date>.*)/$', Lookup_Resource),
