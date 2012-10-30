@@ -4,10 +4,10 @@ from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from piston.handler import BaseHandler
 from piston.utils import rc
-from enhydris.hcore.models import *
+from enhydris.hcore import models
 
 class StationHandler(BaseHandler):
-    model = Station
+    model = models.Station
     fields = ('id', 'name', 'srid', 'abscissa', 'ordinate', 'altitude',
                 'asrid','is_active',
                 ('water_basin',('name',)),
@@ -18,7 +18,7 @@ class StationHandler(BaseHandler):
 
 class StationListHandler(BaseHandler):
     allowed_methods = ('POST')
-    model = Station
+    model = models.Station
     fields = ('id', 'name', 'srid', 'abscissa', 'ordinate', 'altitude',
                 'asrid','is_active',
                 ('water_basin',('name',)),
@@ -42,9 +42,9 @@ class StationListHandler(BaseHandler):
         for station_id in ids:
             if station_id:
                 try:
-                    station = Station.objects.get(id=station_id)
+                    station = models.Station.objects.get(id=station_id)
                     response.append(station)
-                except Station.DoesNotExist:
+                except models.Station.DoesNotExist:
                     pass
 
         return response
@@ -57,7 +57,7 @@ class TSDATA_Handler(BaseHandler):
     """
     def read(self, request, ts_id, *args, **kwargs):
         try:
-            timeseries = Timeseries.objects.get(pk=int(ts_id))
+            timeseries = models.Timeseries.objects.get(pk=int(ts_id))
         except:
             return rc.NOT_FOUND
         return timeseries
@@ -68,7 +68,7 @@ class GFDATA_Handler(BaseHandler):
     """
     def read(self, request, gf_id, *args, **kwargs):
         try:
-            gfile = GentityFile.objects.get(pk=int(gf_id))
+            gfile = models.GentityFile.objects.get(pk=int(gf_id))
         except:
             return rc.NOT_FOUND
 
@@ -106,119 +106,119 @@ class GenericHandler(BaseHandler):
 
 # Regular handlers for the rest of the models
 class Lookup_Handler(GenericHandler):
-    model = Lookup
+    model = models.Lookup
     exclude = ()
 
 class Lentity_Handler(GenericHandler):
-    model = Lentity
+    model = models.Lentity
     exclude = ()
 
 class Person_Handler(GenericHandler):
-    model = Person
+    model = models.Person
     exclude = ()
 
 class Organization_Handler(GenericHandler):
-    model = Organization
+    model = models.Organization
     exclude = ()
 
 class Gentity_Handler(GenericHandler):
-    model = Gentity
+    model = models.Gentity
     exclude = ()
 
 class Gpoint_Handler(GenericHandler):
-    model = Gpoint
+    model = models.Gpoint
     exclude = ()
 
 class Gline_Handler(GenericHandler):
-    model = Gline
+    model = models.Gline
     exclude = ()
 
 class Garea_Handler(GenericHandler):
-    model = Garea
+    model = models.Garea
     exclude = ()
 
 class PoliticalDivisionManager_Handler(GenericHandler):
-    model = PoliticalDivisionManager
+    model = models.PoliticalDivisionManager
     exclude = ()
 
 class PoliticalDivision_Handler(GenericHandler):
-    model = PoliticalDivision
+    model = models.PoliticalDivision
     exclude = ()
 
 class WaterDivision_Handler(GenericHandler):
-    model = WaterDivision
+    model = models.WaterDivision
     exclude = ()
 
 class WaterBasin_Handler(GenericHandler):
-    model = WaterBasin
+    model = models.WaterBasin
     exclude = ()
 
 class GentityAltCodeType_Handler(GenericHandler):
-    model = GentityAltCodeType
+    model = models.GentityAltCodeType
     exclude = ()
 
 class GentityAltCode_Handler(GenericHandler):
-    model = GentityAltCode
+    model = models.GentityAltCode
     exclude = ()
 
 class FileType_Handler(GenericHandler):
-    model = FileType
+    model = models.FileType
     exclude = ()
 
 class GentityFile_Handler(GenericHandler):
-    model = GentityFile
+    model = models.GentityFile
     exclude = ()
 
 class EventType_Handler(GenericHandler):
-    model = EventType
+    model = models.EventType
     exclude = ()
 
 class GentityEvent_Handler(GenericHandler):
-    model = GentityEvent
+    model = models.GentityEvent
     exclude = ()
 
 class StationType_Handler(GenericHandler):
-    model = StationType
+    model = models.StationType
     exclude = ()
 
 class StationManager_Handler(GenericHandler):
-    model = StationManager
+    model = models.StationManager
     exclude = ()
 
 class Station_Handler(GenericHandler):
-    model = Station
+    model = models.Station
     exclude = ('creator',)
 
 class Overseer_Handler(GenericHandler):
-    model = Overseer
+    model = models.Overseer
     exclude = ()
 
 class InstrumentType_Handler(GenericHandler):
-    model = InstrumentType
+    model = models.InstrumentType
     exclude = ()
 
 class Instrument_Handler(GenericHandler):
-    model = Instrument
+    model = models.Instrument
     exclude = ()
 
 class Variable_Handler(GenericHandler):
-    model = Variable
+    model = models.Variable
     exclude = ()
 
 class UnitOfMeasurement_Handler(GenericHandler):
-    model = UnitOfMeasurement
+    model = models.UnitOfMeasurement
     exclude = ()
 
 class TimeZone_Handler(GenericHandler):
-    model = TimeZone
+    model = models.TimeZone
     exclude = ()
 
 class TimeStep_Handler(GenericHandler):
-    model = TimeStep
+    model = models.TimeStep
     exclude = ()
 
 class Timeseries_Handler(GenericHandler):
-    model = Timeseries
+    model = models.Timeseries
     exclude = ()
 
     def create(self, request):
@@ -239,7 +239,7 @@ class Timeseries_Handler(GenericHandler):
                     'interval_type', 'time_zone', 'time_step', 'variable'):
             fields[x+'_id'] = fields[x]
             del(fields[x])
-        station = get_object_or_404(Station, id=fields['gentity_id'])
+        station = get_object_or_404(models.Station, id=fields['gentity_id'])
         if not hasattr(request.user, 'has_row_perm'
                     ) or not request.user.has_row_perm(station, 'edit'):
             return rc.FORBIDDEN
