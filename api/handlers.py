@@ -6,6 +6,7 @@ from piston.handler import BaseHandler
 from piston.utils import rc
 from enhydris.hcore import models
 
+
 class StationHandler(BaseHandler):
     model = models.Station
     fields = ('id', 'name', 'srid', 'abscissa', 'ordinate', 'altitude',
@@ -15,6 +16,7 @@ class StationHandler(BaseHandler):
                 ('political_division',('name',)),
                 ('type',('descr',)),
                 ('owner',('name_any',)))
+
 
 class StationListHandler(BaseHandler):
     allowed_methods = ('POST')
@@ -49,12 +51,13 @@ class StationListHandler(BaseHandler):
 
         return response
 
-# Timeseries handler for ts data
+
 class TSDATA_Handler(BaseHandler):
     """
     This handler is responsible for taking a timeseries id and returning the
     actual timeseries data to the client.
     """
+
     def read(self, request, ts_id, *args, **kwargs):
         try:
             timeseries = models.Timeseries.objects.get(pk=int(ts_id))
@@ -62,10 +65,12 @@ class TSDATA_Handler(BaseHandler):
             return rc.NOT_FOUND
         return timeseries
 
+
 class GFDATA_Handler(BaseHandler):
     """
     This handler serves the GentityFile contents using piston API.
     """
+
     def read(self, request, gf_id, *args, **kwargs):
         try:
             gfile = models.GentityFile.objects.get(pk=int(gf_id))
@@ -75,13 +80,12 @@ class GFDATA_Handler(BaseHandler):
         return gfile
 
 
-# Generic Handler including modification date filtering
-
 class GenericHandler(BaseHandler):
     """
     Generic handler which adds support to request all models modified after a
     specific date.
     """
+
     def queryset(self, request):
         return self.model.objects.all()
 
@@ -104,118 +108,146 @@ class GenericHandler(BaseHandler):
         else:
             return self.queryset(request).filter(*args, **kwargs)
 
-# Regular handlers for the rest of the models
+
 class Lookup_Handler(GenericHandler):
     model = models.Lookup
     exclude = ()
+
 
 class Lentity_Handler(GenericHandler):
     model = models.Lentity
     exclude = ()
 
+
 class Person_Handler(GenericHandler):
     model = models.Person
     exclude = ()
+
 
 class Organization_Handler(GenericHandler):
     model = models.Organization
     exclude = ()
 
+
 class Gentity_Handler(GenericHandler):
     model = models.Gentity
     exclude = ()
+
 
 class Gpoint_Handler(GenericHandler):
     model = models.Gpoint
     exclude = ()
 
+
 class Gline_Handler(GenericHandler):
     model = models.Gline
     exclude = ()
+
 
 class Garea_Handler(GenericHandler):
     model = models.Garea
     exclude = ()
 
+
 class PoliticalDivisionManager_Handler(GenericHandler):
     model = models.PoliticalDivisionManager
     exclude = ()
+
 
 class PoliticalDivision_Handler(GenericHandler):
     model = models.PoliticalDivision
     exclude = ()
 
+
 class WaterDivision_Handler(GenericHandler):
     model = models.WaterDivision
     exclude = ()
+
 
 class WaterBasin_Handler(GenericHandler):
     model = models.WaterBasin
     exclude = ()
 
+
 class GentityAltCodeType_Handler(GenericHandler):
     model = models.GentityAltCodeType
     exclude = ()
+
 
 class GentityAltCode_Handler(GenericHandler):
     model = models.GentityAltCode
     exclude = ()
 
+
 class FileType_Handler(GenericHandler):
     model = models.FileType
     exclude = ()
+
 
 class GentityFile_Handler(GenericHandler):
     model = models.GentityFile
     exclude = ()
 
+
 class EventType_Handler(GenericHandler):
     model = models.EventType
     exclude = ()
+
 
 class GentityEvent_Handler(GenericHandler):
     model = models.GentityEvent
     exclude = ()
 
+
 class StationType_Handler(GenericHandler):
     model = models.StationType
     exclude = ()
+
 
 class StationManager_Handler(GenericHandler):
     model = models.StationManager
     exclude = ()
 
+
 class Station_Handler(GenericHandler):
     model = models.Station
     exclude = ('creator',)
+
 
 class Overseer_Handler(GenericHandler):
     model = models.Overseer
     exclude = ()
 
+
 class InstrumentType_Handler(GenericHandler):
     model = models.InstrumentType
     exclude = ()
+
 
 class Instrument_Handler(GenericHandler):
     model = models.Instrument
     exclude = ()
 
+
 class Variable_Handler(GenericHandler):
     model = models.Variable
     exclude = ()
+
 
 class UnitOfMeasurement_Handler(GenericHandler):
     model = models.UnitOfMeasurement
     exclude = ()
 
+
 class TimeZone_Handler(GenericHandler):
     model = models.TimeZone
     exclude = ()
 
+
 class TimeStep_Handler(GenericHandler):
     model = models.TimeStep
     exclude = ()
+
 
 class Timeseries_Handler(GenericHandler):
     model = models.Timeseries
