@@ -396,24 +396,14 @@ def timeseries_data(request, *args, **kwargs):
         else: raise Http404
    
 
-    if hasattr(settings, 'TS_GRAPH_BIG_STEP_DENOMINATOR'):
-        step_denom = settings.TS_GRAPH_BIG_STEP_DENOMINATOR
-    else:
-        step_denom = 200
-    if hasattr(settings, 'TS_GRAPH_FINE_STEP_DENOMINATOR'):
-        fine_step_denom = settings.TS_GRAPH_FINE_STEP_DENOMINATOR
-    else:
-        fine_step_denom = 50
-    if hasattr(settings, 'TS_GRAPH_CACHE_DIR'):
-        cache_dir = settings.TS_GRAPH_CACHE_DIR
-    else:
-        cache_dir = '/var/tmp/enhydris-timeseries/'
     if request.method == "GET" and request.GET.has_key('object_id'):
         response = HttpResponse(content_type='application/json')
         response.status_code = 200
         object_id = request.GET['object_id']
-        afilename = cache_dir+'%d.hts'%int(object_id)
-        update_ts_temp_file(cache_dir, django.db.connection, object_id)
+        afilename = os.path.join(settings.TS_GRAPH_CACHE_DIR,
+                                            int(self.instance.id) + '.hts')
+        update_ts_temp_file(settings.TS_GRAPH_CACHE_DIR, django.db.connection,
+                                                                    object_id)
         chart_data = []
         if request.GET.has_key('start_pos') and request.GET.has_key('end_pos'):
             start_pos = int(request.GET['start_pos'])
@@ -450,10 +440,10 @@ def timeseries_data(request, *args, **kwargs):
             else:
                 start_pos= 1
         length = end_pos - start_pos + 1
-        step = int(length/step_denom) or 1
-        fine_step= int(step/fine_step_denom) or 1
+        step = int(length/settings.TS_GRAPH_BIG_STEP_DENOMINATOR) or 1
+        fine_step= int(step/settings.TS_GRAPH_FINE_STEP_DENOMINATOR) or 1
         if not step%fine_step==0:
-            step = fine_step * fine_step_denom
+            step = fine_step * settings.TS_GRAPH_FINE_STEP_DENOMINATOR
         pos=start_pos
         amax=''
         prev_pos=-1

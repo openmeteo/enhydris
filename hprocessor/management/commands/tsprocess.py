@@ -13,15 +13,8 @@ from pthelma.tsprocess import (MultiTimeseriesProcessDb,
 from django.conf import settings
 
 
-def get_cache_dir():
-    if hasattr(settings, 'TS_GRAPH_CACHE_DIR'):
-        return settings.TS_GRAPH_CACHE_DIR
-    else:
-        return '/var/tmp/enhydris-timeseries/'
-
-
 def clear_timeseries_cache(timeseries_id):
-    afilename = os.path.join(get_cache_dir(),
+    afilename = os.path.join(settings.TS_GRAPH_CACHE_DIR,
                              '%d.hts'%int(timeseries_id))
     if os.path.exists(afilename):
         os.remove(afilename)
@@ -80,7 +73,7 @@ def ts_interpolation(job):
 
 
 def ts_cache_update(id):
-    update_ts_temp_file(get_cache_dir(), db.connection, id)
+    update_ts_temp_file(settings.TS_GRAPH_CACHE_DIR, db.connection, id)
 
 
 def process_batch(batch, **options):

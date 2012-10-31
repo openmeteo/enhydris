@@ -556,11 +556,8 @@ class TimeseriesForm(ModelForm):
                 pass
                 # ts.append_to_db(db.connection, commit=False)
             else:
-                if hasattr(settings, 'TS_GRAPH_CACHE_DIR'):
-                    cache_dir = settings.TS_GRAPH_CACHE_DIR
-                else:
-                    cache_dir = '/var/tmp/enhydris-timeseries/'
-                afilename = cache_dir+'%d.hts'%int(self.instance.id)
+                afilename = os.path.join(settings.TS_GRAPH_CACHE_DIR,
+                                            int(self.instance.id) + '.hts')
                 if os.path.exists(afilename):
                     os.remove(afilename)
                 ts.write_to_db(db.connection, commit=False)

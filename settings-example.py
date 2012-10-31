@@ -6,7 +6,6 @@ import os.path
 ENHYDRIS_PROGRAM_DIR = os.path.dirname(__file__)
 
 # Leave following three lines as they are, to import several Django settings.
-import sys
 execfile(os.path.join(ENHYDRIS_PROGRAM_DIR, 'settings-base.py'))
 
 DEBUG = True
@@ -92,17 +91,6 @@ USERS_CAN_ADD_CONTENT=False
 SITE_CONTENT_IS_FREE=False
 TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS=False
 STORE_TSDATA_LOCALLY=True
-
-# Chart options for time series details page
-# The big step represents the max num of data points to be ploted, 
-# default is 200.
-# The fine step are the max num of points betwen main data points to
-# search for a maxima, default is 50. 
-# Cache dir is used to store time series data files to show graphs,
-# default is "/var/tmp/enhydris-timeseries/"
-TS_GRAPH_BIG_STEP_DENOMINATOR=200
-TS_GRAPH_FINE_STEP_DENOMINATOR=50
-TS_GRAPH_CACHE_DIR="/var/tmp/enhydris-timeseries/"
 
 #REMOTE_INSTANCE_CREDENTIALS = {'kyy.hydroscope.gr': ('myusername', 'mypassword')}
 

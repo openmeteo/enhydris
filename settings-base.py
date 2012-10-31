@@ -1,3 +1,6 @@
+import os
+import tempfile
+
 USE_I18N = True
 LOCALE_PATHS = (os.path.join(ENHYDRIS_PROGRAM_DIR, 'locale'),)
 
@@ -78,3 +81,8 @@ HRAIN_IGNORE_ONGOING_EVENT = False
 SITE_STATION_FILTER = {}
 
 PAGINATION_INVALID_PAGE_RAISES_404 = True
+
+TS_GRAPH_BIG_STEP_DENOMINATOR=200
+TS_GRAPH_FINE_STEP_DENOMINATOR=50
+TS_GRAPH_CACHE_DIR = os.path.join(tempfile.gettempdir(),
+                                                'enhydris-timeseries-graphs')
