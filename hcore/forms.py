@@ -557,7 +557,7 @@ class TimeseriesForm(ModelForm):
                 # ts.append_to_db(db.connection, commit=False)
             else:
                 afilename = os.path.join(settings.TS_GRAPH_CACHE_DIR,
-                                            int(self.instance.id) + '.hts')
+                                            '%d.hts' % int(self.instance.id))
                 if os.path.exists(afilename):
                     os.remove(afilename)
                 ts.write_to_db(db.connection, commit=False)

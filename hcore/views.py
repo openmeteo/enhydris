@@ -401,7 +401,7 @@ def timeseries_data(request, *args, **kwargs):
         response.status_code = 200
         object_id = request.GET['object_id']
         afilename = os.path.join(settings.TS_GRAPH_CACHE_DIR,
-                                            int(self.instance.id) + '.hts')
+                                            '%d.hts'%int(self.instance.id))
         update_ts_temp_file(settings.TS_GRAPH_CACHE_DIR, django.db.connection,
                                                                     object_id)
         chart_data = []
