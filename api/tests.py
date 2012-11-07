@@ -1,5 +1,10 @@
+from datetime import datetime
+from urllib import urlencode
+
 from django.core.serializers import serialize, deserialize
 from django.test import TestCase
+from django.db import connection
+from pthelma.timeseries import Timeseries
 from enhydris.hcore import models
 
 
@@ -676,4 +681,78 @@ class WriteTestCase(TestCase):
                                             content_type='application/json')
         self.assertEqual(models.Timeseries.objects.filter(
                                     name='Test Timeseries 1221').count(), 1)
+        self.client.logout()
+
+    def testUploadTsDataUnauthenticated(self):
+        # Attempt to upload some timeseries data, unauthenticated
+        response = self.client.post("/api/tsdata/1/",
+            { 'timeseries_records': '2012-11-06 18:17,20,\n' })
+        t = Timeseries(1)
+        t.read_from_db(connection)
+        #self.assertEqual(response.status_code, 401)
+        self.assert_(response.content.startswith('Forbidden'))
+        self.assertEqual(len(t), 0)
+
+    def testUploadTsDataAsWrongUser(self):
+        # Attempt to upload some timeseries data as user 2; should deny
+        self.assert_(self.client.login(username='user2', password='password2'))
+        response = self.client.post("/api/tsdata/1/",
+            { 'timeseries_records': '2012-11-06 18:17,20,\n' })
+        t = Timeseries(1)
+        t.read_from_db(connection)
+        #self.assertEqual(response.status_code, 401)
+        self.assert_(response.content.startswith('Forbidden'))
+        self.assertEqual(len(t), 0)
+        self.client.logout()
+
+    def testUploadTsDataGarbage(self):
+        self.assert_(self.client.login(username='user1', password='password1'))
+        response = self.client.post("/api/tsdata/1/",
+            { 'timeseries_records': '2012-aa-06 18:17,20,\n' })
+        t = Timeseries(1)
+        t.read_from_db(connection)
+        #self.assertEqual(response.status_code, 400)
+        self.assert_(response.content.find('Error')>=0)
+        self.assertEqual(len(t), 0)
+        self.client.logout()
+
+    def testUploadTsData(self):
+        self.assert_(self.client.login(username='user1', password='password1'))
+        response = self.client.post("/api/tsdata/1/",
+            { 'timeseries_records': '2012-11-06 18:17,20,\n' })
+        t = Timeseries(1)
+        t.read_from_db(connection)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, '1')
+        self.assertEqual(len(t), 1)
+        self.assertEqual(t.items(0)[0], datetime(2012, 11, 06, 18, 17, 0))
+        self.assertEqual(t.items(0)[1], 20)
+        self.client.logout()
+
+        # Append two more records
+        self.assert_(self.client.login(username='user1', password='password1'))
+        response = self.client.post("/api/tsdata/1/", { 'timeseries_records': 
+                   '2012-11-06 18:18,21,\n2012-11-07 18:18,23,\n' })
+        t = Timeseries(1)
+        t.read_from_db(connection)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, '2')
+        self.assertEqual(len(t), 3)
+        self.assertEqual(t.items(0)[0], datetime(2012, 11, 06, 18, 17, 0))
+        self.assertEqual(t.items(0)[1], 20)
+        self.assertEqual(t.items(1)[0], datetime(2012, 11, 06, 18, 18, 0))
+        self.assertEqual(t.items(1)[1], 21)
+        self.assertEqual(t.items(2)[0], datetime(2012, 11, 07, 18, 18, 0))
+        self.assertEqual(t.items(2)[1], 23)
+        self.client.logout()
+
+        # Try to append an earlier record; should fail
+        self.assert_(self.client.login(username='user1', password='password1'))
+        response = self.client.post("/api/tsdata/1/",
+            { 'timeseries_records': '2012-11-05 18:18,21,\n' })
+        self.client.logout()
+        t = Timeseries(1)
+        t.read_from_db(connection)
+        #self.assertEqual(response.status_code, 409)
+        self.assertEqual(len(t), 3)
         self.client.logout()

@@ -2,8 +2,10 @@
 Custom authentication mechanism for Piston API
 """
 
+import binascii
+
 from django.http import HttpResponse
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import authenticate
 
 class RemoteInstanceAuthentication(object):

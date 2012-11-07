@@ -3,18 +3,17 @@ from piston.resource import Resource
 from piston.emitters import Emitter, JSONEmitter
 from enhydris.api.authentication import RemoteInstanceAuthentication
 from enhydris.api import handlers
-from enhydris.api.emitters import CFEmitter, TSEmitter, GFEmitter
+from enhydris.api.emitters import CFEmitter, PlainEmitter, GFEmitter
 
 # Default JSON emitter
 Emitter.register('default', JSONEmitter, 'application/json; charset=utf-8')
 # JSON emitter for sync db process
 Emitter.register('json', CFEmitter, 'application/json; charset=utf-8')
-# hts emitter for remote hts file downloading (incl. http authentication)
-Emitter.register('hts', TSEmitter, 'text/vnd.openmeteo.timeseries;charset=iso-8859-7')
-ts_auth = RemoteInstanceAuthentication(realm="Timeseries realm")
 # Emitter for gfd (aka GenityFileData)
 Emitter.register('gfd', GFEmitter )
 gf_auth = RemoteInstanceAuthentication(realm="GentityFile realm")
+# Plain emitter
+Emitter.register('plain', PlainEmitter, 'text/plain; charset=utf-8')
 
 # Used for gis
 station_handler = Resource(handlers.StationHandler)
@@ -53,8 +52,7 @@ TimeStep_Resource = Resource(handlers.TimeStep_Handler)
 Timeseries_Resource = Resource(handlers.Timeseries_Handler)
 
 # Used for timeseries data
-TSDATA_Resource = Resource(handler=handlers.TSDATA_Handler,
-                                                    authentication=ts_auth)
+TSDATA_Resource = Resource(handler=handlers.TSDATA_Handler)
 GFDATA_Resource = Resource(handler=handlers.GFDATA_Handler,
                                                     authentication=gf_auth)
 
@@ -150,6 +148,7 @@ urlpatterns = patterns('',
     url(r'^Timeseries/$', Timeseries_Resource),
     url(r'^Timeseries/(?P<id>\d+)/$', Timeseries_Resource),
     url(r'^Timeseries/date/(?P<date>.*)/$', Timeseries_Resource),
-    url(r'^tsdata/(?P<ts_id>\d+)/$', TSDATA_Resource, {'emitter_format': 'hts'} ),
+    url(r'^tsdata/(?P<ts_id>\d+)/$', TSDATA_Resource,
+                                                  {'emitter_format': 'plain'}),
     url(r'^gfdata/(?P<gf_id>\d+)/$', GFDATA_Resource, {'emitter_format': 'gfd'} ),
 )
