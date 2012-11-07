@@ -112,7 +112,12 @@ class TSDATA_Handler(BaseHandler):
         return response
 
     def create(self, request, ts_id):
-        timeseries = get_object_or_404(models.Timeseries, id = ts_id)
+        try:
+            timeseries = models.Timeseries.objects.get(id = ts_id)
+        except models.Timeseries.DoesNotExist as e:
+            resp = rc.NOT_FOUND
+            resp.content = 'Timeseries with id={0} does not exist'.format(ts_id)
+            return resp
         if (not hasattr(request.user, 'has_row_perm')) or (not request.user.
                     has_row_perm(timeseries.gentity.gpoint.station, 'edit')):
             return rc.FORBIDDEN
