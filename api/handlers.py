@@ -1,10 +1,18 @@
 import string
+from StringIO import StringIO
+
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.db import connection
 from piston.handler import BaseHandler
 from piston.utils import rc
+
 from enhydris.hcore import models
+from enhydris.api.authentication import RemoteInstanceAuthentication
+from pthelma.timeseries import Timeseries, TimeStep
+
+ts_auth = RemoteInstanceAuthentication(realm="Timeseries realm")
 
 
 class StationHandler(BaseHandler):
@@ -55,15 +63,69 @@ class StationListHandler(BaseHandler):
 class TSDATA_Handler(BaseHandler):
     """
     This handler is responsible for taking a timeseries id and returning the
-    actual timeseries data to the client.
+    actual timeseries data to the client, or for updating a time series with
+    new records.
     """
 
     def read(self, request, ts_id, *args, **kwargs):
+        # We perform an authentication test here. Normally this should be done
+        # in urls.py, by passing ts_auth as the "authentication" parameter to
+        # Resource. However, we need different authentication mechanisms for
+        # "read" and for "create". "read" is only meant for remote instances
+        # when Enhydris works in distributed mode; "create" is for anyone
+        # (provided he has permissions on that particular time series). So we
+        # do this hack. It's not well tested, and, really, piston must be
+        # replaced with tastypie or django-rest-framework, and all this must be
+        # rethought.
+        if not ts_auth.is_authenticated(request):
+            return ts_auth.challenge()
         try:
             timeseries = models.Timeseries.objects.get(pk=int(ts_id))
         except:
             return rc.NOT_FOUND
-        return timeseries
+
+        t = timeseries # Nick because we use it a lot below
+        time_step = TimeStep(
+            length_minutes = t.time_step.length_minutes if t.time_step else 0,
+            length_months = t.time_step.length_months if t.time_step else 0)
+        nominal_offset = (t.nominal_offset_minutes, t.nominal_offset_months)\
+            if t.nominal_offset_minutes and t.nominal_offset_months else None
+        actual_offset = (t.actual_offset_minutes, t.actual_offset_months)\
+            if t.actual_offset_minutes and t.actual_offset_months else (0,0)
+        ts = Timeseries(id = int(t.id),
+            time_step = time_step,
+            nominal_offset = nominal_offset,
+            actual_offset = actual_offset,
+            unit = t.unit_of_measurement.symbol,
+            title = t.name,
+            timezone = '%s (UTC+%02d%02d)' % (t.time_zone.code,
+                t.time_zone.utc_offset / 60, t.time_zone.utc_offset % 60),
+            variable = t.variable.descr,
+            precision = t.precision,
+            comment = '%s\n\n%s' % (t.gentity.name, t.remarks)
+        )
+        ts.read_from_db(connection)
+        response = HttpResponse(mimetype=
+                                'text/vnd.openmeteo.timeseries; charset=utf-8')
+        response['Content-Disposition'] = "attachment; filename=%s.hts"%(t.id,)
+        ts.write_file(response)
+        return response
+
+    def create(self, request, ts_id):
+        timeseries = get_object_or_404(models.Timeseries, id = ts_id)
+        if (not hasattr(request.user, 'has_row_perm')) or (not request.user.
+                    has_row_perm(timeseries.gentity.gpoint.station, 'edit')):
+            return rc.FORBIDDEN
+        ts = Timeseries(id = int(ts_id))
+        try:
+            result_if_error=rc.BAD_REQUEST
+            ts.read(StringIO(request.POST['timeseries_records']))
+            result_if_error=rc.DUPLICATE_ENTRY
+            ts.append_to_db(connection, commit=False)
+        except ValueError as e:
+            result_if_error.content = str(e)
+            return result_if_error
+        return str(len(ts))
 
 
 class GFDATA_Handler(BaseHandler):
