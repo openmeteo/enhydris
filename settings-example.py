@@ -94,13 +94,8 @@ STORE_TSDATA_LOCALLY=True
 
 #REMOTE_INSTANCE_CREDENTIALS = {'kyy.hydroscope.gr': ('myusername', 'mypassword')}
 
-import os.path
-CAPTCHA_ROOT=os.path.join(MEDIA_ROOT, 'captchas')
-CAPTCHA_FONT=os.path.join(STATIC_ROOT, 'arizona.ttf')
-
 #Display copyright information on web pages (station detail and time
 #series detail)
-
 DISPLAY_COPYRIGHT_INFO=False
 
 #This is a way to filter all station data site_wide with some

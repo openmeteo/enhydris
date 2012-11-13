@@ -26,7 +26,6 @@ import time
 
 # global salt var
 SALT = settings.SECRET_KEY[:5]
-IMAGE_URL = settings.CAPTCHA_ROOT
 
 
 attrs_dict = { 'class': 'required' }
@@ -98,20 +97,25 @@ def createcapcha():
     imghash = sha.new(SALT+imgtext).hexdigest()
     im = Image.new("RGB", (90,20), (600,600,600))
     draw=ImageDraw.Draw(im)
-    font=ImageFont.truetype(settings.CAPTCHA_FONT, 18)
+    captcha_font = os.path.join(settings.ENHYDRIS_PROGRAM_DIR, 'misc',
+                                                                'arizona.ttf')
+    font=ImageFont.truetype(captcha_font, 18)
     draw.text((3,0),imgtext, font=font, fill=(000,000,50))
+    captcha_root = os.path.join(settings.MEDIA_ROOT, 'captchas')
+    #Delete captchas older than 15 minutes
     try:
         now = time.time()
-        #Delete capthcas files older than 15 minutes
         fifteen = 60*15
-        for item in glob.glob(os.path.join(IMAGE_URL, '*.jpg')):
+        for item in glob.glob(os.path.join(captcha_root, '*.jpg')):
             m = os.stat(item)[7]
             if now - m < fifteen:
                 continue
             os.remove(item)
     except Exception:
         pass
-    temp = IMAGE_URL + imghash + '.jpg'
+    temp = os.path.join(captcha_root, imghash + '.jpg')
+    if not os.path.exists(captcha_root):
+        os.mkdir(captcha_root)
     im.save(temp, "JPEG")
 
     return (imgtext,imghash)
