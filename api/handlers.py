@@ -17,7 +17,7 @@ ts_auth = RemoteInstanceAuthentication(realm="Timeseries realm")
 
 class StationHandler(BaseHandler):
     model = models.Station
-    fields = ('id', 'name', 'srid', 'abscissa', 'ordinate', 'altitude',
+    fields = ('id', 'name', 'srid', 'point', 'altitude',
                 'asrid','is_active',
                 ('water_basin',('name',)),
                 ('water_division',('name',)),
@@ -29,7 +29,7 @@ class StationHandler(BaseHandler):
 class StationListHandler(BaseHandler):
     allowed_methods = ('POST')
     model = models.Station
-    fields = ('id', 'name', 'srid', 'abscissa', 'ordinate', 'altitude',
+    fields = ('id', 'name', 'srid', 'point', 'altitude',
                 'asrid','is_active',
                 ('water_basin',('name',)),
                 ('water_division',('name',)),
