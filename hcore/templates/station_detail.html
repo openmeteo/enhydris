@@ -198,7 +198,7 @@
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Type' %}</th>
-                <td colspan='2'>{{ station.type.descr }}</td>
+                <td colspan='2'>{% for stype in station.stype.all %}{{ stype.descr }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Is Active' %}</th>

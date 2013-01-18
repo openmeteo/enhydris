@@ -1,7 +1,7 @@
 {% load i18n %}
 <p style="color: #884400; font-size:12pt; font-weight:bold; margin: 3px;">{{ station.name }}</h3>
 <p style="color: #000044; font-size: 9pt; margin: 3px;">
-    {{ station.type }}<br />
+    {% for stype in station.stype.all %}{{ stype.descr }}{% if not forloop.last %}, {% endif %}{% endfor %}<br />
     {% trans 'Owner: ' %}{{ station.owner }}<br />
     {% if station.is_active %}{% trans 'Active, ' %}{% else %}{% trans 'Not active, ' %}{% endif %}
     {% if station.is_automatic %}{% trans 'Automatic' %}{% else %}{% trans 'Conventional' %}{% endif %}<br />

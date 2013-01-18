@@ -97,7 +97,7 @@
 					<td>{{ station.water_basin }}</td>
 					<td>{{ station.water_division }}</td>
 					<td>{{ station.political_division.name }}</td>
-					<td>{{ station.type }}</td>
+                                        <td>{% for stype in station.stype.all %}{{ stype.descr }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
 				  </tr>
 				{%endfor%}
 				</tbody>
@@ -128,7 +128,7 @@
 					<td>{{ station.water_basin }}</td>
 					<td>{{ station.water_division }}</td>
 					<td>{{ station.political_division.name }}</td>
-					<td>{{ station.type }}</td>
+                                        <td>{% for stype in station.stype.all %}{{ stype.descr }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
 				  </tr>
 				{%endfor%}
 				</tbody>

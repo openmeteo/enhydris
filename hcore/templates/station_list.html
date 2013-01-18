@@ -201,7 +201,7 @@
                     <td>{{ station.water_division.name }}</td>
                     <td>{{ station.political_division.name }}</td>
                     <td>{{ station.owner }}</td>
-                    <td>{{ station.type.descr }}</td>
+                    <td>{% for stype in station.stype.all %}{{ stype.descr }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
                   </tr>
                 {% endwith %}
                 {% endfor %}

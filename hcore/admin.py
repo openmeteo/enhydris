@@ -108,6 +108,10 @@ admin.site.register(UserProfile, UserProfileAdmin)
 
 ##########################################
 
+class StationTypeInline(admin.TabularInline):
+    model = StationType
+    extra = 1
+
 class GentityAltCodeInline(admin.TabularInline):
     model = GentityAltCode
     extra = 1
@@ -152,13 +156,13 @@ class StationAdmin(admin.ModelAdmin):
     # ChangeList format
     list_display = ('id', 'name', 'short_name', 'remarks', 'water_basin',
         'water_division', 'political_division', 'srid',
-        'approximate', 'altitude', 'asrid', 'owner', 'type', 'is_active',
+        'approximate', 'altitude', 'asrid', 'owner', 'is_active',
         'is_automatic', 'start_date', 'end_date','show_overseers' )
     list_filter = ('is_active', 'is_automatic', 'end_date',)
     date_hierarchy = 'start_date'
 
     # Inlines for m2m relationships
-    inlines = (GentityAltCodeInline, GentityFileInline, 
+    inlines = (StationTypeInline, GentityAltCodeInline, GentityFileInline, 
                 GentityGenericDataInline, GentityEventInline,
                 OverseerInline, InstrumentInline, TimeseriesInline,)
 

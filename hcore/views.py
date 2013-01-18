@@ -128,7 +128,8 @@ def _station_csv(s):
     abscissa, ordinate = s.point.transform(s.srid, clone=True) if s.point else (None, None)
     return [unicode(x).encode('utf-8') for x in
            [s.id, s.name, s.name_alt, s.short_name, s.short_name_alt,
-            s.type.descr if s.type else "", s.owner, s.start_date, s.end_date,
+            '+'.join([t.descr for t in s.stype.all()]),
+            s.owner, s.start_date, s.end_date,
             abscissa, ordinate, s.srid, s.approximate, s.altitude, s.asrid,
             s.water_basin.name if s.water_basin else "",
             s.water_division.name if s.water_division else "",
