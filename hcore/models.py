@@ -364,7 +364,7 @@ def handle_maintainer_permissions(sender, instance, **kwargs):
 
 class Station(Gpoint):
     owner = models.ForeignKey(Lentity, related_name="owned_stations")
-    stype = models.ManyToManyField(StationType)
+    stype = models.ManyToManyField(StationType, verbose_name='type')
     is_automatic = models.BooleanField()
     is_active = models.BooleanField()
     start_date = models.DateField(null=True, blank=True)

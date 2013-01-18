@@ -345,8 +345,6 @@ class StationForm(GpointForm, GentityForm):
     # owner should be modified to allow either Person or Organization add
     owner = forms.ModelChoiceField(Lentity.objects,
                                 widget=SelectWithPop(model_name='lentity'))
-    type = forms.ModelChoiceField(StationType.objects,
-                                widget=SelectWithPop(model_name='stationtype'))
 
 
     if hasattr(settings, 'USERS_CAN_ADD_CONTENT')\
