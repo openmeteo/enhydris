@@ -24,7 +24,7 @@ class TsTestCase(unittest.TestCase):
         self.unit.save()
         self.tz = TimeZone.objects.create(code='UTC', utc_offset='0')
         self.tz.save()
-        self.station = Station.objects.create(name='station', type=self.stype,
+        self.station = Station.objects.create(name='station', 
             owner=self.organization)
         self.station.save()
         self.ts = Timeseries(name="tstest", gentity=self.station,

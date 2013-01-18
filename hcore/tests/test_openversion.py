@@ -48,7 +48,7 @@ class OpenVTestCase(TestCase):
         self.unit = UnitOfMeasurement.objects.create(symbol='+')
         self.unit.variables.add(self.var)
         self.tz = TimeZone.objects.create(code='UTC', utc_offset='0')
-        self.station = Station.objects.create(name='station', type=self.stype,
+        self.station = Station.objects.create(name='station',
             owner=self.organization)
         self.ts = Timeseries(name="tstest", gentity=self.station,
             time_zone=self.tz, unit_of_measurement=self.unit, variable=self.var)
@@ -102,7 +102,7 @@ class OpenVTestCase(TestCase):
 
         post_data = {
             'name' : 'station_test',
-            'type' : self.stype.pk,
+            'stype' : self.stype.pk,
             'owner' : self.organization.pk,
             'creator' : self.user.pk,
             'copyright_holder': 'Copyright Holder',
@@ -194,7 +194,7 @@ class OpenVTestCase(TestCase):
 
         post_data = {
             'name' : 'station_test',
-            'type' : self.stype.pk,
+            'stype' : self.stype.pk,
             'owner' : self.organization.pk,
             'creator' : self.user.pk,
             'copyright_holder': 'Copyright Holder',
@@ -292,7 +292,7 @@ class OpenVTestCase(TestCase):
 
         post_data = {
             'name' : 'station_test',
-            'type' : self.stype.pk,
+            'stype' : self.stype.pk,
             'owner' : self.organization.pk,
             'creator' : self.user.pk,
             'copyright_holder': 'Copyright Holder',
