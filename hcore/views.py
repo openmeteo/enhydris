@@ -235,7 +235,7 @@ def _prepare_csv(queryset):
     return zipfilename
     
 #FIXME: Now you must keep the "political_division" FIRST in order
-@filter_by(('political_division','owner', 'type', 'water_basin',
+@filter_by(('political_division','owner', 'stype', 'water_basin',
             'water_division','variable','bounded',))
 @sort_by
 def station_list(request, queryset, *args, **kwargs):
@@ -252,7 +252,7 @@ def station_list(request, queryset, *args, **kwargs):
         "water_division_heading": _("Water division"),
         "political_division_heading": _("Political division"),
         "owner_heading": _("Owner"),
-        "type_heading": _("Type"),
+        "stype_heading": _("Type"),
     }
     kwargs["template_name"] = "station_list.html"
     if request.GET.has_key("ts_only") and request.GET["ts_only"]=="True":

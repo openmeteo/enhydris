@@ -3,6 +3,9 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Q
 from django.contrib.gis.geos import Polygon
+from django.http import Http404
+from django.core.exceptions import FieldError
+
 from enhydris.hcore.models import *
 
 #############################################################
@@ -32,7 +35,6 @@ def filter_by(filter_list):
                 if not value and request.GET.__contains__(arg):
                     value = request.GET[arg]
                 if value:
-                    mydict = {arg: value}
                     if not nkwargs["extra_context"].has_key("advanced_search"):
                         nkwargs["extra_context"].update({"advanced_search":True})
                     # This is a HACK for the self relation table
@@ -113,7 +115,10 @@ def sort_by(f):
             column = request.GET['sort']
         if column:
             queryset = queryset.order_by(column)
-        return f(request, queryset, *args, **nkwargs)
+        try:
+            return f(request, queryset, *args, **nkwargs)
+        except FieldError:
+            raise Http404
     return _dec
 
 ##############################################################################
