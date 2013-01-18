@@ -53,14 +53,7 @@ def filter_by(filter_list):
                         except:
                             queryset = queryset.none()
                     elif arg == "type":
-                        try:
-                            obj = StationType.objects.get(pk=value)
-                            term = obj.__unicode__()
-                            queryset = queryset.filter(
-                                          Q(type__descr=term) |
-                                          Q(type__descr_alt=term))
-                        except:
-                            queryset = queryset.none()
+                        queryset = queryset.filter(stype__id=value)
                     elif arg == "water_division":
                         try:
                             obj = WaterDivision.objects.get(pk=value)
