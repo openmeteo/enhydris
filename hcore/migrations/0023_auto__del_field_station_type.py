@@ -1,20 +1,21 @@
 # encoding: utf-8
 import datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-class Migration(DataMigration):
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        for station in orm.Station.objects.all():
-            station.stype.add(station.type)
+        
+        # Deleting field 'Station.type'
+        db.delete_column('hcore_station', 'type_id')
 
 
     def backwards(self, orm):
-        for station in orm.Station.objects.all():
-            station.type = station.stype.all()[0]
-            station.save()
+        
+        # Adding field 'Station.type'
+        db.add_column('hcore_station', 'type', self.gf('django.db.models.fields.related.ForeignKey')(related_name='temporary', null=True, to=orm['hcore.StationType']), keep_default=False)
 
 
     models = {
@@ -33,7 +34,7 @@ class Migration(DataMigration):
         },
         'auth.user': {
             'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 1, 18, 11, 37, 22, 132269)'}),
+            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 1, 18, 11, 40, 19, 44464)'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -41,7 +42,7 @@ class Migration(DataMigration):
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 1, 18, 11, 37, 22, 132187)'}),
+            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 1, 18, 11, 40, 19, 44382)'}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -290,8 +291,7 @@ class Migration(DataMigration):
             'overseers': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'stations_overseen'", 'symmetrical': 'False', 'through': "orm['hcore.Overseer']", 'to': "orm['hcore.Person']"}),
             'owner': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'owned_stations'", 'to': "orm['hcore.Lentity']"}),
             'start_date': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
-            'stype': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['hcore.StationType']", 'symmetrical': 'False'}),
-            'type': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'temporary'", 'null': 'True', 'to': "orm['hcore.StationType']"})
+            'stype': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['hcore.StationType']", 'symmetrical': 'False'})
         },
         'hcore.stationtype': {
             'Meta': {'ordering': "('descr',)", 'object_name': 'StationType'},
