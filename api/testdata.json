@@ -325,7 +325,7 @@
             "is_active": false,
             "is_automatic": false,
             "owner": 1,
-            "type": 1,
+            "stype": [1],
             "start_date": null
         }
     },

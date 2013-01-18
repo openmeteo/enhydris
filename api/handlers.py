@@ -18,11 +18,10 @@ ts_auth = RemoteInstanceAuthentication(realm="Timeseries realm")
 class StationHandler(BaseHandler):
     model = models.Station
     fields = ('id', 'name', 'srid', 'point', 'altitude',
-                'asrid','is_active',
+                'asrid','is_active', 'type',
                 ('water_basin',('name',)),
                 ('water_division',('name',)),
                 ('political_division',('name',)),
-                ('type',('descr',)),
                 ('owner',('name_any',)))
 
 
@@ -30,11 +29,10 @@ class StationListHandler(BaseHandler):
     allowed_methods = ('POST')
     model = models.Station
     fields = ('id', 'name', 'srid', 'point', 'altitude',
-                'asrid','is_active',
+                'asrid','is_active', 'stype',
                 ('water_basin',('name',)),
                 ('water_division',('name',)),
                 ('political_division',('name',)),
-                ('type',('descr',)),
                 ('owner',('name_any',)))
 
     def create(self, request, *args, **kwargs):
