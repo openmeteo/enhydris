@@ -1782,7 +1782,7 @@ def kml(request, layer):
             if getparams.has_key('owner'):
                 queryres = queryres.filter(owner__id=getparams['owner'])
             if getparams.has_key('type'):
-                queryres = queryres.filter(type__id=getparams['type'])
+                queryres = queryres.filter(stype__id=getparams['type'])
             if getparams.has_key('political_division'):
                 leaves = PoliticalDivision.objects.get_leaf_subdivisions(\
                                   PoliticalDivision.objects.filter(id=getparams['political_division']))
@@ -1838,7 +1838,7 @@ def bound(request):
             if getparams.has_key('owner'):
                 queryres = queryres.filter(owner__id=getparams['owner'])
             if getparams.has_key('type'):
-                queryres = queryres.filter(type__id=getparams['type'])
+                queryres = queryres.filter(stype__id=getparams['type'])
             if getparams.has_key('political_division'):
                 leaves = PoliticalDivision.objects.get_leaf_subdivisions(\
                               PoliticalDivision.objects.filter(id=getparams['political_division']))
