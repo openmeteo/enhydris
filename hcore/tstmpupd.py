@@ -8,7 +8,7 @@ import shutil
 def update_ts_temp_file(cache_dir, connection, id):
     full_rewrite = False
 
-    afilename = os.path.join(cache_dir, '%d.hts'%int(id))
+    afilename = os.path.join(cache_dir, '%d.hts'%(id,))
     if os.path.exists(afilename):
         if os.path.getsize(afilename)<3:
             full_rewrite = True
@@ -18,7 +18,7 @@ def update_ts_temp_file(cache_dir, connection, id):
             xr = xreverse(fileobject, 2048)
             line = xr.next()
         lastdate = datetime_from_iso(line.split(',')[0])
-        ts = Timeseries(int(id))
+        ts = Timeseries(id)
         ts.read_from_db(connection, bottom_only=True)
         if len(ts)>0:
             db_start, db_end = ts.bounding_dates()
@@ -30,7 +30,7 @@ def update_ts_temp_file(cache_dir, connection, id):
                     ts.write(fileobject, start=ts.keys()[lastindex+1])
 #Check for tmmp file or else create it
     if not os.path.exists(afilename) or full_rewrite:
-        ts = Timeseries(int(id))
+        ts = Timeseries(id)
         ts.read_from_db(connection)
         if not os.path.exists(cache_dir):
             os.mkdir(cache_dir)

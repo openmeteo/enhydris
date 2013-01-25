@@ -400,9 +400,12 @@ def timeseries_data(request, *args, **kwargs):
     if request.method == "GET" and request.GET.has_key('object_id'):
         response = HttpResponse(content_type='application/json')
         response.status_code = 200
-        object_id = request.GET['object_id']
+        try:
+            object_id = int(request.GET['object_id'])
+        except ValueError:
+            raise Http404
         afilename = os.path.join(settings.TS_GRAPH_CACHE_DIR,
-                                                    '%d.hts'%int(object_id))
+                                                    '%d.hts'%(object_id,))
         update_ts_temp_file(settings.TS_GRAPH_CACHE_DIR, django.db.connection,
                                                                     object_id)
         chart_data = []
