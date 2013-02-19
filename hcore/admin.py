@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # UTF8 Encoded
 from django import forms
-from django.contrib.auth.models import User
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 from enhydris.hcore.models import *
@@ -108,10 +107,6 @@ admin.site.register(UserProfile, UserProfileAdmin)
 
 ##########################################
 
-class StationTypeInline(admin.TabularInline):
-    model = StationType
-    extra = 1
-
 class GentityAltCodeInline(admin.TabularInline):
     model = GentityAltCode
     extra = 1
@@ -162,7 +157,7 @@ class StationAdmin(admin.ModelAdmin):
     date_hierarchy = 'start_date'
 
     # Inlines for m2m relationships
-    inlines = (StationTypeInline, GentityAltCodeInline, GentityFileInline, 
+    inlines = (GentityAltCodeInline, GentityFileInline, 
                 GentityGenericDataInline, GentityEventInline,
                 OverseerInline, InstrumentInline, TimeseriesInline,)
 
