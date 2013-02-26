@@ -46,11 +46,8 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'django.contrib.gis',
 
-    # Debugging Apps
     'django_extensions',
-    'piston',
-
-    # Dependencies
+    'rest_framework',
     'south',
     'pagination',
     'enhydris.sorting',
@@ -58,7 +55,6 @@ INSTALLED_APPS = (
     'registration',
     'ajax_select',
 
-    # Hydroscope Apps
     'enhydris.dbsync',
     'enhydris.hcore',
     'enhydris.api',

@@ -1,6 +1,6 @@
 from rest_framework import permissions
 from django.shortcuts import get_object_or_404
-from enhydris.core import models
+from enhydris.hcore import models
 
 
 class CanEditOrReadOnly(permissions.BasePermission):
