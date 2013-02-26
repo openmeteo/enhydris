@@ -431,6 +431,28 @@
         }
     },
 
+    {   "pk": 2,
+        "model": "hcore.timeseries",
+        "fields": {
+            "unit_of_measurement": 1,
+            "original_db": null,
+            "nominal_offset_minutes": null,
+            "instrument": null,
+            "gentity": 4,
+            "precision": null,
+            "time_zone": 1,
+            "remarks": "",
+            "actual_offset_months": null,
+            "last_modified": "2010-05-10 14:22:33",
+            "original_id": null,
+            "nominal_offset_months": null,
+            "variable": 1,
+            "time_step": null,
+            "actual_offset_minutes": null,
+            "name": "Test Timeseries 2"
+        }
+    },
+
     {   "pk": 1,
         "model": "permissions.Permission",
         "fields": {

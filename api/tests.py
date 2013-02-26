@@ -1,5 +1,4 @@
 from datetime import datetime
-from urllib import urlencode
 
 from django.core.serializers import serialize, deserialize
 from django.test import TestCase
@@ -681,6 +680,38 @@ class WriteTestCase(TestCase):
                                             content_type='application/json')
         self.assertEqual(models.Timeseries.objects.filter(
                                     name='Test Timeseries 1221').count(), 1)
+        self.client.logout()
+
+    def testTimeseriesDelete(self):
+        # Check the number of timeseries available
+        ntimeseries = models.Timeseries.objects.count()
+        assert(ntimeseries > 1) # 1 is not enough; we need to know we aren't
+                                # deleting more than necessary.
+
+        # Attempt to delete unauthenticated - should fail
+        response = self.client.delete("/api/Timeseries/1/")
+        # self.assertEqual(response.status_code, 403)  # See previous method
+                                          # which explains that piston sucks
+        self.assertEqual(models.Timeseries.objects.filter(pk=1).count(), 1)
+        self.assertEqual(models.Timeseries.objects.count(), ntimeseries)
+
+        # Try again as user2 - should fail
+        self.assert_(self.client.login(username='user2', password='password2'))
+        response = self.client.delete("/api/Timeseries/1/")
+        # self.assertEqual(response.status_code, 403)  # See previous method
+                                          # which explains that piston sucks
+        self.assertEqual(models.Timeseries.objects.filter(pk=1).count(), 1)
+        self.assertEqual(models.Timeseries.objects.count(), ntimeseries)
+        #self.assertEqual(response.status_code, 403)
+        #self.assertEqual(models.Timeseries.objects.count(), ntimeseries)
+        self.client.logout()
+
+        # Try again as user1 - should succeed
+        self.assert_(self.client.login(username='user1', password='password1'))
+        response = self.client.delete("/api/Timeseries/1/")
+        #self.assertEqual(response.status_code, 204)
+        self.assertEqual(models.Timeseries.objects.filter(pk=1).count(), 0)
+        self.assertEqual(models.Timeseries.objects.count(), ntimeseries-1)
         self.client.logout()
 
     def testUploadTsDataUnauthenticated(self):
