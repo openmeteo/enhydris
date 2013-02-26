@@ -1,6 +1,6 @@
 from datetime import datetime
+import json
 
-from django.core.serializers import serialize, deserialize
 from django.test import TestCase
 from django.db import connection
 from pthelma.timeseries import Timeseries
@@ -14,23 +14,23 @@ class WriteTestCase(TestCase):
         # Get an existing time series
         obj = models.Timeseries.objects.filter(name='Test Timeseries')[0]
         response = self.client.get("/api/Timeseries/%d/" % (obj.id,))
-        t = deserialize('json', response.content).next().object
+        t = json.loads(response.content)
 
         # Change some of its attributes
-        t.id = None
-        t.name = "Test Timeseries 1221"
-        t.remarks = "Yet another timeseries test"
+        t['id'] = None
+        t['name'] = "Test Timeseries 1221"
+        t['remarks'] = "Yet another timeseries test"
 
         # Attempt to upload unauthenticated
-        d = serialize('json', [t])
+        d = json.dumps(t)
         response = self.client.post("/api/Timeseries/", data=d,
-                                            content_type='application/json')
+                                    content_type='application/json')
         # Status code should say forbidden. However, due to some bug somewhere
         # (maybe a piston bug), it says OK, though in fact the request has been
         # denied and the row has not been created. Therefore (until the bug
         # is fixed) we don't check the status code, we check only whether the
         # record has been created.
-        #self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
         self.assertEqual(models.Timeseries.objects.filter(
                                     name='Test Timeseries 1221').count(), 0)
 
@@ -38,6 +38,7 @@ class WriteTestCase(TestCase):
         self.assert_(self.client.login(username='user2', password='password2'))
         response = self.client.post("/api/Timeseries/", data=d,
                                             content_type='application/json')
+        self.assertEqual(response.status_code, 403)
         self.assertEqual(models.Timeseries.objects.filter(
                                     name='Test Timeseries 1221').count(), 0)
         self.client.logout()
@@ -46,6 +47,7 @@ class WriteTestCase(TestCase):
         self.assert_(self.client.login(username='user1', password='password1'))
         response = self.client.post("/api/Timeseries/", data=d,
                                             content_type='application/json')
+        self.assertEqual(response.status_code, 201)
         self.assertEqual(models.Timeseries.objects.filter(
                                     name='Test Timeseries 1221').count(), 1)
         self.client.logout()

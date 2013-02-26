@@ -12,6 +12,6 @@ class CanEditOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        station = get_object_or_404(models.Station, id=obj.station.id)
+        station = get_object_or_404(models.Station, id=obj.gentity.id)
         return hasattr(request.user, 'has_row_perm'
                ) and request.user.has_row_perm(station, 'edit')

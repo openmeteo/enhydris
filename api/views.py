@@ -1,6 +1,7 @@
 from StringIO import StringIO
 from django.http import Http404, HttpResponse
 from django.db import connection
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
@@ -59,6 +60,46 @@ class Tsdata(APIView):
             return HttpResponse(status_code=result_if_error,
                                 content=str(e),
                                 content_type="text/plain")
+
+
+class TimeseriesList(generics.ListCreateAPIView):
+    model = models.Timeseries
+    permission_classes = (CanEditOrReadOnly,)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Redefine post, checking permissions.
+        Django-rest-framework does not do object-level permission when
+        creating a new object, so we have to completely customize the post
+        method. Maybe there's a better way, such as using a mixin for the
+        functionality below (especially when the API is extended to include
+        other types as well).
+        """
+        # Get the data
+        serializer = self.get_serializer(data=request.DATA, files=request.FILES)
+        if not serializer.is_valid():
+            Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check permissions
+        try:
+            gentity_id = int(serializer.init_data['gentity'])
+        except ValueError:
+            raise Http404
+        station = get_object_or_404(models.Station, id=gentity_id)
+        if not hasattr(request.user, 'has_row_perm') or not request.user\
+                                                .has_row_perm(station, 'edit'):
+            return Response('Forbidden', status=status.HTTP_403_FORBIDDEN)
+
+        # Save the object
+        self.pre_save(serializer.object)
+        self.object = serializer.save()
+        self.post_save(self.object, created=True)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED,
+                        headers=headers)
+
+
+        return super(TimeseriesList, self).post(*args, **kwargs)
 
 
 class TimeseriesDetail(generics.RetrieveUpdateDestroyAPIView):
