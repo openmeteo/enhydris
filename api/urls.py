@@ -2,10 +2,13 @@ from django.conf.urls.defaults import patterns, url
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework.generics import RetrieveAPIView, ListAPIView
 from enhydris.hcore import models
-from enhydris.api.views import modelnames, TimeseriesList, TimeseriesDetail
+from enhydris.api.views import modelnames, TimeseriesList, TimeseriesDetail,\
+                               Tsdata
 from enhydris.api import serializers
 
-_urls = ['enhydris.api.views', url(r'^$', 'api_root')]
+_urls = ['enhydris.api.views',
+         url(r'^$', 'api_root'),
+         url(r'^tsdata/(?P<pk>\d+)/$',Tsdata.as_view(), name='tsdata')]
 for _x in modelnames:
     model = models.__dict__[_x]
     serializer_class = None
