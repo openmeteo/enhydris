@@ -791,13 +791,13 @@ def download_timeseries(request, object_id):
         return response
     else:
         """
-        Here we use the piston api to fetch a specific timeseries data from the
-        original database from which it was synced. Since this requires http
-        authentication, we use the username/password stored in the settings file to
-        connect.
+        Here we use the webservice api to fetch a specific timeseries
+        data from the original database from which it was synced.
+        Since this requires http authentication, we use the
+        username/password stored in the settings file to connect.
 
-        NOTE: The user used for the sync should be a superuser in the remote
-        instance.
+        NOTE: The user used for the sync should be a superuser in the
+        remote instance.
         """
         import urllib2, re, base64
 
