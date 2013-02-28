@@ -58,6 +58,13 @@ class Tsdata(APIView):
                                 content=str(e),
                                 content_type="text/plain")
 
+    def post(self, request, pk, format=None):
+        """
+        We temporarily keep post the same as put so that older
+        versions of loggertodb continue to work
+        """
+        return self.put(request, pk, format=None)
+
 
 class TimeseriesList(generics.ListCreateAPIView):
     model = models.Timeseries
