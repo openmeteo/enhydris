@@ -94,16 +94,7 @@ class TimeseriesList(generics.ListCreateAPIView):
                                                 .has_row_perm(station, 'edit'):
             return Response('Forbidden', status=status.HTTP_403_FORBIDDEN)
 
-        # Save the object
-        self.pre_save(serializer.object)
-        self.object = serializer.save()
-        self.post_save(self.object, created=True)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED,
-                        headers=headers)
-
-
-        return super(TimeseriesList, self).post(*args, **kwargs)
+        return super(TimeseriesList, self).post(request, *args, **kwargs)
 
 
 class TimeseriesDetail(generics.RetrieveUpdateDestroyAPIView):
