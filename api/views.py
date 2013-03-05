@@ -41,7 +41,7 @@ class Tsdata(APIView):
         self.check_object_permissions(request, ts)
         ts.read_from_db(connection)
         result = StringIO()
-        ts.write_file(result)
+        ts.write(result)
         return HttpResponse(result.getvalue(), content_type="text/plain")
 
     def put(self, request, pk, format=None):
