@@ -1,0 +1,3 @@
+*.pyc
+enhydris/settings.py
+enhydris/urls.py
