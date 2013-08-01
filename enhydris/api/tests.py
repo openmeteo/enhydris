@@ -8,7 +8,7 @@ from enhydris.hcore import models
 
 
 class WriteTestCase(TestCase):
-    fixtures = ['api/testdata.json']
+    fixtures = ['enhydris/api/testdata.json']
 
     def testTimeSeries(self):
         # Get an existing time series
