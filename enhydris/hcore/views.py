@@ -74,17 +74,15 @@ class StationDetailView(DetailView):
         anonymous_can_download_data = \
             settings.TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS
         display_copyright = settings.DISPLAY_COPYRIGHT_INFO
-        station = get_object_or_404(Station, pk=kwargs["object_id"])
-        owner = station.owner
         chart_exists = False
         if 'enhydris.hchartpages' in settings.INSTALLED_APPS:
             from enhydris.hchartpages.models import ChartPage
             chart_exists = ChartPage.objects.filter(
-                url_int_alias=station.id).exists()
+                url_int_alias=self.object.id).exists()
         use_open_layers = settings.USE_OPEN_LAYERS and \
-            station.srid and station.point
+            self.object.srid and self.object.point
         context.append(
-            {"owner": owner,
+            {"owner": self.object.owner,
              "enabled_user_content": settings.USERS_CAN_ADD_CONTENT,
              "use_open_layers": use_open_layers,
              "anonymous_can_download_data": anonymous_can_download_data,
