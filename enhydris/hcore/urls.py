@@ -24,7 +24,7 @@ urlpatterns = patterns('',
      views.station_list, stations, 'station_list'),
 
     (r'^stations/d/(?P<object_id>\d+)/$',
-     views.station_detail, stations, 'station_detail'),
+     views.StationDetailView.as_view(), name='station_detail'),
 
     (r'^stations/b/(?P<object_id>\d+)/$',
      views.station_brief, {}, 'station_brief'),
