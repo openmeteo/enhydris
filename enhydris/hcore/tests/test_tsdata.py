@@ -48,7 +48,7 @@ class TsTestCase(unittest.TestCase):
 
         from pthelma import timeseries
         # check uploading
-        f = open("hcore/tests/tsdata.hts","r")
+        f = open("enhydris/hcore/tests/tsdata.hts","r")
 
         file_dict = {'data': SimpleUploadedFile(f.name, f.read())}
         post_dict = {'gentity':self.station.pk, 'variable':self.var.pk,

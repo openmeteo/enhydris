@@ -1,10 +1,14 @@
 from django.conf import settings
 from django.contrib.auth.models import User, Group, Permission
 from django.test import TestCase
+from django.utils.unittest import skipUnless
+
 from enhydris.hcore.views import ALLOWED_TO_EDIT
 from enhydris.hcore.models import *
 
 
+@skipUnless(settings.USERS_CAN_ADD_CONTENT,
+            'USERS_CAN_ADD_CONTENT is False')
 class OpenVTestCase(TestCase):
     """
     Test that the behaviour of the site when USERS_CAN_ADD_CONTENT is set to
@@ -12,10 +16,6 @@ class OpenVTestCase(TestCase):
     """
 
     def setUp(self):
-        self.assertEqual(settings.USERS_CAN_ADD_CONTENT, True, ("You need to"
-        " have USERS_CAN_ADD_CONTENT=True in your settings for this test to"
-        " run"))
-
         # Create the editors group
         permitted = ["eventtype", "filetype", "garea", "gentityaltcode",
             "gentityaltcodetype", "gentityevent", "gentityfile", "gline",
