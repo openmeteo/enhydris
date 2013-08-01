@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls.defaults import patterns
+from django.views.generic.detail import DetailView
 
 from enhydris.hcore import views
 from enhydris.hcore.models import (Instrument, Timeseries, Station)
@@ -26,8 +27,7 @@ urlpatterns = patterns('',
     (r'^stations/d/(?P<object_id>\d+)/$',
      views.StationDetailView.as_view(), name='station_detail'),
 
-    (r'^stations/b/(?P<object_id>\d+)/$',
-     views.station_brief, {}, 'station_brief'),
+    (r'^stations/b/(?P<pk>\d+)/$', DetailView.as_view(), name='station_brief'),
 
     (r'^map/$',
         views.map_view, {}, 'map_view'),

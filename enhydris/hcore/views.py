@@ -93,16 +93,6 @@ class StationDetailView(DetailView):
         return context
 
 
-def station_brief(request, object_id):
-    station_objects = Station.objects.all()
-    if len(settings.SITE_STATION_FILTER)>0:
-        station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
-    return list_detail.object_detail(request,
-                                     queryset=station_objects,
-                                     object_id = object_id,
-                                     template_object_name = "station",
-                                     template_name = "station_brief.html")
-
 def get_search_query(search_terms):
     query = Q()
     for term in search_terms:
