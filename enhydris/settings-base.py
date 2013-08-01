@@ -69,7 +69,7 @@ AJAX_LOOKUP_CHANNELS = {
 
 LOGIN_REDIRECT_URL = '/'
 AUTH_PROFILE_MODULE = 'hcore.UserProfile'
-USE_OPEN_LAYERS = True 
+USE_OPEN_LAYERS = True
 MIN_VIEWPORT_IN_DEGS = 0.04
 
 HRAIN_IGNORE_ONGOING_EVENT = False
@@ -82,3 +82,5 @@ TS_GRAPH_BIG_STEP_DENOMINATOR=200
 TS_GRAPH_FINE_STEP_DENOMINATOR=50
 TS_GRAPH_CACHE_DIR = os.path.join(tempfile.gettempdir(),
                                                 'enhydris-timeseries-graphs')
+TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS = False
+DISPLAY_COPYRIGHT_INFO = False

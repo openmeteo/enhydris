@@ -1,4 +1,3 @@
-from __future__ import with_statement 
 import calendar
 import json
 import math
@@ -8,15 +7,14 @@ import linecache
 from calendar import monthrange
 from datetime import timedelta, datetime
 from tempfile import mkstemp
-import django.db
-from pthelma.timeseries import Timeseries as TTimeseries
-from pthelma.timeseries import datetime_from_iso
 from string import lower
+
+import django.db
 from django.http import (HttpResponse, HttpResponseRedirect,
                             HttpResponseForbidden, Http404)
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
-from django.views.generic import list_detail
+from django.views.generic.detail import DetailView
 from django.views.generic.create_update import create_object
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.views import login as auth_login
@@ -32,6 +30,10 @@ from django.utils import simplejson
 from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import Count
+
+from pthelma.timeseries import Timeseries as TTimeseries
+from pthelma.timeseries import datetime_from_iso
+
 from enhydris.hcore.models import *
 from enhydris.hcore.decorators import *
 from enhydris.hcore.forms import *
@@ -61,31 +63,35 @@ def protect_gentityfile(request):
     """
     raise Http404
 
-def station_detail(request, *args, **kwargs):
-    anonymous_can_download_data = False
-    if hasattr(settings, 'TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS') and\
-            settings.TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
-        anonymous_can_download_data = True
-    display_copyright = hasattr(settings, 'DISPLAY_COPYRIGHT_INFO') and\
-        settings.DISPLAY_COPYRIGHT_INFO
-    stat = get_object_or_404(Station, pk=kwargs["object_id"])
-    owner = stat.owner
-    chart_exists = False
-    if hasattr(settings, 'INSTALLED_APPS'):
+
+class StationDetailView(DetailView):
+
+    model = Station
+    template_name = 'station_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(StationDetailView, self).get_context_data(**kwargs)
+        anonymous_can_download_data = \
+            settings.TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS
+        display_copyright = settings.DISPLAY_COPYRIGHT_INFO
+        station = get_object_or_404(Station, pk=kwargs["object_id"])
+        owner = station.owner
+        chart_exists = False
         if 'enhydris.hchartpages' in settings.INSTALLED_APPS:
             from enhydris.hchartpages.models import ChartPage
-            chart_exists = ChartPage.objects.filter(url_int_alias=stat.id).exists()
-    use_open_layers = settings.USE_OPEN_LAYERS and\
-                      stat.srid and stat.point
-    kwargs["extra_context"] = {"owner":owner,
-        "enabled_user_content":settings.USERS_CAN_ADD_CONTENT,
-        "use_open_layers": use_open_layers,
-        "anonymous_can_download_data": anonymous_can_download_data,
-        "display_copyright": display_copyright,
-        "chart_exists": chart_exists}
-    kwargs["request"] = request
-    kwargs["template_name"] = "station_detail.html"
-    return list_detail.object_detail(*args, **kwargs)
+            chart_exists = ChartPage.objects.filter(
+                url_int_alias=station.id).exists()
+        use_open_layers = settings.USE_OPEN_LAYERS and \
+            station.srid and station.point
+        context.append(
+            {"owner": owner,
+             "enabled_user_content": settings.USERS_CAN_ADD_CONTENT,
+             "use_open_layers": use_open_layers,
+             "anonymous_can_download_data": anonymous_can_download_data,
+             "display_copyright": display_copyright,
+             "chart_exists": chart_exists})
+        return context
+
 
 def station_brief(request, object_id):
     station_objects = Station.objects.all()
