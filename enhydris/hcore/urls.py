@@ -3,7 +3,7 @@ from django.conf.urls.defaults import patterns
 from django.views.generic.detail import DetailView
 
 from enhydris.hcore import views
-from enhydris.hcore.models import (Instrument, Timeseries, Station)
+from enhydris.hcore.models import (Instrument, Timeseries)
 
 instruments = {'queryset': Instrument.objects.all(),
                'template_object_name': 'instrument',}
@@ -11,18 +11,11 @@ instruments = {'queryset': Instrument.objects.all(),
 timeseries = {'queryset': Timeseries.objects.all(),
               'template_object_name': 'timeseries',}
 
-station_objects = Station.objects.all()
-if len(settings.SITE_STATION_FILTER)>0:
-    station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
-
-stations = {'queryset': station_objects,
-            'template_object_name': 'station',}
-
 urlpatterns = patterns('',
     (r'^$', views.index, {}, 'index'),
 
     (r'^stations/l/$',
-     views.station_list, stations, 'station_list'),
+     views.StationListView.as_view(), name='station_list'),
 
     (r'^stations/d/(?P<pk>\d+)/$',
      views.StationDetailView.as_view(), name='station_detail'),

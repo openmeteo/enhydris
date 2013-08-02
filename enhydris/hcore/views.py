@@ -14,6 +14,7 @@ from django.http import (HttpResponse, HttpResponseRedirect,
                             HttpResponseForbidden, Http404)
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
+from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.create_update import create_object
 from django.contrib.auth.decorators import login_required, permission_required
@@ -227,19 +228,13 @@ def _prepare_csv(queryset):
     os.remove(readmefilename)
 
     return zipfilename
-    
-#FIXME: Now you must keep the "political_division" FIRST in order
-@filter_by(('political_division','owner', 'stype', 'water_basin',
-            'water_division','variable','bounded',))
-@sort_by
-def station_list(request, queryset, *args, **kwargs):
 
-    kwargs["extra_context"] = {
-        "use_open_layers": settings.USE_OPEN_LAYERS,
-        # The following is a hack because enhydris.sorting (aka
-        # django-sorting) sucks. I18N should be in the template, not
-        # here (but anyway the whole list needs revising, manual
-        # selecting of visible columns, reordering of columns, etc.)
+
+class StationListView(ListView):
+
+    model = Station
+    template_name = 'station_list.html'
+    column_headings = {
         "id_heading": _("id"),
         "name_heading": _("Name"),
         "water_basin_heading": _("Water basin"),
@@ -248,44 +243,127 @@ def station_list(request, queryset, *args, **kwargs):
         "owner_heading": _("Owner"),
         "stype_heading": _("Type"),
     }
-    kwargs["template_name"] = "station_list.html"
-    if request.GET.has_key("ts_only") and request.GET["ts_only"]=="True":
-        tmpset = queryset.annotate(tsnum=Count('timeseries'))
-        queryset = tmpset.exclude(tsnum=0)
 
-    if request.GET.has_key("check") and request.GET["check"]=="search":
-        # The case we got a simple search request
-        kwargs["extra_context"].update({"search":True})
-        query_string = request.GET.get('q', "")
-        search_terms = query_string.split()
-        results = queryset
-
-        if search_terms:
-            results = results.filter(get_search_query(search_terms)).distinct()
-            queryset = results
+    def get(self, request, *args, **kwargs):
+        # The CSV is an undocumented feature we quickly and dirtily created
+        # for some people (Hydroexigiantiki) who needed it.
+        if request.GET.get("format", "").lower() == "csv":
+            zipfilename = _prepare_csv(self.get_queryset())
+            response = HttpResponse(file(zipfilename, 'rb').read(),
+                                    content_type='application/zip')
+            response['Content-Disposition'] = 'attachment; filename=data.zip'
+            response['Content-Length'] = str(os.path.getsize(zipfilename))
+            return response
         else:
-            results = []
-        kwargs["extra_context"].update({'query': query_string,
-                                        'terms': search_terms, })
-    else:
-        if len(request.GET.items())>0:
-            kwargs["extra_context"].update({"advanced_search":True})
+            return super(StationListView, self).get(request, *args, **kwargs)
 
-    if hasattr(settings, 'USERS_CAN_ADD_CONTENT'):
-        if settings.USERS_CAN_ADD_CONTENT:
-            kwargs["extra_context"].update({'enabled_user_content':
-                                    settings.USERS_CAN_ADD_CONTENT})
+    def get_queryset(self, **kwargs):
+        result = super(StationListView, self).get_queryset(**kwargs)
 
-    if request.GET.get("format", "").lower()=="csv":
-        import os.path
-        zipfilename = _prepare_csv(queryset)
-        response = HttpResponse(file(zipfilename, 'rb').read(),
-                                        content_type='application/zip')
-        response['Content-Disposition'] = 'attachment; filename=data.zip'
-        response['Content-Length'] = str(os.path.getsize(zipfilename))
-        return response
+        # Simple search
+        if self.request.GET.get('check', False) == "search":
+            query_string = self.request.GET.get('q', "")
+            search_terms = query_string.split()
+            if search_terms:
+                result = result.filter(
+                    get_search_query(search_terms)).distinct()
+            else:
+                result = result.filter(pk=-1)
 
-    return list_detail.object_list(request,queryset=queryset, *args, **kwargs )
+        # Advanced search
+        nkwargs = kwargs
+        for arg in ('political_division', 'owner', 'stype', 'water_basin',
+                    'water_division', 'variable', 'bounded'):
+                    # Note: Political division must be listed first
+            value = nkwargs.pop(arg) if arg in nkwargs else \
+                self.request.GET[arg] if arg in self.request.GET else None
+            if not value:
+                continue
+            try:
+                if arg == "political_division":
+                    result = Station.objects.get_by_political_division(value)
+                elif arg == "owner":
+                    obj = Lentity.objects.get(pk=value)
+                    term = obj.__unicode__()
+                    result = result.filter(
+                        Q(owner__organization__name=term) |
+                        Q(owner__person__first_name=term) &
+                        Q(owner__person__last_name=term))
+                elif arg == "type":
+                    result = result.filter(stype__id=value)
+                elif arg == "water_division":
+                    obj = WaterDivision.objects.get(pk=value)
+                    term = obj.__unicode__()
+                    result = result.filter(
+                        Q(water_division__name=term) |
+                        Q(water_division__name_alt=term))
+                elif arg == "water_basin":
+                    obj = WaterBasin.objects.get(pk=value)
+                    term = obj.__unicode__()
+                    result = result.filter(
+                        Q(water_basin__name=term) |
+                        Q(water_basin__name_alt=term))
+                elif arg == "variable":
+                    obj = Variable.objects.get(pk=value)
+                    term = obj.__unicode__()
+                    result = result.filter(
+                        Q(timeseries__variable__descr=term)).distinct()
+                elif arg == "bounded":
+                    minx, miny, maxx, maxy = [float(i)
+                                              for i in value.split(',')]
+                    geom = Polygon(((minx, miny), (minx, maxy),
+                                    (maxx, maxy), (maxx, miny),
+                                    (minx, miny)), srid=4326)
+                    result = result.filter(Q(point__contained=geom))
+            except:
+                result = result.none()
+
+        # The following few filters would have logically been better placed at
+        # the beginning of this method rather than at the end. However,
+        # because of the political_division hack above, which creates a new
+        # queryset from scratch, we need to do it this way. (Of course this
+        # code sucks and needs to be rewritten.)
+
+        # Apply SITE_STATION_FILTER.
+        if len(settings.SITE_STATION_FILTER) > 0:
+            result = result.filter(**settings.SITE_STATION_FILTER)
+
+        # Only stations with timeseries?
+        if self.request.GET.get("ts_only", False):
+            result = result.annotate(tsnum=Count('timeseries')
+                                     ).exclude(tsnum=0)
+
+        # Sort results
+        nkwargs = kwargs
+        column = nkwargs.pop('sort') if 'sort' in nkwargs else None
+        if not column and 'sort' in self.request.GET:
+            column = self.request.GET['sort']
+        if column:
+            result = result.order_by(column)
+        return result
+
+    def get_context_data(self, **kwargs):
+
+        context = super(StationListView, self).get_context_data(**kwargs)
+        context['use_open_layers'] = settings.USE_OPEN_LAYERS
+
+        # The following is a hack because enhydris.sorting (aka
+        # django-sorting) sucks. I18N should be in the template, not
+        # here (but anyway the whole list needs revising, manual
+        # selecting of visible columns, reordering of columns, etc.)
+        context.append(self.column_headings)
+
+        if self.request.GET.get('check', False) == "search":
+            # The case we got a simple search request
+            context['search'] = True
+            context['query'] = request.GET.get('q', "")
+            context['terms'] = query_string.split()
+        elif len(request.GET.items()) > 0:
+            context['advanced_search'] = True
+
+        context['enabled_user_content'] = settings.USERS_CAN_ADD_CONTENT
+
+        return context
 
 
 def bufcount(filename):

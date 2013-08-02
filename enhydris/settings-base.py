@@ -84,3 +84,4 @@ TS_GRAPH_CACHE_DIR = os.path.join(tempfile.gettempdir(),
                                                 'enhydris-timeseries-graphs')
 TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS = False
 DISPLAY_COPYRIGHT_INFO = False
+USERS_CAN_ADD_CONTENT = False
