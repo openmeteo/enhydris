@@ -5,9 +5,6 @@ from django.views.generic.detail import DetailView
 from enhydris.hcore import views
 from enhydris.hcore.models import (Instrument, Timeseries)
 
-instruments = {'queryset': Instrument.objects.all(),
-               'template_object_name': 'instrument',}
-
 urlpatterns = patterns('',
     (r'^$', views.index, {}, 'index'),
 
@@ -29,7 +26,7 @@ urlpatterns = patterns('',
      views.get_subdivision, {}, 'get_subdivision'),
 
     (r'^instruments/d/(?P<object_id>\d+)/$',
-     views.instrument_detail, instruments, 'instrument_detail'),
+     views.InstrumentDetailView.as_view(), name='instrument_detail'),
 
     (r'^timeseries/d/(?P<pk>\d+)/$',
      views.TimeseriesDetailView.as_view(), name='timeseries_detail'),

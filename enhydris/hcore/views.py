@@ -602,35 +602,27 @@ class TimeseriesDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(TimeseriesDetailView, self).get_context_data(**kwargs)
-        context.append(
-            {'related_station': self.object.related_station,
-             'enabled_user_content': settings.USERS_CAN_ADD_CONTENT,
-             'display_copyright': settings.DISPLAY_COPYRIGHT_INFO,
-             'anonymous_can_download_data':
-                settings.TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS,
-            }
+        context['related_station'] = self.object.related_station
+        context['enabled_user_content'] = settings.USERS_CAN_ADD_CONTENT
+        context['display_copyright'] = settings.DISPLAY_COPYRIGHT_INFO
+        context['anonymous_can_download_data'] = \
+            settings.TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS
         return context
 
 
-def instrument_detail(request, queryset, object_id, *args, **kwargs):
-    """Return the details for a specific timeseries object."""
+class InstrumentDetailView(DetailView):
 
-    enabled_user_content = False
-    if hasattr(settings, 'USERS_CAN_ADD_CONTENT'):
-        if settings.USERS_CAN_ADD_CONTENT:
-            enabled_user_content = True
+    model = Instrument
+    template_name = 'instrument_detail.html'
 
-    instrument = get_object_or_404(Instrument, id=object_id)
-    related_station = instrument.station
-    try:
-        instrument_timeseries = Timeseries.objects.all().filter(instrument__id=object_id)
-    except:
-        instrument_timeseries = None
-    kwargs["extra_context"] = {'related_station': related_station,
-                               'enabled_user_content':enabled_user_content,
-                               'timeseries': instrument_timeseries}
-    kwargs["template_name"] = "instrument_detail.html"
-    return list_detail.object_detail(request, queryset, object_id, *args, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super(InstrumentDetailView, self).get_context_data(**kwargs)
+        context['related_station'] = self.object.related_station
+        context['enabled_user_content'] = settings.USERS_CAN_ADD_CONTENT
+        context['timeseries'] = Timeseries.objects.filter(
+            instrument__id=self.object.id)
+        return context
+
 
 def embedmap_view(request, *args, **kwargs):
     return render_to_response('embedmap.html', 
