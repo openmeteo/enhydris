@@ -594,29 +594,22 @@ def timeseries_data(request, *args, **kwargs):
     else:
         raise Http404
 
-def timeseries_detail(request, queryset, object_id, *args, **kwargs):
-    """Return the details for a specific timeseries object."""
 
-    enabled_user_content = False
-    if hasattr(settings, 'USERS_CAN_ADD_CONTENT'):
-        if settings.USERS_CAN_ADD_CONTENT:
-            enabled_user_content = True
-    display_copyright = hasattr(settings, 'DISPLAY_COPYRIGHT_INFO') and\
-        settings.DISPLAY_COPYRIGHT_INFO
+class TimeseriesDetailView(DetailView):
 
-    anonymous_can_download_data = False
-    if hasattr(settings, 'TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS') and\
-            settings.TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
-        anonymous_can_download_data = True
-    tseries = get_object_or_404(Timeseries, id=object_id)
-    related_station = tseries.related_station
-    kwargs["extra_context"] = {'related_station': related_station,
-                              'enabled_user_content':enabled_user_content,
-                              'display_copyright': display_copyright,
-                              'anonymous_can_download_data':
-                                    anonymous_can_download_data}
-    kwargs["template_name"] = "timeseries_detail.html"
-    return list_detail.object_detail(request, queryset, object_id, *args, **kwargs)
+    model = Timeseries
+    template_name = 'timeseries_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(TimeseriesDetailView, self).get_context_data(**kwargs)
+        context.append(
+            {'related_station': self.object.related_station,
+             'enabled_user_content': settings.USERS_CAN_ADD_CONTENT,
+             'display_copyright': settings.DISPLAY_COPYRIGHT_INFO,
+             'anonymous_can_download_data':
+                settings.TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS,
+            }
+        return context
 
 
 def instrument_detail(request, queryset, object_id, *args, **kwargs):

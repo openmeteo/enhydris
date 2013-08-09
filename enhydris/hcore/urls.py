@@ -8,9 +8,6 @@ from enhydris.hcore.models import (Instrument, Timeseries)
 instruments = {'queryset': Instrument.objects.all(),
                'template_object_name': 'instrument',}
 
-timeseries = {'queryset': Timeseries.objects.all(),
-              'template_object_name': 'timeseries',}
-
 urlpatterns = patterns('',
     (r'^$', views.index, {}, 'index'),
 
@@ -34,8 +31,8 @@ urlpatterns = patterns('',
     (r'^instruments/d/(?P<object_id>\d+)/$',
      views.instrument_detail, instruments, 'instrument_detail'),
 
-    (r'^timeseries/d/(?P<object_id>\d+)/$',
-     views.timeseries_detail, timeseries, 'timeseries_detail'),
+    (r'^timeseries/d/(?P<pk>\d+)/$',
+     views.TimeseriesDetailView.as_view(), name='timeseries_detail'),
 
     (r'^timeseries/data/$',
      views.timeseries_data, {}, 'timeseries_data'),
