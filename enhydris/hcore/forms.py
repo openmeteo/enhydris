@@ -1,129 +1,22 @@
-"""
-Hcore Forms.
-"""
+import os
 
-from pthelma import timeseries
 from django import forms, db
-from django.contrib.auth.models import User
 from django.contrib.gis.geos import Point
 from django.forms import ModelForm
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-from registration.forms import RegistrationForm
+
 from ajax_select.fields import AutoCompleteSelectMultipleField
-from enhydris.hcore.models import (Station, Instrument, Person, Overseer,
-        FileType, GentityFile, GentityGenericDataType, GentityGenericData,
-        GentityAltCodeType, GentityAltCode, EventType, GentityEvent,
-        Gentity, Gpoint, PoliticalDivision, WaterBasin, WaterDivision,
-        Lentity, StationType, InstrumentType, TimeStep, Variable,
-        UnitOfMeasurement, TimeZone, IntervalType, Timeseries)
+
+from pthelma import timeseries
 from enhydris.hcore.widgets import SelectWithPop
+from enhydris.hcore.models import (
+    Station, Instrument, Person, Overseer, FileType, GentityFile,
+    GentityGenericDataType, GentityGenericData, GentityAltCodeType,
+    GentityAltCode, EventType, GentityEvent, Gentity, Gpoint,
+    PoliticalDivision, WaterBasin, WaterDivision, Lentity, InstrumentType,
+    TimeStep, Variable, UnitOfMeasurement, TimeZone, IntervalType, Timeseries)
 
-import os
-import glob
-import sha
-import time
-
-# global salt var
-SALT = settings.SECRET_KEY[:5]
-
-
-attrs_dict = { 'class': 'required' }
-
-class HcoreRegistrationForm(RegistrationForm):
-    """
-    Extension of the default registration form to include a tos agreement
-    (Terms of Service) and also require unique emails for each registration
-    """
-    tos = forms.BooleanField(widget=forms.CheckboxInput(attrs=attrs_dict),
-                label=_(u'I have read and agree to the Terms of Service'),
-                error_messages={ 'required': _("You must agree to the terms to register") })
-
-    captcha = forms.CharField(required=True)
-    hash = forms.CharField()
-
-    def clean_email(self):
-        """
-        Validate that the supplied email address is unique for the site.
-        """
-        if User.objects.filter(email__iexact=self.cleaned_data['email']):
-            raise forms.ValidationError(_("This email address is already in use. Please supply a different email address."))
-        return self.cleaned_data['email']
-
-    def clean(self):
-        """
-        Validate captcha text
-        """
-        cleaned_data = self.cleaned_data
-        if 'captcha' in cleaned_data and cleaned_data['captcha']:
-            try:
-                cleaned_data['captcha'].decode('ascii')
-            except UnicodeError:
-                self._errors["captcha"] = self.error_class(["Invalid (non latin - non ascii) "
-                                                        "characters entered. Please check your "
-                                                        "input language setting."])
-                del cleaned_data["captcha"]
-                super(HcoreRegistrationForm, self).clean()
-                return cleaned_data
-        if not ('captcha' in cleaned_data) or \
-                         cleaned_data['hash'] != sha.new(SALT+cleaned_data['captcha']).hexdigest():
-            self._errors["captcha"] = self.error_class(["Text displayed in the box and user"
-                                                        "text input don't match."])
-            if 'captcha' in cleaned_data: del cleaned_data["captcha"]
-        super(HcoreRegistrationForm, self).clean()
-        return cleaned_data
-
-    def __init__(self, *args, **kwargs):
-        super(HcoreRegistrationForm, self).__init__(*args, **kwargs)
-        if not ('hash' in self.data):
-            self.imgtext, self.imghash = createcapcha()
-            self.fields['hash'].initial = self.imghash
-        else:
-            self.imghash = self.data['hash']
-
-    def captcha_img(self):
-        return self.imghash
-
-def createcapcha():
-    """
-    This is a simple view which creates a captcha image and returns the name of
-    the image to pass to the template.
-    """
-    from random import choice
-    # PIL elements, sha for hash
-    import Image, ImageDraw, ImageFont
-
-    imgtext = ''.join([choice('QWERTYUIOPASDFGHJKLZXCVBNM234567890@$%&?+') for i in range(5)])
-    imghash = sha.new(SALT+imgtext).hexdigest()
-    im = Image.new("RGB", (90,20), (600,600,600))
-    draw=ImageDraw.Draw(im)
-    captcha_font = os.path.join(settings.ENHYDRIS_PROGRAM_DIR, 'misc',
-                                                                'arizona.ttf')
-    font=ImageFont.truetype(captcha_font, 18)
-    draw.text((3,0),imgtext, font=font, fill=(000,000,50))
-    captcha_root = os.path.join(settings.MEDIA_ROOT, 'captchas')
-    #Delete captchas older than 15 minutes
-    try:
-        now = time.time()
-        fifteen = 60*15
-        for item in glob.glob(os.path.join(captcha_root, '*.jpg')):
-            m = os.stat(item)[7]
-            if now - m < fifteen:
-                continue
-            os.remove(item)
-    except Exception:
-        pass
-    temp = os.path.join(captcha_root, imghash + '.jpg')
-    if not os.path.exists(captcha_root):
-        os.mkdir(captcha_root)
-    im.save(temp, "JPEG")
-
-    return (imgtext,imghash)
-
-
-"""
-Model forms.
-"""
 
 class OverseerForm(ModelForm):
 
@@ -151,7 +44,6 @@ class OverseerForm(ModelForm):
         if gentity_id:
             self.fields["station"].queryset = Station.objects.filter(
                                                 id=gentity_id)
-
 
 
 
