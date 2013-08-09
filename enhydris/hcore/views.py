@@ -17,6 +17,7 @@ from django.template import RequestContext
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
+from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.views import login as auth_login
 from django.contrib.contenttypes.models import ContentType
@@ -1756,30 +1757,30 @@ ALLOWED_TO_EDIT = ('waterbasin', 'waterdivision', 'person', 'organization',
                    'gentitygenericdatatype')
 
 
-@login_required
 class ModelAddView(CreateView):
 
     template_name = 'model_add.html'
 
+    @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         # Verify url parms correctness
-        popup = request.GET.get('_popup', False)
-        if not popup and request.method == 'GET' \
-                and not '_complete' in request.GET:
+        popup = self.request.GET.get('_popup', False)
+        if not popup and self.request.method == 'GET' \
+                and not '_complete' in self.request.GET:
             raise Http404
 
         # Determine self.model
         try:
             self.model = ContentType.objects.get(
-                model=kwargs[model_name], app_label='hcore'
+                model=kwargs['model_name'], app_label='hcore'
             ).model_class()
         except (ContentType.DoesNotExist,
                 ContentType.MultipleObjectsReturned):
             raise Http404
 
         # Check permissions
-        if not kwargs[model_name] in ALLOWED_TO_EDIT or not \
-                request.user.has_perm('hcore.add_' + kwargs[model_name]):
+        if not kwargs['model_name'] in ALLOWED_TO_EDIT or not \
+                self.request.user.has_perm('hcore.add_' + kwargs['model_name']):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
 
         return super(ModelAddView, self).dispatch(*args, **kwargs)
