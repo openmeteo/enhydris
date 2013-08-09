@@ -125,7 +125,7 @@ if settings.USERS_CAN_ADD_CONTENT:
 
 
     (r'^add/(?P<model_name>.+)/$',
-     views.model_add, {} , 'model_add'),
+     views.ModelAddView.as_view(), name='model_add'),
 )
 
 if settings.STATIC_SERVE:

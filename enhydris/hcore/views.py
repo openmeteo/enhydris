@@ -16,7 +16,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.views.generic.create_update import create_object
+from django.views.generic.edit import CreateView
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.views import login as auth_login
 from django.contrib.contenttypes.models import ContentType
@@ -1755,35 +1755,44 @@ ALLOWED_TO_EDIT = ('waterbasin', 'waterdivision', 'person', 'organization',
                    'gentityaltcode', 'gentityfile', 'gentityevent',
                    'gentitygenericdatatype')
 
+
 @login_required
-def model_add(request, model_name=''):
-    popup = request.GET.get('_popup', 0) == '1'
-    if not popup and request.method == 'GET'\
-                                    and not '_complete' in request.GET:
-        raise Http404
-    try:
-       model = ContentType.objects.get(model=model_name,
-                                       app_label='hcore').model_class()
-    except (ContentType.DoesNotExist, ContentType.MultipleObjectsReturned):
-        raise Http404
-    if not model_name in ALLOWED_TO_EDIT\
-       or not request.user.has_perm('hcore.add_'+model_name):
+class ModelAddView(CreateView):
+
+    template_name = 'model_add.html'
+
+    def dispatch(self, *args, **kwargs):
+        # Verify url parms correctness
+        popup = request.GET.get('_popup', False)
+        if not popup and request.method == 'GET' \
+                and not '_complete' in request.GET:
+            raise Http404
+
+        # Determine self.model
+        try:
+            self.model = ContentType.objects.get(
+                model=kwargs[model_name], app_label='hcore'
+            ).model_class()
+        except (ContentType.DoesNotExist,
+                ContentType.MultipleObjectsReturned):
+            raise Http404
+
+        # Check permissions
+        if not kwargs[model_name] in ALLOWED_TO_EDIT or not \
+                request.user.has_perm('hcore.add_' + kwargs[model_name]):
             return HttpResponseForbidden('Forbidden', mimetype='text/plain')
-    if '_complete' in request.GET:
-        if request.GET['_complete'] == '1':
-            newObject = model.objects.order_by('-pk')[0]
-            return HttpResponse('<script type="text/javascript"'
-                 'src="%sadmin/js/admin/RelatedObjectLookups.js"></script>'
-                 '<script type="text/javascript">'
-                 'opener.dismissAddAnotherPopup(window,"%s","%s");</script>'\
-                 % (settings.STATIC_URL, escape(newObject._get_pk_val()),
-                 escape(newObject)))
-    return create_object(request, model,
-                post_save_redirect=reverse('model_add',
-                    kwargs={'model_name':lower(model.__name__)})+"?_complete=1",
-                template_name='model_add.html',
-                form_class= TimeStepForm if model.__name__=='TimeStep' else None,
-                extra_context={'form_prefix': model.__name__,})
+
+        return super(ModelAddView, self).dispatch(*args, **kwargs)
+
+    def get_form_class(self):
+        return TimeStepForm if self.model.__name__ == 'TimeStep' \
+            else super(ModelAddView, self).get_form_class()
+
+    def get_extra_context(self):
+        context = super(ModelAddView, self).get_extra_context()
+        context['form_prefix'] = model.__name__
+        return context
+
 
 # Profile page
 def profile_view(request, username):
