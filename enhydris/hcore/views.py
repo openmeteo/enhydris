@@ -1794,19 +1794,6 @@ class ModelAddView(CreateView):
         return context
 
 
-# Profile page
-def profile_view(request, username):
-    from profiles.views import profile_detail
-    if request.user and request.user.username == username:
-        extra_content = {'user_enabled_content': getattr(settings,
-                                   'USERS_CAN_ADD_CONTENT', False)}
-        return profile_detail(request, username, extra_context=extra_content)
-    else:
-        user = get_object_or_404(User, username=username)
-        return render_to_response('profiles/profile_public.html',
-            { 'profile': user.get_profile()} ,
-            context_instance=RequestContext(request))
-
 def clean_kml_request(tuppleitems):
     try:
         items = {}

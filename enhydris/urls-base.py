@@ -3,9 +3,8 @@ from django.contrib.auth.views import password_reset, password_reset_done, \
                                       password_change, password_change_done
 from django.contrib import admin
 from registration.views import register
-from profiles.views import create_profile, edit_profile
 from enhydris.hcore.forms import HcoreRegistrationForm
-from enhydris.hcore.views import terms, profile_view, login
+from enhydris.hcore.views import terms, login
 
 admin.autodiscover()
 
@@ -26,16 +25,6 @@ urlpatterns = patterns('',
 
 
     (r'^accounts/', include('registration.urls')),
-
-    # django profiles
-    # to enable django <-> site admin overlapping
-    #(r'^profiles/admin/(.*)', admin.site.root),
-    #(r'^profile/', include('profiles.urls')),
-    (r'^profile/create/$', create_profile, {}, 'profiles_create_profile'),
-    (r'^profile/edit/$', edit_profile, {}, 'profiles_edit_profile'),
-    (r'^profile/(?P<username>\w+)/$', profile_view, {},
-                                 'profiles_profile_detail'),
-
 
     # terms of usage
     (r'^terms/$', terms,{}, 'terms'),

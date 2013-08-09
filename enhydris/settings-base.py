@@ -51,7 +51,6 @@ INSTALLED_APPS = (
     'south',
     'pagination',
     'enhydris.sorting',
-    'profiles',
     'registration',
     'ajax_select',
 
