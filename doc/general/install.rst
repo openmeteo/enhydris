@@ -17,7 +17,6 @@ psycopg2              2.2 [9]
 setuptools            0.6 [5]
 PIL with freetype     1.1.7 [14]
 Django                1.4 [4]
-django-profiles       0.2 [4]
 django-registration   0.7 [13]
 django-pagination     1.0 [4]
 django-extensions     0.6 [8]
@@ -124,7 +123,7 @@ unofficial version from http://www.lfd.uci.edu/~gohlke/pythonlibs/.
        aptitude install python postgresql postgis postgresql-8.4-postgis \
            python-psycopg2 python-setuptools mercurial python-markdown \
            python-pip python-imaging
-       pip install django==1.4.2 django-profiles==0.2 django-registration==0.7 \
+       pip install django==1.4.2 django-registration==0.7 \
            "django-pagination>=1.0,<1.1" django-extensions==0.6 \
            djangorestframework==2.2.1 south==0.7 django-notify==1.1 \
            "django-ajax-selects>=1.2,<1.3"
@@ -191,7 +190,7 @@ unofficial version from http://www.lfd.uci.edu/~gohlke/pythonlibs/.
    Finally, open a Command Prompt and give the following commands::
 
        easy_install pip
-       pip install django==1.4.2 django-profiles==0.2
+       pip install django==1.4.2 
        pip install django-registration==0.7 "django-pagination>=1.0,<1.1"
        pip install django-extensions==0.6 djangorestframework==2.2.1
        pip install south==0.7 django-notify==1.1 "django-ajax-selects>=1.2,<1.3"
