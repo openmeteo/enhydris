@@ -27,7 +27,7 @@ urlpatterns = patterns(
     (r'^get_subdivision/(?P<division_id>\d+)/$',
      views.get_subdivision, {}, 'get_subdivision'),
 
-    url(r'^instruments/d/(?P<object_id>\d+)/$',
+    url(r'^instruments/d/(?P<pk>\d+)/$',
         views.InstrumentDetailView.as_view(), name='instrument_detail'),
 
     url(r'^timeseries/d/(?P<pk>\d+)/$', views.TimeseriesDetailView.as_view(),

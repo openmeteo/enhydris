@@ -83,7 +83,7 @@ class StationDetailView(DetailView):
                 url_int_alias=self.object.id).exists()
         use_open_layers = settings.USE_OPEN_LAYERS and \
             self.object.srid and self.object.point
-        context.append(
+        context.update(
             {"owner": self.object.owner,
              "enabled_user_content": settings.USERS_CAN_ADD_CONTENT,
              "use_open_layers": use_open_layers,
@@ -618,7 +618,7 @@ class InstrumentDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(InstrumentDetailView, self).get_context_data(**kwargs)
-        context['related_station'] = self.object.related_station
+        context['related_station'] = self.object.station
         context['enabled_user_content'] = settings.USERS_CAN_ADD_CONTENT
         context['timeseries'] = Timeseries.objects.filter(
             instrument__id=self.object.id)
