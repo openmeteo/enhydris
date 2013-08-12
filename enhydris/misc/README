@@ -1,3 +1,0 @@
-Arizona.ttf is used by default to create captchas. Maybe this is a stupid
-solution, and it should instead have a hardwired list of fonts and search for
-one that is available on the system.
