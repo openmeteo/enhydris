@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns
+from django.conf.urls import patterns
 
 from enhydris.gis_objects import views
 from enhydris.gis_objects.models import GISEntity

@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import include, patterns
+from django.conf.urls import include, patterns
 from django.contrib import admin
 from django.contrib.auth.views import password_reset, password_reset_done
 from enhydris.hcore.views import terms
@@ -13,7 +13,7 @@ urlpatterns = patterns(
     (r'^accounts/password/reset/done/$', password_reset_done,
      {'template_name': 'registration/password_reset_done.html'},
      'password_reset_done'),
-    (r'^accounts/', include('registration.urls')),
+    (r'^accounts/', include('registration.backends.default.urls')),
     (r'^terms/$', terms, {}, 'terms'),
     (r'^i18n/', include('django.conf.urls.i18n')),
     # Uncomment the next line to enable the admin:

@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework.generics import RetrieveAPIView, ListAPIView
 from enhydris.hcore import models
