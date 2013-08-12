@@ -10,7 +10,7 @@
 {% block content %}
 <div style="padding-top:2em;">
 	<img src="{{STATIC_URL}}images/icons/icon_confirmation.gif" /><h2 style="display:inline; padding-left:10px">{% trans msg %}</h2>
-	{% url index as index %}
+	{% url "index" as index %}
 	<p>{% blocktrans %}Here's a link to the <a href="{{ index }}">homepage</a>.{% endblocktrans %}</p>
 </div>
 {% endblock %}

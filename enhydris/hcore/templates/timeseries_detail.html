@@ -28,7 +28,7 @@
 		$("#data_holder").hide()	
 		$("#progress").append("<img style=\"margin: auto;\" src=\""+STATIC_URL+"images/icons/progress.gif\">");
 
-		 $.getJSON('{% url timeseries_data %}', {object_id:{{timeseries.id}}}, function(chart_data){
+		 $.getJSON('{% url "timeseries_data" %}', {object_id:{{timeseries.id}}}, function(chart_data){
 		   
 			$("#progress").hide()
 			$("#data_holder").show()
@@ -87,7 +87,7 @@
                 }
             }
 		    $("#placeholder").append("<img style=\"margin: auto;\" src=\""+STATIC_URL+"images/icons/progress.gif\">");
-            $.getJSON('{% url timeseries_data %}', {object_id:{{timeseries.id}},
+            $.getJSON('{% url "timeseries_data" %}', {object_id:{{timeseries.id}},
                 start_pos:from_pos, end_pos:to_pos}, function(chart_data){
                 d = chart_data['data'];
                 var tol=(actual_xaxis_to-actual_xaxis_from)*0.01;
@@ -124,9 +124,9 @@
         {% if enabled_user_content %}
             {% if request.user|can_edit:timeseries.related_station %}
             <sup class='sup_link'>
-                <a href='{% url timeseries_edit timeseries.id%}'>edit</a>
+                <a href='{% url "timeseries_edit" timeseries.id%}'>edit</a>
                 ,
-                <a onClick='return confirmPost()' href='{% url timeseries_delete timeseries.id%}'>delete</a>
+                <a onClick='return confirmPost()' href='{% url "timeseries_delete" timeseries.id%}'>delete</a>
             {% endif %} 
             </sup>
         {% endif %}
@@ -138,7 +138,7 @@
             <p>{% blocktrans %}
                     Download Timeseries in plain text from 
                 {% endblocktrans %}
-                    <a href="{% url timeseries_text timeseries.id %}">{% trans 'here' %}</a>
+                    <a href="{% url "timeseries_text" timeseries.id %}">{% trans 'here' %}</a>
             </p>
         {% else %}
             <p>{% blocktrans %}
@@ -154,7 +154,7 @@
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Related Station' %}</th>
 				{% if timeseries.related_station %}
-                <td><a href="{% url station_detail timeseries.related_station.id %}">{{ timeseries.related_station }}</a></td>
+                <td><a href="{% url "station_detail" timeseries.related_station.id %}">{{ timeseries.related_station }}</a></td>
                 {% else %}
                 <td>None</td>
                 {% endif %}
@@ -186,7 +186,7 @@
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Instrument' %}</th>
 				{% if timeseries.instrument %}
-                <td><a href="{% url instrument_detail timeseries.instrument.id %}">{{ timeseries.instrument }}</a></td>
+                <td><a href="{% url "instrument_detail" timeseries.instrument.id %}">{{ timeseries.instrument }}</a></td>
 				{% else %} 
                 <td>None</td>
 				{% endif %}

@@ -146,7 +146,7 @@
                             <td>{{ file.remarks }}</td>
 							<td>
 							{% if user.is_authenticated or anonymous_can_download_data %}
-								<a href="{% url gentityfile_dl file.id %}"><img style="border:none" src="{{STATIC_URL}}images/icons/download.png"></a>
+								<a href='{% url "gentityfile_dl" file.id %}'><img style="border:none" src="{{STATIC_URL}}images/icons/download.png"></a>
 							{% else %}
 								<i>N/A</i>
 							{% endif %}
@@ -189,7 +189,7 @@
                             <td>{{ genericdata.remarks }}</td>
 							<td>
 							{% if request.user.is_authenticated or anonymous_can_download_data %}
-								<a href="{% url gentitygenericdata_dl genericdata.id %}"><img style="border:none" src="{{STATIC_URL}}images/icons/download.png"></a>
+								<a href='{% url "gentitygenericdata_dl" genericdata.id %}'><img style="border:none" src="{{STATIC_URL}}images/icons/download.png"></a>
 							{% else %}
 								<i>N/A</i>
 							{% endif %}
@@ -268,7 +268,7 @@
                         {% for t in object.timeseries.all %}
                         {% if not t.hidden %}
                         {% with t.id as t_id %}
-                        {% url timeseries_detail t_id as timeseries_url %}
+                        {% url "timeseries_detail" t_id as timeseries_url %}
                         <tr {% if forloop.counter > 10 %}class='timeseries_rows' style='display: none;'{% endif %}>
                             <td><a href="{{ timeseries_url }}">{{ t_id }}</a></td>
                             <td>{{ t.name }}</td>

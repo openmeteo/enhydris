@@ -33,9 +33,9 @@
 	{% if enabled_user_content %}
             {% if request.user|can_edit:instrument.station %}
             <sup class='sup_link'>
-                <a href='{% url instrument_edit instrument.id%}'>edit</a>
+                <a href='{% url "instrument_edit" instrument.id%}'>edit</a>
                 ,
-                <a onClick='return confirmPost()' href='{% url instrument_delete instrument.id%}'>delete</a>
+                <a onClick='return confirmPost()' href='{% url "instrument_delete" instrument.id%}'>delete</a>
             {% endif %} 
             </sup>
         {% endif %}
@@ -46,7 +46,7 @@
 			<ul style="list-style-type:none;">
 				<li>
 					<span style="color:#A0A095">More: </span>
-					<span class="menu_options"><a href="{% url timeseries_add %}?instrument_id={{ instrument.id }}">Add new Timeseries</a></span>
+					<span class="menu_options"><a href="{% url "timeseries_add" %}?instrument_id={{ instrument.id }}">Add new Timeseries</a></span>
 				</li>
 			</ul>
 			<br />
@@ -62,7 +62,7 @@
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Related Station' %}</th>
-                <td colspan='2'><a href="{% url station_detail instrument.station.id %}">{{ instrument.station }}</a></td>
+                <td colspan='2'><a href="{% url "station_detail" instrument.station.id %}">{{ instrument.station }}</a></td>
             </tr>
             <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Name' %}</th>
@@ -123,7 +123,7 @@
                         {% for t in timeseries %}
                         {% if not t.hidden %}
                         {% with t.id as t_id %}
-                        {% url timeseries_detail t_id as timeseries_url %}
+                        {% url "timeseries_detail" t_id as timeseries_url %}
                         <tr>
                             <td><a href="{{ timeseries_url }}">{{ t_id }}</a></td>
                             <td>{{ t.name }}</td>
@@ -141,8 +141,8 @@
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">
-								<a href="{% url timeseries_edit t.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url timeseries_delete t.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+								<a href="{% url "timeseries_edit" t.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url "timeseries_delete" t.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
 								</td>
 								{% endif %}
 							{% endif %}

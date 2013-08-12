@@ -21,8 +21,8 @@
         <h2>{% trans "Welcome to Enhydris" %}</h2>
 
         <p>{% trans "If you want to take full advantage of our service, you could " %}
-            <a href="{% url registration_register %}">sign up</a> or <a
-            href="{% url auth_login %}">login</a> 
+            <a href="{% url "registration_register" %}">sign up</a> or <a
+            href="{% url "auth_login" %}">login</a> 
             {% trans " if you're already a member!" %}</p>
     </div>
         <div id="frontpage">
@@ -41,7 +41,7 @@
             {% get_latest_stations 5  %}
 			{% if latest_stations %}
 				{% for station in latest_stations %}
-				<p><span><a href="{% url station_detail station.id %}">{{station.name}}</a></span> {% trans "was modifed at" %}
+				<p><span><a href="{% url "station_detail" station.id %}">{{station.name}}</a></span> {% trans "was modifed at" %}
 				{{station.last_modified|date:"l, j N P"}}</p> 
 				{% endfor %}
 			{% else %}

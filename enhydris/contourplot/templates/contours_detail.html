@@ -52,7 +52,7 @@
                                      function(){},
                                      function(){
                                          if($("#date_select").hasClass("expArrow"))
-                                             window.location="{% url contourpage_detail page.url_name %}";
+                                             window.location='{% url "contourpage_detail" page.url_name %}';
                                      });
     });
     </script>
@@ -76,7 +76,7 @@
     <p style="clear: left;">{{page.description}}</p>
     {% endif %}
     <div style="clear: both; padding: 5px;">
-    <img src="{% url image_serve image_filename %}.png" style="float: left; width: {{ x_dim }}px; height: {{y_dim }}px;" alt="{{page.description}}">
+    <img src='{% url "image_serve" image_filename %}.png' style="float: left; width: {{ x_dim }}px; height: {{y_dim }}px;" alt="{{page.description}}">
     {% autoescape off %}
     {% if page.side_text %}
     <div style="float: left; clear: right">
@@ -102,7 +102,7 @@
                     <th>{% trans "Weight" %}</th>
                     <th>{% trans "Value" %}</th>
                     {% for old_value_meta in old_values_meta %}
-                        <th><a href="{% url contourpage_detail page.url_name %}?date={{ old_value_meta.date }}&time={{ old_value_meta.time }}">
+                        <th><a href='{% url "contourpage_detail" page.url_name %}?date={{ old_value_meta.date }}&time={{ old_value_meta.time }}'>
                         {{ old_value_meta.ts }}</a></th>
                     {% endfor %}
                     </tr>
@@ -153,11 +153,11 @@
         </h3>
         {% for item in other_pages %}
            <div style="padding: 15px; float: left;">
-               <a href="{% url contourpage_detail item.rpage.url_name %}">
-               <img src="{% url thumb_serve item.rpage.url_name %}_140.png" style="border-width: 0px; width: {{x_thumb}}px; height {{y_thumb}}px;" alt="{{item.rpage.description}}"></a>
+               <a href='{% url "contourpage_detail" item.rpage.url_name %}'>
+               <img src='{% url "thumb_serve" item.rpage.url_name %}_140.png' style="border-width: 0px; width: {{x_thumb}}px; height {{y_thumb}}px;" alt="{{item.rpage.description}}"></a>
                <p style="display: block; width: 140px;">
                    <strong>
-                     <a href="{% url contourpage_detail item.rpage.url_name %}">{{ item.rpage.name }}</a>
+                     <a href='{% url "contourpage_detail" item.rpage.url_name %}'>{{ item.rpage.name }}</a>
                    </strong><br>
                    {% trans "Time step: " %}<br>{{ item.rpage.time_step }}<br>
                    {% trans "Nominal timestamp:" %}<br>

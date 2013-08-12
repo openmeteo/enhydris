@@ -87,10 +87,10 @@
 	{% if enabled_user_content %}
 		{% if request.user|can_edit:station %}
 		<sup class='sup_link'>
-			<a href='{% url station_edit station.id%}'>edit</a>
+			<a href='{% url "station_edit" station.id%}'>edit</a>
 		{% if request.user|can_delete:station %}
 			,
-			<a onClick='return confirmPost()' href='{% url station_delete station.id%}'>delete</a>
+			<a onClick='return confirmPost()' href='{% url "station_delete" station.id%}'>delete</a>
 		{% endif %}
 		</sup>
 		{% endif %}
@@ -102,19 +102,19 @@
 			<ul style="list-style-type:none;">
 				<li>
 					<span style="color:#A0A095">More: </span>
-					<span class="menu_options"><a href="{% url timeseries_add %}?station_id={{ station.id }}">Add new Timeseries</a></span>
+					<span class="menu_options"><a href="{% url "timeseries_add" %}?station_id={{ station.id }}">Add new Timeseries</a></span>
 					/
-					<span class="menu_options"><a href="{% url instrument_add %}?station_id={{ station.id }}">Add new Instrument</a></span>
+					<span class="menu_options"><a href="{% url "instrument_add" %}?station_id={{ station.id }}">Add new Instrument</a></span>
 					/
-					<span class="menu_options"><a href="{% url gentityfile_add %}?station_id={{ station.id }}">Add new File</a></span>
+					<span class="menu_options"><a href="{% url "gentityfile_add" %}?station_id={{ station.id }}">Add new File</a></span>
 					/
-					<span class="menu_options"><a href="{% url gentitygenericdata_add %}?station_id={{ station.id }}">Add new Generic Item</a></span>
+					<span class="menu_options"><a href="{% url "gentitygenericdata_add" %}?station_id={{ station.id }}">Add new Generic Item</a></span>
 					/
-					<span class="menu_options"><a href="{% url gentityevent_add %}?station_id={{ station.id }}">Add new Event</a></span>
+					<span class="menu_options"><a href="{% url "gentityevent_add" %}?station_id={{ station.id }}">Add new Event</a></span>
 					/
-					<span class="menu_options"><a href="{% url gentityaltcode_add %}?station_id={{ station.id }}">Add new Alt Code</a></span>
+					<span class="menu_options"><a href="{% url "gentityaltcode_add" %}?station_id={{ station.id }}">Add new Alt Code</a></span>
 					/
-					<span class="menu_options"><a href="{% url overseer_add %}?station_id={{ station.id }}">Add new Overseer</a></span>
+					<span class="menu_options"><a href="{% url "overseer_add" %}?station_id={{ station.id }}">Add new Overseer</a></span>
 				<li>
 			</ul>
 			<br />
@@ -220,7 +220,7 @@
 			<tr class="{% cycle rowalts %}">
                 <th>{% trans 'Creator' %}</th>
 				{% if station.creator %}
-					<td colspan='2'><a href="{% url profiles_profile_detail station.creator %}" />{{ station.creator }}</td>
+					<td colspan='2'><a href="{% url "profiles_profile_detail" station.creator %}" />{{ station.creator }}</td>
 				{% else %}
 					<td colspan='2'>{% trans "Unknown" %}</td>
 				{% endif %}
@@ -239,7 +239,7 @@
                             <td>{{ overseer.person.first_name }} {{ overseer.person.last_name }}
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
-								&nbsp;|&nbsp;<a href="{% url overseer_delete overseer.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+								&nbsp;|&nbsp;<a href="{% url "overseer_delete" overseer.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
 								{% endif %}
 							{% endif %}
                             </td>
@@ -279,8 +279,8 @@
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">
-								<a href="{% url gentityaltcode_edit code.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url gentityaltcode_delete code.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+								<a href="{% url "gentityaltcode_edit" code.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url "gentityaltcode_delete" code.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
 								</td>
 
 								{% endif %}
@@ -332,7 +332,7 @@
                             <td>{{ file.remarks }}</td>
 							<td>
 							{% if user.is_authenticated or anonymous_can_download_data %}
-								<a href="{% url gentityfile_dl file.id %}"><img style="border:none" src="{{STATIC_URL}}images/icons/download.png"></a>
+								<a href="{% url "gentityfile_dl" file.id %}"><img style="border:none" src="{{STATIC_URL}}images/icons/download.png"></a>
 							{% else %}
 								<i>N/A</i>
 							{% endif %}
@@ -340,8 +340,8 @@
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">
-								<a href="{% url gentityfile_edit file.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url gentityfile_delete file.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+								<a href="{% url "gentityfile_edit" file.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url "gentityfile_delete" file.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
 								</td>
 								{% endif %}
 							{% endif %}
@@ -388,7 +388,7 @@
                             <td>{{ genericdata.remarks }}</td>
 							<td>
 							{% if request.user.is_authenticated or anonymous_can_download_data %}
-								<a href="{% url gentitygenericdata_dl genericdata.id %}"><img style="border:none" src="{{STATIC_URL}}images/icons/download.png"></a>
+								<a href="{% url "gentitygenericdata_dl" genericdata.id %}"><img style="border:none" src="{{STATIC_URL}}images/icons/download.png"></a>
 							{% else %}
 								<i>N/A</i>
 							{% endif %}
@@ -396,8 +396,8 @@
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">
-								<a href="{% url gentitygenericdata_edit genericdata.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url gentitygenericdata_delete genericdata.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+								<a href="{% url "gentitygenericdata_edit" genericdata.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url "gentitygenericdata_delete" genericdata.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
 								</td>
 								{% endif %}
 							{% endif %}
@@ -446,8 +446,8 @@
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">
-								<a href="{% url gentityevent_edit event.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url gentityevent_delete event.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+								<a href="{% url "gentityevent_edit" event.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url "gentityevent_delete" event.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
 								</td>
 								{% endif %}
 							{% endif %}
@@ -492,7 +492,7 @@
                         <tbody>
                         {% for instrument in station.instrument_set.all %}
                         {% with instrument.id as instrument_id %}
-                        {% url instrument_detail instrument_id as instrument_url %}
+                        {% url "instrument_detail" instrument_id as instrument_url %}
                         <tr class="{% cycle 'odd' 'even' %} {% if forloop.counter > 10 %}instr_rows" style="display: none;{% endif %}">
                             <td><a href="{{ instrument_url }}">{{ instrument_id }}</a></td>
                             <td>{{ instrument.name }}</td>
@@ -506,8 +506,8 @@
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">
-								<a href="{% url instrument_edit instrument.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url instrument_delete instrument.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+								<a href="{% url "instrument_edit" instrument.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url "instrument_delete" instrument.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
 								</td>
 								{% endif %}
 							{% endif %}
@@ -554,7 +554,7 @@
                         {% for t in station.timeseries.all %}
                         {% if not t.hidden %}
                         {% with t.id as t_id %}
-                        {% url timeseries_detail t_id as timeseries_url %}
+                        {% url "timeseries_detail" t_id as timeseries_url %}
                         <tr {% if forloop.counter > 10 %}class='timeseries_rows' style='display: none;'{% endif %}>
                             <td><a href="{{ timeseries_url }}">{{ t_id }}</a></td>
                             <td>{{ t.name }}</td>
@@ -572,8 +572,8 @@
 							{% if enabled_user_content %}
 								{% if request.user|can_edit:station %}
 								<td style="text-align:center;">
-								<a href="{% url timeseries_edit t.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url timeseries_delete t.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+								<a href="{% url "timeseries_edit" t.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
+								<a href="{% url "timeseries_delete" t.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
 								</td>
 								{% endif %}
 							{% endif %}

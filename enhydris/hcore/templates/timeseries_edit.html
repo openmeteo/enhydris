@@ -24,7 +24,7 @@
     {% if form.instance.pk %}
             <h3>
                 {% trans "Edit timeseries details for " %}
-                <a href="{% url timeseries_detail form.instance.id %}">
+                <a href="{% url "timeseries_detail" form.instance.id %}">
                     {% if form.instance.name %}
                         {{ form.instance.name }}
                     {% else %}

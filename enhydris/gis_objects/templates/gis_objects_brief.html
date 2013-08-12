@@ -6,6 +6,6 @@
 {{ gentity.extra_info }}<br />
 {{ gentity.remarks }}<br />
 {% endwith %}
-    {% url gis_objects_detail object.id as object_url %}
+    {% url "gis_objects_detail" object.id as object_url %}
     <a href=" {{object_url}} ">{% trans 'View more details...' %}</a>
 </p>

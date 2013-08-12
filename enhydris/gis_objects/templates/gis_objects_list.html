@@ -87,7 +87,7 @@
   </form>
 </fieldset>
 <fieldset style="margin: 20px 8px; padding: 15px 5px; width: 75%;" class="compact">
-  <form action ="{% url gis_objects_list %}" method="get" id="search-structures-form">
+  <form action ='{% url "gis_objects_list" %}' method="get" id="search-structures-form">
 	<p><label style="font-size: 9pt;">{% trans "Search structures by name, description, etc." %}</label></p>
     <input class="small" id="structures-search_input" name="sq" size=32 value="{{ squery|escape }}" />
       <input name="scheck" value="search" type="hidden" />
@@ -115,7 +115,7 @@
     {% with object.gis_model as gentity %}
             <tr class="{% cycle 'odd' 'even' as rowalts %}">
                 <td>
-                <a href="{% url gis_objects_detail gentity.id %}">
+                <a href='{% url "gis_objects_detail" gentity.id %}'>
                 {{ gentity.id }}</a>
                 </td>
                 <td>{{ gentity.name }}</td>

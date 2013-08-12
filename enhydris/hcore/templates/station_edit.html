@@ -96,7 +96,7 @@
 		{% if form.instance.pk %}
 				<h3>
 				    {% trans "Edit station details for " %}
-				    <a href="{% url station_detail form.instance.id %}">{{ form.instance.name }}</a> :
+				    <a href="{% url "station_detail" form.instance.id %}">{{ form.instance.name }}</a> :
 				</h3>
 			{% else %} 
 				<h3>{% trans "Fill the station details:" %}</h3>

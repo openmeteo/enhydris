@@ -95,7 +95,7 @@ $(document).ready(function() {
   </tr>
         </table>
         <p>
-          <label>Have you read and accepted the <a id="terms" title="{% trans "Terms of Service"%}" href="{% url terms %}" class="iframe">terms of service?</a></label>
+          <label>Have you read and accepted the <a id="terms" title="{% trans "Terms of Service"%}" href="{% url "terms" %}" class="iframe">terms of service?</a></label>
           
           {{ form.tos }} I agree.
           </p> 
@@ -109,7 +109,7 @@ $(document).ready(function() {
     <p>{% trans "Please fill out the form (all fields are required), and your account will be created." %}<br>
     {% trans "You'll then be sent an email with instructions on how to finish your registration." %}</p>
     
-    <p>{% trans "If you already have an account, you can" %} <a href="{% url auth_login %}">{% trans "login here" %}</a>.</p>
+    <p>{% trans "If you already have an account, you can" %} <a href="{% url "auth_login" %}">{% trans "login here" %}</a>.</p>
     
     {% endblock %}
     

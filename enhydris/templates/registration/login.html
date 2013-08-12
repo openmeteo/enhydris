@@ -16,7 +16,7 @@
 {% block extrajs %}
 <script type='text/javascript'>
 $(document).ready(function(){
-    $('a.loginform').attr('href', '{% url auth_login %}')
+    $('a.loginform').attr('href', '{% url "auth_login" %}')
 }
 );
 </script>
@@ -39,7 +39,7 @@ $(document).ready(function(){
 </div>  
 {% endif %}
 
-<form method="post" action="{% url auth_login %}">
+<form method="post" action="{% url "auth_login" %}">
 {% csrf_token %} 
 <table style="margin:auto">
 <tr><td><label for="id_username">{% trans 'Username:' %}</label></td><td>{{ form.username }}</td></tr>
@@ -52,7 +52,7 @@ $(document).ready(function(){
 <input type="submit" value="Login">
 <input type="hidden" name="next" value="{{ next }}">
 </p>
-<a href="{% url password_reset %}" style="font-size:0.9em">Forgot my Password</a>
+<a href="{% url "password_reset" %}" style="font-size:0.9em">Forgot my Password</a>
 </form>
 
 </div>

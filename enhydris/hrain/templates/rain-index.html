@@ -17,7 +17,7 @@
   <td>
   {% for e in group.events %}
       <span style="font-size: {{ e.fontsize }}pt">
-      <a href="{% url enhydris.hrain.views.event e.id %}">{{ e.start_date|date:"Md" }}</a></span>
+      <a href='{% url "enhydris.hrain.views.event" e.id %}'>{{ e.start_date|date:"Md" }}</a></span>
   {% endfor %}
   </td>
 </tr>

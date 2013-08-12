@@ -23,8 +23,8 @@
   </script>
   <script type="text/javascript">
     var STATIC_URL = "{{ STATIC_URL }}";
-    var ENHYDRIS_ROOT_URL = "{% url enhydris.hcore.views.index %}";
-    var BOUND_URL = "{% url enhydris.hcore.views.bound %}";
+    var ENHYDRIS_ROOT_URL = '{% url "enhydris.hcore.views.index" %}';
+    var BOUND_URL = '{% url "enhydris.hcore.views.bound" %}';
     $(document).ready(function() {
 		$("#search_input").placeholder();
 	});
@@ -47,17 +47,17 @@
   <div id="header">
 	<ul id="menu"> 
 		<li class="logo"> 
-			<a href='{% url index %}'>
+			<a href='{% url "index" %}'>
 			<img style="float:left;border:0;" alt="" src="{{ STATIC_URL}}images/menu_left.png" /> 
 			</a>
 		</li> 
-				<li><a href="{% url station_list %}">{% trans "Stations" %}</a> 
+				<li><a href='{% url "station_list" %}'>{% trans "Stations" %}</a> 
 		</li>
-		<li><a href="{% url map_view %}">{% trans "Map" %}</a> 
+		<li><a href='{% url "map_view" %}'>{% trans "Map" %}</a> 
 		</li>
 		<li class="searchContainer"> 
 			<div>
-		    <form id="global-search-form" class="col-6 last" action="{% url station_list %}" method="get">
+		    <form id="global-search-form" class="col-6 last" action='{% url "station_list" %}' method="get">
 		    	<input class="small" id="search_input" type="text" placeholder="search stations" name="q" value="{{ query|escape }}" />
 				<input type="hidden" name="check" value="search" />
 		    </form>
@@ -101,25 +101,25 @@
 			</li>
 			<li id="userinfo">
 			{% with user.username as user_username %}
-            {% trans "Welcome" %}&nbsp;<a href="{% url profiles_profile_detail user_username %}">{{ user_username }}</a>!&nbsp;
+            {% trans "Welcome" %}&nbsp;<a href='{% url "profiles_profile_detail" user_username %}'>{{ user_username }}</a>!&nbsp;
             {% endwith %}
 			</li>
 
-			<li><a href="{% url auth_logout %}?next={{ request.path }}">Logout</a> 
+			<li><a href='{% url "auth_logout" %}?next={{ request.path }}'>Logout</a> 
 			</li> 
 		{% else %}
 			<li style="background:transparent;margin:0;padding:0;">
 			<img style="float:left" alt="" src="{{ STATIC_URL }}images/top_menu_left_bw.png"/>
 			</li>
-			<li><a class="loginform" href="{% url auth_login %}?next={{request.path}}">{% trans "Login" %}</a></li> 
+			<li><a class="loginform" href='{% url "auth_login" %}?next={{request.path}}'>{% trans "Login" %}</a></li> 
 
-			<li><a href="{% url registration_register %}">{% trans "Register" %}</a></li> 
+			<li><a href='{% url "registration_register" %}'>{% trans "Register" %}</a></li> 
 
 
 		{% endif %}
 
 			<li>
-			{% url django.views.i18n.set_language as set_language_url %}
+			{% url "django.views.i18n.set_language" as set_language_url %}
 				<form action="{{ set_language_url }}" method="post">
                                 {% csrf_token %}
 				<p style="display: inline;">

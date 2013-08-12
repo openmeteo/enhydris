@@ -78,7 +78,7 @@
             }
             if(cm[i]['is_vector'])
                 url_params['vector']="true";
-            $.getJSON('{% url timeseries_data %}', url_params, 
+            $.getJSON('{% url "timeseries_data" %}', url_params, 
                 (function(i,j){
                 return function(chart_data){
                 var astatus=true;
@@ -163,7 +163,7 @@
                                      function(){},
                                      function(){
                                          if($("#date_select").hasClass("expArrow"))
-                                             window.location="{% url chartpage_detail page.url_name %}?last="+gup('last');
+                                             window.location="{% url "chartpage_detail" page.url_name %}?last="+gup('last');
                                      });
         var tooltipopts = {
                            position: 'bottom right',
@@ -246,7 +246,7 @@
                              start_pos:from_pos, end_pos:to_pos}; 
             if(cm[i]['is_vector'])
                 urlparams['vector']='true';
-            $.getJSON('{% url timeseries_data %}', urlparams, 
+            $.getJSON('{% url "timeseries_data" %}', urlparams, 
                 (function(i,j){
                 return function(chart_data){
                 var astatus=true;
@@ -409,10 +409,10 @@
     {% endif %}
     <div style="margin: 4px;">
     <p style="display: block; float: left;"><strong>Time span:</strong>&nbsp;&nbsp;
-    {% if page.option_annual %}<a href="{% url chartpage_detail page.url_name %}?last=year" id="year">year</a>&nbsp;{% endif %}
-    {% if page.option_monthly %}<a href="{% url chartpage_detail page.url_name %}?last=month" id="month">month</a>&nbsp;{% endif %}
-    {% if page.option_weekly %}<a href="{% url chartpage_detail page.url_name %}?last=week" id="week">week</a>&nbsp;{% endif %}
-    {% if page.option_daily %}<a href="{% url chartpage_detail page.url_name %}?last=day" id="day">day</a>{% endif %}</p>
+    {% if page.option_annual %}<a href="{% url "chartpage_detail" page.url_name %}?last=year" id="year">year</a>&nbsp;{% endif %}
+    {% if page.option_monthly %}<a href="{% url "chartpage_detail" page.url_name %}?last=month" id="month">month</a>&nbsp;{% endif %}
+    {% if page.option_weekly %}<a href="{% url "chartpage_detail" page.url_name %}?last=week" id="week">week</a>&nbsp;{% endif %}
+    {% if page.option_daily %}<a href="{% url "chartpage_detail" page.url_name %}?last=day" id="day">day</a>{% endif %}</p>
         <p class='date_select' id='date_select' style="margin-left: 3em; margin-bottom: 2.5em; float: left;"></p> 
         <div style="clear: left; border:1px solid gray; padding: 6px; margin: 1.5em 3px; display: none;" id="date_select_form"><p>
         <form action="" method="get">
@@ -447,7 +447,7 @@
                        {% trans "at: " %}<span class="sum" id="last_tstmp{{chart.id}}"></span></p>{% endif %}
                     {% if chart.mainvar.link_to_timeseries %}
                     <p>
-                       <a href={% url enhydris.hcore.views.timeseries_detail chart.mainvar.timeseries.id %}>
+                       <a href={% url "enhydris.hcore.views.timeseries_detail" chart.mainvar.timeseries.id %}>
                        {% trans "Open time series page" %}</a></p>{% endif %}
                     {% if chart.can_zoom %}
                     <p><span id="dragtozoom{{chart.id}}">{%trans "Drag on chart to zoom in" %}</span>

@@ -5,6 +5,6 @@
     {% trans 'Owner: ' %}{{ station.owner }}<br />
     {% if station.is_active %}{% trans 'Active, ' %}{% else %}{% trans 'Not active, ' %}{% endif %}
     {% if station.is_automatic %}{% trans 'Automatic' %}{% else %}{% trans 'Conventional' %}{% endif %}<br />
-    {% url station_detail station.id as station_url %}
+    {% url "station_detail" station.id as station_url %}
     <a href=" {{station_url}} ">{% trans 'Open station details' %}</a>
 </p>

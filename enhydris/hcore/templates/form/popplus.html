@@ -1,6 +1,6 @@
 {% load static %}
 <a
-	 href="{% url model_add field as target %}{{ target }}"
+	 href='{% url "model_add" field as target %}{{ target }}'
 	 class="add-another"
 	 id="add_id_{{ orig_name }}"
 	 onclick="return showAddAnotherPopup(this);">
