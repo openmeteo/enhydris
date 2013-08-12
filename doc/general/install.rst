@@ -7,27 +7,18 @@ Enhydris installation and configuration
 Prerequisites
 =============
 
-===================== =======
-Prerequisite          Version
-===================== =======
-Python                2.6 [1]
-PostgreSQL            8.3 [2]
-PostGIS               1.4 [3]
-psycopg2              2.2 [9]
-setuptools            0.6 [5]
-PIL with freetype     1.1.7 [14]
-Django                1.4 [4]
-django-registration   0.7 [13]
-django-pagination     1.0 [4]
-django-extensions     0.6 [8]
-django-rest-framework 2.2.1 [4]
-south                 0.7 [4]
-django-notify         1.1 [4]
-django-ajax-selects   1.2.5 [4]
-json [10]                   
-Mercurial [11]
-python-markdown
-===================== =======
+===================================================== ============
+Prerequisite                                          Version
+===================================================== ============
+Python                                                2.6 [1]
+PostgreSQL                                            8.4 [2]
+PostGIS                                               1.4 [3]
+psycopg2                                              2.2 [4]
+setuptools                                            0.6 [5]
+pip                                                   1.1 [5]
+PIL with freetype                                     1.1.7 [6]
+The Python modules listed in :file:`requirements.txt` See file [7]
+===================================================== ============
 
 .. admonition:: Note for production installations
 
@@ -38,7 +29,7 @@ python-markdown
 any later 2.x version. Enhydris does not run on Python 3.
 
 [2] Enhydris is known to run on PostgreSQL 8.4 and 9.1, and it should also run
-without problem on PostgreSQL 8.3. In order to avoid possible
+without problem on PostgreSQL 9.2. In order to avoid possible
 incompatibilities with psycopg2, it is better to use the version
 prepackaged by your operating system when running on GNU/Linux, and to
 use the latest PostgreSQL version when running on Windows. If there is
@@ -53,50 +44,41 @@ installation file of PostGIS includes them. Enhydris is known to run
 on PostGIS 1.4 and 1.5. It probably can run on later versions as well.
 It is not known whether it can run on earlier versions.
 
-[4] The table indicates the versions of various Python and Django
-modules on which Enhydris is known to run. Usually it can run on later
-versions as well.
+[4] psycopg2 is listed in :file:`requirements.txt` together with the
+other Python modules. However, in contrast to them, it can be tricky
+to install (because it needs compilation and has a dependency on
+PostgreSQL client libraries), and it is therefore usually better to
+not leave its installation to :command:`pip`. It's better to install a
+prepackaged version for your operating system.
 
-[5] setuptools is needed in order to install the rest of the Python
-modules; Enhydris does not actually need it.
+[5] setuptools and pip are needed in order to install the rest of the
+Python modules; Enhydris does not actually need it.
 
-[8] Enhydris is also known to run on earlier django-extensions;
-however, some tests fail in that case.
-
-[9] Because of a `Django bug`_ which is present in Django versions up
-to and including 1.3, tests fail on psycopg2 2.4.2 or later. Therefore
-you should either use Django 1.4 or later, or psycopg2 no later than
-2.4.1, or not expect the tests to run.
-
-.. _Django bug: https://code.djangoproject.com/ticket/16250
-
-[10] json is included in Python 2.6 or later.
-
-[11] Mercurial is needed in order to download openmeteo software, not
-for running it.
-
-[13] django-registration 0.8 does not work properly with this version of
-enhydris (this may be an enhydris bug).
-
-[14] The Python Imaging Library (PIL) must be compiled with libfreetype
+[6] PIL is listed in :file:`requirements.txt` together with the other
+Python modules. However, in contrast to them, it can be tricky to
+install, and it is therefore usually better to not leave its
+installation to :command:`pip`. It's better to install a prepackaged
+version for your operating system. It must be compiled with libfreetype
 support. This is common in Linux distributions. In Windows, however, the
 `official packages`_ are not thus compiled. One solution is to get the
-unofficial version from http://www.lfd.uci.edu/~gohlke/pythonlibs/.
+unofficial version from http://www.lfd.uci.edu/~gohlke/pythonlibs/. If
+there is any difficulty, Pillow might work instead of PIL.
 
 .. _official packages: http://www.pythonware.com/products/pil/
 
+[7] :file:`requirements.txt` is somewhat conservative with respect to the versions of the modules required; if you have reason to use a different module version than what is described there, try it; it might work. One exception to this is Django; Enhydris does not run on Django versions other than what :file:`requirements.txt` allows.
+
 .. admonition:: Example: Installing prerequisites on Debian/Ubuntu
 
-   These instructions are for Debian squeeze. For Ubuntu they are similar,
+   These instructions are for Debian wheezy. For Ubuntu they are similar,
    except that the postgis package version may be different::
 
-       aptitude install python postgresql postgis postgresql-8.4-postgis \
-           python-psycopg2 python-setuptools mercurial python-markdown \
-           python-pip python-imaging
-       pip install django==1.4.2 django-registration==0.7 \
-           "django-pagination>=1.0,<1.1" django-extensions==0.6 \
-           djangorestframework==2.2.1 south==0.7 django-notify==1.1 \
-           "django-ajax-selects>=1.2,<1.3"
+       aptitude install python postgresql postgis postgresql-9.1-postgis \
+           python-psycopg2 python-setuptools git python-pip python-imaging
+       pip install -r requirements.txt
+
+   It is a good idea to use a virtualenv before running the second
+   command, but you are on your own with that, sorry.
 
 .. admonition:: Example: Installing prerequisites on Windows
 
@@ -109,11 +91,12 @@ unofficial version from http://www.lfd.uci.edu/~gohlke/pythonlibs/.
       OSGeo4W_, but we haven't tried it. So, if you face installation
       problems, we won't be able to help (unless you provide funding).
 
-      Also note that we don't think Enhydris can easily run on 64-bit
-      Python or 64-bit PostgreSQL; the 32-bit versions of everything
-      should be installed. This is because many prerequisites are not
-      available in 64-bit versions, or they may be difficult to
-      install. Such dependencies are PostGIS and some Python packages.
+      Also note that we don't think Enhydris on Windows can easily run
+      on 64-bit Python or 64-bit PostgreSQL; the 32-bit versions of
+      everything should be installed. This is because some
+      prerequisites are not available for Windows in 64-bit versions,
+      or they may be difficult to install. Such dependencies are
+      PostGIS and some Python packages.
 
       That said, we provide instructions below on how it should (in
       theory) be installed. If you choose to use OSGeo4W_, some things
@@ -131,11 +114,11 @@ unofficial version from http://www.lfd.uci.edu/~gohlke/pythonlibs/.
    "System variables" double-click on Path, and add the two new
    directory names at the end, using semicolon to delimit them).
       
-   Download and install an appropriate PostgreSQL version (8.4 and 9.0
-   are known to work) from http://postgresql.org/ (use a binary Windows
-   installer). Important: at some time the installer will create an
-   operating system user and ask you to define a password for that user;
-   keep the password; you will need it later.
+   Download and install an appropriate PostgreSQL version from
+   http://postgresql.org/ (use a binary Windows installer). Important:
+   at some time the installer will create an operating system user and
+   ask you to define a password for that user; keep the password; you
+   will need it later.
 
    Go to Start, All programs, PostgreSQL, Application Stack Builder,
    select your PostgreSQL installation on the first screen, then, on
@@ -153,16 +136,11 @@ unofficial version from http://www.lfd.uci.edu/~gohlke/pythonlibs/.
 
    Download and install PIL from http://www.lfd.uci.edu/~gohlke/pythonlibs/.
 
-   Download and install the Windows Installer package of TortoiseHg
-   with Mercurial from http://mercurial.selenic.com/downloads/.
-
-   Finally, open a Command Prompt and give the following commands::
+   Finally, open a Command Prompt and give the following commands
+   inside the downloaded and unpacked :file:`enhydris` directory::
 
        easy_install pip
-       pip install django==1.4.2 
-       pip install django-registration==0.7 "django-pagination>=1.0,<1.1"
-       pip install django-extensions==0.6 djangorestframework==2.2.1
-       pip install south==0.7 django-notify==1.1 "django-ajax-selects>=1.2,<1.3"
+       pip install -r requirements.txt
 
 Creating a database
 ===================
@@ -431,7 +409,7 @@ all interfaces, use ``0.0.0.0:8088`` instead.
 To use Enhydris in production, you need to setup a web server such as
 apache. This is described in detail in `Deploying Django`_.
 
-.. _deploying django: http://docs.djangoproject.com/en/1.4/howto/deployment/
+.. _deploying django: http://docs.djangoproject.com/en/1.5/howto/deployment/
 
 
 Post-install configuration
@@ -456,7 +434,7 @@ Settings reference
 These are the settings available to Enhydris, in addition to the
 `Django settings`_.
 
-.. _django settings: http://docs.djangoproject.com/en/1.1/ref/settings/
+.. _django settings: http://docs.djangoproject.com/en/1.5/ref/settings/
 
 .. data:: FILTER_DEFAULT_COUNTRY
 

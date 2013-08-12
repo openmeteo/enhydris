@@ -1,3 +1,4 @@
 *.pyc
 enhydris/settings.py
 enhydris/urls.py
+doc/_build
