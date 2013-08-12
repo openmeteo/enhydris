@@ -352,14 +352,14 @@ class StationListView(ListView):
         # django-sorting) sucks. I18N should be in the template, not
         # here (but anyway the whole list needs revising, manual
         # selecting of visible columns, reordering of columns, etc.)
-        context.append(self.column_headings)
+        context.update(self.column_headings)
 
         if self.request.GET.get('check', False) == "search":
             # The case we got a simple search request
             context['search'] = True
-            context['query'] = request.GET.get('q', "")
+            context['query'] = self.request.GET.get('q', "")
             context['terms'] = query_string.split()
-        elif len(request.GET.items()) > 0:
+        elif len(self.request.GET.items()) > 0:
             context['advanced_search'] = True
 
         context['enabled_user_content'] = settings.USERS_CAN_ADD_CONTENT
