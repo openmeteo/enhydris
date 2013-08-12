@@ -1,24 +1,34 @@
-from django.conf.urls import include, patterns
+from django.conf.urls import url, include, patterns
 from django.contrib import admin
 from django.contrib.auth.views import password_reset, password_reset_done
+
+from registration.views import register
+
 from enhydris.hcore.views import terms
+from enhydris.hcore.forms import HcoreRegistrationForm
 
 admin.autodiscover()
 
 urlpatterns = patterns(
     '',
 
+    # Django-registration stuff
+    url(r'^accounts/register/$', register,
+        {'form_class': HcoreRegistrationForm},
+        name='registration_register'),
     (r'^accounts/password/reset/$', password_reset,
      {'template_name': 'registration/password_reset.html'}, 'password_reset'),
     (r'^accounts/password/reset/done/$', password_reset_done,
      {'template_name': 'registration/password_reset_done.html'},
      'password_reset_done'),
     (r'^accounts/', include('registration.backends.default.urls')),
+
     (r'^terms/$', terms, {}, 'terms'),
     (r'^i18n/', include('django.conf.urls.i18n')),
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
     (r'^ajax/', include('ajax_select.urls')),
     (r'^api/', include('enhydris.api.urls')),
+    (r'^captcha/', include('captcha.urls')),
     (r'', include('enhydris.hcore.urls')),
 )

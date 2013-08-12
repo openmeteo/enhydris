@@ -52,6 +52,7 @@ INSTALLED_APPS = (
     'enhydris.sorting',
     'registration',
     'ajax_select',
+    'captcha',
 
     'enhydris.dbsync',
     'enhydris.hcore',
