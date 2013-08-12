@@ -25,7 +25,7 @@ modelnames = (
 def api_root(request, format=None):
     d = {}
     for m in modelnames:
-        d[m] = reverse(m+'-list', request=request, format=format)
+        d[m] = reverse(m + '-list', request=request, format=format)
     return Response(d)
 
 
@@ -80,7 +80,8 @@ class TimeseriesList(generics.ListCreateAPIView):
         other types as well).
         """
         # Get the data
-        serializer = self.get_serializer(data=request.DATA, files=request.FILES)
+        serializer = self.get_serializer(data=request.DATA,
+                                         files=request.FILES)
         if not serializer.is_valid():
             Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -90,8 +91,8 @@ class TimeseriesList(generics.ListCreateAPIView):
         except ValueError:
             raise Http404
         station = get_object_or_404(models.Station, id=gentity_id)
-        if not hasattr(request.user, 'has_row_perm') or not request.user\
-                                                .has_row_perm(station, 'edit'):
+        if not hasattr(request.user, 'has_row_perm') \
+                or not request.user.has_row_perm(station, 'edit'):
             return Response('Forbidden', status=status.HTTP_403_FORBIDDEN)
 
         return super(TimeseriesList, self).post(request, *args, **kwargs)
