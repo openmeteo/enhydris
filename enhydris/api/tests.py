@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 
 from django.test import TestCase
+from django.test.client import MULTIPART_CONTENT, BOUNDARY, encode_multipart
 from django.db import connection
 from pthelma.timeseries import Timeseries
 from enhydris.hcore import models
@@ -77,8 +78,11 @@ class WriteTestCase(TestCase):
 
     def testUploadTsDataUnauthenticated(self):
         # Attempt to upload some timeseries data, unauthenticated
-        response = self.client.put("/api/tsdata/1/",
-            { 'timeseries_records': '2012-11-06 18:17,20,\n' })
+        response = self.client.put(
+            "/api/tsdata/1/",
+            encode_multipart(BOUNDARY,
+                             {'timeseries_records': '2012-11-06 18:17,20,\n'}),
+            content_type=MULTIPART_CONTENT)
         t = Timeseries(1)
         t.read_from_db(connection)
         self.assertEqual(response.status_code, 403)
@@ -87,8 +91,11 @@ class WriteTestCase(TestCase):
     def testUploadTsDataAsWrongUser(self):
         # Attempt to upload some timeseries data as user 2; should deny
         self.assert_(self.client.login(username='user2', password='password2'))
-        response = self.client.put("/api/tsdata/1/",
-            { 'timeseries_records': '2012-11-06 18:17,20,\n' })
+        response = self.client.put(
+            "/api/tsdata/1/",
+            encode_multipart(BOUNDARY,
+                             {'timeseries_records': '2012-11-06 18:17,20,\n'}),
+            content_type=MULTIPART_CONTENT)
         t = Timeseries(1)
         t.read_from_db(connection)
         self.assertEqual(response.status_code, 403)
@@ -97,8 +104,11 @@ class WriteTestCase(TestCase):
 
     def testUploadTsDataGarbage(self):
         self.assert_(self.client.login(username='user1', password='password1'))
-        response = self.client.put("/api/tsdata/1/",
-            { 'timeseries_records': '2012-aa-06 18:17,20,\n' })
+        response = self.client.put(
+            "/api/tsdata/1/",
+            encode_multipart(BOUNDARY,
+                             {'timeseries_records': '2012-aa-06 18:17,20,\n'}),
+            content_type=MULTIPART_CONTENT)
         t = Timeseries(1)
         t.read_from_db(connection)
         self.assertEqual(response.status_code, 400)
@@ -107,8 +117,11 @@ class WriteTestCase(TestCase):
 
     def testUploadTsData(self):
         self.assert_(self.client.login(username='user1', password='password1'))
-        response = self.client.put("/api/tsdata/1/",
-            { 'timeseries_records': '2012-11-06 18:17,20,\n' })
+        response = self.client.put(
+            "/api/tsdata/1/",
+            encode_multipart(BOUNDARY,
+                             {'timeseries_records': '2012-11-06 18:17,20,\n'}),
+            content_type=MULTIPART_CONTENT)
         t = Timeseries(1)
         t.read_from_db(connection)
         self.assertEqual(response.status_code, 200)
@@ -120,8 +133,12 @@ class WriteTestCase(TestCase):
 
         # Append two more records
         self.assert_(self.client.login(username='user1', password='password1'))
-        response = self.client.put("/api/tsdata/1/", { 'timeseries_records': 
-                   '2012-11-06 18:18,21,\n2012-11-07 18:18,23,\n' })
+        response = self.client.put(
+            "/api/tsdata/1/",
+            encode_multipart(BOUNDARY,
+                             {'timeseries_records':
+                              '2012-11-06 18:18,21,\n2012-11-07 18:18,23,\n' }),
+            content_type=MULTIPART_CONTENT)
         t = Timeseries(1)
         t.read_from_db(connection)
         self.assertEqual(response.status_code, 200)
@@ -137,8 +154,11 @@ class WriteTestCase(TestCase):
 
         # Try to append an earlier record; should fail
         self.assert_(self.client.login(username='user1', password='password1'))
-        response = self.client.put("/api/tsdata/1/",
-            { 'timeseries_records': '2012-11-05 18:18,21,\n' })
+        response = self.client.put(
+            "/api/tsdata/1/",
+            encode_multipart(BOUNDARY,
+                             {'timeseries_records': '2012-11-05 18:18,21,\n'}),
+            content_type=MULTIPART_CONTENT)
         self.client.logout()
         t = Timeseries(1)
         t.read_from_db(connection)
