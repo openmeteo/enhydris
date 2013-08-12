@@ -1035,7 +1035,7 @@ def _station_edit_or_create(request,station_id=None):
             if not station_id:
                 station_id = str(station.id)
             return HttpResponseRedirect(reverse('station_detail',
-                                kwargs={'object_id':station_id}))
+                                kwargs={'pk':station_id}))
     else:
         if station:
             form = StationForm(instance=station,
