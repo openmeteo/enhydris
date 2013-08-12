@@ -7,6 +7,8 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 from ajax_select.fields import AutoCompleteSelectMultipleField
+from captcha.fields import CaptchaField
+from registration.forms import RegistrationFormTermsOfService
 
 from pthelma import timeseries
 from enhydris.hcore.widgets import SelectWithPop
@@ -494,3 +496,10 @@ class TimeseriesDataForm(TimeseriesForm):
             required=False,
             choices=(('A', 'Append to existing'),
                      ('O', 'Overwrite existing'),))
+
+
+class RegistrationForm(RegistrationFormTermsOfService):
+    """
+    Extension of the default registration form to include a captcha
+    """
+    captcha = CaptchaField()
