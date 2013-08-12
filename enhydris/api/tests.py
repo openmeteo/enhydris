@@ -4,6 +4,7 @@ import json
 from django.test import TestCase
 from django.test.client import MULTIPART_CONTENT, BOUNDARY, encode_multipart
 from django.db import connection
+
 from pthelma.timeseries import Timeseries
 from enhydris.hcore import models
 
@@ -28,31 +29,31 @@ class WriteTestCase(TestCase):
                                     content_type='application/json')
         self.assertEqual(response.status_code, 403)
         self.assertEqual(models.Timeseries.objects.filter(
-                                    name='Test Timeseries 1221').count(), 0)
+                         name='Test Timeseries 1221').count(), 0)
 
         # Now try again, this time logged on as user 2; again should deny
         self.assert_(self.client.login(username='user2', password='password2'))
         response = self.client.post("/api/Timeseries/", data=d,
-                                            content_type='application/json')
+                                    content_type='application/json')
         self.assertEqual(response.status_code, 403)
         self.assertEqual(models.Timeseries.objects.filter(
-                                    name='Test Timeseries 1221').count(), 0)
+                         name='Test Timeseries 1221').count(), 0)
         self.client.logout()
 
         # Now try again, this time logged on as user 1; should accept
         self.assert_(self.client.login(username='user1', password='password1'))
         response = self.client.post("/api/Timeseries/", data=d,
-                                            content_type='application/json')
+                                    content_type='application/json')
         self.assertEqual(response.status_code, 201)
         self.assertEqual(models.Timeseries.objects.filter(
-                                    name='Test Timeseries 1221').count(), 1)
+                         name='Test Timeseries 1221').count(), 1)
         self.client.logout()
 
     def testTimeseriesDelete(self):
         # Check the number of timeseries available
         ntimeseries = models.Timeseries.objects.count()
-        assert(ntimeseries > 1) # 1 is not enough; we need to know we aren't
-                                # deleting more than necessary.
+        assert(ntimeseries > 1)  # 1 is not enough; we need to know we aren't
+                                 # deleting more than necessary.
 
         # Attempt to delete unauthenticated - should fail
         response = self.client.delete("/api/Timeseries/1/")
@@ -73,7 +74,7 @@ class WriteTestCase(TestCase):
         response = self.client.delete("/api/Timeseries/1/")
         self.assertEqual(response.status_code, 204)
         self.assertEqual(models.Timeseries.objects.filter(pk=1).count(), 0)
-        self.assertEqual(models.Timeseries.objects.count(), ntimeseries-1)
+        self.assertEqual(models.Timeseries.objects.count(), ntimeseries - 1)
         self.client.logout()
 
     def testUploadTsDataUnauthenticated(self):
@@ -137,7 +138,7 @@ class WriteTestCase(TestCase):
             "/api/tsdata/1/",
             encode_multipart(BOUNDARY,
                              {'timeseries_records':
-                              '2012-11-06 18:18,21,\n2012-11-07 18:18,23,\n' }),
+                              '2012-11-06 18:18,21,\n2012-11-07 18:18,23,\n'}),
             content_type=MULTIPART_CONTENT)
         t = Timeseries(1)
         t.read_from_db(connection)
