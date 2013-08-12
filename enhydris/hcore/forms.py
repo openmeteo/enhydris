@@ -21,12 +21,13 @@ from enhydris.hcore.models import (
 class OverseerForm(ModelForm):
 
     station_objects = Station.objects.all()
-    if len(settings.SITE_STATION_FILTER)>0:
-        station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
-    station = forms.ModelChoiceField(station_objects,label='Station',
+    if len(settings.SITE_STATION_FILTER) > 0:
+        station_objects = station_objects.filter(
+            **settings.SITE_STATION_FILTER)
+    station = forms.ModelChoiceField(station_objects, label='Station',
                                      empty_label=None)
     person = forms.ModelChoiceField(Person.objects,
-                                widget=SelectWithPop(model_name='person'))
+                                    widget=SelectWithPop(model_name='person'))
 
     class Meta:
         model = Overseer
@@ -38,24 +39,24 @@ class OverseerForm(ModelForm):
 
         if user and not user.is_superuser:
             perms = user.get_rows_with_permission(Station(), 'edit')
-            ids = [ p.object_id for p in perms]
+            ids = [p.object_id for p in perms]
             self.fields["station"].queryset = Station.objects.filter(
-                                                id__in=ids)
+                id__in=ids)
         if gentity_id:
             self.fields["station"].queryset = Station.objects.filter(
-                                                id=gentity_id)
-
+                id=gentity_id)
 
 
 class GentityFileForm(ModelForm):
 
     station_objects = Station.objects.all()
-    if len(settings.SITE_STATION_FILTER)>0:
-        station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
-    gentity = forms.ModelChoiceField(station_objects,label='Station',
+    if len(settings.SITE_STATION_FILTER) > 0:
+        station_objects = station_objects.filter(
+            **settings.SITE_STATION_FILTER)
+    gentity = forms.ModelChoiceField(station_objects, label='Station',
                                      empty_label=None)
-    file_type = forms.ModelChoiceField(FileType.objects,
-                                widget=SelectWithPop(model_name='filetype'))
+    file_type = forms.ModelChoiceField(
+        FileType.objects, widget=SelectWithPop(model_name='filetype'))
 
     class Meta:
         model = GentityFile
@@ -67,23 +68,26 @@ class GentityFileForm(ModelForm):
 
         if user and not user.is_superuser:
             perms = user.get_rows_with_permission(Station(), 'edit')
-            ids = [ p.object_id for p in perms]
+            ids = [p.object_id for p in perms]
             self.fields["gentity"].queryset = Station.objects.filter(
-                                                id__in=ids)
+                id__in=ids)
         if gentity_id:
             self.fields["gentity"].queryset = Station.objects.filter(
-                                                id=gentity_id)
+                id=gentity_id)
 
 
 class GentityGenericDataForm(ModelForm):
 
     station_objects = Station.objects.all()
-    if len(settings.SITE_STATION_FILTER)>0:
-        station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
-    gentity = forms.ModelChoiceField(station_objects,label='Station',
+    if len(settings.SITE_STATION_FILTER) > 0:
+        station_objects = station_objects.filter(
+            **settings.SITE_STATION_FILTER)
+    gentity = forms.ModelChoiceField(station_objects, label='Station',
                                      empty_label=None)
-    data_type = forms.ModelChoiceField(GentityGenericDataType.objects, label='Data type',
-                                widget=SelectWithPop(model_name='gentitygenericdatatype'))
+    data_type = forms.ModelChoiceField(
+        GentityGenericDataType.objects,
+        label='Data type',
+        widget=SelectWithPop(model_name='gentitygenericdatatype'))
 
     class Meta:
         model = GentityGenericData
@@ -95,22 +99,25 @@ class GentityGenericDataForm(ModelForm):
 
         if user and not user.is_superuser:
             perms = user.get_rows_with_permission(Station(), 'edit')
-            ids = [ p.object_id for p in perms]
+            ids = [p.object_id for p in perms]
             self.fields["gentity"].queryset = Station.objects.filter(
-                                                id__in=ids)
+                id__in=ids)
         if gentity_id:
             self.fields["gentity"].queryset = Station.objects.filter(
-                                                id=gentity_id)
+                id=gentity_id)
+
 
 class GentityAltCodeForm(ModelForm):
 
     station_objects = Station.objects.all()
-    if len(settings.SITE_STATION_FILTER)>0:
-        station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
-    gentity = forms.ModelChoiceField(station_objects,label='Station',
+    if len(settings.SITE_STATION_FILTER) > 0:
+        station_objects = station_objects.filter(
+            **settings.SITE_STATION_FILTER)
+    gentity = forms.ModelChoiceField(station_objects, label='Station',
                                      empty_label=None)
-    type = forms.ModelChoiceField(GentityAltCodeType.objects,
-                      widget=SelectWithPop(model_name='gentityaltcodetype'))
+    type = forms.ModelChoiceField(
+        GentityAltCodeType.objects,
+        widget=SelectWithPop(model_name='gentityaltcodetype'))
 
     class Meta:
         model = GentityAltCode
@@ -122,23 +129,24 @@ class GentityAltCodeForm(ModelForm):
 
         if user and not user.is_superuser:
             perms = user.get_rows_with_permission(Station(), 'edit')
-            ids = [ p.object_id for p in perms]
+            ids = [p.object_id for p in perms]
             self.fields["gentity"].queryset = Station.objects.filter(
-                                                id__in=ids)
+                id__in=ids)
         if gentity_id:
             self.fields["gentity"].queryset = Station.objects.filter(
-                                                id=gentity_id)
+                id=gentity_id)
 
 
 class GentityEventForm(ModelForm):
 
     station_objects = Station.objects.all()
-    if len(settings.SITE_STATION_FILTER)>0:
-        station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
-    gentity = forms.ModelChoiceField(station_objects,label='Station',
+    if len(settings.SITE_STATION_FILTER) > 0:
+        station_objects = station_objects.filter(
+            **settings.SITE_STATION_FILTER)
+    gentity = forms.ModelChoiceField(station_objects, label='Station',
                                      empty_label=None)
-    type = forms.ModelChoiceField(EventType.objects,
-                                widget=SelectWithPop(model_name='eventtype'))
+    type = forms.ModelChoiceField(
+        EventType.objects, widget=SelectWithPop(model_name='eventtype'))
 
     class Meta:
         model = GentityEvent
@@ -150,12 +158,12 @@ class GentityEventForm(ModelForm):
 
         if user and not user.is_superuser:
             perms = user.get_rows_with_permission(Station(), 'edit')
-            ids = [ p.object_id for p in perms]
+            ids = [p.object_id for p in perms]
             self.fields["gentity"].queryset = Station.objects.filter(
-                                                id__in=ids)
+                id__in=ids)
         if gentity_id:
             self.fields["gentity"].queryset = Station.objects.filter(
-                                                id=gentity_id)
+                id=gentity_id)
 
 
 class GentityForm(ModelForm):
@@ -193,17 +201,17 @@ class GpointForm(GentityForm):
         super(GpointForm, self).clean()
         return cleaned_data
 
-    def save(self, commit=True, *args,**kwargs):
+    def save(self, commit=True, *args, **kwargs):
 
-        gpoint = super(GpointForm,self).save(commit=False)
+        gpoint = super(GpointForm, self).save(commit=False)
         abscissa = self.cleaned_data['abscissa']
         ordinate = self.cleaned_data['ordinate']
         srid = self.cleaned_data['srid']
 
-        if (abscissa == None) or (ordinate == None):
+        if (abscissa is None) or (ordinate is None):
             gpoint.point = None
         else:
-            if srid == None:
+            if srid is None:
                 srid = 4326
             gpoint.point = Point(x=abscissa, y=ordinate, srid=srid)
 
@@ -212,6 +220,7 @@ class GpointForm(GentityForm):
             gpoint.save()
 
         return gpoint
+
 
 class StationForm(GpointForm, GentityForm):
     """
@@ -226,39 +235,47 @@ class StationForm(GpointForm, GentityForm):
     """
     class Meta:
         model = Station
-        exclude = ('overseers','creator','point')
+        exclude = ('overseers', 'creator', 'point')
 
-    political_division = forms.ModelChoiceField(PoliticalDivision.objects,
-                                widget=SelectWithPop(model_name='politicaldivision'),required=False)
-    water_basin = forms.ModelChoiceField(WaterBasin.objects,
-                                widget=SelectWithPop(model_name='waterbasin'),required=False)
-    water_division = forms.ModelChoiceField(WaterDivision.objects,
-                                widget=SelectWithPop(model_name='waterdivision'),required=False)
+    political_division = forms.ModelChoiceField(
+        PoliticalDivision.objects,
+        widget=SelectWithPop(model_name='politicaldivision'),
+        required=False)
+    water_basin = forms.ModelChoiceField(
+        WaterBasin.objects,
+        widget=SelectWithPop(model_name='waterbasin'),
+        required=False)
+    water_division = forms.ModelChoiceField(
+        WaterDivision.objects,
+        widget=SelectWithPop(model_name='waterdivision'),
+        required=False)
     # owner should be modified to allow either Person or Organization add
-    owner = forms.ModelChoiceField(Lentity.objects,
-                                widget=SelectWithPop(model_name='lentity'))
+    owner = forms.ModelChoiceField(
+        Lentity.objects, widget=SelectWithPop(model_name='lentity'))
 
-
-    if hasattr(settings, 'USERS_CAN_ADD_CONTENT')\
-        and settings.USERS_CAN_ADD_CONTENT:
-            maintainers = AutoCompleteSelectMultipleField('maintainers',
-                                                         required=False)
+    if settings.USERS_CAN_ADD_CONTENT:
+        maintainers = AutoCompleteSelectMultipleField(
+            'maintainers', required=False)
 
     def clean_altitude(self):
         value = self.cleaned_data['altitude']
-        if not value == None and (value > 8850 or value < -422):
-            raise forms.ValidationError(_("%f is not a valid altitude") %
-            (value,))
+        if not value is None and (value > 8850 or value < -422):
+            raise forms.ValidationError(
+                _("%f is not a valid altitude") % (value,))
         return self.cleaned_data['altitude']
+
 
 class InstrumentForm(ModelForm):
     station_objects = Station.objects.all()
-    if len(settings.SITE_STATION_FILTER)>0:
-        station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
+    if len(settings.SITE_STATION_FILTER) > 0:
+        station_objects = station_objects.filter(
+            **settings.SITE_STATION_FILTER)
     station = forms.ModelChoiceField(station_objects, label='Stations',
                                      empty_label=None)
-    type = forms.ModelChoiceField(InstrumentType.objects,
-                                widget=SelectWithPop(model_name='instrumenttype'))
+    type = forms.ModelChoiceField(
+        InstrumentType.objects,
+        widget=SelectWithPop(model_name='instrumenttype'))
+
     class Meta:
         model = Instrument
 
@@ -269,17 +286,18 @@ class InstrumentForm(ModelForm):
 
         if user and not user.is_superuser:
             perms = user.get_rows_with_permission(Station(), 'edit')
-            ids = [ p.object_id for p in perms]
+            ids = [p.object_id for p in perms]
             self.fields["station"].queryset = Station.objects.filter(
-                                                id__in=ids)
+                id__in=ids)
         if gentity_id:
             self.fields["station"].queryset = Station.objects.filter(
-                                                id=gentity_id)
+                id=gentity_id)
 
 
 def _int_xor(i1, i2):
     """Return True if one and only one of i1 and i2 is zero."""
     return (i1 or i2) and not (i1 and i2)
+
 
 class TimeStepForm(ModelForm):
     """
@@ -289,7 +307,6 @@ class TimeStepForm(ModelForm):
     class Meta:
         model = TimeStep
 
-
     def clean(self):
         """
         This clean function ensures that length minutes and length months have
@@ -298,9 +315,9 @@ class TimeStepForm(ModelForm):
         length_minutes = self.cleaned_data.get('length_minutes', None)
         length_months = self.cleaned_data.get('length_months', None)
         if not _int_xor(length_minutes, length_months):
-            raise forms.ValidationError(_("Invalid timestep: exactly one of"
-                    " minutes and months must be zero"))
-
+            raise forms.ValidationError(
+                _("Invalid timestep: exactly one of"
+                  " minutes and months must be zero"))
         return self.cleaned_data
 
 
@@ -310,24 +327,33 @@ class TimeseriesForm(ModelForm):
     which a user may upload additional data.
     """
 
-    gentity = forms.ModelChoiceField(Gentity.objects.all(),empty_label=None,
-                                label='Station')
-    instrument = forms.ModelChoiceField(Instrument.objects.all(),
-                                required=False, label='Instrument')
-    variable = forms.ModelChoiceField(Variable.objects,
-                                widget=SelectWithPop(model_name='variable'))
-    unit_of_measurement = forms.ModelChoiceField(UnitOfMeasurement.objects,
-                                widget=SelectWithPop(model_name='unitofmeasurement'))
-    time_zone = forms.ModelChoiceField(TimeZone.objects,
-                                widget=SelectWithPop(model_name='timezone'))
-    time_step = forms.ModelChoiceField(TimeStep.objects,
-                                widget=SelectWithPop(model_name='timestep'),required=False)
-    interval_type = forms.ModelChoiceField(IntervalType.objects, required=False)
-
+    gentity = forms.ModelChoiceField(
+        Gentity.objects.all(),
+        empty_label=None,
+        label='Station')
+    instrument = forms.ModelChoiceField(
+        Instrument.objects.all(),
+        required=False,
+        label='Instrument')
+    variable = forms.ModelChoiceField(
+        Variable.objects,
+        widget=SelectWithPop(model_name='variable'))
+    unit_of_measurement = forms.ModelChoiceField(
+        UnitOfMeasurement.objects,
+        widget=SelectWithPop(model_name='unitofmeasurement'))
+    time_zone = forms.ModelChoiceField(
+        TimeZone.objects,
+        widget=SelectWithPop(model_name='timezone'))
+    time_step = forms.ModelChoiceField(
+        TimeStep.objects,
+        widget=SelectWithPop(model_name='timestep'),
+        required=False)
+    interval_type = forms.ModelChoiceField(
+        IntervalType.objects,
+        required=False)
 
     class Meta:
         model = Timeseries
-
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -337,23 +363,22 @@ class TimeseriesForm(ModelForm):
 
         if user and not user.is_superuser:
             perms = user.get_rows_with_permission(Station(), 'edit')
-            ids = [ p.object_id for p in perms]
+            ids = [p.object_id for p in perms]
             self.fields["gentity"].queryset = Station.objects.filter(
-                                                id__in=ids)
+                id__in=ids)
             perms = user.get_rows_with_permission(Instrument(), 'edit')
-            ids = [ p.object_id for p in perms]
+            ids = [p.object_id for p in perms]
             self.fields["instrument"].queryset = Instrument.objects.filter(
-                                                id__in=ids)
+                id__in=ids)
         if gentity_id:
             self.fields["gentity"].queryset = Station.objects.filter(
-                                                id=gentity_id)
+                id=gentity_id)
             self.fields["instrument"].queryset = Instrument.objects.filter(
-                                                station__id=gentity_id)
+                station__id=gentity_id)
         if instrument_id:
             self.fields["instrument"].queryset = Instrument.objects.filter(
-                                                id=instrument_id)
+                id=instrument_id)
             self.fields["instrument"].empty_label = None
-
 
     def clean_data(self):
         # Check if file contains valid timeseries data.
@@ -374,43 +399,41 @@ class TimeseriesForm(ModelForm):
         inconsistencies.
         """
         time_step = self.cleaned_data.get('time_step', None)
-        nominal_offset_minutes = self.cleaned_data.get('nominal_offset_minutes',
-                                                             None)
-        nominal_offset_months = self.cleaned_data.get('nominal_offset_months',
-                                                             None)
-        actual_offset_minutes = self.cleaned_data.get('actual_offset_minutes',
-                                                             None)
-        actual_offset_months = self.cleaned_data.get('actual_offset_months',
-                                                             None)
+        nominal_offset_minutes = self.cleaned_data.get(
+            'nominal_offset_minutes', None)
+        nominal_offset_months = self.cleaned_data.get(
+            'nominal_offset_months', None)
+        actual_offset_minutes = self.cleaned_data.get(
+            'actual_offset_minutes', None)
+        actual_offset_months = self.cleaned_data.get(
+            'actual_offset_months', None)
 
         if not time_step:
-            if nominal_offset_minutes or \
-                nominal_offset_months or \
-                actual_offset_minutes or \
-                actual_offset_months:
-                    raise forms.ValidationError(_("Invalid Timestep: If time step is"
-                                           " null, the offsets must also be null!"))
-
+            if nominal_offset_minutes or nominal_offset_months or \
+                    actual_offset_minutes or actual_offset_months:
+                raise forms.ValidationError(
+                    _("Invalid Timestep: If time step is"
+                      " null, the offsets must also be null!"))
         else:
-            if actual_offset_minutes is None \
-                or actual_offset_months is None:
-                raise forms.ValidationError(_("Invalid offset: If time step is"
-                         " not null, actual offset values must be provided!"))
-
-            if (nominal_offset_minutes is None \
-              and nominal_offset_months is not None) \
-              or (nominal_offset_minutes is not None \
-              and nominal_offset_months is None):
-                raise forms.ValidationError(_("Invalid offsets: Nominal"
-                              " offsets must be both null or both not null!"))
+            if actual_offset_minutes is None or actual_offset_months is None:
+                raise forms.ValidationError(
+                    _("Invalid offset: If time step is"
+                      " not null, actual offset values must be provided!"))
+            if (nominal_offset_minutes is None
+                and nominal_offset_months is not None) \
+                    or (nominal_offset_minutes is not None
+                        and nominal_offset_months is None):
+                raise forms.ValidationError(
+                    _("Invalid offsets: Nominal"
+                      " offsets must be both null or both not null!"))
 
         #add a validation test for instrument in station:
         instr = self.cleaned_data.get('instrument', None)
         if instr:
             stat = self.cleaned_data.get('gentity', None)
             assert(stat)
-            if Instrument.objects.filter(id=instr.id, 
-                                         station__id=stat.id).count()<1:
+            if Instrument.objects.filter(id=instr.id,
+                                         station__id=stat.id).count() < 1:
                 raise forms.ValidationError(_("Selected instrument "
                                               "not in selected station"))
 
@@ -433,9 +456,9 @@ class TimeseriesForm(ModelForm):
 
         return self.cleaned_data
 
-    def save(self, commit=True, *args,**kwargs):
+    def save(self, commit=True, *args, **kwargs):
 
-        tseries = super(TimeseriesForm,self).save(commit=False)
+        tseries = super(TimeseriesForm, self).save(commit=False)
 
         # This may not be a good idea !
         if commit:
@@ -451,7 +474,7 @@ class TimeseriesForm(ModelForm):
                 # ts.append_to_db(db.connection, commit=False)
             else:
                 afilename = os.path.join(settings.TS_GRAPH_CACHE_DIR,
-                                            '%d.hts' % int(self.instance.id))
+                                         '%d.hts' % int(self.instance.id))
                 if os.path.exists(afilename):
                     os.remove(afilename)
                 ts.write_to_db(db.connection, commit=False)
@@ -464,11 +487,10 @@ class TimeseriesDataForm(TimeseriesForm):
     Additional timeseries form to present the data upload fields
     """
     if hasattr(settings, 'STORE_TSDATA_LOCALLY') and\
-        settings.STORE_TSDATA_LOCALLY:
+            settings.STORE_TSDATA_LOCALLY:
         data = forms.FileField(required=False)
-        data_policy = forms.ChoiceField(label=_('New data policy'),
-                                        required=False,
-                                        choices=(('A','Append to existing'),
-                                             ('O','Overwrite existing'),))
-
-
+        data_policy = forms.ChoiceField(
+            label=_('New data policy'),
+            required=False,
+            choices=(('A', 'Append to existing'),
+                     ('O', 'Overwrite existing'),))
