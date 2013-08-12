@@ -40,7 +40,6 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.staticfiles',
     'django.contrib.markup',
-    'grappelli',
     'django.contrib.admin',
     'django.contrib.sites',
     'django.contrib.humanize',

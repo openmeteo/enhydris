@@ -24,7 +24,6 @@ django-rest-framework 2.2.1 [4]
 south                 0.7 [4]
 django-notify         1.1 [4]
 django-ajax-selects   1.2.5 [4]
-grapelli              2.2 [7]
 json [10]                   
 Mercurial [11]
 python-markdown
@@ -61,11 +60,6 @@ versions as well.
 [5] setuptools is needed in order to install the rest of the Python
 modules; Enhydris does not actually need it.
 
-[7] Enhydris currently does not run on grappelli versions later than
-2.2. Since there are no means to download grappelli other than using
-subversion, we have made an :command:`easy_install`-able grappelli
-available for download at http://openmeteo.org/downloads/.
-
 [8] Enhydris is also known to run on earlier django-extensions;
 however, some tests fail in that case.
 
@@ -75,30 +69,6 @@ you should either use Django 1.4 or later, or psycopg2 no later than
 2.4.1, or not expect the tests to run.
 
 .. _Django bug: https://code.djangoproject.com/ticket/16250
-
-.. admonition:: Note for maintainers
-
-   To create the :command:`easy_install`-able grappelli, do this::
-
-      cd /tmp
-      svn co  http://django-grappelli.googlecode.com/svn/tags/releases/2.2/ grappelli-2.2
-      cd grappelli-2.2
-      cat >setup.py <<EOF1
-      #!/usr/bin/python
-      from setuptools import setup, find_packages
-
-      setup(
-          name = "grappelli",
-          version = "2.2",
-          license = "BSD",
-          description = "A jazzy skin for the Django admin",
-          author = "sehmaschine et al.",
-          packages = find_packages(),
-      )
-      EOF1
-      chmod 755 setup.py
-      ./setup.py bdist_egg
-      scp dist/* root@openmeteo.org:/var/www/openmeteo.org/downloads/
 
 [10] json is included in Python 2.6 or later.
 
@@ -127,7 +97,6 @@ unofficial version from http://www.lfd.uci.edu/~gohlke/pythonlibs/.
            "django-pagination>=1.0,<1.1" django-extensions==0.6 \
            djangorestframework==2.2.1 south==0.7 django-notify==1.1 \
            "django-ajax-selects>=1.2,<1.3"
-       easy_install --no-deps https://openmeteo.org/downloads/grappelli-2.2-py2.6.egg
 
 .. admonition:: Example: Installing prerequisites on Windows
 
@@ -194,14 +163,6 @@ unofficial version from http://www.lfd.uci.edu/~gohlke/pythonlibs/.
        pip install django-registration==0.7 "django-pagination>=1.0,<1.1"
        pip install django-extensions==0.6 djangorestframework==2.2.1
        pip install south==0.7 django-notify==1.1 "django-ajax-selects>=1.2,<1.3"
-       easy_install --no-deps https://openmeteo.org/downloads/grappelli-2.2-py2.6.egg
-
-..
-    FIXME: Put this in the appropriate place and clarify
-    You also need the ``media`` folder inside grappelli to be served from
-    the webserver so that all admin media files needed can be loaded. If
-    you're running a development server checkout the ``--adminmedia``
-    option.
 
 Creating a database
 ===================
