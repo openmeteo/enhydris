@@ -1150,7 +1150,7 @@ def _timeseries_edit_or_create(request,tseries_id=None):
             if not tseries_id:
                 tseries_id=str(tseries.id)
             return HttpResponseRedirect(reverse('timeseries_detail',
-                                        kwargs={'object_id':tseries_id}))
+                                        kwargs={'pk':tseries_id}))
     else:
         if tseries and tseries.id:
             form = TimeseriesDataForm(instance=tseries, user=user,
