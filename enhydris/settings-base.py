@@ -45,7 +45,6 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'django.contrib.gis',
 
-    'django_extensions',
     'rest_framework',
     'south',
     'pagination',
