@@ -25,7 +25,6 @@ Contributed applications:
    :maxdepth: 1
 
    contrib/dbsync
-   contrib/contact
    contrib/permissions
 
 Indices and tables
