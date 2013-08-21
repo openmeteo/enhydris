@@ -3,7 +3,6 @@ import os
 from django import forms, db
 from django.contrib.gis.geos import Point
 from django.forms import ModelForm
-from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 from ajax_select.fields import AutoCompleteSelectMultipleField
@@ -11,6 +10,7 @@ from captcha.fields import CaptchaField
 from registration.forms import RegistrationFormTermsOfService
 
 from pthelma import timeseries
+from enhydris.conf import settings
 from enhydris.hcore.widgets import SelectWithPop
 from enhydris.hcore.models import (
     Station, Instrument, Person, Overseer, FileType, GentityFile,
@@ -23,9 +23,9 @@ from enhydris.hcore.models import (
 class OverseerForm(ModelForm):
 
     station_objects = Station.objects.all()
-    if len(settings.SITE_STATION_FILTER) > 0:
+    if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
         station_objects = station_objects.filter(
-            **settings.SITE_STATION_FILTER)
+            **settings.ENHYDRIS_SITE_STATION_FILTER)
     station = forms.ModelChoiceField(station_objects, label='Station',
                                      empty_label=None)
     person = forms.ModelChoiceField(Person.objects,
@@ -52,9 +52,9 @@ class OverseerForm(ModelForm):
 class GentityFileForm(ModelForm):
 
     station_objects = Station.objects.all()
-    if len(settings.SITE_STATION_FILTER) > 0:
+    if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
         station_objects = station_objects.filter(
-            **settings.SITE_STATION_FILTER)
+            **settings.ENHYDRIS_SITE_STATION_FILTER)
     gentity = forms.ModelChoiceField(station_objects, label='Station',
                                      empty_label=None)
     file_type = forms.ModelChoiceField(
@@ -81,9 +81,9 @@ class GentityFileForm(ModelForm):
 class GentityGenericDataForm(ModelForm):
 
     station_objects = Station.objects.all()
-    if len(settings.SITE_STATION_FILTER) > 0:
+    if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
         station_objects = station_objects.filter(
-            **settings.SITE_STATION_FILTER)
+            **settings.ENHYDRIS_SITE_STATION_FILTER)
     gentity = forms.ModelChoiceField(station_objects, label='Station',
                                      empty_label=None)
     data_type = forms.ModelChoiceField(
@@ -112,9 +112,9 @@ class GentityGenericDataForm(ModelForm):
 class GentityAltCodeForm(ModelForm):
 
     station_objects = Station.objects.all()
-    if len(settings.SITE_STATION_FILTER) > 0:
+    if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
         station_objects = station_objects.filter(
-            **settings.SITE_STATION_FILTER)
+            **settings.ENHYDRIS_SITE_STATION_FILTER)
     gentity = forms.ModelChoiceField(station_objects, label='Station',
                                      empty_label=None)
     type = forms.ModelChoiceField(
@@ -142,9 +142,9 @@ class GentityAltCodeForm(ModelForm):
 class GentityEventForm(ModelForm):
 
     station_objects = Station.objects.all()
-    if len(settings.SITE_STATION_FILTER) > 0:
+    if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
         station_objects = station_objects.filter(
-            **settings.SITE_STATION_FILTER)
+            **settings.ENHYDRIS_SITE_STATION_FILTER)
     gentity = forms.ModelChoiceField(station_objects, label='Station',
                                      empty_label=None)
     type = forms.ModelChoiceField(
@@ -255,7 +255,7 @@ class StationForm(GpointForm, GentityForm):
     owner = forms.ModelChoiceField(
         Lentity.objects, widget=SelectWithPop(model_name='lentity'))
 
-    if settings.USERS_CAN_ADD_CONTENT:
+    if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
         maintainers = AutoCompleteSelectMultipleField(
             'maintainers', required=False)
 
@@ -269,9 +269,9 @@ class StationForm(GpointForm, GentityForm):
 
 class InstrumentForm(ModelForm):
     station_objects = Station.objects.all()
-    if len(settings.SITE_STATION_FILTER) > 0:
+    if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
         station_objects = station_objects.filter(
-            **settings.SITE_STATION_FILTER)
+            **settings.ENHYDRIS_SITE_STATION_FILTER)
     station = forms.ModelChoiceField(station_objects, label='Stations',
                                      empty_label=None)
     type = forms.ModelChoiceField(
@@ -475,7 +475,7 @@ class TimeseriesForm(ModelForm):
                 pass
                 # ts.append_to_db(db.connection, commit=False)
             else:
-                afilename = os.path.join(settings.TS_GRAPH_CACHE_DIR,
+                afilename = os.path.join(settings.ENHYDRIS_TS_GRAPH_CACHE_DIR,
                                          '%d.hts' % int(self.instance.id))
                 if os.path.exists(afilename):
                     os.remove(afilename)
@@ -488,8 +488,7 @@ class TimeseriesDataForm(TimeseriesForm):
     """
     Additional timeseries form to present the data upload fields
     """
-    if hasattr(settings, 'STORE_TSDATA_LOCALLY') and\
-            settings.STORE_TSDATA_LOCALLY:
+    if settings.ENHYDRIS_STORE_TSDATA_LOCALLY:
         data = forms.FileField(required=False)
         data_policy = forms.ChoiceField(
             label=_('New data policy'),

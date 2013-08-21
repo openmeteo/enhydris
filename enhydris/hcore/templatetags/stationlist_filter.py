@@ -1,6 +1,6 @@
 import string
 from django.template import Library
-from django.conf import settings
+from enhydris.conf import settings
 from enhydris.hcore.models import *
 
 register = Library()
@@ -42,12 +42,12 @@ def filter_table(request, help_inline):
     subdiv1 = 'Sub Division 1'
     subdiv2 = 'Sub Division 2'
     country = ''
-    if hasattr(settings, 'FILTER_POLITICAL_SUBDIVISION1_NAME'):
-        subdiv1 = settings.FILTER_POLITICAL_SUBDIVISION1_NAME
-    if hasattr(settings, 'FILTER_POLITICAL_SUBDIVISION2_NAME'):
-        subdiv2 = settings.FILTER_POLITICAL_SUBDIVISION2_NAME
-    if hasattr(settings, 'FILTER_DEFAULT_COUNTRY'):
-        country = settings.FILTER_DEFAULT_COUNTRY
+    if settings.ENHYDRIS_FILTER_POLITICAL_SUBDIVISION1_NAME:
+        subdiv1 = settings.ENHYDRIS_FILTER_POLITICAL_SUBDIVISION1_NAME
+    if settings.ENHYDRIS_FILTER_POLITICAL_SUBDIVISION2_NAME:
+        subdiv2 = settings.ENHYDRIS_FILTER_POLITICAL_SUBDIVISION2_NAME
+    if settings.ENHYDRIS_FILTER_DEFAULT_COUNTRY:
+        country = settings.ENHYDRIS_FILTER_DEFAULT_COUNTRY
     vars = {'political_division':
                 PoliticalDivision.objects.filter(parent=None),
             'district': [],

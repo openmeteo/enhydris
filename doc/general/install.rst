@@ -387,15 +387,15 @@ These are the settings available to Enhydris, in addition to the
 
 .. _django settings: http://docs.djangoproject.com/en/1.5/ref/settings/
 
-.. data:: FILTER_DEFAULT_COUNTRY
+.. data:: ENHYDRIS_FILTER_DEFAULT_COUNTRY
 
    When a default country is specified, the station search is locked
    within that country and the station search filter allows only searches
    in the selected country. If left blank, the filter allows all
    countries to be included in the search.
 
-.. data:: FILTER_POLITICAL_SUBDIVISION1_NAME
-.. data:: FILTER_POLITICAL_SUBDIVISION2_NAME 
+.. data:: ENHYDRIS_FILTER_POLITICAL_SUBDIVISION1_NAME
+.. data:: ENHYDRIS_FILTER_POLITICAL_SUBDIVISION2_NAME 
 
    These are used only if :data:`FILTER_DEFAULT_COUNTRY` is set. They
    are the names of the first and the second level of political
@@ -403,46 +403,42 @@ These are the settings available to Enhydris, in addition to the
    divided in 'districts', then in 'prefecture', whereas the USA is
    first divided in 'states', then in 'counties'.
 
-.. data:: GENTITYFILE_DIR
-
-   This is the directory that all gentity files will be uploaded to and
-   consequently served from. The default for this is
-   ``/site_media/gentityfile/``.
-
-.. data:: USERS_CAN_ADD_CONTENT
+.. data:: ENHYDRIS_USERS_CAN_ADD_CONTENT
 
    This must be configured before syncing the database. If set to
    ``True``, it enables all logged in users to add content to the site
    (stations, instruments and timeseries). It enables the use of user
    space forms which are available to all registered users and also
-   allows editing existing data. When set to ``False``, only
-   privileged users are allowed to add/edit/remove data from the db.
+   allows editing existing data. When set to ``False`` (the default),
+   only privileged users are allowed to add/edit/remove data from the
+   db.
 
-.. data:: SITE_CONTENT_IS_FREE
+.. data:: ENHYDRIS_SITE_CONTENT_IS_FREE
 
    If this is set to ``True``, all registered users have access to the
-   timeseries and can download timeseries data. If set to ``False``,
-   the users may be restricted.
+   timeseries and can download timeseries data. If set to ``False``
+   (the default), the users may be restricted.
 
 
-.. data:: TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS
+.. data:: ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS
 
    Setting this option to ``True`` will enable all users to download
-   timeseries data without having to login first.
+   timeseries data without having to login first. The default is
+   ``False``.
 
-.. data:: STORE_TSDATA_LOCALLY
+.. data:: ENHYDRIS_STORE_TSDATA_LOCALLY
 
-   This options controls whether this specific instance can store
-   timeseries data locally. When set to ``True``, users can upload
-   timeseries data to the site (possibly priviliged users, depending
-   on :data:`USERS_CAN_ADD_CONTENT`).  If set to ``False``, the instance
-   is configured to act as a data aggregator of other instances. This
-   means that timeseries data are not stored locally and users cannot
-   upload data in this instance. This is used to serve existing data
-   from other instances which are aggregated using the
-   ``hcore_remotesyncdb`` management command.
+   **Deprecated.**
 
-.. data:: REMOTE_INSTANCE_CREDENTIALS 
+   By default, this is ``True``. If set to ``False``, the installation
+   does not store the actual time series records. The purpose of this
+   setting is to be used together with the `dbsync` application, in
+   order to create a website that contains the collected data (except
+   time series records) of several other Enhydris installations (see
+   the ``hcore_remotesyncdb`` management command).
+   However, all this is under reconsideration.
+
+.. data:: ENHYDRIS_REMOTE_INSTANCE_CREDENTIALS 
 
    If the instance is configured as a data aggregator and doesn't have
    the actual data locally stored, in order to fetch the data from
@@ -451,16 +447,16 @@ These are the settings available to Enhydris, in addition to the
    instances can be configured using this setting, each with its own
    user/pass combination following this scheme::
 
-      REMOTE_INSTANCE_CREDENTIALS = {
+      ENHYDRIS_REMOTE_INSTANCE_CREDENTIALS = {
         'kyy.hydroscope.gr': ('myusername','mypassword'),
         'itia.hydroscope.gr': ('anotheruser','anotherpass')
       }
 
-.. data:: USE_OPEN_LAYERS
+.. data:: ENHYDRIS_USE_OPEN_LAYERS
 
    Set this to :const:`False` to disable the map.
 
-.. data:: MIN_VIEWPORT_IN_DEGS
+.. data:: ENHYDRIS_MIN_VIEWPORT_IN_DEGS
 
    Set a value in degrees. When a geographical query has bounds with
    dimensions less than :data:`MIN_VIEWPORT_IN_DEGS`, the map will have at
@@ -468,7 +464,7 @@ These are the settings available to Enhydris, in addition to the
    a single entity, such as a hydrometeorological station. Default
    value is 0.04, corresponding to an area approximately 4×4 km.
 
-.. data:: MAP_DEFAULT_VIEWPORT
+.. data:: ENHYDRIS_MAP_DEFAULT_VIEWPORT
 
    A tuple containing the default viewport for the map in geographical
    coordinates, in cases of geographical queries that do not return
@@ -476,22 +472,22 @@ These are the settings available to Enhydris, in addition to the
    lat is in decimal degrees, positive for north/east, negative for
    west/south.
 
-.. data:: TS_GRAPH_CACHE_DIR
+.. data:: ENHYDRIS_TS_GRAPH_CACHE_DIR
 
    The directory in which timeseries graphs are cached. It is
    automatically created if it does not exist. The default is
    subdirectory :file:`enhydris-timeseries-graphs` of the system or
    user temporary directory.
 
-.. data:: TS_GRAPH_BIG_STEP_DENOMINATOR
-          TS_GRAPH_FINE_STEP_DENOMINATOR
+.. data:: ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR
+          ENHYDRIS_TS_GRAPH_FINE_STEP_DENOMINATOR
 
    Chart options for time series details page. The big step represents
    the max num of data points to be plotted, default is 200. The fine
    step are the max num of points between main data points to search
    for a maxima, default is 50. 
 
-.. data:: SITE_STATION_FILTER
+.. data:: ENHYDRIS_SITE_STATION_FILTER
 
    This is a quick-and-dirty way to create a web site that only
    displays a subset of an Enhydris database. For example, the
@@ -499,20 +495,9 @@ These are the settings available to Enhydris, in addition to the
    http://openmeteo.org/db/; however, the former only shows stations
    relevant to the Deucalion project, because it has this setting::
 
-      SITE_STATION_FILTER = {'owner__id__exact': '9'}
+      ENHYDRIS_SITE_STATION_FILTER = {'owner__id__exact': '9'}
 
-.. data:: STORE_TSDATA_LOCALLY
-
-   **Deprecated.**
-
-   By default, this is ``True``. If set to ``False``, the installation
-   does not store the actual time series records. The purpose of this
-   setting is to be used together with the `dbsync` application, in
-   order to create a website that contains the collected data (except
-   time series records) of several other Enhydris installations.
-   However, all this is under reconsideration.
-
-.. data:: DISPLAY_COPYRIGHT_INFO
+.. data:: ENHYDRIS_DISPLAY_COPYRIGHT_INFO
 
    If ``True``, the station detail page shows copyright information
    for the station. By default, it is ``False``. If all the stations

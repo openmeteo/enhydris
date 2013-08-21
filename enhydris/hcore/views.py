@@ -24,7 +24,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.shortcuts import render_to_kml
 from django.contrib.gis.geos import Polygon
 from django.contrib import messages
-from django.conf import settings
 from django.db.models import Q
 from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
@@ -36,6 +35,7 @@ from django.db.models import Count
 from pthelma.timeseries import Timeseries as TTimeseries
 from pthelma.timeseries import datetime_from_iso
 
+from enhydris.conf import settings
 from enhydris.hcore.models import *
 from enhydris.hcore.decorators import *
 from enhydris.hcore.forms import *
@@ -58,14 +58,6 @@ def index(request):
         context_instance=RequestContext(request))
 
 
-def protect_gentityfile(request):
-    """
-    This view is used to disallow users to be able to browse through the
-    uploaded gentity files which is the default behaviour of django.
-    """
-    raise Http404
-
-
 class StationDetailView(DetailView):
 
     model = Station
@@ -74,18 +66,18 @@ class StationDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(StationDetailView, self).get_context_data(**kwargs)
         anonymous_can_download_data = \
-            settings.TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS
-        display_copyright = settings.DISPLAY_COPYRIGHT_INFO
+            settings.ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS
+        display_copyright = settings.ENHYDRIS_DISPLAY_COPYRIGHT_INFO
         chart_exists = False
         if 'enhydris.hchartpages' in settings.INSTALLED_APPS:
             from enhydris.hchartpages.models import ChartPage
             chart_exists = ChartPage.objects.filter(
                 url_int_alias=self.object.id).exists()
-        use_open_layers = settings.USE_OPEN_LAYERS and \
+        use_open_layers = settings.ENHYDRIS_USE_OPEN_LAYERS and \
             self.object.srid and self.object.point
         context.update(
             {"owner": self.object.owner,
-             "enabled_user_content": settings.USERS_CAN_ADD_CONTENT,
+             "enabled_user_content": settings.ENHYDRIS_USERS_CAN_ADD_CONTENT,
              "use_open_layers": use_open_layers,
              "anonymous_can_download_data": anonymous_can_download_data,
              "display_copyright": display_copyright,
@@ -326,8 +318,8 @@ class StationListView(ListView):
         # code sucks and needs to be rewritten.)
 
         # Apply SITE_STATION_FILTER.
-        if len(settings.SITE_STATION_FILTER) > 0:
-            result = result.filter(**settings.SITE_STATION_FILTER)
+        if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
+            result = result.filter(**settings.ENHYDRIS_SITE_STATION_FILTER)
 
         # Only stations with timeseries?
         if self.request.GET.get("ts_only", False):
@@ -346,7 +338,7 @@ class StationListView(ListView):
     def get_context_data(self, **kwargs):
 
         context = super(StationListView, self).get_context_data(**kwargs)
-        context['use_open_layers'] = settings.USE_OPEN_LAYERS
+        context['use_open_layers'] = settings.ENHYDRIS_USE_OPEN_LAYERS
 
         # The following is a hack because enhydris.sorting (aka
         # django-sorting) sucks. I18N should be in the template, not
@@ -362,7 +354,7 @@ class StationListView(ListView):
         elif len(self.request.GET.items()) > 0:
             context['advanced_search'] = True
 
-        context['enabled_user_content'] = settings.USERS_CAN_ADD_CONTENT
+        context['enabled_user_content'] = settings.ENHYDRIS_USERS_CAN_ADD_CONTENT
 
         return context
 
@@ -477,10 +469,10 @@ def timeseries_data(request, *args, **kwargs):
             object_id = int(request.GET['object_id'])
         except ValueError:
             raise Http404
-        afilename = os.path.join(settings.TS_GRAPH_CACHE_DIR,
-                                                    '%d.hts'%(object_id,))
-        update_ts_temp_file(settings.TS_GRAPH_CACHE_DIR, django.db.connection,
-                                                                    object_id)
+        afilename = os.path.join(settings.ENHYDRIS_TS_GRAPH_CACHE_DIR,
+                                 '%d.hts'%(object_id,))
+        update_ts_temp_file(settings.ENHYDRIS_TS_GRAPH_CACHE_DIR,
+                            django.db.connection, object_id)
         chart_data = []
         if request.GET.has_key('start_pos') and request.GET.has_key('end_pos'):
             start_pos = int(request.GET['start_pos'])
@@ -517,10 +509,10 @@ def timeseries_data(request, *args, **kwargs):
             else:
                 start_pos= 1
         length = end_pos - start_pos + 1
-        step = int(length/settings.TS_GRAPH_BIG_STEP_DENOMINATOR) or 1
-        fine_step= int(step/settings.TS_GRAPH_FINE_STEP_DENOMINATOR) or 1
+        step = int(length/settings.ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR) or 1
+        fine_step= int(step/settings.ENHYDRIS_TS_GRAPH_FINE_STEP_DENOMINATOR) or 1
         if not step%fine_step==0:
-            step = fine_step * settings.TS_GRAPH_FINE_STEP_DENOMINATOR
+            step = fine_step * settings.ENHYDRIS_TS_GRAPH_FINE_STEP_DENOMINATOR
         pos=start_pos
         amax=''
         prev_pos=-1
@@ -604,10 +596,10 @@ class TimeseriesDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(TimeseriesDetailView, self).get_context_data(**kwargs)
         context['related_station'] = self.object.related_station
-        context['enabled_user_content'] = settings.USERS_CAN_ADD_CONTENT
-        context['display_copyright'] = settings.DISPLAY_COPYRIGHT_INFO
+        context['enabled_user_content'] = settings.ENHYDRIS_USERS_CAN_ADD_CONTENT
+        context['display_copyright'] = settings.ENHYDRIS_DISPLAY_COPYRIGHT_INFO
         context['anonymous_can_download_data'] = \
-            settings.TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS
+            settings.ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS
         return context
 
 
@@ -619,7 +611,7 @@ class InstrumentDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(InstrumentDetailView, self).get_context_data(**kwargs)
         context['related_station'] = self.object.station
-        context['enabled_user_content'] = settings.USERS_CAN_ADD_CONTENT
+        context['enabled_user_content'] = settings.ENHYDRIS_USERS_CAN_ADD_CONTENT
         context['timeseries'] = Timeseries.objects.filter(
             instrument__id=self.object.id)
         return context
@@ -627,12 +619,12 @@ class InstrumentDetailView(DetailView):
 
 def embedmap_view(request, *args, **kwargs):
     return render_to_response('embedmap.html', 
-                              {'use_open_layers': settings.USE_OPEN_LAYERS,},
+                              {'use_open_layers': settings.ENHYDRIS_USE_OPEN_LAYERS,},
         context_instance=RequestContext(request))
 
 def map_view(request, *args, **kwargs):
     return render_to_response('map_page.html', 
-                              {'use_open_layers': settings.USE_OPEN_LAYERS,},
+                              {'use_open_layers': settings.ENHYDRIS_USE_OPEN_LAYERS,},
         context_instance=RequestContext(request))
 
 def get_subdivision(request, division_id):
@@ -671,8 +663,7 @@ def download_gentityfile(request, gf_id):
     content to the user.
     """
 
-    if hasattr(settings, "STORE_TSDATA_LOCALLY") and\
-      settings.STORE_TSDATA_LOCALLY:
+    if settings.ENHYDRIS_STORE_TSDATA_LOCALLY:
         gfile = get_object_or_404(GentityFile, pk=int(gf_id))
         try:
             filename = gfile.content.file.name
@@ -695,10 +686,6 @@ def download_gentityfile(request, gf_id):
 
         gfile = get_object_or_404(GentityFile, pk=int(gf_id))
 
-        # Read the creds from the settings file
-        REMOTE_INSTANCE_CREDENTIALS = getattr(settings,
-                'REMOTE_INSTANCE_CREDENTIALS', {})
-
         # Get the original GentityFile id and the source database
         if gfile.original_id and gfile.original_db:
             gf_id = gfile.original_id
@@ -708,8 +695,9 @@ def download_gentityfile(request, gf_id):
                     " the requested Gentity file.")
             return HttpResponseRedirect(request.META.get('HTTP_REFERER', None) or '/')
 
-        # Next we check the setting files for a uname/pass for this host
-        uname, pwd = REMOTE_INSTANCE_CREDENTIALS.get(db_host, (None,None))
+        # Next we check the setting for a uname/pass for this host
+        uname, pwd = settings.ENHYDRIS_REMOTE_INSTANCE_CREDENTIALS.get(
+            db_host, (None, None))
 
         # We craft the url
         url = 'http://'+db_host + '/api/gfdata/' + str(gf_id)
@@ -825,8 +813,7 @@ def download_timeseries(request, object_id):
 
     # Check whether this instance has local store enabled or else we need to
     # fetch ts data from remote instance
-    if hasattr(settings, 'STORE_TSDATA_LOCALLY') and\
-        settings.STORE_TSDATA_LOCALLY:
+    if settings.ENHYDRIS_STORE_TSDATA_LOCALLY:
 
         t = timeseries # nickname, because we use it much in next statement
         ts = TTimeseries(
@@ -859,10 +846,6 @@ def download_timeseries(request, object_id):
         """
         import urllib2, re, base64
 
-        # Read the creds from the settings file
-        REMOTE_INSTANCE_CREDENTIALS = getattr(settings,
-                'REMOTE_INSTANCE_CREDENTIALS', {})
-
         # Get the original timeseries id and the source database
         if timeseries.original_id and timeseries.original_db:
             ts_id = timeseries.original_id
@@ -874,7 +857,8 @@ def download_timeseries(request, object_id):
                                 or reverse('timeseries_detail',args=[timeseries.id]))
 
         # Next we check the setting files for a uname/pass for this host
-        uname, pwd = REMOTE_INSTANCE_CREDENTIALS.get(db_host, (None,None))
+        uname, pwd = settings.ENHYDRIS_REMOTE_INSTANCE_CREDENTIALS.get(
+            db_host, (None, None))
 
         # We craft the url
         url = 'http://'+db_host + '/api/tsdata/' + str(ts_id)
@@ -951,7 +935,7 @@ def download_timeseries(request, object_id):
 
 @timeseries_permission
 def timeseries_bottom(request, object_id):
-    if not settings.STORE_TSDATA_LOCALLY:
+    if not settings.ENHYDRIS_STORE_TSDATA_LOCALLY:
         raise Http404
     ts = TTimeseries(id = int(object_id))
     ts.read_from_db(django.db.connection, bottom_only=True)
@@ -1017,8 +1001,7 @@ def _station_edit_or_create(request,station_id=None):
                 forms_validated+=1
         if form.is_valid() and forms_validated == len(formsets):
             station = form.save()
-            if hasattr(settings, 'USERS_CAN_ADD_CONTENT')\
-                and settings.USERS_CAN_ADD_CONTENT:
+            if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
                     # Make creating user the station creator
                     if not station_id:
                         station.creator = request.user
@@ -1823,8 +1806,8 @@ def kml(request, layer):
     try:
         getparams = clean_kml_request(request.GET.items())
         station_objects = Station.objects.all()
-        if len(settings.SITE_STATION_FILTER)>0:
-            station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
+        if len(settings.ENHYDRIS_SITE_STATION_FILTER)>0:
+            station_objects = station_objects.filter(**settings.ENHYDRIS_SITE_STATION_FILTER)
         queryres = station_objects.filter(point__isnull=False)
         if getparams.has_key('check') and getparams['check']=='search':
             query_string = request.GET.get('q', request.GET.get('Q', ""))
@@ -1867,8 +1850,8 @@ def bound(request):
     agentity_id = request.GET.get('gentity_id', request.GET.get('GENTITY_ID', None));
     getparams = clean_kml_request(request.GET.items())
     station_objects = Station.objects.all()
-    if len(settings.SITE_STATION_FILTER)>0:
-        station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
+    if len(settings.ENHYDRIS_SITE_STATION_FILTER)>0:
+        station_objects = station_objects.filter(**settings.ENHYDRIS_SITE_STATION_FILTER)
     queryres = station_objects
     if getparams.has_key('check') and getparams['check']=='search':
         query_string = request.GET.get('q', request.GET.get('Q', ""))
@@ -1915,13 +1898,15 @@ def bound(request):
         queryres = tmpset.exclude(tsnum=0)
     if queryres.count()<1:
         return HttpResponse(','.join([str(e) for e in\
-                            settings.MAP_DEFAULT_VIEWPORT]), mimetype='text/plain')
+                            settings.ENHYDRIS_MAP_DEFAULT_VIEWPORT]),
+                            mimetype='text/plain')
     try:
         extent = list(queryres.extent())
     except TypeError:
         return HttpResponse(','.join([str(e) for e in\
-                            settings.MAP_DEFAULT_VIEWPORT]), mimetype='text/plain')
-    min_viewport = settings.MIN_VIEWPORT_IN_DEGS
+                            settings.ENHYDRIS_MAP_DEFAULT_VIEWPORT]),
+                            mimetype='text/plain')
+    min_viewport = settings.ENHYDRIS_MIN_VIEWPORT_IN_DEGS
     min_viewport_half = 0.5*min_viewport
     if abs(extent[2]-extent[0])<min_viewport:
         extent[2]+=min_viewport_half

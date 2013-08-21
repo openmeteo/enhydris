@@ -1,7 +1,7 @@
-from django.conf import settings
 from django.conf.urls import patterns, url
 from django.views.generic.detail import DetailView
 
+from enhydris.conf import settings
 from enhydris.hcore import views
 
 urlpatterns = patterns(
@@ -48,9 +48,6 @@ urlpatterns = patterns(
     (r'^gentitygenericdata/(?P<gg_id>\d+)/download/$',
      views.download_gentitygenericdata, {}, 'gentitygenericdata_dl'),
 
-    (r'^site_media/' + settings.GENTITYFILE_DIR + '/.*$',
-     views.protect_gentityfile, {}, ''),
-
     (r'^(?P<layer>[^/]+)/kml/$',
      views.kml, {}),
 
@@ -58,7 +55,7 @@ urlpatterns = patterns(
 )
 
 # If users can modify content, enable these views
-if settings.USERS_CAN_ADD_CONTENT:
+if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
     urlpatterns += patterns(
         '',
 

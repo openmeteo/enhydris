@@ -1,14 +1,14 @@
-from django.conf import settings
 from django.contrib.auth.models import User, Group, Permission
 from django.test import TestCase
 from django.utils.unittest import skipUnless
 
+from enhydris.conf import settings
 from enhydris.hcore.views import ALLOWED_TO_EDIT
 from enhydris.hcore.models import *
 
 
-@skipUnless(settings.USERS_CAN_ADD_CONTENT,
-            'USERS_CAN_ADD_CONTENT is False')
+@skipUnless(settings.ENHYDRIS_USERS_CAN_ADD_CONTENT,
+            'ENHYDRIS_USERS_CAN_ADD_CONTENT is False')
 class OpenVTestCase(TestCase):
     """
     Test that the behaviour of the site when USERS_CAN_ADD_CONTENT is set to

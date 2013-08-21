@@ -10,11 +10,11 @@ from enhydris.hprocessor.models import (ProcessBatch, ProcessUnit,
 from pthelma.tsprocess import (MultiTimeseriesProcessDb,
                                AggregateDbTimeseries,
                                InterpolateDbTimeseries) 
-from django.conf import settings
+from enhydris.conf import settings
 
 
 def clear_timeseries_cache(timeseries_id):
-    afilename = os.path.join(settings.TS_GRAPH_CACHE_DIR,
+    afilename = os.path.join(settings.ENHYDRIS_TS_GRAPH_CACHE_DIR,
                              '%d.hts'%int(timeseries_id))
     if os.path.exists(afilename):
         os.remove(afilename)
@@ -73,7 +73,7 @@ def ts_interpolation(job):
 
 
 def ts_cache_update(id):
-    update_ts_temp_file(settings.TS_GRAPH_CACHE_DIR, db.connection, id)
+    update_ts_temp_file(settings.ENHYDRIS_TS_GRAPH_CACHE_DIR, db.connection, id)
 
 
 def process_batch(batch, **options):

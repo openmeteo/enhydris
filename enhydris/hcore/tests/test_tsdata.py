@@ -1,9 +1,9 @@
 import unittest
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection as dj_connection
 from django.test.client import Client
+from enhydris.conf import settings
 from enhydris.hcore.models import *
 from enhydris.hcore.forms import TimeseriesDataForm
 
@@ -67,8 +67,7 @@ class TsTestCase(unittest.TestCase):
         #check downloading
         url= "/timeseries/d/%d/download/" % self.ts.pk
         response = self.client.get(url)
-        if hasattr(settings, 'TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS') and\
-          settings.TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
+        if settings.ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
             self.assertEqual(response.status_code, 200)
         else:
             self.assertEqual(response.status_code, 302)

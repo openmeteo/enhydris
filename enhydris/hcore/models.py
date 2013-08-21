@@ -1,12 +1,12 @@
 from django.db import connection as db_connection
 from django.contrib.gis.db import models
 from django.contrib.auth.models import User, Group
-from django.conf import settings
 from django.db.models.signals import post_syncdb, post_save
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import signals
 from pthelma import timeseries
+from enhydris.conf import settings
 from enhydris.hcore.utils import *
 from enhydris.dbsync.models import Database
 
@@ -277,9 +277,6 @@ class FileType(Lookup):
         if self.mime_type: return self.mime_type
         return str(self.id)
 
-# Where to upload the actual data
-GENTITYFILEDIR = settings.GENTITYFILE_DIR
-
 class GentityFile(models.Model):
     # for db sync issues
     original_id = models.IntegerField(null=True, blank=True, editable=False)
@@ -289,7 +286,7 @@ class GentityFile(models.Model):
     gentity = models.ForeignKey(Gentity)
     date = models.DateField(blank=True, null=True)
     file_type = models.ForeignKey(FileType)
-    content = models.FileField(upload_to=GENTITYFILEDIR)
+    content = models.FileField(upload_to='gentityfile')
     descr = models.CharField(max_length=100)
     remarks = models.TextField(blank=True)
     descr_alt = models.CharField(max_length=100)
@@ -344,21 +341,20 @@ def handle_maintainer_permissions(sender, instance, **kwargs):
     from django.contrib.contenttypes.models import ContentType
 
 
-    if hasattr(settings, 'USERS_CAN_ADD_CONTENT')\
-        and settings.USERS_CAN_ADD_CONTENT:
-            old_perms = Permission.objects.filter(
-                            object_id=instance.pk,
-                            content_type=ContentType.objects.get_for_model(Station))
+    if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
+        old_perms = Permission.objects.filter(
+                        object_id=instance.pk,
+                        content_type=ContentType.objects.get_for_model(Station))
 
-            old_users = [ p.user for p in old_perms ]
-            new_users = instance.maintainers.all()
-            # remove all old perms for maintainers. keep for creator
-            for p in old_perms:
-                if not p.user == instance.creator:
-                    p.delete()
+        old_users = [ p.user for p in old_perms ]
+        new_users = instance.maintainers.all()
+        # remove all old perms for maintainers. keep for creator
+        for p in old_perms:
+            if not p.user == instance.creator:
+                p.delete()
 
-            # add new perms
-            [ u.add_row_perm(instance,'edit') for u in new_users ]
+        # add new perms
+        [ u.add_row_perm(instance,'edit') for u in new_users ]
     else:
         pass
 
@@ -691,9 +687,8 @@ class UserProfile(models.Model):
 
 signals.post_save.connect(user_post_save, User)
 
-if hasattr(settings, 'USERS_CAN_ADD_CONTENT')\
-    and settings.USERS_CAN_ADD_CONTENT:
-        signals.post_save.connect(make_user_editor, User)
+if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
+    signals.post_save.connect(make_user_editor, User)
 
 
 import enhydris.hcore.signals

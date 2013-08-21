@@ -4,8 +4,8 @@ using.
 """
 
 from django.template import Library, Node, TemplateSyntaxError
-from django.conf import settings
 from pyproj import Proj, transform
+from enhydris.conf import settings
 from enhydris.hcore.models import Station
 
 register = Library()

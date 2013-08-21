@@ -3,8 +3,8 @@ These template tags are for counting. Used in the frontpage stats
 """
 
 from django.template import Library, Node, TemplateSyntaxError
-from django.conf import settings
 from django.db.models import get_model
+from enhydris.conf import settings
 from enhydris.hcore.models import *
 
 register = Library()
@@ -28,8 +28,8 @@ class LastModifiedStations(Node):
     def render(self, context):
         try:
             station_objects = Station.objects.all()
-            if len(settings.SITE_STATION_FILTER)>0:
-                station_objects = station_objects.filter(**settings.SITE_STATION_FILTER)
+            if len(settings.ENHYDRIS_SITE_STATION_FILTER)>0:
+                station_objects = station_objects.filter(**settings.ENHYDRIS_SITE_STATION_FILTER)
             latest_stations = station_objects.all().order_by('last_modified').reverse()[:self.number]
         except ValueError:
             latest_stations = None
