@@ -17,7 +17,8 @@ psycopg2                                              2.2 [4]
 setuptools                                            0.6 [5]
 pip                                                   1.1 [5]
 PIL with freetype                                     1.1.7 [6]
-The Python modules listed in :file:`requirements.txt` See file [7]
+Dickinson                                             0.1.0 [7]
+The Python modules listed in :file:`requirements.txt` See file [8]
 ===================================================== ============
 
 .. admonition:: Note for production installations
@@ -68,18 +69,37 @@ difficulty, Pillow might work instead of PIL.
 
 .. _official packages: http://www.pythonware.com/products/pil/
 
-[7] :file:`requirements.txt` is somewhat conservative with respect to the versions of the modules required; if you have reason to use a different module version than what is described there, try it; it might work. One exception to this is Django; Enhydris does not run on Django versions other than what :file:`requirements.txt` allows.
+[7] Dickinson_ is not required directly by Enhydris, but by pthelma_,
+which is required by Enhydris and is listed in
+:file:`requirements.txt`.
+
+.. _dickinson: http://dickinson.readthedocs.org/
+.. _pthelma: http://pthelma.readthedocs.org/
+
+[8] :file:`requirements.txt` is somewhat conservative with respect to the versions of the modules required; if you have reason to use a different module version than what is described there, try it; it might work. One exception to this is Django; Enhydris does not run on Django versions other than what :file:`requirements.txt` allows.
 
 .. admonition:: Example: Installing prerequisites on Debian/Ubuntu
 
    These instructions are for Debian wheezy. For Ubuntu they are similar,
-   except that the postgis package version may be different::
+   except that the postgis package version may be different:
 
-       aptitude install python postgresql postgis postgresql-9.1-postgis \
-           python-psycopg2 python-setuptools git python-pip python-imaging
-       pip install -r requirements.txt
+   .. code-block:: sh
 
-   It is a good idea to use a virtualenv before running the second
+      aptitude install python postgresql postgis postgresql-9.1-postgis \
+          python-psycopg2 python-setuptools git python-pip python-imaging
+
+      # Install Dickinson
+      cd /tmp
+      wget https://github.com/openmeteo/dickinson/archive/0.1.0.tar.gz
+      tar xzf 0.1.0.tar.gz
+      cd dickinson-0.1.0
+      ./configure
+      make
+      sudo make install
+
+      pip install -r requirements.txt
+
+   It is a good idea to use a virtualenv before running the last
    command, but you are on your own with that, sorry.
 
 .. admonition:: Example: Installing prerequisites on Windows
@@ -137,6 +157,10 @@ difficulty, Pillow might work instead of PIL.
    that corresponds to your Python version).
 
    Download and install PIL from http://www.lfd.uci.edu/~gohlke/pythonlibs/.
+
+   Download the latest dickinson DLL from
+   http://openmeteo.org/downloads/ and put it in
+   :file:`C:\\Windows\\System32\\dickinson.dll`.
 
    Finally, open a Command Prompt and give the following commands
    inside the downloaded and unpacked :file:`enhydris` directory::
