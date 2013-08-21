@@ -54,15 +54,17 @@ prepackaged version for your operating system.
 [5] setuptools and pip are needed in order to install the rest of the
 Python modules; Enhydris does not actually need it.
 
-[6] PIL is listed in :file:`requirements.txt` together with the other
-Python modules. However, in contrast to them, it can be tricky to
-install, and it is therefore usually better to not leave its
-installation to :command:`pip`. It's better to install a prepackaged
-version for your operating system. It must be compiled with libfreetype
-support. This is common in Linux distributions. In Windows, however, the
-`official packages`_ are not thus compiled. One solution is to get the
-unofficial version from http://www.lfd.uci.edu/~gohlke/pythonlibs/. If
-there is any difficulty, Pillow might work instead of PIL.
+[6] PIL is not directly required by Enhydris, but by other python
+modules required my Enhydris. In theory, installing the requirements
+listed in :file:`requirements.txt` will indirectly result in
+:command:`pip` installing it.  However, it can be tricky to install,
+and it may be better to not leave its installation to :command:`pip`;
+it's better to install a prepackaged version for your operating
+system. It must be compiled with libfreetype support. This is common
+in Linux distributions. In Windows, however, the `official packages`_
+are not thus compiled. One solution is to get the unofficial version
+from http://www.lfd.uci.edu/~gohlke/pythonlibs/. If there is any
+difficulty, Pillow might work instead of PIL.
 
 .. _official packages: http://www.pythonware.com/products/pil/
 

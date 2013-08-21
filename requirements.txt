@@ -1,5 +1,4 @@
 psycopg2>=2.4.5,<2.5
-pil>=1.1.7,<1.2
 Django>=1.5,<1.6
 django-registration>=1.0,<1.1
 django-pagination>=1.0,<1.1
