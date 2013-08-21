@@ -490,3 +490,33 @@ These are the settings available to Enhydris, in addition to the
    the max num of data points to be plotted, default is 200. The fine
    step are the max num of points between main data points to search
    for a maxima, default is 50. 
+
+.. data:: SITE_STATION_FILTER
+
+   This is a quick-and-dirty way to create a web site that only
+   displays a subset of an Enhydris database. For example, the
+   database of http://deucalionproject.gr/db/ is the same as that of
+   http://openmeteo.org/db/; however, the former only shows stations
+   relevant to the Deucalion project, because it has this setting::
+
+      SITE_STATION_FILTER = {'owner__id__exact': '9'}
+
+.. data:: STORE_TSDATA_LOCALLY
+
+   **Deprecated.**
+
+   By default, this is ``True``. If set to ``False``, the installation
+   does not store the actual time series records. The purpose of this
+   setting is to be used together with the `dbsync` application, in
+   order to create a website that contains the collected data (except
+   time series records) of several other Enhydris installations.
+   However, all this is under reconsideration.
+
+.. data:: DISPLAY_COPYRIGHT_INFO
+
+   If ``True``, the station detail page shows copyright information
+   for the station. By default, it is ``False``. If all the stations
+   in the database belong to one organization, you probably want to
+   leave it to ``False``. If the database is going to be openly
+   accessed and contains data that belongs to many owners, you
+   probably want to set it to ``True``.

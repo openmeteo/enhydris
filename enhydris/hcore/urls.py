@@ -133,10 +133,3 @@ if settings.USERS_CAN_ADD_CONTENT:
         url(r'^add/(?P<model_name>.+)/$', views.ModelAddView.as_view(),
             name='model_add'),
     )
-
-if settings.STATIC_SERVE:
-    urlpatterns += patterns(
-        '',
-        (r'^site_media/(?P<path>.*)$', 'django.views.static.serve',
-         {'document_root': settings.MEDIA_ROOT}),
-    )
