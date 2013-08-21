@@ -245,9 +245,8 @@ Configuring Enhydris
 ====================
 
 In the directory :file:`openmeteo/enhydris`, copy the file
-:file:`settings-example.py` to :file:`settings.py`, and copy the file
-:file:`urls-example.py` to :file:`urls.py`.  Open :file:`settings.py`
-in an editor and make the following changes:
+:file:`settings-example.py` to :file:`settings.py`.  Open
+:file:`settings.py` in an editor and make the following changes:
 
 * Set :data:`ADMINS` to a list of admins (the administrators will get
   all enhydris exceptions by mail and also all user emails, as

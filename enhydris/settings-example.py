@@ -1,16 +1,7 @@
-# Django settings for enhydris project.
-# coding=UTF-8
-from django.utils.translation import ugettext_lazy as _
-import os.path
-
-ENHYDRIS_PROGRAM_DIR = os.path.dirname(__file__)
-
-# Leave following three lines as they are, to import several Django settings.
-execfile(os.path.join(ENHYDRIS_PROGRAM_DIR, 'settings-base.py'))
-
 DEBUG = True
 TEMPLATE_DEBUG = False
-STATIC_SERVE = True
+
+ROOT_URLCONF = 'enhydris.urls'
 
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
@@ -21,9 +12,9 @@ MANAGERS = ADMINS
 DATABASES =  {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'enhydris_test',
-        'USER': 'enhydris',
-        'PASSWORD': 'changeme',
+        'NAME': 'openmeteo',
+        'USER': 'openmeteo',
+        'PASSWORD': 'openmeteo',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -34,70 +25,76 @@ TIME_ZONE = 'Europe/Athens'
 SITE_ID = 1
 SITE_URL = "hydroscope.gr"
 
-MEDIA_ROOT = 'site_media/'
+MEDIA_ROOT = '/tmp'
 MEDIA_URL = '/site_media/'
 STATIC_ROOT = 'static/'
 STATIC_URL = '/enhydris-static/'
 
-GRAPPELLI_ADMIN_TITLE = 'Enhydris Administration'
-
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'yy)g)w2jqkpyv9$w39i9$7(6wb+$h(_+x3gj#=@fzs2tmuj$#='
 
-# GentityFile upload directory (must be relative path and it'll be created
-# under site_media dir)
-GENTITYFILE_DIR = 'gentityfile'
-
-#Uncoment to hide open layers map
-#USE_OPEN_LAYERS = False
-#Uncoment to alter the default value of min viewport
-#MIN_VIEWPORT_IN_DEGS = 0.04
-#Map default area (minlong, minlat, maxlong, maxlat)
-MAP_DEFAULT_VIEWPORT = (19.3, 34.75, 29.65, 41.8)
-
 # Options for django-registration
-ACCOUNT_ACTIVATION_DAYS=7
+ACCOUNT_ACTIVATION_DAYS = 7
 EMAIL_USE_TLS = True
-EMAIL_PORT=587
-EMAIL_HOST='smtp.my.domain'
+EMAIL_PORT = 587
+EMAIL_HOST = 'smtp.my.domain'
 DEFAULT_FROM_EMAIL = 'user@host.domain'
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
-EMAIL_HOST_USER='automaticsender@my.domain'
-EMAIL_HOST_PASSWORD='mypassword'
+EMAIL_HOST_USER = 'automaticsender@my.domain'
+EMAIL_HOST_PASSWORD = 'mypassword'
 
-#Set login redirection as apropriate in the cases
-#of site installed on a subdirectory
-#for http://my.site/my_dir/ set it to /my_dir/
-#LOGIN_REDIRECT_URL='/my_dir/'
-#If you uncomment the above line, please uncomment
-#the line bellow as well to update LOGIN_URL correctly
-#LOGIN_URL=LOGIN_REDIRECT_URL+'accounts/login'
+INSTALLED_APPS = (
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.staticfiles',
+    'django.contrib.markup',
+    'django.contrib.admin',
+    'django.contrib.sites',
+    'django.contrib.humanize',
+    'django.contrib.gis',
 
-#Change SESSION_COOKIE_NAME if more than one django
-#sites on a single domain, or other sites with
-# sessionid is already set (defaul: sessionid)
-#SESSION_COOKIE_NAME='sessionid'
+    'rest_framework',
+    'south',
+    'pagination',
+    'enhydris.sorting',
+    'registration',
+    'ajax_select',
+    'captcha',
 
-#Set custom cookies expiration (default is 2 weeks
-#that is 1209600 seconds).
-#SESSION_COOKIE_AGE=2419200
+    'enhydris.dbsync',
+    'enhydris.hcore',
+    'enhydris.hprocessor',
+    'enhydris.hchartpages',
+    'enhydris.api',
+    'enhydris.permissions',
+)
 
-# Options for political divisions
-FILTER_DEFAULT_COUNTRY= 'GREECE'
-FILTER_POLITICAL_SUBDIVISION1_NAME= _('District')
-FILTER_POLITICAL_SUBDIVISION2_NAME= _('Prefecture')
+MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.transaction.TransactionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.middleware.gzip.GZipMiddleware',
+    'django_notify.middleware.NotificationsMiddleware',
+    'pagination.middleware.PaginationMiddleware',
+    'enhydris.sorting.middleware.SortingMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+)
 
-USERS_CAN_ADD_CONTENT=False
-SITE_CONTENT_IS_FREE=False
-TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS=False
-STORE_TSDATA_LOCALLY=True
+APPEND_SLASH = True
 
-#REMOTE_INSTANCE_CREDENTIALS = {'kyy.hydroscope.gr': ('myusername', 'mypassword')}
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.core.context_processors.request',
+    'django.contrib.auth.context_processors.auth',
+    'django.contrib.messages.context_processors.messages',
+    'django_notify.context_processors.notifications',
+)
 
-#Display copyright information on web pages (station detail and time
-#series detail)
-DISPLAY_COPYRIGHT_INFO=False
-
-#This is a way to filter all station data site_wide with some
-#criteria.
-#SITE_STATION_FILTER = {'owner__id__exact': '9',}
+TEMPLATE_DIRS = ('enhydris/templates',)
