@@ -24,7 +24,6 @@ Contributed applications:
 .. toctree::
    :maxdepth: 1
 
-   contrib/hrain
    contrib/dbsync
    contrib/contact
    contrib/permissions
