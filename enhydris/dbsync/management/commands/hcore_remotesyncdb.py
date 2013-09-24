@@ -520,8 +520,8 @@ class Command(BaseCommand):
                 try:
                     if DB.last_sync and not full:
                         timestamp = urlquote(str(DB.last_sync))
-                        req = urllib2.Request("%sdate/%s/" % (request_url,
-                                                                timestamp))
+                        req = urllib2.Request("%smodified_after/%s/" % (request_url,
+                                                                        timestamp))
                     else:
                         req = urllib2.Request(request_url)
 
