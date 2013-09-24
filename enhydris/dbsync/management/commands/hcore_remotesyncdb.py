@@ -2,8 +2,6 @@
 Management command which takes care of syncing the master db
 """
 
-from __future__ import with_statement
-
 import datetime
 import inspect
 import os
@@ -11,22 +9,19 @@ import re
 import signal
 import sys
 import threading
+import urllib2
 from optparse import make_option
 from socket import socket, gethostbyname, AF_INET, SOCK_STREAM
+
 from django.core import serializers
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 from django.db import models as dj_models
 from django.db.models import get_app
 from django.utils.http import urlquote
+
 from enhydris.dbsync.models import Database
 
-try:
-    import urllib2
-except ImportError:
-    ERRMSG("This script needs urllib2 intalled. Please install it and try"\
-           " again")
-    sys.exit(1)
 
 # Register a signal to catch kbd interrupts and handle them
 def signal_handler(signal, frame):
@@ -35,8 +30,8 @@ def signal_handler(signal, frame):
     """
     MSG("Keyboard Interrupt received. Aborting...")
     gracefull_exit(1)
-
 signal.signal(signal.SIGINT, signal_handler)
+
 
 def gracefull_exit(status):
     """
@@ -65,11 +60,13 @@ def gracefull_exit(status):
     # exit
     sys.exit(status)
 
+
 # This dict holds all outstanding foreign key relations that could not be added
 # during the first transaction. This wil be parsed after the main transaction
 # is commited and all objects are saved in the local db
 
 batch_jobs = {}
+
 
 # A progress indicator just for presentation
 class RotatingThing(threading.Thread):
@@ -164,6 +161,7 @@ def get_models(app, exc_list=None):
 
     return model_list
 
+
 def sort_by_dep(model_list):
     """
     This function sorts a list of models and their dependencies to calculate
@@ -189,6 +187,7 @@ def sort_by_dep(model_list):
                         gracefull_exit(1)
 
     return sorted_list
+
 
 def create_generic_objects(app):
     """
@@ -272,6 +271,7 @@ def create_generic_objects(app):
     transaction.commit()
     transaction.leave_transaction_management()
 
+
 def store_fkeys(app_name, model_list, object, m2m_keys='None'):
     """
     This function iterates through the fields of the deserialized object and
@@ -336,6 +336,7 @@ def store_fkeys(app_name, model_list, object, m2m_keys='None'):
                     #Some attributes don't allow Null. Now what?
                     setattr(object, key, eval('Generic'+go_name))
 
+
 def eval_fkeys(app_name, models):
     """
     This function iterates through all the entries in the ``batch_jobs''
@@ -371,6 +372,7 @@ def eval_fkeys(app_name, models):
 
             item.save()
 
+
 def MSG(msg, verbose=1):
     """
     STDOUT logging function
@@ -378,11 +380,13 @@ def MSG(msg, verbose=1):
     if verbose:
         sys.stdout.write('%s\n' % msg)
 
+
 def ERRMSG(msg, verbosity=1):
     """
     STDERR logging function
     """
     sys.stderr.write('--> ERROR: %s\n' % msg)
+
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
