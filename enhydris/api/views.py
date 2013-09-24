@@ -1,12 +1,15 @@
 from StringIO import StringIO
+
 from django.http import Http404, HttpResponse
 from django.db import connection
 from django.shortcuts import get_object_or_404
+
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
+
 from pthelma.timeseries import Timeseries
 from enhydris.hcore import models
 from enhydris.api.permissions import CanEditOrReadOnly
@@ -27,6 +30,15 @@ def api_root(request, format=None):
     for m in modelnames:
         d[m] = reverse(m + '-list', request=request, format=format)
     return Response(d)
+
+
+class ListAPIView(generics.ListAPIView):
+
+    def get_queryset(self):
+        modified_after = datetime(1900, 1, 1)
+        if 'modified_after' in self.kwargs:
+            modified_after = self.kwargs['modified_after']
+        return self.model.objects.filter(last_modified__gt=modified_after)
 
 
 class Tsdata(APIView):
