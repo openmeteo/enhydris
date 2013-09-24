@@ -5,8 +5,60 @@ from django.test import TestCase
 from django.test.client import MULTIPART_CONTENT, BOUNDARY, encode_multipart
 from django.db import connection
 
+from rest_framework.test import APITestCase
+
 from pthelma.timeseries import Timeseries
 from enhydris.hcore import models
+
+
+def get_gentities_from_fixture():
+    """
+    This function is used internally by ReadTestCase.testGentityList.
+    It gets the fixture data, gets only the gentities from there,
+    flattens it, and converts the datetime field to a datetime. The result
+    should be a list of dictionaries identical to the one the API returns when
+    it is queried for the list of gentities.
+    """
+    fixture_data = json.load(open('enhydris/api/testdata.json'))
+    result = []
+    for item in fixture_data:
+        if item['model'] != 'hcore.gentity':
+            continue
+        nitem = {}
+        nitem['id'] = item['pk']
+        for key in item['fields']:
+            if key == 'model':
+                continue
+            nitem[key] = item['fields'][key]
+            if key == 'last_modified':
+                nitem[key] = datetime.strptime(nitem[key],
+                                               '%Y-%m-%d %H:%M:%S')
+        result.append(nitem)
+    result.sort(key=lambda x: x['id'])
+    return result
+
+
+class ReadTestCase(APITestCase):
+    fixtures = ['enhydris/api/testdata.json']
+
+    def testGentityList(self):
+
+        response = self.client.get("/api/Gentity/")
+        response.data.sort(key=lambda x: x['id'])
+        reference_data = get_gentities_from_fixture()
+        self.assertEqual(response.data, reference_data)
+
+        # Same thing, but test with modified_after
+        n_all_gentities = len(reference_data)
+        for item in reference_data[:]:
+            if item['last_modified'] < datetime(2010, 5, 11):
+                reference_data.remove(item)
+        n_recent_gentities = len(reference_data)
+        self.assertTrue(n_recent_gentities < n_all_gentities)
+        response = self.client.get(
+            '/api/Gentity/modified_after/2010-05-11 00:00/')
+        response.data.sort(key=lambda x: x['id'])
+        self.assertEqual(response.data, reference_data)
 
 
 class WriteTestCase(TestCase):

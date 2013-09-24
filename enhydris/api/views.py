@@ -35,7 +35,7 @@ def api_root(request, format=None):
 class ListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
-        modified_after = datetime(1900, 1, 1)
+        modified_after = '1900-01-01'
         if 'modified_after' in self.kwargs:
             modified_after = self.kwargs['modified_after']
         return self.model.objects.filter(last_modified__gt=modified_after)
