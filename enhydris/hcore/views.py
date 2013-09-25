@@ -99,8 +99,6 @@ def get_search_query(search_terms):
                   Q(water_division__name_alt__icontains=term) |
                   Q(political_division__name__icontains=term) |
                   Q(political_division__name_alt__icontains=term) |
-                  Q(type__descr__icontains=term) |
-                  Q(type__descr_alt__icontains=term) |
                   Q(owner__organization__name__icontains=term) |
                   Q(owner__person__first_name__icontains=term) |
                   Q(owner__person__last_name__icontains=term))
@@ -350,6 +348,7 @@ class StationListView(ListView):
             # The case we got a simple search request
             context['search'] = True
             context['query'] = self.request.GET.get('q', "")
+            query_string = self.request.GET.get('q', "")
             context['terms'] = query_string.split()
         elif len(self.request.GET.items()) > 0:
             context['advanced_search'] = True
