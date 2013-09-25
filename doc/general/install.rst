@@ -13,6 +13,7 @@ Prerequisite                                          Version
 Python                                                2.6 [1]
 PostgreSQL                                            8.4 [2]
 PostGIS                                               1.4 [3]
+GDAL                                                  1.9
 psycopg2                                              2.2 [4]
 setuptools                                            0.6 [5]
 pip                                                   1.1 [5]
@@ -86,7 +87,8 @@ which is required by Enhydris and is listed in
    .. code-block:: sh
 
       aptitude install python postgresql postgis postgresql-9.1-postgis \
-          python-psycopg2 python-setuptools git python-pip python-imaging
+          python-psycopg2 python-setuptools git python-pip python-imaging \
+          python-gdal
 
       # Install Dickinson
       cd /tmp

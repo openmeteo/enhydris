@@ -10,3 +10,4 @@ Markdown>=2.1,<2.2
 django-simple-captcha>=0.4,<0.5
 pthelma>=0.2.1,<0.3
 django-appconf>=0.6,<0.7
+gdal>=1.9,<1.10
