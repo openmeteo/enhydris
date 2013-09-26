@@ -59,6 +59,7 @@ INSTALLED_APPS = (
     'pagination',
     'enhydris.sorting',
     'registration',
+    'profiles',
     'ajax_select',
     'captcha',
 
@@ -98,3 +99,5 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 TEMPLATE_DIRS = ('enhydris/templates',)
+
+AUTH_PROFILE_MODULE = 'hcore.UserProfile'

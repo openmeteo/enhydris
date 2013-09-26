@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.contrib.auth.views import password_reset, password_reset_done
 
 from registration.views import RegistrationView
+import profiles
 
 from enhydris.hcore.views import terms
 from enhydris.hcore.forms import RegistrationForm
@@ -12,7 +13,7 @@ admin.autodiscover()
 urlpatterns = patterns(
     '',
 
-    # Django-registration stuff
+    # Django-registration and django-profiles
     url(r'^accounts/register/$',
         RegistrationView.as_view(form_class=RegistrationForm),
         name='registration_register'),
@@ -22,6 +23,7 @@ urlpatterns = patterns(
      {'template_name': 'registration/password_reset_done.html'},
      'password_reset_done'),
     (r'^accounts/', include('registration.backends.default.urls')),
+    (r'^profile/', include('profiles.urls')),
 
     (r'^terms/$', terms, {}, 'terms'),
     (r'^i18n/', include('django.conf.urls.i18n')),
