@@ -10,6 +10,7 @@ import signal
 import sys
 import threading
 import urllib2
+import json
 from optparse import make_option
 from socket import socket, gethostbyname, AF_INET, SOCK_STREAM
 
@@ -365,7 +366,11 @@ def eval_fkeys(app_name, models):
                         f_model = dj_models.get_model(app_name, remote_class)
                         ro = f_model.objects.get(original_id=val, original_db=DB)
                         m2m_handler = getattr(item, key)
-                        m2m_handler.add(ro)
+                        if hasattr(m2m_handler, 'add'):
+                            m2m_handler.add(ro)
+                            # If it doesn't have 'add' it means it is a m2m
+                            # with a "through". We don't fix that; instead, we
+                            # pray it works.
 
             item.save()
 
@@ -528,10 +533,12 @@ class Command(BaseCommand):
                 except Exception, detail:
                     ERRMSG("Error fetching fixtures. %s" % detail)
 
+                j = self.backward_api(response, app_name, model)
+
                 # and save it to a local file
                 try:
                     local_file = open(model.__name__+'.json', "w")
-                    local_file.write(response.read())
+                    json.dump(j, local_file)
                     local_file.close()
                 except:
                     ERRMSG('Error saving local file %s. Check cwd permissions and'\
@@ -637,3 +644,44 @@ class Command(BaseCommand):
 
         # wrap-up and exit
         gracefull_exit(0)
+
+    def backward_api(self, response, app_name, model):
+        """
+        The dbsync application was originally written for some kind of
+        webservice API we had then. Either that API was compatible
+        with the Django deserializer, or I don't understand something
+        (or both).  The API since has changed. So here we hackily
+        convert the results given by the new API so that it's like the
+        results of the old API.  In the old API, each item had a "pk",
+        a "model", and a "fields" dictionary with all the other
+        fields. In the new API, there is an "id", there is no "model"
+        (we know which model it is), and all the other fields are
+        there, siblings of "id" (not nested inside a "fields"
+        dictionary).
+
+        If results are already in the old API, we don't touch it.
+        """
+        result = []
+        try:
+            j = json.load(response)
+        except ValueError:
+            return result
+        if len(j) < 1:
+            return result
+        if ('pk' in j[0]) and ('model' in j[0]) and ('fields' in j[0]) and (
+                'id' not in j[0]):
+            # Old API: return as is
+            result = j
+            return result
+        for x in j:
+            item = {
+                'pk': x['id'],
+                'model': app_name + '.' + model.__name__,
+                'fields': {},
+            }
+            for k in x:
+                if x == 'id':
+                    continue
+                item['fields'][k] = x[k]
+            result.append(item)
+        return result
