@@ -15,7 +15,7 @@ urlpatterns = patterns(
     url(r'^stations/d/(?P<pk>\d+)/$', views.StationDetailView.as_view(),
         name='station_detail'),
 
-    url(r'^stations/b/(?P<pk>\d+)/$', DetailView.as_view(),
+    url(r'^stations/b/(?P<pk>\d+)/$', views.StationBriefView.as_view(),
         name='station_brief'),
 
     (r'^map/$',

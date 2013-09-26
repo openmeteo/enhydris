@@ -85,6 +85,11 @@ class StationDetailView(DetailView):
         return context
 
 
+class StationBriefView(DetailView):
+    model = Station
+    template_name = 'station_brief.html'
+
+
 def get_search_query(search_terms):
     query = Q()
     for term in search_terms:
