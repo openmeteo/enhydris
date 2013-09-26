@@ -18,127 +18,124 @@
 
 {% block content %}
 <div id="tabs">
-	<ul>
-		<li><a href="#tabs-1">Overview</a></li>
-		{% if user_enabled_content %}
-			<li><a href="#tabs-2">Station Management</a></li>
-		{%endif%}
-	</ul>
+    <ul>
+        <li><a href="#tabs-1">Overview</a></li>
+        <li><a href="#tabs-2">Station Management</a></li>
+    </ul>
 
-	<div id="tabs-1">
-		<h3>{% trans "User profile for" %} {{ profile.user }}: </h3>
-		<table> 
-			<tr>
-				<th align="left">{% trans "Username" %}</th>
-				<td>{{profile.user}} </td>
-			</tr>
+    <div id="tabs-1">
+        <h3>{% trans "User profile for" %} {{ profile.user }}: </h3>
+        <table> 
+            <tr>
+                <th align="left">{% trans "Username" %}</th>
+                <td>{{profile.user}} </td>
+            </tr>
 
-			<tr>
-				<th align="left">{% trans "Name" %}</th>
-				<td>{{profile.full_name}} </td>
-			</tr>
+            <tr>
+                <th align="left">{% trans "Name" %}</th>
+                <td>{{profile.full_name}} </td>
+            </tr>
 
-			<tr>
-				<th align="left">{% trans "Email" %}</th>
-				<td>{{profile.email}} </td>
-			</tr>
-			   
-			<tr>
-				<th align="left">{% trans "Address" %}</th>
-				<td>{{profile.address}} </td>
-			</tr>
+            <tr>
+                <th align="left">{% trans "Email" %}</th>
+                <td>{{profile.email}} </td>
+            </tr>
+               
+            <tr>
+                <th align="left">{% trans "Address" %}</th>
+                <td>{{profile.address}} </td>
+            </tr>
 
-			<tr>
-				<th align="left">{% trans "Organization" %}</th>
-				<td>{{profile.organization}} </td>
-			</tr>
-		</table>
-		<br>
-		<h3>Profile Management:</h3>
-		<div class="anchor_override">
-			<img src="{{STATIC_URL}}images/icons/user_edit.png" />
-			<a href="{% url "profiles_edit_profile" %}">{% trans "Edit your user profile" %}</a></div>
-		<div class="anchor_override">
-		
-			<img src="{{STATIC_URL}}images/icons/key.png" />
-	 		<a href="{% url "auth_password_change" %}">{% trans "Change your password" %}</a></div>
-		{% if user.is_staff %}
-		<div class="anchor_override">
-			<img src="{{STATIC_URL}}images/icons/lock_open.png" />
-			<a href="{% url "index" %}admin/">{% trans "Access the admin panel" %}</a></div>
-		{% endif %}
-	</div>
-	{% if user_enabled_content %} 
-	<div id="tabs-2">
+            <tr>
+                <th align="left">{% trans "Organization" %}</th>
+                <td>{{profile.organization}} </td>
+            </tr>
+        </table>
+        <br>
+        <h3>Profile Management:</h3>
+        <div class="anchor_override">
+            <img src="{{STATIC_URL}}images/icons/user_edit.png" />
+            <a href="{% url "profiles_edit_profile" %}">{% trans "Edit your user profile" %}</a></div>
+        <div class="anchor_override">
+        
+            <img src="{{STATIC_URL}}images/icons/key.png" />
+            <a href="{% url "auth_password_change" %}">{% trans "Change your password" %}</a></div>
+        {% if user.is_staff %}
+        <div class="anchor_override">
+            <img src="{{STATIC_URL}}images/icons/lock_open.png" />
+            <a href="{% url "index" %}admin/">{% trans "Access the admin panel" %}</a></div>
+        {% endif %}
+    </div>
+    <div id="tabs-2">
 
-		
-		{% if user.is_superuser %}
-			<p class="anchor_override">{% trans "As a superuser, you can edit all the stations. To find the station you are looking for, go to the" %} <a href="{% url "station_list" %}">{% trans "station list." %}</a></p>
-		{% else %} 
-			{% if user.created_stations.all %}
-				<h3>{% trans "You have created the following stations: " %}</h3>
-				<table class="tablesorter table_container">
-				<thead>
-				  <tr>
-					<th>{% trans "Station ID" %}</th>
-					<th>{% trans "Station Name" %}</th>	
-					<th>{% trans "Water Basin" %}</th>	
-					<th>{% trans "Water Division" %}</th>	
-					<th>{% trans "Political Division" %}</th>	
-					<th>{% trans "Type" %}</th>	
-				  </tr>
-				</thead>
-				<tbody>
-				{% for station in user.created_stations.all %}
-				{% url "station_detail" station_id as station_url %}
-				  <tr class="{% cycle 'odd' 'even' %}">
-					<td class="anchor_override"><a href="{% url "station_detail" station.id %}">{{ station.id }}</a></td>
-					<td>{{ station.name }}</td>
-					<td>{{ station.water_basin }}</td>
-					<td>{{ station.water_division }}</td>
-					<td>{{ station.political_division.name }}</td>
+        
+        {% if user.is_superuser %}
+            <p class="anchor_override">{% trans "As a superuser, you can edit all the stations. To find the station you are looking for, go to the" %} <a href="{% url "station_list" %}">{% trans "station list." %}</a></p>
+        {% else %} 
+            {% if user.created_stations.all %}
+                <h3>{% trans "You have created the following stations: " %}</h3>
+                <table class="tablesorter table_container">
+                <thead>
+                  <tr>
+                    <th>{% trans "Station ID" %}</th>
+                    <th>{% trans "Station Name" %}</th> 
+                    <th>{% trans "Water Basin" %}</th>  
+                    <th>{% trans "Water Division" %}</th>   
+                    <th>{% trans "Political Division" %}</th>   
+                    <th>{% trans "Type" %}</th> 
+                  </tr>
+                </thead>
+                <tbody>
+                {% for station in user.created_stations.all %}
+                {% url "station_detail" station_id as station_url %}
+                  <tr class="{% cycle 'odd' 'even' %}">
+                    <td class="anchor_override"><a href="{% url "station_detail" station.id %}">{{ station.id }}</a></td>
+                    <td>{{ station.name }}</td>
+                    <td>{{ station.water_basin }}</td>
+                    <td>{{ station.water_division }}</td>
+                    <td>{{ station.political_division.name }}</td>
                                         <td>{% for stype in station.stype.all %}{{ stype.descr }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
-				  </tr>
-				{%endfor%}
-				</tbody>
-				</table>
-			{% else %} 
-				<p> * {% trans "It seems that you haven't created any stations yet." %}</p>
-			{% endif %}
+                  </tr>
+                {%endfor%}
+                </tbody>
+                </table>
+            {% else %} 
+                <p> * {% trans "It seems that you haven't created any stations yet." %}</p>
+            {% endif %}
 
-			{% if user.maintaining_stations.all %} 
-				<h3>{% trans "You have permission to edit the following stations: " %}</h3>
-				<table class="tablesorter table_container">
-				<thead>
-				  <tr>
-					<th>{% trans "Station ID" %}</th>
-					<th>{% trans "Station Name" %}</th>	
-					<th>{% trans "Water Basin" %}</th>	
-					<th>{% trans "Water Division" %}</th>	
-					<th>{% trans "Political Division" %}</th>	
-					<th>{% trans "Type" %}</th>	
-				  </tr>
-				</thead>
-				<tbody>
-				{% for station in user.maintaining_stations.all %}
-				{% url "station_detail" station_id as station_url %}
-				  <tr class="{% cycle 'odd' 'even' %}">
-					<td class="anchor_override"><a href="{% url "station_detail" station.id %}">{{ station.id }}</a></td>
-					<td>{{ station.name }}</td>
-					<td>{{ station.water_basin }}</td>
-					<td>{{ station.water_division }}</td>
-					<td>{{ station.political_division.name }}</td>
+            {% if user.maintaining_stations.all %} 
+                <h3>{% trans "You have permission to edit the following stations: " %}</h3>
+                <table class="tablesorter table_container">
+                <thead>
+                  <tr>
+                    <th>{% trans "Station ID" %}</th>
+                    <th>{% trans "Station Name" %}</th> 
+                    <th>{% trans "Water Basin" %}</th>  
+                    <th>{% trans "Water Division" %}</th>   
+                    <th>{% trans "Political Division" %}</th>   
+                    <th>{% trans "Type" %}</th> 
+                  </tr>
+                </thead>
+                <tbody>
+                {% for station in user.maintaining_stations.all %}
+                {% url "station_detail" station_id as station_url %}
+                  <tr class="{% cycle 'odd' 'even' %}">
+                    <td class="anchor_override"><a href="{% url "station_detail" station.id %}">{{ station.id }}</a></td>
+                    <td>{{ station.name }}</td>
+                    <td>{{ station.water_basin }}</td>
+                    <td>{{ station.water_division }}</td>
+                    <td>{{ station.political_division.name }}</td>
                                         <td>{% for stype in station.stype.all %}{{ stype.descr }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
-				  </tr>
-				{%endfor%}
-				</tbody>
-				</table>
-			{% else %} 
-				<p>* {% trans "It seems that you don't have permission to edit any station." %}</p>
-			{% endif %}
+                  </tr>
+                {%endfor%}
+                </tbody>
+                </table>
+            {% else %} 
+                <p>* {% trans "It seems that you don't have permission to edit any station." %}</p>
+            {% endif %}
 
-			<h3>{% trans "Management Actions:" %}</h3>
-				{% if perms.hcore.add_station %}
+            <h3>{% trans "Management Actions:" %}</h3>
+                {% if perms.hcore.add_station %}
                 <p class="anchor_override" style="cursor:pointer;text-align:left">
                        <a href="{% url "station_add" %}">
                           <img src="{{ STATIC_URL }}admin/img/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
@@ -146,7 +143,7 @@
                       </a>
                 </p>
                 {% endif %}
-				{% if perms.hcore.add_instrument %}
+                {% if perms.hcore.add_instrument %}
                 <p class="anchor_override" style="cursor:pointer;text-align:left">
                        <a href="{% url "instrument_add" %}">
                           <img src="{{ STATIC_URL }}admin/img/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
@@ -154,7 +151,7 @@
                       </a>
                 </p>
                 {% endif %}
-				{% if perms.hcore.add_timeseries %}
+                {% if perms.hcore.add_timeseries %}
                 <p class="anchor_override" style="cursor:pointer;text-align:left">
                        <a href="{% url "timeseries_add" %}">
                           <img src="{{ STATIC_URL }}admin/img/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
@@ -163,9 +160,8 @@
                 </p>
                 {% endif %}
 
-		{% endif %}
-	</div>
-	{% endif %}
+        {% endif %}
+    </div>
 </div>
 
 {% endblock %}

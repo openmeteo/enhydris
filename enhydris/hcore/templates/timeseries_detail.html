@@ -121,15 +121,13 @@
 {% block content_main %}
     <div style="width: 99%;">
     <h2>{% trans 'Timeseries Details' %}
-        {% if enabled_user_content %}
-            {% if request.user|can_edit:timeseries.related_station %}
-            <sup class='sup_link'>
-                <a href='{% url "timeseries_edit" timeseries.id%}'>edit</a>
-                ,
-                <a onClick='return confirmPost()' href='{% url "timeseries_delete" timeseries.id%}'>delete</a>
-            {% endif %} 
-            </sup>
-        {% endif %}
+        {% if request.user|can_edit:timeseries.related_station %}
+        <sup class='sup_link'>
+            <a href='{% url "timeseries_edit" timeseries.id%}'>edit</a>
+            ,
+            <a onClick='return confirmPost()' href='{% url "timeseries_delete" timeseries.id%}'>delete</a>
+        {% endif %} 
+        </sup>
     </h2>
 
         {% if timeseries %}

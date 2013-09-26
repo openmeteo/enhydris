@@ -40,19 +40,17 @@
             </sup>
         {% endif %}
 	</h2>
-	{% if enabled_user_content %}
-		{% if request.user|can_edit:instrument.station %}
-		<div id="menu_bar">
-			<ul style="list-style-type:none;">
-				<li>
-					<span style="color:#A0A095">More: </span>
-					<span class="menu_options"><a href="{% url "timeseries_add" %}?instrument_id={{ instrument.id }}">Add new Timeseries</a></span>
-				</li>
-			</ul>
-			<br />
-		</div>
-		{% endif %}
-	{% endif %}
+    {% if request.user|can_edit:instrument.station %}
+    <div id="menu_bar">
+        <ul style="list-style-type:none;">
+            <li>
+                <span style="color:#A0A095">More: </span>
+                <span class="menu_options"><a href="{% url "timeseries_add" %}?instrument_id={{ instrument.id }}">Add new Timeseries</a></span>
+            </li>
+        </ul>
+        <br />
+    </div>
+    {% endif %}
 
         {% if instrument %}
         <table class="definition tablesorter table_container">
@@ -112,11 +110,9 @@
                               <th>{% trans "Instrument" %}</th>
                               <th>{% trans "Start Date" %}</th>
                               <th>{% trans "End Date" %}</th>
-								{% if enabled_user_content %}
-									{% if request.user|can_edit:station %}
-									<th>{% trans "Management" %}</th>
-									{% endif %}
-								{% endif %}
+                              {% if request.user|can_edit:station %}
+                              <th>{% trans "Management" %}</th>
+                              {% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -138,13 +134,11 @@
                             <td>{{ t.instrument }}</td>
                             <td>{{ t.start_date|date:"Y/m/d H:i" }}</td>
                             <td>{{ t.end_date|date:"Y/m/d H:i" }}</td>
-							{% if enabled_user_content %}
-								{% if request.user|can_edit:station %}
-								<td style="text-align:center;">
-								<a href="{% url "timeseries_edit" t.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url "timeseries_delete" t.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
-								</td>
-								{% endif %}
+                            {% if request.user|can_edit:station %}
+                            <td style="text-align:center;">
+                            <a href="{% url "timeseries_edit" t.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
+                            <a href="{% url "timeseries_delete" t.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+                            </td>
 							{% endif %}
                         {% endwith %}
                         {% endif %}

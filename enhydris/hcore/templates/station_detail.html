@@ -55,28 +55,28 @@
   </script>
   <script type="text/javascript">
       $(document).ready(function(){
-		$(".verification_required").click(function(){
-			return confirmPost();
-		});
+        $(".verification_required").click(function(){
+            return confirmPost();
+        });
 
-		$("#instruments_ct").click(function() {
-			setTimeout("$.scrollTo('#instruments_ct',200)",1000)
-		});
+        $("#instruments_ct").click(function() {
+            setTimeout("$.scrollTo('#instruments_ct',200)",1000)
+        });
 
-		$("#timeseries_ct").click(function() {
-			setTimeout("$.scrollTo('#timeseries_ct',200)",1000)
-		});
+        $("#timeseries_ct").click(function() {
+            setTimeout("$.scrollTo('#timeseries_ct',200)",1000)
+        });
 
-		$('.tiptip').tipTip({defaultPosition:"top"});
+        $('.tiptip').tipTip({defaultPosition:"top"});
       });
 
-	function confirmPost(){
-	var agree=confirm("Are you sure you want to delete this object?");
-	if (agree)
-		return true ;
-	else
-		return false ;
-	}
+    function confirmPost(){
+    var agree=confirm("Are you sure you want to delete this object?");
+    if (agree)
+        return true ;
+    else
+        return false ;
+    }
 
   </script>
 {% endblock %}
@@ -84,45 +84,41 @@
 {% block content %}
 
     <p><h2>Station Details
-	{% if enabled_user_content %}
-		{% if request.user|can_edit:station %}
-		<sup class='sup_link'>
-			<a href='{% url "station_edit" station.id%}'>edit</a>
-		{% if request.user|can_delete:station %}
-			,
-			<a onClick='return confirmPost()' href='{% url "station_delete" station.id%}'>delete</a>
-		{% endif %}
-		</sup>
-		{% endif %}
-	{% endif %}
+        {% if request.user|can_edit:station %}
+        <sup class='sup_link'>
+                <a href='{% url "station_edit" station.id%}'>edit</a>
+        {% if request.user|can_delete:station %}
+                ,
+                <a onClick='return confirmPost()' href='{% url "station_delete" station.id%}'>delete</a>
+        {% endif %}
+        </sup>
+        {% endif %}
     </h2></p>
-	{% if enabled_user_content %}
-		{% if request.user|can_edit:station %}
-		<div id="menu_bar">
-			<ul style="list-style-type:none;">
-				<li>
-					<span style="color:#A0A095">More: </span>
-					<span class="menu_options"><a href="{% url "timeseries_add" %}?station_id={{ station.id }}">Add new Timeseries</a></span>
-					/
-					<span class="menu_options"><a href="{% url "instrument_add" %}?station_id={{ station.id }}">Add new Instrument</a></span>
-					/
-					<span class="menu_options"><a href="{% url "gentityfile_add" %}?station_id={{ station.id }}">Add new File</a></span>
-					/
-					<span class="menu_options"><a href="{% url "gentitygenericdata_add" %}?station_id={{ station.id }}">Add new Generic Item</a></span>
-					/
-					<span class="menu_options"><a href="{% url "gentityevent_add" %}?station_id={{ station.id }}">Add new Event</a></span>
-					/
-					<span class="menu_options"><a href="{% url "gentityaltcode_add" %}?station_id={{ station.id }}">Add new Alt Code</a></span>
-					/
-					<span class="menu_options"><a href="{% url "overseer_add" %}?station_id={{ station.id }}">Add new Overseer</a></span>
-				<li>
-			</ul>
-			<br />
-		</div>
-		{% endif %}
-	{% endif %}
+        {% if request.user|can_edit:station %}
+        <div id="menu_bar">
+                <ul style="list-style-type:none;">
+                        <li>
+                                <span style="color:#A0A095">More: </span>
+                                <span class="menu_options"><a href="{% url "timeseries_add" %}?station_id={{ station.id }}">Add new Timeseries</a></span>
+                                /
+                                <span class="menu_options"><a href="{% url "instrument_add" %}?station_id={{ station.id }}">Add new Instrument</a></span>
+                                /
+                                <span class="menu_options"><a href="{% url "gentityfile_add" %}?station_id={{ station.id }}">Add new File</a></span>
+                                /
+                                <span class="menu_options"><a href="{% url "gentitygenericdata_add" %}?station_id={{ station.id }}">Add new Generic Item</a></span>
+                                /
+                                <span class="menu_options"><a href="{% url "gentityevent_add" %}?station_id={{ station.id }}">Add new Event</a></span>
+                                /
+                                <span class="menu_options"><a href="{% url "gentityaltcode_add" %}?station_id={{ station.id }}">Add new Alt Code</a></span>
+                                /
+                                <span class="menu_options"><a href="{% url "overseer_add" %}?station_id={{ station.id }}">Add new Overseer</a></span>
+                        <li>
+                </ul>
+                <br />
+        </div>
+        {% endif %}
 
-		{% if notifications %}
+        {% if notifications %}
         <ul class="notifications">
                 {% for message in notifications %}
                 <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
@@ -216,15 +212,15 @@
                 <th>{% trans 'End Date' %}</th>
                 <td colspan='2'>{{ station.end_date|date:"Y/m/d" }}</td>
             </tr>
-			{% if enabled_user_content %}
-			<tr class="{% cycle rowalts %}">
+            {% if enabled_user_content %}
+            <tr class="{% cycle rowalts %}">
                 <th>{% trans 'Creator' %}</th>
-				{% if station.creator %}
+                {% if station.creator %}
                                 <td colspan='2'><a href='{% url "profiles_profile_detail" station.creator %}' />{{ station.creator }}</td>
-				{% else %}
-					<td colspan='2'>{% trans "Unknown" %}</td>
-				{% endif %}
-			{% endif %}
+                {% else %}
+                    <td colspan='2'>{% trans "Unknown" %}</td>
+                {% endif %}
+            {% endif %}
             </tr>
 
             <!-- Overseers table -->
@@ -237,11 +233,9 @@
                         {% for overseer in station.overseer_set.all %}
                         <tr class="{% cycle 'odd' 'even' %}">
                             <td>{{ overseer.person.first_name }} {{ overseer.person.last_name }}
-							{% if enabled_user_content %}
-								{% if request.user|can_edit:station %}
-								&nbsp;|&nbsp;<a href="{% url "overseer_delete" overseer.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
-								{% endif %}
-							{% endif %}
+                            {% if request.user|can_edit:station %}
+                            &nbsp;|&nbsp;<a href="{% url "overseer_delete" overseer.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+                            {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -263,11 +257,9 @@
                                 <th>{% trans 'ID' %}</th>
                                 <th>{% trans 'Type' %}</th>
                                 <th>{% trans 'Value' %}</th>
-								{% if enabled_user_content %}
-									{% if request.user|can_edit:station %}
-									<th>{% trans "Management" %}</th>
-									{% endif %}
-								{% endif %}
+                                {% if request.user|can_edit:station %}
+                                <th>{% trans "Management" %}</th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -276,15 +268,12 @@
                             <td>{{ code.id }}</td>
                             <td>{{ code.type }}</td>
                             <td>{{ code.value }}</td>
-							{% if enabled_user_content %}
-								{% if request.user|can_edit:station %}
-								<td style="text-align:center;">
-								<a href="{% url "gentityaltcode_edit" code.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url "gentityaltcode_delete" code.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
-								</td>
-
-								{% endif %}
-							{% endif %}
+                            {% if request.user|can_edit:station %}
+                            <td style="text-align:center;">
+                            <a href="{% url "gentityaltcode_edit" code.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
+                            <a href="{% url "gentityaltcode_delete" code.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+                            </td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                         </tbody>
@@ -313,12 +302,10 @@
                                 <th>{% trans 'Content' %}</th>
                                 <th>{% trans 'Description' %}</th>
                                 <th>{% trans 'Remarks' %}</th>
-								<th>{% trans 'Request File' %}</th>
-								{% if enabled_user_content %}
-									{% if request.user|can_edit:station %}
-									<th>{% trans "Management" %}</th>
-									{% endif %}
-								{% endif %}
+                                <th>{% trans 'Request File' %}</th>
+                                {% if request.user|can_edit:station %}
+                                <th>{% trans "Management" %}</th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -330,22 +317,20 @@
                             <td>{{ file.content }}</td>
                             <td>{{ file.descr }}</td>
                             <td>{{ file.remarks }}</td>
-							<td>
-							{% if user.is_authenticated or anonymous_can_download_data %}
-								<a href="{% url "gentityfile_dl" file.id %}"><img style="border:none" src="{{STATIC_URL}}images/icons/download.png"></a>
-							{% else %}
-								<i>N/A</i>
-							{% endif %}
-							</td>
-							{% if enabled_user_content %}
-								{% if request.user|can_edit:station %}
-								<td style="text-align:center;">
-								<a href="{% url "gentityfile_edit" file.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url "gentityfile_delete" file.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
-								</td>
-								{% endif %}
-							{% endif %}
-						</tr>
+                            <td>
+                            {% if user.is_authenticated or anonymous_can_download_data %}
+                                <a href="{% url "gentityfile_dl" file.id %}"><img style="border:none" src="{{STATIC_URL}}images/icons/download.png"></a>
+                            {% else %}
+                                <i>N/A</i>
+                            {% endif %}
+                            </td>
+                            {% if request.user|can_edit:station %}
+                            <td style="text-align:center;">
+                            <a href="{% url "gentityfile_edit" file.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
+                            <a href="{% url "gentityfile_delete" file.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+                            </td>
+                            {% endif %}
+                        </tr>
                         {% endfor %}
                         </tbody>
                     </table>
@@ -371,12 +356,10 @@
                                 <th>{% trans 'Data Type' %}</th>
                                 <th>{% trans 'Description' %}</th>
                                 <th>{% trans 'Remarks' %}</th>
-								<th>{% trans 'Request File' %}</th>
-								{% if enabled_user_content %}
-									{% if request.user|can_edit:station %}
-									<th>{% trans "Management" %}</th>
-									{% endif %}
-								{% endif %}
+                                <th>{% trans 'Request File' %}</th>
+                                {% if request.user|can_edit:station %}
+                                <th>{% trans "Management" %}</th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -386,22 +369,20 @@
                             <td>{{ genericdata.data_type }}</td>
                             <td>{{ genericdata.descr }}</td>
                             <td>{{ genericdata.remarks }}</td>
-							<td>
-							{% if request.user.is_authenticated or anonymous_can_download_data %}
-								<a href="{% url "gentitygenericdata_dl" genericdata.id %}"><img style="border:none" src="{{STATIC_URL}}images/icons/download.png"></a>
-							{% else %}
-								<i>N/A</i>
-							{% endif %}
-							</td>
-							{% if enabled_user_content %}
-								{% if request.user|can_edit:station %}
-								<td style="text-align:center;">
-								<a href="{% url "gentitygenericdata_edit" genericdata.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url "gentitygenericdata_delete" genericdata.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
-								</td>
-								{% endif %}
-							{% endif %}
-						</tr>
+                            <td>
+                            {% if request.user.is_authenticated or anonymous_can_download_data %}
+                                <a href="{% url "gentitygenericdata_dl" genericdata.id %}"><img style="border:none" src="{{STATIC_URL}}images/icons/download.png"></a>
+                            {% else %}
+                                <i>N/A</i>
+                            {% endif %}
+                            </td>
+                            {% if request.user|can_edit:station %}
+                            <td style="text-align:center;">
+                            <a href="{% url "gentitygenericdata_edit" genericdata.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
+                            <a href="{% url "gentitygenericdata_delete" genericdata.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+                            </td>
+                            {% endif %}
+                        </tr>
                         {% endfor %}
                         </tbody>
                     </table>
@@ -428,11 +409,9 @@
                                 <th>{% trans 'Type' %}</th>
                                 <th>{% trans 'User' %}</th>
                                 <th>{% trans 'Report' %}</th>
-								{% if enabled_user_content %}
-									{% if request.user|can_edit:station %}
-									<th>{% trans "Management" %}</th>
-									{% endif %}
-								{% endif %}
+                                {% if request.user|can_edit:station %}
+                                <th>{% trans "Management" %}</th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -443,14 +422,12 @@
                             <td>{{ event.type }}</td>
                             <td>{{ event.user }}</td>
                             <td>{{ event.report }}</td>
-							{% if enabled_user_content %}
-								{% if request.user|can_edit:station %}
-								<td style="text-align:center;">
-								<a href="{% url "gentityevent_edit" event.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url "gentityevent_delete" event.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
-								</td>
-								{% endif %}
-							{% endif %}
+                            {% if request.user|can_edit:station %}
+                            <td style="text-align:center;">
+                            <a href="{% url "gentityevent_edit" event.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
+                            <a href="{% url "gentityevent_delete" event.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+                            </td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                         </tbody>
@@ -482,11 +459,9 @@
                               <th>{% trans "Is Active" %}</th>
                               <th>{% trans "Start Date" %}</th>
                               <th>{% trans "End Date" %}</th>
-								{% if enabled_user_content %}
-									{% if request.user|can_edit:station %}
-									<th>{% trans "Management" %}</th>
-									{% endif %}
-								{% endif %}
+                              {% if request.user|can_edit:station %}
+                              <th>{% trans "Management" %}</th>
+                              {% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -503,14 +478,12 @@
                             <td>{{ instrument.is_active }}</td>
                             <td>{{ instrument.start_date|date:"Y/m/d" }}</td>
                             <td>{{ instrument.end_date|date:"Y/m/d" }}</td>
-							{% if enabled_user_content %}
-								{% if request.user|can_edit:station %}
-								<td style="text-align:center;">
-								<a href="{% url "instrument_edit" instrument.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url "instrument_delete" instrument.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
-								</td>
-								{% endif %}
-							{% endif %}
+                            {% if request.user|can_edit:station %}
+                            <td style="text-align:center;">
+                            <a href="{% url "instrument_edit" instrument.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
+                            <a href="{% url "instrument_delete" instrument.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+                            </td>
+                            {% endif %}
                         </tr>
                         {% endwith %}
                         {% endfor %}
@@ -543,11 +516,9 @@
                               <th>{% trans "Instrument" %}</th>
                               <th>{% trans "Start Date" %}</th>
                               <th>{% trans "End Date" %}</th>
-								{% if enabled_user_content %}
-									{% if request.user|can_edit:station %}
-									<th>{% trans "Management" %}</th>
-									{% endif %}
-								{% endif %}
+                              {% if request.user|can_edit:station %}
+                              <th>{% trans "Management" %}</th>
+                              {% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -569,14 +540,12 @@
                             <td>{{ t.instrument }}</td>
                             <td>{{ t.start_date|date:"Y/m/d H:i" }}</td>
                             <td>{{ t.end_date|date:"Y/m/d H:i" }}</td>
-							{% if enabled_user_content %}
-								{% if request.user|can_edit:station %}
-								<td style="text-align:center;">
-								<a href="{% url "timeseries_edit" t.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-								<a href="{% url "timeseries_delete" t.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
-								</td>
-								{% endif %}
-							{% endif %}
+                            {% if request.user|can_edit:station %}
+                            <td style="text-align:center;">
+                            <a href="{% url "timeseries_edit" t.id %}" class="tiptip" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
+                            <a href="{% url "timeseries_delete" t.id %}" class="tiptip" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+                            </td>
+                            {% endif %}
                         </tr>
                         {% endwith %}
                         {% endif %}
