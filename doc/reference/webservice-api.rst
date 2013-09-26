@@ -133,10 +133,7 @@ id of the timeseries object) you can get the timeseries data in
    .. _django-piston: https://bitbucket.org/jespern/django-piston/
    .. _django-rest-framework: http://django-rest-framework.org/
 
-   Furthermore, there was a feature in which only recently changed
-   items would be returned. This has not been implemented, which means
-   the :ref:`dbsync application <dbsync>` does not work.
-   There was also the possibility to get gentity files at
+   Furthermore, there was also the possibility to get gentity files at
    `http://base-address/api/gfdata/id`` (where ``id`` was the actual
    id of the GentityFile object). Finally, there was the "station
    information and lists" feature, documented below:

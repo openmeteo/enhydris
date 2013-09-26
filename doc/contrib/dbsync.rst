@@ -15,10 +15,7 @@ takes care of fetching and installing remote objects from JSON files using the
 
 .. admonition:: Note
 
-   The dbsync application is currently entirely broken, because of
-   changes made to the api. See the "Backwards compatibility"
-   admonition of :ref:`Webservice API <webservice-api>` for more
-   information.
+   The dbsync application is currently barely working and should be rewritten.
 
 DBSync Objects
 --------------
