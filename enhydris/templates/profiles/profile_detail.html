@@ -61,7 +61,7 @@
 		<div class="anchor_override">
 		
 			<img src="{{STATIC_URL}}images/icons/key.png" />
-	 		<a href="{% url "password_change" %}">{% trans "Change your password" %}</a></div>
+	 		<a href="{% url "auth_password_change" %}">{% trans "Change your password" %}</a></div>
 		{% if user.is_staff %}
 		<div class="anchor_override">
 			<img src="{{STATIC_URL}}images/icons/lock_open.png" />

@@ -220,7 +220,7 @@
 			<tr class="{% cycle rowalts %}">
                 <th>{% trans 'Creator' %}</th>
 				{% if station.creator %}
-					<td colspan='2'><a href="FIXME - obsolete django profiles was being used here" />{{ station.creator }}</td>
+                                <td colspan='2'><a href='{% url "profiles_profile_detail" station.creator %}' />{{ station.creator }}</td>
 				{% else %}
 					<td colspan='2'>{% trans "Unknown" %}</td>
 				{% endif %}
