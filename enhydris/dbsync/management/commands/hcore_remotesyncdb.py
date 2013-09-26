@@ -242,7 +242,7 @@ def create_generic_objects(app):
     GenericStationType.save()
     globals()["GenericLentity"] = app.Lentity()
     GenericLentity.save()
-    globals()["GenericStation"] = app.Station(owner=GenericLentity, type=
+    globals()["GenericStation"] = app.Station(owner=GenericLentity, stype=
                 GenericStationType)
     GenericStation.save()
     globals()["GenericInstrument"] = app.Instrument(station=GenericStation, type=
