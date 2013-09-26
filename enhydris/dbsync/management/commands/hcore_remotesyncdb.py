@@ -238,12 +238,9 @@ def create_generic_objects(app):
     GenericGpoint.save()
     globals()["GenericInstrumentType"] = app.InstrumentType()
     GenericInstrumentType.save()
-    globals()["GenericStationType"] = app.StationType()
-    GenericStationType.save()
     globals()["GenericLentity"] = app.Lentity()
     GenericLentity.save()
-    globals()["GenericStation"] = app.Station(owner=GenericLentity, stype=
-                GenericStationType)
+    globals()["GenericStation"] = app.Station(owner=GenericLentity)
     GenericStation.save()
     globals()["GenericInstrument"] = app.Instrument(station=GenericStation, type=
                 GenericInstrumentType)
