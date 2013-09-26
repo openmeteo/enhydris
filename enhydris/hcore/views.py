@@ -1825,8 +1825,8 @@ def kml(request, layer):
                 queryres = queryres.filter(point__contained=geom)
             if getparams.has_key('owner'):
                 queryres = queryres.filter(owner__id=getparams['owner'])
-            if getparams.has_key('type'):
-                queryres = queryres.filter(stype__id=getparams['type'])
+            if getparams.has_key('stype'):
+                queryres = queryres.filter(stype__id=getparams['stype'])
             if getparams.has_key('political_division'):
                 leaves = PoliticalDivision.objects.get_leaf_subdivisions(\
                                   PoliticalDivision.objects.filter(id=getparams['political_division']))
@@ -1845,7 +1845,7 @@ def kml(request, layer):
     except Exception, e:
         raise Http404
     for arow in queryres:
-        if arow.point: 
+        if arow.point:
             arow.kml = arow.point.kml
     response = render_to_kml("placemarks.kml", {'places': queryres})
     return response

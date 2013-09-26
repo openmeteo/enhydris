@@ -89,11 +89,11 @@ function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor){
                         OpenLayers.Feature.Vector.style["default"]),
                         {context: {aname: function(feature) { return get_attribute(feature, "name"); },
                                    aicon: function(feature) {
-                                       if(get_attribute(feature, "type_id")==marker_categories['id'][0])
+                                       if(get_attribute(feature, "stype_id")==marker_categories['id'][0])
                                            return marker_categories['icon'][0];
-                                       else if(get_attribute(feature, "type_id")==marker_categories['id'][1])
+                                       else if(get_attribute(feature, "stype_id")==marker_categories['id'][1])
                                            return marker_categories['icon'][1];
-                                       else if(get_attribute(feature, "type_id")==marker_categories['id'][2])
+                                       else if(get_attribute(feature, "stype_id")==marker_categories['id'][2])
                                            return marker_categories['icon'][2];
                                        else 
                                            return marker_categories['icon'][3];

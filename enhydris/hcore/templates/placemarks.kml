@@ -1,9 +1,12 @@
 {% extends "gis/kml/base.kml" %}
-{% block placemarks %}{% for place in places %}
-  <Placemark>
-    <name>{% if place.name %}{{ place.name }}{% else %}{{ place }}{% endif %}</name>
-    <id>{{ place.id }}</id>
-    <type_id>{{ place.type.id }}</type_id>
-    {{ place.kml|safe }}
-  </Placemark>{% endfor %}{% endblock %}
+{% block placemarks %}
+{% for place in places %}
+<Placemark>
+  <name>{% if place.name %}{{ place.name }}{% else %}{{ place }}{% endif %}</name>
+  <id>{{ place.id }}</id>
+  <stype_id>{% for stype in place.stype.all %}{% if not forloop.first %},{% endif %}{{ stype.id }}{% endfor %}</stype_id>
+  {{ place.kml|safe }}
+</Placemark>
+{% endfor %}
+{% endblock %}
 
