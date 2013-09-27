@@ -132,15 +132,20 @@
 
         {% if timeseries %}
         <div style="float:left; width: 500px;">
-        {% if user.is_authenticated or anonymous_can_download_data %}
+        {% if timeseries.original_db %}
             <p>{% blocktrans %}
-                    Download Timeseries in plain text from 
-                {% endblocktrans %}
-                    <a href="{% url "timeseries_text" timeseries.id %}">{% trans 'here' %}</a>
+               The information for this time series has been copied from
+               another database. You may be able to download the data from the
+               {% endblocktrans %}
+               <a href='http://{{ timeseries.original_db.hostname }}{% url "timeseries_detail" timeseries.original_id %}'>{% trans "respective page of the originating database" %}</a>.
+            </p>
+        {% elif user.is_authenticated or anonymous_can_download_data %}
+            <p>
+            <a href='{% url "timeseries_text" timeseries.id %}'>{% trans "Download time series" %}</a>
             </p>
         {% else %}
             <p>{% blocktrans %}
-                   You don't have permissions to download the time series!                   
+                   You don't have permission to download the time series.
                {% endblocktrans %}
             </p>
         {% endif %}
