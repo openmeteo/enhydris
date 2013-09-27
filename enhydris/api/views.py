@@ -38,7 +38,7 @@ class ListAPIView(generics.ListAPIView):
         modified_after = '1900-01-01'
         if 'modified_after' in self.kwargs:
             modified_after = self.kwargs['modified_after']
-        return self.model.objects.filter(last_modified__gt=modified_after)
+        return self.model.objects.exclude(last_modified__lte=modified_after)
 
 
 class Tsdata(APIView):
