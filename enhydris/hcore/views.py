@@ -334,6 +334,10 @@ class StationListView(ListView):
         column = nkwargs.pop('sort') if 'sort' in nkwargs else None
         if not column and 'sort' in self.request.GET:
             column = self.request.GET['sort']
+        sort_columns = [x.replace('_heading', '')
+                        for x in self.column_headings.keys()]
+        if column not in sort_columns:
+            column = None
         if column:
             result = result.order_by(column)
         return result
