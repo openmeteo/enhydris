@@ -81,7 +81,9 @@ class StationDetailView(DetailView):
              "use_open_layers": use_open_layers,
              "anonymous_can_download_data": anonymous_can_download_data,
              "display_copyright": display_copyright,
-             "chart_exists": chart_exists})
+             "chart_exists": chart_exists,
+             "wgs84_name": settings.ENHYDRIS_WGS84_NAME,
+            })
         return context
 
 
@@ -1030,8 +1032,8 @@ def _station_edit_or_create(request,station_id=None):
     else:
         if station:
             form = StationForm(instance=station,
-                               initial={'abscissa': station.gis_abscissa,
-                                        'ordinate': station.gis_ordinate})
+                               initial={'abscissa': station.original_abscissa,
+                                        'ordinate': station.original_ordinate})
             formsets["Overseer"]  = OverseerFormset(instance=station,
                                                          prefix='Overseer')
             formsets["Instrument"]  = InstrumentFormset(instance=station,

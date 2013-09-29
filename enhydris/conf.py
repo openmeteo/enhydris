@@ -30,6 +30,7 @@ class EnhydrisConf(AppConf):
     TS_GRAPH_FINE_STEP_DENOMINATOR = 50
     SITE_STATION_FILTER = {}
     DISPLAY_COPYRIGHT_INFO = False
+    WGS84_NAME = 'WGS84'
 
     class Meta:
         prefix = 'ENHYDRIS'

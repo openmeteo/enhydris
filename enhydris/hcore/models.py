@@ -1,5 +1,6 @@
 from django.db import connection as db_connection
 from django.contrib.gis.db import models
+from django.contrib.gis.db.backends.postgis import models as gismodels
 from django.contrib.auth.models import User, Group
 from django.db.models.signals import post_syncdb, post_save
 from django.db.models import Q
@@ -135,18 +136,25 @@ class Gpoint(Gentity):
     point = models.PointField(null=True, blank=True)
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         super(Gpoint, self).save(force_insert, force_update, *args, **kwargs)
-    def gis_abscissa(self):
+    def original_abscissa(self):
         if self.point:
             (x, y) = self.point.transform(self.srid, clone=True)
             return round(x, 2) if abs(x)>180 and abs(y)>90 else x
         else:
             return None
-    def gis_ordinate(self):
+    def original_ordinate(self):
         if self.point:
             (x, y) = self.point.transform(self.srid, clone=True)
             return round(y, 2) if abs(x)>180 and abs(y)>90 else y
         else:
             return None
+    def original_cs_name(self):
+        if self.srid:
+            srtext = gismodels.SpatialRefSys.objects.get(srid=self.srid).srtext
+            cstype, dummy, rest = srtext.partition('[')
+            csname = rest.split('"')[1]
+            return csname + ' (' + cstype + ')'
+
 
 class Gline(Gentity):
     gpoint1 = models.ForeignKey(Gpoint, null=True, blank=True, related_name='glines1')

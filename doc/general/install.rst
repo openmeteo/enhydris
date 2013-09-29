@@ -506,3 +506,20 @@ These are the settings available to Enhydris, in addition to the
    leave it to ``False``. If the database is going to be openly
    accessed and contains data that belongs to many owners, you
    probably want to set it to ``True``.
+
+.. data:: ENHYDRIS_WGS84_NAME
+
+   Sometimes Enhydris displays the reference system of the
+   co-ordinates, which is always WGS84. In some installations, it is
+   desirable to show something other than "WGS84", such as "ETRS89".
+   This parameter specifies the name that will be displayed; the
+   default is WGS84.
+
+   This is merely a cosmetic issue, which does not affect the actual
+   reference system used, which is always WGS84. The purpose of this
+   parameter is merely to enable installations in Europe to display
+   "ETRS89" instead of "WGS84" whenever this is preferred. Given that
+   the difference between WGS84 and ETRS89 is only a few centimeters,
+   which is considerably less that the accuracy with which
+   station co-ordinates are given, whether WGS84 or ETRS89 is
+   displayed is actually irrelevant.
