@@ -19,7 +19,7 @@ setuptools                                            0.6 [5]
 pip                                                   1.1 [5]
 PIL with freetype                                     1.1.7 [6]
 Dickinson                                             0.1.0 [7]
-The Python modules listed in :file:`requirements.txt` See file [8]
+The Python modules listed in :file:`requirements.txt` See file
 ===================================================== ============
 
 .. admonition:: Note for production installations
@@ -76,8 +76,6 @@ which is required by Enhydris and is listed in
 
 .. _dickinson: http://dickinson.readthedocs.org/
 .. _pthelma: http://pthelma.readthedocs.org/
-
-[8] :file:`requirements.txt` is somewhat conservative with respect to the versions of the modules required; if you have reason to use a different module version than what is described there, try it; it might work. One exception to this is Django; Enhydris does not run on Django versions other than what :file:`requirements.txt` allows.
 
 .. admonition:: Example: Installing prerequisites on Debian/Ubuntu
 
