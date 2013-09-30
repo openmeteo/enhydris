@@ -241,6 +241,7 @@ class StationListView(ListView):
         "owner_heading": _("Owner"),
         "stype_heading": _("Type"),
     }
+    paginate_by = 20
 
     def get(self, request, *args, **kwargs):
         # The CSV is an undocumented feature we quickly and dirtily created

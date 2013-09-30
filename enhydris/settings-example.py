@@ -56,7 +56,6 @@ INSTALLED_APPS = (
 
     'rest_framework',
     'south',
-    'pagination',
     'enhydris.sorting',
     'registration',
     'profiles',
@@ -80,7 +79,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.gzip.GZipMiddleware',
     'django_notify.middleware.NotificationsMiddleware',
-    'pagination.middleware.PaginationMiddleware',
     'enhydris.sorting.middleware.SortingMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 )

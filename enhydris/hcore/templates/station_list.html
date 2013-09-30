@@ -1,7 +1,6 @@
 {% extends "station_list_common.html" %}
 {% load i18n %}
 {% block title %} {% trans 'Enhydris - Stations' %}{% endblock %}
-{% load pagination_tags %}
 {% load sorting_tags %}
 {% load stationlist_filter %}
 
@@ -98,7 +97,6 @@
 
 {% block content %}
     {% autosort station_list %}
-    {% autopaginate station_list 20 %}
     
     <div id="tabs">
         <ul>
@@ -212,7 +210,23 @@
               <p>{% trans "You may want to try again with a different filter." %}</p>
             {% endif %}
         	<br />
-            {% paginate %}
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}">‹‹&nbsp;{% trans "previous" %}</a>
+                    {% endif %}
+
+                    <span class="current">
+                        {% blocktrans with page_num=page_obj.number num_pages=paginator.num_pages %}
+                        Page {{ page_num }} of {{ num_pages }}
+                        {% endblocktrans %}
+                    </span>
+
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">{% trans "next" %}&nbsp;››</a>
+                    {% endif %}
+                </span>
+            </div>
         </div>
         <div id="tabs-2">
               {% block filters %}

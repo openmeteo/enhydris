@@ -2,7 +2,6 @@ psycopg2>=2.2,<3
 Django>=1.5,<1.6
 django-registration>=1.0,<2
 -e hg+https://bitbucket.org/fcurella/django-profiles@5482ded#egg=django-profiles
-django-pagination>=1.0,<2
 djangorestframework>=2.3,<3
 South>=0.8
 django-notify>=1.1,<2
