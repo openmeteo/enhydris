@@ -61,6 +61,7 @@ INSTALLED_APPS = (
     'profiles',
     'ajax_select',
     'captcha',
+    'django_tables2',
 
     'enhydris.dbsync',
     'enhydris.hcore',
