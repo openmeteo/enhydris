@@ -30,7 +30,10 @@ from django.core.urlresolvers import reverse
 from django.utils import simplejson
 from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
+from django.utils.safestring import mark_safe
 from django.db.models import Count
+
+import django_tables2 as tables
 
 from pthelma.timeseries import Timeseries as TTimeseries
 from pthelma.timeseries import datetime_from_iso
@@ -228,7 +231,26 @@ def _prepare_csv(queryset):
     return zipfilename
 
 
-class StationListView(ListView):
+class StationTable(tables.Table):
+
+    class Meta:
+        model = Station
+        attrs = {'class': 'paleblue'}
+        fields = ('id', 'name', 'water_basin', 'water_division',
+                  'political_division', 'owner', 'stype')
+
+    def render_id(self, value):
+        return mark_safe('<a href="{0}">{1}</a>'.format(
+            reverse('station_detail', args=[value]), value))
+
+    def render_stype(self, record):
+        return ', '.join([x.descr for x in record.stype.all()])
+
+    def render_political_division(self, record):
+        return record.political_division.name
+
+
+class StationListView(tables.SingleTableView):
 
     model = Station
     template_name = 'station_list.html'
@@ -241,7 +263,7 @@ class StationListView(ListView):
         "owner_heading": _("Owner"),
         "stype_heading": _("Type"),
     }
-    paginate_by = 20
+    table_class = StationTable
 
     def get(self, request, *args, **kwargs):
         # The CSV is an undocumented feature we quickly and dirtily created

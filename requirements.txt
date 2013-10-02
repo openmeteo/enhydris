@@ -11,3 +11,4 @@ django-simple-captcha>=0.4
 pthelma>=0.2.1
 django-appconf>=0.6
 gdal>=1.6
+django-tables2>=0.14

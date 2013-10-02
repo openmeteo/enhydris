@@ -3,11 +3,13 @@
 {% block title %} {% trans 'Enhydris - Stations' %}{% endblock %}
 {% load sorting_tags %}
 {% load stationlist_filter %}
+{% load render_table from django_tables2 %}
 
 {% block js-globals %}
     <script type="text/javascript">var map_mode=1;</script>
 {% endblock %}
 {% block extracss %}
+    <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css">
     {% if use_open_layers %}
     <style type="text/css">
     #map {
@@ -170,63 +172,12 @@
     {% endif %}
 
             {% if station_list %}
-			<span style="float:right; clear: both;"> 
-				<img class="decreaseFont" style="cursor:pointer" alt="Decrease font size" src="{{STATIC_URL}}images/icons/user-decrease.png" />
-				<img class="resetFont" style="cursor:pointer" alt="Decrease font size" src="{{STATIC_URL}}images/icons/user-reset.png" />
-				<img class="increaseFont" style="cursor:pointer" alt="Decrease font size" src="{{STATIC_URL}}images/icons/user-increase.png" />
-			</span>
-
-            <table class="table_container tablesorter tablehighlighted data_table" style='width:100%;text-align:center'>
-              <thead>
-                <tr>
-                  <th>{% sort_anchor 'id' id_heading %}</th>
-                  <th>{% sort_anchor 'name' name_heading %}</th>
-                  <th>{% sort_anchor 'water_basin' water_basin_heading %}</th>
-                  <th>{% sort_anchor 'water_division' water_division_heading %}</th>
-                  <th>{% sort_anchor 'political_division' political_division_heading %}</th>
-                  <th>{% sort_anchor 'owner' owner_heading %}</th>
-                  <th>{% sort_anchor 'stype' stype_heading %}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for station in station_list %}
-                {% with station.id as station_id %}
-                {% url "station_detail" station_id as station_url %}
-                  <tr class="{% cycle 'odd' 'even' %}">
-                    <td><a href="{{ station_url }}">{{ station_id }}</a></td>
-                    <td>{{ station.name }}</td>
-                    <td>{{ station.water_basin.name }}</td>
-                    <td>{{ station.water_division.name }}</td>
-                    <td>{{ station.political_division.name }}</td>
-                    <td>{{ station.owner }}</td>
-                    <td>{% for stype in station.stype.all %}{{ stype.descr }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
-                  </tr>
-                {% endwith %}
-                {% endfor %}
-            </tbody>
-            </table>
+                    {% render_table table %}
             {% else %}
               <p>{% trans "No entries found." %}</p>
               <p>{% trans "You may want to try again with a different filter." %}</p>
             {% endif %}
         	<br />
-            <div class="pagination">
-                <span class="step-links">
-                    {% if page_obj.has_previous %}
-                        <a href="?page={{ page_obj.previous_page_number }}">‹‹&nbsp;{% trans "previous" %}</a>
-                    {% endif %}
-
-                    <span class="current">
-                        {% blocktrans with page_num=page_obj.number num_pages=paginator.num_pages %}
-                        Page {{ page_num }} of {{ num_pages }}
-                        {% endblocktrans %}
-                    </span>
-
-                    {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}">{% trans "next" %}&nbsp;››</a>
-                    {% endif %}
-                </span>
-            </div>
         </div>
         <div id="tabs-2">
               {% block filters %}
