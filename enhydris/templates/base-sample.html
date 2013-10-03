@@ -113,7 +113,9 @@
 			</li>
 			<li><a class="loginform" href='{% url "auth_login" %}?next={{request.path}}'>{% trans "Login" %}</a></li> 
 
-			<li><a href='{% url "registration_register" %}'>{% trans "Register" %}</a></li> 
+                        {% if REGISTRATION_OPEN %}
+			  <li><a href='{% url "registration_register" %}'>{% trans "Register" %}</a></li> 
+                        {% endif %}
 
 
 		{% endif %}

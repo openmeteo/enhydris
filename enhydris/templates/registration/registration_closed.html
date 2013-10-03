@@ -1,0 +1,14 @@
+{% extends "registration/base.html" %}
+{% load i18n %}
+
+{% block title %}Registration closed{% endblock %}
+
+{% block content %}
+<h1>{% trans "Registration is closed" %}</h1>
+<p>
+{% blocktrans %}
+Sorry, but this site currently does not allow new users to be
+registered.
+{% endblocktrans %}
+</p>
+{% endblock %}

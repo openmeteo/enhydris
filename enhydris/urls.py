@@ -1,6 +1,7 @@
 from django.conf.urls import url, include, patterns
 from django.contrib import admin
 from django.contrib.auth.views import password_reset, password_reset_done
+from django.conf import settings
 
 from registration.views import RegistrationView
 import profiles
@@ -14,9 +15,6 @@ urlpatterns = patterns(
     '',
 
     # Django-registration and django-profiles
-    url(r'^accounts/register/$',
-        RegistrationView.as_view(form_class=RegistrationForm),
-        name='registration_register'),
     (r'^accounts/password/reset/$', password_reset,
      {'template_name': 'registration/password_reset.html'}, 'password_reset'),
     (r'^accounts/password/reset/done/$', password_reset_done,
@@ -34,3 +32,10 @@ urlpatterns = patterns(
     (r'^captcha/', include('captcha.urls')),
     (r'', include('enhydris.hcore.urls')),
 )
+
+if getattr(settings, 'REGISTRATION_OPEN', True):
+    urlpatterns = patterns(
+        '',
+        url(r'^accounts/register/$',
+            RegistrationView.as_view(form_class=RegistrationForm),
+            name='registration_register')) + urlpatterns
