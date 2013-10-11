@@ -154,16 +154,14 @@
                {% trans 'Station Catalogue' %}
            </h3>
 			
-            {% if enabled_user_content %}
-                {% if perms.hcore.add_station %}
-                <p class="anchor_override" style="cursor:pointer;text-align:left">
-                       <a href="{% url "station_add" %}">
-                          <img src="{{STATIC_URL}}admin/img/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
-                          {% trans "Add a new station " %}
-                      </a>
-                </p>
-                {% endif %}
-            {% endif %}
+           {% if perms.hcore.add_station %}
+           <p class="anchor_override" style="cursor:pointer;text-align:left">
+                   <a href="{% url "station_add" %}">
+                       <img src="{{STATIC_URL}}admin/img/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
+                       {% trans "Add a new station " %}
+                   </a>
+           </p>
+           {% endif %}
       
     {% if use_open_layers %}
          </div>
