@@ -111,7 +111,10 @@ def get_search_query(search_terms):
                   Q(political_division__name_alt__icontains=term) |
                   Q(owner__organization__name__icontains=term) |
                   Q(owner__person__first_name__icontains=term) |
-                  Q(owner__person__last_name__icontains=term))
+                  Q(owner__person__last_name__icontains=term) |
+                  Q(timeseries_set__remarks__icontains=term) +
+                  Q(timeseries_set__remarks_alt__icontains=term)
+                 )
     return query
 
 _station_list_csv_headers = ['id', 'Name', 'Alternative name', 'Short name',
@@ -1710,8 +1713,8 @@ def _instrument_edit_or_create(request,instrument_id=None):
             instrument.save()
             if not instrument_id:
                 instrument_id=str(instrument.id)
-            return HttpResponseRedirect(reverse('instrument_detail',
-                        kwargs={'object_id':instrument_id}))
+            return HttpResponseRedirect(
+                reverse('instrument_detail', kwargs={'pk': instrument_id}))
     else:
         if instrument:
             form = InstrumentForm(instance=instrument,user=user,
