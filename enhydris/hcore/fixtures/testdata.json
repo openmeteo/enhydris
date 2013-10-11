@@ -1,0 +1,2811 @@
+[
+{
+    "pk": 1, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "permission", 
+        "name": "permission", 
+        "app_label": "auth"
+    }
+},
+{
+    "pk": 2, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "group", 
+        "name": "group", 
+        "app_label": "auth"
+    }
+},
+{
+    "pk": 3, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "user", 
+        "name": "user", 
+        "app_label": "auth"
+    }
+},
+{
+    "pk": 4, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "contenttype", 
+        "name": "content type", 
+        "app_label": "contenttypes"
+    }
+},
+{
+    "pk": 5, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "session", 
+        "name": "session", 
+        "app_label": "sessions"
+    }
+},
+{
+    "pk": 6, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "logentry", 
+        "name": "log entry", 
+        "app_label": "admin"
+    }
+},
+{
+    "pk": 7, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "site", 
+        "name": "site", 
+        "app_label": "sites"
+    }
+},
+{
+    "pk": 8, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "migrationhistory", 
+        "name": "migration history", 
+        "app_label": "south"
+    }
+},
+{
+    "pk": 9, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "permission", 
+        "name": "permission", 
+        "app_label": "permissions"
+    }
+},
+{
+    "pk": 10, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "registrationprofile", 
+        "name": "registration profile", 
+        "app_label": "registration"
+    }
+},
+{
+    "pk": 11, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "captchastore", 
+        "name": "captcha store", 
+        "app_label": "captcha"
+    }
+},
+{
+    "pk": 12, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "database", 
+        "name": "database", 
+        "app_label": "dbsync"
+    }
+},
+{
+    "pk": 13, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "lentity", 
+        "name": "lentity", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 14, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "person", 
+        "name": "person", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 15, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "organization", 
+        "name": "organization", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 16, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "gentity", 
+        "name": "gentity", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 17, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "gpoint", 
+        "name": "gpoint", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 18, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "gline", 
+        "name": "gline", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 19, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "garea", 
+        "name": "garea", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 20, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "politicaldivision", 
+        "name": "political division", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 21, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "waterdivision", 
+        "name": "water division", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 22, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "waterbasin", 
+        "name": "water basin", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 23, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "gentityaltcodetype", 
+        "name": "gentity alt code type", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 24, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "gentityaltcode", 
+        "name": "gentity alt code", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 25, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "gentitygenericdatatype", 
+        "name": "gentity generic data type", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 26, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "gentitygenericdata", 
+        "name": "gentity generic data", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 27, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "filetype", 
+        "name": "file type", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 28, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "gentityfile", 
+        "name": "gentity file", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 29, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "eventtype", 
+        "name": "event type", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 30, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "gentityevent", 
+        "name": "gentity event", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 31, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "stationtype", 
+        "name": "station type", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 32, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "station", 
+        "name": "station", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 33, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "overseer", 
+        "name": "overseer", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 34, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "instrumenttype", 
+        "name": "instrument type", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 35, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "instrument", 
+        "name": "instrument", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 36, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "variable", 
+        "name": "variable", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 37, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "unitofmeasurement", 
+        "name": "unit of measurement", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 38, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "timezone", 
+        "name": "time zone", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 39, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "timestep", 
+        "name": "time step", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 40, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "intervaltype", 
+        "name": "interval type", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 41, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "timeseries", 
+        "name": "Time Series", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 42, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "tsrecords", 
+        "name": "ts records", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 43, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "userprofile", 
+        "name": "Profile", 
+        "app_label": "hcore"
+    }
+},
+{
+    "pk": 44, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "processbatch", 
+        "name": "process batch", 
+        "app_label": "hprocessor"
+    }
+},
+{
+    "pk": 45, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "processunit", 
+        "name": "process unit", 
+        "app_label": "hprocessor"
+    }
+},
+{
+    "pk": 46, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "processinputvariable", 
+        "name": "process input variable", 
+        "app_label": "hprocessor"
+    }
+},
+{
+    "pk": 47, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "cgeneric", 
+        "name": "Curves", 
+        "app_label": "hprocessor"
+    }
+},
+{
+    "pk": 48, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "ctimeseries", 
+        "name": "Timeseries", 
+        "app_label": "hprocessor"
+    }
+},
+{
+    "pk": 49, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "chartpage", 
+        "name": "chart page", 
+        "app_label": "hchartpages"
+    }
+},
+{
+    "pk": 50, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "chart", 
+        "name": "chart", 
+        "app_label": "hchartpages"
+    }
+},
+{
+    "pk": 51, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "variable", 
+        "name": "variable", 
+        "app_label": "hchartpages"
+    }
+},
+{
+    "pk": 52, 
+    "model": "contenttypes.contenttype", 
+    "fields": {
+        "model": "ctimeseries", 
+        "name": "c timeseries", 
+        "app_label": "hchartpages"
+    }
+},
+{
+    "pk": "j907cqvpgz401fdpk43ih0mhl88zi12a", 
+    "model": "sessions.session", 
+    "fields": {
+        "expire_date": "2013-10-25T12:54:21.478", 
+        "session_data": "MWI5ZTQzOWI4YTAyNDhiMjhlNjVmNjcxNTBhYjJhOWI2ZTc2M2Y2ODqAAn1xAShVEl9hdXRoX3VzZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHEDVQ1fYXV0aF91c2VyX2lkcQRLAXUu"
+    }
+},
+{
+    "pk": 1, 
+    "model": "sites.site", 
+    "fields": {
+        "domain": "example.com", 
+        "name": "example.com"
+    }
+},
+{
+    "pk": 1, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:52.291", 
+        "app_name": "captcha", 
+        "migration": "0001_initial"
+    }
+},
+{
+    "pk": 2, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:52.372", 
+        "app_name": "dbsync", 
+        "migration": "0001_initial"
+    }
+},
+{
+    "pk": 3, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:52.387", 
+        "app_name": "dbsync", 
+        "migration": "0002_added_lastsync_timestamp"
+    }
+},
+{
+    "pk": 4, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:52.791", 
+        "app_name": "hcore", 
+        "migration": "0001_initial"
+    }
+},
+{
+    "pk": 5, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:52.911", 
+        "app_name": "hcore", 
+        "migration": "0002_change_profile"
+    }
+},
+{
+    "pk": 6, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:52.992", 
+        "app_name": "hcore", 
+        "migration": "0003_extend_station"
+    }
+},
+{
+    "pk": 7, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:53.357", 
+        "app_name": "hcore", 
+        "migration": "0004_syncdb_info"
+    }
+},
+{
+    "pk": 8, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:53.566", 
+        "app_name": "hcore", 
+        "migration": "0005_change_models_for_syncdb"
+    }
+},
+{
+    "pk": 9, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:53.752", 
+        "app_name": "hcore", 
+        "migration": "0006_add_lookup_fields"
+    }
+},
+{
+    "pk": 10, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:53.953", 
+        "app_name": "hcore", 
+        "migration": "0007_add_last_modified"
+    }
+},
+{
+    "pk": 11, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:54.082", 
+        "app_name": "hcore", 
+        "migration": "0008_addded_ordering_string_for_lentity"
+    }
+},
+{
+    "pk": 12, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:54.203", 
+        "app_name": "hcore", 
+        "migration": "0009_add_ts_name_alt"
+    }
+},
+{
+    "pk": 13, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:54.305", 
+        "app_name": "hcore", 
+        "migration": "0010_add_ts_interval_type"
+    }
+},
+{
+    "pk": 14, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:54.416", 
+        "app_name": "hcore", 
+        "migration": "0011_add_gentity_generic"
+    }
+},
+{
+    "pk": 15, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:54.515", 
+        "app_name": "hcore", 
+        "migration": "0012_ts_field_hidden"
+    }
+},
+{
+    "pk": 16, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:54.601", 
+        "app_name": "hcore", 
+        "migration": "0013_auto__add_field_gpoint_point"
+    }
+},
+{
+    "pk": 17, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:54.670", 
+        "app_name": "hcore", 
+        "migration": "0014_point_geometries"
+    }
+},
+{
+    "pk": 18, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:54.734", 
+        "app_name": "hcore", 
+        "migration": "0015_auto__del_field_gpoint_ordinate__del_field_gpoint_abscissa"
+    }
+},
+{
+    "pk": 19, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:54.806", 
+        "app_name": "hcore", 
+        "migration": "0016_auto__add_field_userprofile_email_is_public"
+    }
+},
+{
+    "pk": 20, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:54.911", 
+        "app_name": "hcore", 
+        "migration": "0017_auto__add_field_station_copyright_holder__add_field_station_copyright_"
+    }
+},
+{
+    "pk": 21, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:54.993", 
+        "app_name": "hcore", 
+        "migration": "0018_auto__add_tsrecords"
+    }
+},
+{
+    "pk": 22, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:55.129", 
+        "app_name": "hcore", 
+        "migration": "0019_auto__add_field_gline_linestring__add_field_garea_mpoly"
+    }
+},
+{
+    "pk": 23, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:55.207", 
+        "app_name": "hcore", 
+        "migration": "0020_insert_hcore_intervaltype_values"
+    }
+},
+{
+    "pk": 24, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:55.328", 
+        "app_name": "hcore", 
+        "migration": "0021_auto__add_field_station_stype"
+    }
+},
+{
+    "pk": 25, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:55.404", 
+        "app_name": "hcore", 
+        "migration": "0022_copy_station_type_to_stype"
+    }
+},
+{
+    "pk": 26, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:55.469", 
+        "app_name": "hcore", 
+        "migration": "0023_auto__del_field_station_type"
+    }
+},
+{
+    "pk": 27, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:55.762", 
+        "app_name": "hprocessor", 
+        "migration": "0001_initial"
+    }
+},
+{
+    "pk": 28, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:55.828", 
+        "app_name": "hprocessor", 
+        "migration": "0002_auto__add_field_processunit_aggregation_last_incomplete"
+    }
+},
+{
+    "pk": 29, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:55.896", 
+        "app_name": "hprocessor", 
+        "migration": "0003_auto__add_field_processunit_aggregation_all_incomplete"
+    }
+},
+{
+    "pk": 30, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:56.002", 
+        "app_name": "hprocessor", 
+        "migration": "0004_auto__add_cgeneric__add_field_processunit_interpol_method__add_field_p"
+    }
+},
+{
+    "pk": 31, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:56.251", 
+        "app_name": "hchartpages", 
+        "migration": "0001_initial"
+    }
+},
+{
+    "pk": 32, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:56.307", 
+        "app_name": "hchartpages", 
+        "migration": "0002_auto__add_ctimeseries__add_field_chartpage_url_int_alias"
+    }
+},
+{
+    "pk": 33, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:56.357", 
+        "app_name": "hchartpages", 
+        "migration": "0003_auto__add_unique_chartpage_url_int_alias"
+    }
+},
+{
+    "pk": 34, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:56.413", 
+        "app_name": "hchartpages", 
+        "migration": "0004_auto__add_field_chart_is_vector"
+    }
+},
+{
+    "pk": 35, 
+    "model": "south.migrationhistory", 
+    "fields": {
+        "applied": "2013-10-11T12:49:56.502", 
+        "app_name": "hchartpages", 
+        "migration": "0005_auto__add_field_chartpage_auto_refresh__add_field_chartpage_auto_refre"
+    }
+},
+{
+    "pk": 1, 
+    "model": "hcore.lentity", 
+    "fields": {
+        "original_db": null, 
+        "last_modified": "2013-10-11T12:57:07.087", 
+        "remarks_alt": "", 
+        "remarks": "", 
+        "original_id": null, 
+        "ordering_string": "We're rich and we fancy it SA"
+    }
+},
+{
+    "pk": 2, 
+    "model": "hcore.lentity", 
+    "fields": {
+        "original_db": null, 
+        "last_modified": "2013-10-11T12:57:16.869", 
+        "remarks_alt": "", 
+        "remarks": "", 
+        "original_id": null, 
+        "ordering_string": "We're poor and dislike it Ltd"
+    }
+},
+{
+    "pk": 2, 
+    "model": "hcore.organization", 
+    "fields": {
+        "acronym": "", 
+        "acronym_alt": "", 
+        "name": "We're poor and dislike it Ltd", 
+        "name_alt": ""
+    }
+},
+{
+    "pk": 1, 
+    "model": "hcore.organization", 
+    "fields": {
+        "acronym": "", 
+        "acronym_alt": "", 
+        "name": "We're rich and we fancy it SA", 
+        "name_alt": ""
+    }
+},
+{
+    "pk": 1, 
+    "model": "hcore.gentity", 
+    "fields": {
+        "original_db": null, 
+        "short_name": "", 
+        "water_division": null, 
+        "political_division": null, 
+        "remarks_alt": "", 
+        "name_alt": "", 
+        "last_modified": "2013-10-11T13:04:49.962", 
+        "water_basin": null, 
+        "short_name_alt": "", 
+        "remarks": "", 
+        "original_id": null, 
+        "name": "Delphi"
+    }
+},
+{
+    "pk": 2, 
+    "model": "hcore.gentity", 
+    "fields": {
+        "original_db": null, 
+        "short_name": "", 
+        "water_division": null, 
+        "political_division": null, 
+        "remarks_alt": "", 
+        "name_alt": "", 
+        "last_modified": "2013-10-11T13:05:37.549", 
+        "water_basin": null, 
+        "short_name_alt": "", 
+        "remarks": "", 
+        "original_id": null, 
+        "name": "New York"
+    }
+},
+{
+    "pk": 3, 
+    "model": "hcore.gentity", 
+    "fields": {
+        "original_db": null, 
+        "short_name": "", 
+        "water_division": null, 
+        "political_division": null, 
+        "remarks_alt": "", 
+        "name_alt": "", 
+        "last_modified": "2013-10-11T13:07:00.925", 
+        "water_basin": null, 
+        "short_name_alt": "", 
+        "remarks": "", 
+        "original_id": null, 
+        "name": "Beijing"
+    }
+},
+{
+    "pk": 3, 
+    "model": "hcore.gpoint", 
+    "fields": {
+        "srid": null, 
+        "altitude": null, 
+        "asrid": null, 
+        "approximate": false, 
+        "point": null
+    }
+},
+{
+    "pk": 1, 
+    "model": "hcore.gpoint", 
+    "fields": {
+        "srid": null, 
+        "altitude": null, 
+        "asrid": null, 
+        "approximate": false, 
+        "point": null
+    }
+},
+{
+    "pk": 2, 
+    "model": "hcore.gpoint", 
+    "fields": {
+        "srid": null, 
+        "altitude": null, 
+        "asrid": null, 
+        "approximate": false, 
+        "point": null
+    }
+},
+{
+    "pk": 1, 
+    "model": "hcore.stationtype", 
+    "fields": {
+        "descr_alt": "", 
+        "last_modified": "2013-10-11T12:55:57.483", 
+        "original_id": null, 
+        "original_db": null, 
+        "descr": "Important"
+    }
+},
+{
+    "pk": 2, 
+    "model": "hcore.stationtype", 
+    "fields": {
+        "descr_alt": "", 
+        "last_modified": "2013-10-11T12:56:03.618", 
+        "original_id": null, 
+        "original_db": null, 
+        "descr": "Unimportant"
+    }
+},
+{
+    "pk": 1, 
+    "model": "hcore.variable", 
+    "fields": {
+        "descr_alt": "", 
+        "last_modified": "2013-10-11T13:01:27.560", 
+        "original_id": null, 
+        "original_db": null, 
+        "descr": "Rainfall"
+    }
+},
+{
+    "pk": 2, 
+    "model": "hcore.variable", 
+    "fields": {
+        "descr_alt": "", 
+        "last_modified": "2013-10-11T13:01:31.726", 
+        "original_id": null, 
+        "original_db": null, 
+        "descr": "Temperature"
+    }
+},
+{
+    "pk": 1, 
+    "model": "hcore.unitofmeasurement", 
+    "fields": {
+        "original_db": null, 
+        "descr": "millimeter", 
+        "symbol": "mm", 
+        "descr_alt": "", 
+        "last_modified": "2013-10-11T13:02:00.602", 
+        "original_id": null, 
+        "variables": [
+            1
+        ]
+    }
+},
+{
+    "pk": 2, 
+    "model": "hcore.unitofmeasurement", 
+    "fields": {
+        "original_db": null, 
+        "descr": "Degrees Celsius", 
+        "symbol": "\u00b0C", 
+        "descr_alt": "", 
+        "last_modified": "2013-10-11T13:02:35.306", 
+        "original_id": null, 
+        "variables": [
+            2
+        ]
+    }
+},
+{
+    "pk": 1, 
+    "model": "hcore.timezone", 
+    "fields": {
+        "code": "EET", 
+        "utc_offset": 120, 
+        "last_modified": "2013-10-11T13:03:41.855", 
+        "original_id": null, 
+        "original_db": null
+    }
+},
+{
+    "pk": 1, 
+    "model": "hcore.intervaltype", 
+    "fields": {
+        "original_db": null, 
+        "descr": "Sum", 
+        "value": "SUM", 
+        "descr_alt": "Sum", 
+        "last_modified": "2013-10-11T12:49:55.198", 
+        "original_id": null
+    }
+},
+{
+    "pk": 2, 
+    "model": "hcore.intervaltype", 
+    "fields": {
+        "original_db": null, 
+        "descr": "Average value", 
+        "value": "AVERAGE", 
+        "descr_alt": "Average value", 
+        "last_modified": "2013-10-11T12:49:55.200", 
+        "original_id": null
+    }
+},
+{
+    "pk": 3, 
+    "model": "hcore.intervaltype", 
+    "fields": {
+        "original_db": null, 
+        "descr": "Minimum", 
+        "value": "MINIMUM", 
+        "descr_alt": "Minimum", 
+        "last_modified": "2013-10-11T12:49:55.202", 
+        "original_id": null
+    }
+},
+{
+    "pk": 4, 
+    "model": "hcore.intervaltype", 
+    "fields": {
+        "original_db": null, 
+        "descr": "Maximum", 
+        "value": "MAXIMUM", 
+        "descr_alt": "Maximum", 
+        "last_modified": "2013-10-11T12:49:55.203", 
+        "original_id": null
+    }
+},
+{
+    "pk": 5, 
+    "model": "hcore.intervaltype", 
+    "fields": {
+        "original_db": null, 
+        "descr": "Vector average", 
+        "value": "VECTOR_AVERAGE", 
+        "descr_alt": "Vector average", 
+        "last_modified": "2013-10-11T12:49:55.205", 
+        "original_id": null
+    }
+},
+{
+    "pk": 1, 
+    "model": "hcore.timeseries", 
+    "fields": {
+        "unit_of_measurement": 1, 
+        "original_db": null, 
+        "nominal_offset_minutes": null, 
+        "instrument": null, 
+        "gentity": 1, 
+        "interval_type": null, 
+        "nominal_offset_months": null, 
+        "precision": null, 
+        "name_alt": "", 
+        "time_zone": 1, 
+        "remarks": "", 
+        "actual_offset_months": null, 
+        "last_modified": "2013-10-11T13:04:30.226", 
+        "original_id": null, 
+        "time_step": null, 
+        "variable": 1, 
+        "remarks_alt": "", 
+        "hidden": false, 
+        "actual_offset_minutes": null, 
+        "name": "Rain"
+    }
+},
+{
+    "pk": 2, 
+    "model": "hcore.timeseries", 
+    "fields": {
+        "unit_of_measurement": 2, 
+        "original_db": null, 
+        "nominal_offset_minutes": null, 
+        "instrument": null, 
+        "gentity": 1, 
+        "interval_type": null, 
+        "nominal_offset_months": null, 
+        "precision": null, 
+        "name_alt": "", 
+        "time_zone": 1, 
+        "remarks": "", 
+        "actual_offset_months": null, 
+        "last_modified": "2013-10-11T13:04:49.978", 
+        "original_id": null, 
+        "time_step": null, 
+        "variable": 2, 
+        "remarks_alt": "", 
+        "hidden": false, 
+        "actual_offset_minutes": null, 
+        "name": "Air temperature"
+    }
+},
+{
+    "pk": 3, 
+    "model": "hcore.timeseries", 
+    "fields": {
+        "unit_of_measurement": 1, 
+        "original_db": null, 
+        "nominal_offset_minutes": null, 
+        "instrument": null, 
+        "gentity": 2, 
+        "interval_type": null, 
+        "nominal_offset_months": null, 
+        "precision": null, 
+        "name_alt": "", 
+        "time_zone": 1, 
+        "remarks": "", 
+        "actual_offset_months": null, 
+        "last_modified": "2013-10-11T13:05:37.558", 
+        "original_id": null, 
+        "time_step": null, 
+        "variable": 1, 
+        "remarks_alt": "", 
+        "hidden": false, 
+        "actual_offset_minutes": null, 
+        "name": "Rain"
+    }
+},
+{
+    "pk": 4, 
+    "model": "hcore.timeseries", 
+    "fields": {
+        "unit_of_measurement": 2, 
+        "original_db": null, 
+        "nominal_offset_minutes": null, 
+        "instrument": null, 
+        "gentity": 2, 
+        "interval_type": null, 
+        "nominal_offset_months": null, 
+        "precision": null, 
+        "name_alt": "", 
+        "time_zone": 1, 
+        "remarks": "", 
+        "actual_offset_months": null, 
+        "last_modified": "2013-10-11T13:05:37.560", 
+        "original_id": null, 
+        "time_step": null, 
+        "variable": 2, 
+        "remarks_alt": "", 
+        "hidden": false, 
+        "actual_offset_minutes": null, 
+        "name": "Air temperature"
+    }
+},
+{
+    "pk": 5, 
+    "model": "hcore.timeseries", 
+    "fields": {
+        "unit_of_measurement": 1, 
+        "original_db": null, 
+        "nominal_offset_minutes": null, 
+        "instrument": null, 
+        "gentity": 3, 
+        "interval_type": null, 
+        "nominal_offset_months": null, 
+        "precision": null, 
+        "name_alt": "", 
+        "time_zone": 1, 
+        "remarks": "", 
+        "actual_offset_months": null, 
+        "last_modified": "2013-10-11T13:07:00.936", 
+        "original_id": null, 
+        "time_step": null, 
+        "variable": 1, 
+        "remarks_alt": "", 
+        "hidden": false, 
+        "actual_offset_minutes": null, 
+        "name": "Rain"
+    }
+},
+{
+    "pk": 6, 
+    "model": "hcore.timeseries", 
+    "fields": {
+        "unit_of_measurement": 2, 
+        "original_db": null, 
+        "nominal_offset_minutes": null, 
+        "instrument": null, 
+        "gentity": 3, 
+        "interval_type": null, 
+        "nominal_offset_months": null, 
+        "precision": null, 
+        "name_alt": "", 
+        "time_zone": 1, 
+        "remarks": "This is an extremely important time series, just because it is hugely significant and markedly outstanding.", 
+        "actual_offset_months": null, 
+        "last_modified": "2013-10-11T13:07:00.938", 
+        "original_id": null, 
+        "time_step": null, 
+        "variable": 2, 
+        "remarks_alt": "", 
+        "hidden": false, 
+        "actual_offset_minutes": null, 
+        "name": "Temperature"
+    }
+},
+{
+    "pk": 1, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_permission", 
+        "name": "Can add permission", 
+        "content_type": 1
+    }
+},
+{
+    "pk": 2, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_permission", 
+        "name": "Can change permission", 
+        "content_type": 1
+    }
+},
+{
+    "pk": 3, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_permission", 
+        "name": "Can delete permission", 
+        "content_type": 1
+    }
+},
+{
+    "pk": 4, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_group", 
+        "name": "Can add group", 
+        "content_type": 2
+    }
+},
+{
+    "pk": 5, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_group", 
+        "name": "Can change group", 
+        "content_type": 2
+    }
+},
+{
+    "pk": 6, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_group", 
+        "name": "Can delete group", 
+        "content_type": 2
+    }
+},
+{
+    "pk": 7, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_user", 
+        "name": "Can add user", 
+        "content_type": 3
+    }
+},
+{
+    "pk": 8, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_user", 
+        "name": "Can change user", 
+        "content_type": 3
+    }
+},
+{
+    "pk": 9, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_user", 
+        "name": "Can delete user", 
+        "content_type": 3
+    }
+},
+{
+    "pk": 10, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_contenttype", 
+        "name": "Can add content type", 
+        "content_type": 4
+    }
+},
+{
+    "pk": 11, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_contenttype", 
+        "name": "Can change content type", 
+        "content_type": 4
+    }
+},
+{
+    "pk": 12, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_contenttype", 
+        "name": "Can delete content type", 
+        "content_type": 4
+    }
+},
+{
+    "pk": 13, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_session", 
+        "name": "Can add session", 
+        "content_type": 5
+    }
+},
+{
+    "pk": 14, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_session", 
+        "name": "Can change session", 
+        "content_type": 5
+    }
+},
+{
+    "pk": 15, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_session", 
+        "name": "Can delete session", 
+        "content_type": 5
+    }
+},
+{
+    "pk": 16, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_logentry", 
+        "name": "Can add log entry", 
+        "content_type": 6
+    }
+},
+{
+    "pk": 17, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_logentry", 
+        "name": "Can change log entry", 
+        "content_type": 6
+    }
+},
+{
+    "pk": 18, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_logentry", 
+        "name": "Can delete log entry", 
+        "content_type": 6
+    }
+},
+{
+    "pk": 19, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_site", 
+        "name": "Can add site", 
+        "content_type": 7
+    }
+},
+{
+    "pk": 20, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_site", 
+        "name": "Can change site", 
+        "content_type": 7
+    }
+},
+{
+    "pk": 21, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_site", 
+        "name": "Can delete site", 
+        "content_type": 7
+    }
+},
+{
+    "pk": 22, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_migrationhistory", 
+        "name": "Can add migration history", 
+        "content_type": 8
+    }
+},
+{
+    "pk": 23, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_migrationhistory", 
+        "name": "Can change migration history", 
+        "content_type": 8
+    }
+},
+{
+    "pk": 24, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_migrationhistory", 
+        "name": "Can delete migration history", 
+        "content_type": 8
+    }
+},
+{
+    "pk": 25, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_permission", 
+        "name": "Can add permission", 
+        "content_type": 9
+    }
+},
+{
+    "pk": 26, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_permission", 
+        "name": "Can change permission", 
+        "content_type": 9
+    }
+},
+{
+    "pk": 27, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_permission", 
+        "name": "Can delete permission", 
+        "content_type": 9
+    }
+},
+{
+    "pk": 28, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_registrationprofile", 
+        "name": "Can add registration profile", 
+        "content_type": 10
+    }
+},
+{
+    "pk": 29, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_registrationprofile", 
+        "name": "Can change registration profile", 
+        "content_type": 10
+    }
+},
+{
+    "pk": 30, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_registrationprofile", 
+        "name": "Can delete registration profile", 
+        "content_type": 10
+    }
+},
+{
+    "pk": 31, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_captchastore", 
+        "name": "Can add captcha store", 
+        "content_type": 11
+    }
+},
+{
+    "pk": 32, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_captchastore", 
+        "name": "Can change captcha store", 
+        "content_type": 11
+    }
+},
+{
+    "pk": 33, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_captchastore", 
+        "name": "Can delete captcha store", 
+        "content_type": 11
+    }
+},
+{
+    "pk": 34, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_database", 
+        "name": "Can add database", 
+        "content_type": 12
+    }
+},
+{
+    "pk": 35, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_database", 
+        "name": "Can change database", 
+        "content_type": 12
+    }
+},
+{
+    "pk": 36, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_database", 
+        "name": "Can delete database", 
+        "content_type": 12
+    }
+},
+{
+    "pk": 37, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_lentity", 
+        "name": "Can add lentity", 
+        "content_type": 13
+    }
+},
+{
+    "pk": 38, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_lentity", 
+        "name": "Can change lentity", 
+        "content_type": 13
+    }
+},
+{
+    "pk": 39, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_lentity", 
+        "name": "Can delete lentity", 
+        "content_type": 13
+    }
+},
+{
+    "pk": 40, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_person", 
+        "name": "Can add person", 
+        "content_type": 14
+    }
+},
+{
+    "pk": 41, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_person", 
+        "name": "Can change person", 
+        "content_type": 14
+    }
+},
+{
+    "pk": 42, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_person", 
+        "name": "Can delete person", 
+        "content_type": 14
+    }
+},
+{
+    "pk": 43, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_organization", 
+        "name": "Can add organization", 
+        "content_type": 15
+    }
+},
+{
+    "pk": 44, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_organization", 
+        "name": "Can change organization", 
+        "content_type": 15
+    }
+},
+{
+    "pk": 45, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_organization", 
+        "name": "Can delete organization", 
+        "content_type": 15
+    }
+},
+{
+    "pk": 46, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_gentity", 
+        "name": "Can add gentity", 
+        "content_type": 16
+    }
+},
+{
+    "pk": 47, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_gentity", 
+        "name": "Can change gentity", 
+        "content_type": 16
+    }
+},
+{
+    "pk": 48, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_gentity", 
+        "name": "Can delete gentity", 
+        "content_type": 16
+    }
+},
+{
+    "pk": 49, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_gpoint", 
+        "name": "Can add gpoint", 
+        "content_type": 17
+    }
+},
+{
+    "pk": 50, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_gpoint", 
+        "name": "Can change gpoint", 
+        "content_type": 17
+    }
+},
+{
+    "pk": 51, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_gpoint", 
+        "name": "Can delete gpoint", 
+        "content_type": 17
+    }
+},
+{
+    "pk": 52, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_gline", 
+        "name": "Can add gline", 
+        "content_type": 18
+    }
+},
+{
+    "pk": 53, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_gline", 
+        "name": "Can change gline", 
+        "content_type": 18
+    }
+},
+{
+    "pk": 54, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_gline", 
+        "name": "Can delete gline", 
+        "content_type": 18
+    }
+},
+{
+    "pk": 55, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_garea", 
+        "name": "Can add garea", 
+        "content_type": 19
+    }
+},
+{
+    "pk": 56, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_garea", 
+        "name": "Can change garea", 
+        "content_type": 19
+    }
+},
+{
+    "pk": 57, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_garea", 
+        "name": "Can delete garea", 
+        "content_type": 19
+    }
+},
+{
+    "pk": 58, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_politicaldivision", 
+        "name": "Can add political division", 
+        "content_type": 20
+    }
+},
+{
+    "pk": 59, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_politicaldivision", 
+        "name": "Can change political division", 
+        "content_type": 20
+    }
+},
+{
+    "pk": 60, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_politicaldivision", 
+        "name": "Can delete political division", 
+        "content_type": 20
+    }
+},
+{
+    "pk": 61, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_waterdivision", 
+        "name": "Can add water division", 
+        "content_type": 21
+    }
+},
+{
+    "pk": 62, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_waterdivision", 
+        "name": "Can change water division", 
+        "content_type": 21
+    }
+},
+{
+    "pk": 63, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_waterdivision", 
+        "name": "Can delete water division", 
+        "content_type": 21
+    }
+},
+{
+    "pk": 64, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_waterbasin", 
+        "name": "Can add water basin", 
+        "content_type": 22
+    }
+},
+{
+    "pk": 65, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_waterbasin", 
+        "name": "Can change water basin", 
+        "content_type": 22
+    }
+},
+{
+    "pk": 66, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_waterbasin", 
+        "name": "Can delete water basin", 
+        "content_type": 22
+    }
+},
+{
+    "pk": 67, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_gentityaltcodetype", 
+        "name": "Can add gentity alt code type", 
+        "content_type": 23
+    }
+},
+{
+    "pk": 68, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_gentityaltcodetype", 
+        "name": "Can change gentity alt code type", 
+        "content_type": 23
+    }
+},
+{
+    "pk": 69, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_gentityaltcodetype", 
+        "name": "Can delete gentity alt code type", 
+        "content_type": 23
+    }
+},
+{
+    "pk": 70, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_gentityaltcode", 
+        "name": "Can add gentity alt code", 
+        "content_type": 24
+    }
+},
+{
+    "pk": 71, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_gentityaltcode", 
+        "name": "Can change gentity alt code", 
+        "content_type": 24
+    }
+},
+{
+    "pk": 72, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_gentityaltcode", 
+        "name": "Can delete gentity alt code", 
+        "content_type": 24
+    }
+},
+{
+    "pk": 73, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_gentitygenericdatatype", 
+        "name": "Can add gentity generic data type", 
+        "content_type": 25
+    }
+},
+{
+    "pk": 74, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_gentitygenericdatatype", 
+        "name": "Can change gentity generic data type", 
+        "content_type": 25
+    }
+},
+{
+    "pk": 75, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_gentitygenericdatatype", 
+        "name": "Can delete gentity generic data type", 
+        "content_type": 25
+    }
+},
+{
+    "pk": 76, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_gentitygenericdata", 
+        "name": "Can add gentity generic data", 
+        "content_type": 26
+    }
+},
+{
+    "pk": 77, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_gentitygenericdata", 
+        "name": "Can change gentity generic data", 
+        "content_type": 26
+    }
+},
+{
+    "pk": 78, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_gentitygenericdata", 
+        "name": "Can delete gentity generic data", 
+        "content_type": 26
+    }
+},
+{
+    "pk": 79, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_filetype", 
+        "name": "Can add file type", 
+        "content_type": 27
+    }
+},
+{
+    "pk": 80, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_filetype", 
+        "name": "Can change file type", 
+        "content_type": 27
+    }
+},
+{
+    "pk": 81, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_filetype", 
+        "name": "Can delete file type", 
+        "content_type": 27
+    }
+},
+{
+    "pk": 82, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_gentityfile", 
+        "name": "Can add gentity file", 
+        "content_type": 28
+    }
+},
+{
+    "pk": 83, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_gentityfile", 
+        "name": "Can change gentity file", 
+        "content_type": 28
+    }
+},
+{
+    "pk": 84, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_gentityfile", 
+        "name": "Can delete gentity file", 
+        "content_type": 28
+    }
+},
+{
+    "pk": 85, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_eventtype", 
+        "name": "Can add event type", 
+        "content_type": 29
+    }
+},
+{
+    "pk": 86, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_eventtype", 
+        "name": "Can change event type", 
+        "content_type": 29
+    }
+},
+{
+    "pk": 87, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_eventtype", 
+        "name": "Can delete event type", 
+        "content_type": 29
+    }
+},
+{
+    "pk": 88, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_gentityevent", 
+        "name": "Can add gentity event", 
+        "content_type": 30
+    }
+},
+{
+    "pk": 89, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_gentityevent", 
+        "name": "Can change gentity event", 
+        "content_type": 30
+    }
+},
+{
+    "pk": 90, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_gentityevent", 
+        "name": "Can delete gentity event", 
+        "content_type": 30
+    }
+},
+{
+    "pk": 91, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_stationtype", 
+        "name": "Can add station type", 
+        "content_type": 31
+    }
+},
+{
+    "pk": 92, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_stationtype", 
+        "name": "Can change station type", 
+        "content_type": 31
+    }
+},
+{
+    "pk": 93, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_stationtype", 
+        "name": "Can delete station type", 
+        "content_type": 31
+    }
+},
+{
+    "pk": 94, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_station", 
+        "name": "Can add station", 
+        "content_type": 32
+    }
+},
+{
+    "pk": 95, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_station", 
+        "name": "Can change station", 
+        "content_type": 32
+    }
+},
+{
+    "pk": 96, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_station", 
+        "name": "Can delete station", 
+        "content_type": 32
+    }
+},
+{
+    "pk": 97, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_overseer", 
+        "name": "Can add overseer", 
+        "content_type": 33
+    }
+},
+{
+    "pk": 98, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_overseer", 
+        "name": "Can change overseer", 
+        "content_type": 33
+    }
+},
+{
+    "pk": 99, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_overseer", 
+        "name": "Can delete overseer", 
+        "content_type": 33
+    }
+},
+{
+    "pk": 100, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_instrumenttype", 
+        "name": "Can add instrument type", 
+        "content_type": 34
+    }
+},
+{
+    "pk": 101, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_instrumenttype", 
+        "name": "Can change instrument type", 
+        "content_type": 34
+    }
+},
+{
+    "pk": 102, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_instrumenttype", 
+        "name": "Can delete instrument type", 
+        "content_type": 34
+    }
+},
+{
+    "pk": 103, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_instrument", 
+        "name": "Can add instrument", 
+        "content_type": 35
+    }
+},
+{
+    "pk": 104, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_instrument", 
+        "name": "Can change instrument", 
+        "content_type": 35
+    }
+},
+{
+    "pk": 105, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_instrument", 
+        "name": "Can delete instrument", 
+        "content_type": 35
+    }
+},
+{
+    "pk": 106, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_variable", 
+        "name": "Can add variable", 
+        "content_type": 36
+    }
+},
+{
+    "pk": 107, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_variable", 
+        "name": "Can change variable", 
+        "content_type": 36
+    }
+},
+{
+    "pk": 108, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_variable", 
+        "name": "Can delete variable", 
+        "content_type": 36
+    }
+},
+{
+    "pk": 109, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_unitofmeasurement", 
+        "name": "Can add unit of measurement", 
+        "content_type": 37
+    }
+},
+{
+    "pk": 110, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_unitofmeasurement", 
+        "name": "Can change unit of measurement", 
+        "content_type": 37
+    }
+},
+{
+    "pk": 111, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_unitofmeasurement", 
+        "name": "Can delete unit of measurement", 
+        "content_type": 37
+    }
+},
+{
+    "pk": 112, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_timezone", 
+        "name": "Can add time zone", 
+        "content_type": 38
+    }
+},
+{
+    "pk": 113, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_timezone", 
+        "name": "Can change time zone", 
+        "content_type": 38
+    }
+},
+{
+    "pk": 114, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_timezone", 
+        "name": "Can delete time zone", 
+        "content_type": 38
+    }
+},
+{
+    "pk": 115, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_timestep", 
+        "name": "Can add time step", 
+        "content_type": 39
+    }
+},
+{
+    "pk": 116, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_timestep", 
+        "name": "Can change time step", 
+        "content_type": 39
+    }
+},
+{
+    "pk": 117, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_timestep", 
+        "name": "Can delete time step", 
+        "content_type": 39
+    }
+},
+{
+    "pk": 118, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_intervaltype", 
+        "name": "Can add interval type", 
+        "content_type": 40
+    }
+},
+{
+    "pk": 119, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_intervaltype", 
+        "name": "Can change interval type", 
+        "content_type": 40
+    }
+},
+{
+    "pk": 120, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_intervaltype", 
+        "name": "Can delete interval type", 
+        "content_type": 40
+    }
+},
+{
+    "pk": 121, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_timeseries", 
+        "name": "Can add Time Series", 
+        "content_type": 41
+    }
+},
+{
+    "pk": 122, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_timeseries", 
+        "name": "Can change Time Series", 
+        "content_type": 41
+    }
+},
+{
+    "pk": 123, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_timeseries", 
+        "name": "Can delete Time Series", 
+        "content_type": 41
+    }
+},
+{
+    "pk": 124, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_tsrecords", 
+        "name": "Can add ts records", 
+        "content_type": 42
+    }
+},
+{
+    "pk": 125, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_tsrecords", 
+        "name": "Can change ts records", 
+        "content_type": 42
+    }
+},
+{
+    "pk": 126, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_tsrecords", 
+        "name": "Can delete ts records", 
+        "content_type": 42
+    }
+},
+{
+    "pk": 127, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_userprofile", 
+        "name": "Can add Profile", 
+        "content_type": 43
+    }
+},
+{
+    "pk": 128, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_userprofile", 
+        "name": "Can change Profile", 
+        "content_type": 43
+    }
+},
+{
+    "pk": 129, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_userprofile", 
+        "name": "Can delete Profile", 
+        "content_type": 43
+    }
+},
+{
+    "pk": 130, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_processbatch", 
+        "name": "Can add process batch", 
+        "content_type": 44
+    }
+},
+{
+    "pk": 131, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_processbatch", 
+        "name": "Can change process batch", 
+        "content_type": 44
+    }
+},
+{
+    "pk": 132, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_processbatch", 
+        "name": "Can delete process batch", 
+        "content_type": 44
+    }
+},
+{
+    "pk": 133, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_ctimeseries", 
+        "name": "Can add Timeseries", 
+        "content_type": 41
+    }
+},
+{
+    "pk": 134, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_ctimeseries", 
+        "name": "Can change Timeseries", 
+        "content_type": 41
+    }
+},
+{
+    "pk": 135, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_ctimeseries", 
+        "name": "Can delete Timeseries", 
+        "content_type": 41
+    }
+},
+{
+    "pk": 136, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_cgeneric", 
+        "name": "Can add Curves", 
+        "content_type": 26
+    }
+},
+{
+    "pk": 137, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_cgeneric", 
+        "name": "Can change Curves", 
+        "content_type": 26
+    }
+},
+{
+    "pk": 138, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_cgeneric", 
+        "name": "Can delete Curves", 
+        "content_type": 26
+    }
+},
+{
+    "pk": 139, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_processunit", 
+        "name": "Can add process unit", 
+        "content_type": 45
+    }
+},
+{
+    "pk": 140, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_processunit", 
+        "name": "Can change process unit", 
+        "content_type": 45
+    }
+},
+{
+    "pk": 141, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_processunit", 
+        "name": "Can delete process unit", 
+        "content_type": 45
+    }
+},
+{
+    "pk": 142, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_processinputvariable", 
+        "name": "Can add process input variable", 
+        "content_type": 46
+    }
+},
+{
+    "pk": 143, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_processinputvariable", 
+        "name": "Can change process input variable", 
+        "content_type": 46
+    }
+},
+{
+    "pk": 144, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_processinputvariable", 
+        "name": "Can delete process input variable", 
+        "content_type": 46
+    }
+},
+{
+    "pk": 145, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_chartpage", 
+        "name": "Can add chart page", 
+        "content_type": 49
+    }
+},
+{
+    "pk": 146, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_chartpage", 
+        "name": "Can change chart page", 
+        "content_type": 49
+    }
+},
+{
+    "pk": 147, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_chartpage", 
+        "name": "Can delete chart page", 
+        "content_type": 49
+    }
+},
+{
+    "pk": 148, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_chart", 
+        "name": "Can add chart", 
+        "content_type": 50
+    }
+},
+{
+    "pk": 149, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_chart", 
+        "name": "Can change chart", 
+        "content_type": 50
+    }
+},
+{
+    "pk": 150, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_chart", 
+        "name": "Can delete chart", 
+        "content_type": 50
+    }
+},
+{
+    "pk": 151, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "add_variable", 
+        "name": "Can add variable", 
+        "content_type": 51
+    }
+},
+{
+    "pk": 152, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "change_variable", 
+        "name": "Can change variable", 
+        "content_type": 51
+    }
+},
+{
+    "pk": 153, 
+    "model": "auth.permission", 
+    "fields": {
+        "codename": "delete_variable", 
+        "name": "Can delete variable", 
+        "content_type": 51
+    }
+},
+{
+    "pk": 1, 
+    "model": "auth.user", 
+    "fields": {
+        "username": "admin", 
+        "first_name": "", 
+        "last_name": "", 
+        "is_active": true, 
+        "is_superuser": true, 
+        "is_staff": true, 
+        "last_login": "2013-10-11T12:54:21.473", 
+        "groups": [], 
+        "user_permissions": [], 
+        "password": "pbkdf2_sha256$10000$WZt5l3Eva2ui$951cpQ+JUo6U+glYnUfr+dY86mafn/AOGpnhUIHSuNM=", 
+        "email": "anthony@itia.ntua.gr", 
+        "date_joined": "2013-10-11T12:50:35.259"
+    }
+},
+{
+    "pk": 1, 
+    "model": "admin.logentry", 
+    "fields": {
+        "action_flag": 1, 
+        "action_time": "2013-10-11T12:55:57.485", 
+        "object_repr": "Important", 
+        "object_id": "1", 
+        "change_message": "", 
+        "user": 1, 
+        "content_type": 31
+    }
+},
+{
+    "pk": 2, 
+    "model": "admin.logentry", 
+    "fields": {
+        "action_flag": 1, 
+        "action_time": "2013-10-11T12:56:03.620", 
+        "object_repr": "Unimportant", 
+        "object_id": "2", 
+        "change_message": "", 
+        "user": 1, 
+        "content_type": 31
+    }
+},
+{
+    "pk": 3, 
+    "model": "admin.logentry", 
+    "fields": {
+        "action_flag": 1, 
+        "action_time": "2013-10-11T12:57:07.089", 
+        "object_repr": "We're rich and we fancy it SA", 
+        "object_id": "1", 
+        "change_message": "", 
+        "user": 1, 
+        "content_type": 15
+    }
+},
+{
+    "pk": 4, 
+    "model": "admin.logentry", 
+    "fields": {
+        "action_flag": 1, 
+        "action_time": "2013-10-11T12:57:16.871", 
+        "object_repr": "We're poor and dislike it Ltd", 
+        "object_id": "2", 
+        "change_message": "", 
+        "user": 1, 
+        "content_type": 15
+    }
+},
+{
+    "pk": 5, 
+    "model": "admin.logentry", 
+    "fields": {
+        "action_flag": 1, 
+        "action_time": "2013-10-11T13:01:27.562", 
+        "object_repr": "Rainfall", 
+        "object_id": "1", 
+        "change_message": "", 
+        "user": 1, 
+        "content_type": 36
+    }
+},
+{
+    "pk": 6, 
+    "model": "admin.logentry", 
+    "fields": {
+        "action_flag": 1, 
+        "action_time": "2013-10-11T13:01:31.728", 
+        "object_repr": "Temperature", 
+        "object_id": "2", 
+        "change_message": "", 
+        "user": 1, 
+        "content_type": 36
+    }
+},
+{
+    "pk": 7, 
+    "model": "admin.logentry", 
+    "fields": {
+        "action_flag": 1, 
+        "action_time": "2013-10-11T13:02:00.609", 
+        "object_repr": "mm", 
+        "object_id": "1", 
+        "change_message": "", 
+        "user": 1, 
+        "content_type": 37
+    }
+},
+{
+    "pk": 8, 
+    "model": "admin.logentry", 
+    "fields": {
+        "action_flag": 1, 
+        "action_time": "2013-10-11T13:02:35.314", 
+        "object_repr": "\u00b0C", 
+        "object_id": "2", 
+        "change_message": "", 
+        "user": 1, 
+        "content_type": 37
+    }
+},
+{
+    "pk": 9, 
+    "model": "admin.logentry", 
+    "fields": {
+        "action_flag": 1, 
+        "action_time": "2013-10-11T13:03:41.857", 
+        "object_repr": "EET (UTC+0200)", 
+        "object_id": "1", 
+        "change_message": "", 
+        "user": 1, 
+        "content_type": 38
+    }
+},
+{
+    "pk": 3, 
+    "model": "hcore.station", 
+    "fields": {
+        "end_date": null, 
+        "creator": null, 
+        "is_active": false, 
+        "is_automatic": false, 
+        "maintainers": [], 
+        "copyright_holder": "Isaac Newton", 
+        "copyright_years": "1687", 
+        "owner": 1, 
+        "start_date": null, 
+        "stype": [
+            2
+        ]
+    }
+},
+{
+    "pk": 1, 
+    "model": "hcore.station", 
+    "fields": {
+        "end_date": null, 
+        "creator": null, 
+        "is_active": false, 
+        "is_automatic": false, 
+        "maintainers": [], 
+        "copyright_holder": "We're poor and dislike it Ltd", 
+        "copyright_years": "2013", 
+        "owner": 2, 
+        "start_date": null, 
+        "stype": [
+            1
+        ]
+    }
+},
+{
+    "pk": 2, 
+    "model": "hcore.station", 
+    "fields": {
+        "end_date": null, 
+        "creator": null, 
+        "is_active": false, 
+        "is_automatic": false, 
+        "maintainers": [], 
+        "copyright_holder": "We're poor and dislike it Ltd", 
+        "copyright_years": "2013", 
+        "owner": 2, 
+        "start_date": null, 
+        "stype": [
+            1
+        ]
+    }
+},
+{
+    "pk": 1, 
+    "model": "hcore.userprofile", 
+    "fields": {
+        "lname": null, 
+        "email_is_public": false, 
+        "user": 1, 
+        "fname": null, 
+        "address": null, 
+        "organization": null
+    }
+}
+]

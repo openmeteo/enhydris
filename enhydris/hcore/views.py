@@ -112,8 +112,8 @@ def get_search_query(search_terms):
                   Q(owner__organization__name__icontains=term) |
                   Q(owner__person__first_name__icontains=term) |
                   Q(owner__person__last_name__icontains=term) |
-                  Q(timeseries_set__remarks__icontains=term) +
-                  Q(timeseries_set__remarks_alt__icontains=term)
+                  Q(timeseries__remarks__icontains=term) |
+                  Q(timeseries__remarks_alt__icontains=term)
                  )
     return query
 

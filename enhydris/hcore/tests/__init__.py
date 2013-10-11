@@ -13,6 +13,23 @@ from enhydris.hcore.models import StationType, Organization, Variable, \
     Instrument
 from enhydris.hcore.forms import TimeseriesDataForm
 from enhydris.hcore.views import ALLOWED_TO_EDIT
+from enhydris.hcore.views import get_search_query
+
+
+class SearchTestCase(TestCase):
+    fixtures = ['testdata.json']
+
+    def test_search_in_timeseries_remarks(self):
+        # Search for something that exists
+        query = get_search_query(['extremely important time series'])
+        result = Station.objects.filter(query).distinct()
+        self.assertEquals(result.count(), 1)
+        self.assertEquals(result[0].id, 3)
+
+        # Search for something that doesn't exist
+        query = get_search_query(['this should not exist anywhere'])
+        result = Station.objects.filter(query).distinct()
+        self.assertEquals(result.count(), 0)
 
 
 class SmokeTestCase(TestCase):
