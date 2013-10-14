@@ -173,6 +173,7 @@ def _prepare_csv(queryset):
     stationsfilename = os.path.join(tempdir, 'stations.csv')
     stationsfile = open(stationsfilename, 'w')
     try:
+        stationsfile.write(b'\xef\xbb\xbf')  # BOM
         csvwriter = csv.writer(stationsfile)
         csvwriter.writerow(_station_list_csv_headers)
         for station in queryset:
@@ -184,6 +185,7 @@ def _prepare_csv(queryset):
     instrumentsfilename = os.path.join(tempdir, 'instruments.csv')
     instrumentsfile = open(instrumentsfilename, 'w')
     try:
+        instrumentsfile.write(b'\xef\xbb\xbf')  # BOM
         csvwriter = csv.writer(instrumentsfile)
         csvwriter.writerow(_instrument_list_csv_headers)
         for station in queryset:
@@ -196,6 +198,7 @@ def _prepare_csv(queryset):
     timeseriesfilename = os.path.join(tempdir, 'timeseries.csv')
     timeseriesfile = open(timeseriesfilename, 'w')
     try:
+        timeseriesfile.write(b'\xef\xbb\xbf')  # BOM
         csvwriter = csv.writer(timeseriesfile)
         csvwriter.writerow(_timeseries_list_csv_headers)
         for station in queryset:
