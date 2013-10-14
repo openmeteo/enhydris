@@ -100,3 +100,4 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 TEMPLATE_DIRS = ('enhydris/templates',)
 
 AUTH_PROFILE_MODULE = 'hcore.UserProfile'
+LOGIN_REDIRECT_URL = '/'
