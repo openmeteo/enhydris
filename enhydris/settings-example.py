@@ -95,6 +95,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
     'django_notify.context_processors.notifications',
+    'enhydris.hcore.context_processors.registration',
+    'enhydris.hcore.context_processors.osm',
 )
 
 TEMPLATE_DIRS = ('enhydris/templates',)

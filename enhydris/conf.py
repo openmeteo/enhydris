@@ -31,6 +31,15 @@ class EnhydrisConf(AppConf):
     SITE_STATION_FILTER = {}
     DISPLAY_COPYRIGHT_INFO = False
     WGS84_NAME = 'WGS84'
+    OSM_BASE_LAYERS = [
+        r'OpenLayers.Layer.OSM.Mapnik("Open Street Map",'
+        r'{isBaseLayer:true,attribution:'
+        r'''"Map by <a href='http://www.openstreetmap.org/'>OSM</a>"})''',
+
+        r'OpenLayers.Layer.OSM.CycleMap("Open Cycle Map",'
+        r'{isBaseLayer: true, attribution:'
+        r'''"Map by <a href='http://www.openstreetmap.org/'>OSM</a>"})''',
+    ]
 
     class Meta:
         prefix = 'ENHYDRIS'

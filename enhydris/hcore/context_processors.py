@@ -8,3 +8,10 @@ def registration(request):
     django-registration, however.
     """
     return {'REGISTRATION_OPEN': getattr(settings, 'REGISTRATION_OPEN', True)}
+
+
+def osm(request):
+    osm_base_layers_js = 'base_layers=[{0}];'.format(
+        ','.join(['new ' + layer.strip()
+                 for layer in settings.ENHYDRIS_OSM_BASE_LAYERS]))
+    return {'osm_base_layers_js': osm_base_layers_js}

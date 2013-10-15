@@ -521,3 +521,17 @@ These are the settings available to Enhydris, in addition to the
    which is considerably less that the accuracy with which
    station co-ordinates are given, whether WGS84 or ETRS89 is
    displayed is actually irrelevant.
+
+.. data:: ENHYDRIS_OSM_BASE_LAYERS
+
+   A list of Javascript definitions of base layers to use on the map.
+   The default is::
+
+        [r'''OpenLayers.Layer.OSM.Mapnik("Open Street Map",
+            {isBaseLayer: true,
+            attribution: "Map by <a href='http://www.openstreetmap.org/'>OSM</a>"})''',
+         r'''OpenLayers.Layer.OSM.CycleMap("Open Cycle Map",
+            {isBaseLayer: true,
+                attribution: "Map by <a href='http://www.openstreetmap.org/'>OSM</a>"})'''
+        ]
+
