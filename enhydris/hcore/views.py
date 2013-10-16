@@ -76,12 +76,9 @@ class StationDetailView(DetailView):
             from enhydris.hchartpages.models import ChartPage
             chart_exists = ChartPage.objects.filter(
                 url_int_alias=self.object.id).exists()
-        use_open_layers = settings.ENHYDRIS_USE_OPEN_LAYERS and \
-            self.object.srid and self.object.point
         context.update(
             {"owner": self.object.owner,
              "enabled_user_content": settings.ENHYDRIS_USERS_CAN_ADD_CONTENT,
-             "use_open_layers": use_open_layers,
              "anonymous_can_download_data": anonymous_can_download_data,
              "display_copyright": display_copyright,
              "chart_exists": chart_exists,
@@ -376,7 +373,6 @@ class StationListView(tables.SingleTableView):
     def get_context_data(self, **kwargs):
 
         context = super(StationListView, self).get_context_data(**kwargs)
-        context['use_open_layers'] = settings.ENHYDRIS_USE_OPEN_LAYERS
 
         # The following is a hack because enhydris.sorting (aka
         # django-sorting) sucks. I18N should be in the template, not
@@ -657,14 +653,12 @@ class InstrumentDetailView(DetailView):
 
 
 def embedmap_view(request, *args, **kwargs):
-    return render_to_response('embedmap.html', 
-                              {'use_open_layers': settings.ENHYDRIS_USE_OPEN_LAYERS,},
-        context_instance=RequestContext(request))
+    return render_to_response('embedmap.html',
+                              context_instance=RequestContext(request))
 
 def map_view(request, *args, **kwargs):
-    return render_to_response('map_page.html', 
-                              {'use_open_layers': settings.ENHYDRIS_USE_OPEN_LAYERS,},
-        context_instance=RequestContext(request))
+    return render_to_response('map_page.html',
+                              context_instance=RequestContext(request))
 
 def get_subdivision(request, division_id):
     """Ajax call to refresh divisions in filter table"""

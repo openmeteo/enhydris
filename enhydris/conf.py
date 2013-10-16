@@ -21,7 +21,6 @@ class EnhydrisConf(AppConf):
     TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS = False
     STORE_TSDATA_LOCALLY = True
     REMOTE_INSTANCE_CREDENTIALS = {}
-    USE_OPEN_LAYERS = True
     MIN_VIEWPORT_IN_DEGS = 0.04
     MAP_DEFAULT_VIEWPORT = (19.3, 34.75, 29.65, 41.8)
     TS_GRAPH_CACHE_DIR = os.path.join(tempfile.gettempdir(),

@@ -451,10 +451,6 @@ These are the settings available to Enhydris, in addition to the
         'itia.hydroscope.gr': ('anotheruser','anotherpass')
       }
 
-.. data:: ENHYDRIS_USE_OPEN_LAYERS
-
-   Set this to :const:`False` to disable the map.
-
 .. data:: ENHYDRIS_MIN_VIEWPORT_IN_DEGS
 
    Set a value in degrees. When a geographical query has bounds with

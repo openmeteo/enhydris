@@ -10,7 +10,6 @@
 {% endblock %}
 {% block extracss %}
     <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css">
-    {% if use_open_layers %}
     <style type="text/css">
     #map {
         width: 560px;
@@ -18,7 +17,7 @@
         border: 1px solid #eee;
         z-index: 1;
     }
-    </style>{% endif %}
+    </style>
 {% endblock %}
 
 {% block extrajs %}
@@ -107,14 +106,12 @@
         </ul>
 
         <div id="tabs-1" >
-    {% if use_open_layers %}
-          <div>
+        <div>
            <div style="float: right;">
                 <div id="map" style="float: left;">
                 <div id="map_progress" style="position: absolute; margin-top:212px; margin-left: 272px; z-index: 5000;"></div></div>
            </div>
-           <div style="float: left;">
-    {% endif %}
+        <div style="float: left;">
              <div>
                   <h3>{% trans 'Searching' %}</h3>
 					<div class="searchform">
@@ -162,13 +159,9 @@
                    </a>
            </p>
            {% endif %}
-      
-    {% if use_open_layers %}
          </div>
          <button type="button" onclick="GetRectAreaResults();">{% trans 'Filter results by map viewport' %}</button>
         </div>
-    {% endif %}
-
             {% if station_list %}
                     {% render_table table %}
             {% else %}

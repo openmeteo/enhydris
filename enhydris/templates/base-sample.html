@@ -29,21 +29,19 @@
 		$("#search_input").placeholder();
 	});
   </script>
-  {% if use_open_layers %}
-     <link media="screen" href="{{ STATIC_URL }}css/olmap.css" type="text/css" rel="stylesheet" />
-     <script src="{{ STATIC_URL}}js/openlayers/OpenLayers.js"></script>
-     <script type="text/javascript" src="http://openstreetmap.org/openlayers/OpenStreetMap.js"></script>
-     <script type="text/javascript">{{ osm_base_layers_js | safe }}</script>
-     <script type="text/javascript" src="{{ STATIC_URL}}js/olmap-settings.js"></script>
-     <script type="text/javascript" src="{{ STATIC_URL}}js/olmap.js"></script>
-  {% endif %}
+  <link media="screen" href="{{ STATIC_URL }}css/olmap.css" type="text/css" rel="stylesheet" />
+  <script src="{{ STATIC_URL}}js/openlayers/OpenLayers.js"></script>
+  <script type="text/javascript" src="http://openstreetmap.org/openlayers/OpenStreetMap.js"></script>
+  <script type="text/javascript">{{ osm_base_layers_js | safe }}</script>
+  <script type="text/javascript" src="{{ STATIC_URL}}js/olmap-settings.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL}}js/olmap.js"></script>
   {% endblock %}
   {% block shortcut_icon %}{% endblock %}
   {% block extracss %}{% endblock %}
   {% block extrajs %}{% endblock %}
   {% block extra_head %}{% endblock %}
 </head>
-<body {% if use_open_layers %}onload="init()"{% endif %}>
+<body onload="init()">
 <div id="wrapper">
   <div id="header">
 	<ul id="menu"> 
