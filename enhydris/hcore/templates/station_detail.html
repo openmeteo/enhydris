@@ -24,7 +24,6 @@
 {% endblock %}
 
 {% block extra_head %}
-  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.scrollTo-min.js"></script>
   <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.tipTip.minified.js"></script>
   <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.collapser.mod.js"></script>
   <script type="text/javascript">
@@ -57,15 +56,6 @@
         $(".verification_required").click(function(){
             return confirmPost();
         });
-
-        $("#instruments_ct").click(function() {
-            setTimeout("$.scrollTo('#instruments_ct',200)",1000)
-        });
-
-        $("#timeseries_ct").click(function() {
-            setTimeout("$.scrollTo('#timeseries_ct',200)",1000)
-        });
-
         $('.tiptip').tipTip({defaultPosition:"top"});
       });
 
