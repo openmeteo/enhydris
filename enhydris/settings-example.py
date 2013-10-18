@@ -66,7 +66,6 @@ INSTALLED_APPS = (
     'enhydris.dbsync',
     'enhydris.hcore',
     'enhydris.hprocessor',
-    'enhydris.hchartpages',
     'enhydris.api',
     'enhydris.permissions',
 )

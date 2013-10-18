@@ -71,17 +71,11 @@ class StationDetailView(DetailView):
         anonymous_can_download_data = \
             settings.ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS
         display_copyright = settings.ENHYDRIS_DISPLAY_COPYRIGHT_INFO
-        chart_exists = False
-        if 'enhydris.hchartpages' in settings.INSTALLED_APPS:
-            from enhydris.hchartpages.models import ChartPage
-            chart_exists = ChartPage.objects.filter(
-                url_int_alias=self.object.id).exists()
         context.update(
             {"owner": self.object.owner,
              "enabled_user_content": settings.ENHYDRIS_USERS_CAN_ADD_CONTENT,
              "anonymous_can_download_data": anonymous_can_download_data,
              "display_copyright": display_copyright,
-             "chart_exists": chart_exists,
              "wgs84_name": settings.ENHYDRIS_WGS84_NAME,
             })
         return context
