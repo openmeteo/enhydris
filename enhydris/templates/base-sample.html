@@ -21,9 +21,10 @@
   <script type="text/javascript">
   </script>
   <script type="text/javascript">
-    var STATIC_URL = "{{ STATIC_URL }}";
-    var ENHYDRIS_ROOT_URL = '{% url "enhydris.hcore.views.index" %}';
-    var BOUND_URL = '{% url "enhydris.hcore.views.bound" %}';
+    var enhydris = {};
+    enhydris.static_url = '{{ STATIC_URL }}';
+    enhydris.root_url = '{% url "enhydris.hcore.views.index" %}';
+    enhydris.bound_url = '{% url "enhydris.hcore.views.bound" %}';
     $(document).ready(function() {
 		$("#search_input").placeholder();
 	});

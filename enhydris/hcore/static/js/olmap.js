@@ -28,7 +28,7 @@ function get_attribute(afeature, attrib)
 function InvokePopup(afeature) {
     apoint = afeature.geometry.getBounds().getCenterLonLat();
     map.panTo(apoint);
-    $.get(ENHYDRIS_ROOT_URL+"stations/b/"+get_attribute(afeature, "id")+'/', {}, function(data){
+    $.get(enhydris.root_url+"stations/b/"+get_attribute(afeature, "id")+'/', {}, function(data){
         var amessage = '';
         amessage=data;
         apopup = new OpenLayers.Popup(get_attribute(afeature, "name"), apoint, new OpenLayers.Size(190,150), amessage, true);
@@ -63,12 +63,12 @@ function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor){
             fontWeight: "bold", labelAlign: "cm" 
     };
     var general_opts = {
-            externalGraphic: STATIC_URL+"${aicon}",
+            externalGraphic: enhydris.static_url+"${aicon}",
             graphicWidth: 21, graphicHeight:25, graphicXOffset:-10,
             graphicYOffset: -25, fillOpacity: 1
     };
     general_opts = Object.extend(general_opts, labeling_opts);
-    AURL = ENHYDRIS_ROOT_URL+ObjectName+"/kml/";
+    AURL = enhydris.root_url+ObjectName+"/kml/";
     var alayer = new OpenLayers.Layer.Vector(AName,
     {
         strategies: [
@@ -102,7 +102,7 @@ function CreateLayer(AName, ObjectName, AFillColor, AStrokeColor){
                         ),
             "select": new OpenLayers.Style(
                   OpenLayers.Util.applyDefaults({
-                        externalGraphic: STATIC_URL+'images/drop_marker_selected.png',
+                        externalGraphic: enhydris.static_url+'images/drop_marker_selected.png',
                         graphicWidth: 21, graphicHeight:25, graphicXOffset:-10,
                         graphicYOffset: -25, fillOpacity: 1}, 
                         OpenLayers.Feature.Vector.style["select"])
@@ -177,7 +177,7 @@ function init() {
     }
     var getboundoptions =  {'gentity_id': agentity_id_repr}; 
     Object.extend(getboundoptions, getUrlVars());
-    $.ajax({url: BOUND_URL, data: getboundoptions, method: 'get', 
+    $.ajax({url: enhydris.bound_url, data: getboundoptions, method: 'get', 
         success: function(data){
             bounds = OpenLayers.Bounds.fromString(data);
             bounds.transform(new OpenLayers.Projection("EPSG:4326"), new
@@ -218,7 +218,7 @@ function ShowProgress(name){
    var aprogress = document.getElementById("map_progress");
    if(aprogress==null)return;
    aprogress.innerHTML=
-       "<img src='"+STATIC_URL+"images/wait16.gif'>";
+       "<img src='"+enhydris.static_url+"images/wait16.gif'>";
 }
 
 function HideProgress(name){
