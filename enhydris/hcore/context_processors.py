@@ -1,3 +1,5 @@
+import json
+
 from django.conf import settings
 
 
@@ -10,8 +12,12 @@ def registration(request):
     return {'REGISTRATION_OPEN': getattr(settings, 'REGISTRATION_OPEN', True)}
 
 
-def osm(request):
-    osm_base_layers_js = 'base_layers=[{0}];'.format(
+def map(request):
+    map_js = 'enhydris.map_base_layers=[{0}];'.format(
         ','.join(['new ' + layer.strip()
-                 for layer in settings.ENHYDRIS_OSM_BASE_LAYERS]))
-    return {'osm_base_layers_js': osm_base_layers_js}
+                 for layer in settings.ENHYDRIS_MAP_BASE_LAYERS]))
+    map_js += 'enhydris.map_bounds={0};'.format(
+        json.dumps(settings.ENHYDRIS_MAP_BOUNDS))
+    map_js += 'enhydris.map_markers={0};'.format(
+        json.dumps(settings.ENHYDRIS_MAP_MARKERS))
+    return {'map_js': map_js}

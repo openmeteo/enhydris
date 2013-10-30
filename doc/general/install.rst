@@ -518,7 +518,7 @@ These are the settings available to Enhydris, in addition to the
    station co-ordinates are given, whether WGS84 or ETRS89 is
    displayed is actually irrelevant.
 
-.. data:: ENHYDRIS_OSM_BASE_LAYERS
+.. data:: ENHYDRIS_MAP_BASE_LAYERS
 
    A list of Javascript definitions of base layers to use on the map.
    The default is::
@@ -531,3 +531,38 @@ These are the settings available to Enhydris, in addition to the
                 attribution: "Map by <a href='http://www.openstreetmap.org/'>OSM</a>"})'''
         ]
 
+.. data:: ENHYDRIS_MAP_BOUNDS
+
+   A pair of points, each one being a pair of co-ordinates in WGS84; the first
+   one is the bottom-left point and the second is the top-right. The default
+   is Greece::
+
+       ENHYDRIS_MAP_BOUNDS = ((19.3, 34.75), (29.65, 41.8))
+
+   The bounds are automatically enlarged in order to encompass all registered
+   objects, so this setting is useful only if there are no objects or a few
+   objects.
+
+.. data:: ENHYDRIS_MAP_MARKERS
+
+   The map can show different station types with different markers. For
+   example::
+
+      ENHYDRIS_MAP_MARKERS = {
+          '0': 'images/drop_marker.png', 
+          '1': 'images/drop_marker_cyan.png',
+          '3': 'images/drop_marker_orange.png', 
+          '11': 'images/drop_marker_green.png', 
+      }
+                                
+   In the example above, stations whose type id is 3 will be shown with
+   :file:`drop_marker_orange.png`, and any marker whose id is not one
+   of 1, 3, or 11 will show with :file:`drop_marker.png`. The files
+   are URLs; if they are relative, they are relative to
+   :data:`STATIC_URL`.
+
+   The default is::
+
+      ENHYDRIS_MAP_MARKERS = {
+          '0': 'images/drop_marker.png', 
+      }

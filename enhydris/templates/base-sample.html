@@ -160,8 +160,6 @@
   <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.placeholder-1.0.1.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/openlayers/2.12/OpenLayers.min.js"></script>
   <script type="text/javascript" src="http://openstreetmap.org/openlayers/OpenStreetMap.js"></script>
-  <script type="text/javascript">{{ osm_base_layers_js | safe }}</script>
-  <script type="text/javascript" src="{{ STATIC_URL}}js/olmap-settings.js"></script>
   <script type="text/javascript" src="{{ STATIC_URL}}js/olmap.js"></script>
   <script type="text/javascript" src="{{ STATIC_URL}}js/hcore.js"></script>
   <script type="text/javascript">
@@ -170,6 +168,7 @@
     enhydris.root_url = '{% url "enhydris.hcore.views.index" %}';
     enhydris.bound_url = '{% url "enhydris.hcore.views.bound" %}';
     enhydris.map_mode = 1;
+    {{ map_js | safe }}
     $(document).ready(function() {
 		$("#search_input").placeholder();
 	});
