@@ -169,6 +169,7 @@
     enhydris.static_url = '{{ STATIC_URL }}';
     enhydris.root_url = '{% url "enhydris.hcore.views.index" %}';
     enhydris.bound_url = '{% url "enhydris.hcore.views.bound" %}';
+    enhydris.map_mode = 1;
     $(document).ready(function() {
 		$("#search_input").placeholder();
 	});

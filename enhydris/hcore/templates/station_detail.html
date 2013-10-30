@@ -3,10 +3,11 @@
 {% load permissions %}
 {% block title %} {% trans 'Enhydris - Station' %} - {%if station %}{{ station.name }} {% endif %}
 {% endblock %}
-{% block js-globals %}
-    <script type="text/javascript">var map_mode=2;
-      {% if station %}agentity_id={{station.id}}{% endif %}
-    </script>
+{% block extrajs %}
+<script type="text/javascript">
+    enhydris.map_mode = 2;
+    {% if station %}enhydris.agentity_id = {{station.id}};{% endif %}
+</script>
 {% endblock %}
 
 {% block extracss %}

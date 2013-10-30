@@ -2,8 +2,9 @@
 {% load i18n %}
 {% block title %}{% trans 'Entities map' %}{% endblock %}
 {% block js-globals %}
-    <script type="text/javascript">var map_mode=1;
-    var legent_displayed=true;</script>
+    <script type="text/javascript">
+        var legent_displayed=true;
+    </script>
 {% endblock %}
 {% block extracss %}
     <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
