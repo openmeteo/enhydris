@@ -60,10 +60,6 @@
     color: #111111;
 }
 
-.tablehighlighted .highlight td, .tablehighlighted tr.even.highlight  td{
-    background-color: #f4f4d8;
-}
-
 .ui-tabs { 
 	z-index:10 !important;
 }

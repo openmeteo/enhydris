@@ -12,33 +12,10 @@
   <link media="screen" href="{{ STATIC_URL }}css/tablesorter.css" type="text/css" rel="stylesheet" />
   <link type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/css/base/jquery.ui.all.min.css" rel="stylesheet" />
   <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
-  {% endblock %}
-  {% block basejs %}
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.10.8/jquery.tablesorter.min.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.placeholder-1.0.1.js"></script>
-  <script type="text/javascript">
-  </script>
-  <script type="text/javascript">
-    var enhydris = {};
-    enhydris.static_url = '{{ STATIC_URL }}';
-    enhydris.root_url = '{% url "enhydris.hcore.views.index" %}';
-    enhydris.bound_url = '{% url "enhydris.hcore.views.bound" %}';
-    $(document).ready(function() {
-		$("#search_input").placeholder();
-	});
-  </script>
   <link media="screen" href="{{ STATIC_URL }}css/olmap.css" type="text/css" rel="stylesheet" />
-  <script src="//cdnjs.cloudflare.com/ajax/libs/openlayers/2.12/OpenLayers.min.js"></script>
-  <script type="text/javascript" src="http://openstreetmap.org/openlayers/OpenStreetMap.js"></script>
-  <script type="text/javascript">{{ osm_base_layers_js | safe }}</script>
-  <script type="text/javascript" src="{{ STATIC_URL}}js/olmap-settings.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL}}js/olmap.js"></script>
   {% endblock %}
   {% block shortcut_icon %}{% endblock %}
   {% block extracss %}{% endblock %}
-  {% block extrajs %}{% endblock %}
   {% block extra_head %}{% endblock %}
 </head>
 <body onload="init()">
@@ -176,5 +153,27 @@
     {% block extrafooter %}{% endblock %}
   {% endblock %}</div>
 {% block bodyend %}{% endblock %}
+{% block basejs %}
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.10.8/jquery.tablesorter.min.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.placeholder-1.0.1.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/openlayers/2.12/OpenLayers.min.js"></script>
+  <script type="text/javascript" src="http://openstreetmap.org/openlayers/OpenStreetMap.js"></script>
+  <script type="text/javascript">{{ osm_base_layers_js | safe }}</script>
+  <script type="text/javascript" src="{{ STATIC_URL}}js/olmap-settings.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL}}js/olmap.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL}}js/hcore.js"></script>
+  <script type="text/javascript">
+    var enhydris = {};
+    enhydris.static_url = '{{ STATIC_URL }}';
+    enhydris.root_url = '{% url "enhydris.hcore.views.index" %}';
+    enhydris.bound_url = '{% url "enhydris.hcore.views.bound" %}';
+    $(document).ready(function() {
+		$("#search_input").placeholder();
+	});
+  </script>
+{% endblock %}
+{% block extrajs %}{% endblock %}
 </body>
 </html>
