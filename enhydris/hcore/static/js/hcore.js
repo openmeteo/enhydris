@@ -279,7 +279,8 @@ function CreateLayer(AName, ObjectName) {
 
 enhydris.map = (function namespace() {
     'use strict';
-    var bounds, options, map, data_layers;
+    var bounds, options, map, data_layers, add_nav_toolbar, add_pan_zoom_bar,
+        add_layer_switcher, show_labels, add_label_button, add_panel;
     
     // Map bounds
     bounds = new OpenLayers.Bounds();
@@ -331,8 +332,7 @@ enhydris.map = (function namespace() {
     };
 
     show_labels = function (value) {
-        'use strict';
-        var i, layer;
+        var i, layer, defaultStyle;
         for (i = 0; i < data_layers.length; i++) {
             layer = data_layers[i];
             defaultStyle = layer.styleMap.styles['default'].defaultStyle;
@@ -340,7 +340,7 @@ enhydris.map = (function namespace() {
             layer.styleMap.styles['default'].setDefaultStyle(defaultStyle);
             layer.redraw();
         }
-    }
+    };
 
     add_label_button = function () {
         var label_button = new OpenLayers.Control.Button({
@@ -354,17 +354,32 @@ enhydris.map = (function namespace() {
         label_button.events.register('deactivate', label_button,
             function () { show_labels(false); });
         return label_button;
-    }
+    };
+
+    add_panel = function () {
+        var panel, i;
+        panel = new OpenLayers.Control.Panel({
+            displayClass: 'olControlShowLabels'
+        });
+        panel.addControls(arguments);
+        for (i = 0; i < arguments.length; ++i) {
+            panel.activateControl(arguments[i]);
+        }
+        map.addControl(panel);
+    };
 
     init = function () {
+        var label_button;
+
         map = new OpenLayers.Map('map', options);
         map.addControl(new OpenLayers.Control.ScaleLine());
         map.addControl(new OpenLayers.Control.MousePosition());
         map.addControl(new OpenLayers.Control.OverviewMap());
         map.addLayers(enhydris.map_base_layers);
-        add_pan_zoom_bar;
-        add_layer_switcher;
-        add_label_button;
+        add_pan_zoom_bar();
+        add_layer_switcher();
+        label_button = add_label_button();
+        add_panel(label_button);
         add_nav_toolbar(hover_control, select_control);
     };
 
@@ -375,17 +390,11 @@ enhydris.map = (function namespace() {
 
 function init() {
     'use strict';
-    var stations, ls, labelButton, panel,
+    var stations,
         agentity_id_repr, getboundoptions, SelectControl, HoverControl;
     stations = CreateLayer('Σταθμοί', 'stations', '#dd0022', '#990077');
     map.addLayers([stations]);
 
-    panel = new OpenLayers.Control.Panel({
-        displayClass: 'olControlShowLabels'
-    });
-    panel.addControls([labelButton]);
-    panel.activateControl(labelButton);
-    map.addControl(panel);
     agentity_id_repr = '';
     if (enhydris.map_mode === 2)
     {
