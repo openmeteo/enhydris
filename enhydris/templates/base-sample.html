@@ -23,7 +23,7 @@
   </script>
   <script type="text/javascript">
     var STATIC_URL = "{{ STATIC_URL }}";
-    var ENHYDRIS_ROOT_URL = '{% url "enhydris.hcore.views.index" %}';
+    var ENHYDRIS_ROOT_URL = '{% url "station_list" %}';
     var BOUND_URL = '{% url "enhydris.hcore.views.bound" %}';
     $(document).ready(function() {
 		$("#search_input").placeholder();
@@ -47,7 +47,7 @@
   <div id="header">
 	<ul id="menu"> 
 		<li class="logo"> 
-			<a href='{% url "index" %}'>
+			<a href='{% url "station_list" %}'>
 			<img style="float:left;border:0;" alt="" src="{{ STATIC_URL}}images/menu_left.png" /> 
 			</a>
 		</li> 

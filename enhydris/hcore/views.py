@@ -49,17 +49,12 @@ from enhydris.hcore.tstmpupd import update_ts_temp_file
 
 def login(request, *args, **kwargs):
     if request.user.is_authenticated():
-        redir_url = request.GET.get('next', reverse('index'))
+        redir_url = request.GET.get('next', reverse('station_list'))
         messages.info(request, 'You are already logged on; '
                                'logout to log in again.')
         return HttpResponseRedirect(redir_url)
     else:
         return auth_login(request, *args, **kwargs)
-
-def index(request):
-    return render_to_response('index.html', {},
-        context_instance=RequestContext(request))
-
 
 class StationDetailView(DetailView):
 

@@ -5,9 +5,7 @@ from enhydris.hcore import views
 urlpatterns = patterns(
     '',
 
-    (r'^$', views.index, {}, 'index'),
-
-    url(r'^stations/l/$', views.StationListView.as_view(),
+    url(r'^$', views.StationListView.as_view(),
         name='station_list'),
     url(r'^stations/d/(?P<pk>\d+)/$', views.StationDetailView.as_view(),
         name='station_detail'),

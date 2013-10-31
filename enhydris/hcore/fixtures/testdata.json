@@ -2795,17 +2795,5 @@
             1
         ]
     }
-},
-{
-    "pk": 1, 
-    "model": "hcore.userprofile", 
-    "fields": {
-        "lname": null, 
-        "email_is_public": false, 
-        "user": 1, 
-        "fname": null, 
-        "address": null, 
-        "organization": null
-    }
 }
 ]

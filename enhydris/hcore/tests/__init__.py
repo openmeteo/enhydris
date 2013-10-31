@@ -40,7 +40,6 @@ class SmokeTestCase(TestCase):
 
     pages = {
         200: ['/',
-                '/stations/l/',
                 '/accounts/login/',
                 '/accounts/logout/',
                 '/accounts/register/',
@@ -50,6 +49,7 @@ class SmokeTestCase(TestCase):
                 '/map/',
                 ],
         404: ['/nonexistent/',
+                '/stations/l/',
                 '/stations/d/',
                 '/stations/d/nonexistent/',
                 '/timeseries/d/',
