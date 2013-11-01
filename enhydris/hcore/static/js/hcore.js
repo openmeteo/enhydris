@@ -113,190 +113,50 @@ function station_search() {
 }
 
 
-function getUrlVars() {
-    'use strict';
-    var vars;
-    vars = {};
-    window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,
-        function (m, key, value) {
-            vars[key] = decodeURI(value);
-        });
-    return vars;
-}
-
-
-Object.extend = function (destination, source) {
-    'use strict';
-    for (var property in source) {
-        destination[property] = source[property];
-    }
-    return destination;
-};
-
-
-function get_attribute(afeature, attrib) {
-    'use strict';
-    if (!afeature.cluster) {
-        return afeature.attributes[attrib];
-    } else {
-        return afeature.cluster[0].attributes[attrib];
-    }
-}
-
-
-function InvokePopup(afeature) {
-    'use strict';
-    var map, apopup, apoint;
-    // FIXME map = null;
-    // FIXME apopup = null;
-    apoint = afeature.geometry.getBounds().getCenterLonLat();
-    map.panTo(apoint);
-    $.get(enhydris.root_url + 'stations/b/' + get_attribute(afeature, 'id') +
-        '/', {}, function (data) {
-            var amessage = '';
-            amessage = data;
-            apopup = new OpenLayers.Popup(get_attribute(afeature, 'name'),
-                apoint, new OpenLayers.Size(190, 150), amessage, true);
-            apopup.setBorder('2px solid');
-            apopup.setBackgroundColor('#EEEEBB');
-            map.addPopup(apopup, true);
-            HideProgress('popup');
-        });
-}
-
-
-function InvokeTooltip(atitle) {
-    'use strict';
-    document.getElementById('map').title = atitle;
-}
-
-
-function HideTooltip() {
-    'use strict';
-    document.getElementById('map').title = '';
-}
-
-
-function CreateLayer(AName, ObjectName) {
-    'use strict';
-    var params, labelvalue, labeling_opts, general_opts, alayer, AURL;
-    if (enhydris.map_mode === 1) {
-        params = getUrlVars();
-    }
-    else if (enhydris.map_mode === 2) {
-        params = {'gentity_id': enhydris.agentity_id};
-    }
-    params.request = 'GetFeature';
-    params.srs = 'EPSG:4326';
-    params.version = '1.0.0';
-    params.service = 'WFS';
-    params.format = 'WFS';
-    labelvalue = '';
-    labeling_opts = {
-        label : labelvalue,
-        fontColor: '#504065',
-        fontSize: '9px',
-        fontFamily: 'Verdana, Arial',
-        fontWeight: 'bold',
-        labelAlign: 'cm'
-    };
-    general_opts = {
-        externalGraphic: enhydris.static_url + '${aicon}',
-        graphicWidth: 21,
-        graphicHeight: 25,
-        graphicXOffset: -10,
-        graphicYOffset: -25,
-        fillOpacity: 1
-    };
-    general_opts = Object.extend(general_opts, labeling_opts);
-    AURL = enhydris.root_url + ObjectName + '/kml/';
-    alayer = new OpenLayers.Layer.Vector(AName, {
-        strategies: [
-            new OpenLayers.Strategy.BBOX({ratio: 1.5, resFactor: 2}),
-            new OpenLayers.Strategy.Cluster({distance: 15, threshold: 3})
-        ],
-        protocol: new OpenLayers.Protocol.HTTP({
-            url: AURL,
-            format: new OpenLayers.Format.KML(),
-            params: params
-        }),
-        projection: new OpenLayers.Projection('EPSG:4326'),
-        formatOptions: { extractAttributes: true },
-        styleMap: new OpenLayers.StyleMap({
-            'default': new OpenLayers.Style(
-                OpenLayers.Util.applyDefaults(general_opts,
-                OpenLayers.Feature.Vector.style['default']),
-                {context: {
-                    aname: function (feature) {
-                        return get_attribute(feature, 'name');
-                    },
-                    aicon: function (feature) {
-                        var stype_id = get_attribute(feature, 'stype_id');
-                        return enhydris.map_markers[stype_id] ||
-                               enhydris.map_markers[0];
-                    }
-                }}
-            ),
-            'select': new OpenLayers.Style(
-                OpenLayers.Util.applyDefaults({
-                    externalGraphic: enhydris.static_url +
-                        'images/drop_marker_selected.png',
-                    graphicWidth: 21,
-                    graphicHeight: 25,
-                    graphicXOffset: -10,
-                    graphicYOffset: -25,
-                    fillOpacity: 1
-                }, OpenLayers.Feature.Vector.style.select)
-            ),
-            'temporary': new OpenLayers.Style(
-                OpenLayers.Util.applyDefaults({
-                    graphicWidth: 21,
-                    graphicHeight: 25,
-                    graphicXOffset: -10,
-                    graphicYOffset: -25,
-                    fillOpacity: 0.7
-                }, OpenLayers.Feature.Vector.style.select)
-            )
-        })
-    });
-    alayer.events.register('loadstart', alayer,
-        function () { ShowProgress(ObjectName); });
-    alayer.events.register('loadend', alayer,
-        function () { HideProgress(ObjectName); });
-    alayer.events.register('loadcancel', alayer,
-        function () { HideProgress(ObjectName); });
-    alayer.events.on({
-        'featureselected': function (e) {
-            ShowProgress('popup');
-            InvokePopup(e.feature);
-        },
-        'featureunselected': function (e) {
-            map.removePopup(apopup);
-        }
-    });
-    return alayer;
-}
-
 enhydris.map = (function namespace() {
     'use strict';
-    var bounds, options, map, data_layers, add_nav_toolbar, add_pan_zoom_bar,
-        add_layer_switcher, show_labels, add_label_button, add_panel;
+    var default_bounds, options, map, data_layers, add_nav_toolbar,
+        add_pan_zoom_bar, add_layer_switcher, show_labels, add_label_button,
+        add_panel, set_map_extents, add_select_control, add_hover_control,
+        layer_params, layer_options, style_default, style_select,
+        style_temporary, style_map, init, create_layer, popup,
+        show_popup, processing_indicator, show_processing_indicator,
+        hide_processing_indicator, get_attribute;
     
+    // Processing indicator
+    processing_indicator = document.getElementById('processing_indicator');
+    if (processing_indicator) {
+        show_processing_indicator = function () {
+            processing_indicator.innerHTML =
+                    '<img src="' + enhydris.static_url + 'images/wait16.gif">';
+        };
+        hide_processing_indicator = function () {
+            processing_indicator.innerHTML = '';
+        };
+    } else {
+        show_processing_indicator = hide_processing_indicator = function () {};
+    }
+
     // Map bounds
-    bounds = new OpenLayers.Bounds();
-    bounds.extend(enhydris.map_bounds[0]);
-    bounds.extend(enhydris.map_bounds[1]);
-    bounds.transform(new OpenLayers.Projection('EPSG:4326'),
-                         new OpenLayers.Projection('EPSG:900913'));
+    default_bounds = new OpenLayers.Bounds();
+    default_bounds.extend(enhydris.map_bounds[0]);
+    default_bounds.extend(enhydris.map_bounds[1]);
+    default_bounds.transform(new OpenLayers.Projection('EPSG:4326'),
+                     new OpenLayers.Projection('EPSG:900913'));
 
     // Map options
     options = {
-        'units' :   'm',
-        'numZoomLevels' :   15,
+        'units': 'm',
+        'numZoomLevels': 15,
         'sphericalMercator': true,
-        'maxExtent': bounds,
+        'maxExtent': default_bounds,
         'projection': new OpenLayers.Projection('EPSG:900913'),
         'displayProjection': new OpenLayers.Projection('EPSG:4326')
+    };
+
+    get_attribute = function (feature, attrib) {
+        var obj = feature.cluster ? feature.cluster[0] : feature;
+        return obj.attributes[attrib];
     };
 
     add_nav_toolbar = function (hover_control, select_control) {
@@ -368,9 +228,181 @@ enhydris.map = (function namespace() {
         map.addControl(panel);
     };
 
-    init = function () {
-        var label_button;
+    add_select_control = function (layers) {
+        var select_control;
+        select_control = new OpenLayers.Control.SelectFeature(layers, {
+            clickout: true,
+            togle: false,
+            multiple: false,
+            hover: false
+        });
+        map.addControl(select_control);
+        select_control.activate();
+        return select_control;
+    };
 
+    add_hover_control = function (layers) {
+        var hover_control = new OpenLayers.Control.SelectFeature(layers, {
+            clickout: false,
+            togle: false,
+            multiple: false,
+            hover: true,
+            highlightOnly: true,
+            renderIntent: 'temporary',
+            eventListeners: {
+                beforefeaturehighlighted: function () {},
+                featurehighlighted: function (e) {
+                    document.getElementById('map').title = get_attribute(
+                        e.feature, 'name');
+                },
+                featureunhighlighted: function () {
+                    document.getElementById('map').title = '';
+                }
+            }
+        });
+        map.addControl(hover_control);
+        hover_control.activate();
+        return hover_control;
+    };
+
+    set_map_extents = function (map) {
+        var gentity_id, get_bound_options;
+        gentity_id = enhydris.map_mode === 2 ? enhydris.agentity_id : '';
+        get_bound_options = $.deparam.querystring();
+        get_bound_options.gentity_id = gentity_id;
+        $.ajax({
+            url: enhydris.bound_url,
+            data: get_bound_options,
+            success: function (data) {
+                var bounds = OpenLayers.Bounds.fromString(data);
+                bounds.transform(new OpenLayers.Projection('EPSG:4326'),
+                                 new OpenLayers.Projection('EPSG:900913'));
+                map.zoomToExtent(bounds);
+            },
+            error: function () {
+                map.zoomToExtent(default_bounds);
+            }
+        });
+    };
+ 
+    popup = null;
+
+    show_popup = function (map, feature) {
+        var point, url;
+        point = feature.geometry.getBounds().getCenterLonLat();
+        map.panTo(point);
+        url = enhydris.root_url + 'stations/b/' +
+              get_attribute(feature, 'id') + '/';
+        $.get(url, {}, function (message) {
+            var size;
+            size = new OpenLayers.Size(190, 150);
+            popup = new OpenLayers.Popup(get_attribute(feature, 'name'),
+                                         point, size, message, true);
+            popup.setBorder('2px solid');
+            popup.setBackgroundColor('#EEEEBB');
+            map.addPopup(popup, true);
+            hide_processing_indicator();
+        });
+    };
+
+    layer_params =
+        enhydris.map_mode === 1 ? $.deparam.querystring() :
+        enhydris.map_mode === 2 ? { 'gentity_id': enhydris.agentity_id} :
+                                  {};
+    $.extend(layer_params, {
+        request: 'GetFeature',
+        srs: 'EPSG:4326',
+        version: '1.0.0',
+        service: 'WFS',
+        format: 'WFS'
+    });
+
+    layer_options = {
+        externalGraphic: enhydris.static_url + '${aicon}',
+        graphicWidth: 21,
+        graphicHeight: 25,
+        graphicXOffset: -10,
+        graphicYOffset: -25,
+        fillOpacity: 1,
+        label: '',
+        fontColor: '#504065',
+        fontSize: '9px',
+        fontFamily: 'Verdana, Arial',
+        fontWeight: 'bold',
+        labelAlign: 'cm'
+    };
+
+    // Style map
+    style_default = new OpenLayers.Style(
+        OpenLayers.Util.applyDefaults(layer_options,
+        OpenLayers.Feature.Vector.style['default']), {
+            context: {
+                aname: function (feature) {
+                    return get_attribute(feature, 'name');
+                },
+                aicon: function (feature) {
+                    var stype_id = get_attribute(feature, 'stype_id');
+                    return enhydris.map_markers[stype_id] ||
+                            enhydris.map_markers[0];
+                }
+            }
+        });
+    style_select = new OpenLayers.Style(
+        OpenLayers.Util.applyDefaults($.extend(layer_options, {
+            externalGraphic: enhydris.static_url +
+                'images/drop_marker_selected.png',
+        }, OpenLayers.Feature.Vector.style.select))
+    );
+    style_temporary = new OpenLayers.Style(
+        OpenLayers.Util.applyDefaults($.extend(layer_options, {
+            fillOpacity: 0.7
+        }, OpenLayers.Feature.Vector.style.select))
+    );
+    style_map = new OpenLayers.StyleMap({
+        'default': style_default,
+        'select': style_select,
+        'temporary': style_temporary,
+    });
+
+    create_layer = function (name, object_type) {
+        var new_layer;
+        new_layer = new OpenLayers.Layer.Vector(name, {
+            strategies: [
+                new OpenLayers.Strategy.BBOX({ratio: 1.5, resFactor: 2}),
+                new OpenLayers.Strategy.Cluster({distance: 15, threshold: 3})
+            ],
+            protocol: new OpenLayers.Protocol.HTTP({
+                url: enhydris.root_url + object_type + '/kml/',
+                format: new OpenLayers.Format.KML(),
+                params: layer_params
+            }),
+            projection: new OpenLayers.Projection('EPSG:4326'),
+            formatOptions: {extractAttributes: true},
+            styleMap: style_map
+        });
+        new_layer.events.register('loadstart', new_layer,
+                                  show_processing_indicator);
+        new_layer.events.register('loadend', new_layer,
+                                  hide_processing_indicator);
+        new_layer.events.register('loadcancel', new_layer,
+                                  hide_processing_indicator);
+        new_layer.events.on({
+            'featureselected': function (e) {
+                show_processing_indicator();
+                show_popup(e.feature);
+            },
+            'featureunselected': function () {
+                map.removePopup(popup);
+            }
+        });
+        return new_layer;
+    };
+
+    init = function () {
+        var label_button, hover_control, select_control, layers;
+
+        layers = [create_layer('Stations', 'stations', '#dd0022', '#990077')];
+        map.addLayers(layers);
         map = new OpenLayers.Map('map', options);
         map.addControl(new OpenLayers.Control.ScaleLine());
         map.addControl(new OpenLayers.Control.MousePosition());
@@ -380,86 +412,13 @@ enhydris.map = (function namespace() {
         add_layer_switcher();
         label_button = add_label_button();
         add_panel(label_button);
+        select_control = add_select_control(layers);
+        hover_control = add_hover_control(layers);
         add_nav_toolbar(hover_control, select_control);
+        set_map_extents(map);
     };
 
     return {
         init: init
     };
 }());
-
-function init() {
-    'use strict';
-    var stations,
-        agentity_id_repr, getboundoptions, SelectControl, HoverControl;
-    stations = CreateLayer('Σταθμοί', 'stations', '#dd0022', '#990077');
-    map.addLayers([stations]);
-
-    agentity_id_repr = '';
-    if (enhydris.map_mode === 2)
-    {
-        agentity_id_repr = enhydris.agentity_id;
-    }
-    getboundoptions =  {'gentity_id': agentity_id_repr};
-    Object.extend(getboundoptions, getUrlVars());
-    $.ajax({url: enhydris.bound_url, data: getboundoptions, method: 'get',
-        success: function (data) {
-            var bounds = OpenLayers.Bounds.fromString(data);
-            bounds.transform(new OpenLayers.Projection('EPSG:4326'), new
-                                 OpenLayers.Projection('EPSG:900913'));
-            map.zoomToExtent(bounds);
-        },
-        error: function () {
-            map.zoomToExtent(bounds);
-        }
-    });
-    SelectControl = new OpenLayers.Control.SelectFeature([stations], {
-        clickout: true,
-        togle: false,
-        multiple: false,
-        hover: false
-    });
-    HoverControl = new OpenLayers.Control.SelectFeature([stations], {
-        clickout: false,
-        togle: false,
-        multiple: false,
-        hover: true,
-        highlightOnly: true,
-        renderIntent: 'temporary',
-        eventListeners: {
-            beforefeaturehighlighted: function () {},
-            featurehighlighted: function (e) {
-                InvokeTooltip(get_attribute(e.feature, 'name'));
-            },
-            featureunhighlighted: function (e) {
-                HideTooltip(get_attribute(e.feature, 'name'));
-            }
-        }
-    });
-    map.addControl(SelectControl);
-    map.addControl(HoverControl);
-    HoverControl.activate();
-    SelectControl.activate();
-}
-
-function ShowProgress() {
-    'use strict';
-    var aprogress = document.getElementById('map_progress');
-    if (aprogress === null) {
-        return;
-    }
-    aprogress.innerHTML =
-        '<img src="' + enhydris.static_url + 'images/wait16.gif">';
-}
-
-
-function HideProgress() {
-    'use strict';
-    var aprogress = document.getElementById('map_progress');
-    if (aprogress === null) {
-        return;
-    }
-    aprogress.innerHTML = '';
-}
-
-
