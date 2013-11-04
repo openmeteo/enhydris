@@ -18,7 +18,7 @@
   {% block extracss %}{% endblock %}
   {% block extra_head %}{% endblock %}
 </head>
-<body onload="init()">
+<body onload="enhydris.map.init()">
 <div id="wrapper">
   <div id="header">
 	<ul id="menu"> 
@@ -158,11 +158,9 @@
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.10.8/jquery.tablesorter.min.js"></script>
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/openlayers/2.12/OpenLayers.min.js"></script>
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery.ba-bbq/1.2.1/jquery.ba-bbq.min.js"></script>
   <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.placeholder-1.0.1.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/arg.js.v1.1.min.js"></script>
   <script type="text/javascript" src="http://openstreetmap.org/openlayers/OpenStreetMap.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL}}js/olmap.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL}}js/hcore.js"></script>
   <script type="text/javascript">
     var enhydris = {};
     enhydris.static_url = '{{ STATIC_URL }}';
@@ -174,6 +172,7 @@
 		$("#search_input").placeholder();
 	});
   </script>
+  <script type="text/javascript" src="{{ STATIC_URL}}js/hcore.js"></script>
 {% endblock %}
 {% block extrajs %}{% endblock %}
 </body>

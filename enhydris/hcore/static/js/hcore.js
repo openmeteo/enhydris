@@ -185,10 +185,10 @@ enhydris.map = (function namespace() {
     };
 
     add_layer_switcher = function () {
-        var ls = new OpenLayers.Control.LayerSwitcher();
-        ls.baseLbl.innerHTML = 'Base layers';
-        ls.dataLbl.innerHTML = 'Data layers';
-        map.addControl(ls);
+        var layer_switcher = new OpenLayers.Control.LayerSwitcher();
+        map.addControl(layer_switcher);
+        layer_switcher.baseLbl.innerHTML = 'Base layers';
+        layer_switcher.dataLbl.innerHTML = 'Data layers';
     };
 
     show_labels = function (value) {
@@ -216,13 +216,13 @@ enhydris.map = (function namespace() {
         return label_button;
     };
 
-    add_panel = function () {
+    add_panel = function (map, controls) {
         var panel, i;
         panel = new OpenLayers.Control.Panel({
             displayClass: 'olControlShowLabels'
         });
-        panel.addControls(arguments);
-        for (i = 0; i < arguments.length; ++i) {
+        panel.addControls(controls);
+        for (i = 0; i < controls.length; ++i) {
             panel.activateControl(arguments[i]);
         }
         map.addControl(panel);
@@ -268,7 +268,7 @@ enhydris.map = (function namespace() {
     set_map_extents = function (map) {
         var gentity_id, get_bound_options;
         gentity_id = enhydris.map_mode === 2 ? enhydris.agentity_id : '';
-        get_bound_options = $.deparam.querystring();
+        get_bound_options = Arg.all();
         get_bound_options.gentity_id = gentity_id;
         $.ajax({
             url: enhydris.bound_url,
@@ -306,7 +306,7 @@ enhydris.map = (function namespace() {
     };
 
     layer_params =
-        enhydris.map_mode === 1 ? $.deparam.querystring() :
+        enhydris.map_mode === 1 ? Arg.all() :
         enhydris.map_mode === 2 ? { 'gentity_id': enhydris.agentity_id} :
                                   {};
     $.extend(layer_params, {
@@ -402,8 +402,8 @@ enhydris.map = (function namespace() {
         var label_button, hover_control, select_control, layers;
 
         layers = [create_layer('Stations', 'stations', '#dd0022', '#990077')];
-        map.addLayers(layers);
         map = new OpenLayers.Map('map', options);
+        map.addLayers(layers);
         map.addControl(new OpenLayers.Control.ScaleLine());
         map.addControl(new OpenLayers.Control.MousePosition());
         map.addControl(new OpenLayers.Control.OverviewMap());
@@ -411,7 +411,7 @@ enhydris.map = (function namespace() {
         add_pan_zoom_bar();
         add_layer_switcher();
         label_button = add_label_button();
-        add_panel(label_button);
+        add_panel(map, [label_button]);
         select_control = add_select_control(layers);
         hover_control = add_hover_control(layers);
         add_nav_toolbar(hover_control, select_control);
