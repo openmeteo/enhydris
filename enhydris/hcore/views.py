@@ -1263,7 +1263,7 @@ def _gentityfile_edit_or_create(request,gfile_id=None):
             if not gfile_id:
                 gfile_id=str(gfile.id)
             return HttpResponseRedirect(reverse('station_detail',
-                                 kwargs={'object_id': str(gfile.gentity.id)}))
+                                        kwargs={'pk': str(gfile.gentity.id)}))
     else:
         if gfile:
             form = GentityFileForm(instance=gfile,user=user,

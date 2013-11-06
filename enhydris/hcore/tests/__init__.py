@@ -1,16 +1,17 @@
 from itertools import takewhile
+from tempfile import TemporaryFile
 
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.utils.unittest import skipUnless
 from django.contrib.auth.models import User, Group, Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection as dj_connection
+from django.core.urlresolvers import reverse
 
 from enhydris.conf import settings
 from enhydris.hcore.models import StationType, Organization, Variable, \
     UnitOfMeasurement, TimeZone, Station, Timeseries, InstrumentType, \
-    Instrument
+    Instrument, GentityFile
 from enhydris.hcore.forms import TimeseriesDataForm
 from enhydris.hcore.views import ALLOWED_TO_EDIT
 from enhydris.hcore.views import get_search_query
@@ -30,6 +31,30 @@ class SearchTestCase(TestCase):
         query = get_search_query(['this should not exist anywhere'])
         result = Station.objects.filter(query).distinct()
         self.assertEquals(result.count(), 0)
+
+
+class GentityFileTestCase(TestCase):
+    fixtures = ['testdata.json']
+
+    def test_upload_gentity_file(self):
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertEquals(r, True)
+        self.assertEquals(GentityFile.objects.filter(gentity__id=2).count(), 0)
+        with TemporaryFile(suffix='.jpg') as tmpfile:
+            tmpfile.write('Irrelevant data\n')
+            tmpfile.seek(0)
+            response = self.client.post(reverse('gentityfile_add'),
+                                        {'gentity': 2,
+                                         'date': '',
+                                         'file_type': 1,
+                                         'descr': 'A description',
+                                         'remarks': '',
+                                         'descr_alt': 'An alt description',
+                                         'remarks_alt': '',
+                                         'content': tmpfile,
+                                         })
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(GentityFile.objects.filter(gentity__id=2).count(), 1)
 
 
 class SmokeTestCase(TestCase):
