@@ -468,14 +468,6 @@
     }
 },
 {
-    "pk": "j907cqvpgz401fdpk43ih0mhl88zi12a", 
-    "model": "sessions.session", 
-    "fields": {
-        "expire_date": "2013-10-25T12:54:21.478", 
-        "session_data": "MWI5ZTQzOWI4YTAyNDhiMjhlNjVmNjcxNTBhYjJhOWI2ZTc2M2Y2ODqAAn1xAShVEl9hdXRoX3VzZXJfYmFja2VuZHECVSlkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZHEDVQ1fYXV0aF91c2VyX2lkcQRLAXUu"
-    }
-},
-{
     "pk": 1, 
     "model": "sites.site", 
     "fields": {
@@ -803,7 +795,7 @@
     "model": "hcore.lentity", 
     "fields": {
         "original_db": null, 
-        "last_modified": "2013-10-11T12:57:07.087", 
+        "last_modified": "2013-11-06T12:39:40.001", 
         "remarks_alt": "", 
         "remarks": "", 
         "original_id": null, 
@@ -815,7 +807,7 @@
     "model": "hcore.lentity", 
     "fields": {
         "original_db": null, 
-        "last_modified": "2013-10-11T12:57:16.869", 
+        "last_modified": "2013-11-06T12:39:39.994", 
         "remarks_alt": "", 
         "remarks": "", 
         "original_id": null, 
@@ -927,6 +919,18 @@
         "asrid": null, 
         "approximate": false, 
         "point": null
+    }
+},
+{
+    "pk": 1, 
+    "model": "hcore.filetype", 
+    "fields": {
+        "original_db": null, 
+        "descr": "", 
+        "descr_alt": "", 
+        "last_modified": "2013-11-06T12:42:14.088", 
+        "original_id": null, 
+        "mime_type": "image/jpeg"
     }
 },
 {
@@ -2617,129 +2621,12 @@
         "is_active": true, 
         "is_superuser": true, 
         "is_staff": true, 
-        "last_login": "2013-10-11T12:54:21.473", 
+        "last_login": "2013-11-06T12:40:05.444", 
         "groups": [], 
         "user_permissions": [], 
         "password": "pbkdf2_sha256$10000$WZt5l3Eva2ui$951cpQ+JUo6U+glYnUfr+dY86mafn/AOGpnhUIHSuNM=", 
         "email": "anthony@itia.ntua.gr", 
         "date_joined": "2013-10-11T12:50:35.259"
-    }
-},
-{
-    "pk": 1, 
-    "model": "admin.logentry", 
-    "fields": {
-        "action_flag": 1, 
-        "action_time": "2013-10-11T12:55:57.485", 
-        "object_repr": "Important", 
-        "object_id": "1", 
-        "change_message": "", 
-        "user": 1, 
-        "content_type": 31
-    }
-},
-{
-    "pk": 2, 
-    "model": "admin.logentry", 
-    "fields": {
-        "action_flag": 1, 
-        "action_time": "2013-10-11T12:56:03.620", 
-        "object_repr": "Unimportant", 
-        "object_id": "2", 
-        "change_message": "", 
-        "user": 1, 
-        "content_type": 31
-    }
-},
-{
-    "pk": 3, 
-    "model": "admin.logentry", 
-    "fields": {
-        "action_flag": 1, 
-        "action_time": "2013-10-11T12:57:07.089", 
-        "object_repr": "We're rich and we fancy it SA", 
-        "object_id": "1", 
-        "change_message": "", 
-        "user": 1, 
-        "content_type": 15
-    }
-},
-{
-    "pk": 4, 
-    "model": "admin.logentry", 
-    "fields": {
-        "action_flag": 1, 
-        "action_time": "2013-10-11T12:57:16.871", 
-        "object_repr": "We're poor and dislike it Ltd", 
-        "object_id": "2", 
-        "change_message": "", 
-        "user": 1, 
-        "content_type": 15
-    }
-},
-{
-    "pk": 5, 
-    "model": "admin.logentry", 
-    "fields": {
-        "action_flag": 1, 
-        "action_time": "2013-10-11T13:01:27.562", 
-        "object_repr": "Rainfall", 
-        "object_id": "1", 
-        "change_message": "", 
-        "user": 1, 
-        "content_type": 36
-    }
-},
-{
-    "pk": 6, 
-    "model": "admin.logentry", 
-    "fields": {
-        "action_flag": 1, 
-        "action_time": "2013-10-11T13:01:31.728", 
-        "object_repr": "Temperature", 
-        "object_id": "2", 
-        "change_message": "", 
-        "user": 1, 
-        "content_type": 36
-    }
-},
-{
-    "pk": 7, 
-    "model": "admin.logentry", 
-    "fields": {
-        "action_flag": 1, 
-        "action_time": "2013-10-11T13:02:00.609", 
-        "object_repr": "mm", 
-        "object_id": "1", 
-        "change_message": "", 
-        "user": 1, 
-        "content_type": 37
-    }
-},
-{
-    "pk": 8, 
-    "model": "admin.logentry", 
-    "fields": {
-        "action_flag": 1, 
-        "action_time": "2013-10-11T13:02:35.314", 
-        "object_repr": "\u00b0C", 
-        "object_id": "2", 
-        "change_message": "", 
-        "user": 1, 
-        "content_type": 37
-    }
-},
-{
-    "pk": 9, 
-    "model": "admin.logentry", 
-    "fields": {
-        "action_flag": 1, 
-        "action_time": "2013-10-11T13:03:41.857", 
-        "object_repr": "EET (UTC+0200)", 
-        "object_id": "1", 
-        "change_message": "", 
-        "user": 1, 
-        "content_type": 38
     }
 },
 {
@@ -2794,6 +2681,18 @@
         "stype": [
             1
         ]
+    }
+},
+{
+    "pk": 1, 
+    "model": "hcore.userprofile", 
+    "fields": {
+        "lname": null, 
+        "email_is_public": false, 
+        "user": 1, 
+        "fname": null, 
+        "address": null, 
+        "organization": null
     }
 }
 ]
