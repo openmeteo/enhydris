@@ -574,3 +574,19 @@ class OpenVTestCase(TestCase):
             self.assertTemplateUsed(resp, "model_add.html")
 
         self.client.logout()
+
+
+class RegisterTestCase(TestCase):
+    """
+    Test that "Register" link appears depending on REGISTRATION_OPEN setting.
+    """
+
+    @override_settings(REGISTRATION_OPEN=False)
+    def test_register_link_absent(self):
+        response = self.client.get('/')
+        self.assertNotContains(response, 'Register')
+
+    @override_settings(REGISTRATION_OPEN=True)
+    def test_register_link_present(self):
+        response = self.client.get('/')
+        self.assertContains(response, 'Register')
