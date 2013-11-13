@@ -29,7 +29,7 @@ Supply Company`_, and `WQ DREAMS`_.
 .. _athens water Supply Company: http://itia.ntua.gr/eydap/db/
 .. _wq dreams: http://wq-dreams.eu/
 
-For more information about Enhydris, read its in the ``doc``
-directory or `live at readthedocs`_.
+For more information about Enhydris, read its documentation in the
+``doc`` directory or `live at readthedocs`_.
 
 .. _live at readthedocs: http://enhydris.readthedocs.org/
