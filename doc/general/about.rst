@@ -4,6 +4,9 @@
 About Enhydris
 ==============
 
+General
+=======
+
 Enhydris is a system for the storage and management of hydrological
 and meteorological time series.
 
