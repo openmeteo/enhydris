@@ -295,7 +295,8 @@ class StationListView(tables.SingleTableView):
         # Advanced search
         nkwargs = kwargs
         for arg in ('political_division', 'owner', 'stype', 'water_basin',
-                    'water_division', 'variable', 'bounded'):
+                    'water_division', 'variable', 'bounded', 'ts_has_years',
+                    ):
                     # Note: Political division must be listed first
             value = nkwargs.pop(arg) if arg in nkwargs else \
                 self.request.GET[arg] if arg in self.request.GET else None
@@ -337,6 +338,16 @@ class StationListView(tables.SingleTableView):
                                     (maxx, maxy), (maxx, miny),
                                     (minx, miny)), srid=4326)
                     result = result.filter(Q(point__contained=geom))
+                elif arg == 'ts_has_years':
+                    years = [int(y) for y in value.split(',')]
+                    result = result.extra(
+                        where=['hcore_gentity.id IN '
+                        '(SELECT t.gentity_id FROM hcore_timeseries t '
+                        'WHERE ' + (' AND '.join(
+                        ['{0} BETWEEN '
+                        'EXTRACT(YEAR FROM timeseries_start_date(t.id)) AND '
+                        'EXTRACT(YEAR FROM timeseries_end_date(t.id))'
+                         .format(year) for year in years])) + ')'])
             except:
                 result = result.none()
 
