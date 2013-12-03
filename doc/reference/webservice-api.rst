@@ -117,7 +117,9 @@ Timeseries data and GentityFile
 
 At ``http://base-address/api/tsdata/id/`` (where ``id`` is the actual
 id of the timeseries object) you can get the timeseries data in
-:ref:`text format <textformat>`.
+`text format`_.
+
+.. _text format: http://pthelma.readthedocs.org/en/latest/timeseries.html#text-format
 
 .. admonition:: Backwards-compatibility
 

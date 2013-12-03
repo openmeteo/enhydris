@@ -244,9 +244,9 @@ bin directory, or have it in the path.
 Configuring Enhydris
 ====================
 
-In the directory :file:`openmeteo/enhydris`, copy the file
-:file:`settings-example.py` to :file:`settings.py`.  Open
-:file:`settings.py` in an editor and make the following changes:
+In the directory :file:`enhydris/settings`, copy the file
+:file:`example.py` to :file:`local.py`.  Open
+:file:`local.py` in an editor and make the following changes:
 
 * Set :data:`ADMINS` to a list of admins (the administrators will get
   all enhydris exceptions by mail and also all user emails, as
@@ -260,12 +260,12 @@ Initializing the database
 
 In order to initialize your database and create the necessary database
 tables for Enhydris to run, run the following commands inside the
-:file:`openmeteo/enhydris` directory::
+:file:`enhydris` directory::
 
-   python manage.py syncdb --noinput
-   python manage.py migrate dbsync
-   python manage.py migrate hcore
-   python manage.py createsuperuser
+   python manage.py syncdb --settings=enhydris.settings.local --noinput
+   python manage.py migrate --settings=enhydris.settings.local dbsync
+   python manage.py migrate --settings=enhydris.settings.local hcore
+   python manage.py createsuperuser --settings=enhydris.settings.local 
 
 The above commands will also ask you to create a Enhydris superuser.
 
@@ -309,7 +309,7 @@ The above commands will also ask you to create a Enhydris superuser.
 
    and **THEN** run::
 
-           ./manage.py syncdb --all
+           ./manage.py syncdb --settings=enhydris.settings.local --all
 
    Also make sure that when you are asked whether to create a superuser you answer NO!
    You can create the superuser **after** the migrations are completed. 
@@ -321,13 +321,13 @@ The above commands will also ask you to create a Enhydris superuser.
    has already been completed and after that apply all the additional changes. In
    order to do that, after running the psql command, you issue the following:: 
 
-           ./manage.py migrate hcore 0001 --fake
-           ./manage.py migrate hcore
+           ./manage.py migrate --settings=enhydris.settings.local hcore 0001 --fake
+           ./manage.py migrate --settings=enhydris.settings.local hcore
 
 
    After that, you may also create a super user by running::
 
-           ./manage.py createsuperuser
+           ./manage.py createsuperuser --settings=enhydris.settings.local 
 
 
    Initial Data
@@ -339,7 +339,7 @@ The above commands will also ask you to create a Enhydris superuser.
 
    In order to load the actual data, issue the following command: ::
 
-           ./manage.py loaddata hcore.json 
+           ./manage.py loaddata --settings=enhydris.settings.local hcore.json 
            
 
 Running Enhydris
@@ -348,7 +348,7 @@ Running Enhydris
 Inside the :file:`openmeteo/enhydris` directory, run the following
 command::
 
-    python manage.py runserver 8088
+    python manage.py runserver --settings=enhydris.settings.local 8088
 
 The above command will start the Django development server and set it
 to listen to port 8088. If you then start your browser and point it to

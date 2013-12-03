@@ -671,21 +671,20 @@ Time series and related models
       that the time series has a nonstrict time step of 10 minutes,
       which means it has no specific nominal offset.
 
-The time series records are stored in the ``ts_records`` table,
-the format of which conforms to the specification laid out in the
-documentation for the :mod:`Timeseries` module, section :ref:`Database
-format <databaseformat>`. Although this table corresponds to a Django
-model, the existence of that model (which is a bit hacked and can run
-only on PostgreSQL) is only a means to create the table. The Django
-model should never be used to access the table; instead, the
+The time series records are stored in the ``ts_records`` table, the format of
+which is `documented in pthelma`_.  Although this table corresponds to a Django
+model, the existence of that model (which is a bit hacked and can run only on
+PostgreSQL) is only a means to create the table. The Django model should never
+be used to access the table; instead, the
 :class:`pthelma.timeseries.Timeseries` methods
 :meth:`~pthelma.timeseries.Timeseries.read_from_db`,
 :meth:`~pthelma.timeseries.Timeseries.write_to_db`, and
-:meth:`~pthelma.timeseries.Timeseries.append_to_db`, should be used.
-(It is also likely that these internals will change in the future, and
-the time series records will be stored by a Django FileField in the
+:meth:`~pthelma.timeseries.Timeseries.append_to_db`, should be used.  (It is
+also likely that these internals will change in the future, and the time series
+records will be stored by a Django FileField in the
 :class:`~enhydris.hcore.models.Timeseries` table.
 
+.. _documented in pthelma: http://pthelma.readthedocs.org/en/latest/timeseries.html#database-format
 .. _multi-table inheritance: http://docs.djangoproject.com/en/dev/topics/db/models/#id6
 .. _django-multilingual: http://code.google.com/p/django-multilingual/
 .. _abstract base class: http://docs.djangoproject.com/en/dev/topics/db/models/#id5
