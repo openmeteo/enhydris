@@ -20,7 +20,8 @@ modelnames = (
     'PoliticalDivisionManager PoliticalDivision WaterDivision WaterBasin '
     'GentityAltCodeType GentityAltCode FileType GentityFile EventType '
     'GentityEvent StationType StationManager Station Overseer InstrumentType '
-    'Instrument Variable UnitOfMeasurement TimeZone TimeStep Timeseries'
+    'Instrument Variable UnitOfMeasurement TimeZone TimeStep IntervalType '
+    'Timeseries'
 ).split()
 
 
