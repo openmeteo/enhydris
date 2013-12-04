@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.contrib.auth.views import password_reset, password_reset_done
 from django.conf import settings
 
-from registration.views import RegistrationView
+from registration.backends.default.views import RegistrationView
 import profiles
 
 from enhydris.hcore.views import terms
