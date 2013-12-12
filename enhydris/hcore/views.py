@@ -989,9 +989,6 @@ def timeseries_bottom(request, object_id):
     return response
 
 
-def terms(request):
-    return render_to_response('terms.html', RequestContext(request,{}) )
-
 """
 Model management views.
 """

@@ -6,7 +6,6 @@ from django.conf import settings
 from registration.backends.default.views import RegistrationView
 import profiles
 
-from enhydris.hcore.views import terms
 from enhydris.hcore.forms import RegistrationForm
 
 admin.autodiscover()
@@ -23,7 +22,6 @@ urlpatterns = patterns(
     (r'^accounts/', include('registration.backends.default.urls')),
     (r'^profile/', include('profiles.urls')),
 
-    (r'^terms/$', terms, {}, 'terms'),
     (r'^i18n/', include('django.conf.urls.i18n')),
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
