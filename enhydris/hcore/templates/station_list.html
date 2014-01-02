@@ -70,8 +70,8 @@
 
     function GetRectAreaResults(){
         var aurl=window.location.pathname;
-        var urlparams = getUrlVars();
-        urlparams['bounded']=map.getExtent().transform(new
+        var urlparams = Arg.all();
+        urlparams['bounded'] = enhydris.map.getExtent().transform(new
         OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326")).toBBOX(7);
         var aarray = [];
         var i = 0;

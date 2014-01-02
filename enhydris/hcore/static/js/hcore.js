@@ -113,7 +113,7 @@ function station_search() {
 }
 
 
-enhydris.map = (function namespace() {
+enhydris.map_module = (function namespace() {
     'use strict';
     var default_bounds, options, map, data_layers, add_nav_toolbar,
         add_pan_zoom_bar, add_layer_switcher, show_labels, add_label_button,
@@ -416,6 +416,7 @@ enhydris.map = (function namespace() {
         hover_control = add_hover_control(layers);
         add_nav_toolbar(hover_control, select_control);
         set_map_extents(map);
+        return map;
     };
 
     return {
