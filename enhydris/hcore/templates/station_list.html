@@ -18,6 +18,7 @@
 {% endblock %}
 
 {% block extrajs %}
+    {{ block.super }}
     <script type="text/javascript">
     $(document).ready(function() {
         $('#political_division').change( function() {
