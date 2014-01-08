@@ -11,9 +11,9 @@ Normally the web pages of Enhydris are good if you are a human; but if
 you are a computer (a script that creates stations, for example), then
 you need a different interface. For that purpose, Enydris offers an
 API through HTTP, through which applications can communicate. For
-example, http://openmeteo.org/db/stations/d/1334/ shows you a weather
+example, http://openmeteo.org/stations/d/1334/ shows you a weather
 station in human-readable format;
-http://openmeteo.org/db/api/Station/1334/ provides you data on the
+http://openmeteo.org/api/Station/1334/ provides you data on the
 same station in machine-readable format.
 
 .. admonition:: Important
