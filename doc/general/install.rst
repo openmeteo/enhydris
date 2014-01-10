@@ -4,6 +4,8 @@
 Installation and configuration
 ==============================
 
+.. highlight:: bash
+
 Prerequisites
 =============
 
@@ -80,9 +82,7 @@ which is required by Enhydris and is listed in
 .. admonition:: Example: Installing prerequisites on Debian/Ubuntu
 
    These instructions are for Debian wheezy. For Ubuntu they are similar,
-   except that the postgis package version may be different:
-
-   .. code-block:: sh
+   except that the postgis package version may be different::
 
       aptitude install python postgresql postgis postgresql-9.1-postgis \
           python-psycopg2 python-setuptools git python-pip python-imaging \
@@ -168,22 +168,35 @@ which is required by Enhydris and is listed in
        easy_install pip
        pip install -r requirements.txt
 
-Creating a database
-===================
+Creating a spatially enabled database
+=====================================
 
-You need to create a database user and a database (we use
-``enhydris_user`` and ``enhydris_db`` in the examples below). Enhydris
-will be connecting to the database as that user. The user should not
-be a super user, not be allowed to create databases, and not be
-allowed to create more users.
+You need to create a database user and a spatially enabled database
+(we use ``enhydris_user`` and ``enhydris_db`` in the examples below).
+Enhydris will be connecting to the database as that user. The user
+should not be a super user, not be allowed to create databases, and
+not be allowed to create more users.
 
 .. admonition:: GNU example
 
-   ::
+   First, you need to create a spatially enabled database template. For
+   PostGIS 2.0 or later (for earlier version refer to the GeoDjango
+   instructions)::
+
+      sudo -u postgres -s
+      createdb template_postgis
+      psql -d template_postgis -c "CREATE EXTENSION postgis;"
+      psql -d template_postgis -c \
+         "UPDATE pg_database SET datistemplate='true' \
+         WHERE datname='template_postgis';"
+      exit
+
+   The create the database::
 
       sudo -u postgres -s
       createuser --pwprompt enhydris_user
-      createdb --owner enhydris_user enhydris_db
+      createdb --template template_postgis --owner enhydris_user \
+         enhydris_db
       exit
 
    You may also need to edit your ``pg_hba.conf`` file as needed
@@ -211,35 +224,15 @@ allowed to create more users.
    at a command prompt::
    
       cd C:\Program Files\PostgreSQL\9.0\bin
+      createdb template_postgis
+      psql -d template_postgis -c "CREATE EXTENSION postgis;"
+      psql -d template_postgis -c "UPDATE pg_database SET datistemplate='true'
+         WHERE datname='template_postgis';"
       createuser -U postgres --pwprompt enhydris_user
-      createdb -U postgres --owner enhydris_user enhydris_db
+      createdb --template template_postgis --owner enhydris_user enhydris_db
 
    At some point, these commands will ask you for the password of the
    operating system user.
-
-Spatially enabling the database
-===============================
-
-Assuming the database is called "enhydris_db" and the user is
-"enhydris_user", run the following::
-
-   createlang -U postgres plpgsql enhydris_db
-   psql -d enhydris_db -U postgres -f postgis.sql
-   psql -d enhydris_db -U postgres -f postgis_comments.sql
-   psql -d enhydris_db -U postgres -f spatial_ref_sys.sql
-   psql -U postgres enhydris_db
-     grant select on spatial_ref_sys to enhydris_user;
-     grant all on geometry_columns to enhydris_user;
-     \q
-
-The location of the files :file:`postgis.sql`,
-:file:`postgis_comments.sql` and :file:`spatial_ref_sys.sql` depends
-on your installation. In Ubuntu 10.10 they are at
-:file:`/usr/share/postgresql/8.4/contrib/`. In Windows, they are
-somewhere like
-:file:`C:\\Program Files\\PostgreSQL\\9.0\\share\\contrib\\postgis-1.5`;
-also note that for these commands to run you must be in the PostgreSQL
-bin directory, or have it in the path.
 
 Configuring Enhydris
 ====================
