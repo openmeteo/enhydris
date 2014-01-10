@@ -1,8 +1,8 @@
 .. _install:
 
-=======================================
-Enhydris installation and configuration
-=======================================
+==============================
+Installation and configuration
+==============================
 
 Prerequisites
 =============

@@ -1,7 +1,7 @@
 .. _database:
 
-The Enhydris database
-=====================
+The database
+============
 
 Main principles
 ---------------
