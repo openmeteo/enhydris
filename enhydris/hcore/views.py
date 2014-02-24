@@ -289,8 +289,6 @@ class StationListView(tables.SingleTableView):
             if search_terms:
                 result = result.filter(
                     get_search_query(search_terms)).distinct()
-            else:
-                result = result.filter(pk=-1)
 
         # Advanced search
         nkwargs = kwargs
