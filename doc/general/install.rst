@@ -6,6 +6,13 @@ Installation and configuration
 
 .. highlight:: bash
 
+Download Enhydris
+=================
+
+Download Enhydris from https://github.com/openmeteo/enhydris/ (if you
+are uncomfortable with git and github, click on the "Download ZIP"
+button).
+
 Prerequisites
 =============
 
@@ -13,7 +20,7 @@ Prerequisites
 Prerequisite                                          Version
 ===================================================== ============
 Python                                                2.6 [1]
-PostgreSQL                                            8.4 [2]
+PostgreSQL                                            [2]
 PostGIS                                               1.4 [3]
 GDAL                                                  1.9
 psycopg2                                              2.2 [4]
@@ -32,13 +39,12 @@ The Python modules listed in :file:`requirements.txt` See file
 [1] Enhydris runs on Python 2.6 and 2.7. It should also run on
 any later 2.x version. Enhydris does not run on Python 3.
 
-[2] Enhydris is known to run on PostgreSQL 8.4 and 9.1, and it should also run
-without problem on PostgreSQL 9.2. In order to avoid possible
-incompatibilities with psycopg2, it is better to use the version
-prepackaged by your operating system when running on GNU/Linux, and to
-use the latest PostgreSQL version when running on Windows. If there is
-a problem with your version of PostgreSQL, email us and we'll try to
-check if it is easy to fix. 
+[2] Enhydris should run on all supported PostgreSQL versions.  In
+order to avoid possible incompatibilities with psycopg2, it is better
+to use the version prepackaged by your operating system when running
+on GNU/Linux, and to use the latest PostgreSQL version when running on
+Windows. If there is a problem with your version of PostgreSQL, email
+us and we'll check if it is easy to fix. 
 
 [3] Except for PostGIS, more libraries, namely geos and proj, are
 needed; however, you probably not need to worry about that, because in
