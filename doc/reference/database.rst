@@ -41,20 +41,17 @@ need to know the model translation rules, which are quite simple:
   lower cased parent model name suffixed with ``_ptr_id``.
 
 There are two drawings that accompany this text: the drawing for the
-`conceptual data model`_, and the drawing for the `physical data
-model`_.  You should avoid looking at the physical data model; it is
-cluttered and confusing, since it is machine-generated. It is only
-provided for the benefit of those who are not comfortable with
-Django's object-relational mapping. However, it is best to learn to
-read the conceptual data model; if you become acquainted with the
-Django's object-relational mapping rules listed above, you will be
-able to write SQL commands effortlessly, by using these rules in your
-head.  The drawing of the physical data model is also far more likely
-to contain errors or to be outdated than the drawing and documentation
-for the conceptual data model.
-
-.. _conceptual data model: ../../_static/hcore-cdm.pdf
-.. _physical data model: ../../_static/hcore-pdm.pdf
+:download:`conceptual data model <hcore-cdm.pdf>`, and the drawing for
+the :download:`physical data model <hcore-pdm.pdf>`.  You should avoid
+looking at the physical data model; it is cluttered and confusing,
+since it is machine-generated. It is only provided for the benefit of
+those who are not comfortable with Django's object-relational mapping.
+However, it is best to learn to read the conceptual data model; if you
+become acquainted with the Django's object-relational mapping rules
+listed above, you will be able to write SQL commands effortlessly, by
+using these rules in your head.  The drawing of the physical data
+model is also far more likely to contain errors or to be outdated than
+the drawing and documentation for the conceptual data model.
 
 The core of the Enhydris database is a list of measuring stations,
 with additional information such as instruments, photos, videos, and
