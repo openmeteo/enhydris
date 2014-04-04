@@ -1,7 +1,0 @@
-{% extends "base.html" %}
-{% load markup %}
-{% block title %}{{ flatpage.title }}{% endblock %}
-{% block content_main %}
-<h1>{{ flatpage.title }}</h1>
-{{ flatpage.content|restructuredtext }}
-{% endblock %}

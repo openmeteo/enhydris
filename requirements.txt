@@ -1,11 +1,11 @@
 psycopg2>=2.2,<3
-Django>=1.5,<1.6
+Django>=1.5,<1.7
 django-registration>=1.0,<2
--e hg+https://bitbucket.org/fcurella/django-profiles@5482ded#egg=django-profiles
+-e hg+https://bitbucket.org/richert/django-profiles@d69e342#egg=django-profiles
 djangorestframework>=2.3,<3
 South>=0.8
 django-notify>=1.1,<2
-django-ajax-selects>=1.2.5,<2
+django-ajax-selects>=1.3.4,<2
 Markdown>=2.1,<3
 django-simple-captcha>=0.4
 pthelma>=0.2.1

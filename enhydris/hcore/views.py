@@ -27,7 +27,6 @@ from django.contrib import messages
 from django.db.models import Q
 from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
-from django.utils import simplejson
 from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
@@ -672,8 +671,7 @@ def map_view(request, *args, **kwargs):
 
 def get_subdivision(request, division_id):
     """Ajax call to refresh divisions in filter table"""
-    response = HttpResponse(content_type='text/plain;charset=utf8',
-                            mimetype='application/json')
+    response = HttpResponse(content_type='application/json;charset=utf8')
     try:
         div = PoliticalDivision.objects.get(pk=division_id)
     except:
@@ -688,7 +686,7 @@ def get_subdivision(request, division_id):
     added = []
     for num,div in enumerate(divisions):
         if not div.name in added:
-            response.write(simplejson.dumps({"name": div.name,"id": div.pk}))
+            response.write(json.dumps({"name": div.name,"id": div.pk}))
             added.append(div.name)
             if num < divisions.count()-1:
                 response.write(',')
@@ -806,7 +804,7 @@ def download_gentityfile(request, gf_id):
 
         download_name = gfile.content.name.split('/')[-1]
         content_type = gfile.file_type.mime_type
-        response = HttpResponse(mimetype=content_type)
+        response = HttpResponse(content_type=content_type)
         response['Content-Length'] = len(filedata)
         response['Content-Disposition'] = "attachment; filename=%s"%download_name
         response.write(filedata)
@@ -872,7 +870,7 @@ def download_timeseries(request, object_id):
             comment = '%s\n\n%s' % (t.gentity.name, t.remarks)
             )
         ts.read_from_db(django.db.connection)
-        response = HttpResponse(mimetype=
+        response = HttpResponse(content_type=
                                 'text/vnd.openmeteo.timeseries; charset=utf-8')
         response['Content-Disposition'] = "attachment; filename=%s.hts"%(object_id,)
         ts.write_file(response)
@@ -969,7 +967,8 @@ def download_timeseries(request, object_id):
 
         tsdata = handle.read()
 
-        response = HttpResponse(mimetype='text/vnd.openmeteo.timeseries;charset=iso-8859-7')
+        response = HttpResponse(content_type=
+                                'text/vnd.openmeteo.timeseries;charset=utf-8')
         response['Content-Disposition']="attachment;filename=%s.hts"%(object_id,)
 
         response.write(tsdata)
@@ -982,7 +981,7 @@ def timeseries_bottom(request, object_id):
         raise Http404
     ts = TTimeseries(id = int(object_id))
     ts.read_from_db(django.db.connection, bottom_only=True)
-    response = HttpResponse(mimetype='text/plain; charset=utf-8')
+    response = HttpResponse(content_type='text/plain; charset=utf-8')
     ts.write(response)
     return response
 
@@ -1003,12 +1002,14 @@ def _station_edit_or_create(request,station_id=None):
         station = get_object_or_404(Station, id=station_id)
         if not (user.has_row_perm(station, 'edit')\
                                 and user.has_perm('hcore.change_station')):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
     else:
         # User is creating a new station
         station = None
         if not user.has_perm('hcore.add_station'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
 
     OverseerFormset = inlineformset_factory(Station, Overseer,
                                             extra=1)
@@ -1120,7 +1121,7 @@ def station_delete(request,station_id):
         return render_to_response('success.html',
             {'msg': 'Station deleted successfully',},
             context_instance=RequestContext(request))
-    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+    return HttpResponseForbidden('Forbidden', content_type='text/plain')
 
 
 """
@@ -1153,7 +1154,8 @@ def _timeseries_edit_or_create(request,tseries_id=None):
         station = get_object_or_404(Station, id=station_id)
     if station:
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
     if station and not tseries:
         tseries = Timeseries(gentity=station, instrument=instrument)
 
@@ -1223,7 +1225,8 @@ def timeseries_delete(request, timeseries_id):
             return render_to_response('success.html',
                     {'msg': 'Timeseries deleted successfully',},
                     context_instance=RequestContext(request))
-    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+    return HttpResponseForbidden('Forbidden',
+                                 content_type='text/plain')
 
 
 """
@@ -1246,13 +1249,15 @@ def _gentityfile_edit_or_create(request,gfile_id=None):
         station = gfile.related_station
         station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
 
     if station_id and not gfile_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
         gevent = GentityFile(gentity=station)
 
     user = request.user
@@ -1314,7 +1319,8 @@ def gentityfile_delete(request, gentityfile_id):
             return render_to_response('success.html',
                     {'msg': 'GentityFile deleted successfully',},
                     context_instance=RequestContext(request))
-    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+    return HttpResponseForbidden('Forbidden',
+                                 content_type='text/plain')
 
 
 """
@@ -1337,13 +1343,15 @@ def _gentitygenericdata_edit_or_create(request,ggenericdata_id=None):
         station = ggenericdata.related_station
         station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
 
     if station_id and not ggenericdata_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
         gevent = GentityGenericData(gentity=station)
 
     user = request.user
@@ -1405,7 +1413,7 @@ def gentitygenericdata_delete(request, ggenericdata_id):
             return render_to_response('success.html',
                     {'msg': 'GentityGenericData deleted successfully',},
                     context_instance=RequestContext(request))
-    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+    return HttpResponseForbidden('Forbidden', content_type='text/plain')
 
 
 """
@@ -1427,13 +1435,15 @@ def _gentityevent_edit_or_create(request,gevent_id=None):
         station = gevent.related_station
         station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
 
     if station_id and not gevent_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
         gevent = GentityEvent(gentity=station)
 
     user = request.user
@@ -1496,7 +1506,7 @@ def gentityevent_delete(request, gentityevent_id):
             return render_to_response('success.html',
                     {'msg': 'GentityEvent deleted successfully',},
                     context_instance=RequestContext(request))
-    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+    return HttpResponseForbidden('Forbidden', content_type='text/plain')
 
 
 def _gentityaltcode_edit_or_create(request,galtcode_id=None):
@@ -1514,13 +1524,15 @@ def _gentityaltcode_edit_or_create(request,galtcode_id=None):
         station = galtcode.related_station
         station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
 
     if station_id and not galtcode_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
         gevent = GentityAltCode(gentity=station)
 
     user = request.user
@@ -1582,7 +1594,8 @@ def gentityaltcode_delete(request, gentityaltcode_id):
             return render_to_response('success.html',
                     {'msg': 'GentityAltCode deleted successfully',},
                     context_instance=RequestContext(request))
-    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+    return HttpResponseForbidden('Forbidden',
+                                 content_type='text/plain')
 
 """
 Overseer Views
@@ -1604,13 +1617,15 @@ def _overseer_edit_or_create(request,overseer_id=None,station_id=None):
         station = overseer.station
         station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
 
     if station_id and not overseer_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
         overseer = Overseer(station=station)
 
     user = request.user
@@ -1672,7 +1687,7 @@ def overseer_delete(request, overseer_id):
             return render_to_response('success.html',
                     {'msg': 'Overseer deleted successfully',},
                     context_instance=RequestContext(request))
-    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+    return HttpResponseForbidden('Forbidden', content_type='text/plain')
 
 
 
@@ -1696,12 +1711,14 @@ def _instrument_edit_or_create(request,instrument_id=None):
         station = instrument.station
         station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
 
     if station_id and not instrument_id:
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
         instrument = Instrument(station=station)
 
     user = request.user
@@ -1763,7 +1780,7 @@ def instrument_delete(request, instrument_id):
             return render_to_response('success.html',
                     {'msg': 'Instrument deleted successfully',},
                     context_instance=RequestContext(request))
-    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+    return HttpResponseForbidden('Forbidden', content_type='text/plain')
 
 
 
@@ -1804,7 +1821,8 @@ class ModelAddView(CreateView):
         # Check permissions
         if not kwargs['model_name'] in ALLOWED_TO_EDIT or not \
                 self.request.user.has_perm('hcore.add_' + kwargs['model_name']):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
 
         return super(ModelAddView, self).dispatch(*args, **kwargs)
 
@@ -1908,7 +1926,8 @@ def bound(request):
             miny-=dx
             miny+=dy
             maxy-=dy
-            return HttpResponse("%f,%f,%f,%f"%(minx,miny,maxx,maxy), mimetype='text/plain') 
+            return HttpResponse("%f,%f,%f,%f"%(minx,miny,maxx,maxy),
+                                content_type='text/plain')
         except ValueError:
             queryres = queryres.none()     
     else:
@@ -1939,13 +1958,13 @@ def bound(request):
     if queryres.count()<1:
         return HttpResponse(','.join([str(e) for e in\
                             settings.ENHYDRIS_MAP_DEFAULT_VIEWPORT]),
-                            mimetype='text/plain')
+                            content_type='text/plain')
     try:
         extent = list(queryres.extent())
     except TypeError:
         return HttpResponse(','.join([str(e) for e in\
                             settings.ENHYDRIS_MAP_DEFAULT_VIEWPORT]),
-                            mimetype='text/plain')
+                            content_type='text/plain')
     min_viewport = settings.ENHYDRIS_MIN_VIEWPORT_IN_DEGS
     min_viewport_half = 0.5*min_viewport
     if abs(extent[2]-extent[0])<min_viewport:
@@ -1954,4 +1973,5 @@ def bound(request):
     if abs(extent[3]-extent[1])<min_viewport:
         extent[3]+=min_viewport_half
         extent[1]-=min_viewport_half
-    return HttpResponse(','.join([str(e) for e in extent]), mimetype='text/plain')
+    return HttpResponse(','.join([str(e) for e in extent]),
+                        content_type='text/plain')
