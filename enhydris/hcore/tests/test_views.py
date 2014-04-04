@@ -119,26 +119,55 @@ class TsTestCase(TestCase):
         pts.read_from_db(dj_connection)
         self.assertEqual(len(pts.items()), 12872)
 
-        #check downloading
-        url = "/timeseries/d/%d/download/" % self.ts.pk
+        # check downloading
+
+        def nrecords():
+            lines = response.content.splitlines()
+            linecount = len(lines)
+            headerlinecount = sum([1 for x in takewhile(lambda x: x != '',
+                                                        lines)]) + 1
+            return linecount - headerlinecount
+        if not settings.ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
+            self.client.login(username='test', password='test')
+
+        url = "/timeseries/d/{}/download/".format(self.ts.pk)
         response = self.client.get(url)
-        if settings.ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
-            self.assertEqual(response.status_code, 200)
-        else:
-            self.assertEqual(response.status_code, 302)
-            self.assertEquals(self.client.login(username='test',
-                                                password='test'), True)
-            response = self.client.get(url)
-            self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(nrecords(), 12872)
 
-        # check fiLe
-        lines = response.content.splitlines()
-        linecount = len(lines)
-        headerlinecount = sum([1 for x in takewhile(lambda x: x != '',
-                                                    lines)]) + 1
-        datalinecount = linecount - headerlinecount
+        url = "/timeseries/d/{}/download/1960-11-04/".format(self.ts.pk)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(nrecords(), 12870)
 
-        self.assertEqual(datalinecount, 12872)
+        url = "/timeseries/d/{}/download/1960-11-04/1960-11-08T08:00/".format(
+            self.ts.pk)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(nrecords(), 4)
+
+        url = "/timeseries/d/{}/download//1960-11-08T08:00/".format(self.ts.pk)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(nrecords(), 6)
+
+        url = "/timeseries/d/{}/download/1950-02-02/1960-11-08T08:00/".format(
+            self.ts.pk)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(nrecords(), 6)
+
+        url = "/timeseries/d/{}/download/1950-02-02/1960-01-01T08:00/".format(
+            self.ts.pk)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(nrecords(), 0)
+
+        url = "/timeseries/d/{}/download/1998-02-02//".format(
+            self.ts.pk)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(nrecords(), 0)
 
         self.client.logout()
 

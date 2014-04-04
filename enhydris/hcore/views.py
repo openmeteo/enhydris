@@ -843,136 +843,50 @@ TS_ERROR = ("There seems to be some problem with our internal infrastuctrure. Th
 " admins have been notified of this and will try to resolve the matter as soon as"
 " possible.  Please try again later.")
 
+
 @timeseries_permission
-def download_timeseries(request, object_id):
+def download_timeseries(request, object_id, start_date=None, end_date=None):
     """
     This function handles timeseries downloading either from the local db or
     from a remote instance.
     """
-
+    if not settings.ENHYDRIS_STORE_TSDATA_LOCALLY:
+        raise Http404
     timeseries = get_object_or_404(Timeseries, pk=int(object_id))
-
-    # Check whether this instance has local store enabled or else we need to
-    # fetch ts data from remote instance
-    if settings.ENHYDRIS_STORE_TSDATA_LOCALLY:
-
-        t = timeseries # nickname, because we use it much in next statement
-        ts = TTimeseries(
-            id = int(object_id),
-            time_step = ReadTimeStep(object_id, t),
-            unit = t.unit_of_measurement.symbol,
-            title = t.name,
-            timezone = '%s (UTC%+03d%02d)' % (t.time_zone.code,
-                (abs(t.time_zone.utc_offset) / 60)* (-1 if t.time_zone.utc_offset<0 else 1), 
-                abs(t.time_zone.utc_offset % 60),),
-            variable = t.variable.descr,
-            precision = t.precision,
-            comment = '%s\n\n%s' % (t.gentity.name, t.remarks)
-            )
+    sign = -1 if timeseries.time_zone.utc_offset < 0 else 1
+    ts = TTimeseries(
+        id = int(object_id),
+        time_step = ReadTimeStep(object_id, timeseries),
+        unit = timeseries.unit_of_measurement.symbol,
+        title = timeseries.name,
+        timezone = '{} (UTC{:+03d}{:02d})'.format(timeseries.time_zone.code,
+            abs(timeseries.time_zone.utc_offset) / 60 * sign,
+            abs(timeseries.time_zone.utc_offset) % 60),
+        variable = timeseries.variable.descr,
+        precision = timeseries.precision,
+        comment = '%s\n\n%s' % (timeseries.gentity.name, timeseries.remarks)
+        )
+    start_date = (datetime_from_iso(start_date) if start_date
+                  else timeseries.start_date)
+    end_date = (datetime_from_iso(end_date) if end_date
+                else timeseries.end_date)
+    if (start_date <= timeseries.end_date) or (end_date >=
+                                               timeseries.start_date):
         ts.read_from_db(django.db.connection)
-        response = HttpResponse(content_type=
-                                'text/vnd.openmeteo.timeseries; charset=utf-8')
-        response['Content-Disposition'] = "attachment; filename=%s.hts"%(object_id,)
-        ts.write_file(response)
-        return response
-    else:
-        """
-        Here we use the webservice api to fetch a specific timeseries
-        data from the original database from which it was synced.
-        Since this requires http authentication, we use the
-        username/password stored in the settings file to connect.
-
-        NOTE: The user used for the sync should be a superuser in the
-        remote instance.
-        """
-        import urllib2, re, base64
-
-        # Get the original timeseries id and the source database
-        if timeseries.original_id and timeseries.original_db:
-            ts_id = timeseries.original_id
-            db_host = timeseries.original_db.hostname
-        else:
-            request.notifications.error("No data was found for "
-                    " the requested timeseries.")
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                or reverse('timeseries_detail',args=[timeseries.id]))
-
-        # Next we check the setting files for a uname/pass for this host
-        uname, pwd = settings.ENHYDRIS_REMOTE_INSTANCE_CREDENTIALS.get(
-            db_host, (None, None))
-
-        # We craft the url
-        url = 'http://'+db_host + '/api/tsdata/' + str(ts_id)
-        req = urllib2.Request(url)
-        try:
-            handle = urllib2.urlopen(req,timeout=10)
-        except IOError, e:
-            # here we *want* to fail
-            pass
-        else:
-            # If we don't fail then the page isn't protected
-            # which means something is not right. Raise hell
-            # mail admins + return user notification.
-            request.notifications.error(TS_ERROR)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                or reverse('timeseries_detail',args=[timeseries.id]))
-
-        if not hasattr(e, 'code') or e.code != 401:
-            # we got an error - but not a 401 error
-            request.notifications.error(TS_ERROR)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                or reverse('timeseries_detail',args=[timeseries.id]))
-
-        authline = e.headers['www-authenticate']
-        # this gets the www-authenticate line from the headers
-        # which has the authentication scheme and realm in it
-
-        authobj = re.compile(
-            r'''(?:\s*www-authenticate\s*:)?\s*(\w*)\s+realm=['"]([^'"]+)['"]''',
-            re.IGNORECASE)
-        # this regular expression is used to extract scheme and realm
-        matchobj = authobj.match(authline)
-
-        if not matchobj:
-            # if the authline isn't matched by the regular expression
-            # then something is wrong
-            request.notifications.error(TS_ERROR)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                or reverse('timeseries_detail',args=[timeseries.id]))
-
-        scheme = matchobj.group(1)
-        realm = matchobj.group(2)
-        # here we've extracted the scheme
-        # and the realm from the header
-        if scheme.lower() != 'basic':
-            # we don't support other auth
-            # mail admins + inform user of error
-            request.notifications.error(TS_ERROR)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                or reverse('timeseries_detail',args=[timeseries.id]))
-
-        # now the good part.
-        base64string = base64.encodestring(
-                '%s:%s' % (uname, pwd))[:-1]
-        authheader =  "Basic %s" % base64string
-        req.add_header("Authorization", authheader)
-
-        try:
-            handle = urllib2.urlopen(req)
-        except IOError, e:
-            # here we shouldn't fail if the username/password is right
-            request.notifications.error(TS_ERROR)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                or reverse('timeseries_detail',args=[timeseries.id]))
-
-        tsdata = handle.read()
-
-        response = HttpResponse(content_type=
-                                'text/vnd.openmeteo.timeseries;charset=utf-8')
-        response['Content-Disposition']="attachment;filename=%s.hts"%(object_id,)
-
-        response.write(tsdata)
-        return response
+        if (start_date > timeseries.start_date) or (end_date
+                                                    < timeseries.end_date):
+            # Delete the part we don't want. The way we do it sucks; but it's
+            # because pthelma currently does not offer another. Really, we must
+            # use pandas instead of dickinson.
+            tskeys = ts.keys()
+            for d in tskeys:
+                if d < start_date or d > end_date:
+                    del ts[d]
+    response = HttpResponse(content_type=
+                            'text/vnd.openmeteo.timeseries; charset=utf-8')
+    response['Content-Disposition'] = "attachment; filename=%s.hts"%(object_id,)
+    ts.write_file(response)
+    return response
 
 
 @timeseries_permission

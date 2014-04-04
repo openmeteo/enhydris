@@ -41,7 +41,8 @@ urlpatterns = patterns(
         name='timeseries_detail'),
     (r'^timeseries/data/$',
      views.timeseries_data, {}, 'timeseries_data'),
-    (r'^timeseries/d/(?P<object_id>\d+)/download/$',
+    (r'^timeseries/d/(?P<object_id>\d+)/download/'
+     r'((?P<start_date>[^/]*)/((?P<end_date>[^/]*)/)?)?$',
      views.download_timeseries, {}, 'timeseries_text'),
     (r'^timeseries/d/(?P<object_id>\d+)/bottom/$',
      views.timeseries_bottom, {}, 'timeseries_bottom'),
