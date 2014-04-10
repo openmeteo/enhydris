@@ -151,6 +151,11 @@ class TsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(nrecords(), 6)
 
+        url = "/timeseries/d/{}/download//1960-11-08T08:00:00/".format(self.ts.pk)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(nrecords(), 6)
+
         url = "/timeseries/d/{}/download/1950-02-02/1960-11-08T08:00/".format(
             self.ts.pk)
         response = self.client.get(url)
