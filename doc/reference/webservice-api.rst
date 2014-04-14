@@ -63,45 +63,22 @@ this: ``http://base-address/api/Station/1000/``.
 See the :ref:`data model reference <database>` for information on the
 models.
 
-Creating new time series
-========================
+
+Creating new time series and stations
+=====================================
 
 To create a new time series, you POST ``/api/Timeseries/``; you must
 pass an appropriate csrf_token and a session id (you must be logged on
 as a user who has permission to do this), and pass the data in an
-appropriate format, such as JSON. This is an example::
+appropriate format, such as JSON. Likewise, you can create new
+stations by POSTing ``/api/Station/``; you can also delete stations
+and time series, and you can edit stations.
 
-    from urllib2 import build_opener, HTTPCookieProcessor, Request
-    import cookielib
-    import json
+If you program in Python, you should use `Pthelma's enhydris_api`_
+module. Otherwise, you should read its code to see more concrete
+examples of how to use the API.
 
-    BASE_URL = 'http://openmeteo.org/db/'
-    USERNAME = 'my_username'
-    PASSWORD = 'my_password'
-    EXISTING_TIMESERIES_ID = 42
-
-    # Get a csrf token and login
-    cookiejar = cookielib.CookieJar()
-    opener = build_opener(HTTPCookieProcessor(cookiejar))
-    s = opener.open(BASE_URL + 'accounts/login/').read()
-    opener.addheaders = [('X-CSRFToken', cookie.value)
-                        for cookie in cookiejar if cookie.name == 'csrftoken']
-    data = 'username={0}&password={1}'.format(USERNAME, PASSWORD)
-    opener.open(BASE_URL + 'accounts/login/', data)
-
-    # Read an existing time series, and create a new one that has
-    # different remarks.
-    fp = opener.open('{0}api/Timeseries/{1}/'.format(BASE_URL,
-                                                    EXISTING_TIMESERIES_ID))
-    j = json.load(fp)
-    j[0]['fields']['remarks'] += "This time series rocks!"
-    fp = opener.open(Request('{0}api/Timeseries/'.format(BASE_URL),
-                             data = json.dumps(j),
-                             headers = { 'Content-type': 'application/json' }))
-    response_text = fp.read()
-    new_id = int(response_text)
-
-    print "The time series was created; its id is {0}".format(new_id,)
+.. _pthelma's enhydris_api: http://pthelma.readthedocs.org/en/latest/enhydris_api.html
 
 
 Appending data to a time series

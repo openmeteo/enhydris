@@ -1,9 +1,11 @@
 from datetime import datetime
 import json
 
+from django.contrib.auth.models import User, Permission
+from django.db import connection
 from django.test import TestCase
 from django.test.client import MULTIPART_CONTENT, BOUNDARY, encode_multipart
-from django.db import connection
+from django.test.utils import override_settings
 
 from rest_framework.test import APITestCase
 
@@ -217,4 +219,143 @@ class WriteTestCase(TestCase):
         t.read_from_db(connection)
         self.assertEqual(response.status_code, 409)
         self.assertEqual(len(t), 3)
+        self.client.logout()
+
+
+class WriteStationTestCase(TestCase):
+    fixtures = ['enhydris/api/testdata.json']
+
+    def test_edit_station(self):
+        # Get an existing station
+        obj = models.Station.objects.get(name='Test Station')
+        response = self.client.get("/api/Station/{}/".format(obj.id))
+        station = json.loads(response.content)
+
+        # Change some of its attributes
+        station_id = station['id']
+        del station['id']
+        station['name'] = 'Test Station 1222'
+        station['remarks'] = 'Yet another station test'
+
+        # Attempt to upload unauthenticated - should deny
+        d = json.dumps(station)
+        response = self.client.put('/api/Station/{}/'.format(station_id),
+                                   data=d, content_type='application/json')
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(models.Station.objects.filter(
+                         name='Test Station 1222').count(), 0)
+
+        # Try again, this time logged on as user 2; again should deny
+        self.assertTrue(self.client.login(username='user2',
+                                          password='password2'))
+        response = self.client.put('/api/Station/{}/'.format(station_id),
+                                   data=d, content_type='application/json')
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(models.Station.objects.filter(
+                         name='Test Station 1222').count(), 0)
+        self.client.logout()
+
+        # Try again, as user 1; should accept
+        self.assertTrue(self.client.login(username='user1',
+                                          password='password1'))
+        response = self.client.put('/api/Station/{}/'.format(station_id),
+                                   data=d, content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(models.Station.objects.filter(
+                         name='Test Station 1222').count(), 1)
+        self.client.logout()
+
+    def test_station_delete(self):
+        # Check the number of stations available
+        nstations = models.Station.objects.count()
+        assert(nstations > 1)  # 1 is not enough; we need to know we aren't
+                               # deleting more than necessary.
+
+        # Attempt to delete unauthenticated - should fail
+        response = self.client.delete('/api/Station/4/')
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(models.Station.objects.filter(pk=4).count(), 1)
+        self.assertEqual(models.Station.objects.count(), nstations)
+
+        # Try again as user2 - should fail
+        self.assertTrue(self.client.login(username='user2',
+                                          password='password2'))
+        response = self.client.delete('/api/Station/4/')
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(models.Station.objects.filter(pk=4).count(), 1)
+        self.assertEqual(models.Station.objects.count(), nstations)
+        self.client.logout()
+
+        # Try again as user1 - should succeed
+        self.assertTrue(self.client.login(username='user1',
+                                          password='password1'))
+        response = self.client.delete('/api/Station/4/')
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(models.Station.objects.filter(pk=4).count(), 0)
+        self.assertEqual(models.Station.objects.count(), nstations - 1)
+        self.client.logout()
+
+
+class CreateStationTestCase(TestCase):
+    fixtures = ['enhydris/api/testdata.json']
+
+    def setUp(self):
+        # Get an existing station
+        obj = models.Station.objects.get(name='Test Station')
+        response = self.client.get("/api/Station/{}/".format(obj.id))
+        self.station = json.loads(response.content)
+
+        # Change some of its attributes
+        del self.station['id']
+        self.station['name'] = 'Test Station 1507'
+        self.station['remarks'] = 'Yet another station test'
+
+    def test_create_unauthenticated(self):
+        response = self.client.post('/api/Station/',
+                                    data=json.dumps(self.station),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(models.Station.objects.filter(
+                         name='Test Station 1507').count(), 0)
+
+    @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+    def test_create_station_on_database_allowing_any_user(self):
+        self.assertTrue(self.client.login(username='user2',
+                                          password='password2'))
+        response = self.client.post('/api/Station/',
+                                    data=json.dumps(self.station),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(models.Station.objects.filter(
+            name='Test Station 1507').count(), 1)
+        self.client.logout()
+
+    @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=False)
+    def test_create_station_by_disallowed_user(self):
+        self.assertTrue(self.client.login(username='user2',
+                                          password='password2'))
+        response = self.client.post('/api/Station/',
+                                    data=json.dumps(self.station),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(models.Station.objects.filter(
+            name='Test Station 1507').count(), 0)
+        self.client.logout()
+
+    @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=False)
+    def test_create_station_by_allowed_user(self):
+        # Give the appropriate permissions to the user
+        user = User.objects.get(username='user2')
+        permission = Permission.objects.get(codename='add_station')
+        user.user_permissions.add(permission)
+        user.save()
+
+        self.assertTrue(self.client.login(username='user2',
+                                          password='password2'))
+        response = self.client.post('/api/Station/',
+                                    data=json.dumps(self.station),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(models.Station.objects.filter(
+            name='Test Station 1507').count(), 1)
         self.client.logout()

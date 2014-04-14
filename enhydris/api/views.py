@@ -12,7 +12,8 @@ from rest_framework.reverse import reverse
 
 from pthelma.timeseries import Timeseries
 from enhydris.hcore import models
-from enhydris.api.permissions import CanEditOrReadOnly
+from enhydris.api.permissions import CanEditOrReadOnly, CanCreateStation
+from enhydris.api.serializers import StationSerializer
 
 
 modelnames = (
@@ -113,4 +114,15 @@ class TimeseriesList(generics.ListCreateAPIView):
 
 class TimeseriesDetail(generics.RetrieveUpdateDestroyAPIView):
     model = models.Timeseries
+    permission_classes = (CanEditOrReadOnly,)
+
+
+class StationList(generics.ListCreateAPIView):
+    model = models.Station
+    serializer_class = StationSerializer
+    permission_classes = (CanCreateStation,)
+
+
+class StationDetail(generics.RetrieveUpdateDestroyAPIView):
+    model = models.Station
     permission_classes = (CanEditOrReadOnly,)
