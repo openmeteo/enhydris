@@ -873,15 +873,8 @@ def download_timeseries(request, object_id, start_date=None, end_date=None):
     if (start_date <= timeseries.end_date) or (end_date >=
                                                timeseries.start_date):
         ts.read_from_db(django.db.connection)
-        if (start_date > timeseries.start_date) or (end_date
-                                                    < timeseries.end_date):
-            # Delete the part we don't want. The way we do it sucks; but it's
-            # because pthelma currently does not offer another. Really, we must
-            # use pandas instead of dickinson.
-            tskeys = ts.keys()
-            for d in tskeys:
-                if d < start_date or d > end_date:
-                    del ts[d]
+        ts.delete_items(None, start_date - timedelta(minutes=1))
+        ts.delete_items(end_date + timedelta(minutes=1), None)
     response = HttpResponse(content_type=
                             'text/vnd.openmeteo.timeseries; charset=utf-8')
     response['Content-Disposition'] = "attachment; filename=%s.hts"%(object_id,)
