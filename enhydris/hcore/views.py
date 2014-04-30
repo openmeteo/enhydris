@@ -870,8 +870,8 @@ def download_timeseries(request, object_id, start_date=None, end_date=None):
                   else timeseries.start_date)
     end_date = (datetime_from_iso(end_date) if end_date
                 else timeseries.end_date)
-    if (start_date <= timeseries.end_date) or (end_date >=
-                                               timeseries.start_date):
+    if start_date and end_date and ((start_date <= timeseries.end_date) or (
+            end_date >= timeseries.start_date)):
         ts.read_from_db(django.db.connection)
         ts.delete_items(None, start_date - timedelta(minutes=1))
         ts.delete_items(end_date + timedelta(minutes=1), None)
