@@ -887,6 +887,10 @@ def timeseries_bottom(request, object_id):
     if not settings.ENHYDRIS_STORE_TSDATA_LOCALLY:
         raise Http404
     ts = TTimeseries(id = int(object_id))
+    try:
+        Timeseries.objects.get(pk=int(object_id))
+    except Timeseries.DoesNotExist:
+        raise Http404
     ts.read_from_db(django.db.connection, bottom_only=True)
     response = HttpResponse(content_type='text/plain; charset=utf-8')
     ts.write(response)
