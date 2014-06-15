@@ -388,9 +388,11 @@ class TimeseriesForm(ModelForm):
             return None
         self.cleaned_data['data'].seek(0)
         ts = timeseries.Timeseries()
+        data = self.cleaned_data['data']
+
         try:
             ts.read_file(self.cleaned_data['data'])
-        except Exception, e:
+        except Exception as e:
             raise forms.ValidationError(str(e))
 
         return self.cleaned_data['data']
@@ -447,9 +449,10 @@ class TimeseriesForm(ModelForm):
         # module.
 
         if 'data' in self.cleaned_data and self.cleaned_data['data']:
+            data = self.cleaned_data['data']
             ts = timeseries.Timeseries(int(self.instance.id))
-            self.cleaned_data['data'].seek(0)
-            ts.read_file(self.cleaned_data['data'])
+            data.seek(0)
+            ts.read_file(data)
             if self.cleaned_data['data_policy'] == 'A':
                 try:
                     ts.append_to_db(db.connection, commit=False)
@@ -468,9 +471,10 @@ class TimeseriesForm(ModelForm):
 
         # Handle pushing additional data if present back to the db
         if 'data' in self.cleaned_data and self.cleaned_data['data']:
+            data = self.cleaned_data['data']
             ts = timeseries.Timeseries(int(self.instance.id))
-            self.cleaned_data['data'].seek(0)
-            ts.read_file(self.cleaned_data['data'])
+            data.seek(0)
+            ts.read_file(data)
             if self.cleaned_data['data_policy'] == 'A':
                 pass
                 # ts.append_to_db(db.connection, commit=False)

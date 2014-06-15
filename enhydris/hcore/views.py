@@ -432,10 +432,10 @@ def timeseries_data(request, *args, **kwargs):
         b = b.days*86400+b.seconds
         return float(a)/float(b)
 
-# Return the nearest record number to the specified date
-# The second argument is 0 for exact match, -1 if no
-# exact match and the date is after the record found,
-# 1 if no exact match and the date is before the record.
+    # Return the nearest record number to the specified date
+    # The second argument is 0 for exact match, -1 if no
+    # exact match and the date is after the record found,
+    # 1 if no exact match and the date is before the record.
     def find_line_at_date(adatetime, totlines):
         if totlines <2:
             return totlines
@@ -542,8 +542,9 @@ def timeseries_data(request, *args, **kwargs):
                 else:
                     last_date = date_at_pos(end_pos)
                     first_date = inc_datetime(last_date, request.GET['last'], -1)
-# This is an almost bad workarround to exclude the first record from
-# sums, i.e. when we need the 144 10 minute values from a day.
+                    # This is an almost bad workarround to exclude the first
+                    # record from sums, i.e. when we need the 144 10 minute
+                    # values from a day.
                     if request.GET.has_key('start_offset'):
                         offset = float(request.GET['start_offset'])
                         first_date+= timedelta(minutes=offset)
@@ -575,9 +576,9 @@ def timeseries_data(request, *args, **kwargs):
                     pos+=fine_step
                     continue 
                 t = s.split(',') 
-# Use the following exception handling to catch incoplete
-# reads from cache. Tries only one time, next time if
-# the error on the same line persists, it raises.
+                # Use the following exception handling to catch incoplete
+                # reads from cache. Tries only one time, next time if
+                # the error on the same line persists, it raises.
                 try:
                     k = datetime_from_iso(t[0])
                     v = t[1]
@@ -600,8 +601,8 @@ def timeseries_data(request, *args, **kwargs):
                     if amax == '': amax = 'null'
                     chart_data.append([calendar.timegm(k.timetuple())*1000, str(amax), pos])
                     amax = ''
-# Some times linecache tries to read a file being written (from 
-# timeseries.write_file). So every 5000 lines refresh the cache.
+                # Some times linecache tries to read a file being written (from 
+                # timeseries.write_file). So every 5000 lines refresh the cache.
                 if (pos-start_pos)%5000==0:
                     linecache.checkcache(afilename)
                 pos+=fine_step
@@ -854,6 +855,18 @@ def download_timeseries(request, object_id, start_date=None, end_date=None):
         raise Http404
     timeseries = get_object_or_404(Timeseries, pk=int(object_id))
     sign = -1 if timeseries.time_zone.utc_offset < 0 else 1
+    try:
+        location = {
+            'abscissa': timeseries.gentity.gpoint.point[0],
+            'ordinate': timeseries.gentity.gpoint.point[1],
+            'srid': timeseries.gentity.gpoint.srid,
+            'altitude': timeseries.gentity.gpoint.altitude,
+            'asrid': timeseries.gentity.gpoint.asrid,
+        }
+    except TypeError:
+        # TypeError occurs when timeseries.gentity.gpoint.point is None,
+        # meaning the co-ordinates aren't registered.
+        location = None
     ts = TTimeseries(
         id = int(object_id),
         time_step = ReadTimeStep(object_id, timeseries),
@@ -864,6 +877,7 @@ def download_timeseries(request, object_id, start_date=None, end_date=None):
             abs(timeseries.time_zone.utc_offset) % 60),
         variable = timeseries.variable.descr,
         precision = timeseries.precision,
+        location = location,
         comment = '%s\n\n%s' % (timeseries.gentity.name, timeseries.remarks)
         )
     start_date = (datetime_from_iso(start_date) if start_date
@@ -878,7 +892,13 @@ def download_timeseries(request, object_id, start_date=None, end_date=None):
     response = HttpResponse(content_type=
                             'text/vnd.openmeteo.timeseries; charset=utf-8')
     response['Content-Disposition'] = "attachment; filename=%s.hts"%(object_id,)
-    ts.write_file(response)
+    try:
+        file_version = int(request.GET.get('version', '2'))
+    except ValueError:
+        raise Http404
+    if file_version not in (2, 3):
+        raise Http404
+    ts.write_file(response, version=file_version)
     return response
 
 

@@ -1,12 +1,16 @@
 from itertools import takewhile
+from StringIO import StringIO
 from tempfile import TemporaryFile
 
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.urlresolvers import reverse
+from django.contrib.auth.models import User, Group, Permission
+from django.contrib.gis.geos import fromstr
+from django.db import connection as dj_connection
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.contrib.auth.models import User, Group, Permission
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.db import connection as dj_connection
-from django.core.urlresolvers import reverse
+
+from pthelma import timeseries
 
 from enhydris.conf import settings
 from enhydris.hcore.models import StationType, Organization, Variable, \
@@ -73,11 +77,15 @@ class TsTestCase(TestCase):
         self.unit.save()
         self.tz = TimeZone.objects.create(code='UTC', utc_offset='0')
         self.tz.save()
-        self.station = Station.objects.create(name='station',
-                                              owner=self.organization,
-                                              approximate=False,
-                                              is_active=True,
-                                              is_automatic=True)
+        self.station = Station.objects.create(
+            name='station',
+            owner=self.organization,
+            approximate=False,
+            is_active=True,
+            is_automatic=True,
+            point=fromstr('POINT(24.67890 38.12345)'),
+            srid=4326,
+            altitude=219.22)
         self.station.save()
         self.ts = Timeseries(name="tstest", gentity=self.station,
                              time_zone=self.tz,
@@ -97,29 +105,23 @@ class TsTestCase(TestCase):
         self.ts.delete()
         self.user.delete()
 
-    def testTimeseriesData(self):
-        """Test that the timeseries data upload/download is correct"""
-
-        from pthelma import timeseries
-        # check uploading
-        f = open("enhydris/hcore/tests/tsdata.hts", "r")
-
-        file_dict = {'data': SimpleUploadedFile(f.name, f.read())}
+    def test_timeseries_data(self):
+        # Upload
+        with open("enhydris/hcore/tests/tsdata.hts", "r") as f:
+            file_dict = {'data': SimpleUploadedFile(f.name, f.read())}
         post_dict = {'gentity': self.station.pk, 'variable': self.var.pk,
                      'unit_of_measurement': self.unit.pk,
                      'time_zone': self.tz.pk
                      }
         form = TimeseriesDataForm(post_dict, file_dict, instance=self.ts)
-
-        self.assertEqual(form.is_valid(), True)
+        self.assertTrue(form.is_valid())
         ts = form.save()
-
         ts.save()
         pts = timeseries.Timeseries(ts.id)
         pts.read_from_db(dj_connection)
         self.assertEqual(len(pts.items()), 12872)
 
-        # check downloading
+        # Download
 
         def nrecords():
             lines = response.content.splitlines()
@@ -127,12 +129,26 @@ class TsTestCase(TestCase):
             headerlinecount = sum([1 for x in takewhile(lambda x: x != '',
                                                         lines)]) + 1
             return linecount - headerlinecount
+
         if not settings.ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
             self.client.login(username='test', password='test')
 
         url = "/timeseries/d/{}/download/".format(self.ts.pk)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content.splitlines()[0].strip(), 'Version=2')
+        self.assertEqual(nrecords(), 12872)
+
+        url = "/timeseries/d/{}/download/?version=3".format(self.ts.pk)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        ats = timeseries.Timeseries()
+        ats.read_file(StringIO(response.content))
+        self.assertAlmostEqual(ats.location['abscissa'], 24.67890, places=6)
+        self.assertAlmostEqual(ats.location['ordinate'], 38.12345, places=6)
+        self.assertEqual(ats.location['srid'], 4326)
+        self.assertAlmostEqual(ats.location['altitude'], 219.22, places=2)
+        self.assertTrue(ats.location['asrid'] is None)
         self.assertEqual(nrecords(), 12872)
 
         url = "/timeseries/d/{}/download/1960-11-04/".format(self.ts.pk)
