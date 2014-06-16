@@ -1,9 +1,10 @@
-from __future__ import with_statement 
 import os
-from pthelma.timeseries import Timeseries, datetime_from_iso
-from pthelma.xreverse import xreverse
-import tempfile
 import shutil
+import tempfile
+
+from simpletail import ropen
+
+from pthelma.timeseries import Timeseries, datetime_from_iso
 
 def update_ts_temp_file(cache_dir, connection, id):
     full_rewrite = False
@@ -12,11 +13,10 @@ def update_ts_temp_file(cache_dir, connection, id):
     if os.path.exists(afilename):
         if os.path.getsize(afilename)<3:
             full_rewrite = True
-#Update the file in the case of logged data, if this is possible
+    #Update the file in the case of logged data, if this is possible
     if os.path.exists(afilename) and not full_rewrite:
-        with open(afilename, 'r') as fileobject:
-            xr = xreverse(fileobject, 2048)
-            line = xr.next()
+        with ropen(afilename) as fileobject:
+            line = fileobject.readline()
         lastdate = datetime_from_iso(line.split(',')[0])
         ts = Timeseries(id)
         ts.read_from_db(connection, bottom_only=True)
