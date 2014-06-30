@@ -1,8 +1,17 @@
 .. _install:
 
-=======================================
-Enhydris installation and configuration
-=======================================
+==============================
+Installation and configuration
+==============================
+
+.. highlight:: bash
+
+Download Enhydris
+=================
+
+Download Enhydris from https://github.com/openmeteo/enhydris/ (if you
+are uncomfortable with git and github, click on the "Download ZIP"
+button).
 
 Prerequisites
 =============
@@ -11,7 +20,7 @@ Prerequisites
 Prerequisite                                          Version
 ===================================================== ============
 Python                                                2.6 [1]
-PostgreSQL                                            8.4 [2]
+PostgreSQL                                            [2]
 PostGIS                                               1.4 [3]
 GDAL                                                  1.9
 psycopg2                                              2.2 [4]
@@ -30,13 +39,12 @@ The Python modules listed in :file:`requirements.txt` See file
 [1] Enhydris runs on Python 2.6 and 2.7. It should also run on
 any later 2.x version. Enhydris does not run on Python 3.
 
-[2] Enhydris is known to run on PostgreSQL 8.4 and 9.1, and it should also run
-without problem on PostgreSQL 9.2. In order to avoid possible
-incompatibilities with psycopg2, it is better to use the version
-prepackaged by your operating system when running on GNU/Linux, and to
-use the latest PostgreSQL version when running on Windows. If there is
-a problem with your version of PostgreSQL, email us and we'll try to
-check if it is easy to fix. 
+[2] Enhydris should run on all supported PostgreSQL versions.  In
+order to avoid possible incompatibilities with psycopg2, it is better
+to use the version prepackaged by your operating system when running
+on GNU/Linux, and to use the latest PostgreSQL version when running on
+Windows. If there is a problem with your version of PostgreSQL, email
+us and we'll check if it is easy to fix. 
 
 [3] Except for PostGIS, more libraries, namely geos and proj, are
 needed; however, you probably not need to worry about that, because in
@@ -80,9 +88,7 @@ which is required by Enhydris and is listed in
 .. admonition:: Example: Installing prerequisites on Debian/Ubuntu
 
    These instructions are for Debian wheezy. For Ubuntu they are similar,
-   except that the postgis package version may be different:
-
-   .. code-block:: sh
+   except that the postgis package version may be different::
 
       aptitude install python postgresql postgis postgresql-9.1-postgis \
           python-psycopg2 python-setuptools git python-pip python-imaging \
@@ -168,22 +174,35 @@ which is required by Enhydris and is listed in
        easy_install pip
        pip install -r requirements.txt
 
-Creating a database
-===================
+Creating a spatially enabled database
+=====================================
 
-You need to create a database user and a database (we use
-``enhydris_user`` and ``enhydris_db`` in the examples below). Enhydris
-will be connecting to the database as that user. The user should not
-be a super user, not be allowed to create databases, and not be
-allowed to create more users.
+You need to create a database user and a spatially enabled database
+(we use ``enhydris_user`` and ``enhydris_db`` in the examples below).
+Enhydris will be connecting to the database as that user. The user
+should not be a super user, not be allowed to create databases, and
+not be allowed to create more users.
 
 .. admonition:: GNU example
 
-   ::
+   First, you need to create a spatially enabled database template. For
+   PostGIS 2.0 or later (for earlier version refer to the GeoDjango
+   instructions)::
+
+      sudo -u postgres -s
+      createdb template_postgis
+      psql -d template_postgis -c "CREATE EXTENSION postgis;"
+      psql -d template_postgis -c \
+         "UPDATE pg_database SET datistemplate='true' \
+         WHERE datname='template_postgis';"
+      exit
+
+   The create the database::
 
       sudo -u postgres -s
       createuser --pwprompt enhydris_user
-      createdb --owner enhydris_user enhydris_db
+      createdb --template template_postgis --owner enhydris_user \
+         enhydris_db
       exit
 
    You may also need to edit your ``pg_hba.conf`` file as needed
@@ -211,42 +230,22 @@ allowed to create more users.
    at a command prompt::
    
       cd C:\Program Files\PostgreSQL\9.0\bin
+      createdb template_postgis
+      psql -d template_postgis -c "CREATE EXTENSION postgis;"
+      psql -d template_postgis -c "UPDATE pg_database SET datistemplate='true'
+         WHERE datname='template_postgis';"
       createuser -U postgres --pwprompt enhydris_user
-      createdb -U postgres --owner enhydris_user enhydris_db
+      createdb --template template_postgis --owner enhydris_user enhydris_db
 
    At some point, these commands will ask you for the password of the
    operating system user.
 
-Spatially enabling the database
-===============================
-
-Assuming the database is called "enhydris_db" and the user is
-"enhydris_user", run the following::
-
-   createlang -U postgres plpgsql enhydris_db
-   psql -d enhydris_db -U postgres -f postgis.sql
-   psql -d enhydris_db -U postgres -f postgis_comments.sql
-   psql -d enhydris_db -U postgres -f spatial_ref_sys.sql
-   psql -U postgres enhydris_db
-     grant select on spatial_ref_sys to enhydris_user;
-     grant all on geometry_columns to enhydris_user;
-     \q
-
-The location of the files :file:`postgis.sql`,
-:file:`postgis_comments.sql` and :file:`spatial_ref_sys.sql` depends
-on your installation. In Ubuntu 10.10 they are at
-:file:`/usr/share/postgresql/8.4/contrib/`. In Windows, they are
-somewhere like
-:file:`C:\\Program Files\\PostgreSQL\\9.0\\share\\contrib\\postgis-1.5`;
-also note that for these commands to run you must be in the PostgreSQL
-bin directory, or have it in the path.
-
 Configuring Enhydris
 ====================
 
-In the directory :file:`openmeteo/enhydris`, copy the file
-:file:`settings-example.py` to :file:`settings.py`.  Open
-:file:`settings.py` in an editor and make the following changes:
+In the directory :file:`enhydris/settings`, copy the file
+:file:`example.py` to :file:`local.py`.  Open
+:file:`local.py` in an editor and make the following changes:
 
 * Set :data:`ADMINS` to a list of admins (the administrators will get
   all enhydris exceptions by mail and also all user emails, as
@@ -260,12 +259,12 @@ Initializing the database
 
 In order to initialize your database and create the necessary database
 tables for Enhydris to run, run the following commands inside the
-:file:`openmeteo/enhydris` directory::
+:file:`enhydris` directory::
 
-   python manage.py syncdb --noinput
-   python manage.py migrate dbsync
-   python manage.py migrate hcore
-   python manage.py createsuperuser
+   python manage.py syncdb --settings=enhydris.settings.local --noinput
+   python manage.py migrate --settings=enhydris.settings.local dbsync
+   python manage.py migrate --settings=enhydris.settings.local hcore
+   python manage.py createsuperuser --settings=enhydris.settings.local 
 
 The above commands will also ask you to create a Enhydris superuser.
 
@@ -309,7 +308,7 @@ The above commands will also ask you to create a Enhydris superuser.
 
    and **THEN** run::
 
-           ./manage.py syncdb --all
+           ./manage.py syncdb --settings=enhydris.settings.local --all
 
    Also make sure that when you are asked whether to create a superuser you answer NO!
    You can create the superuser **after** the migrations are completed. 
@@ -321,13 +320,13 @@ The above commands will also ask you to create a Enhydris superuser.
    has already been completed and after that apply all the additional changes. In
    order to do that, after running the psql command, you issue the following:: 
 
-           ./manage.py migrate hcore 0001 --fake
-           ./manage.py migrate hcore
+           ./manage.py migrate --settings=enhydris.settings.local hcore 0001 --fake
+           ./manage.py migrate --settings=enhydris.settings.local hcore
 
 
    After that, you may also create a super user by running::
 
-           ./manage.py createsuperuser
+           ./manage.py createsuperuser --settings=enhydris.settings.local 
 
 
    Initial Data
@@ -339,7 +338,7 @@ The above commands will also ask you to create a Enhydris superuser.
 
    In order to load the actual data, issue the following command: ::
 
-           ./manage.py loaddata hcore.json 
+           ./manage.py loaddata --settings=enhydris.settings.local hcore.json 
            
 
 Running Enhydris
@@ -348,7 +347,7 @@ Running Enhydris
 Inside the :file:`openmeteo/enhydris` directory, run the following
 command::
 
-    python manage.py runserver 8088
+    python manage.py runserver --settings=enhydris.settings.local 8088
 
 The above command will start the Django development server and set it
 to listen to port 8088. If you then start your browser and point it to

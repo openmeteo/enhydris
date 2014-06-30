@@ -1,7 +1,7 @@
 .. _permissions:
 
-:mod:`permissions` --- Enhydris Permissions
-=============================================
+:mod:`permissions` --- Permissions
+==================================
 
 .. module:: permissions
    :synopsis: Enhydris Permission Implementation

@@ -1,7 +1,7 @@
 .. _dbsync:
 
-:mod:`dbsync` --- Enhydris Database Syncing
-===========================================
+:mod:`dbsync` --- Database Syncing
+==================================
 
 .. module:: dbsync
    :synopsis: Enhydris Databasy Synchronization Details

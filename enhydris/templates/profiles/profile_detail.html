@@ -63,7 +63,7 @@
         {% if user.is_staff %}
         <div class="anchor_override">
             <img src="{{STATIC_URL}}images/icons/lock_open.png" />
-            <a href="{% url "index" %}admin/">{% trans "Access the admin panel" %}</a></div>
+            <a href="{% url "station_list" %}admin/">{% trans "Access the admin panel" %}</a></div>
         {% endif %}
     </div>
     <div id="tabs-2">

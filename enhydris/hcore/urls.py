@@ -1,14 +1,14 @@
 from django.conf.urls import patterns, url
+from django.views.generic.base import RedirectView
 
 from enhydris.hcore import views
 
 urlpatterns = patterns(
     '',
 
-    (r'^$', views.index, {}, 'index'),
-
-    url(r'^stations/l/$', views.StationListView.as_view(),
+    url(r'^$', views.StationListView.as_view(),
         name='station_list'),
+    url(r'^stations/l/$', RedirectView.as_view(url='../..')),
     url(r'^stations/d/(?P<pk>\d+)/$', views.StationDetailView.as_view(),
         name='station_detail'),
     url(r'^stations/b/(?P<pk>\d+)/$', views.StationBriefView.as_view(),
@@ -41,7 +41,8 @@ urlpatterns = patterns(
         name='timeseries_detail'),
     (r'^timeseries/data/$',
      views.timeseries_data, {}, 'timeseries_data'),
-    (r'^timeseries/d/(?P<object_id>\d+)/download/$',
+    (r'^timeseries/d/(?P<object_id>\d+)/download/'
+     r'((?P<start_date>[^/]*)/((?P<end_date>[^/]*)/)?)?$',
      views.download_timeseries, {}, 'timeseries_text'),
     (r'^timeseries/d/(?P<object_id>\d+)/bottom/$',
      views.timeseries_bottom, {}, 'timeseries_bottom'),

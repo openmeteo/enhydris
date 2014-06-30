@@ -160,6 +160,24 @@
         }
     },
 
+    {   "pk": 7,
+        "model": "hcore.gentity",
+        "fields": {
+            "original_db": null,
+            "short_name": "",
+            "water_division": 2,
+            "political_division": 3,
+            "remarks_alt": "",
+            "name_alt": "",
+            "last_modified": "2010-05-10 14:21:31",
+            "water_basin": 1,
+            "short_name_alt": "",
+            "remarks": "",
+            "original_id": null,
+            "name": "Test Station 2"
+        }
+    },
+
     {   "pk": 1,
         "model": "hcore.gentity",
         "fields": {
@@ -197,6 +215,17 @@
     },
 
     {   "pk": 4,
+        "model": "hcore.gpoint",
+        "fields": {
+            "altitude": null,
+            "asrid": null,
+            "approximate": false,
+            "srid": null,
+            "point": null
+        }
+    },
+
+    {   "pk": 7,
         "model": "hcore.gpoint",
         "fields": {
             "altitude": null,
@@ -326,7 +355,23 @@
             "is_automatic": false,
             "owner": 1,
             "stype": [1],
-            "start_date": null
+            "start_date": null,
+            "copyright_holder": "Joe User",
+            "copyright_years": "2014"
+        }
+    },
+
+    {   "pk": 7,
+        "model": "hcore.station",
+        "fields": {
+            "end_date": null,
+            "is_active": false,
+            "is_automatic": false,
+            "owner": 1,
+            "stype": [1],
+            "start_date": null,
+            "copyright_holder": "Joe User",
+            "copyright_years": "2014"
         }
     },
 

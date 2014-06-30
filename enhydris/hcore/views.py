@@ -27,7 +27,6 @@ from django.contrib import messages
 from django.db.models import Q
 from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
-from django.utils import simplejson
 from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
@@ -49,17 +48,12 @@ from enhydris.hcore.tstmpupd import update_ts_temp_file
 
 def login(request, *args, **kwargs):
     if request.user.is_authenticated():
-        redir_url = request.GET.get('next', reverse('index'))
+        redir_url = request.GET.get('next', reverse('station_list'))
         messages.info(request, 'You are already logged on; '
                                'logout to log in again.')
         return HttpResponseRedirect(redir_url)
     else:
         return auth_login(request, *args, **kwargs)
-
-def index(request):
-    return render_to_response('index.html', {},
-        context_instance=RequestContext(request))
-
 
 class StationDetailView(DetailView):
 
@@ -285,13 +279,12 @@ class StationListView(tables.SingleTableView):
             if search_terms:
                 result = result.filter(
                     get_search_query(search_terms)).distinct()
-            else:
-                result = result.filter(pk=-1)
 
         # Advanced search
         nkwargs = kwargs
         for arg in ('political_division', 'owner', 'stype', 'water_basin',
-                    'water_division', 'variable', 'bounded'):
+                    'water_division', 'variable', 'bounded', 'ts_has_years',
+                    ):
                     # Note: Political division must be listed first
             value = nkwargs.pop(arg) if arg in nkwargs else \
                 self.request.GET[arg] if arg in self.request.GET else None
@@ -333,6 +326,16 @@ class StationListView(tables.SingleTableView):
                                     (maxx, maxy), (maxx, miny),
                                     (minx, miny)), srid=4326)
                     result = result.filter(Q(point__contained=geom))
+                elif arg == 'ts_has_years':
+                    years = [int(y) for y in value.split(',')]
+                    result = result.extra(
+                        where=['hcore_gentity.id IN '
+                        '(SELECT t.gentity_id FROM hcore_timeseries t '
+                        'WHERE ' + (' AND '.join(
+                        ['{0} BETWEEN '
+                        'EXTRACT(YEAR FROM timeseries_start_date(t.id)) AND '
+                        'EXTRACT(YEAR FROM timeseries_end_date(t.id))'
+                         .format(year) for year in years])) + ')'])
             except:
                 result = result.none()
 
@@ -419,10 +422,10 @@ def timeseries_data(request, *args, **kwargs):
         b = b.days*86400+b.seconds
         return float(a)/float(b)
 
-# Return the nearest record number to the specified date
-# The second argument is 0 for exact match, -1 if no
-# exact match and the date is after the record found,
-# 1 if no exact match and the date is before the record.
+    # Return the nearest record number to the specified date
+    # The second argument is 0 for exact match, -1 if no
+    # exact match and the date is after the record found,
+    # 1 if no exact match and the date is before the record.
     def find_line_at_date(adatetime, totlines):
         if totlines <2:
             return totlines
@@ -529,8 +532,9 @@ def timeseries_data(request, *args, **kwargs):
                 else:
                     last_date = date_at_pos(end_pos)
                     first_date = inc_datetime(last_date, request.GET['last'], -1)
-# This is an almost bad workarround to exclude the first record from
-# sums, i.e. when we need the 144 10 minute values from a day.
+                    # This is an almost bad workarround to exclude the first
+                    # record from sums, i.e. when we need the 144 10 minute
+                    # values from a day.
                     if request.GET.has_key('start_offset'):
                         offset = float(request.GET['start_offset'])
                         first_date+= timedelta(minutes=offset)
@@ -562,9 +566,9 @@ def timeseries_data(request, *args, **kwargs):
                     pos+=fine_step
                     continue 
                 t = s.split(',') 
-# Use the following exception handling to catch incoplete
-# reads from cache. Tries only one time, next time if
-# the error on the same line persists, it raises.
+                # Use the following exception handling to catch incoplete
+                # reads from cache. Tries only one time, next time if
+                # the error on the same line persists, it raises.
                 try:
                     k = datetime_from_iso(t[0])
                     v = t[1]
@@ -587,8 +591,8 @@ def timeseries_data(request, *args, **kwargs):
                     if amax == '': amax = 'null'
                     chart_data.append([calendar.timegm(k.timetuple())*1000, str(amax), pos])
                     amax = ''
-# Some times linecache tries to read a file being written (from 
-# timeseries.write_file). So every 5000 lines refresh the cache.
+                # Some times linecache tries to read a file being written (from 
+                # timeseries.write_file). So every 5000 lines refresh the cache.
                 if (pos-start_pos)%5000==0:
                     linecache.checkcache(afilename)
                 pos+=fine_step
@@ -656,8 +660,7 @@ def map_view(request, *args, **kwargs):
 
 def get_subdivision(request, division_id):
     """Ajax call to refresh divisions in filter table"""
-    response = HttpResponse(content_type='text/plain;charset=utf8',
-                            mimetype='application/json')
+    response = HttpResponse(content_type='application/json;charset=utf8')
     try:
         div = PoliticalDivision.objects.get(pk=division_id)
     except:
@@ -672,7 +675,7 @@ def get_subdivision(request, division_id):
     added = []
     for num,div in enumerate(divisions):
         if not div.name in added:
-            response.write(simplejson.dumps({"name": div.name,"id": div.pk}))
+            response.write(json.dumps({"name": div.name,"id": div.pk}))
             added.append(div.name)
             if num < divisions.count()-1:
                 response.write(',')
@@ -790,7 +793,7 @@ def download_gentityfile(request, gf_id):
 
         download_name = gfile.content.name.split('/')[-1]
         content_type = gfile.file_type.mime_type
-        response = HttpResponse(mimetype=content_type)
+        response = HttpResponse(content_type=content_type)
         response['Content-Length'] = len(filedata)
         response['Content-Disposition'] = "attachment; filename=%s"%download_name
         response.write(filedata)
@@ -829,135 +832,62 @@ TS_ERROR = ("There seems to be some problem with our internal infrastuctrure. Th
 " admins have been notified of this and will try to resolve the matter as soon as"
 " possible.  Please try again later.")
 
+
 @timeseries_permission
-def download_timeseries(request, object_id):
+def download_timeseries(request, object_id, start_date=None, end_date=None):
     """
     This function handles timeseries downloading either from the local db or
     from a remote instance.
     """
-
+    if not settings.ENHYDRIS_STORE_TSDATA_LOCALLY:
+        raise Http404
     timeseries = get_object_or_404(Timeseries, pk=int(object_id))
-
-    # Check whether this instance has local store enabled or else we need to
-    # fetch ts data from remote instance
-    if settings.ENHYDRIS_STORE_TSDATA_LOCALLY:
-
-        t = timeseries # nickname, because we use it much in next statement
-        ts = TTimeseries(
-            id = int(object_id),
-            time_step = ReadTimeStep(object_id, t),
-            unit = t.unit_of_measurement.symbol,
-            title = t.name,
-            timezone = '%s (UTC%+03d%02d)' % (t.time_zone.code,
-                (abs(t.time_zone.utc_offset) / 60)* (-1 if t.time_zone.utc_offset<0 else 1), 
-                abs(t.time_zone.utc_offset % 60),),
-            variable = t.variable.descr,
-            precision = t.precision,
-            comment = '%s\n\n%s' % (t.gentity.name, t.remarks)
-            )
+    sign = -1 if timeseries.time_zone.utc_offset < 0 else 1
+    try:
+        location = {
+            'abscissa': timeseries.gentity.gpoint.point[0],
+            'ordinate': timeseries.gentity.gpoint.point[1],
+            'srid': timeseries.gentity.gpoint.srid,
+            'altitude': timeseries.gentity.gpoint.altitude,
+            'asrid': timeseries.gentity.gpoint.asrid,
+        }
+    except TypeError:
+        # TypeError occurs when timeseries.gentity.gpoint.point is None,
+        # meaning the co-ordinates aren't registered.
+        location = None
+    ts = TTimeseries(
+        id = int(object_id),
+        time_step = ReadTimeStep(object_id, timeseries),
+        unit = timeseries.unit_of_measurement.symbol,
+        title = timeseries.name,
+        timezone = '{} (UTC{:+03d}{:02d})'.format(timeseries.time_zone.code,
+            abs(timeseries.time_zone.utc_offset) / 60 * sign,
+            abs(timeseries.time_zone.utc_offset) % 60),
+        variable = timeseries.variable.descr,
+        precision = timeseries.precision,
+        location = location,
+        comment = '%s\n\n%s' % (timeseries.gentity.name, timeseries.remarks)
+        )
+    start_date = (datetime_from_iso(start_date) if start_date
+                  else timeseries.start_date)
+    end_date = (datetime_from_iso(end_date) if end_date
+                else timeseries.end_date)
+    if start_date and end_date and ((start_date <= timeseries.end_date) or (
+            end_date >= timeseries.start_date)):
         ts.read_from_db(django.db.connection)
-        response = HttpResponse(mimetype=
-                                'text/vnd.openmeteo.timeseries; charset=utf-8')
-        response['Content-Disposition'] = "attachment; filename=%s.hts"%(object_id,)
-        ts.write_file(response)
-        return response
-    else:
-        """
-        Here we use the webservice api to fetch a specific timeseries
-        data from the original database from which it was synced.
-        Since this requires http authentication, we use the
-        username/password stored in the settings file to connect.
-
-        NOTE: The user used for the sync should be a superuser in the
-        remote instance.
-        """
-        import urllib2, re, base64
-
-        # Get the original timeseries id and the source database
-        if timeseries.original_id and timeseries.original_db:
-            ts_id = timeseries.original_id
-            db_host = timeseries.original_db.hostname
-        else:
-            request.notifications.error("No data was found for "
-                    " the requested timeseries.")
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                or reverse('timeseries_detail',args=[timeseries.id]))
-
-        # Next we check the setting files for a uname/pass for this host
-        uname, pwd = settings.ENHYDRIS_REMOTE_INSTANCE_CREDENTIALS.get(
-            db_host, (None, None))
-
-        # We craft the url
-        url = 'http://'+db_host + '/api/tsdata/' + str(ts_id)
-        req = urllib2.Request(url)
-        try:
-            handle = urllib2.urlopen(req,timeout=10)
-        except IOError, e:
-            # here we *want* to fail
-            pass
-        else:
-            # If we don't fail then the page isn't protected
-            # which means something is not right. Raise hell
-            # mail admins + return user notification.
-            request.notifications.error(TS_ERROR)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                or reverse('timeseries_detail',args=[timeseries.id]))
-
-        if not hasattr(e, 'code') or e.code != 401:
-            # we got an error - but not a 401 error
-            request.notifications.error(TS_ERROR)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                or reverse('timeseries_detail',args=[timeseries.id]))
-
-        authline = e.headers['www-authenticate']
-        # this gets the www-authenticate line from the headers
-        # which has the authentication scheme and realm in it
-
-        authobj = re.compile(
-            r'''(?:\s*www-authenticate\s*:)?\s*(\w*)\s+realm=['"]([^'"]+)['"]''',
-            re.IGNORECASE)
-        # this regular expression is used to extract scheme and realm
-        matchobj = authobj.match(authline)
-
-        if not matchobj:
-            # if the authline isn't matched by the regular expression
-            # then something is wrong
-            request.notifications.error(TS_ERROR)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                or reverse('timeseries_detail',args=[timeseries.id]))
-
-        scheme = matchobj.group(1)
-        realm = matchobj.group(2)
-        # here we've extracted the scheme
-        # and the realm from the header
-        if scheme.lower() != 'basic':
-            # we don't support other auth
-            # mail admins + inform user of error
-            request.notifications.error(TS_ERROR)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                or reverse('timeseries_detail',args=[timeseries.id]))
-
-        # now the good part.
-        base64string = base64.encodestring(
-                '%s:%s' % (uname, pwd))[:-1]
-        authheader =  "Basic %s" % base64string
-        req.add_header("Authorization", authheader)
-
-        try:
-            handle = urllib2.urlopen(req)
-        except IOError, e:
-            # here we shouldn't fail if the username/password is right
-            request.notifications.error(TS_ERROR)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                or reverse('timeseries_detail',args=[timeseries.id]))
-
-        tsdata = handle.read()
-
-        response = HttpResponse(mimetype='text/vnd.openmeteo.timeseries;charset=iso-8859-7')
-        response['Content-Disposition']="attachment;filename=%s.hts"%(object_id,)
-
-        response.write(tsdata)
-        return response
+        ts.delete_items(None, start_date - timedelta(minutes=1))
+        ts.delete_items(end_date + timedelta(minutes=1), None)
+    response = HttpResponse(content_type=
+                            'text/vnd.openmeteo.timeseries; charset=utf-8')
+    response['Content-Disposition'] = "attachment; filename=%s.hts"%(object_id,)
+    try:
+        file_version = int(request.GET.get('version', '2'))
+    except ValueError:
+        raise Http404
+    if file_version not in (2, 3):
+        raise Http404
+    ts.write_file(response, version=file_version)
+    return response
 
 
 @timeseries_permission
@@ -965,14 +895,15 @@ def timeseries_bottom(request, object_id):
     if not settings.ENHYDRIS_STORE_TSDATA_LOCALLY:
         raise Http404
     ts = TTimeseries(id = int(object_id))
+    try:
+        Timeseries.objects.get(pk=int(object_id))
+    except Timeseries.DoesNotExist:
+        raise Http404
     ts.read_from_db(django.db.connection, bottom_only=True)
-    response = HttpResponse(mimetype='text/plain; charset=utf-8')
+    response = HttpResponse(content_type='text/plain; charset=utf-8')
     ts.write(response)
     return response
 
-
-def terms(request):
-    return render_to_response('terms.html', RequestContext(request,{}) )
 
 """
 Model management views.
@@ -990,12 +921,14 @@ def _station_edit_or_create(request,station_id=None):
         station = get_object_or_404(Station, id=station_id)
         if not (user.has_row_perm(station, 'edit')\
                                 and user.has_perm('hcore.change_station')):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
     else:
         # User is creating a new station
         station = None
         if not user.has_perm('hcore.add_station'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
 
     OverseerFormset = inlineformset_factory(Station, Overseer,
                                             extra=1)
@@ -1107,7 +1040,7 @@ def station_delete(request,station_id):
         return render_to_response('success.html',
             {'msg': 'Station deleted successfully',},
             context_instance=RequestContext(request))
-    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+    return HttpResponseForbidden('Forbidden', content_type='text/plain')
 
 
 """
@@ -1140,7 +1073,8 @@ def _timeseries_edit_or_create(request,tseries_id=None):
         station = get_object_or_404(Station, id=station_id)
     if station:
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
     if station and not tseries:
         tseries = Timeseries(gentity=station, instrument=instrument)
 
@@ -1210,7 +1144,8 @@ def timeseries_delete(request, timeseries_id):
             return render_to_response('success.html',
                     {'msg': 'Timeseries deleted successfully',},
                     context_instance=RequestContext(request))
-    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+    return HttpResponseForbidden('Forbidden',
+                                 content_type='text/plain')
 
 
 """
@@ -1233,13 +1168,15 @@ def _gentityfile_edit_or_create(request,gfile_id=None):
         station = gfile.related_station
         station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
 
     if station_id and not gfile_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
         gevent = GentityFile(gentity=station)
 
     user = request.user
@@ -1256,7 +1193,7 @@ def _gentityfile_edit_or_create(request,gfile_id=None):
             if not gfile_id:
                 gfile_id=str(gfile.id)
             return HttpResponseRedirect(reverse('station_detail',
-                                 kwargs={'object_id': str(gfile.gentity.id)}))
+                                        kwargs={'pk': str(gfile.gentity.id)}))
     else:
         if gfile:
             form = GentityFileForm(instance=gfile,user=user,
@@ -1301,7 +1238,8 @@ def gentityfile_delete(request, gentityfile_id):
             return render_to_response('success.html',
                     {'msg': 'GentityFile deleted successfully',},
                     context_instance=RequestContext(request))
-    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+    return HttpResponseForbidden('Forbidden',
+                                 content_type='text/plain')
 
 
 """
@@ -1324,13 +1262,15 @@ def _gentitygenericdata_edit_or_create(request,ggenericdata_id=None):
         station = ggenericdata.related_station
         station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
 
     if station_id and not ggenericdata_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
         gevent = GentityGenericData(gentity=station)
 
     user = request.user
@@ -1392,7 +1332,7 @@ def gentitygenericdata_delete(request, ggenericdata_id):
             return render_to_response('success.html',
                     {'msg': 'GentityGenericData deleted successfully',},
                     context_instance=RequestContext(request))
-    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+    return HttpResponseForbidden('Forbidden', content_type='text/plain')
 
 
 """
@@ -1414,13 +1354,15 @@ def _gentityevent_edit_or_create(request,gevent_id=None):
         station = gevent.related_station
         station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
 
     if station_id and not gevent_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
         gevent = GentityEvent(gentity=station)
 
     user = request.user
@@ -1483,7 +1425,7 @@ def gentityevent_delete(request, gentityevent_id):
             return render_to_response('success.html',
                     {'msg': 'GentityEvent deleted successfully',},
                     context_instance=RequestContext(request))
-    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+    return HttpResponseForbidden('Forbidden', content_type='text/plain')
 
 
 def _gentityaltcode_edit_or_create(request,galtcode_id=None):
@@ -1501,13 +1443,15 @@ def _gentityaltcode_edit_or_create(request,galtcode_id=None):
         station = galtcode.related_station
         station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
 
     if station_id and not galtcode_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
         gevent = GentityAltCode(gentity=station)
 
     user = request.user
@@ -1569,7 +1513,8 @@ def gentityaltcode_delete(request, gentityaltcode_id):
             return render_to_response('success.html',
                     {'msg': 'GentityAltCode deleted successfully',},
                     context_instance=RequestContext(request))
-    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+    return HttpResponseForbidden('Forbidden',
+                                 content_type='text/plain')
 
 """
 Overseer Views
@@ -1591,13 +1536,15 @@ def _overseer_edit_or_create(request,overseer_id=None,station_id=None):
         station = overseer.station
         station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
 
     if station_id and not overseer_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
         overseer = Overseer(station=station)
 
     user = request.user
@@ -1659,7 +1606,7 @@ def overseer_delete(request, overseer_id):
             return render_to_response('success.html',
                     {'msg': 'Overseer deleted successfully',},
                     context_instance=RequestContext(request))
-    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+    return HttpResponseForbidden('Forbidden', content_type='text/plain')
 
 
 
@@ -1683,12 +1630,14 @@ def _instrument_edit_or_create(request,instrument_id=None):
         station = instrument.station
         station_id = station.id
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
 
     if station_id and not instrument_id:
         station = get_object_or_404(Station, id=station_id)
         if not request.user.has_row_perm(station,'edit'):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
         instrument = Instrument(station=station)
 
     user = request.user
@@ -1750,7 +1699,7 @@ def instrument_delete(request, instrument_id):
             return render_to_response('success.html',
                     {'msg': 'Instrument deleted successfully',},
                     context_instance=RequestContext(request))
-    return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+    return HttpResponseForbidden('Forbidden', content_type='text/plain')
 
 
 
@@ -1791,7 +1740,8 @@ class ModelAddView(CreateView):
         # Check permissions
         if not kwargs['model_name'] in ALLOWED_TO_EDIT or not \
                 self.request.user.has_perm('hcore.add_' + kwargs['model_name']):
-            return HttpResponseForbidden('Forbidden', mimetype='text/plain')
+            return HttpResponseForbidden('Forbidden',
+                                         content_type='text/plain')
 
         return super(ModelAddView, self).dispatch(*args, **kwargs)
 
@@ -1895,7 +1845,8 @@ def bound(request):
             miny-=dx
             miny+=dy
             maxy-=dy
-            return HttpResponse("%f,%f,%f,%f"%(minx,miny,maxx,maxy), mimetype='text/plain') 
+            return HttpResponse("%f,%f,%f,%f"%(minx,miny,maxx,maxy),
+                                content_type='text/plain')
         except ValueError:
             queryres = queryres.none()     
     else:
@@ -1926,13 +1877,13 @@ def bound(request):
     if queryres.count()<1:
         return HttpResponse(','.join([str(e) for e in\
                             settings.ENHYDRIS_MAP_DEFAULT_VIEWPORT]),
-                            mimetype='text/plain')
+                            content_type='text/plain')
     try:
         extent = list(queryres.extent())
     except TypeError:
         return HttpResponse(','.join([str(e) for e in\
                             settings.ENHYDRIS_MAP_DEFAULT_VIEWPORT]),
-                            mimetype='text/plain')
+                            content_type='text/plain')
     min_viewport = settings.ENHYDRIS_MIN_VIEWPORT_IN_DEGS
     min_viewport_half = 0.5*min_viewport
     if abs(extent[2]-extent[0])<min_viewport:
@@ -1941,4 +1892,5 @@ def bound(request):
     if abs(extent[3]-extent[1])<min_viewport:
         extent[3]+=min_viewport_half
         extent[1]-=min_viewport_half
-    return HttpResponse(','.join([str(e) for e in extent]), mimetype='text/plain')
+    return HttpResponse(','.join([str(e) for e in extent]),
+                        content_type='text/plain')
