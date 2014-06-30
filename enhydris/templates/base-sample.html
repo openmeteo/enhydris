@@ -164,7 +164,7 @@
   <script type="text/javascript">
     var enhydris = {};
     enhydris.static_url = '{{ STATIC_URL }}';
-    enhydris.root_url = '{% url "enhydris.hcore.views.index" %}';
+    enhydris.root_url = '{% url "station_list" %}';
     enhydris.bound_url = '{% url "enhydris.hcore.views.bound" %}';
     enhydris.map_mode = 1;
     {{ map_js | safe }}
