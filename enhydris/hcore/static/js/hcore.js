@@ -121,7 +121,8 @@ enhydris.map_module = (function namespace() {
         layer_params, layer_options, style_default, style_select,
         style_temporary, style_map, init, create_layer, popup,
         show_popup, processing_indicator, show_processing_indicator,
-        hide_processing_indicator, get_attribute;
+        hide_processing_indicator, get_attribute, default_layer_options,
+        select_layer_options, temporary_layer_options, style_context;
     
     // Processing indicator
     processing_indicator = document.getElementById('processing_indicator');
@@ -318,7 +319,6 @@ enhydris.map_module = (function namespace() {
     });
 
     layer_options = {
-        externalGraphic: enhydris.static_url + '${aicon}',
         graphicWidth: 21,
         graphicHeight: 25,
         graphicXOffset: -10,
@@ -332,10 +332,22 @@ enhydris.map_module = (function namespace() {
         labelAlign: 'cm'
     };
 
+    default_layer_options = {
+        externalGraphic: enhydris.static_url + '${aicon}'
+    };
+    $.extend(default_layer_options, layer_options);
+    select_layer_options = {
+        externalGraphic: enhydris.static_url + 'images/drop_marker_selected.png'
+    }
+    $.extend(select_layer_options, layer_options);
+    temporary_layer_options = {
+        externalGraphic: enhydris.static_url + '${aicon}'
+    }
+    $.extend(temporary_layer_options, layer_options);
+    temporary_layer_options['fillOpacity'] = 0.7;
+
     // Style map
-    style_default = new OpenLayers.Style(
-        OpenLayers.Util.applyDefaults(layer_options,
-        OpenLayers.Feature.Vector.style['default']), {
+    style_context = {
             context: {
                 aname: function (feature) {
                     return get_attribute(feature, 'name');
@@ -346,18 +358,21 @@ enhydris.map_module = (function namespace() {
                             enhydris.map_markers[0];
                 }
             }
-        });
+    };
+    style_default = new OpenLayers.Style(
+        OpenLayers.Util.applyDefaults(
+            default_layer_options,
+            OpenLayers.Feature.Vector.style['default']),
+        style_context);
     style_select = new OpenLayers.Style(
-        OpenLayers.Util.applyDefaults($.extend(layer_options, {
-            externalGraphic: enhydris.static_url +
-                'images/drop_marker_selected.png',
-        }, OpenLayers.Feature.Vector.style.select))
-    );
+        OpenLayers.Util.applyDefaults(
+            select_layer_options,
+            OpenLayers.Feature.Vector.style['select']));
     style_temporary = new OpenLayers.Style(
-        OpenLayers.Util.applyDefaults($.extend(layer_options, {
-            fillOpacity: 0.7
-        }, OpenLayers.Feature.Vector.style.select))
-    );
+        OpenLayers.Util.applyDefaults(
+            temporary_layer_options,
+            OpenLayers.Feature.Vector.style['select']),
+        style_context);
     style_map = new OpenLayers.StyleMap({
         'default': style_default,
         'select': style_select,
@@ -389,7 +404,7 @@ enhydris.map_module = (function namespace() {
         new_layer.events.on({
             'featureselected': function (e) {
                 show_processing_indicator();
-                show_popup(e.feature);
+                show_popup(map, e.feature);
             },
             'featureunselected': function () {
                 map.removePopup(popup);
@@ -401,9 +416,10 @@ enhydris.map_module = (function namespace() {
     init = function () {
         var label_button, hover_control, select_control, layers;
 
-        layers = [create_layer('Stations', 'stations', '#dd0022', '#990077')];
+        data_layers = [create_layer('Stations','stations', '#dd0022',
+                '#990077')];
         map = new OpenLayers.Map('map', options);
-        map.addLayers(layers);
+        map.addLayers(data_layers);
         map.addControl(new OpenLayers.Control.ScaleLine());
         map.addControl(new OpenLayers.Control.MousePosition());
         map.addControl(new OpenLayers.Control.OverviewMap());
@@ -412,8 +428,8 @@ enhydris.map_module = (function namespace() {
         add_layer_switcher();
         label_button = add_label_button();
         add_panel(map, [label_button]);
-        select_control = add_select_control(layers);
-        hover_control = add_hover_control(layers);
+        select_control = add_select_control(data_layers);
+        hover_control = add_hover_control(data_layers);
         add_nav_toolbar(hover_control, select_control);
         set_map_extents(map);
         return map;
