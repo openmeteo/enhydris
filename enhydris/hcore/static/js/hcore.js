@@ -1,4 +1,4 @@
-/* global enhydris, OpenLayers */
+/* global enhydris, OpenLayers, Arg, $, document, window */
 
 // Functions to handle political division relations
 function render_pref_filter(data) {
@@ -28,6 +28,7 @@ function render_pref_filter(data) {
             $('select#prefecture').html(options);
         });
 }
+
 function render_dist_filter(data) {
     'use strict';
     $.getJSON(enhydris.root_url + 'get_subdivision/' + data + '/', {},
@@ -59,7 +60,7 @@ function render_dist_filter(data) {
         });
 }
 
-// Function to handle asynchronous station search 
+// Function to handle asynchronous station search
 function station_search() {
     'use strict';
     var query, pd_v, p_v, d_v, wd_v, wb_v, t_v, o_v, pathname;
@@ -67,7 +68,7 @@ function station_search() {
     pd_v = $('#political_division');
     p_v = $('#prefecture');
     d_v = $('#district');
-    
+
     if (pd_v.val() > -1) {
         if (p_v.val() > -1 && ! p_v.is(':disabled')) {
             query += '&political_division=' + p_v.val();
@@ -80,7 +81,7 @@ function station_search() {
             query += '&political_division=' + pd_v.val();
         }
     }
-    
+
     wd_v = $('#water_division');
     if (wd_v.val() > -1 && ! wd_v.is(':disabled')) {
         query += '&water_division=' + wd_v.val();
@@ -102,7 +103,7 @@ function station_search() {
     if (t_v.val() > -1 && ! t_v.is(':disabled')) {
         query += '&type=' + t_v.val();
     }
-    
+
     if ($('#ts_only').is(':checked')) {
         query += '&ts_only=True';
     }
@@ -115,165 +116,47 @@ function station_search() {
 
 enhydris.map_module = (function namespace() {
     'use strict';
-    var default_bounds, options, map, data_layers, add_nav_toolbar,
-        add_pan_zoom_bar, add_layer_switcher, show_labels, add_label_button,
-        add_panel, set_map_extents, add_select_control, add_hover_control,
-        layer_params, layer_options, style_default, style_select,
-        style_temporary, style_map, init, create_layer, popup,
-        show_popup, processing_indicator, show_processing_indicator,
-        hide_processing_indicator, get_attribute, default_layer_options,
-        select_layer_options, temporary_layer_options, style_context;
-    
+    var map;
+
     // Processing indicator
-    processing_indicator = document.getElementById('processing_indicator');
-    if (processing_indicator) {
-        show_processing_indicator = function () {
-            processing_indicator.innerHTML =
-                    '<img src="' + enhydris.static_url + 'images/wait16.gif">';
-        };
-        hide_processing_indicator = function () {
-            processing_indicator.innerHTML = '';
-        };
-    } else {
-        show_processing_indicator = hide_processing_indicator = function () {};
-    }
+    var processingIndicator = document.getElementById('processing_indicator');
+    var showProcessingIndicator =
+        processingIndicator ?
+            function () {
+                processingIndicator.innerHTML =
+                    '<img src="' + enhydris.staticUrl + 'images/wait16.gif">';
+            }
+        :
+            function () {};
+    var hideProcessingIndicator =
+        processingIndicator ?
+            function () {
+                processingIndicator.innerHTML = '';
+            }
+        :
+            function () {};
 
     // Map bounds
-    default_bounds = new OpenLayers.Bounds();
-    default_bounds.extend(enhydris.map_bounds[0]);
-    default_bounds.extend(enhydris.map_bounds[1]);
-    default_bounds.transform(new OpenLayers.Projection('EPSG:4326'),
-                     new OpenLayers.Projection('EPSG:900913'));
+    var defaultBounds = new OpenLayers.Bounds();
+    defaultBounds.extend(enhydris.mapBounds[0]);
+    defaultBounds.extend(enhydris.mapBounds[1]);
+    defaultBounds.transform(new OpenLayers.Projection('EPSG:4326'),
+                            new OpenLayers.Projection('EPSG:900913'));
 
-    // Map options
-    options = {
-        'units': 'm',
-        'numZoomLevels': 15,
-        'sphericalMercator': true,
-        'maxExtent': default_bounds,
-        'projection': new OpenLayers.Projection('EPSG:900913'),
-        'displayProjection': new OpenLayers.Projection('EPSG:4326')
-    };
+    // Various functions
 
-    get_attribute = function (feature, attrib) {
+    var getAttribute = function (feature, attrib) {
         var obj = feature.cluster ? feature.cluster[0] : feature;
         return obj.attributes[attrib];
     };
 
-    add_nav_toolbar = function (hover_control, select_control) {
-        var nav_toolbar;
-        nav_toolbar = new OpenLayers.Control.NavToolbar();
-        map.addControl(nav_toolbar);
-        $('div.olControlNavToolbar').css('top', '14px');
-        $('div.olControlNavToolbar').css('left', '11px');
-        nav_toolbar.controls[0].events.on({
-            'activate': function () {
-                hover_control.activate();
-                select_control.activate();
-            },
-            'deactivate': function () {
-                hover_control.deactivate();
-                select_control.deactivate();
-            }
-        });
-        nav_toolbar.controls[0].activate();
-    };
-
-    add_pan_zoom_bar = function () {
-        var pzb = new OpenLayers.Control.PanZoomBar();
-        pzb.zoomWorldIcon = false;
-        map.addControl(pzb);
-    };
-
-    add_layer_switcher = function () {
-        var layer_switcher = new OpenLayers.Control.LayerSwitcher();
-        map.addControl(layer_switcher);
-        layer_switcher.baseLbl.innerHTML = 'Base layers';
-        layer_switcher.dataLbl.innerHTML = 'Data layers';
-    };
-
-    show_labels = function (value) {
-        var i, layer, defaultStyle;
-        for (i = 0; i < data_layers.length; i++) {
-            layer = data_layers[i];
-            defaultStyle = layer.styleMap.styles['default'].defaultStyle;
-            defaultStyle.value = value ?  '${aname}' : '';
-            layer.styleMap.styles['default'].setDefaultStyle(defaultStyle);
-            layer.redraw();
-        }
-    };
-
-    add_label_button = function () {
-        var label_button = new OpenLayers.Control.Button({
-            type: OpenLayers.Control.TYPE_TOGGLE,
-            title: 'Show labels',
-            displayClass: 'LabelButtonClass',
-            trigger: function () {}
-        });
-        label_button.events.register('activate', label_button,
-            function () { show_labels(true); });
-        label_button.events.register('deactivate', label_button,
-            function () { show_labels(false); });
-        return label_button;
-    };
-
-    add_panel = function (map, controls) {
-        var panel, i;
-        panel = new OpenLayers.Control.Panel({
-            displayClass: 'olControlShowLabels'
-        });
-        panel.addControls(controls);
-        for (i = 0; i < controls.length; ++i) {
-            panel.activateControl(arguments[i]);
-        }
-        map.addControl(panel);
-    };
-
-    add_select_control = function (layers) {
-        var select_control;
-        select_control = new OpenLayers.Control.SelectFeature(layers, {
-            clickout: true,
-            togle: false,
-            multiple: false,
-            hover: false
-        });
-        map.addControl(select_control);
-        select_control.activate();
-        return select_control;
-    };
-
-    add_hover_control = function (layers) {
-        var hover_control = new OpenLayers.Control.SelectFeature(layers, {
-            clickout: false,
-            togle: false,
-            multiple: false,
-            hover: true,
-            highlightOnly: true,
-            renderIntent: 'temporary',
-            eventListeners: {
-                beforefeaturehighlighted: function () {},
-                featurehighlighted: function (e) {
-                    document.getElementById('map').title = get_attribute(
-                        e.feature, 'name');
-                },
-                featureunhighlighted: function () {
-                    document.getElementById('map').title = '';
-                }
-            }
-        });
-        map.addControl(hover_control);
-        hover_control.activate();
-        return hover_control;
-    };
-
-    set_map_extents = function (map) {
-        var gentity_id, get_bound_options;
-        gentity_id = enhydris.map_mode === 2 ? enhydris.agentity_id : '';
-        get_bound_options = Arg.all();
-        get_bound_options.gentity_id = gentity_id;
+    var setMapExtents = function (map) {
+        var gentityId = enhydris.mapMode === 2 ? enhydris.agentityId : '';
+        var getBoundOptions = Arg.all();
+        getBoundOptions.gentityId = gentityId;
         $.ajax({
-            url: enhydris.bound_url,
-            data: get_bound_options,
+            url: enhydris.boundUrl,
+            data: getBoundOptions,
             success: function (data) {
                 var bounds = OpenLayers.Bounds.fromString(data);
                 bounds.transform(new OpenLayers.Projection('EPSG:4326'),
@@ -281,36 +164,55 @@ enhydris.map_module = (function namespace() {
                 map.zoomToExtent(bounds);
             },
             error: function () {
-                map.zoomToExtent(default_bounds);
+                map.zoomToExtent(defaultBounds);
             }
         });
     };
- 
-    popup = null;
 
-    show_popup = function (map, feature) {
+    // Popup-related stuff
+
+    var popup = null;
+
+    var onFeatureSelect = function (feature) {
         var point, url;
+        showProcessingIndicator();
+        removePopup();
         point = feature.geometry.getBounds().getCenterLonLat();
         map.panTo(point);
-        url = enhydris.root_url + 'stations/b/' +
-              get_attribute(feature, 'id') + '/';
+        url = enhydris.rootUrl + 'stations/b/' +
+              getAttribute(feature, 'id') + '/';
         $.get(url, {}, function (message) {
             var size;
             size = new OpenLayers.Size(190, 150);
-            popup = new OpenLayers.Popup(get_attribute(feature, 'name'),
+            popup = new OpenLayers.Popup(getAttribute(feature, 'name'),
                                          point, size, message, true);
             popup.setBorder('2px solid');
             popup.setBackgroundColor('#EEEEBB');
             map.addPopup(popup, true);
-            hide_processing_indicator();
+            hideProcessingIndicator();
         });
     };
 
-    layer_params =
-        enhydris.map_mode === 1 ? Arg.all() :
-        enhydris.map_mode === 2 ? { 'gentity_id': enhydris.agentity_id} :
-                                  {};
-    $.extend(layer_params, {
+    var removePopup = function () {
+        if (popup) {
+            map.removePopup(popup);
+            popup.destroy();
+            popup = null;
+        }
+    };
+
+    var onFeatureUnselect = function (feature) {
+        feature;  // Does nothing but remove a lint "unused" warning
+        removePopup();
+    };
+
+    // Layer parameters
+
+    var layerParams =
+        enhydris.mapMode === 1 ? Arg.all() :
+        enhydris.mapMode === 2 ? {'gentity_id': enhydris.agentityId} :
+                                 {};
+    OpenLayers.Util.applyDefaults(layerParams, {
         request: 'GetFeature',
         srs: 'EPSG:4326',
         version: '1.0.0',
@@ -318,120 +220,126 @@ enhydris.map_module = (function namespace() {
         format: 'WFS'
     });
 
-    layer_options = {
-        graphicWidth: 21,
-        graphicHeight: 25,
-        graphicXOffset: -10,
-        graphicYOffset: -25,
-        fillOpacity: 1,
-        label: '',
-        fontColor: '#504065',
-        fontSize: '9px',
-        fontFamily: 'Verdana, Arial',
-        fontWeight: 'bold',
-        labelAlign: 'cm'
-    };
-
-    default_layer_options = {
-        externalGraphic: enhydris.static_url + '${aicon}'
-    };
-    $.extend(default_layer_options, layer_options);
-    select_layer_options = {
-        externalGraphic: enhydris.static_url + 'images/drop_marker_selected.png'
-    }
-    $.extend(select_layer_options, layer_options);
-    temporary_layer_options = {
-        externalGraphic: enhydris.static_url + '${aicon}'
-    }
-    $.extend(temporary_layer_options, layer_options);
-    temporary_layer_options['fillOpacity'] = 0.7;
-
     // Style map
-    style_context = {
-            context: {
-                aname: function (feature) {
-                    return get_attribute(feature, 'name');
-                },
-                aicon: function (feature) {
-                    var stype_id = get_attribute(feature, 'stype_id');
-                    return enhydris.map_markers[stype_id] ||
-                            enhydris.map_markers[0];
-                }
-            }
+
+    var getStyleOptions = function (extraOptions) {
+        var baseOptions = {
+            graphicWidth: 21,
+            graphicHeight: 25,
+            graphicXOffset: -10,
+            graphicYOffset: -25,
+            fillOpacity: 1,
+            label: '',
+            fontColor: '#504065',
+            fontSize: '9px',
+            fontFamily: 'Verdana, Arial',
+            fontWeight: 'bold',
+            labelAlign: 'cm',
+            graphicTitle: '${name}'
+        };
+        var result = extraOptions;
+        OpenLayers.Util.applyDefaults(result, baseOptions);
+        return result;
     };
-    style_default = new OpenLayers.Style(
-        OpenLayers.Util.applyDefaults(
-            default_layer_options,
-            OpenLayers.Feature.Vector.style['default']),
-        style_context);
-    style_select = new OpenLayers.Style(
-        OpenLayers.Util.applyDefaults(
-            select_layer_options,
-            OpenLayers.Feature.Vector.style['select']));
-    style_temporary = new OpenLayers.Style(
-        OpenLayers.Util.applyDefaults(
-            temporary_layer_options,
-            OpenLayers.Feature.Vector.style['select']),
-        style_context);
-    style_map = new OpenLayers.StyleMap({
-        'default': style_default,
-        'select': style_select,
-        'temporary': style_temporary,
+
+    var styleContext = {
+        aname: function (feature) {
+            return getAttribute(feature, 'name');
+        },
+        aicon: function (feature) {
+            var stypeId = getAttribute(feature, 'stype_id');
+            return enhydris.mapMarkers[stypeId] ||
+                    enhydris.mapMarkers[0];
+        }
+    };
+
+    var styleMap = new OpenLayers.StyleMap({
+        'default': new OpenLayers.Style(
+            OpenLayers.Util.applyDefaults(
+                getStyleOptions(
+                    {externalGraphic: enhydris.staticUrl + '${aicon}'}),
+                OpenLayers.Feature.Vector.style['default']),
+            {context: styleContext}),
+        'select': new OpenLayers.Style(
+            OpenLayers.Util.applyDefaults(
+                getStyleOptions(
+                    {externalGraphic: enhydris.staticUrl +
+                        'images/drop_marker_selected.png'}),
+                OpenLayers.Feature.Vector.style.select)),
+        'temporary': new OpenLayers.Style(
+            OpenLayers.Util.applyDefaults(
+                getStyleOptions(
+                    {externalGraphic: enhydris.staticUrl + '${aicon}',
+                    fillOpacity: 0.7}),
+                OpenLayers.Feature.Vector.style.select),
+            {context: styleContext})
     });
 
-    create_layer = function (name, object_type) {
-        var new_layer;
-        new_layer = new OpenLayers.Layer.Vector(name, {
+    // Create layer
+
+    var createLayer = function (name, objectType) {
+        var newLayer = new OpenLayers.Layer.Vector(name, {
             strategies: [
                 new OpenLayers.Strategy.BBOX({ratio: 1.5, resFactor: 2}),
                 new OpenLayers.Strategy.Cluster({distance: 15, threshold: 3})
             ],
             protocol: new OpenLayers.Protocol.HTTP({
-                url: enhydris.root_url + object_type + '/kml/',
+                url: enhydris.rootUrl + objectType + '/kml/',
                 format: new OpenLayers.Format.KML(),
-                params: layer_params
+                params: layerParams
             }),
             projection: new OpenLayers.Projection('EPSG:4326'),
             formatOptions: {extractAttributes: true},
-            styleMap: style_map
+            styleMap: styleMap
         });
-        new_layer.events.register('loadstart', new_layer,
-                                  show_processing_indicator);
-        new_layer.events.register('loadend', new_layer,
-                                  hide_processing_indicator);
-        new_layer.events.register('loadcancel', new_layer,
-                                  hide_processing_indicator);
-        new_layer.events.on({
-            'featureselected': function (e) {
-                show_processing_indicator();
-                show_popup(map, e.feature);
-            },
-            'featureunselected': function () {
-                map.removePopup(popup);
-            }
-        });
-        return new_layer;
+        newLayer.events.register('loadstart', newLayer,
+                                  showProcessingIndicator);
+        newLayer.events.register('loadend', newLayer, hideProcessingIndicator);
+        newLayer.events.register('loadcancel', newLayer,
+                                  hideProcessingIndicator);
+        return newLayer;
     };
 
-    init = function () {
-        var label_button, hover_control, select_control, layers;
+    // Init
 
-        data_layers = [create_layer('Stations','stations', '#dd0022',
+    var init = function () {
+        map = new OpenLayers.Map(
+            'map',
+            {'units': 'm',
+             'numZoomLevels': 15,
+             'sphericalMercator': true,
+             'maxExtent': defaultBounds,
+             'projection': new OpenLayers.Projection('EPSG:900913'),
+             'displayProjection': new OpenLayers.Projection('EPSG:4326'),
+             'controls': [new OpenLayers.Control.Navigation(),
+                          new OpenLayers.Control.ZoomBox(),
+                          new OpenLayers.Control.Zoom(),
+                          new OpenLayers.Control.ScaleLine(),
+                          new OpenLayers.Control.MousePosition(),
+                          new OpenLayers.Control.LayerSwitcher()
+                          ]
+            });
+
+        map.addLayers(enhydris.mapBaseLayers);
+        var dataLayers = [createLayer('Stations','stations', '#dd0022',
                 '#990077')];
-        map = new OpenLayers.Map('map', options);
-        map.addLayers(data_layers);
-        map.addControl(new OpenLayers.Control.ScaleLine());
-        map.addControl(new OpenLayers.Control.MousePosition());
-        map.addControl(new OpenLayers.Control.OverviewMap());
-        map.addLayers(enhydris.map_base_layers);
-        add_pan_zoom_bar();
-        add_layer_switcher();
-        label_button = add_label_button();
-        add_panel(map, [label_button]);
-        select_control = add_select_control(data_layers);
-        hover_control = add_hover_control(data_layers);
-        add_nav_toolbar(hover_control, select_control);
-        set_map_extents(map);
+        map.addLayers(dataLayers);
+
+        // Change style on hover
+        var hoverControl =  new OpenLayers.Control.SelectFeature(
+            dataLayers[0],
+            {hover: true, highlightOnly: true, renderIntent: 'temporary'});
+        map.addControl(hoverControl);
+        hoverControl.activate();
+
+        // Popup on select
+        var selectControl =  new OpenLayers.Control.SelectFeature(
+            dataLayers[0],
+            {onSelect: onFeatureSelect, onUnselect: onFeatureUnselect});
+        map.addControl(selectControl);
+        selectControl.activate();
+
+        setMapExtents(map);
         return map;
     };
 

@@ -548,10 +548,10 @@ These are the settings available to Enhydris, in addition to the
    example::
 
       ENHYDRIS_MAP_MARKERS = {
-          '0': 'images/drop_marker.png', 
+          '0': 'images/drop_marker.png',
           '1': 'images/drop_marker_cyan.png',
-          '3': 'images/drop_marker_orange.png', 
-          '11': 'images/drop_marker_green.png', 
+          '3': 'images/drop_marker_orange.png',
+          '11': 'images/drop_marker_green.png',
       }
                                 
    In the example above, stations whose type id is 3 will be shown with

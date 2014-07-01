@@ -163,10 +163,10 @@
   <script type="text/javascript" src="http://openstreetmap.org/openlayers/OpenStreetMap.js"></script>
   <script type="text/javascript">
     var enhydris = {};
-    enhydris.static_url = '{{ STATIC_URL }}';
-    enhydris.root_url = '{% url "station_list" %}';
-    enhydris.bound_url = '{% url "enhydris.hcore.views.bound" %}';
-    enhydris.map_mode = 1;
+    enhydris.staticUrl = '{{ STATIC_URL }}';
+    enhydris.rootUrl = '{% url "station_list" %}';
+    enhydris.boundUrl = '{% url "enhydris.hcore.views.bound" %}';
+    enhydris.mapMode = 1;
     {{ map_js | safe }}
     $(document).ready(function() {
 		$("#search_input").placeholder();

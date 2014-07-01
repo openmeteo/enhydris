@@ -13,11 +13,11 @@ def registration(request):
 
 
 def map(request):
-    map_js = 'enhydris.map_base_layers=[{0}];'.format(
+    map_js = 'enhydris.mapBaseLayers=[{0}];'.format(
         ','.join(['new ' + layer.strip()
                  for layer in settings.ENHYDRIS_MAP_BASE_LAYERS]))
-    map_js += 'enhydris.map_bounds={0};'.format(
+    map_js += 'enhydris.mapBounds={0};'.format(
         json.dumps(settings.ENHYDRIS_MAP_BOUNDS))
-    map_js += 'enhydris.map_markers={0};'.format(
+    map_js += 'enhydris.mapMarkers={0};'.format(
         json.dumps(settings.ENHYDRIS_MAP_MARKERS))
     return {'map_js': map_js}
