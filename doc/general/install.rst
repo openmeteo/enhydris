@@ -452,11 +452,12 @@ These are the settings available to Enhydris, in addition to the
 
 .. data:: ENHYDRIS_MIN_VIEWPORT_IN_DEGS
 
-   Set a value in degrees. When a geographical query has bounds with
-   dimensions less than :data:`MIN_VIEWPORT_IN_DEGS`, the map will have at
-   least a dimension of ``MIN_VIEWPORT_IN_DEGS²``. Useful when showing
-   a single entity, such as a hydrometeorological station. Default
-   value is 0.04, corresponding to an area approximately 4×4 km.
+   Set a value in degrees. When a geographical query has a bounding
+   box with dimensions less than :data:`MIN_VIEWPORT_IN_DEGS`, the map
+   will have at least a dimension of ``MIN_VIEWPORT_IN_DEGS²``. Useful
+   when showing a single entity, such as a hydrometeorological
+   station. Default value is 0.04, corresponding to an area
+   approximately 4×4 km.
 
 .. data:: ENHYDRIS_MAP_DEFAULT_VIEWPORT
 

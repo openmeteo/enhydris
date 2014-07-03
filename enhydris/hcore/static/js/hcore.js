@@ -155,7 +155,7 @@ enhydris.map_module = (function namespace() {
         var getBoundOptions = Arg.all();
         getBoundOptions.gentityId = gentityId;
         $.ajax({
-            url: enhydris.boundUrl,
+            url: enhydris.boundingBoxUrl,
             data: getBoundOptions,
             success: function (data) {
                 var bounds = OpenLayers.Bounds.fromString(data);

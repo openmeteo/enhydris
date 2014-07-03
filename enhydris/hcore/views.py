@@ -1,33 +1,32 @@
 import calendar
+from calendar import monthrange
+import csv
+from datetime import datetime, timedelta
 import json
+import linecache
 import math
 import mimetypes
 import os
-import linecache
-from calendar import monthrange
-from datetime import timedelta, datetime
+import tempfile
 from tempfile import mkstemp
-from string import lower
+from zipfile import ZipFile, ZIP_DEFLATED
 
 import django.db
 from django.http import (HttpResponse, HttpResponseRedirect,
-                            HttpResponseForbidden, Http404)
+                         HttpResponseForbidden, Http404)
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
-from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.views import login as auth_login
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.gis.shortcuts import render_to_kml
 from django.contrib.gis.geos import Polygon
 from django.contrib import messages
 from django.db.models import Q
 from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
-from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.db.models import Count
@@ -43,8 +42,6 @@ from enhydris.hcore.decorators import *
 from enhydris.hcore.forms import *
 from enhydris.hcore.tstmpupd import update_ts_temp_file
 
-####################################################
-# VIEWS
 
 def login(request, *args, **kwargs):
     if request.user.is_authenticated():
@@ -54,6 +51,7 @@ def login(request, *args, **kwargs):
         return HttpResponseRedirect(redir_url)
     else:
         return auth_login(request, *args, **kwargs)
+
 
 class StationDetailView(DetailView):
 
@@ -71,7 +69,7 @@ class StationDetailView(DetailView):
              "anonymous_can_download_data": anonymous_can_download_data,
              "display_copyright": display_copyright,
              "wgs84_name": settings.ENHYDRIS_WGS84_NAME,
-            })
+             })
         return context
 
 
@@ -80,36 +78,17 @@ class StationBriefView(DetailView):
     template_name = 'station_brief.html'
 
 
-def get_search_query(search_terms):
-    query = Q()
-    for term in search_terms:
-        query &= (Q(name__icontains=term) | Q(name_alt__icontains=term) |
-                  Q(short_name__icontains=term )|
-                  Q(short_name_alt__icontains=term) |
-                  Q(remarks__icontains=term) |
-                  Q(remarks_alt__icontains=term)|
-                  Q(water_basin__name__icontains=term) |
-                  Q(water_basin__name_alt__icontains=term) |
-                  Q(water_division__name__icontains=term) |
-                  Q(water_division__name_alt__icontains=term) |
-                  Q(political_division__name__icontains=term) |
-                  Q(political_division__name_alt__icontains=term) |
-                  Q(owner__organization__name__icontains=term) |
-                  Q(owner__person__first_name__icontains=term) |
-                  Q(owner__person__last_name__icontains=term) |
-                  Q(timeseries__remarks__icontains=term) |
-                  Q(timeseries__remarks_alt__icontains=term)
-                 )
-    return query
-
-_station_list_csv_headers = ['id', 'Name', 'Alternative name', 'Short name',
+_station_list_csv_headers = [
+    'id', 'Name', 'Alternative name', 'Short name',
     'Alt short name', 'Type', 'Owner', 'Start date', 'End date', 'Abscissa',
     'Ordinate', 'SRID', 'Approximate', 'Altitude', 'SRID', 'Water basin',
     'Water division', 'Political division', 'Active', 'Automatic', 'Remarks',
     'Alternative remarks', 'Last modified']
 
+
 def _station_csv(s):
-    abscissa, ordinate = s.point.transform(s.srid, clone=True) if s.point else (None, None)
+    abscissa, ordinate = (s.point.transform(s.srid, clone=True)
+                          if s.point else (None, None))
     return [unicode(x).encode('utf-8') for x in
            [s.id, s.name, s.name_alt, s.short_name, s.short_name_alt,
             '+'.join([t.descr for t in s.stype.all()]),
@@ -120,23 +99,29 @@ def _station_csv(s):
             s.political_division.name if s.political_division else "",
             s.is_active, s.is_automatic, s.remarks, s.remarks_alt,
             s.last_modified]
-           ]
+            ]
 
-_instrument_list_csv_headers = ['id', 'Station', 'Type', 'Name',
+
+_instrument_list_csv_headers = [
+    'id', 'Station', 'Type', 'Name',
     'Alternative name', 'Manufacturer', 'Model', 'Start date', 'End date',
     'Active', 'Remarks', 'Alternative remarks']
+
 
 def _instrument_csv(i):
     return [unicode(x).encode('utf-8') for x in
            [i.id, i.station.id, i.type.descr if i.type else "", i.name,
             i.name_alt, i.manufacturer, i.model, i.start_date, i.end_date,
             i.is_active, i.remarks, i.remarks_alt]
-           ]
+            ]
 
-_timeseries_list_csv_headers = ['id', 'Station', 'Instrument', 'Variable',
+
+_timeseries_list_csv_headers = [
+    'id', 'Station', 'Instrument', 'Variable',
     'Unit', 'Name', 'Alternative name', 'Precision', 'Time zone', 'Time step',
     'Nom. Offs. Min.', 'Nom. Offs. Mon.', 'Act. Offs. Min.',
     'Act. Offs.  Mon.', 'Remarks', 'Alternative Remarks']
+
 
 def _timeseries_csv(t):
     return [unicode(x).encode('utf-8') for x in
@@ -146,11 +131,10 @@ def _timeseries_csv(t):
             t.time_zone.code, t.time_step.descr if t.time_step else "",
             t.nominal_offset_minutes, t.nominal_offset_months,
             t.actual_offset_minutes, t.actual_offset_months]
-           ]
+            ]
+
 
 def _prepare_csv(queryset):
-    import tempfile, csv, os, os.path
-    from zipfile import ZipFile, ZIP_DEFLATED
     tempdir = tempfile.mkdtemp()
     zipfilename = os.path.join(tempdir, 'data.zip')
     zipfile = ZipFile(zipfilename, 'w', ZIP_DEFLATED)
@@ -272,80 +256,7 @@ class StationListView(tables.SingleTableView):
     def get_queryset(self, **kwargs):
         result = super(StationListView, self).get_queryset(**kwargs)
 
-        # Simple search
-        if self.request.GET.get('check', False) == "search":
-            query_string = self.request.GET.get('q', "")
-            search_terms = query_string.split()
-            if search_terms:
-                result = result.filter(
-                    get_search_query(search_terms)).distinct()
-
-        # Advanced search
-        nkwargs = kwargs
-        for arg in ('political_division', 'owner', 'stype', 'water_basin',
-                    'water_division', 'variable', 'bounded', 'ts_has_years',
-                    ):
-                    # Note: Political division must be listed first
-            value = nkwargs.pop(arg) if arg in nkwargs else \
-                self.request.GET[arg] if arg in self.request.GET else None
-            if not value:
-                continue
-            try:
-                if arg == "political_division":
-                    result = Station.objects.get_by_political_division(value)
-                elif arg == "owner":
-                    obj = Lentity.objects.get(pk=value)
-                    term = obj.__unicode__()
-                    result = result.filter(
-                        Q(owner__organization__name=term) |
-                        Q(owner__person__first_name=term) &
-                        Q(owner__person__last_name=term))
-                elif arg == "type":
-                    result = result.filter(stype__id=value)
-                elif arg == "water_division":
-                    obj = WaterDivision.objects.get(pk=value)
-                    term = obj.__unicode__()
-                    result = result.filter(
-                        Q(water_division__name=term) |
-                        Q(water_division__name_alt=term))
-                elif arg == "water_basin":
-                    obj = WaterBasin.objects.get(pk=value)
-                    term = obj.__unicode__()
-                    result = result.filter(
-                        Q(water_basin__name=term) |
-                        Q(water_basin__name_alt=term))
-                elif arg == "variable":
-                    obj = Variable.objects.get(pk=value)
-                    term = obj.__unicode__()
-                    result = result.filter(
-                        Q(timeseries__variable__descr=term)).distinct()
-                elif arg == "bounded":
-                    minx, miny, maxx, maxy = [float(i)
-                                              for i in value.split(',')]
-                    geom = Polygon(((minx, miny), (minx, maxy),
-                                    (maxx, maxy), (maxx, miny),
-                                    (minx, miny)), srid=4326)
-                    result = result.filter(Q(point__contained=geom))
-                elif arg == 'ts_has_years':
-                    years = [int(y) for y in value.split(',')]
-                    result = result.extra(
-                        where=['hcore_gentity.id IN '
-                        '(SELECT t.gentity_id FROM hcore_timeseries t '
-                        'WHERE ' + (' AND '.join(
-                        ['{0} BETWEEN '
-                        'EXTRACT(YEAR FROM timeseries_start_date(t.id)) AND '
-                        'EXTRACT(YEAR FROM timeseries_end_date(t.id))'
-                         .format(year) for year in years])) + ')'])
-            except:
-                result = result.none()
-
-        # The following few filters would have logically been better placed at
-        # the beginning of this method rather than at the end. However,
-        # because of the political_division hack above, which creates a new
-        # queryset from scratch, we need to do it this way. (Of course this
-        # code sucks and needs to be rewritten.)
-
-        # Apply SITE_STATION_FILTER.
+        # Apply SITE_STATION_FILTER
         if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
             result = result.filter(**settings.ENHYDRIS_SITE_STATION_FILTER)
 
@@ -354,18 +265,173 @@ class StationListView(tables.SingleTableView):
             result = result.annotate(tsnum=Count('timeseries')
                                      ).exclude(tsnum=0)
 
+        # If kml, only stations with location
+        if self.template_name.endswith('.kml'):
+            result = result.filter(point__isnull=False)
+
+        # Perform the search specified by the user
+        query_string = self.request.GET.get('q', '')
+        for search_term in query_string.split():
+            result = self.refine_queryset(result, search_term)
+
+        # Perform search specified by query parameters
+        for param in self.request.GET:
+            result = self.specific_filter(result,
+                                          param,
+                                          self.request.GET[param],
+                                          ignore_invalid=True)
+
         # Sort results
         nkwargs = kwargs
-        column = nkwargs.pop('sort') if 'sort' in nkwargs else None
-        if not column and 'sort' in self.request.GET:
-            column = self.request.GET['sort']
-        sort_columns = [x.replace('_heading', '')
-                        for x in self.column_headings.keys()]
-        if column not in sort_columns:
-            column = None
-        if column:
-            result = result.order_by(column)
+        sort_column = (nkwargs.pop('sort') if 'sort' in nkwargs else
+                       self.request.GET.get('sort', None))
+        possible_sort_columns = [x.replace('_heading', '')
+                                 for x in self.column_headings.keys()]
+        if sort_column and (sort_column in possible_sort_columns):
+            result = result.order_by(sort_column)
+
+        return result.distinct()
+
+    def refine_queryset(self, queryset, search_term):
+        '''
+        Return the queryset refined according to search_term.
+        search_term can either be a word or a "name:value" string, such as
+        political_division:greece.
+        '''
+        if not (':' in search_term):
+            result = self.general_filter(queryset, search_term)
+        else:
+            name, dummy, value = search_term.partition(':')
+            result = self.specific_filter(queryset, name, value)
         return result
+
+    def general_filter(self, queryset, search_term):
+        '''
+        Return the queryset refined according to search_term.
+        search_term is a simple word searched in various places.
+        '''
+        return queryset.filter(
+            Q(name__icontains=search_term) |
+            Q(name_alt__icontains=search_term) |
+            Q(short_name__icontains=search_term) |
+            Q(short_name_alt__icontains=search_term) |
+            Q(remarks__icontains=search_term) |
+            Q(remarks_alt__icontains=search_term) |
+            Q(water_basin__name__icontains=search_term) |
+            Q(water_basin__name_alt__icontains=search_term) |
+            Q(water_division__name__icontains=search_term) |
+            Q(water_division__name_alt__icontains=search_term) |
+            Q(political_division__name__icontains=search_term) |
+            Q(political_division__name_alt__icontains=search_term) |
+            Q(owner__organization__name__icontains=search_term) |
+            Q(owner__person__first_name__icontains=search_term) |
+            Q(owner__person__last_name__icontains=search_term) |
+            Q(timeseries__remarks__icontains=search_term) |
+            Q(timeseries__remarks_alt__icontains=search_term))
+
+    def specific_filter(self, queryset, name, value, ignore_invalid=False):
+        '''
+        Return the queryset refined according to the specified name
+        and value; e.g. name can be "political_division" and value can be
+        "greece". Value can also be an integer, in which case it refers to the
+        id.
+        '''
+        method_name = 'filter_by_' + name
+        try:
+            method = getattr(self, method_name)
+        except AttributeError:
+            if not ignore_invalid:
+                raise Http404  # FIXME: This must be changed to empty result
+                               # with error message.
+            return queryset
+        return method(queryset, value)
+
+    def filter_by_owner(self, queryset, value):
+        return queryset.filter(
+            Q(owner__organization__name__icontains=value) |
+            Q(owner__organization__name_alt__icontains=value) |
+            Q(owner__person__first_name__icontains=value) |
+            Q(owner__person__first_name_alt__icontains=value) |
+            Q(owner__person__last_name_alt__icontains=value) |
+            Q(owner__person__last_name__icontains=value))
+
+    def filter_by_type(self, queryset, value):
+        return queryset.filter(
+            Q(stype__name__icontains=value) |
+            Q(stype__name_alt__icontains=value))
+
+    def filter_by_water_division(self, queryset, value):
+        return queryset.filter(
+            Q(water_division__name__icontains=value) |
+            Q(water_division__name_alt__icontains=value))
+
+    def filter_by_water_basin(self, queryset, value):
+        return queryset.filter(
+            Q(water_basin__name__icontains=value) |
+            Q(water_basin__name_alt__icontains=value))
+
+    def filter_by_variable(self, queryset, value):
+        return queryset.filter(
+            Q(variable__descr__icontains=value) |
+            Q(variable__descr_alt__icontains=value))
+
+    def filter_by_bbox(self, queryset, value):
+        try:
+            minx, miny, maxx, maxy = [float(i) for i in value.split(',')]
+        except ValueError:
+            raise Http404  # FIXME: Return empty result plus error message
+        geom = Polygon(((minx, miny), (minx, maxy),
+                        (maxx, maxy), (maxx, miny),
+                        (minx, miny)), srid=4326)
+        return queryset.filter(point__contained=geom)
+
+    def filter_by_gentityId(self, queryset, value):
+        '''
+        Normally the user won't perform the advanced search "gentity_id:1334"
+        (and if he wants to do it we should find a simpler way than for him
+        to type all that); so this filter is useful primarily for the kml view,
+        when the client requests a specific station in order to show on the
+        map.
+        '''
+        if not value:
+            return queryset
+        try:
+            gentity_id = int(value)
+        except ValueError:
+            raise Http404  # FIXME: Return empty result plus error message
+        return queryset.filter(pk=gentity_id)
+
+    def filter_by_ts_has_years(self, queryset, value):
+        try:
+            years = [int(y) for y in value.split(',')]
+        except ValueError:
+            raise Http404  # FIXME: Return empty result plus error message
+        return queryset.extra(
+            where=['hcore_gentity.id IN '
+                   '(SELECT t.gentity_id FROM hcore_timeseries t '
+                   'WHERE ' + (' AND '.join(
+                       ['{0} BETWEEN '
+                        'EXTRACT(YEAR FROM timeseries_start_date(t.id)) AND '
+                        'EXTRACT(YEAR FROM timeseries_end_date(t.id))'
+                        .format(year) for year in years])) +
+                   ')'])
+
+    def filter_by_political_division(self, queryset, value):
+        return queryset.extra(where=['''
+            hcore_gentity.id IN (
+                WITH RECURSIVE mytable(garea_ptr_id) AS (
+                    SELECT garea_ptr_id FROM hcore_politicaldivision
+                    WHERE garea_ptr_id IN (SELECT id FROM hcore_gentity
+                                           WHERE name ilike '%{}%'
+                                           OR name_alt ilike '%{}%')
+                  UNION ALL
+                    SELECT pd.garea_ptr_id
+                    FROM hcore_politicaldivision pd, mytable
+                    WHERE pd.parent_id=mytable.garea_ptr_id
+                )
+                SELECT g.id, g.name FROM hcore_gentity g, mytable
+                WHERE g.id=mytable.garea_ptr_id)
+                                     '''.format(value, value)])
 
     def get_context_data(self, **kwargs):
 
@@ -377,18 +443,33 @@ class StationListView(tables.SingleTableView):
         # selecting of visible columns, reordering of columns, etc.)
         context.update(self.column_headings)
 
-        if self.request.GET.get('check', False) == "search":
-            # The case we got a simple search request
-            context['search'] = True
-            context['query'] = self.request.GET.get('q', "")
-            query_string = self.request.GET.get('q', "")
-            context['terms'] = query_string.split()
-        elif len(self.request.GET.items()) > 0:
-            context['advanced_search'] = True
+        context['query'] = self.request.GET.get('q', '')
 
-        context['enabled_user_content'] = settings.ENHYDRIS_USERS_CAN_ADD_CONTENT
+        context['enabled_user_content'] = \
+            settings.ENHYDRIS_USERS_CAN_ADD_CONTENT
 
         return context
+
+
+class BoundingBoxView(StationListView):
+
+    def get(self, request, *args, **kwargs):
+        # Determine queryset's extent
+        queryset = self.get_queryset()
+        extent = list(queryset.extent() if queryset.count()
+                      else settings.ENHYDRIS_MAP_DEFAULT_VIEWPORT)
+
+        # Increase extent if it's too small
+        min_viewport = settings.ENHYDRIS_MIN_VIEWPORT_IN_DEGS
+        if abs(extent[2] - extent[0]) < min_viewport:
+            extent[2] += 0.5 * min_viewport
+            extent[0] -= 0.5 * min_viewport
+        if abs(extent[3] - extent[1]) < min_viewport:
+            extent[3] += 0.5 * min_viewport
+            extent[1] -= 0.5 * min_viewport
+
+        return HttpResponse(','.join([str(e) for e in extent]),
+                            content_type='text/plain')
 
 
 def bufcount(filename):
@@ -1754,143 +1835,3 @@ class ModelAddView(CreateView):
         context['form_prefix'] = model.__name__
         return context
 
-
-def clean_kml_request(tuppleitems):
-    try:
-        items = {}
-        for item in tuppleitems:
-            items[item[0].lower()] = item[1] 
-        klist = ('service', 'version', 'request', 'srs', 'bbox')
-        for key in klist:
-            if items.has_key(key):
-                items.pop(key)
-        return items
-    except Exception, e:
-        raise Http404
-
-def kml(request, layer):
-    try:
-        bbox=request.GET.get('BBOX', request.GET.get('bbox', None))
-        agentity_id = request.GET.get('gentity_id', request.GET.get('GENTITY_ID', None));
-    except Exception, e:
-        raise Http404
-    if bbox:
-        try:
-            minx, miny, maxx, maxy=[float(i) for i in bbox.split(',')]
-            geom=Polygon(((minx,miny),(minx,maxy),(maxx,maxy),(maxx,miny),(minx,miny)),srid=4326)
-        except Exception, e:
-            raise Http404
-    try:
-        getparams = clean_kml_request(request.GET.items())
-        station_objects = Station.objects.all()
-        if len(settings.ENHYDRIS_SITE_STATION_FILTER)>0:
-            station_objects = station_objects.filter(**settings.ENHYDRIS_SITE_STATION_FILTER)
-        queryres = station_objects.filter(point__isnull=False)
-        if getparams.has_key('check') and getparams['check']=='search':
-            query_string = request.GET.get('q', request.GET.get('Q', ""))
-            search_terms = query_string.split()
-            if search_terms:
-                queryres = queryres.filter(get_search_query(search_terms)).distinct()
-        else:
-            if agentity_id:
-                queryres = queryres.filter(id=agentity_id)
-            if bbox:
-                queryres = queryres.filter(point__contained=geom)
-            if getparams.has_key('owner'):
-                queryres = queryres.filter(owner__id=getparams['owner'])
-            if getparams.has_key('stype'):
-                queryres = queryres.filter(stype__id=getparams['stype'])
-            if getparams.has_key('political_division'):
-                leaves = PoliticalDivision.objects.get_leaf_subdivisions(\
-                                  PoliticalDivision.objects.filter(id=getparams['political_division']))
-                queryres = queryres.filter(political_division__in=leaves)
-            if getparams.has_key('water_basin'):
-                queryres = queryres.filter(Q(water_basin__id=getparams['water_basin']) | \
-                                           Q(water_basin__parent=getparams['water_basin']))
-            if getparams.has_key('water_division'):
-                queryres = queryres.filter(water_division__id=getparams['water_division'])
-            if getparams.has_key('variable'):
-                queryres = queryres.filter(id__in=\
-                      Timeseries.objects.all().filter(variable__id=getparams['variable']).values_list('gentity', flat=True)).distinct()
-        if getparams.has_key('ts_only'):
-            tmpset = queryres.annotate(tsnum=Count('timeseries'))
-            queryres = tmpset.exclude(tsnum=0)
-    except Exception, e:
-        raise Http404
-    for arow in queryres:
-        if arow.point:
-            arow.kml = arow.point.kml
-    response = render_to_kml("placemarks.kml", {'places': queryres})
-    return response
-
-def bound(request):
-    agentity_id = request.GET.get('gentity_id', request.GET.get('GENTITY_ID', None));
-    getparams = clean_kml_request(request.GET.items())
-    station_objects = Station.objects.all()
-    if len(settings.ENHYDRIS_SITE_STATION_FILTER)>0:
-        station_objects = station_objects.filter(**settings.ENHYDRIS_SITE_STATION_FILTER)
-    queryres = station_objects
-    if getparams.has_key('check') and getparams['check']=='search':
-        query_string = request.GET.get('q', request.GET.get('Q', ""))
-        search_terms = query_string.split()
-        if search_terms:
-            queryres = queryres.filter(get_search_query(search_terms))
-    elif getparams.has_key('bounded'):
-        try:
-            bound_str = getparams['bounded'].replace('%2C',',').replace('%2c',',')
-            minx, miny, maxx, maxy=[float(i) for i in bound_str.split(',')]
-            dx = (maxx-minx)/2000
-            dy = (maxy-miny)/2000
-            minx+=dx
-            miny-=dx
-            miny+=dy
-            maxy-=dy
-            return HttpResponse("%f,%f,%f,%f"%(minx,miny,maxx,maxy),
-                                content_type='text/plain')
-        except ValueError:
-            queryres = queryres.none()     
-    else:
-        try:
-            if agentity_id:
-                queryres = queryres.filter(id=agentity_id)
-            if getparams.has_key('owner'):
-                queryres = queryres.filter(owner__id=getparams['owner'])
-            if getparams.has_key('type'):
-                queryres = queryres.filter(stype__id=getparams['type'])
-            if getparams.has_key('political_division'):
-                leaves = PoliticalDivision.objects.get_leaf_subdivisions(\
-                              PoliticalDivision.objects.filter(id=getparams['political_division']))
-                queryres = queryres.filter(political_division__in=leaves)
-            if getparams.has_key('water_basin'):
-                queryres = queryres.filter(Q(water_basin__id=getparams['water_basin']) | \
-                                       Q(water_basin__parent=getparams['water_basin']))
-            if getparams.has_key('water_division'):
-                queryres = queryres.filter(water_division__id=getparams['water_division'])
-            if getparams.has_key('variable'):
-                queryres = queryres.filter(id__in=\
-                  Timeseries.objects.all().filter(variable__id=getparams['variable']).values_list('gentity', flat=True))
-        except ValueError:
-            queryres = queryres.none()
-    if getparams.has_key('ts_only'):
-        tmpset = queryres.annotate(tsnum=Count('timeseries'))
-        queryres = tmpset.exclude(tsnum=0)
-    if queryres.count()<1:
-        return HttpResponse(','.join([str(e) for e in\
-                            settings.ENHYDRIS_MAP_DEFAULT_VIEWPORT]),
-                            content_type='text/plain')
-    try:
-        extent = list(queryres.extent())
-    except TypeError:
-        return HttpResponse(','.join([str(e) for e in\
-                            settings.ENHYDRIS_MAP_DEFAULT_VIEWPORT]),
-                            content_type='text/plain')
-    min_viewport = settings.ENHYDRIS_MIN_VIEWPORT_IN_DEGS
-    min_viewport_half = 0.5*min_viewport
-    if abs(extent[2]-extent[0])<min_viewport:
-        extent[2]+=min_viewport_half
-        extent[0]-=min_viewport_half
-    if abs(extent[3]-extent[1])<min_viewport:
-        extent[3]+=min_viewport_half
-        extent[1]-=min_viewport_half
-    return HttpResponse(','.join([str(e) for e in extent]),
-                        content_type='text/plain')

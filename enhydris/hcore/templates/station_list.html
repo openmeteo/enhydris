@@ -21,29 +21,6 @@
     {{ block.super }}
     <script type="text/javascript">
     $(document).ready(function() {
-        $('#political_division').change( function() {
-            val = $(this).attr('value');
-            render_dist_filter(val);
-        });
-
-        $('#district').change( function() {
-            val = $(this).attr('value');
-            render_pref_filter(val);
-        });
-
-        if ( ! $('#political_division').attr(':disabled') ) { 
-           render_dist_filter($('#political_division').attr('value'));
-        }
-
-        $('#filter_submit').click( function() {
-            station_search();
-        });
-        
-		$(function() {
-            $("#tabs").tabs();
-        });
-
-
 	  // Reset Font Size
 	  var originalFontSize = $('.data_table').css('font-size');
 		$(".resetFont").click(function(){
@@ -71,7 +48,7 @@
     function GetRectAreaResults(){
         var aurl=window.location.pathname;
         var urlparams = Arg.all();
-        urlparams['bounded'] = enhydris.map.getExtent().transform(new
+        urlparams['bbox'] = enhydris.map.getExtent().transform(new
         OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326")).toBBOX(7);
         var aarray = [];
         var i = 0;
@@ -116,21 +93,12 @@
 					  </form>
 					</div>
  
-                    {% if search %}
+                    {% if query %}
                     <div class="ui-widget">
                         <div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;"> 
                             <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em; color:#4C0D8C;"></span>
                             {% trans "Search results obtained" %} ::
-                            <a href="{% url "station_list" %}">{% trans " Back to all results" %}</a> ::
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% if advanced_search %}
-                    <div class="ui-widget">
-                        <div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;"> 
-                            <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
-                            {% trans "Filter based search results obtained" %} ::
-                            <a href="{% url "station_list" %}">{% trans " Back to all results" %}</a> ::
+                            <a href="{% url "station_list" %}">{% trans " Back to all stations" %}</a> ::
                         </div>
                     </div>
                     {% endif %}

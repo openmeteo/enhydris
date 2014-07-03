@@ -165,7 +165,7 @@
     var enhydris = {};
     enhydris.staticUrl = '{{ STATIC_URL }}';
     enhydris.rootUrl = '{% url "station_list" %}';
-    enhydris.boundUrl = '{% url "enhydris.hcore.views.bound" %}';
+    enhydris.boundingBoxUrl = '{% url "bounding_box" %}';
     enhydris.mapMode = 1;
     {{ map_js | safe }}
     $(document).ready(function() {
