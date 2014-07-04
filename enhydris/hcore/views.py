@@ -216,21 +216,7 @@ class StationListBaseView(ListView):
     template_name = ''
     model = Station
 
-    def get(self, request, *args, **kwargs):
-        # The CSV is an undocumented feature we quickly and dirtily created
-        # for some people (Hydroexigiantiki) who needed it.
-        if request.GET.get("format", "").lower() == "csv":
-            zipfilename = _prepare_csv(self.get_queryset())
-            response = HttpResponse(file(zipfilename, 'rb').read(),
-                                    content_type='application/zip')
-            response['Content-Disposition'] = 'attachment; filename=data.zip'
-            response['Content-Length'] = str(os.path.getsize(zipfilename))
-            return response
-        else:
-            return super(StationListBaseView, self).get(
-                request, *args, **kwargs)
-
-    def get_queryset(self, **kwargs):
+    def get_queryset(self, distinct=True, **kwargs):
         result = super(StationListBaseView, self).get_queryset(**kwargs)
 
         # Apply SITE_STATION_FILTER
@@ -257,6 +243,12 @@ class StationListBaseView(ListView):
                                           param,
                                           self.request.GET[param],
                                           ignore_invalid=True)
+
+        # By default, only return distinct rows. We provide a way to
+        # override this by calling with distinct=False, because distinct()
+        # is incompatible with some things (namely extent()).
+        if distinct:
+            result = result.distinct()
 
         return result
 
@@ -325,8 +317,8 @@ class StationListBaseView(ListView):
 
     def filter_by_type(self, queryset, value):
         return queryset.filter(
-            Q(stype__name__icontains=value) |
-            Q(stype__name_alt__icontains=value))
+            Q(stype__descr__icontains=value) |
+            Q(stype__descr_alt__icontains=value))
 
     def filter_by_water_division(self, queryset, value):
         return queryset.filter(
@@ -340,8 +332,8 @@ class StationListBaseView(ListView):
 
     def filter_by_variable(self, queryset, value):
         return queryset.filter(
-            Q(variable__descr__icontains=value) |
-            Q(variable__descr_alt__icontains=value))
+            Q(timeseries__variable__descr__icontains=value) |
+            Q(timeseries__variable__descr_alt__icontains=value))
 
     def filter_by_bbox(self, queryset, value):
         try:
@@ -375,7 +367,7 @@ class StationListBaseView(ListView):
         except ValueError:
             raise Http404  # FIXME: Return empty result plus error message
         return queryset.extra(
-            where=['hcore_gentity.id IN '
+            where=['hcore_station.gpoint_ptr_id IN '
                    '(SELECT t.gentity_id FROM hcore_timeseries t '
                    'WHERE ' + (' AND '.join(
                        ['{0} BETWEEN '
@@ -386,19 +378,20 @@ class StationListBaseView(ListView):
 
     def filter_by_political_division(self, queryset, value):
         return queryset.extra(where=['''
-            hcore_gentity.id IN (
+            hcore_station.gpoint_ptr_id IN (
+              SELECT id FROM hcore_gentity WHERE political_division_id IN (
                 WITH RECURSIVE mytable(garea_ptr_id) AS (
                     SELECT garea_ptr_id FROM hcore_politicaldivision
                     WHERE garea_ptr_id IN (SELECT id FROM hcore_gentity
-                                           WHERE name ilike '%{}%'
-                                           OR name_alt ilike '%{}%')
+                                           WHERE name ilike '%%{}%%'
+                                           OR name_alt ilike '%%{}%%')
                   UNION ALL
                     SELECT pd.garea_ptr_id
                     FROM hcore_politicaldivision pd, mytable
                     WHERE pd.parent_id=mytable.garea_ptr_id
                 )
-                SELECT g.id, g.name FROM hcore_gentity g, mytable
-                WHERE g.id=mytable.garea_ptr_id)
+                SELECT g.id FROM hcore_gentity g, mytable
+                WHERE g.id=mytable.garea_ptr_id))
                                      '''.format(value, value)])
 
     def get_context_data(self, **kwargs):
@@ -441,6 +434,20 @@ class StationListView(tables.SingleTableMixin, StationListBaseView):
         "stype_heading": _("Type"),
     }
 
+    def get(self, request, *args, **kwargs):
+        # The CSV is an undocumented feature we quickly and dirtily created
+        # for some people (Hydroexigiantiki) who needed it.
+        if request.GET.get("format", "").lower() == "csv":
+            zipfilename = _prepare_csv(self.get_queryset())
+            response = HttpResponse(file(zipfilename, 'rb').read(),
+                                    content_type='application/zip')
+            response['Content-Disposition'] = 'attachment; filename=data.zip'
+            response['Content-Length'] = str(os.path.getsize(zipfilename))
+            return response
+        else:
+            return super(StationListView, self).get(
+                request, *args, **kwargs)
+
     def get_queryset(self, **kwargs):
         result = super(StationListView, self).get_queryset(**kwargs)
 
@@ -471,7 +478,7 @@ class BoundingBoxView(StationListBaseView):
 
     def get(self, request, *args, **kwargs):
         # Determine queryset's extent
-        queryset = self.get_queryset()
+        queryset = self.get_queryset(distinct=False)
         try:
             extent = list(queryset.extent())
         except TypeError:

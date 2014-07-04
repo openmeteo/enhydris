@@ -2,7 +2,6 @@
 {% load i18n %}
 {% block title %} {% trans 'Enhydris - Stations' %}{% endblock %}
 {% load sorting_tags %}
-{% load stationlist_filter %}
 {% load render_table from django_tables2 %}
 
 {% block extracss %}
@@ -66,12 +65,6 @@
 {% block content %}
     {% autosort station_list %}
     
-    <div id="tabs">
-        <ul>
-            <li class="noborder"><a href="#tabs-1">{% trans "List" %}</a></li>
-            <li class="noborder"><a href="#tabs-2">{% trans "Advanced Search" %}</a></li>
-        </ul>
-
         <div id="tabs-1" >
         <div>
            <div style="float: right;">
@@ -121,21 +114,11 @@
          <button type="button" onclick="GetRectAreaResults();">{% trans 'Filter results by map viewport' %}</button>
         </div>
             {% if station_list %}
-                    {% render_table table %}
+              {% render_table table %}
             {% else %}
               <p>{% trans "No entries found." %}</p>
-              <p>{% trans "You may want to try again with a different filter." %}</p>
             {% endif %}
         	<br />
         </div>
-        <div id="tabs-2">
-              {% block filters %}
-              <div style="padding: 10px;">
-              <h3>{% trans 'Filter' %}</h3>
-              {% filter_table request "True" %}
-              {% endblock %}
-              </div>
-        </div>
-    </div>
 
 {% endblock %}
