@@ -1,6 +1,6 @@
 {% extends "gis/kml/base.kml" %}
 {% block placemarks %}
-{% for place in places %}
+{% for place in station_list %}
 <Placemark>
   <name>{% if place.name %}{{ place.name }}{% else %}{{ place }}{% endif %}</name>
   <id>{{ place.id }}</id>
@@ -9,4 +9,3 @@
 </Placemark>
 {% endfor %}
 {% endblock %}
-

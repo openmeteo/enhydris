@@ -3,12 +3,6 @@
 {% load permissions %}
 {% block title %} {% trans 'Enhydris - Station' %} - {%if station %}{{ station.name }} {% endif %}
 {% endblock %}
-{% block extrajs %}
-<script type="text/javascript">
-    enhydris.mapMode = 2;
-    {% if station %}enhydris.agentityId = {{station.id}};{% endif %}
-</script>
-{% endblock %}
 
 {% block extracss %}
     <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
@@ -23,8 +17,12 @@
     </style>
 {% endblock %}
 
-{% block extra_head %}
+{% block extrajs %}
   <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.collapser.mod.js"></script>
+  <script type="text/javascript">
+      enhydris.mapMode = 2;
+      {% if station %}enhydris.agentityId = {{station.id}};{% endif %}
+  </script>
   <script type="text/javascript">
   $(document).ready(function() {
       $("table").tablesorter();
