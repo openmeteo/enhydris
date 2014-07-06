@@ -1,0 +1,29 @@
+Here's how to release a new micro 0.1.Z version:
+
+    1. Switch to the 0.1 branch:
+
+          git checkout 0.1
+
+    2. Make the required bug fixes, add them to CHANGES.txt under the
+       (probably new) 0.1.Z heading, and commit them.
+
+    3. In the toplevel __init__.py, change __version__ so that it has the
+       value "0.1.Z" (should be "0.1.Q" where Q=Z-1).
+
+    4. Commit:
+    
+          git commit -a -m "Version 0.1.Z"
+
+    5. Create a tag:
+    
+          git tag 0.1.Z
+
+    6. Push changes and tag:
+
+          git push
+          git push origin 0.1.Z
+
+    7. Create a new release in github.
+
+    8. If needed, also apply the bug fixes to the master branch and
+       other release branches.
