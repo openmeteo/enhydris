@@ -21,7 +21,6 @@ class EnhydrisConf(AppConf):
     TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS = False
     STORE_TSDATA_LOCALLY = True
     REMOTE_INSTANCE_CREDENTIALS = {}
-    USE_OPEN_LAYERS = True
     MIN_VIEWPORT_IN_DEGS = 0.04
     MAP_DEFAULT_VIEWPORT = (19.3, 34.75, 29.65, 41.8)
     TS_GRAPH_CACHE_DIR = os.path.join(tempfile.gettempdir(),
@@ -31,6 +30,17 @@ class EnhydrisConf(AppConf):
     SITE_STATION_FILTER = {}
     DISPLAY_COPYRIGHT_INFO = False
     WGS84_NAME = 'WGS84'
+    MAP_BASE_LAYERS = [
+        r'OpenLayers.Layer.OSM.Mapnik("Open Street Map",'
+        r'{isBaseLayer:true,attribution:'
+        r'''"Map by <a href='http://www.openstreetmap.org/'>OSM</a>"})''',
+
+        r'OpenLayers.Layer.OSM.CycleMap("Open Cycle Map",'
+        r'{isBaseLayer: true, attribution:'
+        r'''"Map by <a href='http://www.openstreetmap.org/'>OSM</a>"})''',
+    ]
+    MAP_BOUNDS = ((19.3, 34.75), (29.65, 41.8))
+    MAP_MARKERS = {'0': 'images/drop_marker.png'}
 
     class Meta:
         prefix = 'ENHYDRIS'

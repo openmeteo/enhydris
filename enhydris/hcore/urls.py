@@ -90,9 +90,10 @@ urlpatterns = patterns(
      views.overseer_delete, {}, 'overseer_delete'),
 
     (r'^(?P<layer>[^/]+)/kml/$',
-     views.kml, {}),
+     views.StationListView.as_view(template_name='placemarks.kml')),
 
-    (r'^bound/$', views.bound, {}),
+    (r'^bounding_box/$', views.BoundingBoxView.as_view(), {},
+        'bounding_box'),
 
     url(r'^add/(?P<model_name>.+)/$', views.ModelAddView.as_view(),
         name='model_add'),

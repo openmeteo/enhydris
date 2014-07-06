@@ -2,27 +2,26 @@
 {% load i18n %}
 {% block title %}{% trans 'Entities map' %}{% endblock %}
 {% block js-globals %}
-    <script type="text/javascript">var map_mode=1;
-    var legent_displayed=true;</script>
+    <script type="text/javascript">
+        var legent_displayed=true;
+    </script>
 {% endblock %}
 {% block extracss %}
     <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
-    <link type="text/css" href="{{ STATIC_URL }}css/tipTip.css" rel="stylesheet" />
     <link media="screen" href="{{ STATIC_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
     <style type="text/css">
-    {% if use_open_layers %}
     #map {
         width: 980px;
         height: 700px;
         border: 1px solid #eee;
         z-index: 1;
-    }{% endif %}
+    }
     </style>
 {% endblock %}
 
 {% block content %}
            <div style="float: left;">
                 <div id="map" style="float: left;">
-                <div id="map_progress" style="position: absolute; margin-top:212px; margin-left: 272px; z-index: 5000;"></div></div>
+                <div id="processing_indicator" style="position: absolute; margin-top:212px; margin-left: 272px; z-index: 5000;"></div></div>
            </div>
 {% endblock %}

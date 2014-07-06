@@ -52,16 +52,12 @@
     -moz-border-radius-bottomright:8px;
     -moz-border-radius-topleft:8px;
     -moz-border-radius-topright:8px;
-    background:#FFFFFF url(smoothness/images/ui-bg_flat_0_aaaaaa_40x100.png) repeat-x scroll 50% 50%;
+    background:#FFFFFF;
     margin:-8px 0 0 -8px;
     padding:12px;
     width:400px;
     text-align:justify;
     color: #111111;
-}
-
-.tablehighlighted .highlight td, .tablehighlighted tr.even.highlight  td{
-    background-color: #f4f4d8;
 }
 
 .ui-tabs { 

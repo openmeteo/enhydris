@@ -1,54 +1,341 @@
 from itertools import takewhile
 from StringIO import StringIO
 from tempfile import TemporaryFile
+from urllib import urlencode
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.gis.geos import fromstr
 from django.db import connection as dj_connection
+from django.http import HttpRequest, QueryDict
 from django.test import TestCase
 from django.test.utils import override_settings
 
 from pthelma import timeseries
 
 from enhydris.conf import settings
-from enhydris.hcore.models import StationType, Organization, Variable, \
-    UnitOfMeasurement, TimeZone, Station, Timeseries, InstrumentType, \
-    Instrument, GentityFile
+from enhydris.hcore.models import (
+    FileType, GentityFile, Instrument, InstrumentType, IntervalType,
+    Organization, PoliticalDivision, Station, StationType, TimeZone,
+    Timeseries, UnitOfMeasurement, Variable, WaterBasin, WaterDivision)
 from enhydris.hcore.forms import TimeseriesDataForm
-from enhydris.hcore.views import ALLOWED_TO_EDIT
-from enhydris.hcore.views import get_search_query
+from enhydris.hcore.views import ALLOWED_TO_EDIT, StationListBaseView
+
+
+def create_test_data():
+    user1 = User.objects.create_user('admin', 'anthony@itia.ntua.gr',
+                                     'topsecret')
+    user1.is_active = True
+    user1.is_superuser = True
+    user1.is_staff = True
+    user1.save()
+
+    organization1 = Organization.objects.create(
+        name="We're rich and we fancy it SA")
+    organization2 = Organization.objects.create(
+        name="We're poor and dislike it Ltd")
+
+    water_division1 = WaterDivision.objects.create(
+        name="North Syldavia Basins")
+    water_division2 = WaterDivision.objects.create(
+        name="South Syldavia Basins")
+    water_division3 = WaterDivision.objects.create(name="East Syldavia Basins")
+    water_division4 = WaterDivision.objects.create(name="West Syldavia Basins")
+
+    water_basin1 = WaterBasin.objects.create(name="Arachthos")
+    water_basin2 = WaterBasin.objects.create(name="Pinios")
+    water_basin3 = WaterBasin.objects.create(name="Greyflood")
+
+    # Political divisions
+    # +-> Greece       +-> Epirus   +-> Preveza
+    # |                |            +-> Arta
+    # |                +-> Thessaly +-> Karditsa
+    # |                             +-> Magnisia
+    # +-> Middle Earth +-> Eriador  +-> Arthedain
+    #                  |            +-> Cardolan
+    #                  +-> Gondor   +-> Lamedon
+    #                               +-> Lebbenin
+    pd = PoliticalDivision
+    pd_greece = pd.objects.create(name="Greece")
+    pd_epirus = pd.objects.create(name="Epirus", parent=pd_greece)
+    pd_thessaly = pd.objects.create(name="Thessaly", parent=pd_greece)
+    pd_preveza = pd.objects.create(name="Preveza", parent=pd_epirus)
+    pd_arta = pd.objects.create(name="Arta", parent=pd_epirus)
+    pd_karditsa = pd.objects.create(name="Karditsa", parent=pd_thessaly)
+    pd_magnisia = pd.objects.create(name="Magnisia", parent=pd_thessaly)
+    pd_middleearth = pd.objects.create(name="Middle Earth")
+    pd_eriador = pd.objects.create(name="Eriador", parent=pd_middleearth)
+    pd_gondor = pd.objects.create(name="Gondor", parent=pd_middleearth)
+    pd_arthedain = pd.objects.create(name="Arthedain", parent=pd_eriador)
+    pd_cardolan = pd.objects.create(name="Cardolan", parent=pd_eriador)
+    pd_lamedon = pd.objects.create(name="Lamedon", parent=pd_gondor)
+    pd_lebbenin = pd.objects.create(name="Lamedon", parent=pd_gondor)
+
+    stype1 = StationType.objects.create(descr="Important")
+    stype2 = StationType.objects.create(descr="Unimportant")
+
+    filetype1 = FileType.objects.create(mime_type='image.jpeg')
+
+    variable1 = Variable.objects.create(descr='Rainfall')
+    variable2 = Variable.objects.create(descr='Temperature')
+
+    unit_of_measurement1 = UnitOfMeasurement.objects.create(
+        descr='millimeter', symbol='mm')
+    unit_of_measurement1.variables = [variable1]
+    unit_of_measurement1.save()
+    unit_of_measurement2 = UnitOfMeasurement.objects.create(
+        descr='Degrees Celsius', symbol=u'\u00b0C')
+    unit_of_measurement2.variables = [variable2]
+    unit_of_measurement2.save()
+
+    timezone1 = TimeZone.objects.create(code='EET', utc_offset=120)
+
+    interval_type1 = IntervalType.objects.create(
+        descr='Sum', value='SUM', descr_alt='Sum')
+    interval_type2 = IntervalType.objects.create(
+        descr='Average value', value='AVERAGE', descr_alt='Average value')
+    interval_type3 = IntervalType.objects.create(
+        descr='Minimum', value='MINIMUM', descr_alt='Minimum')
+    interval_type4 = IntervalType.objects.create(
+        descr='Maximum', value='MAXIMUM', descr_alt='Maximum')
+    interval_type5 = IntervalType.objects.create(
+        descr='Vector average', value='VECTOR_AVERAGE',
+        descr_alt='Vector average')
+
+    station1 = Station.objects.create(
+        name='Komboti',
+        approximate=False,
+        is_active=False,
+        is_automatic=False,
+        copyright_holder="We're poor and dislike it Ltd",
+        copyright_years='2013',
+        owner=organization2,
+        water_division=water_division1,
+        water_basin=water_basin1,
+        political_division=pd_arta)
+    station1.stype = [stype1]
+    station1.save()
+    station2 = Station.objects.create(
+        name='Agios Athanasios',
+        approximate=False,
+        is_active=False,
+        is_automatic=False,
+        copyright_holder="We're poor and dislike it Ltd",
+        copyright_years='2013',
+        owner=organization2,
+        water_division=water_division2,
+        water_basin=water_basin2,
+        political_division=pd_karditsa)
+    station2.stype = [stype1, stype2]
+    station2.save()
+    station3 = Station.objects.create(
+        name='Tharbad',
+        approximate=False,
+        is_active=False,
+        is_automatic=False,
+        copyright_holder="Isaac Newton",
+        copyright_years='1687',
+        owner=organization1,
+        water_division=water_division2,
+        water_basin=water_basin3,
+        political_division=pd_cardolan)
+    station3.stype = [stype2]
+    station3.save()
+
+    timeseries1 = Timeseries.objects.create(
+        unit_of_measurement=unit_of_measurement1,
+        gentity=station1,
+        time_zone=timezone1,
+        variable=variable1,
+        name='Rain')
+    timeseries2 = Timeseries.objects.create(
+        unit_of_measurement=unit_of_measurement2,
+        gentity=station1,
+        time_zone=timezone1,
+        variable=variable2,
+        name='Air temperature')
+    timeseries3 = Timeseries.objects.create(
+        unit_of_measurement=unit_of_measurement1,
+        gentity=station2,
+        time_zone=timezone1,
+        variable=variable1,
+        name='Rain')
+    timeseries4 = Timeseries.objects.create(
+        unit_of_measurement=unit_of_measurement2,
+        gentity=station2,
+        time_zone=timezone1,
+        variable=variable2,
+        name='Air temperature')
+    timeseries5 = Timeseries.objects.create(
+        unit_of_measurement=unit_of_measurement2,
+        gentity=station3,
+        time_zone=timezone1,
+        variable=variable2,
+        name='Temperature',
+        remarks='This is an extremely important time series, just because it '
+                'is hugely significant and markedly outstanding.')
 
 
 class SearchTestCase(TestCase):
-    fixtures = ['testdata.json']
+
+    def setUp(self):
+        create_test_data()
+
+    def get_queryset(self, query_string):
+        view = StationListBaseView()
+        view.request = HttpRequest()
+        view.request.method = 'GET'
+        view.request.GET = QueryDict(query_string)
+        return view.get_queryset()
 
     def test_search_in_timeseries_remarks(self):
         # Search for something that exists
-        query = get_search_query(['extremely important time series'])
-        result = Station.objects.filter(query).distinct()
-        self.assertEquals(result.count(), 1)
-        self.assertEquals(result[0].id, 3)
+        queryset = self.get_queryset(urlencode({
+            'q': 'extremely important time series'}))
+        self.assertEquals(queryset.count(), 1)
+        self.assertEquals(queryset[0].name, 'Tharbad')
 
         # Search for something that doesn't exist
-        query = get_search_query(['this should not exist anywhere'])
-        result = Station.objects.filter(query).distinct()
-        self.assertEquals(result.count(), 0)
+        queryset = self.get_queryset(urlencode({
+            'q': 'this should not exist anywhere'}))
+        self.assertEquals(queryset.count(), 0)
+
+    def test_search_by_owner(self):
+        queryset = self.get_queryset(urlencode({'q': 'owner:RiCh'}))
+        self.assertEquals(queryset.count(), 1)
+        self.assertEquals(queryset[0].owner.organization.name,
+                          "We're rich and we fancy it SA")
+        queryset = self.get_queryset(urlencode({'owner': 'poor'}))
+        self.assertEquals(queryset.count(), 2)
+        self.assertEquals(queryset[0].owner.organization.name,
+                          "We're poor and dislike it Ltd")
+        queryset = self.get_queryset(urlencode({'owner': 'nonexistent'}))
+        self.assertEquals(queryset.count(), 0)
+
+    def test_search_by_type(self):
+        # The following will find both "Important" and "Unimportant" stations,
+        # because the string "important" is included in "Unimportant".
+        queryset = self.get_queryset(urlencode({'q': 'type:Important'}))
+        queryset = queryset.distinct()
+        self.assertEquals(queryset.count(), 3)
+
+        queryset = self.get_queryset(urlencode({'type': 'Unimportant'}))
+        queryset = queryset.order_by('name')
+        self.assertEquals(queryset.count(), 2)
+        self.assertEquals(queryset[0].name, 'Agios Athanasios')
+        self.assertEquals(queryset[1].name, 'Tharbad')
+
+        queryset = self.get_queryset(urlencode({'type': 'Nonexistent'}))
+        self.assertEquals(queryset.count(), 0)
+
+    def test_search_by_water_division(self):
+        queryset = self.get_queryset(urlencode({'q': 'water_division:north'}))
+        self.assertEquals(queryset.count(), 1)
+        self.assertEquals(queryset[0].name, 'Komboti')
+
+        queryset = self.get_queryset(urlencode({'q': 'water_division:south'}))
+        queryset = queryset.order_by('name')
+        self.assertEquals(queryset.count(), 2)
+        self.assertEquals(queryset[0].name, 'Agios Athanasios')
+        self.assertEquals(queryset[1].name, 'Tharbad')
+
+        queryset = self.get_queryset(urlencode({'q': 'water_division:east'}))
+        self.assertEquals(queryset.count(), 0)
+
+    def test_search_by_water_basin(self):
+        queryset = self.get_queryset(urlencode({'q': 'water_basin:arachthos'}))
+        self.assertEquals(queryset.count(), 1)
+        self.assertEquals(queryset[0].name, 'Komboti')
+
+        queryset = self.get_queryset(urlencode({'water_basin': 'greyflood'}))
+        queryset = queryset.order_by('name')
+        self.assertEquals(queryset.count(), 1)
+        self.assertEquals(queryset[0].name, 'Tharbad')
+
+        queryset = self.get_queryset(urlencode({'water_basin': 'nonexistent'}))
+        self.assertEquals(queryset.count(), 0)
+
+    def test_search_by_variable(self):
+        queryset = self.get_queryset(urlencode({'q': 'variable:rain'}))
+        queryset = queryset.order_by('name')
+        self.assertEquals(queryset.count(), 2)
+        self.assertEquals(queryset[0].name, 'Agios Athanasios')
+        self.assertEquals(queryset[1].name, 'Komboti')
+
+        queryset = self.get_queryset(urlencode({'q': 'variable:temperature'}))
+        queryset = queryset.order_by('name')
+        self.assertEquals(queryset.count(), 3)
+        self.assertEquals(queryset[0].name, 'Agios Athanasios')
+        self.assertEquals(queryset[1].name, 'Komboti')
+        self.assertEquals(queryset[2].name, 'Tharbad')
+
+        queryset = self.get_queryset(urlencode({'q': 'variable:nonexistent'}))
+        self.assertEquals(queryset.count(), 0)
+
+    def test_search_by_gentityId(self):
+        station_id = Station.objects.get(name='Komboti').id
+        queryset = self.get_queryset(urlencode({'gentityId': str(station_id)}))
+        self.assertEquals(queryset.count(), 1)
+        self.assertEquals(queryset[0].name, 'Komboti')
+
+        queryset = self.get_queryset(urlencode({'gentityId': '98765'}))
+        self.assertEquals(queryset.count(), 0)
+
+    def test_search_by_political_division(self):
+        queryset = self.get_queryset(
+            urlencode({'political_division': 'Cardolan'}))
+        self.assertEquals(queryset.count(), 1)
+        self.assertEquals(queryset[0].name, 'Tharbad')
+
+        queryset = self.get_queryset(
+            urlencode({'political_division': 'Arthedain'}))
+        self.assertEquals(queryset.count(), 0)
+
+        queryset = self.get_queryset(
+            urlencode({'political_division': 'Karditsa'}))
+        self.assertEquals(queryset.count(), 1)
+        self.assertEquals(queryset[0].name, 'Agios Athanasios')
+
+        queryset = self.get_queryset(
+            urlencode({'political_division': 'Arta'}))
+        self.assertEquals(queryset.count(), 1)
+        self.assertEquals(queryset[0].name, 'Komboti')
+
+        queryset = self.get_queryset(
+            urlencode({'political_division': 'Epirus'}))
+        self.assertEquals(queryset.count(), 1)
+        self.assertEquals(queryset[0].name, 'Komboti')
+
+        queryset = self.get_queryset(
+            urlencode({'political_division': 'Greece'}))
+        queryset = queryset.order_by('name')
+        self.assertEquals(queryset.count(), 2)
+        self.assertEquals(queryset[0].name, 'Agios Athanasios')
+        self.assertEquals(queryset[1].name, 'Komboti')
+
+        queryset = self.get_queryset(
+            urlencode({'political_division': 'Middle Earth'}))
+        self.assertEquals(queryset.count(), 1)
+        self.assertEquals(queryset[0].name, 'Tharbad')
 
 
 class GentityFileTestCase(TestCase):
-    fixtures = ['testdata.json']
+
+    def setUp(self):
+        create_test_data()
 
     def test_upload_gentity_file(self):
+        gentity_id = Station.objects.get(name='Komboti').id
         r = self.client.login(username='admin', password='topsecret')
-        self.assertEquals(r, True)
-        self.assertEquals(GentityFile.objects.filter(gentity__id=2).count(), 0)
+        self.assertTrue(r)
+        self.assertEquals(GentityFile.objects.filter(gentity__id=gentity_id
+                                                     ).count(), 0)
         with TemporaryFile(suffix='.jpg') as tmpfile:
             tmpfile.write('Irrelevant data\n')
             tmpfile.seek(0)
             response = self.client.post(reverse('gentityfile_add'),
-                                        {'gentity': 2,
+                                        {'gentity': gentity_id,
                                          'date': '',
                                          'file_type': 1,
                                          'descr': 'A description',
@@ -58,7 +345,8 @@ class GentityFileTestCase(TestCase):
                                          'content': tmpfile,
                                          })
         self.assertEquals(response.status_code, 302)
-        self.assertEquals(GentityFile.objects.filter(gentity__id=2).count(), 1)
+        self.assertEquals(GentityFile.objects.filter(gentity__id=gentity_id
+                                                     ).count(), 1)
 
 
 class TsTestCase(TestCase):
@@ -167,7 +455,8 @@ class TsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(nrecords(), 6)
 
-        url = "/timeseries/d/{}/download//1960-11-08T08:00:00/".format(self.ts.pk)
+        url = "/timeseries/d/{}/download//1960-11-08T08:00:00/".format(
+            self.ts.pk)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(nrecords(), 6)

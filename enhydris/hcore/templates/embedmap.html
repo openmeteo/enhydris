@@ -10,21 +10,20 @@
 
   <link media="screen" href="{{ STATIC_URL }}css/base.css" type="text/css" rel="stylesheet" />
   <link media="screen" href="{{ STATIC_URL }}css/olmap.css" type="text/css" rel="stylesheet" />
-  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.3.2.min.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.tablesorter.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.10.8/jquery.tablesorter.min.js"></script>
   <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.placeholder-1.0.1.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/base.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
   <script type="text/javascript">
   </script>
   <script type="text/javascript">
     var STATIC_URL = "{{ STATIC_URL }}";
     var ENHYDRIS_ROOT_URL = '{% url "station_list" %}';
-    var BOUND_URL = '{% url "enhydris.hcore.views.bound" %}';
+    var BOUNDING_BOX_URL = '{% url "enhydris.hcore.views.bounding_box" %}';
     var map_mode=1;
   </script>
 
-        <script src="{{ STATIC_URL}}js/openlayers/OpenLayers.js">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/openlayers/2.12/OpenLayers.min.js">
         </script>
 
         <script type="text/javascript"
@@ -43,6 +42,6 @@
 </head>
 <body onload="init()" style="overflow:hidden;">
     <div id="map" style="float: left;">
-    <div id="map_progress" style="position: absolute; margin-top:49%; margin-left: 49%; z-index: 5000;"></div></div>
+    <div id="processing_indicator" style="position: absolute; margin-top:49%; margin-left: 49%; z-index: 5000;"></div></div>
 </body>
 </html>

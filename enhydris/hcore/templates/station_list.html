@@ -2,15 +2,10 @@
 {% load i18n %}
 {% block title %} {% trans 'Enhydris - Stations' %}{% endblock %}
 {% load sorting_tags %}
-{% load stationlist_filter %}
 {% load render_table from django_tables2 %}
 
-{% block js-globals %}
-    <script type="text/javascript">var map_mode=1;</script>
-{% endblock %}
 {% block extracss %}
     <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css">
-    {% if use_open_layers %}
     <style type="text/css">
     #map {
         width: 560px;
@@ -18,43 +13,13 @@
         border: 1px solid #eee;
         z-index: 1;
     }
-    </style>{% endif %}
+    </style>
 {% endblock %}
 
 {% block extrajs %}
+    {{ block.super }}
     <script type="text/javascript">
     $(document).ready(function() {
-        $('#political_division').change( function() {
-            val = $(this).attr('value');
-            render_dist_filter(val);
-        });
-
-        $('#district').change( function() {
-            val = $(this).attr('value');
-            render_pref_filter(val);
-        });
-
-        if ( ! $('#political_division').attr(':disabled') ) { 
-           render_dist_filter($('#political_division').attr('value'));
-        }
-
-        $('#filter_submit').click( function() {
-            station_search();
-        });
-        
-        $(".tablehighlighted tbody tr").hover( 
-             function() {  // mouseover 
-                  $(this).addClass('highlight'); 
-             }, 
-             function() {  // mouseout 
-                  $(this).removeClass('highlight'); 
-        });
-
-		$(function() {
-            $("#tabs").tabs();
-        });
-
-
 	  // Reset Font Size
 	  var originalFontSize = $('.data_table').css('font-size');
 		$(".resetFont").click(function(){
@@ -81,8 +46,8 @@
 
     function GetRectAreaResults(){
         var aurl=window.location.pathname;
-        var urlparams = getUrlVars();
-        urlparams['bounded']=map.getExtent().transform(new
+        var urlparams = Arg.all();
+        urlparams['bbox'] = enhydris.map.getExtent().transform(new
         OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326")).toBBOX(7);
         var aarray = [];
         var i = 0;
@@ -100,21 +65,13 @@
 {% block content %}
     {% autosort station_list %}
     
-    <div id="tabs">
-        <ul>
-            <li class="noborder"><a href="#tabs-1">{% trans "List" %}</a></li>
-            <li class="noborder"><a href="#tabs-2">{% trans "Advanced Search" %}</a></li>
-        </ul>
-
         <div id="tabs-1" >
-    {% if use_open_layers %}
-          <div>
+        <div>
            <div style="float: right;">
                 <div id="map" style="float: left;">
-                <div id="map_progress" style="position: absolute; margin-top:212px; margin-left: 272px; z-index: 5000;"></div></div>
+                <div id="processing_indicator" style="position: absolute; margin-top:212px; margin-left: 272px; z-index: 5000;"></div></div>
            </div>
-           <div style="float: left;">
-    {% endif %}
+        <div style="float: left;">
              <div>
                   <h3>{% trans 'Searching' %}</h3>
 					<div class="searchform">
@@ -129,21 +86,12 @@
 					  </form>
 					</div>
  
-                    {% if search %}
+                    {% if query %}
                     <div class="ui-widget">
                         <div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;"> 
                             <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em; color:#4C0D8C;"></span>
                             {% trans "Search results obtained" %} ::
-                            <a href="{% url "station_list" %}">{% trans " Back to all results" %}</a> ::
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% if advanced_search %}
-                    <div class="ui-widget">
-                        <div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;"> 
-                            <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
-                            {% trans "Filter based search results obtained" %} ::
-                            <a href="{% url "station_list" %}">{% trans " Back to all results" %}</a> ::
+                            <a href="{% url "station_list" %}">{% trans " Back to all stations" %}</a> ::
                         </div>
                     </div>
                     {% endif %}
@@ -162,29 +110,15 @@
                    </a>
            </p>
            {% endif %}
-      
-    {% if use_open_layers %}
          </div>
          <button type="button" onclick="GetRectAreaResults();">{% trans 'Filter results by map viewport' %}</button>
         </div>
-    {% endif %}
-
             {% if station_list %}
-                    {% render_table table %}
+              {% render_table table %}
             {% else %}
               <p>{% trans "No entries found." %}</p>
-              <p>{% trans "You may want to try again with a different filter." %}</p>
             {% endif %}
         	<br />
         </div>
-        <div id="tabs-2">
-              {% block filters %}
-              <div style="padding: 10px;">
-              <h3>{% trans 'Filter' %}</h3>
-              {% filter_table request "True" %}
-              {% endblock %}
-              </div>
-        </div>
-    </div>
 
 {% endblock %}
