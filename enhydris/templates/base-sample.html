@@ -21,130 +21,80 @@
 <body onload="enhydris.map = enhydris.map_module.init()">
 <div id="wrapper">
   <div id="header">
-	<ul id="menu"> 
-		<li class="logo"> 
-			<a href='{% url "station_list" %}'>
-			<img style="float:left;border:0;" alt="" src="{{ STATIC_URL}}images/menu_left.png" /> 
-			</a>
-		</li> 
-				<li><a href='{% url "station_list" %}'>{% trans "Stations" %}</a> 
-		</li>
-		<li><a href='{% url "map_view" %}'>{% trans "Map" %}</a> 
-		</li>
-		<li class="searchContainer"> 
-			<div>
-		    <form id="global-search-form" class="col-6 last" action='{% url "station_list" %}' method="get">
-		    	<input class="small" id="search_input" type="text" placeholder="search stations" name="q" value="{{ query|escape }}" />
-				<input type="hidden" name="check" value="search" />
-		    </form>
-		    </div>
+    <ul id="menu"> 
+      <li><a href='{% url "station_list" %}'>{% trans "Stations" %}</a></li>
+      <li class="searchContainer"> 
+        <form id="global-search-form" class="col-6 last" action='{% url "station_list" %}' method="get">
+          <input class="small" id="search_input" type="text" placeholder="search stations" name="q" value="{{ query|escape }}" />
+          <input type="hidden" name="check" value="search" />
+        </form>
+      </li> 
+    </ul>
 
-		<!--
-					<form method="get" id="global-search-form" action='/stations/l/'>
-						<input type="text" value="" name="q" size="20" placeholder="{% trans "search stations"%}" id="search_input" class="placeholder">
-
-
-					</form>
-
-			<ul id="search"> 
-				<li>
-					<img class="corner_inset_left" alt="" src="{{ STATIC_URL }}images/corner_inset_left.png"/> 
-					<a href="#">All</a> 
-					<img class="corner_inset_right" alt="" src="{{ STATIC_URL }}images/corner_inset_right.png"/> 
-				</li>
-				<li><input id="Stations" type="checkbox" />Stations</li> 
-				<li><input id="Instruments" type="checkbox" />Instruments</li> 
-				<li><input id="Timeseries" type="checkbox" />Timeseries</li> 
-				<li class="last"> 
-					<img class="corner_left" alt="" src="{{ STATIC_URL }}images/corner_left.png"/> 
-					<img class="middle" alt="" src="{{ STATIC_URL }}images/dot.gif"/> 
-					<img class="corner_right" alt="" src="{{ STATIC_URL }}images/corner_right.png"/> 
-				</li> 
-			</ul>
-		-->
-		</li> 
-		<li style="background:transparent;margin:0;padding:0;">
-			<img style="float:left" alt="" src="{{ STATIC_URL }}images/menu_right.png" />
-		</li>
-	</ul> 
-
-	<ul id="menu2"> 
-
-		{% if user.is_authenticated %}
-
-			<li style="background:transparent;margin:0;padding:0;">
-				<img style="float:left" alt="" src="{{ STATIC_URL }}images/top_menu_left.png"/>
-			</li>
-			<li id="userinfo">
-			{% with user.username as user_username %}
+    <ul id="menu2">
+        {% if user.is_authenticated %}
+            <li id="userinfo">
+            {% with user.username as user_username %}
                         {% trans "Welcome" %}&nbsp;<a href='{% url "profiles_profile_detail" user_username %}'>{{ user_username }}</a>!&nbsp;
             {% endwith %}
-			</li>
+            </li>
 
-			<li><a href='{% url "auth_logout" %}?next={{ request.path }}'>Logout</a> 
-			</li> 
-		{% else %}
-			<li style="background:transparent;margin:0;padding:0;">
-			<img style="float:left" alt="" src="{{ STATIC_URL }}images/top_menu_left_bw.png"/>
-			</li>
-			<li><a class="loginform" href='{% url "auth_login" %}?next={{request.path}}'>{% trans "Login" %}</a></li> 
+            <li><a href='{% url "auth_logout" %}?next={{ request.path }}'>Logout</a> 
+            </li> 
+        {% else %}
+            <li><a class="loginform" href='{% url "auth_login" %}?next={{request.path}}'>{% trans "Login" %}</a></li> 
 
                         {% if REGISTRATION_OPEN %}
-			  <li><a href='{% url "registration_register" %}'>{% trans "Register" %}</a></li> 
+            <li><a href='{% url "registration_register" %}'>{% trans "Register" %}</a></li> 
                         {% endif %}
+        {% endif %}
 
-
-		{% endif %}
-
-			<li>
-			{% url "django.views.i18n.set_language" as set_language_url %}
-				<form action="{{ set_language_url }}" method="post">
+            <li>
+            {% url "django.views.i18n.set_language" as set_language_url %}
+                <form action="{{ set_language_url }}" method="post">
                                 {% csrf_token %}
-				<p style="display: inline;">
-					<input name="next" type="hidden" value="{{ request.path }}" />
-						<select name="language">
-						{% for lang in LANGUAGES %}
-						   <option value="{{ lang.0 }}" {% ifequal request.session.django_language lang.0 %}selected="selected"{% endifequal %}>{{ lang.1 }}</option>
-						{% endfor %}
-						</select>
-						<input type="submit" value="Go" />
-				</p>
-				</form>
+                <p style="display: inline;">
+                    <input name="next" type="hidden" value="{{ request.path }}" />
+                        <select name="language">
+                        {% for lang in LANGUAGES %}
+                           <option value="{{ lang.0 }}" {% ifequal request.session.django_language lang.0 %}selected="selected"{% endifequal %}>{{ lang.1 }}</option>
+                        {% endfor %}
+                        </select>
+                        <input type="submit" value="Go" />
+                </p>
+                </form>
 
 
-			</li>
-			<li style="background:transparent;margin:0;padding:0;">
-			<img style="float:left" alt="" src="{{ STATIC_URL }}images/menu_right.png"/>
-			</li>
-			
-	</ul>
-	</div>
-	    <div id="content">
-		<div id="body">
-	    {% if notifications %}
+            </li>
+    </ul>
+  </div>
+
+        <div id="content">
+        <div id="body">
+        {% if notifications %}
         <ul class="notifications">
                 {% for message in notifications %}
                 <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
                 {% endfor %}
         </ul>
         {% endif %}
-			  {% block messages %}
-				{% if messages %}
-					<div class="messages">
-					{% for message in messages %}
-						<span class="i16 tip message" style="font-size:0.8em">{{ message }}</span> 
-					{% endfor %}
-					</div>
-				{% endif %}
-			  {% endblock %}
-		  {% block content %}
-			<div id="body_main">
-			{% block content_main %}
+              {% block messages %}
+                {% if messages %}
+                    <div class="messages">
+                    {% for message in messages %}
+                        <span class="i16 tip message" style="font-size:0.8em">{{ message }}</span> 
+                    {% endfor %}
+                    </div>
+                {% endif %}
+              {% endblock %}
+          {% block content %}
+            <div id="body_main">
+            {% block content_main %}
             {% endblock %}
-			</div>
-		  {% endblock %}
-		</div>
-	  </div>
+            </div>
+          {% endblock %}
+        </div>
+      </div>
 </div>
 
   <div id="footer">{% block footer %}
@@ -169,8 +119,8 @@
     enhydris.mapMode = 1;
     {{ map_js | safe }}
     $(document).ready(function() {
-		$("#search_input").placeholder();
-	});
+        $("#search_input").placeholder();
+    });
   </script>
   <script type="text/javascript" src="{{ STATIC_URL}}js/hcore.js"></script>
 {% endblock %}
