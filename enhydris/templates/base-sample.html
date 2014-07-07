@@ -33,14 +33,19 @@
 
     <ul id="menu2">
         {% if user.is_authenticated %}
-            <li id="userinfo">
-            {% with user.username as user_username %}
-                        {% trans "Welcome" %}&nbsp;<a href='{% url "profiles_profile_detail" user_username %}'>{{ user_username }}</a>!&nbsp;
-            {% endwith %}
-            </li>
+           {% if perms.hcore.add_station %}
+             <li>
+               <a href="{% url "station_add" %}">{% trans "New&nbsp;station" %}</a>
+             </li>
+           {% endif %}
+           {% with user.username as user_username %}
+             <li>
+             <a href='{% url "profiles_profile_detail" user_username %}'>{% trans "Settings" %}</a>
+             </li>
 
-            <li><a href='{% url "auth_logout" %}?next={{ request.path }}'>Logout</a> 
-            </li> 
+             <li><a href='{% url "auth_logout" %}?next={{ request.path }}'>Logout&nbsp;{{ user_username }}</a>
+             </li> 
+           {% endwith %}
         {% else %}
             <li><a class="loginform" href='{% url "auth_login" %}?next={{request.path}}'>{% trans "Login" %}</a></li> 
 

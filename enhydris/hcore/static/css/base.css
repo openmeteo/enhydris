@@ -61,26 +61,12 @@ div#header div#navmenu {
 #menu2 a { color: white; text-decoration: none; } 
 #menu2 > li { float: left; margin-left: 15px; }
 #menu2 > li a:hover {color:#B0D730; text-decoration: none; } 
-#menu2 #userinfo { background-color: #9fc54e; cursor: auto;  color: #000; }  
 
 .searchContainer input[type="text"] {border:none; } 
 .searchContainer img { vertical-align:middle;}
 
-/*
-#menu .last { background:transparent none repeat scroll 0% 0%; margin:0px; padding:0px; 
-    border:none; position:relative; border:none; height:0px;} 
-#menu .middle { position:absolute; left:18px; height: 20px; width: 115px; top:0px;}
-*/
-
-/* language selector */
-#language_select { 
-	padding:0;
-	margin:0;
-}
-
 
 /* Content */
-
 
 div#body {
   clear: both;

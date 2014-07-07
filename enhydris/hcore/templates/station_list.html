@@ -102,14 +102,6 @@
                {% trans 'Station Catalogue' %}
            </h3>
 			
-           {% if perms.hcore.add_station %}
-           <p class="anchor_override" style="cursor:pointer;text-align:left">
-                   <a href="{% url "station_add" %}">
-                       <img src="{{STATIC_URL}}admin/img/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
-                       {% trans "Add a new station " %}
-                   </a>
-           </p>
-           {% endif %}
          </div>
          <button type="button" onclick="GetRectAreaResults();">{% trans 'Filter results by map viewport' %}</button>
         </div>
