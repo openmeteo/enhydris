@@ -8,11 +8,11 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   {% block js-globals %}{% endblock %}
   {% block basecss %}
-  <link media="screen" href="{{ STATIC_URL }}css/base.css" type="text/css" rel="stylesheet" />
   <link media="screen" href="{{ STATIC_URL }}css/tablesorter.css" type="text/css" rel="stylesheet" />
   <link type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/css/base/jquery.ui.all.min.css" rel="stylesheet" />
   <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
   <link media="screen" href="{{ STATIC_URL }}css/olmap.css" type="text/css" rel="stylesheet" />
+  <link media="screen" href="{{ STATIC_URL }}css/base.css" type="text/css" rel="stylesheet" />
   {% endblock %}
   {% block shortcut_icon %}{% endblock %}
   {% block extracss %}{% endblock %}
@@ -29,7 +29,32 @@
           <input type="hidden" name="check" value="search" />
         </form>
       </li> 
+      <li><a href='#' onclick='enhydris.toggleSearchTips();'>Search&nbsp;tips</a></li>
     </ul>
+    <div id="searchtips" title="Search tips" style="display: none;">
+      {% blocktrans %}
+        <h3>Simple search</h3>
+        <p>Stations having "diamond" and "emerald" in
+        their name or remarks (or various other fields):</p>
+        <p class="code">diamond emerald</p>
+        <h3>Advanced search</h3>
+        <p>Meteorological stations owned by George Michael or Boy
+        George or any George:</p>
+        <p class="code">owner:george type:meteorological</p>
+        <hr>
+        <p>Stations measuring temperature in Celduin:</p>
+        <p class="code">variable:temperature water_basin:celduin</p>
+        <hr>
+        <p>German stations that have time series:</p>
+        <p class="code">country:germany ts_only:</p>
+        <hr>
+        <p>Stations that have at least one time series that
+        has values in 1988, at least one time series that has values
+        in 1989, and at least one time series that has values in
+        2004:</p>
+        <p class="code">ts_has_years:1988,1989,2004</p>
+        {% endblocktrans %}
+    </div>
 
     <ul id="menu2">
         {% if user.is_authenticated %}
@@ -107,6 +132,7 @@
     {{ map_js | safe }}
     $(document).ready(function() {
         $("#search_input").placeholder();
+        $("#searchtips").dialog({autoOpen: false});
     });
   </script>
   <script type="text/javascript" src="{{ STATIC_URL}}js/hcore.js"></script>

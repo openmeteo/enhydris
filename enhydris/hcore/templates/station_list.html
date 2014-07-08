@@ -71,35 +71,6 @@
                 <div id="map" style="float: left;">
                 <div id="processing_indicator" style="position: absolute; margin-top:212px; margin-left: 272px; z-index: 5000;"></div></div>
            </div>
-        <div style="float: left;">
-             <div>
-                  <h3>{% trans 'Searching' %}</h3>
-					<div class="searchform">
-					  <form action="{% url "station_list" %}" method="get">
-						<p><label>{% trans "Find Stations by name, description, etc." %}</label></p>
-						<div><input type="hidden" name="check" value="search" /></div>
-						<div><input type="text" name="q" size="40" value="{{ query|escape }}" />
-						<input class="i16 magnifier long" type="submit" value="{% trans "Search" %}"<br /></div>
-					  </form>
-					</div>
- 
-                    {% if query %}
-                    <div class="ui-widget">
-                        <div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;"> 
-                            <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em; color:#4C0D8C;"></span>
-                            {% trans "Search results obtained" %} ::
-                            <a href="{% url "station_list" %}">{% trans " Back to all stations" %}</a> ::
-                        </div>
-                    </div>
-                    {% endif %}
-             </div>
-
-
-           <h3 style="font-size:14pt;font-weight:200;">
-               {% trans 'Station Catalogue' %}
-           </h3>
-			
-         </div>
          <button type="button" onclick="GetRectAreaResults();">{% trans 'Filter results by map viewport' %}</button>
         </div>
             {% if station_list %}

@@ -391,6 +391,8 @@ class StationListBaseView(ListView):
                 SELECT g.id FROM hcore_gentity g, mytable
                 WHERE g.id=mytable.garea_ptr_id))
                                      '''.format(value, value)])
+    filter_by_country = filter_by_political_division  # synonym
+
 
     def get_context_data(self, **kwargs):
         context = super(StationListBaseView, self).get_context_data(**kwargs)

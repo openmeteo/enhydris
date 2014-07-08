@@ -65,6 +65,33 @@ div#header div#navmenu {
 .searchContainer input[type="text"] {border:none; } 
 .searchContainer img { vertical-align:middle;}
 
+/* Search tips */
+
+.ui-dialog {
+    z-index: 2000 !important;
+}
+#searchtips h3 {
+    font-size: 100%;
+    margin-bottom: 0;
+}
+#searchtips p {
+    font-size: 90%;
+    line-height: 1.2em;
+    margin-top: 0.75em;
+    margin-bottom: 0.75em;
+}
+#searchtips p.code {
+    font-family: monospace;
+    font-size: 110%;
+    line-height: 1.2em;
+    border: solid #ddd 1px;
+    background-color: #eee;
+}
+#searchtips hr {
+    background-color: #bbd;
+    width: 80%;
+    border: none;
+}
 
 /* Content */
 
