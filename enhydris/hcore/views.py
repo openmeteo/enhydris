@@ -223,11 +223,6 @@ class StationListBaseView(ListView):
         if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
             result = result.filter(**settings.ENHYDRIS_SITE_STATION_FILTER)
 
-        # Only stations with timeseries?
-        if self.request.GET.get("ts_only", False):
-            result = result.annotate(tsnum=Count('timeseries')
-                                     ).exclude(tsnum=0)
-
         # If kml, only stations with location
         if self.template_name.endswith('.kml'):
             result = result.filter(point__isnull=False)
@@ -360,6 +355,9 @@ class StationListBaseView(ListView):
         except ValueError:
             raise Http404  # FIXME: Return empty result plus error message
         return queryset.filter(pk=gentity_id)
+
+    def filter_by_ts_only(self, queryset, value):
+        return queryset.annotate(tsnum=Count('timeseries')).exclude(tsnum=0)
 
     def filter_by_ts_has_years(self, queryset, value):
         try:

@@ -35,6 +35,8 @@ def create_test_data():
         name="We're rich and we fancy it SA")
     organization2 = Organization.objects.create(
         name="We're poor and dislike it Ltd")
+    organization3 = Organization.objects.create(
+        name="We get all your money and enjoy it plc")
 
     water_division1 = WaterDivision.objects.create(
         name="North Syldavia Basins")
@@ -74,6 +76,7 @@ def create_test_data():
 
     stype1 = StationType.objects.create(descr="Important")
     stype2 = StationType.objects.create(descr="Unimportant")
+    stype3 = StationType.objects.create(descr="Even less significant")
 
     filetype1 = FileType.objects.create(mime_type='image.jpeg')
 
@@ -142,6 +145,18 @@ def create_test_data():
         political_division=pd_cardolan)
     station3.stype = [stype2]
     station3.save()
+
+    # Station 4 has no time series
+    station4 = Station.objects.create(
+        name='Lefkada',
+        approximate=False,
+        is_active=False,
+        is_automatic=False,
+        copyright_holder='Alice Brown',
+        copyright_years='2014',
+        owner=organization3)
+    station4.stype = [stype3]
+    station4.save()
 
     timeseries1 = Timeseries.objects.create(
         unit_of_measurement=unit_of_measurement1,
@@ -281,6 +296,12 @@ class SearchTestCase(TestCase):
 
         queryset = self.get_queryset(urlencode({'gentityId': '98765'}))
         self.assertEquals(queryset.count(), 0)
+
+    def test_search_by_ts_only(self):
+        queryset = self.get_queryset('')
+        self.assertEquals(queryset.count(), 4)
+        queryset = self.get_queryset(urlencode({'q': 'ts_only:'}))
+        self.assertEquals(queryset.count(), 3)
 
     def test_search_by_political_division(self):
         queryset = self.get_queryset(
