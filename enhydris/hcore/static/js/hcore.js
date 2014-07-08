@@ -195,6 +195,27 @@ enhydris.map_module = (function namespace() {
         return newLayer;
     };
 
+    // getRectAreaResults (exported function)
+
+    var getRectAreaResults = function () {
+        var bbox = enhydris.map.getExtent().transform(
+                new OpenLayers.Projection("EPSG:900913"),
+                new OpenLayers.Projection("EPSG:4326")).toBBOX(7);
+        var query_params = Arg.all();
+        query_params.bbox = bbox;
+        var query_string = '';
+        for (var param in query_params) {
+            if (param == '') {
+                continue;
+            }
+            if (query_string) {
+                query_string += '&';
+            }
+            query_string += param + '=' + query_params[param];
+        }
+        window.location = window.location.pathname + '?' + query_string;
+    }
+
     // Init
 
     var init = function () {
@@ -239,6 +260,7 @@ enhydris.map_module = (function namespace() {
     };
 
     return {
-        init: init
+        init: init,
+        getRectAreaResults: getRectAreaResults
     };
 }());

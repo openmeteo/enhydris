@@ -16,62 +16,17 @@
     </style>
 {% endblock %}
 
-{% block extrajs %}
-    {{ block.super }}
-    <script type="text/javascript">
-    $(document).ready(function() {
-	  // Reset Font Size
-	  var originalFontSize = $('.data_table').css('font-size');
-		$(".resetFont").click(function(){
-		$('.data_table').css('font-size', originalFontSize);
-	  });
-	  // Increase Font Size
-	  $(".increaseFont").click(function(){
-		var currentFontSize = $('.data_table').css('font-size');
-		var currentFontSizeNum = parseFloat(currentFontSize, 10);
-		var newFontSize = currentFontSizeNum + 0.5;
-		$('.data_table').css('font-size', newFontSize);
-		return false;
-	  });
-	  // Decrease Font Size
-	  $(".decreaseFont").click(function(){
-		var currentFontSize = $('.data_table').css('font-size');
-		var currentFontSizeNum = parseFloat(currentFontSize, 10);
-		var newFontSize = currentFontSizeNum - 0.5;
-		$('.data_table').css('font-size', newFontSize);
-		return false;
-	  });
-
-    });
-
-    function GetRectAreaResults(){
-        var aurl=window.location.pathname;
-        var urlparams = Arg.all();
-        urlparams['bbox'] = enhydris.map.getExtent().transform(new
-        OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326")).toBBOX(7);
-        var aarray = [];
-        var i = 0;
-        for(param in urlparams){
-            if(param=='page')
-                continue;
-            aarray[i] = param+"="+urlparams[param];
-            i++;
-        }
-        window.location=encodeURI(aurl+'?'+aarray.join('&'));
-    }
-    </script>
-{% endblock %}
-
 {% block content %}
     {% autosort station_list %}
     
         <div id="tabs-1" >
         <div>
            <div style="float: right;">
-                <div id="map" style="float: left;">
-                <div id="processing_indicator" style="position: absolute; margin-top:212px; margin-left: 272px; z-index: 5000;"></div></div>
+             <div id="map">
+                 <div id="processing_indicator" style="position: absolute; margin-top:212px; margin-left: 272px; z-index: 5000;"></div>
+             </div>
+             <p style='text-align: center'><a href="#" onclick="enhydris.map_module.getRectAreaResults();">{% trans 'List stations visible on map' %}</a></p>
            </div>
-         <button type="button" onclick="GetRectAreaResults();">{% trans 'Filter results by map viewport' %}</button>
         </div>
             {% if station_list %}
               {% render_table table %}
