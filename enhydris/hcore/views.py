@@ -465,10 +465,10 @@ class StationListView(tables.SingleTableMixin, StationListBaseView):
     def get_context_data(self, **kwargs):
         context = super(StationListView, self).get_context_data(**kwargs)
 
-        # The following is a hack because enhydris.sorting (aka
-        # django-sorting) sucks. I18N should be in the template, not
-        # here (but anyway the whole list needs revising, manual
-        # selecting of visible columns, reordering of columns, etc.)
+        # The following is a hack because django-sorting sucks. I18N
+        # should be in the template, not here (but anyway the whole
+        # list needs revising, manual selecting of visible columns,
+        # reordering of columns, etc.)
         context.update(self.column_headings)
 
         return context

@@ -13,7 +13,7 @@ INSTALLED_APPS = (
 
     'rest_framework',
     'south',
-    'enhydris.sorting',
+    'django_sorting',
     'registration',
     'profiles',
     'ajax_select',
@@ -22,7 +22,6 @@ INSTALLED_APPS = (
 
     'enhydris.dbsync',
     'enhydris.hcore',
-    'enhydris.hprocessor',
     'enhydris.api',
     'enhydris.permissions',
 )
@@ -36,7 +35,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.gzip.GZipMiddleware',
     'django_notify.middleware.NotificationsMiddleware',
-    'enhydris.sorting.middleware.SortingMiddleware',
+    'django_sorting.middleware.SortingMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 )
