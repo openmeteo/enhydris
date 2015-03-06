@@ -64,3 +64,8 @@ LOGIN_REDIRECT_URL = '/'
 # Options for django-registration
 ACCOUNT_ACTIVATION_DAYS = 7
 REGISTRATION_OPEN = True
+
+# Options for django-ajax-selects
+AJAX_LOOKUP_CHANNELS = {
+    'maintainers': dict(model='auth.User', search_field='username'),
+}

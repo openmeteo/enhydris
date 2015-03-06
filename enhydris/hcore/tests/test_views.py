@@ -5,6 +5,7 @@ from tempfile import TemporaryFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group, Permission
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.geos import fromstr
 from django.db import connection as dj_connection
 from django.test import TestCase
@@ -605,3 +606,26 @@ class RegisterTestCase(TestCase):
     def test_register_link_present(self):
         response = self.client.get('/')
         self.assertContains(response, 'Register')
+
+class StationTestCase(TestCase):
+
+    def setUp(self):
+        self.auser = User.objects.create_user(
+            username='auser', email='irrelevant@example.com',
+            password='topsecret')
+        self.auser.save()
+        self.auser.user_permissions.add(
+            Permission.objects.get(codename='add_station'))
+
+    def tearDown(self):
+        self.auser.delete()
+
+    @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+    def test_add_station(self):
+        """
+        Test that the add station form appears properly.
+        """
+        r = self.client.login(username='auser', password='topsecret')
+        self.assertTrue(r)
+        response = self.client.get('/stations/add/')
+        self.assertEqual(response.status_code, 200)
