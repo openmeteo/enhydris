@@ -1,14 +1,5 @@
 /* global enhydris, OpenLayers, Arg, document */
 
-enhydris.toggleSearchTips = function () {
-    var searchtipsdiv = $("#searchtips");
-    if (searchtipsdiv.dialog("isOpen")) {
-        searchtipsdiv.dialog("close");
-    } else {
-        searchtipsdiv.dialog("open");
-    }
-}
-
 enhydris.map_module = (function namespace() {
     'use strict';
     var map;

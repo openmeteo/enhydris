@@ -22,6 +22,7 @@ installation_requirements = [
     "gdal>=1.6",
     "django-tables2>=0.14",
     "django-sorting=={}".format(_django_sorting_version),
+    "django-bootstrap3>=5.1,<5.2",
 ]
 
 _django_profiles_url = \

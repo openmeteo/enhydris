@@ -1,122 +1,176 @@
 {% load i18n %}
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+{% load bootstrap3 %}
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <title>{% block title %}{% trans "Enhydris" %}{% endblock %}</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-  {% block js-globals %}{% endblock %}
-  {% block basecss %}
-  <link media="screen" href="{{ STATIC_URL }}css/tablesorter.css" type="text/css" rel="stylesheet" />
-  <link type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/css/base/jquery.ui.all.min.css" rel="stylesheet" />
-  <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
-  <link media="screen" href="{{ STATIC_URL }}css/olmap.css" type="text/css" rel="stylesheet" />
-  <link media="screen" href="{{ STATIC_URL }}css/base.css" type="text/css" rel="stylesheet" />
-  {% endblock %}
-  {% block shortcut_icon %}{% endblock %}
-  {% block extracss %}{% endblock %}
-  {% block extra_head %}{% endblock %}
+    <title>{% block title %}{% trans "Enhydris" %}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% block js-globals %}{% endblock %}
+    {% block basecss %}
+        <link media="screen" href="{{ STATIC_URL }}css/tablesorter.css" type="text/css" rel="stylesheet" />
+        <link type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/css/base/jquery.ui.all.min.css" rel="stylesheet" />
+        <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
+        <link media="screen" href="{{ STATIC_URL }}css/olmap.css" type="text/css" rel="stylesheet" />
+        <link media="screen" href="{{ STATIC_URL }}css/base.css" type="text/css" rel="stylesheet" />
+        {% bootstrap_css %}
+    {% endblock %}
+    {% block shortcut_icon %}{% endblock %}
+    {% block extracss %}{% endblock %}
+    {% block extra_head %}{% endblock %}
 </head>
 <body onload="enhydris.map = enhydris.map_module.init()">
-<div id="wrapper">
-  <div id="header">
-    <ul id="menu"> 
-      <li><a href='{% url "station_list" %}'>{% trans "Stations" %}</a></li>
-      <li class="searchContainer"> 
-        <form id="global-search-form" class="col-6 last" action='{% url "station_list" %}' method="get">
-          <input class="small" id="search_input" type="text" placeholder="search stations" name="q" value="{{ query|escape }}" />
-          <input type="hidden" name="check" value="search" />
-        </form>
-      </li> 
-      <li><a href='#' onclick='enhydris.toggleSearchTips();'>Search&nbsp;tips</a></li>
-    </ul>
-    <div id="searchtips" title="Search tips" style="display: none;">
-      {% blocktrans %}
-        <h3>Simple search</h3>
-        <p>Stations having "diamond" and "emerald" in
-        their name or remarks (or various other fields):</p>
-        <p class="code">diamond emerald</p>
-        <h3>Advanced search</h3>
-        <p>Meteorological stations owned by George Michael or Boy
-        George or any George:</p>
-        <p class="code">owner:george type:meteorological</p>
-        <hr>
-        <p>Stations measuring temperature in Celduin:</p>
-        <p class="code">variable:temperature water_basin:celduin</p>
-        <hr>
-        <p>German stations that have time series:</p>
-        <p class="code">country:germany ts_only:</p>
-        <hr>
-        <p>Stations that have at least one time series that
-        has values in 1988, at least one time series that has values
-        in 1989, and at least one time series that has values in
-        2004:</p>
-        <p class="code">ts_has_years:1988,1989,2004</p>
-        {% endblocktrans %}
-    </div>
+  <div id="container">
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed"
+              data-toggle="collapse" data-target="#navbarlinks">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">{% trans "Stations" %}</a>
+        </div>
 
-    <ul id="menu2">
-        {% if user.is_authenticated %}
-           {% if perms.hcore.add_station %}
-             <li>
-               <a href="{% url "station_add" %}">{% trans "New&nbsp;station" %}</a>
-             </li>
-           {% endif %}
-           {% with user.username as user_username %}
-             <li>
-             <a href='{% url "profiles_profile_detail" user_username %}'>{% trans "Settings" %}</a>
-             </li>
-
-             <li><a href='{% url "auth_logout" %}?next={{ request.path }}'>Logout&nbsp;{{ user_username }}</a>
-             </li> 
-           {% endwith %}
-        {% else %}
-            <li><a class="loginform" href='{% url "auth_login" %}?next={{request.path}}'>{% trans "Login" %}</a></li> 
-
-                        {% if REGISTRATION_OPEN %}
-            <li><a href='{% url "registration_register" %}'>{% trans "Register" %}</a></li> 
-                        {% endif %}
-        {% endif %}
-    </ul>
-  </div>
-
-        <div id="content">
-        <div id="body">
-        {% if notifications %}
-        <ul class="notifications">
-                {% for message in notifications %}
-                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                {% endfor %}
-        </ul>
-        {% endif %}
-              {% block messages %}
-                {% if messages %}
-                    <div class="messages">
-                    {% for message in messages %}
-                        <span class="i16 tip message" style="font-size:0.8em">{{ message }}</span> 
-                    {% endfor %}
-                    </div>
-                {% endif %}
-              {% endblock %}
-          {% block content %}
-            <div id="body_main">
-            {% block content_main %}
-            {% endblock %}
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="navbarlinks">
+          <form id="global-search-form" class="navbar-form navbar-left" role="search"
+              action='{% url "station_list" %}' method="get">
+            <div class="form-group">
+              <input id="search_input" type="text" name="q"
+                value="{{ query|escape }}" class="form-control"
+                placeholder="{% trans 'Search stations' %}">
+              <input type="hidden" name="check" value="search" />
             </div>
-          {% endblock %}
+          </form>
+          <ul class="nav navbar-nav">
+            <li><a href="#searchtips"
+                data-toggle="modal">{% trans "Search tips" %}</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            {% if user.is_authenticated %}
+              {% if perms.hcore.add_station %}
+                <li>
+                  <a href="{% url "station_add" %}"
+                    >{% trans "New&nbsp;station" %}</a>
+                </li>
+              {% endif %}
+              {% with user.username as user_username %}
+                <li>
+                  <a href='{% url "profiles_profile_detail" user_username %}'
+                    >{% trans "Settings" %}</a>
+                </li>
+                <li><a href='{% url "auth_logout" %}?next={{ request.path }}'
+                    >Logout&nbsp;{{ user_username }}</a>
+                </li>
+              {% endwith %}
+            {% else %}
+              <li><a class="loginform"
+                  href='{% url "auth_login" %}?next={{request.path}}'
+                  >{% trans "Login" %}</a>
+              </li>
+              {% if REGISTRATION_OPEN %}
+              <li><a href='{% url "registration_register" %}'
+                  >{% trans "Register" %}</a>
+              </li>
+              {% endif %}
+            {% endif %}
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+
+    <div id="searchtips" class="modal fade" tabindex="-1" role="dialog"
+        aria-hidden="true" aria-labelledby="SearchTips">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">{% trans "Search tips" %}
+            <button type="button" class="close" data-target="#searchtips"
+                data-toggle="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <!-- List group -->
+            <ul class="list-group">
+              {% blocktrans %}
+                <li class="list-group-item">
+                  Stations having "diamond" and "emerald" in
+                  their name or remarks (or various other fields):
+                  <code>diamond&nbsp;emerald</code>
+                </li>
+                <li class="list-group-item">
+                  Meteorological stations owned by George Michael or Boy
+                  George or any George:
+                  <code>owner:george&nbsp;type:meteorological</code>
+                </li>
+                <li class="list-group-item">
+                  Stations measuring temperature in Celduin:
+                  <code>variable:temperature&nbsp;water_basin:celduin</code>
+                </li>
+                <li class="list-group-item">
+                  German stations that have time series:
+                  <code>country:germany&nbsp;ts_only:</code>
+                </li>
+                <li class="list-group-item">
+                  Stations that have at least one time series that
+                  has values in 1988, at least one time series that has values
+                  in 1989, and at least one time series that has values in
+                  2004:
+                  <code>ts_has_years:1988,1989,2004</code>
+                </li>
+              {% endblocktrans %}
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <a href="#" class="btn" data-dismiss="modal">Close</a>
+          </div>
         </div>
       </div>
-</div>
+    </div>
 
-  <div id="footer">{% block footer %}
+    <div id="content">
+      <div id="body">
+        {% if notifications %}
+          <ul class="notifications">
+            {% for message in notifications %}
+              <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% block messages %}
+          {% if messages %}
+            <div class="messages">
+              {% for message in messages %}
+                <span class="i16 tip message" style="font-size:0.8em">{{ message }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endblock %}
+        {% block content %}
+          <div id="body_main">
+            {% block content_main %}
+            {% endblock %}
+          </div>
+        {% endblock %}
+      </div>
+    </div>
+
+  <footer>
+    {% block footer %}
       {% block footerlinks %}{% endblock %}
-    {% block powered %}{% endblock %}
-    {% block extrafooter %}{% endblock %}
-  {% endblock %}</div>
+      {% block powered %}{% endblock %}
+      {% block extrafooter %}{% endblock %}
+    {% endblock %}
+  </footer>
 {% block bodyend %}{% endblock %}
+  </div>
+
 {% block basejs %}
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  {% bootstrap_javascript %}
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.10.8/jquery.tablesorter.min.js"></script>
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/openlayers/2.12/OpenLayers.min.js"></script>
@@ -130,10 +184,6 @@
     enhydris.boundingBoxUrl = '{% url "bounding_box" %}';
     enhydris.mapMode = 1;
     {{ map_js | safe }}
-    $(document).ready(function() {
-        $("#search_input").placeholder();
-        $("#searchtips").dialog({autoOpen: false});
-    });
   </script>
   <script type="text/javascript" src="{{ STATIC_URL}}js/hcore.js"></script>
 {% endblock %}

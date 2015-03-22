@@ -19,6 +19,7 @@ INSTALLED_APPS = (
     'ajax_select',
     'captcha',
     'django_tables2',
+    'bootstrap3',
 
     'enhydris.dbsync',
     'enhydris.hcore',
