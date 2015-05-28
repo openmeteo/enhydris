@@ -1,3 +1,8 @@
+0.2.2
+=====
+
+- Fixed password reset, which was not working on Django 1.6.
+
 0.2.1
 =====
 
