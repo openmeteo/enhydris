@@ -1,6 +1,6 @@
 psycopg2>=2.2,<3
 Django>=1.5,<1.7
-django-registration>=1.0,<2
+django-registration-redux>=1.1,<2
 -e hg+https://bitbucket.org/richert/django-profiles@d69e342#egg=django-profiles
 djangorestframework>=2.3,<3
 South>=0.8
