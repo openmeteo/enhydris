@@ -59,7 +59,7 @@
               {% endif %}
               {% with user.username as user_username %}
                 <li>
-                  <a href='{% url "profiles_profile_detail" user_username %}'
+                  <a href='{% url "current_user_profile" %}'
                     >{% trans "Settings" %}</a>
                 </li>
                 <li><a href='{% url "auth_logout" %}?next={{ request.path }}'

@@ -24,38 +24,40 @@
     </ul>
 
     <div id="tabs-1">
-        <h3>{% trans "User profile for" %} {{ profile.user }}: </h3>
+        <h3>{% trans "User profile for" %} {{ object }}: </h3>
         <table> 
             <tr>
                 <th align="left">{% trans "Username" %}</th>
-                <td>{{profile.user}} </td>
+                <td>{{object.user}} </td>
             </tr>
 
             <tr>
                 <th align="left">{% trans "Name" %}</th>
-                <td>{{profile.full_name}} </td>
+                <td>{{object.full_name}} </td>
             </tr>
 
+            {% if object.email_is_public %}
             <tr>
                 <th align="left">{% trans "Email" %}</th>
-                <td>{{profile.email}} </td>
+                <td>{{object.email}} </td>
             </tr>
+            {% endif %}
                
             <tr>
                 <th align="left">{% trans "Address" %}</th>
-                <td>{{profile.address}} </td>
+                <td>{{object.address}} </td>
             </tr>
 
             <tr>
                 <th align="left">{% trans "Organization" %}</th>
-                <td>{{profile.organization}} </td>
+                <td>{{object.organization}} </td>
             </tr>
         </table>
         <br>
         <h3>Profile Management:</h3>
         <div class="anchor_override">
             <img src="{{STATIC_URL}}images/icons/user_edit.png" />
-            <a href="{% url "profiles_edit_profile" %}">{% trans "Edit your user profile" %}</a></div>
+            <a href="{% url "profile_edit" %}">{% trans "Edit your user profile" %}</a></div>
         <div class="anchor_override">
         
             <img src="{{STATIC_URL}}images/icons/key.png" />

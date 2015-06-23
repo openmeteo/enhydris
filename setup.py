@@ -9,8 +9,7 @@ _django_sorting_version = '0.2b1'
 installation_requirements = [
     "psycopg2>=2.2,<3",
     "Django>=1.5,<1.7",
-    "django-registration>=1.0,<2",
-    "django-profiles=={}".format(_django_profiles_version),
+    "django-registration-redux>=1.0,<2",
     "djangorestframework>=2.3,<3",
     "South>=0.8",
     "django-notify>=1.1,<2",
@@ -25,9 +24,6 @@ installation_requirements = [
     "django-bootstrap3>=5.1,<5.2",
 ]
 
-_django_profiles_url = \
-    "https://bitbucket.org/aptiko/django-profiles" \
-    "/get/{0}.tar.gz#egg=django-profiles-{0}".format(_django_profiles_version)
 _django_sorting_url = \
     "https://github.com/aptiko/django-sorting/archive" \
     "/{0}.tar.gz#egg=django-sorting-{0}".format(_django_sorting_version)

@@ -4,9 +4,9 @@ from django.contrib.auth.views import password_reset, password_reset_done
 from django.conf import settings
 
 from registration.backends.default.views import RegistrationView
-import profiles
 
 from enhydris.hcore.forms import RegistrationForm
+from enhydris.hcore.views import ProfileDetailView, ProfileEditView
 
 admin.autodiscover()
 
@@ -20,7 +20,14 @@ urlpatterns = patterns(
      {'template_name': 'registration/password_reset_done.html'},
      'password_reset_done'),
     (r'^accounts/', include('registration.backends.default.urls')),
-    (r'^profile/', include('profiles.urls')),
+
+    url(r'^profile/$', ProfileDetailView.as_view(),
+        name='current_user_profile'),
+    url(r'^profile/edit/$',
+        ProfileEditView.as_view(),
+        name='profile_edit'),
+    url(r'^profile/(?P<slug>[^/]+)/$', ProfileDetailView.as_view(),
+        name='profile_detail'),
 
     (r'^i18n/', include('django.conf.urls.i18n')),
     # Uncomment the next line to enable the admin:

@@ -26,8 +26,9 @@ from django.http import (Http404, HttpResponse, HttpResponseForbidden,
                          HttpResponseRedirect)
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
-from django.views.generic import CreateView, DetailView, ListView
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from django.utils.decorators import method_decorator
+from django.utils.functional import lazy
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
@@ -39,7 +40,8 @@ from pthelma.timeseries import (add_months_to_datetime, datetime_from_iso,
 from enhydris.conf import settings
 from enhydris.hcore.models import (
     GentityAltCode, GentityEvent, GentityFile, GentityGenericData, Instrument,
-    Overseer, PoliticalDivision, ReadTimeStep, Station, Timeseries)
+    Overseer, PoliticalDivision, ReadTimeStep, Station, Timeseries,
+    UserProfile)
 from enhydris.hcore.decorators import (gentityfile_permission,
                                        timeseries_permission)
 from enhydris.hcore.forms import (
@@ -47,6 +49,34 @@ from enhydris.hcore.forms import (
     GentityGenericDataForm, InstrumentForm, OverseerForm, StationForm,
     TimeseriesForm, TimeseriesDataForm, TimeStepForm)
 from enhydris.hcore.tstmpupd import update_ts_temp_file
+
+
+class ProfileDetailView(DetailView):
+    model = UserProfile
+    template_name = 'profile_detail.html'
+    slug_field = 'user__username'
+
+    def get_object(self, queryset=None):
+        if self.kwargs.get('slug', None):
+            return super(ProfileDetailView, self).get_object(queryset)
+        if not self.request.user.is_authenticated():
+            return None
+        if queryset is None:
+            queryset = self.get_queryset()
+        return queryset.get(user=self.request.user)
+
+
+class ProfileEditView(UpdateView):
+    model = UserProfile
+    template_name = 'profile_edit.html'
+    success_url = lazy(reverse, str)('current_user_profile')
+
+    def get_object(self, queryset=None):
+        if not self.request.user.is_authenticated():
+            return None
+        if queryset is None:
+            queryset = self.get_queryset()
+        return queryset.get(user=self.request.user)
 
 
 def login(request, *args, **kwargs):
@@ -392,7 +422,6 @@ class StationListBaseView(ListView):
                 WHERE g.id=mytable.garea_ptr_id))
                                      '''.format(value, value)])
     filter_by_country = filter_by_political_division  # synonym
-
 
     def get_context_data(self, **kwargs):
         context = super(StationListBaseView, self).get_context_data(**kwargs)
