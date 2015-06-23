@@ -13,7 +13,7 @@ admin.autodiscover()
 urlpatterns = patterns(
     '',
 
-    # Django-registration and django-profiles
+    # Registration and profiles
     (r'^accounts/password/reset/$', password_reset,
      {'template_name': 'registration/password_reset.html'}, 'password_reset'),
     (r'^accounts/password/reset/done/$', password_reset_done,

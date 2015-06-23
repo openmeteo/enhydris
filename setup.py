@@ -3,7 +3,6 @@
 from setuptools import setup, find_packages
 
 
-_django_profiles_version = '0.3b1'
 _django_sorting_version = '0.2b1'
 
 installation_requirements = [
@@ -39,7 +38,7 @@ kwargs = {
     'author_email': "anthony@itia.ntua.gr",
     'packages': find_packages(),
     'install_requires': installation_requirements,
-    'dependency_links': [_django_profiles_url, _django_sorting_url],
+    'dependency_links': [_django_sorting_url],
     'test_suite': 'runtests.runtests',
 }
 
