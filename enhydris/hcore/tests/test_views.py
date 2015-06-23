@@ -6,7 +6,6 @@ from urllib import urlencode
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group, Permission
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.geos import fromstr
 from django.db import connection as dj_connection
 from django.http import HttpRequest, QueryDict
@@ -43,8 +42,10 @@ def create_test_data():
         name="North Syldavia Basins")
     water_division2 = WaterDivision.objects.create(
         name="South Syldavia Basins")
-    water_division3 = WaterDivision.objects.create(name="East Syldavia Basins")
-    water_division4 = WaterDivision.objects.create(name="West Syldavia Basins")
+    # water_division3
+    WaterDivision.objects.create(name="East Syldavia Basins")
+    # water_division4
+    WaterDivision.objects.create(name="West Syldavia Basins")
 
     water_basin1 = WaterBasin.objects.create(name="Arachthos")
     water_basin2 = WaterBasin.objects.create(name="Pinios")
@@ -63,23 +64,29 @@ def create_test_data():
     pd_greece = pd.objects.create(name="Greece")
     pd_epirus = pd.objects.create(name="Epirus", parent=pd_greece)
     pd_thessaly = pd.objects.create(name="Thessaly", parent=pd_greece)
-    pd_preveza = pd.objects.create(name="Preveza", parent=pd_epirus)
+    # pd_preveza
+    pd.objects.create(name="Preveza", parent=pd_epirus)
     pd_arta = pd.objects.create(name="Arta", parent=pd_epirus)
     pd_karditsa = pd.objects.create(name="Karditsa", parent=pd_thessaly)
-    pd_magnisia = pd.objects.create(name="Magnisia", parent=pd_thessaly)
+    # pd_magnisia
+    pd.objects.create(name="Magnisia", parent=pd_thessaly)
     pd_middleearth = pd.objects.create(name="Middle Earth")
     pd_eriador = pd.objects.create(name="Eriador", parent=pd_middleearth)
     pd_gondor = pd.objects.create(name="Gondor", parent=pd_middleearth)
-    pd_arthedain = pd.objects.create(name="Arthedain", parent=pd_eriador)
+    # pd_arthedain
+    pd.objects.create(name="Arthedain", parent=pd_eriador)
     pd_cardolan = pd.objects.create(name="Cardolan", parent=pd_eriador)
-    pd_lamedon = pd.objects.create(name="Lamedon", parent=pd_gondor)
-    pd_lebbenin = pd.objects.create(name="Lamedon", parent=pd_gondor)
+    # pd_lamedon
+    pd.objects.create(name="Lamedon", parent=pd_gondor)
+    # pd_lebbenin
+    pd.objects.create(name="Lamedon", parent=pd_gondor)
 
     stype1 = StationType.objects.create(descr="Important")
     stype2 = StationType.objects.create(descr="Unimportant")
     stype3 = StationType.objects.create(descr="Even less significant")
 
-    filetype1 = FileType.objects.create(mime_type='image.jpeg')
+    # filetype1
+    FileType.objects.create(mime_type='image.jpeg')
 
     variable1 = Variable.objects.create(descr='Rainfall')
     variable2 = Variable.objects.create(descr='Temperature')
@@ -95,15 +102,20 @@ def create_test_data():
 
     timezone1 = TimeZone.objects.create(code='EET', utc_offset=120)
 
-    interval_type1 = IntervalType.objects.create(
+    # interval_type1
+    IntervalType.objects.create(
         descr='Sum', value='SUM', descr_alt='Sum')
-    interval_type2 = IntervalType.objects.create(
+    # interval_type2
+    IntervalType.objects.create(
         descr='Average value', value='AVERAGE', descr_alt='Average value')
-    interval_type3 = IntervalType.objects.create(
+    # interval_type3
+    IntervalType.objects.create(
         descr='Minimum', value='MINIMUM', descr_alt='Minimum')
-    interval_type4 = IntervalType.objects.create(
+    # interval_type4
+    IntervalType.objects.create(
         descr='Maximum', value='MAXIMUM', descr_alt='Maximum')
-    interval_type5 = IntervalType.objects.create(
+    # interval_type5
+    IntervalType.objects.create(
         descr='Vector average', value='VECTOR_AVERAGE',
         descr_alt='Vector average')
 
@@ -159,31 +171,36 @@ def create_test_data():
     station4.stype = [stype3]
     station4.save()
 
-    timeseries1 = Timeseries.objects.create(
+    # timeseries1
+    Timeseries.objects.create(
         unit_of_measurement=unit_of_measurement1,
         gentity=station1,
         time_zone=timezone1,
         variable=variable1,
         name='Rain')
-    timeseries2 = Timeseries.objects.create(
+    # timeseries2
+    Timeseries.objects.create(
         unit_of_measurement=unit_of_measurement2,
         gentity=station1,
         time_zone=timezone1,
         variable=variable2,
         name='Air temperature')
-    timeseries3 = Timeseries.objects.create(
+    # timeseries3
+    Timeseries.objects.create(
         unit_of_measurement=unit_of_measurement1,
         gentity=station2,
         time_zone=timezone1,
         variable=variable1,
         name='Rain')
-    timeseries4 = Timeseries.objects.create(
+    # timeseries4
+    Timeseries.objects.create(
         unit_of_measurement=unit_of_measurement2,
         gentity=station2,
         time_zone=timezone1,
         variable=variable2,
         name='Air temperature')
-    timeseries5 = Timeseries.objects.create(
+    # timeseries5
+    Timeseries.objects.create(
         unit_of_measurement=unit_of_measurement2,
         gentity=station3,
         time_zone=timezone1,
@@ -916,6 +933,7 @@ class RegisterTestCase(TestCase):
     def test_register_link_present(self):
         response = self.client.get('/')
         self.assertContains(response, 'Register')
+
 
 class StationTestCase(TestCase):
 
