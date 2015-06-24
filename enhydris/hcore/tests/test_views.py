@@ -18,7 +18,8 @@ from enhydris.conf import settings
 from enhydris.hcore.models import (
     FileType, GentityFile, Instrument, InstrumentType, IntervalType,
     Organization, PoliticalDivision, Station, StationType, TimeZone,
-    Timeseries, UnitOfMeasurement, Variable, WaterBasin, WaterDivision)
+    Timeseries, UnitOfMeasurement, UserProfile, Variable, WaterBasin,
+    WaterDivision)
 from enhydris.hcore.forms import TimeseriesDataForm
 from enhydris.hcore.views import ALLOWED_TO_EDIT, StationListBaseView
 
@@ -957,3 +958,58 @@ class StationTestCase(TestCase):
         self.assertTrue(r)
         response = self.client.get('/stations/add/')
         self.assertEqual(response.status_code, 200)
+
+
+class ProfileTestCase(TestCase):
+
+    def test_profile(self):
+        # Create a user
+        self.auser = User.objects.create_user(
+            username='auser', email='irrelevant@example.com',
+            password='topsecret')
+        self.auser.save()
+        profile = UserProfile.objects.get(user=self.auser)
+        profile.fname = 'A'
+        profile.lname = 'User'
+        profile.address = 'Nowhere'
+        profile.email_is_public = True
+        profile.save()
+
+        # Create a second user
+        self.buser = User.objects.create_user(
+            username='buser', email='irrelevant_indeed@example.com',
+            password='topsecret')
+        self.buser.save()
+
+        # View the first user's profile
+        response = self.client.get('/profile/auser/')
+        self.assertContains(response, 'irrelevant@example.com')
+
+        # Prepare the post data that we will be attempting to post -
+        # essentially this sets email_is_public to False.
+        post_data = {'user': 1, 'fname': 'A', 'lname': 'User',
+                     'address': 'Nowhere', 'organization': 'UN',
+                     'email_is_public': False}
+
+        # Try to modify first user's profile anonymously - should deny
+        response = self.client.post('/profile/edit/', post_data)
+        self.assertEqual(response.status_code, 200)
+
+        # Try to modify first user's profile as second user - should deny
+        r = self.client.login(username='buser', password='topsecret')
+        self.assertTrue(r)
+        response = self.client.post('/profile/edit/', post_data)
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+
+        # Try to modify first user's profile as first user - should accept.
+        # Also check that email_is_public makes a difference.
+        r = self.client.login(username='auser', password='topsecret')
+        self.assertTrue(r)
+        response = self.client.get('/profile/auser/')
+        self.assertContains(response, 'irrelevant@example.com')
+        response = self.client.post('/profile/edit/', post_data)
+        self.assertEquals(response.status_code, 302)
+        response = self.client.get('/profile/auser/')
+        self.assertNotContains(response, 'irrelevant@example.com')
+        self.client.logout()
