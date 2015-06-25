@@ -14,7 +14,6 @@ INSTALLED_APPS = (
     'rest_framework',
     'south',
     'registration',
-    'profiles',
     'ajax_select',
     'captcha',
     'bootstrap3',

@@ -19,8 +19,6 @@ installation_requirements = [
     "django-bootstrap3>=5.1,<5.2",
 ]
 
-from setuptest import test
-
 kwargs = {
     'name': "enhydris",
     'version': "dev",
