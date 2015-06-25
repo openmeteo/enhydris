@@ -9,7 +9,6 @@ installation_requirements = [
     "django-registration-redux>=1.0,<1.2",
     "djangorestframework>=2.3,<3",
     "South>=0.8",
-    "django-notify>=1.1,<2",
     "django-ajax-selects>=1.3.4,<2",
     "Markdown>=2.1,<3",
     "django-simple-captcha>=0.4",

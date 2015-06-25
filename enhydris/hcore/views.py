@@ -841,6 +841,13 @@ def download_gentityfile(request, gf_id):
         """
         Fetch GentityFile content from remote instance.
         """
+        # FIXME: request.notifications does nothing. In old times the system
+        # was using django-notify module which was doing something similar to
+        # what django.contrib.messages is doing. This was removed at some
+        # point, but the only place in the code where it was used was inside
+        # this "else" clause, and we've rarely, if ever, seen these messages.
+        # The code that has to do with remote instances is badly in need for
+        # overhaul anyway.
         gfile = get_object_or_404(GentityFile, pk=int(gf_id))
 
         # Get the original GentityFile id and the source database
