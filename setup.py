@@ -5,10 +5,9 @@ from setuptools import setup, find_packages
 
 installation_requirements = [
     "psycopg2>=2.2,<3",
-    "Django>=1.5,<1.7",
+    "Django>=1.7,<1.8",
     "django-registration-redux>=1.0,<1.2",
     "djangorestframework>=2.3,<3",
-    "South>=0.8",
     "django-ajax-selects>=1.3.4,<2",
     "Markdown>=2.1,<3",
     "django-simple-captcha>=0.4",

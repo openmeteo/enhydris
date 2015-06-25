@@ -609,8 +609,14 @@ class BlobField(models.Field):
     def db_type(self, connection):
         return 'bytea'
 
-from south.modelsinspector import add_introspection_rules
-add_introspection_rules([], ["^enhydris\.hcore\.models\.BlobField"])
+
+# The following two lines were needed when we were using South. It's not clear
+# to me that Django>=1.7 doesn't need anything like that. If some time goes by
+# and some migrations are made and everything works fine, remove. 2015-06-25
+#
+# from south.modelsinspector import add_introspection_rules
+# add_introspection_rules([], ["^enhydris\.hcore\.models\.BlobField"])
+
 
 class TsRecords(models.Model):
     id = models.ForeignKey(Timeseries, primary_key=True, db_column='id')

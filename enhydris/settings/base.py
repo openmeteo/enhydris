@@ -12,7 +12,6 @@ INSTALLED_APPS = (
     'django.contrib.flatpages',
 
     'rest_framework',
-    'south',
     'registration',
     'ajax_select',
     'captcha',
