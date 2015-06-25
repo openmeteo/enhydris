@@ -1,6 +1,6 @@
 from django.db import connection as db_connection
 from django.contrib.gis.db import models
-from django.contrib.gis.db.backends.postgis import models as gismodels
+from django.contrib.gis.db.backends import postgis
 from django.contrib.auth.models import User, Group
 from django.db.models.signals import post_syncdb, post_save
 from django.db.models import Q
@@ -129,7 +129,7 @@ class Gentity(models.Model):
 
 class Gpoint(Gentity):
     srid = models.IntegerField(null=True, blank=True)
-    approximate = models.BooleanField()
+    approximate = models.BooleanField(default=False)
     altitude = models.FloatField(null=True, blank=True)
     asrid = models.IntegerField(null=True, blank=True)
     f_dependencies = ['Gentity']
@@ -150,7 +150,8 @@ class Gpoint(Gentity):
             return None
     def original_cs_name(self):
         if self.srid:
-            srtext = gismodels.SpatialRefSys.objects.get(srid=self.srid).srtext
+            srtext = postgis.models.PostGISSpatialRefSys.objects.get(
+                srid=self.srid).srtext
             cstype, dummy, rest = srtext.partition('[')
             csname = rest.split('"')[1]
             return csname + ' (' + cstype + ')'
@@ -369,8 +370,8 @@ def handle_maintainer_permissions(sender, instance, **kwargs):
 class Station(Gpoint):
     owner = models.ForeignKey(Lentity, related_name="owned_stations")
     stype = models.ManyToManyField(StationType, verbose_name='type')
-    is_automatic = models.BooleanField()
-    is_active = models.BooleanField()
+    is_automatic = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     overseers = models.ManyToManyField(Person, through='Overseer',
@@ -403,7 +404,7 @@ class Overseer(models.Model):
 
     station = models.ForeignKey(Station)
     person = models.ForeignKey(Person)
-    is_current = models.BooleanField()
+    is_current = models.BooleanField(default=False)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     def __unicode__(self):
@@ -425,7 +426,7 @@ class Instrument(models.Model):
     type = models.ForeignKey(InstrumentType)
     manufacturer = models.CharField(max_length=50, blank=True)
     model = models.CharField(max_length=50, blank=True)
-    is_active = models.BooleanField()
+    is_active = models.BooleanField(default=False)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     name = models.CharField(max_length=100, blank=True)

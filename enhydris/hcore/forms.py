@@ -33,6 +33,7 @@ class OverseerForm(ModelForm):
 
     class Meta:
         model = Overseer
+        exclude = []
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -62,6 +63,7 @@ class GentityFileForm(ModelForm):
 
     class Meta:
         model = GentityFile
+        exclude = []
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -93,6 +95,7 @@ class GentityGenericDataForm(ModelForm):
 
     class Meta:
         model = GentityGenericData
+        exclude = []
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -123,6 +126,7 @@ class GentityAltCodeForm(ModelForm):
 
     class Meta:
         model = GentityAltCode
+        exclude = []
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -152,6 +156,7 @@ class GentityEventForm(ModelForm):
 
     class Meta:
         model = GentityEvent
+        exclude = []
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -169,8 +174,10 @@ class GentityEventForm(ModelForm):
 
 
 class GentityForm(ModelForm):
+
     class Meta:
         model = Gentity
+        exclude = []
 
 
 class GpointForm(GentityForm):
@@ -268,6 +275,7 @@ class StationForm(GpointForm, GentityForm):
 
 
 class InstrumentForm(ModelForm):
+
     station_objects = Station.objects.all()
     if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
         station_objects = station_objects.filter(
@@ -280,6 +288,7 @@ class InstrumentForm(ModelForm):
 
     class Meta:
         model = Instrument
+        exclude = []
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -302,12 +311,10 @@ def _int_xor(i1, i2):
 
 
 class TimeStepForm(ModelForm):
-    """
-    Form for TimeStep
-    """
 
     class Meta:
         model = TimeStep
+        exclude = []
 
     def clean(self):
         """
@@ -356,6 +363,7 @@ class TimeseriesForm(ModelForm):
 
     class Meta:
         model = Timeseries
+        exclude = []
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -499,6 +507,9 @@ class TimeseriesDataForm(TimeseriesForm):
             required=False,
             choices=(('A', 'Append to existing'),
                      ('O', 'Overwrite existing'),))
+
+    class Meta:
+        exclude = []
 
 
 class RegistrationForm(RegistrationFormTermsOfService):

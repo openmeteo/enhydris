@@ -136,15 +136,19 @@ class TimeseriesInline(admin.TabularInline):
     model = Timeseries
     extra = 1
 
+
 class StationAdminForm(forms.ModelForm):
+
     class Meta:
         model = Station
+        exclude = []
     def clean_altitude(self):
         value = self.cleaned_data['altitude']
         if not value == None and (value > 8850 or value < -422):
             raise forms.ValidationError(_("%f is not a valid altitude") %
             (value,))
         return self.cleaned_data['altitude']
+
 
 class StationAdmin(admin.ModelAdmin):
     form = StationAdminForm
