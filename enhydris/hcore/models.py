@@ -229,7 +229,6 @@ class WaterDivision(Garea):
 
 class WaterBasin(Garea):
     parent = models.ForeignKey('self', null=True, blank=True)
-    water_division = models.ForeignKey(WaterDivision, null=True, blank=True)
     f_dependencies = ['Garea']
     def __unicode__(self):
         return self.name or str(self.id)
