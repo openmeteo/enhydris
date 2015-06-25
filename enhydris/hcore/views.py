@@ -29,10 +29,6 @@ from django.template import RequestContext
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from django.utils.decorators import method_decorator
 from django.utils.functional import lazy
-from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _
-
-import django_tables2 as tables
 
 from pthelma.timeseries import (add_months_to_datetime, datetime_from_iso,
                                 Timeseries as TTimeseries)
@@ -431,37 +427,25 @@ class StationListBaseView(ListView):
         return context
 
 
-class StationTable(tables.Table):
-
-    class Meta:
-        model = Station
-        attrs = {'class': 'paleblue'}
-        fields = ('id', 'name', 'water_basin', 'water_division',
-                  'political_division', 'owner', 'stype')
-
-    def render_id(self, value):
-        return mark_safe('<a href="{0}">{1}</a>'.format(
-            reverse('station_detail', args=[value]), value))
-
-    def render_stype(self, record):
-        return ', '.join([x.descr for x in record.stype.all()])
-
-    def render_political_division(self, record):
-        return record.political_division.name
-
-
-class StationListView(tables.SingleTableMixin, StationListBaseView):
+class StationListView(StationListBaseView):
     template_name = 'station_list.html'
-    table_class = StationTable
-    column_headings = {
-        "id_heading": _("id"),
-        "name_heading": _("Name"),
-        "water_basin_heading": _("Water basin"),
-        "water_division_heading": _("Water division"),
-        "political_division_heading": _("Political division"),
-        "owner_heading": _("Owner"),
-        "stype_heading": _("Type"),
-    }
+
+    def get_sort_order(self):
+        """Get sort_order as a list: from the request parameters, otherwise
+        from request.session, otherwise it's the default, ['name']. Removes
+        duplicate column occurences from the list.
+        """
+        sort_order = self.request.GET.getlist('sort')
+        if not sort_order:
+            sort_order = self.request.session.get('sort', ['name'])
+        sort_order = sort_order[:]
+        for i in range(len(sort_order) - 1, -1, -1):
+            s = sort_order[i]
+            if s[0] == '-':
+                s = s[1:]
+            if (s in sort_order[:i]) or ('-' + s in sort_order[:i]):
+                del sort_order[i]
+        self.sort_order = sort_order
 
     def get(self, request, *args, **kwargs):
         # The CSV is an undocumented feature we quickly and dirtily created
@@ -481,25 +465,15 @@ class StationListView(tables.SingleTableMixin, StationListBaseView):
         result = super(StationListView, self).get_queryset(**kwargs)
 
         # Sort results
-        nkwargs = kwargs
-        sort_column = (nkwargs.pop('sort') if 'sort' in nkwargs else
-                       self.request.GET.get('sort', None))
-        possible_sort_columns = [x.replace('_heading', '')
-                                 for x in self.column_headings.keys()]
-        if sort_column and (sort_column in possible_sort_columns):
-            result = result.order_by(sort_column)
+        self.get_sort_order()
+        self.request.session['sort'] = self.sort_order
+        result = result.order_by(*self.sort_order)
 
         return result
 
     def get_context_data(self, **kwargs):
         context = super(StationListView, self).get_context_data(**kwargs)
-
-        # The following is a hack because django-sorting sucks. I18N
-        # should be in the template, not here (but anyway the whole
-        # list needs revising, manual selecting of visible columns,
-        # reordering of columns, etc.)
-        context.update(self.column_headings)
-
+        context['sort'] = self.sort_order
         return context
 
 

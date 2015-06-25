@@ -304,6 +304,9 @@ table.formset td {
     font-size: 0.8em;
     border: 2px solid #EEEEEE;
 }
+table.table thead th a {
+    color: black;
+}
 
 /* Buttons with Jquery :) */
 .fg-button { 

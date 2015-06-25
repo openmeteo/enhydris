@@ -3,8 +3,6 @@
 from setuptools import setup, find_packages
 
 
-_django_sorting_version = '0.2b1'
-
 installation_requirements = [
     "psycopg2>=2.2,<3",
     "Django>=1.5,<1.7",
@@ -18,14 +16,8 @@ installation_requirements = [
     "pthelma>=0.9,<1",
     "django-appconf>=0.6",
     "gdal>=1.6",
-    "django-tables2>=0.14",
-    "django-sorting=={}".format(_django_sorting_version),
     "django-bootstrap3>=5.1,<5.2",
 ]
-
-_django_sorting_url = \
-    "https://github.com/aptiko/django-sorting/archive" \
-    "/{0}.tar.gz#egg=django-sorting-{0}".format(_django_sorting_version)
 
 from setuptest import test
 
@@ -38,7 +30,6 @@ kwargs = {
     'author_email': "anthony@itia.ntua.gr",
     'packages': find_packages(),
     'install_requires': installation_requirements,
-    'dependency_links': [_django_sorting_url],
     'test_suite': 'runtests.runtests',
 }
 

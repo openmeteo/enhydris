@@ -13,12 +13,10 @@ INSTALLED_APPS = (
 
     'rest_framework',
     'south',
-    'django_sorting',
     'registration',
     'profiles',
     'ajax_select',
     'captcha',
-    'django_tables2',
     'bootstrap3',
 
     'enhydris.dbsync',
@@ -36,7 +34,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.gzip.GZipMiddleware',
     'django_notify.middleware.NotificationsMiddleware',
-    'django_sorting.middleware.SortingMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 )
