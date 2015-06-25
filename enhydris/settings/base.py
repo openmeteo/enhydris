@@ -28,7 +28,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.middleware.transaction.TransactionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.gzip.GZipMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -53,6 +52,8 @@ TEMPLATE_DIRS = ('enhydris/templates',)
 
 AUTH_PROFILE_MODULE = 'hcore.UserProfile'
 LOGIN_REDIRECT_URL = '/'
+
+ATOMIC_REQUESTS = True
 
 # Options for django-registration
 ACCOUNT_ACTIVATION_DAYS = 7
