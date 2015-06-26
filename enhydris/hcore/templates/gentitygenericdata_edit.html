@@ -1,18 +1,21 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load static %}
 {% load form_as_table %} 
-{% block extra_head %}
 
-    <link type="text/css" href="{{ STATIC_URL }}css/smoothness/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
-    <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
-	<script type="text/javascript" src="{{ STATIC_URL }}admin/js/admin/RelatedObjectLookups.js"></script>
+{% block extra_head %}
+<link type="text/css" href="{% static "css/smoothness/jquery-ui-1.7.2.custom.css" %}" rel="stylesheet" />
+<link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
 
 <script type="text/javascript">
     $(document).ready(function(){
 		$("[id$='_date']").datepicker({ dateFormat: 'yy-mm-dd' });
 	});
 </script>
-
 {% endblock %}
 
 {% block title %}

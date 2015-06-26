@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load static %}
+
 {% block title %}{% trans 'Entities map' %}{% endblock %}
 {% block js-globals %}
     <script type="text/javascript">
@@ -7,8 +9,8 @@
     </script>
 {% endblock %}
 {% block extracss %}
-    <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
-    <link media="screen" href="{{ STATIC_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
+<link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
+<link media="screen" href="{% static "css/tablesorter.css" %}" type="text/css" rel="stylesheet">
     <style type="text/css">
     #map {
         width: 980px;

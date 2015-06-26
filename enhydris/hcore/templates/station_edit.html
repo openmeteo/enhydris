@@ -1,14 +1,20 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load static %}
 {% load form_as_table %} 
 {% load dict_parser %}
 
 {% block extracss %}
-    <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
+<link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
+	<style type="text/css">
+		textarea {
+			font-size:10px;
+		}
+	</style>
 {% endblock %}
 
-{% block extra_head %}
-	<script type="text/javascript" src="{{ STATIC_URL }}admin/js/admin/RelatedObjectLookups.js"></script>
+{% block extrajs %}
+<script type="text/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
     <script type="text/javascript">
 
     $(document).ready(function(){
@@ -58,11 +64,6 @@
             $("#tabs").tabs();
         });
     </script>
-	<style type="text/css">
-		textarea {
-			font-size:10px;
-		}
-	</style>
 {% endblock %}
 
 {% block title %}
@@ -134,7 +135,7 @@
 		<div class='formsets'>
 				<p class="anchor_override" style="cursor:pointer;text-align:left">
     				<a class="add" onclick="return add_inline_form('{{ formset.prefix }}')">
-    					<img src="{{ STATIC_URL }}admin/img/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
+                                    <img src="{% static "admin/img/icon_addlink.gif" %}" width="10" height="10" alt="Add Another" border="0"/>
     					add new {{ formset.prefix|title }}
     				</a>
 				</p>

@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load static %}
 {% load permissions %}
 {% block title %} {% trans 'Enhydris - Station' %} - {%if station %}{{ station.name }} {% endif %}
 {% endblock %}
 
 {% block extracss %}
-    <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
-    <link media="screen" href="{{ STATIC_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
+<link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
+<link media="screen" href="{% static "css/tablesorter.css" %}" type="text/css" rel="stylesheet">
     <style type="text/css">
     #map {
         width: 480px;
@@ -18,7 +19,7 @@
 {% endblock %}
 
 {% block extrajs %}
-  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.collapser.mod.js"></script>
+  <script type="text/javascript" src="{% static "js/jquery.collapser.mod.js" %}"></script>
   <script type="text/javascript">
       enhydris.mapMode = 2;
       {% if station %}enhydris.agentityId = {{station.id}};{% endif %}
@@ -219,7 +220,7 @@
                         <tr class="{% cycle 'odd' 'even' %}">
                             <td>{{ overseer.person.first_name }} {{ overseer.person.last_name }}
                             {% if request.user|can_edit:station %}
-                            &nbsp;|&nbsp;<a href="{% url "overseer_delete" overseer.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+                            &nbsp;|&nbsp;<a href="{% url "overseer_delete" overseer.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{% static "images/icons/cross.png" %}"</img></a>
                             {% endif %}
                             </td>
                         </tr>
@@ -255,8 +256,8 @@
                             <td>{{ code.value }}</td>
                             {% if request.user|can_edit:station %}
                             <td style="text-align:center;">
-                            <a href="{% url "gentityaltcode_edit" code.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-                            <a href="{% url "gentityaltcode_delete" code.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+                                <a href="{% url "gentityaltcode_edit" code.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{% static "images/icons/pencil.png" %}"</img></a>&nbsp;
+                                <a href="{% url "gentityaltcode_delete" code.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{% static "images/icons/cross.png" %}"</img></a>
                             </td>
                             {% endif %}
                         </tr>
@@ -304,15 +305,15 @@
                             <td>{{ file.remarks }}</td>
                             <td>
                             {% if user.is_authenticated or anonymous_can_download_data %}
-                                <a href="{% url "gentityfile_dl" file.id %}"><img style="border:none" src="{{STATIC_URL}}images/icons/download.png"></a>
+                            <a href="{% url "gentityfile_dl" file.id %}"><img style="border:none" src="{% static "images/icons/download.png" %}"></a>
                             {% else %}
                                 <i>N/A</i>
                             {% endif %}
                             </td>
                             {% if request.user|can_edit:station %}
                             <td style="text-align:center;">
-                            <a href="{% url "gentityfile_edit" file.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-                            <a href="{% url "gentityfile_delete" file.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+                                <a href="{% url "gentityfile_edit" file.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{% static "images/icons/pencil.png" %}"</img></a>&nbsp;
+                                <a href="{% url "gentityfile_delete" file.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{% static "images/icons/cross.png" %}"</img></a>
                             </td>
                             {% endif %}
                         </tr>
@@ -356,15 +357,15 @@
                             <td>{{ genericdata.remarks }}</td>
                             <td>
                             {% if request.user.is_authenticated or anonymous_can_download_data %}
-                                <a href="{% url "gentitygenericdata_dl" genericdata.id %}"><img style="border:none" src="{{STATIC_URL}}images/icons/download.png"></a>
+                            <a href="{% url "gentitygenericdata_dl" genericdata.id %}"><img style="border:none" src="{% static "images/icons/download.png" %}"></a>
                             {% else %}
                                 <i>N/A</i>
                             {% endif %}
                             </td>
                             {% if request.user|can_edit:station %}
                             <td style="text-align:center;">
-                            <a href="{% url "gentitygenericdata_edit" genericdata.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-                            <a href="{% url "gentitygenericdata_delete" genericdata.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+                                <a href="{% url "gentitygenericdata_edit" genericdata.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{% static "images/icons/pencil.png" %}"</img></a>&nbsp;
+                                <a href="{% url "gentitygenericdata_delete" genericdata.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{% static "images/icons/cross.png" %}"</img></a>
                             </td>
                             {% endif %}
                         </tr>
@@ -409,8 +410,8 @@
                             <td>{{ event.report }}</td>
                             {% if request.user|can_edit:station %}
                             <td style="text-align:center;">
-                            <a href="{% url "gentityevent_edit" event.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-                            <a href="{% url "gentityevent_delete" event.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+                                <a href="{% url "gentityevent_edit" event.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{% static "images/icons/pencil.png" %}"</img></a>&nbsp;
+                                <a href="{% url "gentityevent_delete" event.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{% static "images/icons/cross.png" %}"</img></a>
                             </td>
                             {% endif %}
                         </tr>
@@ -465,8 +466,8 @@
                             <td>{{ instrument.end_date|date:"Y/m/d" }}</td>
                             {% if request.user|can_edit:station %}
                             <td style="text-align:center;">
-                            <a href="{% url "instrument_edit" instrument.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-                            <a href="{% url "instrument_delete" instrument.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+                                <a href="{% url "instrument_edit" instrument.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{% static "images/icons/pencil.png" %}"</img></a>&nbsp;
+                                <a href="{% url "instrument_delete" instrument.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{% static "images/icons/cross.png" %}"</img></a>
                             </td>
                             {% endif %}
                         </tr>
@@ -527,8 +528,8 @@
                             <td>{{ t.end_date|date:"Y/m/d H:i" }}</td>
                             {% if request.user|can_edit:station %}
                             <td style="text-align:center;">
-                            <a href="{% url "timeseries_edit" t.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{{STATIC_URL}}images/icons/pencil.png"</img></a>&nbsp;
-                            <a href="{% url "timeseries_delete" t.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{{STATIC_URL}}images/icons/cross.png"</img></a>
+                                <a href="{% url "timeseries_edit" t.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{% static "images/icons/pencil.png" %}"</img></a>&nbsp;
+                                <a href="{% url "timeseries_delete" t.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{% static "images/icons/cross.png" %}"</img></a>
                             </td>
                             {% endif %}
                         </tr>

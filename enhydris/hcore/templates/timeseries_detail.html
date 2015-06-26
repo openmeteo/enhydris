@@ -1,15 +1,20 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load static %}
 {% load permissions %}
 {% block title %} {% trans 'Enhydris - Time series' %} - {%if timeseries %}{{ timeseries.name }} (id={{ timeseries.id }}){% endif %}
 {% endblock %}
 
 {% block extra_head %}
+<link media="screen" href="{% static "css/tablesorter.css" %}" type="text/css" rel="stylesheet">
+{% endblock %}
+
+{% block extrajs %}
   <!--[if IE]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
   <script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/excanvas.min.js"></script>
   <script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/jquery.flot.min.js"></script>
   <script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/jquery.flot.selection.min.js"></script>
-  <link media="screen" href="{{ STATIC_URL }}css/tablesorter.css" type="text/css" rel="stylesheet">
+  <script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/jquery.flot.time.min.js"></script>
   <script type="text/javascript">
 
     function confirmPost(){
@@ -26,7 +31,7 @@
 	$(document).ready(function() {
 		
 		$("#data_holder").hide()	
-		$("#progress").append("<img style=\"margin: auto;\" src=\""+STATIC_URL+"images/icons/progress.gif\">");
+                    $("#progress").append("<img style=\"margin: auto;\" src=\"{% static "images/icons/progress.gif" %}\">");
 
 		 $.getJSON('{% url "timeseries_data" %}', {object_id:{{timeseries.id}}}, function(chart_data){
 		   
@@ -86,7 +91,7 @@
                     break;
                 }
             }
-		    $("#placeholder").append("<img style=\"margin: auto;\" src=\""+STATIC_URL+"images/icons/progress.gif\">");
+            $("#placeholder").append("<img style=\"margin: auto;\" src=\"{% static "images/icons/progress.gif" %}\">");
             $.getJSON('{% url "timeseries_data" %}', {object_id:{{timeseries.id}},
                 start_pos:from_pos, end_pos:to_pos}, function(chart_data){
                 d = chart_data['data'];
@@ -259,7 +264,7 @@
                          {{ timeseries.related_station.copyright_holder }}.
         {% endif %}
         </div>
-		<img src="{{STATIC_URL}}images/vertical.gif" style="margin: 20px 10px; float: left;" />
+        <img src="{% static "images/vertical.gif" %}" style="margin: 20px 10px; float: left;" />
         <div id="chartdiv" style="float:left;text-align:center;width:450px;">
 			<div id="progress" style="text-align:center;padding-top:3em;">
 			</div>

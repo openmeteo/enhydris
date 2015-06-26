@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load static %}
 
 {% block extracss %}
-    <link type="text/css" href="{{ STATIC_URL }}css/smoothness/jquery-ui-1.7.2.custom.css" rel="stylesheet" />
-    <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
+<link type="text/css" href="{% static "css/smoothness/jquery-ui-1.7.2.custom.css" %}" rel="stylesheet" />
+<link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
 {% endblock %}
 
-{% block extra_head %}
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
+{% block extrajs %}
+<script type="text/javascript" src="{% static "js/jquery-ui-1.7.2.custom.min.js" %}"></script>
 
     <script type="text/javascript">
         $(function() {
@@ -56,15 +57,15 @@
         <br>
         <h3>Profile Management:</h3>
         <div class="anchor_override">
-            <img src="{{STATIC_URL}}images/icons/user_edit.png" />
+            <img src="{% static "images/icons/user_edit.png" %}" />
             <a href="{% url "profile_edit" %}">{% trans "Edit your user profile" %}</a></div>
         <div class="anchor_override">
         
-            <img src="{{STATIC_URL}}images/icons/key.png" />
+            <img src="{% static "images/icons/key.png" %}" />
             <a href="{% url "auth_password_change" %}">{% trans "Change your password" %}</a></div>
         {% if user.is_staff %}
         <div class="anchor_override">
-            <img src="{{STATIC_URL}}images/icons/lock_open.png" />
+            <img src="{% static "images/icons/lock_open.png" %}" />
             <a href="{% url "station_list" %}admin/">{% trans "Access the admin panel" %}</a></div>
         {% endif %}
     </div>
@@ -140,7 +141,7 @@
                 {% if perms.hcore.add_station %}
                 <p class="anchor_override" style="cursor:pointer;text-align:left">
                        <a href="{% url "station_add" %}">
-                          <img src="{{ STATIC_URL }}admin/img/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
+                           <img src="{% static "admin/img/icon_addlink.gif" %}" width="10" height="10" alt="Add Another" border="0"/>
                           {% trans "Add a new station " %}
                       </a>
                 </p>
@@ -148,7 +149,7 @@
                 {% if perms.hcore.add_instrument %}
                 <p class="anchor_override" style="cursor:pointer;text-align:left">
                        <a href="{% url "instrument_add" %}">
-                          <img src="{{ STATIC_URL }}admin/img/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
+                           <img src="{% static "admin/img/icon_addlink.gif" %}" width="10" height="10" alt="Add Another" border="0"/>
                           {% trans "Add a new instrument" %}
                       </a>
                 </p>
@@ -156,7 +157,7 @@
                 {% if perms.hcore.add_timeseries %}
                 <p class="anchor_override" style="cursor:pointer;text-align:left">
                        <a href="{% url "timeseries_add" %}">
-                          <img src="{{ STATIC_URL }}admin/img/icon_addlink.gif" width="10" height="10" alt="Add Another" border="0"/>
+                           <img src="{% static "admin/img/icon_addlink.gif" %}" width="10" height="10" alt="Add Another" border="0"/>
                           {% trans "Add a new timeseries" %}
                       </a>
                 </p>

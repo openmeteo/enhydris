@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load static %}
 {% load bootstrap3 %}
 <!DOCTYPE html>
 <html lang="en">
@@ -7,11 +8,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% block js-globals %}{% endblock %}
     {% block basecss %}
-        <link media="screen" href="{{ STATIC_URL }}css/tablesorter.css" type="text/css" rel="stylesheet" />
+    <link media="screen" href="{% static "css/tablesorter.css" %}" type="text/css" rel="stylesheet" />
         <link type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/css/base/jquery.ui.all.min.css" rel="stylesheet" />
-        <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
-        <link media="screen" href="{{ STATIC_URL }}css/olmap.css" type="text/css" rel="stylesheet" />
-        <link media="screen" href="{{ STATIC_URL }}css/base.css" type="text/css" rel="stylesheet" />
+        <link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
+        <link media="screen" href="{% static "css/olmap.css" %}" type="text/css" rel="stylesheet" />
+        <link media="screen" href="{% static "css/base.css" %}" type="text/css" rel="stylesheet" />
         {% bootstrap_css %}
     {% endblock %}
     {% block shortcut_icon %}{% endblock %}
@@ -174,18 +175,18 @@
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.10.8/jquery.tablesorter.min.js"></script>
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/openlayers/2.12/OpenLayers.min.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.placeholder-1.0.1.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/arg.js.v1.1.min.js"></script>
+  <script type="text/javascript" src="{% static "js/jquery.placeholder-1.0.1.js" %}"></script>
+  <script type="text/javascript" src="{% static "js/arg.js.v1.1.min.js" %}"></script>
   <script type="text/javascript" src="//openstreetmap.org/openlayers/OpenStreetMap.js"></script>
   <script type="text/javascript">
     var enhydris = {};
-    enhydris.staticUrl = '{{ STATIC_URL }}';
+    enhydris.staticUrl = '{% static "" %}';
     enhydris.rootUrl = '{% url "station_list" %}';
     enhydris.boundingBoxUrl = '{% url "bounding_box" %}';
     enhydris.mapMode = 1;
     {{ map_js | safe }}
   </script>
-  <script type="text/javascript" src="{{ STATIC_URL}}js/hcore.js"></script>
+  <script type="text/javascript" src="{% static "js/hcore.js" %}"></script>
 {% endblock %}
 {% block extrajs %}{% endblock %}
 </body>

@@ -1,11 +1,11 @@
 {% load i18n %}
+{% load static %}
 {% load form_as_table %} 
 <html>
 <head>
 	<title>	Add New {{ form_prefix }} </title>
-	<script type="text/javascript" src="{{ STATIC_URL }}admin/js/admin/RelatedObjectLookups.js"></script> 
-    <link media="screen" href="{{ STATIC_URL }}css/base.css" type="text/css" rel="stylesheet"> 
-    <link type="text/css" href="{{ STATIC_URL }}css/ui_override.css" rel="stylesheet" />
+        <link media="screen" href="{% static "css/base.css" %}" type="text/css" rel="stylesheet"> 
+        <link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
 
 </head>
 <body>
@@ -26,5 +26,6 @@
 						| <a href="javascript:window.close()">Cancel</a></p>
     </form>
 </div>
+<script type="text/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script> 
 </body>
 </html>
