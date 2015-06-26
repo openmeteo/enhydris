@@ -17,7 +17,6 @@ INSTALLED_APPS = (
     'captcha',
     'bootstrap3',
 
-    'enhydris.dbsync',
     'enhydris.hcore',
     'enhydris.api',
     'enhydris.permissions',
