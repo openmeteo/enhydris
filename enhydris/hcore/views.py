@@ -821,122 +821,21 @@ def download_gentityfile(request, gf_id):
     content to the user.
     """
 
-    if settings.ENHYDRIS_STORE_TSDATA_LOCALLY:
-        gfile = get_object_or_404(GentityFile, pk=int(gf_id))
-        try:
-            filename = gfile.content.file.name
-            wrapper = FileWrapper(open(filename))
-        except:
-            raise Http404
-        download_name = gfile.content.name.split('/')[-1]
-        content_type = mimetypes.guess_type(filename)[0]
-        response = HttpResponse(content_type=content_type)
-        response['Content-Length'] = os.path.getsize(filename)
-        response['Content-Disposition'] = \
-            "attachment; filename=%s" % download_name
+    gfile = get_object_or_404(GentityFile, pk=int(gf_id))
+    try:
+        filename = gfile.content.file.name
+        wrapper = FileWrapper(open(filename))
+    except:
+        raise Http404
+    download_name = gfile.content.name.split('/')[-1]
+    content_type = mimetypes.guess_type(filename)[0]
+    response = HttpResponse(content_type=content_type)
+    response['Content-Length'] = os.path.getsize(filename)
+    response['Content-Disposition'] = \
+        "attachment; filename=%s" % download_name
 
-        for chunk in wrapper:
-            response.write(chunk)
-    else:
-        """
-        Fetch GentityFile content from remote instance.
-        """
-        # FIXME: request.notifications does nothing. In old times the system
-        # was using django-notify module which was doing something similar to
-        # what django.contrib.messages is doing. This was removed at some
-        # point, but the only place in the code where it was used was inside
-        # this "else" clause, and we've rarely, if ever, seen these messages.
-        # The code that has to do with remote instances is badly in need for
-        # overhaul anyway.
-        gfile = get_object_or_404(GentityFile, pk=int(gf_id))
-
-        # Get the original GentityFile id and the source database
-        if gfile.original_id and gfile.original_db:
-            gf_id = gfile.original_id
-            db_host = gfile.original_db.hostname
-        else:
-            request.notifications.error(
-                "No data was found for the requested Gentity file.")
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                        or '/')
-
-        # Next we check the setting for a uname/pass for this host
-        uname, pwd = settings.ENHYDRIS_REMOTE_INSTANCE_CREDENTIALS.get(
-            db_host, (None, None))
-
-        # We craft the url
-        url = 'http://' + db_host + '/api/gfdata/' + str(gf_id)
-        req = urllib2.Request(url)
-        try:
-            handle = urllib2.urlopen(req, timeout=10)
-        except IOError, e:
-            # here we *want* to fail
-            pass
-        else:
-            # If we don't fail then the page isn't protected
-            # which means something is not right. Raise hell
-            # mail admins + return user notification.
-            request.notifications.error(GF_ERROR)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                        or '/')
-
-        if not hasattr(e, 'code') or e.code != 401:
-            # we got an error - but not a 401 error
-            request.notifications.error(GF_ERROR)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                        or '/')
-
-        authline = e.headers['www-authenticate']
-        # this gets the www-authenticate line from the headers
-        # which has the authentication scheme and realm in it
-
-        authobj = re.compile(
-            r'''(?:\s*www-authenticate\s*:)?\s*(\w*)'''
-            r'''\s+realm=['"]([^'"]+)['"]''',
-            re.IGNORECASE)
-        # this regular expression is used to extract scheme and realm
-        matchobj = authobj.match(authline)
-
-        if not matchobj:
-            # if the authline isn't matched by the regular expression
-            # then something is wrong
-            request.notifications.error(GF_ERROR)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                        or '/')
-
-        scheme = matchobj.group(1)
-        # here we've extracted the scheme
-        # and the realm from the header
-        if scheme.lower() != 'basic':
-            # we don't support other auth
-            # mail admins + inform user of error
-            request.notifications.error(GF_ERROR)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                        or '/')
-
-        # now the good part.
-        base64string = base64.encodestring(
-            '%s:%s' % (uname, pwd))[:-1]
-        authheader = "Basic %s" % base64string
-        req.add_header("Authorization", authheader)
-
-        try:
-            handle = urllib2.urlopen(req)
-        except IOError, e:
-            # here we shouldn't fail if the username/password is right
-            request.notifications.error(GF_ERROR)
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', None)
-                                        or '/')
-
-        filedata = handle.read()
-
-        download_name = gfile.content.name.split('/')[-1]
-        content_type = gfile.file_type.mime_type
-        response = HttpResponse(content_type=content_type)
-        response['Content-Length'] = len(filedata)
-        response['Content-Disposition'] = \
-            "attachment; filename=%s" % download_name
-        response.write(filedata)
+    for chunk in wrapper:
+        response.write(chunk)
 
     return response
 
@@ -977,12 +876,6 @@ TS_ERROR = ("There seems to be some problem with our internal infrastuctrure. "
 
 @timeseries_permission
 def download_timeseries(request, object_id, start_date=None, end_date=None):
-    """
-    This function handles timeseries downloading either from the local db or
-    from a remote instance.
-    """
-    if not settings.ENHYDRIS_STORE_TSDATA_LOCALLY:
-        raise Http404
     timeseries = get_object_or_404(Timeseries, pk=int(object_id))
     sign = -1 if timeseries.time_zone.utc_offset < 0 else 1
     try:
@@ -1035,8 +928,6 @@ def download_timeseries(request, object_id, start_date=None, end_date=None):
 
 @timeseries_permission
 def timeseries_bottom(request, object_id):
-    if not settings.ENHYDRIS_STORE_TSDATA_LOCALLY:
-        raise Http404
     ts = TTimeseries(id=int(object_id))
     try:
         Timeseries.objects.get(pk=int(object_id))

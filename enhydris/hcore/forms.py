@@ -500,13 +500,12 @@ class TimeseriesDataForm(TimeseriesForm):
     """
     Additional timeseries form to present the data upload fields
     """
-    if settings.ENHYDRIS_STORE_TSDATA_LOCALLY:
-        data = forms.FileField(required=False)
-        data_policy = forms.ChoiceField(
-            label=_('New data policy'),
-            required=False,
-            choices=(('A', 'Append to existing'),
-                     ('O', 'Overwrite existing'),))
+    data = forms.FileField(required=False)
+    data_policy = forms.ChoiceField(
+        label=_('New data policy'),
+        required=False,
+        choices=(('A', 'Append to existing'),
+                    ('O', 'Overwrite existing'),))
 
 
 class RegistrationForm(RegistrationFormTermsOfService):

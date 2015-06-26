@@ -30,7 +30,6 @@ Contributed applications:
 .. toctree::
    :maxdepth: 1
 
-   contrib/dbsync
    contrib/permissions
 
 Indices and tables

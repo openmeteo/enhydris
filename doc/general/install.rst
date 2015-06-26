@@ -424,18 +424,6 @@ These are the settings available to Enhydris, in addition to the
    timeseries data without having to login first. The default is
    ``False``.
 
-.. data:: ENHYDRIS_STORE_TSDATA_LOCALLY
-
-   **Deprecated.**
-
-   By default, this is ``True``. If set to ``False``, the installation
-   does not store the actual time series records. The purpose of this
-   setting is to be used together with the `dbsync` application, in
-   order to create a website that contains the collected data (except
-   time series records) of several other Enhydris installations (see
-   the ``hcore_remotesyncdb`` management command).
-   However, all this is under reconsideration.
-
 .. data:: ENHYDRIS_REMOTE_INSTANCE_CREDENTIALS 
 
    If the instance is configured as a data aggregator and doesn't have

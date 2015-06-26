@@ -9,13 +9,9 @@ from django.db.models import signals
 from pthelma import timeseries
 from enhydris.conf import settings
 from enhydris.hcore.utils import *
-from enhydris.dbsync.models import Database
 
 # Lookups
 class Lookup(models.Model):
-    # for db sync issues
-    original_id = models.IntegerField(null=True, blank=True, editable=False)
-    original_db = models.ForeignKey(Database, null=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
 
     descr = models.CharField(max_length=200, blank=True)
@@ -40,9 +36,6 @@ def post_save_person_or_organization(sender, **kwargs):
 
 
 class Lentity(models.Model):
-    # for db sync issues
-    original_id = models.IntegerField(null=True, blank=True, editable=False)
-    original_db = models.ForeignKey(Database, null=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
 
     remarks = models.TextField(blank=True)
@@ -105,9 +98,6 @@ post_save.connect(post_save_person_or_organization, sender=Organization)
 
 # Gentity and direct descendants
 class Gentity(models.Model):
-    # for db sync issues
-    original_id = models.IntegerField(null=True, blank=True, editable=False)
-    original_db = models.ForeignKey(Database, null=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
 
     water_basin = models.ForeignKey('WaterBasin', null=True, blank=True)
@@ -237,9 +227,6 @@ class WaterBasin(Garea):
 class GentityAltCodeType(Lookup): pass
 
 class GentityAltCode(models.Model):
-    # for db sync issues
-    original_id = models.IntegerField(null=True, blank=True, editable=False)
-    original_db = models.ForeignKey(Database, null=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
 
     gentity = models.ForeignKey(Gentity)
@@ -258,9 +245,6 @@ class GentityGenericDataType(Lookup):
     file_extension = models.CharField(max_length=16)
 
 class GentityGenericData(models.Model):
-    # for db sync issues
-    original_id = models.IntegerField(null=True, blank=True, editable=False)
-    original_db = models.ForeignKey(Database, null=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
 
     gentity = models.ForeignKey(Gentity)
@@ -286,9 +270,6 @@ class FileType(Lookup):
         return str(self.id)
 
 class GentityFile(models.Model):
-    # for db sync issues
-    original_id = models.IntegerField(null=True, blank=True, editable=False)
-    original_db = models.ForeignKey(Database, null=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
 
     gentity = models.ForeignKey(Gentity)
@@ -311,9 +292,6 @@ class GentityFile(models.Model):
 class EventType(Lookup): pass
 
 class GentityEvent(models.Model):
-    # for db sync issues
-    original_id = models.IntegerField(null=True, blank=True, editable=False)
-    original_db = models.ForeignKey(Database, null=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
 
     gentity = models.ForeignKey(Gentity)
@@ -396,9 +374,6 @@ class Station(Gpoint):
 signals.post_save.connect(handle_maintainer_permissions, Station)
 
 class Overseer(models.Model):
-    # for db sync issues
-    original_id = models.IntegerField(null=True, blank=True, editable=False)
-    original_db = models.ForeignKey(Database, null=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
 
     station = models.ForeignKey(Station)
@@ -416,9 +391,6 @@ class Instrument(models.Model):
     class Meta:
         ordering = ('name',)
 
-    # for db sync issues
-    original_id = models.IntegerField(null=True, blank=True, editable=False)
-    original_db = models.ForeignKey(Database, null=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
 
     station = models.ForeignKey(Station)
@@ -449,9 +421,6 @@ class UnitOfMeasurement(Lookup):
         return str(self.id)
 
 class TimeZone(models.Model):
-    # for db sync issues
-    original_id = models.IntegerField(null=True, blank=True, editable=False)
-    original_db = models.ForeignKey(Database, null=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
 
     code = models.CharField(max_length=50)
@@ -513,9 +482,6 @@ class IntervalType(Lookup):
         return self.descr
 
 class Timeseries(models.Model):
-    # for db sync issues
-    original_id = models.IntegerField(null=True, blank=True, editable=False)
-    original_db = models.ForeignKey(Database, null=True, editable=False)
     last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
 
     gentity = models.ForeignKey(Gentity, related_name="timeseries")
