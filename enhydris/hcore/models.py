@@ -382,7 +382,7 @@ class Station(Gpoint):
     creator = models.ForeignKey(User, null=True, blank=True,
                      related_name='created_stations')
     maintainers = models.ManyToManyField(User,
-                     related_name='maintaining_stations', null=True,blank=True)
+                                         related_name='maintaining_stations')
 
 
     f_dependencies = ['Gpoint']
@@ -619,7 +619,7 @@ class BlobField(models.Field):
 
 
 class TsRecords(models.Model):
-    id = models.ForeignKey(Timeseries, primary_key=True, db_column='id')
+    id = models.OneToOneField(Timeseries, primary_key=True, db_column='id')
     top = models.TextField(blank=True)
     middle = BlobField(null=True, blank=True)
     bottom = models.TextField()
@@ -666,7 +666,7 @@ def ReadTimeStep(id, timeseries_instance = None):
 
 # Class for user profiles
 class UserProfile(models.Model):
-    user = models.ForeignKey(User, unique=True, verbose_name=_('Username'))
+    user = models.OneToOneField(User, verbose_name=_('Username'))
     fname = models.CharField(_('First Name'),null=True,blank=True, max_length=30)
     lname = models.CharField(_('Last Name'),null=True,blank=True, max_length=30)
     address = models.CharField(_('Location'),null=True,blank=True,max_length=100)

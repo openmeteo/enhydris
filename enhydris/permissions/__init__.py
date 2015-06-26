@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
-from models import Permission
 import new
 import inspect
 
@@ -48,6 +47,7 @@ class User(MetaObject):
 
         if type(instance).__name__ == 'QuerySet':
             for object in instance:
+                from .models import Permission
                 if self.has_row_perm(object, perm, True):
                     pass
                 permission = Permission()

@@ -8,7 +8,7 @@ urlpatterns = patterns(
 
     url(r'^$', views.StationListView.as_view(),
         name='station_list'),
-    url(r'^stations/l/$', RedirectView.as_view(url='../..')),
+    url(r'^stations/l/$', RedirectView.as_view(url='../..', permanent=True)),
     url(r'^stations/d/(?P<pk>\d+)/$', views.StationDetailView.as_view(),
         name='station_detail'),
     url(r'^stations/b/(?P<pk>\d+)/$', views.StationBriefView.as_view(),
