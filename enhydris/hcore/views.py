@@ -1075,11 +1075,11 @@ def _station_edit_or_create(request, station_id=None):
                                          content_type='text/plain')
 
     OverseerFormset = inlineformset_factory(Station, Overseer,
-                                            extra=1)
+                                            extra=1, exclude=[])
     InstrumentFormset = inlineformset_factory(Station, Instrument,
-                                              extra=1)
+                                              extra=1, exclude=[])
     TimeseriesFormset = inlineformset_factory(Station, Timeseries,
-                                              extra=1)
+                                              extra=1, exclude=[])
 
     if request.method == 'POST':
         if station:

@@ -508,9 +508,6 @@ class TimeseriesDataForm(TimeseriesForm):
             choices=(('A', 'Append to existing'),
                      ('O', 'Overwrite existing'),))
 
-    class Meta:
-        exclude = []
-
 
 class RegistrationForm(RegistrationFormTermsOfService):
     """
