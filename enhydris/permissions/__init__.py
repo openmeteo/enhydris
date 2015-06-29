@@ -3,6 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 import new
 import inspect
+from .models import Permission
 
 class MetaClass(type):
     """General metaclass which extends User/Group creators with additional

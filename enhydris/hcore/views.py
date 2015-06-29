@@ -1796,7 +1796,7 @@ class ModelAddView(CreateView):
                 and not '_complete' in self.request.GET:
             raise Http404
 
-        # Determine self.model
+        # Determine self.model and self.fields
         try:
             self.model = ContentType.objects.get(
                 model=kwargs['model_name'], app_label='hcore'
@@ -1804,6 +1804,7 @@ class ModelAddView(CreateView):
         except (ContentType.DoesNotExist,
                 ContentType.MultipleObjectsReturned):
             raise Http404
+        self.fields = [f.name for f in self.model._meta.fields if f.editable]
 
         # Check permissions
         if not kwargs['model_name'] in ALLOWED_TO_EDIT or not \

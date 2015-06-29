@@ -36,9 +36,7 @@
         "fields": {
             "remarks": "Test Owner",
             "remarks_alt": "",
-            "last_modified": "2010-05-10 14:21:11",
-            "original_id": null,
-            "original_db": null
+            "last_modified": "2010-05-10 14:21:11"
         }
     },
 
@@ -47,9 +45,7 @@
         "fields": {
             "remarks": "",
             "remarks_alt": "",
-            "last_modified": "2010-05-10 14:26:01",
-            "original_id": null,
-            "original_db": null
+            "last_modified": "2010-05-10 14:26:01"
         }
     },
 
@@ -58,9 +54,7 @@
         "fields": {
             "remarks": "",
             "remarks_alt": "",
-            "last_modified": "2010-05-10 14:26:22",
-            "original_id": null,
-            "original_db": null
+            "last_modified": "2010-05-10 14:26:22"
         }
     },
 
@@ -91,7 +85,6 @@
     {   "pk": 5,
         "model": "hcore.gentity",
         "fields": {
-            "original_db": null,
             "short_name": "",
             "water_division": null,
             "political_division": null,
@@ -101,7 +94,6 @@
             "water_basin": null,
             "short_name_alt": "",
             "remarks": "",
-            "original_id": null,
             "name": "Test Garea"
         }
     },
@@ -109,7 +101,6 @@
     {   "pk": 6,
         "model": "hcore.gentity",
         "fields": {
-            "original_db": null,
             "short_name": "",
             "water_division": null,
             "political_division": null,
@@ -119,7 +110,6 @@
             "water_basin": null,
             "short_name_alt": "",
             "remarks": "",
-            "original_id": null,
             "name": "Test Gentity"
         }
     },
@@ -127,7 +117,6 @@
     {   "pk": 3,
         "model": "hcore.gentity",
         "fields": {
-            "original_db": null,
             "short_name": "",
             "water_division": null,
             "political_division": null,
@@ -137,7 +126,6 @@
             "water_basin": null,
             "short_name_alt": "",
             "remarks": "",
-            "original_id": null,
             "name": "Test Political Division"
         }
     },
@@ -145,7 +133,6 @@
     {   "pk": 4,
         "model": "hcore.gentity",
         "fields": {
-            "original_db": null,
             "short_name": "",
             "water_division": 2,
             "political_division": 3,
@@ -155,7 +142,6 @@
             "water_basin": 1,
             "short_name_alt": "",
             "remarks": "",
-            "original_id": null,
             "name": "Test Station"
         }
     },
@@ -163,7 +149,6 @@
     {   "pk": 7,
         "model": "hcore.gentity",
         "fields": {
-            "original_db": null,
             "short_name": "",
             "water_division": 2,
             "political_division": 3,
@@ -173,7 +158,6 @@
             "water_basin": 1,
             "short_name_alt": "",
             "remarks": "",
-            "original_id": null,
             "name": "Test Station 2"
         }
     },
@@ -181,7 +165,6 @@
     {   "pk": 1,
         "model": "hcore.gentity",
         "fields": {
-            "original_db": null,
             "short_name": "",
             "water_division": null,
             "political_division": null,
@@ -191,7 +174,6 @@
             "water_basin": null,
             "short_name_alt": "",
             "remarks": "",
-            "original_id": null,
             "name": "Test Water Basin"
         }
     },
@@ -199,7 +181,6 @@
     {   "pk": 2,
         "model": "hcore.gentity",
         "fields": {
-            "original_db": null,
             "short_name": "",
             "water_division": null,
             "political_division": null,
@@ -209,7 +190,6 @@
             "water_basin": null,
             "short_name_alt": "",
             "remarks": "",
-            "original_id": null,
             "name": "Test Water Division"
         }
     },
@@ -290,8 +270,6 @@
         "fields": {
             "descr_alt": "",
             "last_modified": "2010-05-10 14:24:18",
-            "original_id": null,
-            "original_db": null,
             "descr": "Test Gentity Alt Code Type"
         }
     },
@@ -299,11 +277,9 @@
     {   "pk": 1,
         "model": "hcore.filetype",
         "fields": {
-            "original_db": null,
             "descr": "Test File Type",
             "descr_alt": "",
             "last_modified": "2010-05-10 14:20:11",
-            "original_id": null,
             "mime_type": "text/plain"
         }
     },
@@ -311,7 +287,6 @@
     {   "pk": 1,
         "model": "hcore.gentityfile",
         "fields": {
-            "original_db": null,
             "descr": "Test Gentity File",
             "file_type": 1,
             "gentity": 4,
@@ -319,7 +294,6 @@
             "remarks": "",
             "descr_alt": "Test Gentity File",
             "last_modified": "2010-05-10 14:25:20",
-            "original_id": null,
             "date": null,
             "remarks_alt": ""
         }
@@ -330,8 +304,6 @@
         "fields": {
             "descr_alt": "",
             "last_modified": "2010-05-10 14:19:36",
-            "original_id": null,
-            "original_db": null,
             "descr": "Test Event Type"
         }
     },
@@ -341,8 +313,6 @@
         "fields": {
             "descr_alt": "",
             "last_modified": "2010-05-10 14:21:20",
-            "original_id": null,
-            "original_db": null,
             "descr": "Test Station Type"
         }
     },
@@ -380,8 +350,6 @@
         "fields": {
             "descr_alt": "",
             "last_modified": "2010-05-10 14:25:31",
-            "original_id": null,
-            "original_db": null,
             "descr": "Test Instrument Type"
         }
     },
@@ -389,13 +357,11 @@
     {   "pk": 1,
         "model": "hcore.instrument",
         "fields": {
-            "original_db": null,
             "end_date": null,
             "is_active": false,
             "name_alt": "",
             "name": "Test Instrument",
             "station": 4,
-            "original_id": null,
             "last_modified": "2010-05-10 14:25:50",
             "remarks": "",
             "remarks_alt": "",
@@ -411,8 +377,6 @@
         "fields": {
             "descr_alt": "",
             "last_modified": "2010-05-10 14:21:46",
-            "original_id": null,
-            "original_db": null,
             "descr": "Test Variable"
         }
     },
@@ -420,12 +384,10 @@
     {   "pk": 1,
         "model": "hcore.unitofmeasurement",
         "fields": {
-            "original_db": null,
             "descr": "Test Unit Of Measurement",
             "symbol": "+",
             "descr_alt": "",
             "last_modified": "2010-05-10 14:22:21",
-            "original_id": null,
             "variables": [1]
         }
     },
@@ -435,21 +397,17 @@
         "fields": {
             "code": "Test Time Zone",
             "utc_offset": 2,
-            "last_modified": "2010-05-10 14:22:29",
-            "original_id": null,
-            "original_db": null
+            "last_modified": "2010-05-10 14:22:29"
         }
     },
 
     {   "pk": 1,
         "model": "hcore.timestep",
         "fields": {
-            "original_db": null,
             "descr": "Test Time Step",
             "length_minutes": 5,
             "descr_alt": "",
             "last_modified": "2010-05-10 14:23:00",
-            "original_id": null,
             "length_months": 0
         }
     },
@@ -458,7 +416,6 @@
         "model": "hcore.timeseries",
         "fields": {
             "unit_of_measurement": 1,
-            "original_db": null,
             "nominal_offset_minutes": null,
             "instrument": null,
             "gentity": 4,
@@ -467,7 +424,6 @@
             "remarks": "",
             "actual_offset_months": null,
             "last_modified": "2010-05-10 14:22:32",
-            "original_id": null,
             "nominal_offset_months": null,
             "variable": 1,
             "time_step": null,
@@ -480,7 +436,6 @@
         "model": "hcore.timeseries",
         "fields": {
             "unit_of_measurement": 1,
-            "original_db": null,
             "nominal_offset_minutes": null,
             "instrument": null,
             "gentity": 4,
@@ -489,7 +444,6 @@
             "remarks": "",
             "actual_offset_months": null,
             "last_modified": "2010-05-10 14:22:33",
-            "original_id": null,
             "nominal_offset_months": null,
             "variable": 1,
             "time_step": null,
