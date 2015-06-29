@@ -13,14 +13,14 @@ from rest_framework.reverse import reverse
 from pthelma.timeseries import Timeseries
 from enhydris.hcore import models
 from enhydris.api.permissions import CanEditOrReadOnly, CanCreateStation
-from enhydris.api.serializers import StationSerializer
+from enhydris.api.serializers import StationSerializer, TimeseriesSerializer
 
 
 modelnames = (
-    'Lookup Lentity Person Organization Gentity Gpoint Gline Garea '
-    'PoliticalDivisionManager PoliticalDivision WaterDivision WaterBasin '
+    'Lentity Person Organization Gentity Gpoint Gline Garea '
+    'PoliticalDivision WaterDivision WaterBasin '
     'GentityAltCodeType GentityAltCode FileType GentityFile EventType '
-    'GentityEvent StationType StationManager Station Overseer InstrumentType '
+    'GentityEvent StationType Station Overseer InstrumentType '
     'Instrument Variable UnitOfMeasurement TimeZone TimeStep IntervalType '
     'Timeseries'
 ).split()
@@ -40,7 +40,7 @@ class ListAPIView(generics.ListAPIView):
         modified_after = '1900-01-01'
         if 'modified_after' in self.kwargs:
             modified_after = self.kwargs['modified_after']
-        return self.model.objects.exclude(last_modified__lte=modified_after)
+        return self.queryset.exclude(last_modified__lte=modified_after)
 
 
 class Tsdata(APIView):
@@ -81,7 +81,8 @@ class Tsdata(APIView):
 
 
 class TimeseriesList(generics.ListCreateAPIView):
-    model = models.Timeseries
+    queryset = models.Timeseries.objects.all()
+    serializer_class = TimeseriesSerializer
     permission_classes = (CanEditOrReadOnly,)
 
     def post(self, request, *args, **kwargs):
@@ -94,14 +95,13 @@ class TimeseriesList(generics.ListCreateAPIView):
         other types as well).
         """
         # Get the data
-        serializer = self.get_serializer(data=request.DATA,
-                                         files=request.FILES)
+        serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
             Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         # Check permissions
         try:
-            gentity_id = int(serializer.init_data['gentity'])
+            gentity_id = int(serializer.get_initial()['gentity'])
         except ValueError:
             raise Http404
         station = get_object_or_404(models.Station, id=gentity_id)
@@ -113,16 +113,18 @@ class TimeseriesList(generics.ListCreateAPIView):
 
 
 class TimeseriesDetail(generics.RetrieveUpdateDestroyAPIView):
-    model = models.Timeseries
+    queryset = models.Timeseries.objects.all()
+    serializer_class = TimeseriesSerializer
     permission_classes = (CanEditOrReadOnly,)
 
 
 class StationList(generics.ListCreateAPIView):
-    model = models.Station
+    queryset = models.Station.objects.all()
     serializer_class = StationSerializer
     permission_classes = (CanCreateStation,)
 
 
 class StationDetail(generics.RetrieveUpdateDestroyAPIView):
-    model = models.Station
+    queryset = models.Station.objects.all()
+    serializer_class = StationSerializer
     permission_classes = (CanEditOrReadOnly,)

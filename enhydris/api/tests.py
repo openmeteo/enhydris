@@ -32,9 +32,6 @@ def get_gentities_from_fixture():
             if key == 'model':
                 continue
             nitem[key] = item['fields'][key]
-            if key == 'last_modified':
-                nitem[key] = datetime.strptime(nitem[key],
-                                               '%Y-%m-%d %H:%M:%S')
         result.append(nitem)
     result.sort(key=lambda x: x['id'])
     return result
@@ -48,7 +45,16 @@ class ReadTestCase(APITestCase):
         response = self.client.get("/api/Gentity/")
         response.data.sort(key=lambda x: x['id'])
         reference_data = get_gentities_from_fixture()
-        self.assertEqual(response.data, reference_data)
+        self.assertEqual(len(response.data), len(reference_data))
+        for res_datum, ref_datum in zip(response.data, reference_data):
+            self.assertEqual(len(res_datum), len(ref_datum))
+            for key in res_datum:
+                if key == 'last_modified':
+                    res_datum[key] = datetime.strptime(res_datum[key],
+                                                       '%Y-%m-%dT%H:%M:%S')
+                    ref_datum[key] = datetime.strptime(ref_datum[key],
+                                                       '%Y-%m-%d %H:%M:%S')
+                self.assertEqual(res_datum[key], ref_datum[key])
 
         # Same thing, but test with modified_after
         n_all_gentities = len(reference_data)
@@ -60,7 +66,14 @@ class ReadTestCase(APITestCase):
         response = self.client.get(
             '/api/Gentity/modified_after/2010-05-11 00:00/')
         response.data.sort(key=lambda x: x['id'])
-        self.assertEqual(response.data, reference_data)
+        self.assertEqual(len(response.data), len(reference_data))
+        for res_datum, ref_datum in zip(response.data, reference_data):
+            self.assertEqual(len(res_datum), len(ref_datum))
+            for key in res_datum:
+                if key == 'last_modified':
+                    res_datum[key] = datetime.strptime(res_datum[key],
+                                                       '%Y-%m-%dT%H:%M:%S')
+                self.assertEqual(res_datum[key], ref_datum[key])
 
 
 class WriteTestCase(TestCase):
@@ -106,8 +119,10 @@ class WriteTestCase(TestCase):
     def testTimeseriesDelete(self):
         # Check the number of timeseries available
         ntimeseries = models.Timeseries.objects.count()
-        assert(ntimeseries > 1)  # 1 is not enough; we need to know we aren't
-                                 # deleting more than necessary.
+
+        # 1 is not enough; we need to know we aren't
+        # deleting more than necessary.
+        assert(ntimeseries > 1)
 
         # Attempt to delete unauthenticated - should fail
         response = self.client.delete("/api/Timeseries/1/")
@@ -268,8 +283,10 @@ class WriteStationTestCase(TestCase):
     def test_station_delete(self):
         # Check the number of stations available
         nstations = models.Station.objects.count()
-        assert(nstations > 1)  # 1 is not enough; we need to know we aren't
-                               # deleting more than necessary.
+
+        # 1 is not enough; we need to know we aren't
+        # deleting more than necessary.
+        assert(nstations > 1)
 
         # Attempt to delete unauthenticated - should fail
         response = self.client.delete('/api/Station/4/')
