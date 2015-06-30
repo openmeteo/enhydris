@@ -359,7 +359,7 @@ class Station(Gpoint):
     # is set.
     creator = models.ForeignKey(User, null=True, blank=True,
                      related_name='created_stations')
-    maintainers = models.ManyToManyField(User, null=True, blank=True,
+    maintainers = models.ManyToManyField(User, blank=True,
                                          related_name='maintaining_stations')
 
 
