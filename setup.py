@@ -14,7 +14,7 @@ installation_requirements = [
     "pthelma>=0.9,<1",
     "django-appconf>=0.6",
     "gdal>=1.6",
-    "django-bootstrap3>=5.1,<5.2",
+    "django-bootstrap3>=5.1,<6",
 ]
 
 kwargs = {
