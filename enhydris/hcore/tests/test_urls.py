@@ -15,10 +15,11 @@ class SmokeTestCase(TestCase):
               '/accounts/register/',
               '/accounts/password/reset/',
               '/accounts/password/reset/done/',
-              '/admin/',
               '/map/',
               ],
         301: ['/stations/l/',
+              ],
+        302: ['/admin/',  # This redirects to a login page
               ],
         404: ['/nonexistent/',
               '/stations/d/',

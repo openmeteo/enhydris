@@ -323,7 +323,7 @@ class StationManager(models.GeoManager):
         return Station.objects.filter(political_division__in=leaves)
 
 def handle_maintainer_permissions(sender, instance, **kwargs):
-    from enhydris.permissions import Permission
+    from enhydris.permissions.models import Permission
     from django.contrib.contenttypes.models import ContentType
 
 
@@ -359,7 +359,7 @@ class Station(Gpoint):
     # is set.
     creator = models.ForeignKey(User, null=True, blank=True,
                      related_name='created_stations')
-    maintainers = models.ManyToManyField(User,
+    maintainers = models.ManyToManyField(User, null=True, blank=True,
                                          related_name='maintaining_stations')
 
 

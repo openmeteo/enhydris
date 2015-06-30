@@ -66,6 +66,8 @@ class ProfileEditView(UpdateView):
     model = UserProfile
     template_name = 'profile_edit.html'
     success_url = lazy(reverse, str)('current_user_profile')
+    fields = ('user', 'fname', 'lname', 'address', 'organization',
+              'email_is_public')
 
     def get_object(self, queryset=None):
         if not self.request.user.is_authenticated():

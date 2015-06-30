@@ -87,7 +87,7 @@ def create_test_data():
     stype3 = StationType.objects.create(descr="Even less significant")
 
     # filetype1
-    FileType.objects.create(mime_type='image.jpeg')
+    FileType.objects.create(mime_type='image/jpeg')
 
     variable1 = Variable.objects.create(descr='Rainfall')
     variable2 = Variable.objects.create(descr='Temperature')
@@ -371,13 +371,14 @@ class GentityFileTestCase(TestCase):
         self.assertTrue(r)
         self.assertEquals(GentityFile.objects.filter(gentity__id=gentity_id
                                                      ).count(), 0)
+        filetype_id = FileType.objects.get(mime_type='image/jpeg').id
         with TemporaryFile(suffix='.jpg') as tmpfile:
             tmpfile.write('Irrelevant data\n')
             tmpfile.seek(0)
             response = self.client.post(reverse('gentityfile_add'),
                                         {'gentity': gentity_id,
                                          'date': '',
-                                         'file_type': 1,
+                                         'file_type': filetype_id,
                                          'descr': 'A description',
                                          'remarks': '',
                                          'descr_alt': 'An alt description',
@@ -987,7 +988,7 @@ class ProfileTestCase(TestCase):
 
         # Prepare the post data that we will be attempting to post -
         # essentially this sets email_is_public to False.
-        post_data = {'user': 1, 'fname': 'A', 'lname': 'User',
+        post_data = {'user': self.auser.id, 'fname': 'A', 'lname': 'User',
                      'address': 'Nowhere', 'organization': 'UN',
                      'email_is_public': False}
 

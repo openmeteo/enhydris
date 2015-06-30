@@ -245,6 +245,8 @@ class StationForm(GpointForm, GentityForm):
     class Meta:
         model = Station
         exclude = ('overseers', 'creator', 'point')
+        if not settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
+            exclude = exclude + ('maintainers',)
 
     political_division = forms.ModelChoiceField(
         PoliticalDivision.objects,

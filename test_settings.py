@@ -1,8 +1,5 @@
 from enhydris.settings.base import *
 
-INSTALLED_APPS = list(INSTALLED_APPS)
-INSTALLED_APPS.remove('south')
-
 DEBUG = True
 TEMPLATE_DEBUG = False
 ADMINS = (
