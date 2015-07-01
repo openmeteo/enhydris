@@ -5,7 +5,6 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.staticfiles',
-    'django.contrib.admin',
     'django.contrib.sites',
     'django.contrib.humanize',
     'django.contrib.gis',
@@ -20,6 +19,11 @@ INSTALLED_APPS = (
     'enhydris.hcore',
     'enhydris.api',
     'enhydris.permissions',
+
+    # enhydris.hcore overrides some templates from django.contrib.admin; for
+    # this reason, it must be listed in INSTALLED_APPS before
+    # django.contrib.admin.
+    'django.contrib.admin',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -46,8 +50,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'enhydris.hcore.context_processors.registration',
     'enhydris.hcore.context_processors.map',
 )
-
-TEMPLATE_DIRS = ('enhydris/templates',)
 
 AUTH_PROFILE_MODULE = 'hcore.UserProfile'
 LOGIN_REDIRECT_URL = '/'
