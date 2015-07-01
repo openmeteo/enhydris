@@ -31,5 +31,6 @@ DEFAULT_FROM_EMAIL = 'user@host.domain'
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 EMAIL_HOST_USER = 'automaticsender@my.domain'
 EMAIL_HOST_PASSWORD = 'mypassword'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 ROOT_URLCONF = 'enhydris.urls'
