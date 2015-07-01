@@ -14,6 +14,7 @@ General documentation:
 
    general/about
    general/install
+   general/release-notes
    general/copyright
 
 
