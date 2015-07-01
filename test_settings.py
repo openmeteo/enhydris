@@ -1,7 +1,7 @@
 from enhydris.settings.base import *
 
 DEBUG = True
-TEMPLATE_DEBUG = False
+TEMPLATE_DEBUG = DEBUG
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
 )
