@@ -1,5 +1,5 @@
+from django.conf import settings
 from django.template import Library, Node, TemplateSyntaxError
-from enhydris.conf import settings
 
 register = Library()
 

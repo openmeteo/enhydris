@@ -16,7 +16,8 @@ from django.test.utils import override_settings
 
 from pthelma import timeseries
 
-from enhydris.conf import settings
+from django.conf import settings
+
 from enhydris.hcore.models import (
     FileType, GentityFile, Instrument, InstrumentType, IntervalType,
     Organization, PoliticalDivision, Station, StationType, TimeZone,
