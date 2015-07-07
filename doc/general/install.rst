@@ -70,7 +70,7 @@ which is required by Enhydris.
    These instructions are for Debian jessie. For Ubuntu they are similar,
    except that the postgis package version may be different::
 
-      aptitude install python postgresql postgis postgresql-9.4-postgis \
+      apt-get install python postgresql postgis postgresql-9.4-postgis \
           python-psycopg2 python-setuptools python-pip python-pil \
           python-gdal
 
