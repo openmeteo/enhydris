@@ -44,7 +44,7 @@ class Command(TemplateCommand):
         options['enhydris_version'] = enhydris.__version__
         version_items = enhydris.__version__.split('.')
         if len(version_items) > 1:
-            enhydris_docs_version = '{}.{}'.format(version_items[:2])
+            enhydris_docs_version = '{}.{}'.format(*version_items[:2])
         else:
             enhydris_docs_version = 'latest'
         options['enhydris_docs_version'] = enhydris_docs_version
