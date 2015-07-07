@@ -6,29 +6,19 @@ Installation and configuration
 
 .. highlight:: bash
 
-Download Enhydris
-=================
-
-Download Enhydris from https://github.com/openmeteo/enhydris/ (if you
-are uncomfortable with git and github, click on the "Download ZIP"
-button).
-
 Prerequisites
 =============
 
 ===================================================== ============
 Prerequisite                                          Version
 ===================================================== ============
-Python                                                2.6 [1]
+Python with setuptools and pip                        2.7 [1]
 PostgreSQL                                            [2]
-PostGIS                                               1.4 [3]
+PostGIS                                               [3]
 GDAL                                                  1.9
 psycopg2                                              2.2 [4]
-setuptools                                            0.6 [5]
-pip                                                   1.1 [5]
-PIL with freetype                                     1.1.7 [6]
-Dickinson                                             0.1.0 [7]
-The Python modules listed in :file:`requirements.txt` See file
+PIL or Pillow with freetype                           1.1.7 [5]
+Dickinson                                             0.1.0 [6]
 ===================================================== ============
 
 .. admonition:: Note for production installations
@@ -37,142 +27,62 @@ The Python modules listed in :file:`requirements.txt` See file
    production installations you also need a web server.
 
 [1] Enhydris runs on Python 2.6 and 2.7. It should also run on
-any later 2.x version. Enhydris does not run on Python 3.
+any later 2.x version. Enhydris does not run on Python 3.  setuptools
+and pip are needed in order to install the rest of the Python modules.
 
 [2] Enhydris should run on all supported PostgreSQL versions.  In
 order to avoid possible incompatibilities with psycopg2, it is better
 to use the version prepackaged by your operating system when running
 on GNU/Linux, and to use the latest PostgreSQL version when running on
-Windows. If there is a problem with your version of PostgreSQL, email
-us and we'll check if it is easy to fix. 
+Windows.
 
 [3] Except for PostGIS, more libraries, namely geos and proj, are
 needed; however, you probably not need to worry about that, because in
 most GNU/Linux distributions PostGIS has a dependency on them and
 therefore they will be installed automatically, whereas in Windows the
 installation file of PostGIS includes them. Enhydris is known to run
-on PostGIS 1.4 and 1.5. It probably can run on later versions as well.
-It is not known whether it can run on earlier versions.
+on PostGIS 2.1. It probably can run on most previous and later
+versions as well.
 
-[4] psycopg2 is listed in :file:`requirements.txt` together with the
-other Python modules. However, in contrast to them, it can be tricky
-to install (because it needs compilation and has a dependency on
-PostgreSQL client libraries), and it is therefore usually better to
-not leave its installation to :command:`pip`. It's better to install a
-prepackaged version for your operating system.
+[4] psycopg2 is an Enhydris dependency, and when you install Enhydris,
+:command:`pip` will attempt to install psycopg2. However, it can be
+tricky to install (because it needs compilation and has a dependency
+on PostgreSQL client libraries, which probably means you must have
+PostgreSQL's development files installed), and it is therefore usually
+better to install a prepackaged version for your operating system.
 
-[5] setuptools and pip are needed in order to install the rest of the
-Python modules; Enhydris does not actually need it.
-
-[6] PIL is not directly required by Enhydris, but by other python
-modules required my Enhydris. In theory, installing the requirements
-listed in :file:`requirements.txt` will indirectly result in
-:command:`pip` installing it.  However, it can be tricky to install,
-and it may be better to not leave its installation to :command:`pip`;
-it's better to install a prepackaged version for your operating
+[5] PIL/Pillow is not directly required by Enhydris, but by other
+python modules required my Enhydris. In theory, installing Enhydris
+with :command:`pip` will indirectly result in also installing
+PIL/Pillow.  However, it can be tricky to install, and it may be
+better to install a prepackaged version for your operating
 system. It must be compiled with libfreetype support. This is common
-in Linux distributions. In Windows, however, the `official packages`_
-are not thus compiled. One solution is to get the unofficial version
-from http://www.lfd.uci.edu/~gohlke/pythonlibs/. If there is any
-difficulty, Pillow might work instead of PIL.
+in Linux distributions.
 
-.. _official packages: http://www.pythonware.com/products/pil/
-
-[7] Dickinson_ is not required directly by Enhydris, but by pthelma_,
-which is required by Enhydris and is listed in
-:file:`requirements.txt`.
+[6] Dickinson_ is not required directly by Enhydris, but by pthelma_,
+which is required by Enhydris.
 
 .. _dickinson: http://dickinson.readthedocs.org/
 .. _pthelma: http://pthelma.readthedocs.org/
 
 .. admonition:: Example: Installing prerequisites on Debian/Ubuntu
 
-   These instructions are for Debian wheezy. For Ubuntu they are similar,
+   These instructions are for Debian jessie. For Ubuntu they are similar,
    except that the postgis package version may be different::
 
-      aptitude install python postgresql postgis postgresql-9.1-postgis \
-          python-psycopg2 python-setuptools git python-pip python-imaging \
+      aptitude install python postgresql postgis postgresql-9.4-postgis \
+          python-psycopg2 python-setuptools python-pip python-pil \
           python-gdal
 
       # Install Dickinson
       cd /tmp
-      wget https://github.com/openmeteo/dickinson/archive/0.1.0.tar.gz
-      tar xzf 0.1.0.tar.gz
-      cd dickinson-0.1.0
+      wget https://github.com/openmeteo/dickinson/archive/0.2.0.tar.gz
+      tar xzf 0.2.0.tar.gz
+      cd dickinson-0.2.0
       ./configure
       make
       sudo make install
 
-      pip install -r requirements.txt
-
-   It is a good idea to use a virtualenv before running the last
-   command, but you are on your own with that, sorry.
-
-.. admonition:: Example: Installing prerequisites on Windows
-
-   .. admonition:: Important
-
-      We don't support Enhydris very well on Windows. We do provide
-      instructions, and we do fix bugs, but honestly we can't install
-      it; we get an error message related to "geos" at some point.
-      Some people have had success by installing Enhydris using
-      OSGeo4W_, but we haven't tried it. So, if you face installation
-      problems, we won't be able to help (unless you provide funding).
-
-      Also note that we don't think Enhydris on Windows can easily run
-      on 64-bit Python or 64-bit PostgreSQL; the 32-bit versions of
-      everything should be installed. This is because some
-      prerequisites are not available for Windows in 64-bit versions,
-      or they may be difficult to install. Such dependencies are
-      PostGIS and some Python packages.
-
-      That said, we provide instructions below on how it should (in
-      theory) be installed. If you choose to use OSGeo4W_, some things
-      will be different - you are on your own anyway.
-
-      .. _OSGeo4W: http://osgeo4w.osgeo.org/
-
-   Download and install the latest Python 2.x version from
-   http://python.org/ (use the Windows Installer package).
-
-   Add the Python installation directory (such as
-   :file:`C:\\Python27`) and its :file:`Scripts` subdirectory (such as
-   :file:`C:\\Python27\\Scripts`) to the system path (right-click on
-   My Computer, Properties, Advanced, Environment variables, under
-   "System variables" double-click on Path, and add the two new
-   directory names at the end, using semicolon to delimit them).
-      
-   Download and install an appropriate PostgreSQL version from
-   http://postgresql.org/ (use a binary Windows installer). Important:
-   at some time the installer will create an operating system user and
-   ask you to define a password for that user; keep the password; you
-   will need it later.
-
-   Go to Start, All programs, PostgreSQL, Application Stack Builder,
-   select your PostgreSQL installation on the first screen, then, on
-   the application selection screen, select Spatial Extensions,
-   PostGIS. Allow it to install (you don't need to create a spatial
-   database at this stage).
-
-   Download and install psycopg2 for Windows from
-   http://www.stickpeople.com/projects/python/win-psycopg/.
-
-   Download and install setuptools from
-   http://pypi.python.org/pypi/setuptools (you probably need to go to
-   http://pypi.python.org/pypi/setuptools#files and pick the .exe file
-   that corresponds to your Python version).
-
-   Download and install PIL from http://www.lfd.uci.edu/~gohlke/pythonlibs/.
-
-   Download the latest dickinson DLL from
-   http://openmeteo.org/downloads/ and put it in
-   :file:`C:\\Windows\\System32\\dickinson.dll`.
-
-   Finally, open a Command Prompt and give the following commands
-   inside the downloaded and unpacked :file:`enhydris` directory::
-
-       easy_install pip
-       pip install -r requirements.txt
 
 Creating a spatially enabled database
 =====================================
@@ -186,8 +96,7 @@ not be allowed to create more users.
 .. admonition:: GNU example
 
    First, you need to create a spatially enabled database template. For
-   PostGIS 2.0 or later (for earlier version refer to the GeoDjango
-   instructions)::
+   PostGIS 2.0 or later::
 
       sudo -u postgres -s
       createdb template_postgis
@@ -217,19 +126,18 @@ not be allowed to create more users.
        host    all         all         ::1/128               md5
 
    Restart the server to read the new ``pg_hba.conf`` configuration.
-   For example, in Ubuntu::
+   For example::
 
        service postgresql restart
 
-   .. _client authentication: http://www.postgresql.org/docs/8.4/static/client-authentication.html
-
+   .. _client authentication: http://www.postgresql.org/docs/9.4/static/client-authentication.html
 
 .. admonition:: Windows example
 
    Assuming PostgreSQL is installed at the default location, run these
    at a command prompt::
    
-      cd C:\Program Files\PostgreSQL\9.0\bin
+      cd C:\Program Files\PostgreSQL\9.4\bin
       createdb template_postgis
       psql -d template_postgis -c "CREATE EXTENSION postgis;"
       psql -d template_postgis -c "UPDATE pg_database SET datistemplate='true'
@@ -240,31 +148,44 @@ not be allowed to create more users.
    At some point, these commands will ask you for the password of the
    operating system user.
 
+Install Enhydris
+================
+
+Install Enhydris with :command:`pip install enhydris`, probably
+specifying a version and using a virtualenv, like this::
+
+    virtualenv --system-site-packages [virtualenv_target_dir]
+    pip install 'enhydris>=0.5,<0.6'
+
+You may or may not want to use the ``--system-site-packages``
+parameter. The main reason to use it is that it will then use your
+systemwide ``python-gdal``, ``python-psycopg2``, and ``python-pil``,
+which means it won't need to compile these for the virtualenv.
+
 Configuring Enhydris
 ====================
 
-In the directory :file:`enhydris/settings`, copy the file
-:file:`example.py` to :file:`local.py`.  Open
-:file:`local.py` in an editor and make the following changes:
+Execute :command:`enhydris-admin newinstance` to create a new Enhydris
+configuration directory; for example::
 
-* Set :data:`ADMINS` to a list of admins (the administrators will get
-  all enhydris exceptions by mail and also all user emails, as
-  generated by the contact application).
-* Under :data:`DATABASES`, set :data:`NAME` to the name of the
-  database, and :data:`USER` and :data:`PASSWORD` according to the
-  user created above.
+    cd /etc
+    enhydris-admin newinstance myinstance
+
+The above will create directory :file:`/etc/myinstance` with some
+files in it.
+
+Open the created file :file:`settings.py` and edit it according to the
+comments you will find in the file.
 
 Initializing the database
 =========================
 
 In order to initialize your database and create the necessary database
 tables for Enhydris to run, run the following commands inside the
-:file:`enhydris` directory::
+Enhydris configuration directory::
 
-   python manage.py syncdb --settings=enhydris.settings.local --noinput
-   python manage.py migrate --settings=enhydris.settings.local dbsync
-   python manage.py migrate --settings=enhydris.settings.local hcore
-   python manage.py createsuperuser --settings=enhydris.settings.local 
+   python manage.py migrate
+   python manage.py createsuperuser
 
 The above commands will also ask you to create a Enhydris superuser.
 
@@ -279,101 +200,40 @@ The above commands will also ask you to create a Enhydris superuser.
    who use Enhydris, Enhydris/Django keeps a list of usernames and
    passwords in the database, which have nothing to do with operating
    system users or database users. The Enhydris superuser created by
-   the ``./manage.py createsuperuser`` command is such an Enhydris
+   the ``python manage.py createsuperuser`` command is such an Enhydris
    user, and is intended to represent a human.
 
-   Advanced Django administrators can also use `alternative
-   authentication backends`_, such as LDAP, for storing the Enhydris
-   users.
-
-.. _alternative authentication backends: http://docs.djangoproject.com/en/1.1/topics/auth/#other-authentication-sources
-
-..
-   FIXME: Either update or delete the following
-
-   Initialize the database using old data
-   --------------------------------------
-
-   *** Probably Deprecated. Better ask for the json file of the data!**
-
-   Under the migration directory there are 3 scripts which take care of migrating
-   data from the old hydroscope schema to the new one. If the initial sql
-   file contains data in this schema a few additional steps are required in order
-   to update the schema to the current version. 
-
-   If you want to import an old sql file, be sure to import the ``sql`` file
-   first by running:: 
-
-           psql -h localhost hydrotest hydro < hydro.sql
-
-   and **THEN** run::
-
-           ./manage.py syncdb --settings=enhydris.settings.local --all
-
-   Also make sure that when you are asked whether to create a superuser you answer NO!
-   You can create the superuser **after** the migrations are completed. 
-
-   By using south, Enhydris takes care of data migrations. If the data have
-   been produced by the migration scripts, they correspond to the 0001 migration
-   (named initial). So, in case you already have the data in this schema, before
-   applying new updates you need to tell south that the first migration (0001)
-   has already been completed and after that apply all the additional changes. In
-   order to do that, after running the psql command, you issue the following:: 
-
-           ./manage.py migrate --settings=enhydris.settings.local hcore 0001 --fake
-           ./manage.py migrate --settings=enhydris.settings.local hcore
-
-
-   After that, you may also create a super user by running::
-
-           ./manage.py createsuperuser --settings=enhydris.settings.local 
-
-
-   Initial Data
-   ~~~~~~~~~~~~
-
-   After all hcore models are up to date, you may proceed with  loading the initial 
-   data needed. All initial data are stored in json formatted text files which
-   you can acquire by asking the right people. 
-
-   In order to load the actual data, issue the following command: ::
-
-           ./manage.py loaddata --settings=enhydris.settings.local hcore.json 
-           
 
 Running Enhydris
 ================
 
-Inside the :file:`openmeteo/enhydris` directory, run the following
+Inside the Enhydris configuration directory, run the following
 command::
 
-    python manage.py runserver --settings=enhydris.settings.local 8088
+    python manage.py runserver
 
 The above command will start the Django development server and set it
-to listen to port 8088. If you then start your browser and point it to
-``http://localhost:8088/``, you should see Enhydris in action. Note
+to listen to port 8000. If you then start your browser and point it to
+``http://localhost:8000/``, you should see Enhydris in action. Note
 that this only listens to the localhost; if you want it to listen on
-all interfaces, use ``0.0.0.0:8088`` instead.
+all interfaces, use ``0.0.0.0:8000`` instead.
 
 To use Enhydris in production, you need to setup a web server such as
 apache. This is described in detail in `Deploying Django`_.
 
-.. _deploying django: http://docs.djangoproject.com/en/1.5/howto/deployment/
+.. _deploying django: http://docs.djangoproject.com/en/1.8/howto/deployment/
 
 
-Post-install configuration
-==========================
-
-Domain name
------------
-
-.. FIXME: Is it really necessary to restart the web server?
+Post-install configuration: domain name
+=======================================
 
 After you run Enhydris, logon as a superuser, visit the admin panel,
 go to ``Sites``, edit the default site, and enter your domain name
 there instead of ``example.com``. Emails to users for registration
-confirmation will appear to be coming from that domain.  Restart the
-webserver after changing the domain name.
+confirmation will contain links to that domain.  Restart the
+Enhydris (by restarting apache/gunicorn/whatever) after changing the
+domain name.
+
 
 .. _settings:
 
@@ -383,7 +243,7 @@ Settings reference
 These are the settings available to Enhydris, in addition to the
 `Django settings`_.
 
-.. _django settings: http://docs.djangoproject.com/en/1.5/ref/settings/
+.. _django settings: http://docs.djangoproject.com/en/1.8/ref/settings/
 
 .. data:: ENHYDRIS_FILTER_DEFAULT_COUNTRY
 
@@ -474,8 +334,8 @@ These are the settings available to Enhydris, in addition to the
 
    This is a quick-and-dirty way to create a web site that only
    displays a subset of an Enhydris database. For example, the
-   database of http://deucalionproject.gr/db/ is the same as that of
-   http://openmeteo.org/db/; however, the former only shows stations
+   database of http://system.deucalionproject.gr/ is the same as that
+   of http://openmeteo.org/; however, the former only shows stations
    relevant to the Deucalion project, because it has this setting::
 
       ENHYDRIS_SITE_STATION_FILTER = {'owner__id__exact': '9'}

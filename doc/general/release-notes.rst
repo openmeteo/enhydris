@@ -6,7 +6,7 @@ Release notes
 
 .. highlight:: bash
 
-Version 0.4
+Version 0.5
 ===========
 
 Overview
@@ -43,9 +43,9 @@ Backwards incompatible changes
 Upgrading from 0.2
 ------------------
 
-Version 0.4 contains some tricky database changes. The upgrade
+Version 0.5 contains some tricky database changes. The upgrade
 procedure is slightly complicated, and uses the intermediate Enhydris
-versions 0.3 and 0.3.1, which exist only for this purpose.
+versions 0.3 and 0.4, which exist only for this purpose.
 
 (Note for developers: the reason for this procedure is that hcore used
 to have a foreign key to a dbsync model. As a result, the initial
@@ -63,19 +63,19 @@ The upgrade procedure is as follows:
    :command:`python manage.py migrate` should apply all such upgrades,
    and should do nothing if they are already applied).
 
-3. Follow the Enhydris 0.4 installation instructions to install
+3. Follow the Enhydris 0.5 installation instructions to install
    Enhydris in a new virtualenv; however, instead of installing
-   Enhydris 0.4, install, instead, Enhydris 0.3.0, like this::
+   Enhydris 0.5, install, instead, Enhydris 0.3, like this::
 
-       pip install 'enhydris>=0.3,<0.3.1'
+       pip install 'enhydris>=0.3,<0.4'
 
 4. Apply the database upgrades::
 
        python manage.py migrate --fake-initial
 
-5. Install Enhydris 0.3.1::
+5. Install Enhydris 0.4::
 
-       pip install --upgrade 'enhydris>=0.3.1,<0.3.2'
+       pip install --upgrade 'enhydris>=0.4,<0.5'
 
 6. Have your database password ready and run the following to empty
    the `django_migrations` database table::
@@ -88,10 +88,10 @@ The upgrade procedure is as follows:
 
        python manage.py migrate --fake
 
-8. Install Enhydris 0.4. It is best to discard your Enhydris 0.3
-   virtualenv and create a new one. Install Enhydris 0.4 like this::
+8. Install Enhydris 0.5. It is best to discard your Enhydris 0.4
+   virtualenv and create a new one. Install Enhydris 0.5 like this::
 
-       pip install 'enhydris>=0.4,<0.5'
+       pip install 'enhydris>=0.5,<0.6'
 
 9. Perform the final database upgrades::
 
