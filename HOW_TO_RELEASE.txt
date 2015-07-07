@@ -5,9 +5,7 @@ The Enhydris version has the form
 
 Here's how to release a new minor version X.Y.0:
 
-    1. Update CHANGES.txt; changes showing on top as "dev" should now
-       show as X.Y.0, with the current date. If no changes show, find
-       them from the VCS and add them. Commit.
+    1. Update the release notes.
 
     2. Create a branch:
 
@@ -38,8 +36,8 @@ Here's how to release a new micro X.Y.Z version:
 
           git checkout X.Y
 
-    2. Make the required bug fixes, add them to CHANGES.txt under the
-       (probably new) X.Y.Z heading, and commit them.
+    2. Make the required bug fixes, add them to the release notes
+       under the (probably new) X.Y.Z heading, and commit them.
 
     3. In enhydris/__init__.py, change __version__ so that it has the
        value "X.Y.Z" (should be "X.Y.Q" where Q=Z-1).
