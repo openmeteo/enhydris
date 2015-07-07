@@ -13,21 +13,27 @@ Here's how to release a new minor version X.Y.0:
 
     3. In enhydris/__init__.py change the value of __version__ so that
        it has the value "X.Y.0" (should be "dev" before you change it).
+
+    4. Likewise for setup.py.
        
-    4. Commit:
+    5. Commit:
 
           git commit -a -m "Version X.Y.0"
 
-    5. Create a tag:
+    6. Create a tag:
 
           git tag X.Y.0
 
-    6. Push the new branch and the new tag:
+    7. Push the new branch and the new tag:
 
           git push origin X.Y
           git push origin X.Y.0
 
-    7. Create a new release in github.
+    8. Create a new release in github.
+
+    9. Upload to pypi:
+
+         ./setup.py sdist upload
 
 
 Here's how to release a new micro X.Y.Z version:
@@ -42,22 +48,28 @@ Here's how to release a new micro X.Y.Z version:
     3. In enhydris/__init__.py, change __version__ so that it has the
        value "X.Y.Z" (should be "X.Y.Q" where Q=Z-1).
 
-    4. Commit:
+    4. Likewise for setup.py.
+
+    5. Commit:
     
           git commit -a -m "Version X.Y.Z"
 
-    5. Create a tag:
+    6. Create a tag:
     
           git tag X.Y.Z
 
-    6. Push changes and tag:
+    7. Push changes and tag:
 
           git push
           git push origin X.Y.Z
 
-    7. Create a new release in github.
+    8. Create a new release in github.
 
-    8. Also apply the bug fixes to the master branch. On the release
+    9. Upload to pypi:
+
+         ./setup.py sdist upload
+
+   10. Also apply the bug fixes to the master branch. On the release
        branch:
        
           git log --oneline -n5
