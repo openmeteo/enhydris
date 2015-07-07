@@ -1,6 +1,7 @@
 import os
 
 from django import forms, db
+from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.forms import ModelForm
 from django.utils.translation import ugettext_lazy as _
@@ -10,7 +11,6 @@ from captcha.fields import CaptchaField
 from registration.forms import RegistrationFormTermsOfService
 
 from pthelma import timeseries
-from enhydris.conf import settings
 from enhydris.hcore.widgets import SelectWithPop
 from enhydris.hcore.models import (
     Station, Instrument, Person, Overseer, FileType, GentityFile,

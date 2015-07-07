@@ -3,9 +3,9 @@ from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Q
 from django.contrib.gis.geos import Polygon
 from django.http import Http404
+from django.conf import settings
 from django.core.exceptions import FieldError
 
-from enhydris.conf import settings
 from enhydris.hcore.models import *
 
 

@@ -33,7 +33,8 @@ from django.utils.functional import lazy
 from pthelma.timeseries import (add_months_to_datetime, datetime_from_iso,
                                 Timeseries as TTimeseries)
 
-from enhydris.conf import settings
+from django.conf import settings
+
 from enhydris.hcore.models import (
     GentityAltCode, GentityEvent, GentityFile, GentityGenericData, Instrument,
     Overseer, PoliticalDivision, ReadTimeStep, Station, Timeseries,

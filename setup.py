@@ -12,7 +12,6 @@ installation_requirements = [
     "Markdown>=2.1,<3",
     "django-simple-captcha>=0.4",
     "pthelma>=0.9,<1",
-    "django-appconf>=0.6",
     "gdal>=1.6",
     "django-bootstrap3>=5.1,<5.2",
 ]

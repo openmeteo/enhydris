@@ -2,9 +2,10 @@
 These template tags are for counting. Used in the frontpage stats
 """
 
+from django.conf import settings
 from django.template import Library, Node, TemplateSyntaxError
 from django.db.models import get_model
-from enhydris.conf import settings
+
 from enhydris.hcore.models import *
 
 register = Library()

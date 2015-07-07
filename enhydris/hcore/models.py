@@ -1,4 +1,5 @@
 from django.db import connection as db_connection
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.db.backends import postgis
 from django.contrib.auth.models import User, Group
@@ -7,7 +8,6 @@ from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import signals
 from pthelma import timeseries
-from enhydris.conf import settings
 from enhydris.hcore.utils import *
 
 # Lookups
