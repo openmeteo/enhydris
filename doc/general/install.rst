@@ -284,20 +284,6 @@ These are the settings available to Enhydris, in addition to the
    timeseries data without having to login first. The default is
    ``False``.
 
-.. data:: ENHYDRIS_REMOTE_INSTANCE_CREDENTIALS 
-
-   If the instance is configured as a data aggregator and doesn't have
-   the actual data locally stored, in order to fetch the data from
-   another instance a user name and password must be provided which
-   correspond to a superuser account in the remote instance. Many
-   instances can be configured using this setting, each with its own
-   user/pass combination following this scheme::
-
-      ENHYDRIS_REMOTE_INSTANCE_CREDENTIALS = {
-        'kyy.hydroscope.gr': ('myusername','mypassword'),
-        'itia.hydroscope.gr': ('anotheruser','anotherpass')
-      }
-
 .. data:: ENHYDRIS_MIN_VIEWPORT_IN_DEGS
 
    Set a value in degrees. When a geographical query has a bounding
