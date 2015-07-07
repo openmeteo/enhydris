@@ -21,6 +21,7 @@ kwargs = {
     'version': "dev",
     'license': "AGPL3",
     'summary': "Web application for meteorological data storage",
+    'description': "Web application for meteorological data storage",
     'author': "Antonis Christofides",
     'author_email': "anthony@itia.ntua.gr",
     'packages': find_packages(),
