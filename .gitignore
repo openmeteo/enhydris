@@ -4,3 +4,4 @@
 enhydris/settings/local.py
 enhydris/urls.py
 doc/_build
+dist
