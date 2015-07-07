@@ -24,6 +24,7 @@ kwargs = {
     'author': "Antonis Christofides",
     'author_email': "anthony@itia.ntua.gr",
     'packages': find_packages(),
+    'scripts': ['enhydris/bin/enhydris-admin'],
     'install_requires': installation_requirements,
     'test_suite': 'runtests.runtests',
 }

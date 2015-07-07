@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+
+from django.conf import settings
+from django.core import management
+
+if __name__ == "__main__":
+    settings.configure()
+    settings.INSTALLED_APPS = list(settings.INSTALLED_APPS) + [
+        'enhydris.management']
+    management.execute_from_command_line()
