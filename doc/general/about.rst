@@ -46,15 +46,6 @@ Enhydris has several advanced features:
    retrieved immediately, and appending a few records at the end can
    also be done instantly.
 
- * It can work in a distributed way. Many organisations can install
-   one instance each, but an additional instance, common to all
-   organisations, can be setup as a common portal. This additional
-   instance can be configured to replicate data from the databases of
-   the organisations, but without the space-consuming time series,
-   which it retrieves from the other databases on demand. A user can
-   transparently use this portal to access the data of all
-   participating organisations collectively.
-
  * It offers access to the data through a webservice API. This is the
    foundation on which the above distributing features are based, but
    it can also be used so that other systems access the data.

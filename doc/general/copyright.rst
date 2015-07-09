@@ -5,7 +5,8 @@ Copyright and credits
 
 Enhydris is
 
-| Copyright (C) 2005-2011 National Technical University of Athens
+| Copyright (C) 2005-2015 National Technical University of Athens
+| Copyright (C) 2013-2014 TEI of Epirus
 
 Enhydris is free software: you can redistribute it and/or modify it
 under the terms of the GNU Affero General Public License, as published
