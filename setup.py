@@ -55,7 +55,7 @@ package_data = {
 
 kwargs = {
     'name': "enhydris",
-    'version': "dev",
+    'version': __import__('enhydris').__version__,
     'license': "AGPL3",
     'description': "Web application for meteorological data storage",
     'author': "Antonis Christofides",
