@@ -19,8 +19,8 @@ installation_requirements = [
 
 kwargs = {
     'name': "enhydris",
-    'version': "dev",
-    'license': "GPL3",
+    'version': __import__('enhydris').__version__,
+    'license': "AGPL3",
     'description': "Web application for meteorological data storage",
     'author': "Antonis Christofides",
     'author_email': "anthony@itia.ntua.gr",
