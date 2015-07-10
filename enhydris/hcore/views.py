@@ -828,7 +828,7 @@ def download_gentityfile(request, gf_id):
     try:
         filename = gfile.content.file.name
         wrapper = FileWrapper(open(filename))
-    except:
+    except IOError:
         raise Http404
     download_name = gfile.content.name.split('/')[-1]
     content_type = mimetypes.guess_type(filename)[0]
