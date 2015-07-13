@@ -76,6 +76,8 @@ EMAIL_PORT = 587
 EMAIL_HOST = 'smtp.example.com'
 EMAIL_HOST_USER = 'emailuser'
 EMAIL_HOST_PASSWORD = 'topsecret'
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # The above are only the settings that are absolutely essential. Check the
 # installation instructions for more settings that you can set.
