@@ -368,7 +368,9 @@ class GentityFileTestCase(TestCase):
     def setUp(self):
         create_test_data()
 
-    def test_upload_gentity_file(self):
+    def test_gentity_file(self):
+
+        # Upload a gentity file
         gentity_id = Station.objects.get(name='Komboti').id
         r = self.client.login(username='admin', password='topsecret')
         self.assertTrue(r)
@@ -391,6 +393,13 @@ class GentityFileTestCase(TestCase):
         self.assertEquals(response.status_code, 302)
         self.assertEquals(GentityFile.objects.filter(gentity__id=gentity_id
                                                      ).count(), 1)
+
+        # Now try to download that gentity file
+        gentity_file_id = GentityFile.objects.all()[0].id
+        response = self.client.get(reverse('gentityfile_dl',
+                                           kwargs={'gf_id': gentity_file_id}))
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.content, 'Irrelevant data\n')
 
 
 class TsTestCase(TestCase):

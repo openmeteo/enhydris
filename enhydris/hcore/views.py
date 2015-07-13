@@ -778,11 +778,6 @@ class InstrumentDetailView(DetailView):
         return context
 
 
-def embedmap_view(request, *args, **kwargs):
-    return render_to_response('embedmap.html',
-                              context_instance=RequestContext(request))
-
-
 def map_view(request, *args, **kwargs):
     return render_to_response('map_page.html',
                               context_instance=RequestContext(request))
@@ -828,7 +823,7 @@ def download_gentityfile(request, gf_id):
     try:
         filename = gfile.content.file.name
         wrapper = FileWrapper(open(filename))
-    except:
+    except IOError:
         raise Http404
     download_name = gfile.content.name.split('/')[-1]
     content_type = mimetypes.guess_type(filename)[0]

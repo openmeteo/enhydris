@@ -33,3 +33,15 @@ For more information about Enhydris, read its documentation in the
 ``doc`` directory or `live at readthedocs`_.
 
 .. _live at readthedocs: http://enhydris.readthedocs.org/
+
+**Installing a development instance**
+
+After creating a `virtualenv` and installing prerequisites, execute
+this in the top-level directory::
+
+    python enhydris/bin/enhydris-admin newinstance devinstance
+
+Then, edit :file:`devinstance/settings.py`, and then execute this::
+
+    python devinstance/manage.py runserver
+

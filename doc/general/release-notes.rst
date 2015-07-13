@@ -93,6 +93,14 @@ The upgrade procedure is as follows:
 
        python manage.py migrate --fake
 
+Changes in 0.5 microversions
+----------------------------
+
+- Removed embedmap view (in 5.0.1)
+- Removed ``example_project``, which was used for development
+  instances; instead, added instructions in :file:`README.rst` on how
+  to create one (in 5.0.1).
+
 
 Version 0.2
 ===========
