@@ -778,11 +778,6 @@ class InstrumentDetailView(DetailView):
         return context
 
 
-def embedmap_view(request, *args, **kwargs):
-    return render_to_response('embedmap.html',
-                              context_instance=RequestContext(request))
-
-
 def map_view(request, *args, **kwargs):
     return render_to_response('map_page.html',
                               context_instance=RequestContext(request))
