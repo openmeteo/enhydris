@@ -18,7 +18,6 @@ DATABASES = {
 }
 TIME_ZONE = 'Europe/Athens'
 SITE_ID = 1
-SITE_URL = "hydroscope.gr"
 MEDIA_ROOT = '/tmp'
 MEDIA_URL = '/site_media/'
 STATIC_ROOT = 'static/'
