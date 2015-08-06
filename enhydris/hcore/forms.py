@@ -281,7 +281,7 @@ def StationForm(*args, **kwargs):
 
         def clean_altitude(self):
             value = self.cleaned_data['altitude']
-            if not value is None and (value > 8850 or value < -422):
+            if value is not None and (value > 8850 or value < -422):
                 raise forms.ValidationError(
                     _("%f is not a valid altitude") % (value,))
             return self.cleaned_data['altitude']
@@ -411,7 +411,6 @@ class TimeseriesForm(ModelForm):
             return None
         self.cleaned_data['data'].seek(0)
         ts = timeseries.Timeseries()
-        data = self.cleaned_data['data']
 
         try:
             ts.read_file(self.cleaned_data['data'])
@@ -454,7 +453,7 @@ class TimeseriesForm(ModelForm):
                     _("Invalid offsets: Nominal"
                       " offsets must be both null or both not null!"))
 
-        #add a validation test for instrument in station:
+        # add a validation test for instrument in station:
         instr = self.cleaned_data.get('instrument', None)
         if instr:
             stat = self.cleaned_data.get('gentity', None)
@@ -520,7 +519,7 @@ class TimeseriesDataForm(TimeseriesForm):
         label=_('New data policy'),
         required=False,
         choices=(('A', 'Append to existing'),
-                    ('O', 'Overwrite existing'),))
+                 ('O', 'Overwrite existing'),))
 
 
 class RegistrationForm(RegistrationFormTermsOfService):
