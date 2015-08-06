@@ -65,6 +65,11 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 ACCOUNT_ACTIVATION_DAYS = 7
 REGISTRATION_OPEN = True
 
+# Options for django-ajax-selects
+AJAX_LOOKUP_CHANNELS = {
+    'maintainers': dict(model='auth.User', search_field='username'),
+}
+
 # Default Enhydris settings
 ENHYDRIS_FILTER_DEFAULT_COUNTRY = None
 ENHYDRIS_FILTER_POLITICAL_SUBDIVISION1_NAME = None
