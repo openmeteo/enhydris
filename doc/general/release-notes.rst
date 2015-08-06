@@ -96,10 +96,12 @@ The upgrade procedure is as follows:
 Changes in 0.5 microversions
 ----------------------------
 
-- Removed embedmap view (in 5.0.1)
+- Removed embedmap view (in 0.5.1)
 - Removed ``example_project``, which was used for development
   instances; instead, added instructions in :file:`README.rst` on how
-  to create one (in 5.0.1).
+  to create one (in 0.5.1).
+- Fixed internal server error when editing station with
+  ``ENHYDRIS_USERS_CAN_ADD_CONTENT=True`` (in 0.5.2).
 
 
 Version 0.2
