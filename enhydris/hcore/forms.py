@@ -231,49 +231,62 @@ class GpointForm(GentityForm):
         return gpoint
 
 
-class StationForm(GpointForm, GentityForm):
+def StationForm(*args, **kwargs):
+    """Return a form object.
+
+    Think of StationForm as a class and instantiate it as if it were a class;
+    the only thing this function does is define the class at instantiation
+    time. The reason we do it this way is that we are using
+    settings.ENHYDRIS_USERS_CAN_ADD_CONTENT at class definition time, and we
+    want that setting to be overridable in unit tests.
     """
-    In this form, we overide the default fields with our own to allow inline
-    creation of models that a Station has foreign keys to.
 
-    To achieve this we use a custom widget which adds in each select box a 'Add
-    New' button which takes care of the object creation and also updating the
-    original select box with the new entries. The only caveat is that we need
-    to pass manually to the widget the name of the foreign object as it is
-    depicted in our database in cases where the field name is not the same.
-    """
-    class Meta:
-        model = Station
-        exclude = ('overseers', 'creator', 'point')
-        if not settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
-            exclude = exclude + ('maintainers',)
+    class StationFormClass(GpointForm, GentityForm):
+        """
+        In this form, we overide the default fields with our own to allow
+        inline creation of models that a Station has foreign keys to.
 
-    political_division = forms.ModelChoiceField(
-        PoliticalDivision.objects,
-        widget=SelectWithPop(model_name='politicaldivision'),
-        required=False)
-    water_basin = forms.ModelChoiceField(
-        WaterBasin.objects,
-        widget=SelectWithPop(model_name='waterbasin'),
-        required=False)
-    water_division = forms.ModelChoiceField(
-        WaterDivision.objects,
-        widget=SelectWithPop(model_name='waterdivision'),
-        required=False)
-    # owner should be modified to allow either Person or Organization add
-    owner = forms.ModelChoiceField(
-        Lentity.objects, widget=SelectWithPop(model_name='lentity'))
+        To achieve this we use a custom widget which adds in each select box a
+        'Add New' button which takes care of the object creation and also
+        updating the original select box with the new entries. The only caveat
+        is that we need to pass manually to the widget the name of the foreign
+        object as it is depicted in our database in cases where the field name
+        is not the same.
+        """
+        class Meta:
+            model = Station
+            exclude = ('overseers', 'creator', 'point')
+            if not settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
+                exclude = exclude + ('maintainers',)
 
-    if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
-        maintainers = AutoCompleteSelectMultipleField(
-            'maintainers', required=False)
+        political_division = forms.ModelChoiceField(
+            PoliticalDivision.objects,
+            widget=SelectWithPop(model_name='politicaldivision'),
+            required=False)
+        water_basin = forms.ModelChoiceField(
+            WaterBasin.objects,
+            widget=SelectWithPop(model_name='waterbasin'),
+            required=False)
+        water_division = forms.ModelChoiceField(
+            WaterDivision.objects,
+            widget=SelectWithPop(model_name='waterdivision'),
+            required=False)
+        # owner should be modified to allow either Person or Organization add
+        owner = forms.ModelChoiceField(
+            Lentity.objects, widget=SelectWithPop(model_name='lentity'))
 
-    def clean_altitude(self):
-        value = self.cleaned_data['altitude']
-        if not value is None and (value > 8850 or value < -422):
-            raise forms.ValidationError(
-                _("%f is not a valid altitude") % (value,))
-        return self.cleaned_data['altitude']
+        if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
+            maintainers = AutoCompleteSelectMultipleField(
+                'maintainers', required=False)
+
+        def clean_altitude(self):
+            value = self.cleaned_data['altitude']
+            if value is not None and (value > 8850 or value < -422):
+                raise forms.ValidationError(
+                    _("%f is not a valid altitude") % (value,))
+            return self.cleaned_data['altitude']
+
+    return StationFormClass(*args, **kwargs)
 
 
 class InstrumentForm(ModelForm):
@@ -398,7 +411,6 @@ class TimeseriesForm(ModelForm):
             return None
         self.cleaned_data['data'].seek(0)
         ts = timeseries.Timeseries()
-        data = self.cleaned_data['data']
 
         try:
             ts.read_file(self.cleaned_data['data'])
@@ -441,7 +453,7 @@ class TimeseriesForm(ModelForm):
                     _("Invalid offsets: Nominal"
                       " offsets must be both null or both not null!"))
 
-        #add a validation test for instrument in station:
+        # add a validation test for instrument in station:
         instr = self.cleaned_data.get('instrument', None)
         if instr:
             stat = self.cleaned_data.get('gentity', None)
@@ -507,7 +519,7 @@ class TimeseriesDataForm(TimeseriesForm):
         label=_('New data policy'),
         required=False,
         choices=(('A', 'Append to existing'),
-                    ('O', 'Overwrite existing'),))
+                 ('O', 'Overwrite existing'),))
 
 
 class RegistrationForm(RegistrationFormTermsOfService):
