@@ -1,7 +1,8 @@
 from itertools import takewhile
 import re
 from StringIO import StringIO
-from tempfile import TemporaryFile
+import shutil
+import tempfile
 from urllib import urlencode
 
 import django
@@ -363,11 +364,30 @@ class SearchTestCase(TestCase):
         self.assertEquals(queryset[0].name, 'Tharbad')
 
 
+class RandomMediaRoot(override_settings):
+    """
+    Override MEDIA_ROOT to a temporary directory.
+
+    Specifying "@RandomMediaRoot()" as a decorator is the same as
+    "@override_settings(MEDIA_ROOT=tempfile.mkdtemp())", except that in the
+    end it removes the temporary directory.
+    """
+
+    def __init__(self):
+        self.tmpdir = tempfile.mkdtemp()
+        super(RandomMediaRoot, self).__init__(MEDIA_ROOT=self.tmpdir)
+
+    def disable(self):
+        super(RandomMediaRoot, self).disable()
+        shutil.rmtree(self.tmpdir)
+
+
 class GentityFileTestCase(TestCase):
 
     def setUp(self):
         create_test_data()
 
+    @RandomMediaRoot()
     def test_gentity_file(self):
 
         # Upload a gentity file
@@ -377,7 +397,7 @@ class GentityFileTestCase(TestCase):
         self.assertEquals(GentityFile.objects.filter(gentity__id=gentity_id
                                                      ).count(), 0)
         filetype_id = FileType.objects.get(mime_type='image/jpeg').id
-        with TemporaryFile(suffix='.jpg') as tmpfile:
+        with tempfile.TemporaryFile(suffix='.jpg') as tmpfile:
             tmpfile.write('Irrelevant data\n')
             tmpfile.seek(0)
             response = self.client.post(reverse('gentityfile_add'),
