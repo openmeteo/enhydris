@@ -5,6 +5,7 @@ from django.contrib.gis.db.backends import postgis
 from django.contrib.auth.models import User, Group
 from django.db.models.signals import post_syncdb, post_save
 from django.db.models import Q
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import signals
 from pthelma import timeseries
@@ -12,7 +13,7 @@ from enhydris.hcore.utils import *
 
 # Lookups
 class Lookup(models.Model):
-    last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
+    last_modified = models.DateTimeField(default=timezone.now, null=True, editable=False)
 
     descr = models.CharField(max_length=200, blank=True)
     descr_alt = models.CharField(max_length=200, blank=True)
@@ -36,7 +37,7 @@ def post_save_person_or_organization(sender, **kwargs):
 
 
 class Lentity(models.Model):
-    last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
+    last_modified = models.DateTimeField(default=timezone.now, null=True, editable=False)
 
     remarks = models.TextField(blank=True)
     remarks_alt = models.TextField(blank=True)
@@ -98,7 +99,7 @@ post_save.connect(post_save_person_or_organization, sender=Organization)
 
 # Gentity and direct descendants
 class Gentity(models.Model):
-    last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
+    last_modified = models.DateTimeField(default=timezone.now, null=True, editable=False)
 
     water_basin = models.ForeignKey('WaterBasin', null=True, blank=True)
     water_division = models.ForeignKey('WaterDivision', null=True, blank=True)
@@ -227,7 +228,7 @@ class WaterBasin(Garea):
 class GentityAltCodeType(Lookup): pass
 
 class GentityAltCode(models.Model):
-    last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
+    last_modified = models.DateTimeField(default=timezone.now, null=True, editable=False)
 
     gentity = models.ForeignKey(Gentity)
     type = models.ForeignKey(GentityAltCodeType)
@@ -245,7 +246,7 @@ class GentityGenericDataType(Lookup):
     file_extension = models.CharField(max_length=16)
 
 class GentityGenericData(models.Model):
-    last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
+    last_modified = models.DateTimeField(default=timezone.now, null=True, editable=False)
 
     gentity = models.ForeignKey(Gentity)
     descr = models.CharField(max_length=100)
@@ -270,7 +271,7 @@ class FileType(Lookup):
         return str(self.id)
 
 class GentityFile(models.Model):
-    last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
+    last_modified = models.DateTimeField(default=timezone.now, null=True, editable=False)
 
     gentity = models.ForeignKey(Gentity)
     date = models.DateField(blank=True, null=True)
@@ -292,7 +293,7 @@ class GentityFile(models.Model):
 class EventType(Lookup): pass
 
 class GentityEvent(models.Model):
-    last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
+    last_modified = models.DateTimeField(default=timezone.now, null=True, editable=False)
 
     gentity = models.ForeignKey(Gentity)
     date = models.DateField()
@@ -374,7 +375,7 @@ class Station(Gpoint):
 signals.post_save.connect(handle_maintainer_permissions, Station)
 
 class Overseer(models.Model):
-    last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
+    last_modified = models.DateTimeField(default=timezone.now, null=True, editable=False)
 
     station = models.ForeignKey(Station)
     person = models.ForeignKey(Person)
@@ -391,7 +392,7 @@ class Instrument(models.Model):
     class Meta:
         ordering = ('name',)
 
-    last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
+    last_modified = models.DateTimeField(default=timezone.now, null=True, editable=False)
 
     station = models.ForeignKey(Station)
     type = models.ForeignKey(InstrumentType)
@@ -421,7 +422,7 @@ class UnitOfMeasurement(Lookup):
         return str(self.id)
 
 class TimeZone(models.Model):
-    last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
+    last_modified = models.DateTimeField(default=timezone.now, null=True, editable=False)
 
     code = models.CharField(max_length=50)
     utc_offset = models.SmallIntegerField()
@@ -482,7 +483,7 @@ class IntervalType(Lookup):
         return self.descr
 
 class Timeseries(models.Model):
-    last_modified = models.DateTimeField(auto_now=True, null=True, editable=False)
+    last_modified = models.DateTimeField(default=timezone.now, null=True, editable=False)
 
     gentity = models.ForeignKey(Gentity, related_name="timeseries")
     variable = models.ForeignKey(Variable)
