@@ -640,10 +640,10 @@ Time series and related models
    step and they are several:
 
    .. attribute:: enhydris.hcore.models.Timeseries.time_step
-                  enhydris.hcore.models.Timeseries.nominal_offset_minutes
-                  enhydris.hcore.models.Timeseries.nominal_offset_months
-                  enhydris.hcore.models.Timeseries.actual_offset_minutes
-                  enhydris.hcore.models.Timeseries.actual_offset_months
+                  enhydris.hcore.models.Timeseries.timestamp_rounding_minutes
+                  enhydris.hcore.models.Timeseries.timestamp_rounding_months
+                  enhydris.hcore.models.Timeseries.timestamp_offset_minutes
+                  enhydris.hcore.models.Timeseries.timestamp_offset_months
 
       The :attr:`~enhydris.hcore.models.Timeseries.time_step` is a
       foreign key to :class:`~enhydris.hcore.models.TimeStep`. Some
@@ -653,20 +653,20 @@ Time series and related models
       contains an appropriate time step. For an explanation of the
       other four attributes, see the :class:`timeseries.TimeStep`
       class.
-      :attr:`~enhydris.hcore.models.Timeseries.actual_offset_minutes`
+      :attr:`~enhydris.hcore.models.Timeseries.timestamp_offset_minutes`
       and
-      :attr:`~enhydris.hcore.models.Timeseries.actual_offset_months`
+      :attr:`~enhydris.hcore.models.Timeseries.timestamp_offset_months`
       must always be present if the time step is not null.  The
-      nominal offset attributes may, however, be null, if the time
+      rounding attributes may, however, be null, if the time
       series is not strict, that is, if it does have a time step, but
       that time step contains irregularities. As an example, a time
       series measured by an automatic meteorological station every ten
-      minutes will usually have a nominal offset of 0 minutes, which
+      minutes will usually have a rounding of 0 minutes, which
       means the timestamps will end in :10, :20, :30, etc; but a clock
       error or a setup error could result in the timestamps ending in
       :11, :21, :31 for a brief period of time. In that case, we say
       that the time series has a nonstrict time step of 10 minutes,
-      which means it has no specific nominal offset.
+      which means it has no specific rounding.
 
 The time series records are stored in the ``ts_records`` table, the format of
 which is `documented in pthelma`_.  Although this table corresponds to a Django

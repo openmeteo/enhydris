@@ -7,7 +7,7 @@ Comment=
 Comment=ΜΟΝΑΔΕΣ (mm)
 Timezone=EET (UTC+0200)
 Time_step=1440,0
-Actual_offset=0,0
+Timestamp_offset=0,0
 Variable=ΒΡΟΧΟΠΤΩΣΗ
 
 1960-11-02 08:00,0,

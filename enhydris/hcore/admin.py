@@ -180,11 +180,11 @@ class TimeseriesAdmin(admin.ModelAdmin):
     # ChangeList format
     list_display = ('id', 'name', 'remarks', 'gentity', 'variable', 
         'unit_of_measurement', 'precision', 'time_zone', 'instrument',
-        'time_step', 'nominal_offset_minutes', 'nominal_offset_months', 
-        'interval_type', 'actual_offset_minutes', 'actual_offset_months')
+        'time_step', 'timestamp_rounding_minutes', 'timestamp_rounding_months', 
+        'interval_type', 'timestamp_offset_minutes', 'timestamp_offset_months')
     list_filter = ('unit_of_measurement','precision', 'time_zone', 
-                    'nominal_offset_minutes', 'nominal_offset_months',
-                    'actual_offset_minutes', 'actual_offset_months')
+                    'timestamp_rounding_minutes', 'timestamp_rounding_months',
+                    'timestamp_offset_minutes', 'timestamp_offset_months')
 
 
 admin.site.register(Timeseries, TimeseriesAdmin)

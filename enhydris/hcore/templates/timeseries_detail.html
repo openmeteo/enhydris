@@ -236,21 +236,21 @@
                                 {% endif %}
                             </td>
                           </tr>
-                          {% ifequal timeseries.nominal_offset_minutes NULL %}
+                          {% ifequal timeseries.timestamp_rounding_minutes NULL %}
                             <tr>
-                              <th>{% trans 'Time stamps regularity' %}</th>
+                              <th>{% trans 'Timestamp regularity' %}</th>
                               <td>{% trans 'Time step is not strict' %}</td>
                             </tr>
                           {% else %}
                             <tr>
-                              <th>{% trans 'Time stamps regularity' %}</th>
+                              <th>{% trans 'Timestamp regularity' %}</th>
                               <td>{% trans 'Time step is strict' %}</td>
                             </tr>
                             <tr>
-                              <th>{% trans ' Time stamps nominal offset' %}</th>
-                              <td>{{ timeseries.nominal_offset_minutes }}
+                              <th>{% trans ' Timestamp rounding' %}</th>
+                              <td>{{ timeseries.timestamp_rounding_minutes }}
                                 {% trans 'minutes' %},
-                                {{ timeseries.nominal_offset_months }}
+                                {{ timeseries.timestamp_rounding_months }}
                                 {% trans 'months' %}
                               </td>
                             </tr>
@@ -264,12 +264,12 @@
                                 {% endif %}
                             </td>
                           </tr>
-                          {% ifnotequal timeseries.actual_offset_months NULL %}
+                          {% ifnotequal timeseries.timestamp_offset_months NULL %}
                             <tr>
-                              <th>{% trans 'Actual offset of reference' %}</th>
-                              <td>{{ timeseries.actual_offset_minutes }}
+                              <th>{% trans 'Timestamp offset' %}</th>
+                              <td>{{ timeseries.timestamp_offset_minutes }}
                                 {% trans 'minutes' %},
-                                {{ timeseries.actual_offset_months }}
+                                {{ timeseries.timestamp_offset_months }}
                                 {% trans 'months' %}
                               </td>
                             </tr>

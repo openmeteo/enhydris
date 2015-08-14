@@ -425,33 +425,32 @@ class TimeseriesForm(ModelForm):
         inconsistencies.
         """
         time_step = self.cleaned_data.get('time_step', None)
-        nominal_offset_minutes = self.cleaned_data.get(
-            'nominal_offset_minutes', None)
-        nominal_offset_months = self.cleaned_data.get(
-            'nominal_offset_months', None)
-        actual_offset_minutes = self.cleaned_data.get(
-            'actual_offset_minutes', None)
-        actual_offset_months = self.cleaned_data.get(
-            'actual_offset_months', None)
+        timestamp_rounding_minutes = self.cleaned_data.get(
+            'timestamp_rounding_minutes', None)
+        timestamp_rounding_months = self.cleaned_data.get(
+            'timestamp_rounding_months', None)
+        timestamp_offset_minutes = self.cleaned_data.get(
+            'timestamp_offset_minutes', None)
+        timestamp_offset_months = self.cleaned_data.get(
+            'timestamp_offset_months', None)
 
-        if not time_step:
-            if nominal_offset_minutes or nominal_offset_months or \
-                    actual_offset_minutes or actual_offset_months:
-                raise forms.ValidationError(
-                    _("Invalid Timestep: If time step is"
-                      " null, the offsets must also be null!"))
-        else:
-            if actual_offset_minutes is None or actual_offset_months is None:
-                raise forms.ValidationError(
-                    _("Invalid offset: If time step is"
-                      " not null, actual offset values must be provided!"))
-            if (nominal_offset_minutes is None
-                and nominal_offset_months is not None) \
-                    or (nominal_offset_minutes is not None
-                        and nominal_offset_months is None):
-                raise forms.ValidationError(
-                    _("Invalid offsets: Nominal"
-                      " offsets must be both null or both not null!"))
+        if (not time_step) and (
+                timestamp_rounding_minutes or timestamp_rounding_months or
+                timestamp_offset_minutes or timestamp_offset_months):
+            raise forms.ValidationError(
+                _("Invalid Timestep: If time step is"
+                  " null, the rounding and offset must also be null"))
+        elif time_step and (timestamp_offset_minutes is None or
+                            timestamp_offset_months is None):
+            raise forms.ValidationError(
+                _("Invalid offset: If time step is"
+                  " not null, timestamp offset values must be provided"))
+        elif time_step and ((timestamp_rounding_minutes is None
+                             and timestamp_rounding_months is not None) or
+                            (timestamp_rounding_minutes is not None
+                             and timestamp_rounding_months is None)):
+            raise forms.ValidationError(
+                _("Invalid rounding: both must be null or not null"))
 
         # add a validation test for instrument in station:
         instr = self.cleaned_data.get('instrument', None)

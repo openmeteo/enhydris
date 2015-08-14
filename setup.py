@@ -14,7 +14,7 @@ installation_requirements = [
     "django-ajax-selects>=1.3.4,<2",
     "Markdown>=2.1,<3",
     "django-simple-captcha>=0.4",
-    "pthelma>=0.9,<1",
+    "pthelma>=0.12,<1",
     "gdal>=1.6",
     "django-bootstrap3>=5.1,<6",
 ]

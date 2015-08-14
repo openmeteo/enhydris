@@ -498,10 +498,12 @@ class Timeseries(models.Model):
     instrument = models.ForeignKey(Instrument, null=True, blank=True)
     time_step = models.ForeignKey(TimeStep, null=True, blank=True)
     interval_type = models.ForeignKey(IntervalType, null=True, blank=True)
-    nominal_offset_minutes = models.PositiveIntegerField(null=True, blank=True)
-    nominal_offset_months = models.PositiveSmallIntegerField(null=True, blank=True)
-    actual_offset_minutes = models.IntegerField(null=True, blank=True)
-    actual_offset_months = models.SmallIntegerField(null=True, blank=True)
+    timestamp_rounding_minutes = models.PositiveIntegerField(null=True,
+                                                             blank=True)
+    timestamp_rounding_months = models.PositiveSmallIntegerField(null=True,
+                                                                 blank=True)
+    timestamp_offset_minutes = models.IntegerField(null=True, blank=True)
+    timestamp_offset_months = models.SmallIntegerField(null=True, blank=True)
     class Meta:
         verbose_name = "Time Series"
         verbose_name_plural = "Time Series"
@@ -548,18 +550,18 @@ class Timeseries(models.Model):
         return self.name
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         if not self.time_step:
-            if self.nominal_offset_minutes or self.nominal_offset_months \
-            or self.actual_offset_minutes or self.actual_offset_months:
-                raise Exception(_("Invalid time step: if time_step is null, offsets must also be null"))
+            if self.timestamp_rounding_minutes or self.timestamp_rounding_months \
+            or self.timestamp_offset_minutes or self.timestamp_offset_months:
+                raise Exception(_("Invalid time step: if time_step is null, rounding and offset must also be null"))
         else:
-            if self.actual_offset_minutes is None \
-            or self.actual_offset_months is None:
-                raise Exception(_("Invalid time step: if time_step is not null, actual offsets must be provided"))
-            if (self.nominal_offset_minutes is None
-                                and self.nominal_offset_months is not None) \
-                        or (self.nominal_offset_minutes is not None
-                                    and self.nominal_offset_months is None):
-                raise Exception(_("Invalid time step: nominal offsets must be both null or both not null"))
+            if self.timestamp_offset_minutes is None \
+            or self.timestamp_offset_months is None:
+                raise Exception(_("Invalid time step: if time_step is not null, offset must be provided"))
+            if (self.timestamp_rounding_minutes is None
+                                and self.timestamp_rounding_months is not None) \
+                        or (self.timestamp_rounding_minutes is not None
+                                    and self.timestamp_rounding_months is None):
+                raise Exception(_("Invalid time step: roundings must be both null or not null"))
         super(Timeseries, self).save(force_insert, force_update, *args, **kwargs)
 
 
@@ -618,12 +620,12 @@ def ReadTimeStep(id, timeseries_instance = None):
                                     else 0,
         length_months = t.time_step.length_months if t.time_step
                                     else 0,
-        nominal_offset = None if None in
-                    (t.nominal_offset_minutes, t.nominal_offset_months)
-               else (t.nominal_offset_minutes, t.nominal_offset_months),
-        actual_offset = None if None in
-                    (t.actual_offset_minutes, t.actual_offset_months)
-               else (t.actual_offset_minutes, t.actual_offset_months),
+        timestamp_rounding = None if None in
+                    (t.timestamp_rounding_minutes, t.timestamp_rounding_months)
+               else (t.timestamp_rounding_minutes, t.timestamp_rounding_months),
+        timestamp_offset = None if None in
+                    (t.timestamp_offset_minutes, t.timestamp_offset_months)
+               else (t.timestamp_offset_minutes, t.timestamp_offset_months),
         interval_type = None if not t.interval_type else\
                 {'sum': it.SUM, 'average': it.AVERAGE,\
                  'vector_average': it.VECTOR_AVERAGE,\
