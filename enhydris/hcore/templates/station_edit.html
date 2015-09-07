@@ -7,6 +7,11 @@
 
 {% block extrajs %}
 <script type="text/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
+<script type="text/javascript">
+  $(document).ready(function(){
+    enhydris.coordinatesUI.initializeCoordinatesView();
+  });
+</script>
 {% endblock %}
 
 
@@ -44,25 +49,34 @@
           {% bootstrap_field form.is_active %}
           {% bootstrap_field form.start_date %}
           {% bootstrap_field form.end_date %}
+          <hr>
         </div>
         <div class="col-sm-3">
+          {% bootstrap_field form.ordinate %}
+          {% bootstrap_field form.abscissa %}
           {% bootstrap_field form.srid %}
-          {% bootstrap_field form.approximate %}
           {% bootstrap_field form.altitude %}
           {% bootstrap_field form.asrid %}
-          {% bootstrap_field form.abscissa %}
-          {% bootstrap_field form.ordinate %}
+          {% bootstrap_field form.approximate %}
+           <a id="btnCoordinates"
+              form-view='simple'
+              class="btn btn-sm btn-primary"
+              onclick="enhydris.coordinatesUI.toggleCoordinatesView()">
+           </a>
+           <hr>
         </div>
         <div class="col-sm-3">
           {% bootstrap_field form.remarks %}
           {% bootstrap_field form.name_alt %}
           {% bootstrap_field form.short_name_alt %}
           {% bootstrap_field form.remarks_alt %}
+          <hr>
         </div>
         <div class="col-sm-3">
           {% bootstrap_field form.owner %}
           {% bootstrap_field form.copyright_holder %}
           {% bootstrap_field form.copyright_years %}
+          <hr>
         </div>
     </fieldset>
   </div>

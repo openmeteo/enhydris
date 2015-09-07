@@ -256,3 +256,92 @@ enhydris.mapModule = (function namespace() {
         getRectAreaResults: getRectAreaResults
     };
 }());
+
+enhydris.coordinatesUI = (function namespace() {
+    'use strict';
+    /* To determine the location of a station, the user must set the
+    abscissa , the ordinate and the id of the reference system ,
+    information very specialized and incomprehensible to most users
+    who just know the longitude and latitude of the station.
+    In order to simplify UI when user adds new or edits station,
+    openmeteo developers team decided to intergate a fix with minimal as
+    possible modifications at backend and add javascript functions to handle
+    this.
+    */
+
+    // enhydris.transCoordinatesUI init at 'base-sample.html'
+    var transText = enhydris.transCoordinatesUI;
+
+    var switchToSimpleView = function () {
+        // Hide elements for simple view
+        var elementIDArray = ['id_asrid','id_srid','id_approximate'];
+        for (var i = 0; i < elementIDArray.length; i++) {
+            $('#' + elementIDArray[i]).hide();
+            $('label[for="' + elementIDArray[i] + '"]').hide();
+        }
+        // Prepare switch for the next view: advanced
+        $('#btnCoordinates').html(transText.btnAdvanceView);
+        $('#btnCoordinates').attr('form-view', 'advanced');
+        // Alter elements attributes
+        $('label[for="id_srid"]').text(transText.formSridLabel);
+        $('label[for="id_abscissa"]').text(transText.formLongtitudeLabel);
+        $('#id_abscissa').attr('placeholder', 'ex. 20.94546');
+        $('label[for="id_ordinate"]').text(transText.formLatitudeLabel);
+        $('#id_ordinate').attr('placeholder', 'ex. 39.12171');
+    };
+
+    var switchToAdvancedView = function () {
+        // Show elements for advanced view
+        var elementIDArray = ['id_asrid','id_srid','id_approximate'];
+        for (var i = 0; i < elementIDArray.length; i++) {
+            $('#' + elementIDArray[i]).show();
+            $('label[for="' + elementIDArray[i] + '"]').show();
+        }
+        // Prepare  switch for the next view: simple
+        $('#btnCoordinates').html(transText.btnSimpleView);
+        $('#btnCoordinates').attr('form-view', 'simple');
+        // Alter elements attributes
+        $('label[for="id_srid"]').text(transText.formSridLabel);
+        $('label[for="id_abscissa"]').text(transText.formAbscissaLabel);
+        $('#id_abscissa').attr('placeholder', 'ex. 20.94546');
+        $('label[for="id_ordinate"]').text(transText.formOrdinateLabel);
+        $('#id_ordinate').attr('placeholder', 'ex. 39.12171');
+    };
+
+    var toggleCoordinatesView = function () {
+        // Main Switch, handles on click in btn id='btnCoordinates'
+        var viewCase = $('#btnCoordinates').attr('form-view');
+        if (viewCase === 'simple') {
+            switchToSimpleView();
+        }
+        if (viewCase === 'advanced') {
+            switchToAdvancedView();
+        }
+    };
+
+    var initializeCoordinatesView = function () {
+        // if SRID is '' or null then '4326'
+        // This is equal to say 'SRID' default value equals '4326'
+        if ($('#id_srid').val() === '' || $('#id_srid').val() === null) {
+            $('#id_srid').attr('value', '4326');
+        }
+        // Initialize Form elements
+        var sridValue = $('#id_srid').val();
+        var asridValue = $('#id_asrid').val();
+        // if the srid is 4326 or null, AND asrid is null
+
+        if (sridValue === '4326' && asridValue === '') {
+            switchToSimpleView();
+            $('#btnCoordinates').show();
+            $("label[for='id_asrid']").text(transText.formASridLabel);
+        } else {
+            $('#btnCoordinates').hide();
+            $('label[for="id_asrid"]').text(transText.formASridLabel);
+            switchToAdvancedView();
+        }
+    };
+    return {
+        initializeCoordinatesView: initializeCoordinatesView,
+        toggleCoordinatesView: toggleCoordinatesView
+    };
+}());
