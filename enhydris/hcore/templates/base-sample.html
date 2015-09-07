@@ -5,80 +5,94 @@
 <html lang="en">
 <head>
   <title>{% block title %}{% trans "Enhydris" %}{% endblock %}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  {% block js-globals %}{% endblock %}
-  {% block basecss %}
-  <link media="screen" href="{% static "css/tablesorter.css" %}" type="text/css" rel="stylesheet" />
-      <link type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/css/base/jquery.ui.all.min.css" rel="stylesheet" />
-      <link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% block js-globals %}{% endblock %}
+    {% block basecss %}
+      <link href="{% static 'css/enhydris.css' %}" type="text/css" rel="stylesheet" />
       <link media="screen" href="{% static "css/olmap.css" %}" type="text/css" rel="stylesheet" />
-      <link media="screen" href="{% static "css/base.css" %}" type="text/css" rel="stylesheet" />
       {% bootstrap_css %}
-  {% endblock %}
-  {% block shortcut_icon %}{% endblock %}
-  {% block extracss %}{% endblock %}
-  {% block extra_head %}{% endblock %}
+      <link rel="stylesheet" media="screen" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/css/bootstrap-datepicker.min.css">
+    {% endblock %}
+    {% block shortcut_icon %}{% endblock %}
+    {% block extracss %}{% endblock %}
+    {% block extra_head %}{% endblock %}
 </head>
 <body onload="enhydris.map = enhydris.map_module.init()">
-  <div id="container">
-    <nav class="navbar navbar-inverse">
-      <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed"
-              data-toggle="collapse" data-target="#navbarlinks">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="{% url "station_list" %}">{% trans "Stations" %}</a>
-        </div>
-
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="navbarlinks">
-          <form id="global-search-form" class="navbar-form navbar-left" role="search"
-              action='{% url "station_list" %}' method="get">
-            <div class="form-group">
+  <div class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="{% url "station_list" %}">{% trans "Stations" %}</a>
+      </div>
+      <div class="navbar-collapse collapse">
+        <form class="navbar-form navbar-left" role="search" action='{% url "station_list" %}' method="get">
+          <div class="form-group">
+            <div class="input-group">
               <input id="search_input" type="text" name="q"
                 value="{{ query|escape }}" class="form-control"
                 placeholder="{% trans 'Search stations' %}">
               <input type="hidden" name="check" value="search" />
+              <div class="input-group-btn">
+                <button class="btn btn-primary btn-block glyphicon glyphicon-search"></button>
+              </div>
             </div>
+          </div>
           </form>
           <ul class="nav navbar-nav">
-            <li><a href="#searchtips"
-                data-toggle="modal">{% trans "Search tips" %}</a></li>
+            <li>
+                <a href="#searchtips" data-toggle="modal">
+                  <i class="glyphicon glyphicon-eye-open"></i> {% trans "Search tips" %}
+                </a>
+            </li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
             {% if user.is_authenticated %}
+              <li>
+                <p class="navbar-text">
+                  &nbsp;&nbsp;&nbsp;{% trans "Logged in as" %} <span class="text-success">{{ user }}</span></p>
+              </li>
               {% if perms.hcore.add_station %}
                 <li>
-                  <a href="{% url "station_add" %}">{% trans "New&nbsp;station" %}</a>
+                    <a href="{% url "station_add" %}">
+                      <i class="glyphicon glyphicon-plus"></i> {% trans "New&nbsp;station" %}
+                    </a>
                 </li>
               {% endif %}
               {% with user.username as user_username %}
                 <li>
-                  <a href='{% url "current_user_profile" %}'>{% trans "Settings" %}</a>
+                    <a href='{% url "current_user_profile" %}'>
+                      <i class="glyphicon glyphicon-cog"></i> {% trans "Settings" %}
+                    </a>
                 </li>
                 <li>
-                  <a href='{% url "auth_logout" %}?next={{ request.path }}'>Logout&nbsp;{{ user_username }}</a>
+                    <a href='{% url "auth_logout" %}?next={{ request.path }}'>
+                      <i class="glyphicon glyphicon-log-out"></i> {% trans "Logout" %}
+                    </a>
                 </li>
               {% endwith %}
             {% else %}
               <li>
-                <a class="loginform" href='{% url "auth_login" %}?next={{request.path}}'>{% trans "Login" %}</a>
+                  <a href='{% url "auth_login" %}?next={{request.path}}'>
+                    <i class="glyphicon glyphicon-off"></i> {% trans "Login" %}
+                  </a>
               </li>
               {% if REGISTRATION_OPEN %}
                 <li>
-                  <a href='{% url "registration_register" %}'>{% trans "Register" %}</a>
+                    <a href='{% url "registration_register" %}'>
+                      <i class="glyphicon glyphicon-user"></i> {% trans "Register" %}
+                    </a>
                 </li>
               {% endif %}
             {% endif %}
           </ul>
-        </div><!-- /.navbar-collapse -->
-      </div><!-- /.container-fluid -->
-    </nav>
+        </div> <!-- navbar-collapse -->
+    </div> <!--container - fluid -->
+  </div> <!-- navbar -->
 
     <div id="searchtips" class="modal fade" tabindex="-1" role="dialog"
         aria-hidden="true" aria-labelledby="SearchTips">
@@ -129,29 +143,28 @@
       </div>
     </div>
 
-    <div id="content">
-      <div id="body">
+    <div>
+      <div>
         {% if notifications %}
-          <ul class="notifications">
-            {% for message in notifications %}
-              <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-          </ul>
+        <div class="alerts">
+          {% for message in notifications %}
+            <div class="alert alert-warning alert-dismissible" role="alert">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <p> {{ message }} </p>
+            </div>
+          {% endfor %}
         {% endif %}
         {% block messages %}
           {% if messages %}
-            <div class="messages">
-              {% for message in messages %}
-                <span class="i16 tip message" style="font-size:0.8em">{{ message }}</span>
-              {% endfor %}
+            <div class="alert alert-info alert-dismissible" role="alert">
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <p> {{ message }} </p>
             </div>
           {% endif %}
         {% endblock %}
         {% block content %}
-          <div id="body_main">
             {% block content_main %}
             {% endblock %}
-          </div>
         {% endblock %}
       </div>
     </div>
@@ -165,17 +178,15 @@
   </footer>
 
 {% block bodyend %}{% endblock %}
-  </div><!--container-->
+  </div>
 
 {% block basejs %}
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
   {% bootstrap_javascript %}
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.10.8/jquery.tablesorter.min.js"></script>
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/openlayers/2.12/OpenLayers.min.js"></script>
-  <script type="text/javascript" src="{% static "js/jquery.placeholder-1.0.1.js" %}"></script>
   <script type="text/javascript" src="{% static "js/arg.js.v1.1.min.js" %}"></script>
   <script type="text/javascript" src="//openstreetmap.org/openlayers/OpenStreetMap.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/js/bootstrap-datepicker.min.js" charset="UTF-8"></script>
   <script type="text/javascript">
     var enhydris = {};
     enhydris.staticUrl = '{% static "" %}';

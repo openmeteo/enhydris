@@ -20,9 +20,6 @@ urlpatterns = patterns(
     (r'^stations/delete/(?P<station_id>\d+)/$',
      views.station_delete, {}, 'station_delete'),
 
-    (r'^map/$',
-        views.map_view, {}, 'map_view'),
-
     (r'^get_subdivision/(?P<division_id>\d+)/$',
      views.get_subdivision, {}, 'get_subdivision'),
 

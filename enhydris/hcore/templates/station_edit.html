@@ -1,146 +1,74 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load static %}
-{% load form_as_table %}
+{% load bootstrap3 %}
 {% load dict_parser %}
 
 
-{% block extracss %}
-  <link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
-  <style type="text/css">
-    textarea {
-      font-size:10px;
-    }
-    </style>
-{% endblock %}
-
-
 {% block extrajs %}
-  <script type="text/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
-  <script type="text/javascript">
-    $(document).ready(function(){
-      $(".formsets textarea").attr('rows','3');
-      $(".formsets textarea").attr('cols','20');
-      $(".formsets input").attr('size','15');
-      $("[id$='_date']").datepicker({ dateFormat: 'yy-mm-dd' });
-    });
-
-    function increment_form_ids(el, to, name) {
-      var from = to-1
-      $(':input', $(el)).each(function(i,e){
-        var old_name = $(e).attr('name');
-        var old_id = $(e).attr('id');
-        $(e).attr('name', old_name.replace(from, to));
-        $(e).attr('id', old_id.replace(from, to));
-        if ( old_id.match(/_date$/) ) {
-          $(e).removeClass('hasDatepicker').datepicker({
-            showOn: 'focus',
-            owButtonPanel: true });
-          }
-          $(e).val('');
-        });
-
-        $('label', $(el)).each(function(i,e){
-          var old_for = $(e).attr('for');
-          $(e).attr('for', old_for.replace(from,to));
-        });
-      }
-
-    function add_inline_form(name) {
-      var first = $('#'+name+'_row_1');
-      var last = $('.'+name+'_last_row');
-      var copy = $(last).clone(true);
-      var count = $(first).parent().children().length-1;
-      $(last).removeClass(name+'_last_row');
-      $(last).after(copy);
-      $('input#id_'+name+'-TOTAL_FORMS').val(count+2)
-      increment_form_ids($(copy), count+1, name);
-      return false;
-    }
-  </script>
-  <script type="text/javascript">
-    $(function() {
-      $("#tabs").tabs();
-    });
-    </script>
+<script type="text/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
 {% endblock %}
 
 
 {% block title %}
-  {% if form.instance.pk %}
-    {% trans "Edit Station"  %}
-  {% else %}
-    {% trans "Add Station" %}
-  {% endif %}
+{% if form.instance.pk %}
+  {% trans "Edit Station"  %}
+{% else %}
+  {% trans "Add Station" %}
+{% endif %}
 {% endblock %}
 
+
 {% block content %}
+<div class="container">
+  {% if form.instance.pk %}
+  <h3>
+    {% trans "Edit station details for " %}
+      <a href="{% url "station_detail" form.instance.id %}">{{ form.instance.name }}</a> :
+  </h3>
+  {% else %}
+    <h3>{% trans "Fill the station details:" %}</h3>
+  {% endif %}
   <form method="post" action="" class="wide">
     {% csrf_token %}
-    <div id="tabs">
-      <ul>
-        <li class="noborder"><a href="#tabs-1">Station</a></li>
-        {% if form.instance.pk %}
-          {% for key,formset in formsets.items %}
-            <li class="noborder"><a href="#tabs-{{forloop.counter|add:"1"}}">{% if not formset.errors|list_empty  %}<span style='color:#C27878'>*&nbsp;</span>{% endif %}{{formset.prefix|title}}</a></li>
-          {% endfor %}
-        {% endif %}
-      </ul>
-      <div id="tabs-1">
-        {% if form.instance.pk %}
-          <h3>
-              {% trans "Edit station details for " %}
-              <a href="{% url "station_detail" form.instance.id %}">{{ form.instance.name }}</a> :
-          </h3>
-        {% else %}
-          <h3>{% trans "Fill the station details:" %}</h3>
-        {% endif %}
-        {% if form.errors %}
-          <p class="fielderrors">{% trans "Please correct the errors below: " %}{{ form.non_field_errors }}</p>
-        {% endif %}
-        {% for key,formset in formsets.items %}
-          {% if not formset.errors|list_empty  %}
-            <p class="fielderrors">{% trans "There were some errors in one of the forms. Please correct them and click the submit button again." %}</p>
-          {% endif %}
-        {% endfor %}
-        <table class="table_container">
-          <tbody>
-            {% form_as_table_rows form  %}
-          </tbody>
-        </table>
-        {% for key,formset in formsets.items %}
-          {{ formset.management_form }}
-        {% endfor %}
-      </div>
-      {% if not form.instance.pk %}
-        <div class="ui-widget">
-          <div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;">
-            <p><span class="ui-icon ui-icon-info" style="float:left; margin-right: .3em;"></span>
-              <p>{% trans "Create the station and then you'll be able to add more details."%}</p>
-          </div>
+    <div class="row">
+      <fieldset class="well well-sm">
+        <div class="col-sm-3">
+          {% bootstrap_field form.water_basin %}
+          {% bootstrap_field form.water_division %}
+          {% bootstrap_field form.political_division %}
+          {% bootstrap_field form.name %}
+          {% bootstrap_field form.short_name %}
+          {% bootstrap_field form.stype %}
+          {% bootstrap_field form.is_automatic %}
+          {% bootstrap_field form.is_active %}
+          {% bootstrap_field form.start_date %}
+          {% bootstrap_field form.end_date %}
         </div>
-      {% else %}
-        {% for key,formset in formsets.items %}
-          <div id="tabs-{{forloop.counter|add:"1"}}" style="overflow:auto;">
-            <h3>Station {{formset.prefix|title}}:</h3>
-            <div class='formsets'>
-              <p class="anchor_override" style="cursor:pointer;text-align:left">
-                <a class="add" onclick="return add_inline_form('{{ formset.prefix }}')">
-                  <img src="{% static "admin/img/icon_addlink.gif" %}" width="10" height="10" alt="Add Another" border="0"/>
-                    add new {{ formset.prefix|title }}
-                </a>
-              </p>
-              {% if not formset.errors|list_empty %}
-                <p class="fielderrors">{% trans "Please correct the errors below: " %}{{ formset.non_field_errors }}</p>
-              {% endif %}
-              <table class='tablesorter table_container'>
-                {% forms_as_table_cols formset %}
-              </table>
-            </div>
-          </div>
-        {% endfor %}
-      {% endif %}
-    </div>
-    <p class="submit"><input type="submit" value="{% trans "Submit Changes" %} &rarr;"></p>
+        <div class="col-sm-3">
+          {% bootstrap_field form.srid %}
+          {% bootstrap_field form.approximate %}
+          {% bootstrap_field form.altitude %}
+          {% bootstrap_field form.asrid %}
+          {% bootstrap_field form.abscissa %}
+          {% bootstrap_field form.ordinate %}
+        </div>
+        <div class="col-sm-3">
+          {% bootstrap_field form.remarks %}
+          {% bootstrap_field form.name_alt %}
+          {% bootstrap_field form.short_name_alt %}
+          {% bootstrap_field form.remarks_alt %}
+        </div>
+        <div class="col-sm-3">
+          {% bootstrap_field form.owner %}
+          {% bootstrap_field form.copyright_holder %}
+          {% bootstrap_field form.copyright_years %}
+        </div>
+    </fieldset>
+  </div>
+  {% buttons %}
+    <button type="submit" class="btn btn-primary">{% trans "Submit Changes" %}</button>
+  {% endbuttons %}
   </form>
+</div>
 {% endblock %}

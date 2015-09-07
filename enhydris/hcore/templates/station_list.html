@@ -8,55 +8,49 @@
 {% endblock %}
 
 
-{% block extracss %}
-  <style type="text/css">
-    #map {
-      width: 560px;
-      height: 440px;
-      border: 1px solid #eee;
-      z-index: 1;
-    }
-    </style>
-{% endblock %}
-
-
 {% block content %}
-<div class="pull-right">
-  <div id="map">
-    <div id="processing_indicator" style="position: absolute; margin-top:212px; margin-left: 272px; z-index: 5000;"></div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <div id="map" class="map"></div>
+        <br>
+        <p class="text-center"><a class="btn btn-xs btn-primary" href="#" onclick="enhydris.map_module.getRectAreaResults();">{% trans 'List stations visible on map' %}</a></p>
+      </div>
+      <div class="col-md-12">
+        <hr>
+        {% if object_list %}
+        <div class="table-responsive">
+          <table class="table table-hover table-condensed">
+            <thead>
+              <tr>
+              <th>{% sorter "id" sort "id" %}</th>
+              <th>{% sorter "name" sort _("Name") %}</th>
+              <th>{% sorter "water_basin" sort _("Water basin") %}</th>
+              <th>{% sorter "water_division" sort _("Water division") %}</th>
+              <th>{% sorter "political_division" sort _("Political division") %}</th>
+              <th>{% sorter "owner" sort _("Owner") %}</th>
+              <th>{% sorter "stype" sort _("Type") %}</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for object in object_list %}
+                <tr>
+                  <td><a href="{% url 'station_detail' object.id %}">{{ object.id }}</a></td>
+                  <td>{{ object.name }}</td>
+                  <td>{{ object.water_basin|default_if_none:"" }}</td>
+                  <td>{{ object.water_division|default_if_none:"" }}</td>
+                  <td>{{ object.political_division.name|default_if_none:"" }}</td>
+                  <td>{{ object.owner|default_if_none:"" }}</td>
+                  <td>{{ object.stype.all|join:", " }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+          <p>{% trans "No entries found." %}</p>
+        {% endif %}
+      </div>
+    </div>
   </div>
-  <p style='text-align: center'><a href="#" onclick="enhydris.map_module.getRectAreaResults();">{% trans 'List stations visible on map' %}</a></p>
-</div>
-<div class="clearfix">
-  {% if object_list %}
-    <table class="table table-condensed table-striped">
-      <thead>
-        <tr>
-          <th>{% sorter "id" sort "id" %}</th>
-          <th>{% sorter "name" sort _("Name") %}</th>
-          <th>{% sorter "water_basin" sort _("Water basin") %}</th>
-          <th>{% sorter "water_division" sort _("Water division") %}</th>
-          <th>{% sorter "political_division" sort _("Political division") %}</th>
-          <th>{% sorter "owner" sort _("Owner") %}</th>
-          <th>{% sorter "stype" sort _("Type") %}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for object in object_list %}
-        <tr>
-          <td><a href="{% url 'station_detail' object.id %}">{{ object.id }}</a></td>
-          <td>{{ object.name }}</td>
-          <td>{{ object.water_basin|default_if_none:"" }}</td>
-          <td>{{ object.water_division|default_if_none:"" }}</td>
-          <td>{{ object.political_division.name|default_if_none:"" }}</td>
-          <td>{{ object.owner|default_if_none:"" }}</td>
-          <td>{{ object.stype.all|join:", " }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-      <p>{% trans "No entries found." %}</p>
-    {% endif %}
-</div>
 {% endblock %}
