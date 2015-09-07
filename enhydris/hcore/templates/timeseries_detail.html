@@ -277,7 +277,7 @@
                         </table>
                       </div>
                       {% if display_copyright and  timeseries.related_station %}
-                        <p class="lead">
+                        <p class="well well-sm">
                           {% trans "Station " %}&quot;{{ timeseries.related_station.name }}&quot;,
                           {% trans "Copyright (c) " %}{{ timeseries.related_station.copyright_years }},
                           {{ timeseries.related_station.copyright_holder }}.
