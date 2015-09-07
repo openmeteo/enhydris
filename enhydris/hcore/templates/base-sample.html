@@ -189,6 +189,19 @@
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/js/bootstrap-datepicker.min.js" charset="UTF-8"></script>
   <script type="text/javascript">
     var enhydris = {};
+
+    // Translation strings for enhydris.coordinatesUI module
+    enhydris.transCoordinatesUI = {
+      btnSimpleView: '{% trans "Simple view" %}',
+      btnAdvanceView: '{% trans "Advanced view" %}',
+      formSridLabel:'{% trans "SRID" %}',
+      formASridLabel: '{% trans "Altitude SRID" %}',
+      formLongtitudeLabel:'{% trans "Longitude" %}',
+      formLatitudeLabel:'{% trans "Latitude" %}',
+      formOrdinateLabel:'{% trans "Ordinate" %}',
+      formAbscissaLabel:'{% trans "Abscissa" %}',
+    }
+    // String Variables for enhydris.mapModule module
     enhydris.staticUrl = '{% static "" %}';
     enhydris.rootUrl = '{% url "station_list" %}';
     enhydris.boundingBoxUrl = '{% url "bounding_box" %}';
