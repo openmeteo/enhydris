@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Account activation complete" %}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>{% trans "Success!" %}</h1>
+  <p class="lead">{% trans "Account successfully activated" %}.</p>
+  <p>{% trans "You can now sign in to the website" %}.</p>
+  <p><a href="{% url 'django.contrib.auth.views.login' %}"
+		class="btn btn-success"
+        role="button">{% trans "Login" %}</a>
+  </p>
+</div>
+{% endblock %}
+
+

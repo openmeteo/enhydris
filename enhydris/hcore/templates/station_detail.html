@@ -59,19 +59,11 @@
           <div class="panel panel-default">
             <div class="panel-heading">
               <a href='{% url "station_edit" station.id%}'><h5>{{ station.name }}</h5></a>
-                <sub>
-                  {% if request.user|can_edit:station %}
-                    <a class="btn btn-xs btn-primary" href='{% url "station_edit" station.id%}'>{% trans "Edit" %}</a>
-                  {% endif %}
-                  {% if request.user|can_delete:station %}
-                    <a onClick='return confirmPost()' href='{% url "station_delete" station.id%}' class="btn btn-xs btn-danger" >{% trans "Delete" %}</a>
-                  {% endif %}
-                  <sub>
             </div>
             <div class="panel-body">
               <div id="map" class="map"></div>
                 {% if display_copyright %}
-                  <p style="font-size: 8pt">
+                  <p class="well well-sm">
                     {% trans "Station " %}&quot;{{station.name}}&quot;,
                     {% trans "Copyright (c) " %}{{ station.copyright_years }}, {{ station.copyright_holder }}.
                   </p>
@@ -84,6 +76,14 @@
           <div class="panel panel-default">
             <div class="panel-heading">
               <b>{% trans "Station Details" %}</b><br>
+              <sub>
+                {% if request.user|can_edit:station %}
+                  <a class="btn btn-xs btn-primary" href='{% url "station_edit" station.id%}'>{% trans "Edit" %}</a>
+                {% endif %}
+                {% if request.user|can_delete:station %}
+                  <a onClick='return confirmPost()' href='{% url "station_delete" station.id%}' class="btn btn-xs btn-danger" >{% trans "Delete" %}</a>
+                {% endif %}
+              <sub>
               <sub>
                 {% if request.user|can_edit:station %}
                   <button style="float:right" onclick="togl('more')"class="btn btn-primary btn-xs" id="show_results"> {% trans "Show/Hide more options" %}</button>

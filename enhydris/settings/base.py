@@ -15,7 +15,7 @@ INSTALLED_APPS = (
     'django.contrib.flatpages',
 
     'rest_framework',
-    'registration',
+
     'ajax_select',
     'captcha',
     'bootstrap3',
@@ -28,6 +28,9 @@ INSTALLED_APPS = (
     # this reason, it must be listed in INSTALLED_APPS before
     # django.contrib.admin.
     'django.contrib.admin',
+    # Registration templates it must be listed in INSTALLED_APPS after
+    # 'enhydris.hcore' in order to overide django-default templates.
+    'registration',
 )
 
 MIDDLEWARE_CLASSES = (
