@@ -946,9 +946,7 @@ def _station_edit_or_create(request, station_id=None):
     """
     This function updates existing stations and creates new ones.
     """
-    from django.forms.models import inlineformset_factory
     user = request.user
-    formsets = {}
     if station_id:
         # User is editing a station
         station = get_object_or_404(Station, id=station_id)
@@ -963,36 +961,13 @@ def _station_edit_or_create(request, station_id=None):
             return HttpResponseForbidden('Forbidden',
                                          content_type='text/plain')
 
-    OverseerFormset = inlineformset_factory(Station, Overseer,
-                                            extra=1, exclude=[])
-    InstrumentFormset = inlineformset_factory(Station, Instrument,
-                                              extra=1, exclude=[])
-    TimeseriesFormset = inlineformset_factory(Station, Timeseries,
-                                              extra=1, exclude=[])
-
     if request.method == 'POST':
         if station:
             form = StationForm(request.POST, instance=station)
-            formsets["Overseer"] = OverseerFormset(
-                request.POST, instance=station, prefix='Overseer')
-            formsets["Instrument"] = InstrumentFormset(
-                request.POST, instance=station, prefix='Instrument')
-            formsets["Timeseries"] = TimeseriesFormset(
-                request.POST, instance=station, prefix='Timeseries')
         else:
             form = StationForm(request.POST)
-            formsets["Overseer"] = OverseerFormset(
-                request.POST, prefix='Overseer')
-            formsets["Instrument"] = InstrumentFormset(
-                request.POST, prefix='Instrument')
-            formsets["Timeseries"] = TimeseriesFormset(
-                request.POST, prefix='Timeseries')
 
-        forms_validated = 0
-        for type in formsets:
-            if formsets[type].is_valid():
-                forms_validated += 1
-        if form.is_valid() and forms_validated == len(formsets):
+        if form.is_valid():
             station = form.save()
             if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
                     # Make creating user the station creator
@@ -1006,8 +981,6 @@ def _station_edit_or_create(request, station_id=None):
             #set correctly row permissions
             form.save_m2m()
             station.save()
-            for type in formsets:
-                formsets[type].save()
             if not station_id:
                 station_id = str(station.id)
             return HttpResponseRedirect(reverse('station_detail',
@@ -1017,20 +990,11 @@ def _station_edit_or_create(request, station_id=None):
             form = StationForm(instance=station,
                                initial={'abscissa': station.original_abscissa,
                                         'ordinate': station.original_ordinate})
-            formsets["Overseer"] = OverseerFormset(instance=station,
-                                                   prefix='Overseer')
-            formsets["Instrument"] = InstrumentFormset(instance=station,
-                                                       prefix='Instrument')
-            formsets["Timeseries"] = TimeseriesFormset(instance=station,
-                                                       prefix='Timeseries')
         else:
             form = StationForm()
-            formsets["Overseer"] = OverseerFormset(prefix='Overseer')
-            formsets["Instrument"] = InstrumentFormset(prefix='Instrument')
-            formsets["Timeseries"] = TimeseriesFormset(prefix='Timeseries')
 
     return render_to_response('station_edit.html',
-                              {'form': form, 'formsets': formsets, },
+                              {'form': form },
                               context_instance=RequestContext(request))
 
 

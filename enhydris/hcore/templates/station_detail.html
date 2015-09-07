@@ -9,50 +9,11 @@
 {% endblock %}
 
 
-{% block extracss %}
-  <link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
-  <link media="screen" href="{% static "css/tablesorter.css" %}" type="text/css" rel="stylesheet">
-  <style type="text/css">
-    #map {
-      width: 480px;
-      height: 420px;
-      border: 1px solid #eee;
-      z-index: 1;
-    }
-  </style>
-{% endblock %}
-
-
 {% block extrajs %}
   <script type="text/javascript" src="{% static "js/jquery.collapser.mod.js" %}"></script>
   <script type="text/javascript">
     enhydris.mapMode = 2;
-      {% if station %}enhydris.agentityId = {{station.id}};{% endif %}
-  </script>
-  <script type="text/javascript">
-    $(document).ready(function() {
-      $("table").tablesorter();
-        $("#eventstable").tablesorter( {sortList: [[1,1]]});
-          var colopts ={
-            target: '.timeseries_rows',
-            effect: null,
-            expandHtml: '{% trans "More..." %}',
-            collapseHtml: '{% trans "Less..." %}',
-            expandClass: 'expArrow',
-            collapseClass: 'collArrow'
-          }
-          $('.timeseries_collapse').collapser(colopts);
-          colopts['target']='.events_rows';
-          $('.events_collapse').collapser(colopts);
-          colopts['target']='.instr_rows';
-          $('.instruments_collapse').collapser(colopts);
-          colopts['target']='.altcodes_rows';
-          $('.altcodes_collapse').collapser(colopts);
-          colopts['target']='.gfiles_rows';
-          $('.gfiles_collapse').collapser(colopts);
-          colopts['target']='.generics_rows';
-          $('.generics_collapse').collapser(colopts);
-      });
+    {% if station %}enhydris.agentityId = {{station.id}};{% endif %}
   </script>
   <script type="text/javascript">
     $(document).ready(function(){
@@ -66,494 +27,549 @@
         if (agree)
           return true;
         else
-        return false;
+          return false ;
+      }
+
+    function togl(name) {
+      $("#"+ name).stop().toggle()
     }
+
+    $(document).ready(function ($) {
+      $('#tabs').tab();
+    });
   </script>
 {% endblock %}
 
 
 {% block content %}
-  <p>
-    <h2>Station Details
-      {% if request.user|can_edit:station %}
-        <sup class='sup_link'>
-          <a href='{% url "station_edit" station.id%}'>edit</a>
-      {% if request.user|can_delete:station %}
-        ,<a onClick='return confirmPost()' href='{% url "station_delete" station.id%}'>delete</a>
-      {% endif %}
-        </sup>
-      {% endif %}
-    </h2>
-  </p>
-  {% if request.user|can_edit:station %}
-    <div id="menu_bar">
-      <ul style="list-style-type:none;">
-        <li>
-          <span style="color:#A0A095">More: </span>
-          <span class="menu_options"><a href="{% url "timeseries_add" %}?station_id={{ station.id }}">Add new Timeseries</a></span>
-          /
-          <span class="menu_options"><a href="{% url "instrument_add" %}?station_id={{ station.id }}">Add new Instrument</a></span>
-          /
-          <span class="menu_options"><a href="{% url "gentityfile_add" %}?station_id={{ station.id }}">Add new File</a></span>
-          /
-          <span class="menu_options"><a href="{% url "gentitygenericdata_add" %}?station_id={{ station.id }}">Add new Generic Item</a></span>
-          /
-          <span class="menu_options"><a href="{% url "gentityevent_add" %}?station_id={{ station.id }}">Add new Event</a></span>
-          /
-          <span class="menu_options"><a href="{% url "gentityaltcode_add" %}?station_id={{ station.id }}">Add new Alt Code</a></span>
-          /
-          <span class="menu_options"><a href="{% url "overseer_add" %}?station_id={{ station.id }}">Add new Overseer</a></span>
-          <li>
-      </ul>
-      <br>
-    </div>
-  {% endif %}
-  {% if notifications %}
-    <ul class="notifications">
-      {% for message in notifications %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-  {% if station %}
-    <div>
+  <div class="container">
+    {% if notifications %}
+      <div class="alert alert-warning">
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <i class="fa fa-hand-o-right"></i>
+        {% for message in notifications %}
+          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% if station %}
+    <div class="row">
       {% if station.point %}
-        <div id="map" style="float: right;">
-          <div id="processing_indicator" style="position: absolute; margin-top:202px; margin-left: 232px; z-index: 5000;"></div>
+        <div class="col-md-4">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <a href='{% url "station_edit" station.id%}'><h5>{{ station.name }}</h5></a>
+                <sub>
+                  {% if request.user|can_edit:station %}
+                    <a class="btn btn-xs btn-primary" href='{% url "station_edit" station.id%}'>{% trans "Edit" %}</a>
+                  {% endif %}
+                  {% if request.user|can_delete:station %}
+                    <a onClick='return confirmPost()' href='{% url "station_delete" station.id%}' class="btn btn-xs btn-danger" >{% trans "Delete" %}</a>
+                  {% endif %}
+                  <sub>
+            </div>
+            <div class="panel-body">
+              <div id="map" class="map"></div>
+                {% if display_copyright %}
+                  <p style="font-size: 8pt">
+                    {% trans "Station " %}&quot;{{station.name}}&quot;,
+                    {% trans "Copyright (c) " %}{{ station.copyright_years }}, {{ station.copyright_holder }}.
+                  </p>
+                {% endif %}
+            </div>
+          </div>
         </div>
       {% endif %}
-    <div>
-      <table class="definition tablesorter table_container">
-        <tr class="{% cycle 'odd' 'even' as rowalts %}">
-          <th>{% trans 'ID' %}</th>
-          <td colspan='2'>{{ station.id }}</td>
-        </tr>
-        <tr class="{% cycle rowalts %}">
-          <th>{% trans 'Name' %}</th>
-          <td colspan='2'>{{ station.name }}</td>
-        </tr>
-        <tr class="{% cycle rowalts %}">
-          <th>{% trans 'Short Name' %}</th>
-          <td colspan='2'>{{ station.short_name }}</td>
-        </tr>
-        <tr class="{% cycle rowalts %}">
-          <th>{% trans 'Remarks' %}</th>
-          <td colspan='2'>{{ station.remarks }}</td>
-        </tr>
-        <tr class="{% cycle rowalts %}">
-          <th>{% trans 'Water Basin' %}</th>
-          <td colspan='2'>{{ station.water_basin.name }}</td>
-        </tr>
-        <tr class="{% cycle rowalts %}">
-          <th>{% trans 'Water Division' %}</th>
-          <td colspan='2'>{{ station.water_division.name }}</td>
-        </tr>
-        <tr class="{% cycle rowalts %}">
-          <th>{% trans 'Political Division' %}</th>
-          <td colspan='2'>{{ station.political_division.name }}</td>
-        </tr>
-        <tr class="{% cycle rowalts %}">
-          <th>{% trans 'Co-ordinates' %}</th>
-          <td colspan='2'>{{ station.point.x | floatformat:5 }},
-            {{ station.point.y | floatformat:5 }}
-            {% if station.approximate %}
-              ({% trans 'approximate' %})
-            {% endif %}
-            {% if station.srid != 4326 %}
-            <small>
-              <br>
-              ({{ wgs84_name }};
-              {% trans "originally" %}
-              {{ station.original_cs_name }}
-              [srid={{ station.srid }}]:
-              {{ station.original_abscissa }},
-              {{ station.original_ordinate }})
-            </small>
-          {% endif %}
-        </td>
-        <tr class="{% cycle rowalts %}">
-          <th>{% trans 'Altitude' %}</th>
-          <td colspan='2'>{{ station.altitude|floatformat:2 }}
-            {% if station.asrid %}[srid={{ station.asrid }}]{% endif %}
-          </td>
-        </tr>
-        <tr class="{% cycle rowalts %}">
-          <th>{% trans 'Owner' %}</th>
-          <td colspan='2'>
-            {{ station.owner }}
-          </td>
-        </tr>
-        <tr class="{% cycle rowalts %}">
-          <th>{% trans 'Type' %}</th>
-          <td colspan='2'>{% for stype in station.stype.all %}{{ stype.descr }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
-        </tr>
-        <tr class="{% cycle rowalts %}">
-          <th>{% trans 'Is Active' %}</th>
-          <td colspan='2'>{{ station.is_active }}</td>
-        </tr>
-        <tr class="{% cycle rowalts %}">
-          <th>{% trans 'Is Automatic' %}</th>
-          <td colspan='2'>{{ station.is_automatic }}</td>
-        </tr>
-        <tr class="{% cycle rowalts %}">
-          <th>{% trans 'Start Date' %}</th>
-          <td colspan='2'>{{ station.start_date|date:"Y/m/d" }}</td>
-        </tr>
-          <tr class="{% cycle rowalts %}">
-            <th>{% trans 'End Date' %}</th>
-            <td colspan='2'>{{ station.end_date|date:"Y/m/d" }}</td>
-          </tr>
-          {% if enabled_user_content %}
-            <tr class="{% cycle rowalts %}">
-              <th>{% trans 'Creator' %}</th>
-              {% if station.creator %}
-                <td colspan='2'><a href='{% url "profile_detail" station.creator %}' />{{ station.creator }}</td>
-              {% else %}
-                <td colspan='2'>{% trans "Unknown" %}</td>
-              {% endif %}
-          {% endif %}
-        </tr><!-- Overseers table -->
-        <tr>
-          <th>{% trans 'Overseers' %}</th>
-          <td colspan='2'>
-            {% if station.overseers.count %}
-              <table class="tablesorter">
-                <tbody>
-                  {% for overseer in station.overseer_set.all %}
-                    <tr class="{% cycle 'odd' 'even' %}">
-                      <td>{{ overseer.person.first_name }} {{ overseer.person.last_name }}
+        <div class="col-md-8">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <b>{% trans "Station Details" %}</b><br>
+              <sub>
+                {% if request.user|can_edit:station %}
+                  <button style="float:right" onclick="togl('more')"class="btn btn-primary btn-xs" id="show_results"> {% trans "Show/Hide more options" %}</button>
+                  <br>
+                  <div id="more" style="display:none;padding-top:10px" >
+                    <a class="btn btn-xs btn-default " href="{% url "timeseries_add" %}?station_id={{ station.id }}"><i class="glyphicon glyphicon-plus"></i> New Timeseries</a>
+                    <a class="btn btn-xs btn-default " href="{% url "instrument_add" %}?station_id={{ station.id }}"><i class="glyphicon glyphicon-plus"></i> New Instrument</a>
+                    <a class="btn btn-xs btn-default " href="{% url "gentityfile_add" %}?station_id={{ station.id }}"><i class="glyphicon glyphicon-plus"></i> New File</a>
+                    <a class="btn btn-xs btn-default " href="{% url "gentitygenericdata_add" %}?station_id={{ station.id }}"><i class="glyphicon glyphicon-plus"></i> New Generic Item</a>
+                    <a class="btn btn-xs btn-default " href="{% url "gentityevent_add" %}?station_id={{ station.id }}"><i class="glyphicon glyphicon-plus"></i> New Event</a>
+                    <a class="btn btn-xs btn-default " href="{% url "gentityaltcode_add" %}?station_id={{ station.id }}"><i class="glyphicon glyphicon-plus"></i> New Alt Code</a>
+                    <a class="btn btn-xs btn-default " href="{% url "overseer_add" %}?station_id={{ station.id }}"><i class="glyphicon glyphicon-plus"></i> New Overseer</a>
+                  </div>
+                  {% endif %}
+              </sub>
+            </div> <!--Heading Panel -->
+            <div class="table-responsive">
+              <table class="table table-hover table-condensed">
+                <tr>
+                  <th class="col-md-2">{% trans 'ID' %}</th>
+                  <td colspan='2'>{{ station.id }}</td>
+                </tr>
+                <tr>
+                  <th class="col-md-3">{% trans 'Name' %}</th>
+                  <td colspan='2'>{{ station.name }}</td>
+                </tr>
+              </tr>
+              <tr>
+                <th class="col-md-3">{% trans 'Remarks' %}</th>
+                <td colspan='2'>{{ station.remarks }}</td>
+              </tr>
+              <tr>
+                <th class="col-md-3" >{% trans 'Water Basin' %}</th>
+                <td colspan='2'>{{ station.water_basin.name }}</td>
+              </tr>
+              <tr>
+                <th class="col-md-3" >{% trans 'Water Division' %}</th>
+                <td colspan='2'>{{ station.water_division.name }}</td>
+              </tr>
+              <tr>
+                <th class="col-md-3" >{% trans 'Political Division' %}</th>
+                <td colspan='2'>{{ station.political_division.name }}</td>
+              </tr>
+              <tr>
+                <th class="col-md-3" >{% trans 'Co-ordinates' %}</th>
+                <td colspan='2'>{{ station.point.x | floatformat:5 }}, {{ station.point.y | floatformat:5 }}
+                  {% if station.approximate %}
+                    ({% trans 'approximate' %})
+                  {% endif %}
+                  {% if station.srid != 4326 %}
+                    <small>
+                      <br>
+                      ({{ wgs84_name }};
+                      {% trans "originally" %}
+                      {{ station.original_cs_name }}
+                      [srid={{ station.srid }}]:
+                      {{ station.original_abscissa }},
+                      {{ station.original_ordinate }})
+                    </small>
+                  {% endif %}
+                </td>
+                <tr>
+                  <th class="col-md-3" >{% trans 'Altitude' %}</th>
+                  <td colspan='2'>{{ station.altitude|floatformat:2 }}
+                    {% if station.asrid %}[srid={{ station.asrid }}]{% endif %}
+                  </td>
+                </tr>
+                <tr >
+                  <th class="col-md-3">{% trans 'Owner' %}</th>
+                  <td colspan='2'>
+                    {{ station.owner }}
+                  </td>
+                </tr>
+                <tr>
+                  <th class="col-md-3">{% trans 'Type' %}</th>
+                  <td colspan='2'>{% for stype in station.stype.all %}{{ stype.descr }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                </tr>
+                <tr>
+                  <th class="col-md-3">{% trans 'Is Active' %}</th>
+                  <td colspan='2'>{{ station.is_active }}</td>
+                </tr>
+                <tr>
+                  <th class="col-md-3">{% trans 'Is Automatic' %}</th>
+                  <td colspan='2'>{{ station.is_automatic }}</td>
+                </tr>
+                <tr>
+                  <th class="col-md-3">{% trans 'Start Date' %}</th>
+                  <td colspan='2'>{{ station.start_date|date:"Y/m/d" }}</td>
+                </tr>
+                <tr>
+                  <th class="col-md-3">{% trans 'End Date' %}</th>
+                  <td colspan='2'>{{ station.end_date|date:"Y/m/d" }}</td>
+                </tr>
+                {% if enabled_user_content %}
+                  <tr>
+                    <th class="col-md-3">{% trans 'Creator' %}</th>
+                    {% if station.creator %}
+                      <td colspan='2'><a href='{% url "profile_detail" station.creator %}' />{{ station.creator }}</td>
+                    {% else %}
+                      <td colspan='2'>{% trans "Unknown" %}</td>
+                    {% endif %}
+                {% endif %}
+                  </tr>
+                  <tr><!-- Overseers table -->
+                    <th>{% trans 'Overseers' %}</th>
+                    <td colspan='2'>
+                      {% if station.overseers.count %}
+                        <div class="table-responsive">
+                          <table class="table table-hover table-condensed">
+                            <tbody>
+                              {% for overseer in station.overseer_set.all %}
+                                <tr>
+                                  <td>{{ overseer.person.first_name }} {{ overseer.person.last_name }}
+                                    {% if request.user|can_edit:station %}
+                                      &nbsp;|&nbsp;<a href="{% url "overseer_delete" overseer.id %}" title="Delete">
+                                        <img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{% static "images/icons/cross.png" %}"</img></a>
+                                        {% endif %}
+                                  </td>
+                                </tr>
+                              {% endfor %}
+                            </tbody>
+                          </table>
+                        </div>
+                      {% endif %}
+                    </td>
+                  </tr>
+                </table>
+              </div> <!--Table -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+  <!-- Tabs -->
+  <div class="container">
+    <hr>
+    <div id="content">
+      <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
+        <li class="active"><a href="#timeseries" data-toggle="tab">{% trans "Timeseries" %}</a></li>
+        <li><a href="#gentity_codes" data-toggle="tab">{% trans "Codes" %}</a></li>
+        <li><a href="#gentity_files" data-toggle="tab">{% trans "Files" %}</a></li>
+        <li><a href="#gentity_data" data-toggle="tab">{% trans "Generic Data" %}</a></li>
+        <li><a href="#gentity_events" data-toggle="tab">{% trans "Events" %}</a></li>
+        <li><a href="#instruments" data-toggle="tab">{% trans "Instruments" %}</a></li>
+      </ul>
+      <div id="my-tab-content" class="tab-content">
+        <div class="tab-pane" id="gentity_codes">
+          <h4>{% trans 'Station (Gentity) Alternative Codes' %}</h4>
+          <div class="table-responsive">
+            {% if station.gentityaltcode_set.count %}
+              <td>
+                <table class="table table-hover table-condensed">
+                  <thead>
+                    <tr>
+                      <th>{% trans 'ID' %}</th>
+                      <th>{% trans 'Type' %}</th>
+                      <th>{% trans 'Value' %}</th>
+                      {% if request.user|can_edit:station %}
+                        <th>{% trans "Management" %}</th>
+                      {% endif %}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for code in station.gentityaltcode_set.all %}
+                      <tr>
+                        <td>{{ code.id }}</td>
+                        <td>{{ code.type }}</td>
+                        <td>{{ code.value }}</td>
                         {% if request.user|can_edit:station %}
-                          &nbsp;|&nbsp;<a href="{% url "overseer_delete" overseer.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{% static "images/icons/cross.png" %}"</img></a>
+                          <td style="text-align:center;">
+                            <a href="{% url "gentityaltcode_edit" code.id %}" title="Edit"><i class="glyphicon glyphicon-pencil"></i></a>&nbsp;
+                            <a href="{% url "gentityaltcode_delete" code.id %}" title="Delete"><i class="glyphicon glyphicon-remove"></i></a>
+                          </td>
+                        {% endif %}
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </td>
+            {% else %}
+              <td>
+                <h4>{% trans "No data available" %}</h4>
+                {% comment "Many <br>" %}
+                  Extra '<br>' in order to keep screen width when no data exist.
+                {% endcomment %}
+                  <br><br><br><br><br><br><br><br><br><br><br>
+                  <br><br><br><br><br><br><br><br><br><br><br>
+              </td>
+            {% endif %}
+          </table>
+        </div>
+      </div>
+      <div class="tab-pane" id="gentity_files">
+        <h4>{% trans 'Station (Gentity) Files' %}</h4>
+        <div class="table-responsive">
+          {% if station.gentityfile_set.count %}
+            <td>
+              <table class="table table-hover table-condensed">
+                <thead>
+                  <tr>
+                    <th>{% trans 'ID' %}</th>
+                    <th>{% trans 'Date' %}</th>
+                    <th>{% trans 'File Type' %}</th>
+                    <th>{% trans 'Content' %}</th>
+                    <th>{% trans 'Description' %}</th>
+                    <th>{% trans 'Remarks' %}</th>
+                    <th>{% trans 'Request File' %}</th>
+                    {% if request.user|can_edit:station %}
+                      <th>{% trans "Management" %}</th>
+                    {% endif %}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for file in station.gentityfile_set.all %}
+                    <tr>
+                      <td class="col-sm-1">{{ file.id }}</td>
+                      <td class="col-sm-1">{{ file.date|date:"Y/m/d" }}</td>
+                      <td class="col-sm-1">{{ file.file_type.descr }}</td>
+                      <td class="col-sm-1">{{ file.content }}</td>
+                      <td class="col-sm-1">{{ file.descr }}</td>
+                      <td class="col-sm-8">{{ file.remarks }}</td>
+                      <td class="col-sm-1">
+                        {% if user.is_authenticated or anonymous_can_download_data %}
+                          <a href="{% url "gentityfile_dl" file.id %}"><i class="glyphicon glyphicon-cloud-download"></i></a>
+                        {% else %}
+                          <i>N/A</i>
                         {% endif %}
                       </td>
+                      {% if request.user|can_edit:station %}
+                        <td style="text-align:center;">
+                          <a href="{% url "gentityfile_edit" file.id %}" title="Edit"><i class="glyphicon glyphicon-pencil"></i></a>&nbsp;
+                          <a href="{% url "gentityfile_delete" file.id %}" title="Delete"><i class="glyphicon glyphicon-remove"></i></a>
+                        </td>
+                      {% endif %}
                     </tr>
                   {% endfor %}
                 </tbody>
               </table>
+            </td>
+            {% else %}
+              <td colspan="2">
+                <h4>{% trans "No data available" %}</h4>
+                {% comment "Many <br>" %}
+                  Extra '<br>' in order to keep screen width when no data exist.
+                {% endcomment %}
+                  <br><br><br><br><br><br><br><br><br><br><br>
+                  <br><br><br><br><br><br><br><br><br><br><br>
+              </td>
             {% endif %}
-          </td>
-        </tr>
-      </table>
-    </div>
-  </div>
-  <table class="definition tablesorter table_container"><!-- Gentity Alternative Codes table -->
-    <tr>
-      <th>{% trans 'Station (Gentity) Alternative Codes' %}</th>
-        {% if station.gentityaltcode_set.count %}
-          <td colspan="2">
-            <table class="tablesorter" style='text-align:right;'>
-              <thead>
-                <tr>
-                  <th>{% trans 'ID' %}</th>
-                  <th>{% trans 'Type' %}</th>
-                  <th>{% trans 'Value' %}</th>
-                  {% if request.user|can_edit:station %}
-                    <th>{% trans "Management" %}</th>
-                  {% endif %}
-                </tr>
-              </thead>
-              <tbody>
-                {% for code in station.gentityaltcode_set.all %}
-                  <tr class="{% cycle 'odd' 'even' %} {% if forloop.counter > 10 %}altcodes_rows" style="display: none;{% endif %}">
-                    <td>{{ code.id }}</td>
-                    <td>{{ code.type }}</td>
-                    <td>{{ code.value }}</td>
-                    {% if request.user|can_edit:station %}
-                      <td style="text-align:center;">
-                        <a href="{% url "gentityaltcode_edit" code.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{% static "images/icons/pencil.png" %}"</img></a>&nbsp;
-                        <a href="{% url "gentityaltcode_delete" code.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{% static "images/icons/cross.png" %}"</img></a>
-                      </td>
-                    {% endif %}
+          </table>
+        </div>
+      </div>
+      <div class="tab-pane" id="gentity_data">
+        <h4>{% trans 'Station (Gentity) Generic data' %}</h4>
+        <div class="table-responsive">
+          {% if station.gentitygenericdata_set.count %}
+            <td>
+              <table class="table table-hover table-condensed">
+                <thead>
+                  <tr>
+                    <th>{% trans 'ID' %}</th>
+                    <th>{% trans 'Data Type' %}</th>
+                    <th>{% trans 'Description' %}</th>
+                    <th>{% trans 'Remarks' %}</th>
+                    <th>{% trans 'Request File' %}</th>
+                      {% if request.user|can_edit:station %}
+                        <th>{% trans "Management" %}</th>
+                      {% endif %}
                   </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-            {% if station.gentityaltcode_set.count > 10 %}
-              <p class="altcodes_collapse expArrow">More...</p>
-            {% endif %}
-          </td>
-        {% else %}
+                </thead>
+                <tbody>
+                  {% for genericdata in station.gentitygenericdata_set.all %}
+                    <tr>
+                      <td>{{ genericdata.id }}</td>
+                      <td>{{ genericdata.data_type }}</td>
+                      <td class="col-sm-4">{{ genericdata.descr }}</td>
+                      <td class="col-sm-4">{{ genericdata.remarks }}</td>
+                      <td>
+                        {% if request.user.is_authenticated or anonymous_can_download_data %}
+                          <a href="{% url "gentitygenericdata_dl" genericdata.id %}"><img style="border:none" src="{% static "images/icons/download.png" %}"></a>
+                        {% else %}
+                          <i>N/A</i>
+                        {% endif %}
+                      </td>
+                      {% if request.user|can_edit:station %}
+                        <td style="text-align:center;">
+                          <a href="{% url "gentitygenericdata_edit" genericdata.id %}" title="Edit"><i class="glyphicon glyphicon-pencil"></a>&nbsp;
+                          <a href="{% url "gentitygenericdata_delete" genericdata.id %}" title="Delete"><i class="glyphicon glyphicon-remove"></a>
+                        </td>
+                      {% endif %}
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </td>
+          {% else %}
+            <td>
+              <h4>{% trans "No data available" %}</h4>
+              {% comment "Many <br>" %}
+                Extra '<br>' in order to keep screen width when no data exist.
+              {% endcomment %}
+                <br><br><br><br><br><br><br><br><br><br>
+                <br><br><br><br><br><br><br><br><br><br><br>
+            </td>
+          {% endif %}
+        </table>
+      </div>
+    </div>
+    <div class="tab-pane" id="gentity_events">
+      <h4>{% trans 'Station (Gentity) Events' %}</h4>
+      <div class="table-responsive">
+        {% if station.gentityevent_set.count %}
           <td colspan="2">
-            {% trans "No data available" %}
-          </td>
-        {% endif %}
-      </tr><!-- Gentity File table -->
-      <tr>
-        <th>{% trans 'Station (Gentity) Files' %}</th>
-        {% if station.gentityfile_set.count %}
-          <td colspan="2">
-            <table class="tablesorter" style='text-align:right;width:100%;'>
+            <table class="table table-hover table-condensed">
               <thead>
                 <tr>
                   <th>{% trans 'ID' %}</th>
                   <th>{% trans 'Date' %}</th>
-                  <th>{% trans 'File Type' %}</th>
-                  <th>{% trans 'Content' %}</th>
-                  <th>{% trans 'Description' %}</th>
-                  <th>{% trans 'Remarks' %}</th>
-                  <th>{% trans 'Request File' %}</th>
+                  <th>{% trans 'Type' %}</th>
+                  <th>{% trans 'User' %}</th>
+                  <th>{% trans 'Report' %}</th>
                   {% if request.user|can_edit:station %}
                     <th>{% trans "Management" %}</th>
                   {% endif %}
                 </tr>
               </thead>
               <tbody>
-                {% for file in station.gentityfile_set.all %}
-                  <tr class="{% cycle 'odd' 'even' %} {% if forloop.counter > 10 %}gfiles_rows" style="display: none;{% endif %}">
-                    <td>{{ file.id }}</td>
-                    <td>{{ file.date|date:"Y/m/d" }}</td>
-                    <td>{{ file.file_type.descr }}</td>
-                    <td>{{ file.content }}</td>
-                    <td>{{ file.descr }}</td>
-                    <td>{{ file.remarks }}</td>
-                    <td>
-                      {% if user.is_authenticated or anonymous_can_download_data %}
-                        <a href="{% url "gentityfile_dl" file.id %}"><img style="border:none" src="{% static "images/icons/download.png" %}"></a>
-                      {% else %}
-                        <i>N/A</i>
-                      {% endif %}
-                    </td>
+                {% for event in station.gentityevent_set.all %}
+                  <tr>
+                    <td>{{ event.id }}</td>
+                    <td>{{ event.date|date:"Y/m/d" }}</td>
+                    <td>{{ event.type }}</td>
+                    <td>{{ event.user }}</td>
+                    <td>{{ event.report }}</td>
                     {% if request.user|can_edit:station %}
                       <td style="text-align:center;">
-                        <a href="{% url "gentityfile_edit" file.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{% static "images/icons/pencil.png" %}"</img></a>&nbsp;
-                        <a href="{% url "gentityfile_delete" file.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{% static "images/icons/cross.png" %}"</img></a>
+                        <a href="{% url "gentityevent_edit" event.id %}" title="Edit"><i class="glyphicon glyphicon-pencil"></i></a>&nbsp;
+                        <a href="{% url "gentityevent_delete" event.id %}" title="Delete"><i class="glyphicon glyphicon-remove"></i></a>
                       </td>
                     {% endif %}
                   </tr>
                 {% endfor %}
               </tbody>
             </table>
-            {% if station.gentityfile_set.count > 10 %}
-              <p class="gfiles_collapse expArrow">More...</p>
-            {% endif %}
           </td>
-            {% else %}
-              <td colspan="2">
-                {% trans "No data available" %}
-              </td>
-            {% endif %}
-          </tr><!-- Gentity Generic data table -->
-          <tr>
-            <th>{% trans 'Station (Gentity) Generic data' %}</th>
-              {% if station.gentitygenericdata_set.count %}
-                <td colspan="2">
-                  <table class="tablesorter" style='text-align:right;width:100%;'>
-                    <thead>
-                      <tr>
-                        <th>{% trans 'ID' %}</th>
-                        <th>{% trans 'Data Type' %}</th>
-                        <th>{% trans 'Description' %}</th>
-                        <th>{% trans 'Remarks' %}</th>
-                        <th>{% trans 'Request File' %}</th>
-                        {% if request.user|can_edit:station %}
-                          <th>{% trans "Management" %}</th>
-                        {% endif %}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for genericdata in station.gentitygenericdata_set.all %}
-                        <tr class="{% cycle 'odd' 'even' %} {% if forloop.counter > 10 %}generics_rows" style="display: none;{% endif %}">
-                          <td>{{ genericdata.id }}</td>
-                          <td>{{ genericdata.data_type }}</td>
-                          <td>{{ genericdata.descr }}</td>
-                          <td>{{ genericdata.remarks }}</td>
-                          <td>
-                            {% if request.user.is_authenticated or anonymous_can_download_data %}
-                              <a href="{% url "gentitygenericdata_dl" genericdata.id %}"><img style="border:none" src="{% static "images/icons/download.png" %}"></a>
-                            {% else %}
-                              <i>N/A</i>
-                            {% endif %}
-                          </td>
-                          {% if request.user|can_edit:station %}
-                            <td style="text-align:center;">
-                              <a href="{% url "gentitygenericdata_edit" genericdata.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{% static "images/icons/pencil.png" %}"</img></a>&nbsp;
-                              <a href="{% url "gentitygenericdata_delete" genericdata.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{% static "images/icons/cross.png" %}"</img></a>
-                            </td>
-                          {% endif %}
-                        </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                  {% if station.gentitygenericdata_set.count > 10 %}
-                    <p class="generics_collapse expArrow">More...</p>
+        {% else %}
+          <td>
+            <h4>{% trans "No data available" %}</h4>
+            {% comment "Many <br>" %}
+              Extra '<br>' in order to keep screen width when no data exist.
+            {% endcomment %}
+              <br><br><br><br><br><br><br><br><br><br>
+              <br><br><br><br><br><br><br><br><br><br><br>
+            </td>
+        {% endif %}
+        </table>
+      </div>
+    </div>
+    <div class="tab-pane" id="instruments">
+      <h4>{% trans 'Instruments' %}</h4>
+      <div class="table-responsive">
+        {% if station.instrument_set.count %}
+          <td colspan="2">
+            <table class="table table-hover table-condensed">
+              <thead>
+                <tr>
+                  <th>{% trans "ID" %}</th>
+                  <th>{% trans "Name" %}</th>
+                  <th>{% trans "Type" %}</th>
+                  <th>{% trans "Manufacturer" %}</th>
+                  <th>{% trans "Model" %}</th>
+                  <th>{% trans "Is Active" %}</th>
+                  <th>{% trans "Start Date" %}</th>
+                  <th>{% trans "End Date" %}</th>
+                  {% if request.user|can_edit:station %}
+                    <th>{% trans "Management" %}</th>
                   {% endif %}
-                </td>
-                {% else %}
-                  <td colspan="2">
-                    {% trans "No data available" %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for instrument in station.instrument_set.all %}
+                  {% with instrument.id as instrument_id %}
+                  {% url "instrument_detail" instrument_id as instrument_url %}
+                  <tr>
+                    <td><a href="{{ instrument_url }}">{{ instrument_id }}</a></td>
+                      <td>{{ instrument.name }}</td>
+                      <td>{{ instrument.type }}</td>
+                      <td>{{ instrument.manufacturer }}</td>
+                      <td>{{ instrument.model }}</td>
+                      <td>{{ instrument.is_active }}</td>
+                      <td>{{ instrument.start_date|date:"Y/m/d" }}</td>
+                      <td>{{ instrument.end_date|date:"Y/m/d" }}</td>
+                {% if request.user|can_edit:station %}
+                  <td style="text-align:center;">
+                    <a href="{% url "instrument_edit" instrument.id %}" title="Edit"><i class="glyphicon glyphicon-pencil"></i></a>&nbsp;
+                    <a href="{% url "instrument_delete" instrument.id %}" title="Delete"><i class="glyphicon glyphicon-remove"></i></a>
                   </td>
                 {% endif %}
-              </tr><!-- Gentity Event table -->
-              <tr>
-                <th>{% trans 'Station (Gentity) Events' %}</th>
-                {% if station.gentityevent_set.count %}
-                  <td colspan="2">
-                    <table class="tablesorter" id="eventstable" style='text-align:right;width:100%;'>
-                      <thead>
-                        <tr>
-                          <th>{% trans 'ID' %}</th>
-                          <th>{% trans 'Date' %}</th>
-                          <th>{% trans 'Type' %}</th>
-                          <th>{% trans 'User' %}</th>
-                          <th>{% trans 'Report' %}</th>
-                          {% if request.user|can_edit:station %}
-                            <th>{% trans "Management" %}</th>
-                          {% endif %}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for event in station.gentityevent_set.all %}
-                          <tr class="{% cycle 'odd' 'even' %} {% if forloop.counter > 10 %}events_rows" style="display: none;{% endif %}">
-                            <td>{{ event.id }}</td>
-                            <td>{{ event.date|date:"Y/m/d" }}</td>
-                            <td>{{ event.type }}</td>
-                            <td>{{ event.user }}</td>
-                            <td>{{ event.report }}</td>
-                            {% if request.user|can_edit:station %}
-                              <td style="text-align:center;">
-                                <a href="{% url "gentityevent_edit" event.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{% static "images/icons/pencil.png" %}"</img></a>&nbsp;
-                                <a href="{% url "gentityevent_delete" event.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{% static "images/icons/cross.png" %}"</img></a>
-                              </td>
-                            {% endif %}
-                          </tr>
-                        {% endfor %}
-                      </tbody>
-                    </table>
-                    {% if station.gentityevent_set.count > 10 %}
-                      <p class="events_collapse expArrow">More...</p>
-                    {% endif %}
-                  </td>
-                    {% else %}
-                      <td colspan="2">
-                        {% trans "No data available" %}
-                      </td>
-                    {% endif %}
-                  </tr><!-- Instrument table -->
+            </tr>
+                {% endwith %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </td>
+        {% else %}
+          <td>
+            <h4>{% trans "No data available" %}</h4>
+            {% comment "Many <br>" %}
+              Extra '<br>' in order to keep screen width when no data exist.
+            {% endcomment %}
+              <br><br><br><br><br><br><br><br><br><br>
+              <br><br><br><br><br><br><br><br><br><br><br>
+          </td>
+        {% endif %}
+        </table>
+      </div>
+    </div>
+    <div class="tab-pane active" id="timeseries">
+      <h4>{% trans 'Timeseries' %}</h4>
+      <div class="table-responsive">
+        {% if station.timeseries.count %}
+          <td colspan="2">
+            <table class="table table-hover table-condensed">
+              <thead>
+                <tr>
+                  <th>{% trans "ID" %}</th>
+                  <th>{% trans "Name" %}</th>
+                  <th>{% trans "Variable" %}</th>
+                  <th>{% trans "Time step" %}</th>
+                  <th>{% trans "Unit" %}</th>
+                  <th>{% trans "Remarks" %}</th>
+                  <th>{% trans "Instrument" %}</th>
+                  <th>{% trans "Start Date" %}</th>
+                  <th>{% trans "End Date" %}</th>
+                  {% if request.user|can_edit:station %}
+                    <th>{% trans "Management" %}</th>
+                  {% endif %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for t in station.timeseries.all %}
+                {% if not t.hidden %}
+                {% with t.id as t_id %}
+                {% url "timeseries_detail" t_id as timeseries_url %}
                   <tr>
-                    <th>{% trans 'Instruments' %}</th>
-                    {% if station.instrument_set.count %}
-                      <td colspan="2">
-                        <table class="tablesorter" style='text-align:right;'>
-                          <thead>
-                            <tr>
-                              <th>{% trans "ID" %}</th>
-                              <th>{% trans "Name" %}</th>
-                              <th>{% trans "Type" %}</th>
-                              <!--                              <th>{% trans "Remarks" %}</th>-->
-                              <th>{% trans "Manufacturer" %}</th>
-                              <th>{% trans "Model" %}</th>
-                              <th>{% trans "Is Active" %}</th>
-                              <th>{% trans "Start Date" %}</th>
-                              <th>{% trans "End Date" %}</th>
-                              {% if request.user|can_edit:station %}
-                                <th>{% trans "Management" %}</th>
-                              {% endif %}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {% for instrument in station.instrument_set.all %}
-                              {% with instrument.id as instrument_id %}
-                                {% url "instrument_detail" instrument_id as instrument_url %}
-                                  <tr class="{% cycle 'odd' 'even' %} {% if forloop.counter > 10 %}instr_rows" style="display: none;{% endif %}">
-                                    <td><a href="{{ instrument_url }}">{{ instrument_id }}</a></td>
-                                    <td>{{ instrument.name }}</td>
-                                    <td>{{ instrument.type }}</td>
-                                    <!--                            <td>{{ instrument.remarks }}</td>-->
-                                    <td>{{ instrument.manufacturer }}</td>
-                                    <td>{{ instrument.model }}</td>
-                                    <td>{{ instrument.is_active }}</td>
-                                    <td>{{ instrument.start_date|date:"Y/m/d" }}</td>
-                                    <td>{{ instrument.end_date|date:"Y/m/d" }}</td>
-                                    {% if request.user|can_edit:station %}
-                                    <td style="text-align:center;">
-                                      <a href="{% url "instrument_edit" instrument.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{% static "images/icons/pencil.png" %}"</img></a>&nbsp;
-                                      <a href="{% url "instrument_delete" instrument.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{% static "images/icons/cross.png" %}"</img></a>
-                                    </td>
-                                    {% endif %}
-                                  </tr>
-                              {% endwith %}
-                            {% endfor %}
-                          </tbody>
-                        </table>
-                        {% if station.instrument_set.count > 10 %}
-                          <p class="instruments_collapse expArrow">More...</p>
-                        {% endif %}
-                      </td>
-                        {% else %}
-                          <td colspan="2">
-                            {% trans "No data available" %}
-                          </td>
-                        {% endif %}
-                      </tr><!-- Timeseries table -->
-                      <tr>
-                        <th>{% trans 'Timeseries' %}</th>
-                        {% if station.timeseries.count %}
-                          <td colspan="2">
-                            <table class="tablesorter" style='text-align:right;width:100%;'>
-                              <thead>
-                                <tr>
-                                  <th>{% trans "ID" %}</th>
-                                  <th>{% trans "Name" %}</th>
-                                  <th>{% trans "Variable" %}</th>
-                                  <th>{% trans "Time step" %}</th>
-                                  <th>{% trans "Unit Of Measurement" %}</th>
-                                  <th>{% trans "Remarks" %}</th>
-                                  <th>{% trans "Instrument" %}</th>
-                                  <th>{% trans "Start Date" %}</th>
-                                  <th>{% trans "End Date" %}</th>
-                                  {% if request.user|can_edit:station %}
-                                    <th>{% trans "Management" %}</th>
-                                  {% endif %}
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {% for t in station.timeseries.all %}
-                                  {% if not t.hidden %}
-                                    {% with t.id as t_id %}
-                                      {% url "timeseries_detail" t_id as timeseries_url %}
-                                        <tr {% if forloop.counter > 10 %}class='timeseries_rows' style='display: none;'{% endif %}>
-                                          <td><a href="{{ timeseries_url }}">{{ t_id }}</a></td>
-                                          <td>{{ t.name }}</td>
-                                          <td>{{ t.variable }}</td>
-                                          <td>{% if not t.time_step %}
-                                            {% trans 'Variable step' %}
-                                            {% else %}
-                                            {{ t.time_step }}
-                                            {% endif %}</td>
-                                            <td>{{ t.unit_of_measurement }}</td>
-                                            <td>{{ t.remarks }}</td>
-                                            <td>{{ t.instrument }}</td>
-                                            <td>{{ t.start_date|date:"Y/m/d H:i" }}</td>
-                                            <td>{{ t.end_date|date:"Y/m/d H:i" }}</td>
-                                            {% if request.user|can_edit:station %}
-                                              <td style="text-align:center;">
-                                                <a href="{% url "timeseries_edit" t.id %}" title="Edit"><img class="mgmt_button " alt="edit" width="12" height="12" src="{% static "images/icons/pencil.png" %}"</img></a>&nbsp;
-                                                <a href="{% url "timeseries_delete" t.id %}" title="Delete"><img class="mgmt_button  verification_required" alt="delete" width="12" height="12" src="{% static "images/icons/cross.png" %}"</img></a>
-                                              </td>
-                                            {% endif %}
-                                          </tr>
-                                        {% endwith %}
-                                      {% endif %}
-                                    {% endfor %}
-                                  </tbody>
-                                </table>
-                                {% if station.timeseries.count > 10 %}
-                                  <p class="timeseries_collapse expArrow">More...</p>
-                                {% endif %}
-                              </td>
-                                {% else %}
-                                  <td colspan="2">
-                                    {% trans "No data available" %}
-                                  </td>
-                                {% endif %}
-                              </tr>
-                            </table>
-                            {% if display_copyright %}
-                              <p style="font-size: 8pt">
-                                {% trans "Station " %}&quot;{{station.name}}&quot;,
-                                {% trans "Copyright (c) " %}{{ station.copyright_years }},
-                                {{ station.copyright_holder }}.
-                              </p>
-                            {% endif %}
-                          {% endif %}
+                    <td><a href="{{ timeseries_url }}">{{ t_id }}</a></td>
+                    <td>{{ t.name }}</td>
+                    <td class="col-sm-1">{{ t.variable }}</td>
+                    <td class="col-sm-4">{% if not t.time_step %}
+                    {% trans 'Variable step' %}
+               {% else %}
+                {{ t.time_step }}
+              {% endif %}</td>
+                <td>{{ t.unit_of_measurement }}</td>
+                <td>{{ t.remarks }}</td>
+                <td class="col-sm-4">{{ t.instrument }}</td>
+                <td>{{ t.start_date|date:"Y/m/d H:i" }}</td>
+                <td>{{ t.end_date|date:"Y/m/d H:i" }}</td>
+                {% if request.user|can_edit:station %}
+                  <td style="text-align:center;">
+                    <a href="{% url "timeseries_edit" t.id %}" title="Edit"><i class="glyphicon glyphicon-pencil"></i></a>&nbsp;
+                    <a href="{% url "timeseries_delete" t.id %}" title="Delete"><i class="glyphicon glyphicon-remove"></i></a>
+                  </td>
+                {% endif %}
+              </tr>
+              {% endwith %}
+              {% endif %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </td>
+      {% else %}
+        <td colspan="2">
+          <h4>{% trans "No data available" %}<h4>
+            {% comment "Many <br>" %}
+              Extra '<br>' in order to keep screen width when no data exist.
+            {% endcomment %}
+            <br><br><br><br><br><br><br><br><br><br><br>
+            <br><br><br><br><br><br><br><br><br><br><br>
+        </td>
+      {% endif %}
+    </table>
+    </div>
+    </div>
+    </div>
+    </div> <!--  id=contant -->
+  </div> <!-- container-->
+{% endif %}
 {% endblock %}

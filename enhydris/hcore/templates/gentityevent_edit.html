@@ -1,13 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load static %}
-{% load form_as_table %}
-
-
-{% block extra_head %}
-  <link type="text/css" href="{% static "css/smoothness/jquery-ui-1.7.2.custom.css" %}" rel="stylesheet" />
-  <link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
-{% endblock %}
+{% load bootstrap3 %}
 
 
 {% block extrajs %}
@@ -30,25 +24,29 @@
 
 
 {% block content %}
-  <form method="post" action="" class="wide" enctype="multipart/form-data">
-    {% csrf_token %}
-    {% if form.instance.pk %}
-      <h3>{% trans "Edit gentity event details:" %}</h3>
-    {% else %}
-      <h3>{% trans "Fill the gentity event details:" %}</h3>
-    {% endif %}
-
+  <div class="container">
     {% if form.errors %}
-      <p class="fielderrors">{% trans "Please correct the errors below: " %}{{ form.field_errors }}</p>
+    <div class="row">
+      <div class="alert alert-danger col-sm-offset-2 col-sm-6">
+        <p><strong>{% trans "Please correct the errors below: " %}{{ form.field_errors }}</strong></p>
+      </div>
+    </div>
     {% endif %}
-      <form method="post" action="" class="wide">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+      <form method="post" action="" enctype="multipart/form-data"
+          class="form-vertical">
+        {% if form.instance.pk %}
+          <h3> {% trans "Edit gentity event details:" %}</h3>
+        {% else %}
+          <h3> {% trans "Fill the gentity event details:" %}</h3>
+        {% endif %}
         {% csrf_token %}
-        <table class="table_container">
-          <tbody>
-            {% form_as_table_rows form  %}
-          </tbody>
-        </table>
-        <p class="submit"><input type="submit" value="{% trans "Submit Changes" %} &rarr;"></p>
+        {% bootstrap_form form %}
+        {% buttons %}
+          <button type="submit" class="btn btn-primary">{% trans "Submit Changes" %}</button>
+        {% endbuttons %}
       </form>
-  </form>
+    </div>
+  </div> <!--container-->
 {% endblock %}
