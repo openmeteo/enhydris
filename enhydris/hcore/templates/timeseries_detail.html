@@ -2,12 +2,19 @@
 {% load i18n %}
 {% load static %}
 {% load permissions %}
-{% block title %} {% trans 'Enhydris - Time series' %} - {%if timeseries %}{{ timeseries.name }} (id={{ timeseries.id }}){% endif %}
+
+
+{% block title %}
+  {% trans 'Enhydris - Time series' %} -
+    {% if timeseries %}
+      {{ timeseries.name }} (id={{ timeseries.id }}){% endif %}
 {% endblock %}
 
+
 {% block extra_head %}
-<link media="screen" href="{% static "css/tablesorter.css" %}" type="text/css" rel="stylesheet">
+  <link media="screen" href="{% static "css/tablesorter.css" %}" type="text/css" rel="stylesheet">
 {% endblock %}
+
 
 {% block extrajs %}
   <!--[if IE]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
@@ -16,267 +23,252 @@
   <script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/jquery.flot.selection.min.js"></script>
   <script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/jquery.flot.time.min.js"></script>
   <script type="text/javascript">
-
     function confirmPost(){
-        var agree=confirm("Are you sure you want to delete this timeseries?");
-        if (agree)
-            return true ;
-        else
-            return false ;
-	}
-
-		// helper for returning the weekends in a period
-	
-
-	$(document).ready(function() {
-		
-		$("#data_holder").hide()	
-                    $("#progress").append("<img style=\"margin: auto;\" src=\"{% static "images/icons/progress.gif" %}\">");
-
-		 $.getJSON('{% url "timeseries_data" %}', {object_id:{{timeseries.id}}}, function(chart_data){
-		   
-			$("#progress").hide()
-			$("#data_holder").show()
-			if ( chart_data ) {
-				flot_init(chart_data['data']);
-			} else {
-				$("#data_holder").html("<h3>No data locally available!</h3>");
-			}
-
-		});
-	});
-	
-	function flot_init(chart_data) {
-		var d = chart_data;
-        var d_bak = d.slice();
-        var from_x, to_x, tol;
-        from_x = d[0][0];
-        to_x = d[d.length-1][0];
-        tol = (to_x-from_x)*0.01;
-        from_x-=tol;
-        to_x+=tol;
-		var options = {
-			xaxis: { mode: "time", min: from_x, max: to_x},
-			selection: { mode: "x" }
-		};
-
-		var plot = $.plot($("#placeholder"), [d], options);
-
-		var overview = $.plot($("#overview"), [d], {
-			series: {
-				lines: { show: true, lineWidth: 1 },
-				shadowSize: 0
-			},
-			xaxis: { ticks: [], mode: "time", min: from_x, max: to_x },
-			yaxis: { ticks: [], min: 0, autoscaleMargin: 0.1 },
-			selection: { mode: "x" }
-		});
-
-        function get_zoomed_data(ranges, data){
-            var from_pos, to_pos;
-            var actual_xaxis_from, actual_xaxis_to;
-            from_pos = data[0][2];
-            to_pos = data[data.length-1][2];
-            for(var i=0;i<data.length;i++){
-                if(ranges.xaxis.from<=data[i][0]){
-                    from_pos = data[i][2];
-                    actual_xaxis_from = data[i][0];
-                    break;
-                }
-            }
-            for(var i=data.length-1;i>=0;i--){
-                if(ranges.xaxis.to>=data[i][0]){
-                    to_pos = data[i][2];
-                    actual_xaxis_to = data[i][0];
-                    break;
-                }
-            }
-            $("#placeholder").append("<img style=\"margin: auto;\" src=\"{% static "images/icons/progress.gif" %}\">");
-            $.getJSON('{% url "timeseries_data" %}', {object_id:{{timeseries.id}},
-                start_pos:from_pos, end_pos:to_pos}, function(chart_data){
-                d = chart_data['data'];
-                var tol=(actual_xaxis_to-actual_xaxis_from)*0.01;
-			    plot = $.plot($("#placeholder"), [d],
-    						  $.extend(true, {}, options, {
-    							  xaxis: { min: actual_xaxis_from-tol, max: actual_xaxis_to+tol }
-    						  }));
-    		});
-			$("placeholder").remove(":contains('img style')");
+      var agree=confirm("Are you sure you want to delete this timeseries?");
+      if (agree)
+        return true;
+      else
+        return false;
+    }
+    // helper for returning the weekends in a period
+    $(document).ready(function() {
+      $("#data_holder").hide()
+      $("#progress").append("<img style=\"margin: auto;\" src=\"{% static "images/icons/progress.gif" %}\">");
+      $.getJSON('{% url "timeseries_data" %}', {object_id:{{timeseries.id}}}, function(chart_data){
+        $("#progress").hide()
+        $("#data_holder").show()
+        if ( chart_data ) {
+          flot_init(chart_data['data']);
+        } else {
+          $("#data_holder").html("<h3>No data locally available!</h3>");
         }
+      });
+    });
+    function flot_init(chart_data) {
+      var d = chart_data;
+      var d_bak = d.slice();
+      var from_x, to_x, tol;
+      from_x = d[0][0];
+      to_x = d[d.length-1][0];
+      tol = (to_x-from_x)*0.01;
+      from_x-=tol;
+      to_x+=tol;
+      var options = {
+        xaxis: { mode: "time", min: from_x, max: to_x},
+        selection: { mode: "x" }
+      };
+      var plot = $.plot($("#placeholder"), [d], options);
+      var overview = $.plot($("#overview"), [d], {
+        series: {
+          lines: { show: true, lineWidth: 1 },
+          shadowSize: 0
+        },
+        xaxis: { ticks: [], mode: "time", min: from_x, max: to_x },
+        yaxis: { ticks: [], min: 0, autoscaleMargin: 0.1 },
+        selection: { mode: "x" }
+      });
 
-		// now connect the two
-		$("#placeholder").bind("plotselected", function (event, ranges) {
-            get_zoomed_data(ranges, d);
-
-		// don't fire event on the overview to prevent eternal loop
-			overview.setSelection(ranges, true);
-		});
-		
-		$("#overview").bind("plotselected", function (event, ranges) {
-            d = d_bak;
-			plot.setSelection(ranges);
-		});		
-
-	}
-	
-
+      function get_zoomed_data(ranges, data){
+        var from_pos, to_pos;
+        var actual_xaxis_from, actual_xaxis_to;
+        from_pos = data[0][2];
+        to_pos = data[data.length-1][2];
+        for(var i=0;i<data.length;i++){
+          if(ranges.xaxis.from<=data[i][0]){
+            from_pos = data[i][2];
+            actual_xaxis_from = data[i][0];
+            break;
+          }
+        }
+        for(var i=data.length-1;i>=0;i--){
+          if(ranges.xaxis.to>=data[i][0]){
+            to_pos = data[i][2];
+            actual_xaxis_to = data[i][0];
+            break;
+        }
+      }
+      $("#placeholder").append("<img style=\"margin: auto;\" src=\"{% static "images/icons/progress.gif" %}\">");
+      $.getJSON('{% url "timeseries_data" %}', {object_id:{{timeseries.id}},
+        start_pos:from_pos, end_pos:to_pos}, function(chart_data){
+          d = chart_data['data'];
+          var tol=(actual_xaxis_to-actual_xaxis_from)*0.01;
+          plot = $.plot($("#placeholder"), [d],
+          $.extend(true, {}, options, {
+            xaxis: { min: actual_xaxis_from-tol, max: actual_xaxis_to+tol }
+          }));
+        });
+        $("placeholder").remove(":contains('img style')");
+      }
+      // now connect the two
+      $("#placeholder").bind("plotselected", function (event, ranges) {
+        get_zoomed_data(ranges, d);
+      // don't fire event on the overview to prevent eternal loop
+      overview.setSelection(ranges, true);
+    });
+    $("#overview").bind("plotselected", function (event, ranges) {
+      d = d_bak;
+      plot.setSelection(ranges);
+    });
+  }
   </script>
 {% endblock %}
 
+
 {% block content_main %}
-    <div style="width: 99%;">
+  <div style="width: 99%;">
     <h2>{% trans 'Timeseries Details' %}
-        {% if request.user|can_edit:timeseries.related_station %}
-        <sup class='sup_link'>
-            <a href='{% url "timeseries_edit" timeseries.id%}'>edit</a>
-            ,
-            <a onClick='return confirmPost()' href='{% url "timeseries_delete" timeseries.id%}'>delete</a>
-        {% endif %} 
-        </sup>
+      {% if request.user|can_edit:timeseries.related_station %}
+      <sup class='sup_link'>
+        <a href='{% url "timeseries_edit" timeseries.id%}'>edit</a>
+        ,<a onClick='return confirmPost()' href='{% url "timeseries_delete" timeseries.id%}'>delete</a>
+      {% endif %}
+      </sup>
     </h2>
-
-        {% if timeseries %}
-        <div style="float:left; width: 500px;">
-        {% if timeseries.original_db %}
-            <p>{% blocktrans %}
-               The information for this time series has been copied from
-               another database. You may be able to download the data from the
-               {% endblocktrans %}
-               <a href='http://{{ timeseries.original_db.hostname }}{% url "timeseries_detail" timeseries.original_id %}'>{% trans "respective page of the originating database" %}</a>.
-            </p>
-        {% elif user.is_authenticated or anonymous_can_download_data %}
-            <p>
-            <a href='{% url "timeseries_text" timeseries.id %}'>{% trans "Download time series" %}</a>
-            </p>
-        {% else %}
-            <p>{% blocktrans %}
-                   You don't have permission to download the time series.
-               {% endblocktrans %}
-            </p>
+    {% if timeseries %}
+      <div style="float:left; width: 500px;">
+      {% if timeseries.original_db %}
+      <p>
+        {% blocktrans %}
+          The information for this time series has been copied from
+          another database. You may be able to download the data from the
+        {% endblocktrans %}
+        <a href='http://{{ timeseries.original_db.hostname }}{% url "timeseries_detail" timeseries.original_id %}'>{% trans "respective page of the originating database" %}</a>.
+      </p>
+      {% elif user.is_authenticated or anonymous_can_download_data %}
+        <p>
+          <a href='{% url "timeseries_text" timeseries.id %}'>{% trans "Download time series" %}</a>
+        </p>
+      {% else %}
+        <p>
+          {% blocktrans %}
+            You don't have permission to download the time series.
+          {% endblocktrans %}
+        </p>
         {% endif %}
-        <table class="definition tablesorter">
-            <tr class="{% cycle 'odd' 'even' as rowalts %}">
-                <th>{% trans 'ID' %}</th>
-                <td>{{ timeseries.id }}</td>
-            </tr>
+      <table class="definition tablesorter">
+        <tr class="{% cycle 'odd' 'even' as rowalts %}">
+          <th>{% trans 'ID' %}</th>
+          <td>{{ timeseries.id }}</td>
+        </tr>
+        <tr class="{% cycle rowalts %}">
+          <th>{% trans 'Related Station' %}</th>
+          {% if timeseries.related_station %}
+            <td><a href="{% url "station_detail" timeseries.related_station.id %}">{{ timeseries.related_station }}</a></td>
+          {% else %}
+            <td>None</td>
+          {% endif %}
+        </tr>
+        <tr class="{% cycle rowalts %}">
+          <th>{% trans 'Name' %}</th>
+          <td>{{ timeseries.name }}</td>
+        </tr>
+        <tr class="{% cycle rowalts %}">
+          <th>{% trans 'Variable' %}</th>
+          <td>{{ timeseries.variable }}</td>
+        </tr>
+        <tr class="{% cycle rowalts %}">
+          <th>{% trans 'Unit Of Measurement' %}</th>
+          <td>{{ timeseries.unit_of_measurement }}</td>
+        </tr>
+        <tr class="{% cycle rowalts %}">
+          <th>{% trans 'Precision' %}</th>
+          <td>{{ timeseries.precision }}</td>
+        </tr>
+        <tr class="{% cycle rowalts %}">
+          <th>{% trans 'Time Zone' %}</th>
+          <td>{{ timeseries.time_zone }}</td>
+        </tr>
+        <tr class="{% cycle rowalts %}">
+          <th>{% trans 'Remarks' %}</th>
+          <td>{{ timeseries.remarks }}</td>
+        </tr>
+        <tr class="{% cycle rowalts %}">
+          <th>{% trans 'Instrument' %}</th>
+          {% if timeseries.instrument %}
+            <td><a href="{% url "instrument_detail" timeseries.instrument.id %}">{{ timeseries.instrument }}</a></td>
+          {% else %}
+            <td>None</td>
+          {% endif %}
+        </tr>
+        <tr class="{% cycle rowalts %}">
+          <th>{% trans 'Start Date' %}</th>
+          <td>{{ timeseries.start_date|date:"Y/m/d H:i" }}</td>
+        </tr>
+        <tr class="{% cycle rowalts %}">
+          <th>{% trans 'End Date' %}</th>
+          <td>{{ timeseries.end_date|date:"Y/m/d H:i" }}</td>
+        </tr>
+        <tr class="{% cycle rowalts %}">
+          <td colspan="2" align="center"><strong>Time stamps properties</strong></th></tr>
             <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Related Station' %}</th>
-				{% if timeseries.related_station %}
-                <td><a href="{% url "station_detail" timeseries.related_station.id %}">{{ timeseries.related_station }}</a></td>
+              <th>{% trans 'Time scale' %}</th>
+              <td>
+                {% if not timeseries.time_step %}
+                  {% trans 'Variable step' %}
                 {% else %}
-                <td>None</td>
+                  {{ timeseries.time_step }}
                 {% endif %}
-            </tr>
-            <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Name' %}</th>
-                <td>{{ timeseries.name }}</td>
-            </tr>
-            <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Variable' %}</th>
-                <td>{{ timeseries.variable }}</td>
-            </tr>
-            <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Unit Of Measurement' %}</th>
-                <td>{{ timeseries.unit_of_measurement }}</td>
-            </tr>
-            <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Precision' %}</th>
-                <td>{{ timeseries.precision }}</td>
-            </tr>
-            <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Time Zone' %}</th>
-                <td>{{ timeseries.time_zone }}</td>
-            </tr>
-            <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Remarks' %}</th>
-                <td>{{ timeseries.remarks }}</td>
-            </tr>
-            <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Instrument' %}</th>
-				{% if timeseries.instrument %}
-                <td><a href="{% url "instrument_detail" timeseries.instrument.id %}">{{ timeseries.instrument }}</a></td>
-				{% else %} 
-                <td>None</td>
-				{% endif %}
-            </tr>
-			<tr class="{% cycle rowalts %}">
-                <th>{% trans 'Start Date' %}</th>
-                <td>{{ timeseries.start_date|date:"Y/m/d H:i" }}</td>
-            </tr>
-			<tr class="{% cycle rowalts %}">
-                <th>{% trans 'End Date' %}</th>
-                <td>{{ timeseries.end_date|date:"Y/m/d H:i" }}</td>
-            </tr>
-
-			<tr class="{% cycle rowalts %}">
-                <td colspan="2" align="center"><strong>Time stamps properties</strong></th></tr>
-            <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Time scale' %}</th>
-                <td>{% if not timeseries.time_step %}
-                        {% trans 'Variable step' %}
-                    {% else %}
-                        {{ timeseries.time_step }}
-                    {% endif %}
-                </td>
+              </td>
             </tr>
             {% ifequal timeseries.nominal_offset_minutes NULL %}
-                <tr class="{% cycle rowalts %}">
-                    <th>{% trans 'Time stamps regularity' %}</th>
-                    <td>{% trans 'Time step is not strict' %}</td>
-                </tr>
+              <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Time stamps regularity' %}</th>
+                <td>{% trans 'Time step is not strict' %}</td>
+              </tr>
             {% else %}
-                <tr class="{% cycle rowalts %}">
-                    <th>{% trans 'Time stamps regularity' %}</th>
-                    <td>{% trans 'Time step is strict' %}</td>
-                </tr>
-                <tr class="{% cycle rowalts %}">
-                    <th>{% trans ' Time stamps nominal offset' %}</th>
-                    <td>{{ timeseries.nominal_offset_minutes }} 
-                        {% trans 'minutes' %}, 
-                        {{ timeseries.nominal_offset_months }}
-                        {% trans 'months' %}
-                    </td>
-                </tr>
-            {% endifequal %}
-            <tr class="{% cycle rowalts %}">
-                <th>{% trans 'Time stamps reference' %}</th>
-                <td>{% if not timeseries.interval_type %}
-                        {% trans 'Instantaneous values' %}
-                    {% else %}
-                        {% trans 'Interval, '%}{{ timeseries.interval_type }}
-                    {% endif %}</td>
+              <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Time stamps regularity' %}</th>
+                <td>{% trans 'Time step is strict' %}</td>
+              </tr>
+              <tr class="{% cycle rowalts %}">
+                <th>{% trans ' Time stamps nominal offset' %}</th>
+                <td>{{ timeseries.nominal_offset_minutes }}
+                  {% trans 'minutes' %},
+                  {{ timeseries.nominal_offset_months }}
+                  {% trans 'months' %}
+                </td>
+              </tr>
+          {% endifequal %}
+          <tr class="{% cycle rowalts %}">
+            <th>{% trans 'Time stamps reference' %}</th>
+            <td>
+              {% if not timeseries.interval_type %}
+                {% trans 'Instantaneous values' %}
+              {% else %}
+                {% trans 'Interval, '%}{{ timeseries.interval_type }}
+              {% endif %}</td>
             </tr>
             {% ifnotequal timeseries.actual_offset_months NULL %}
-                <tr class="{% cycle rowalts %}">
-                    <th>{% trans 'Actual offset of reference' %}</th>
-                    <td>{{ timeseries.actual_offset_minutes }} 
-                        {% trans 'minutes' %}, 
-                        {{ timeseries.actual_offset_months }}
-                        {% trans 'months' %}
-                    </td>
-                </tr>
+              <tr class="{% cycle rowalts %}">
+                <th>{% trans 'Actual offset of reference' %}</th>
+                <td>{{ timeseries.actual_offset_minutes }}
+                  {% trans 'minutes' %},
+                  {{ timeseries.actual_offset_months }}
+                  {% trans 'months' %}
+                </td>
+              </tr>
             {% endifnotequal %}
-        </table>
-        {% if display_copyright and  timeseries.related_station %}
-        <p style="font-size: 8pt">
-                         {% trans "Station " %}&quot;{{ timeseries.related_station.name }}&quot;, 
-                         {% trans "Copyright (c) " %}{{ timeseries.related_station.copyright_years }},
-                         {{ timeseries.related_station.copyright_holder }}.
-        {% endif %}
+          </table>
+          {% if display_copyright and  timeseries.related_station %}
+            <p style="font-size: 8pt">
+              {% trans "Station " %}&quot;{{ timeseries.related_station.name }}&quot;,
+              {% trans "Copyright (c) " %}{{ timeseries.related_station.copyright_years }},
+              {{ timeseries.related_station.copyright_holder }}.
+          {% endif %}
         </div>
-        <img src="{% static "images/vertical.gif" %}" style="margin: 20px 10px; float: left;" />
-        <div id="chartdiv" style="float:left;text-align:center;width:450px;">
-			<div id="progress" style="text-align:center;padding-top:3em;">
-			</div>
-			<div id="data_holder">
-			<p style="text-align:center"> Drag over the <b>overview</b> diagram and zoom to a specific period of time.</p>
-			<div id="overview" style="margin:0;width:410px;height:50px;"></div>
-			<p style="text-align:center"> <b>Timeseries Diagram</b></p>
-			<div id="placeholder" style="margin:0;width:400px;height:300px"></div>
-			</div>
-        </div>
-        {% else %}
-        <p>Currently, there is no Timeseries data available!</p>
-        {% endif %}
-   </div>
+          <img src="{% static "images/vertical.gif" %}" style="margin: 20px 10px; float: left;" />
+          <div id="chartdiv" style="float:left;text-align:center;width:450px;">
+            <div id="progress" style="text-align:center;padding-top:3em;">
+            </div>
+            <div id="data_holder">
+              <p style="text-align:center"> Drag over the <b>overview</b> diagram and zoom to a specific period of time.</p>
+              <div id="overview" style="margin:0;width:410px;height:50px;"></div>
+              <p style="text-align:center"> <b>Timeseries Diagram</b></p>
+              <div id="placeholder" style="margin:0;width:400px;height:300px"></div>
+            </div>
+          </div>
+          {% else %}
+            <p>Currently, there is no Timeseries data available!</p>
+          {% endif %}
+  </div>
 {% endblock %}
