@@ -4,20 +4,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{% block title %}{% trans "Enhydris" %}{% endblock %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% block js-globals %}{% endblock %}
-    {% block basecss %}
-    <link media="screen" href="{% static "css/tablesorter.css" %}" type="text/css" rel="stylesheet" />
-        <link type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/css/base/jquery.ui.all.min.css" rel="stylesheet" />
-        <link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
-        <link media="screen" href="{% static "css/olmap.css" %}" type="text/css" rel="stylesheet" />
-        <link media="screen" href="{% static "css/base.css" %}" type="text/css" rel="stylesheet" />
-        {% bootstrap_css %}
-    {% endblock %}
-    {% block shortcut_icon %}{% endblock %}
-    {% block extracss %}{% endblock %}
-    {% block extra_head %}{% endblock %}
+  <title>{% block title %}{% trans "Enhydris" %}{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% block js-globals %}{% endblock %}
+  {% block basecss %}
+  <link media="screen" href="{% static "css/tablesorter.css" %}" type="text/css" rel="stylesheet" />
+      <link type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/css/base/jquery.ui.all.min.css" rel="stylesheet" />
+      <link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
+      <link media="screen" href="{% static "css/olmap.css" %}" type="text/css" rel="stylesheet" />
+      <link media="screen" href="{% static "css/base.css" %}" type="text/css" rel="stylesheet" />
+      {% bootstrap_css %}
+  {% endblock %}
+  {% block shortcut_icon %}{% endblock %}
+  {% block extracss %}{% endblock %}
+  {% block extra_head %}{% endblock %}
 </head>
 <body onload="enhydris.map = enhydris.map_module.init()">
   <div id="container">
@@ -54,28 +54,25 @@
             {% if user.is_authenticated %}
               {% if perms.hcore.add_station %}
                 <li>
-                  <a href="{% url "station_add" %}"
-                    >{% trans "New&nbsp;station" %}</a>
+                  <a href="{% url "station_add" %}">{% trans "New&nbsp;station" %}</a>
                 </li>
               {% endif %}
               {% with user.username as user_username %}
                 <li>
-                  <a href='{% url "current_user_profile" %}'
-                    >{% trans "Settings" %}</a>
+                  <a href='{% url "current_user_profile" %}'>{% trans "Settings" %}</a>
                 </li>
-                <li><a href='{% url "auth_logout" %}?next={{ request.path }}'
-                    >Logout&nbsp;{{ user_username }}</a>
+                <li>
+                  <a href='{% url "auth_logout" %}?next={{ request.path }}'>Logout&nbsp;{{ user_username }}</a>
                 </li>
               {% endwith %}
             {% else %}
-              <li><a class="loginform"
-                  href='{% url "auth_login" %}?next={{request.path}}'
-                  >{% trans "Login" %}</a>
+              <li>
+                <a class="loginform" href='{% url "auth_login" %}?next={{request.path}}'>{% trans "Login" %}</a>
               </li>
               {% if REGISTRATION_OPEN %}
-              <li><a href='{% url "registration_register" %}'
-                  >{% trans "Register" %}</a>
-              </li>
+                <li>
+                  <a href='{% url "registration_register" %}'>{% trans "Register" %}</a>
+                </li>
               {% endif %}
             {% endif %}
           </ul>
@@ -166,8 +163,9 @@
       {% block extrafooter %}{% endblock %}
     {% endblock %}
   </footer>
+
 {% block bodyend %}{% endblock %}
-  </div>
+  </div><!--container-->
 
 {% block basejs %}
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>

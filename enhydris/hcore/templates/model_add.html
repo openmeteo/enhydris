@@ -1,31 +1,29 @@
 {% load i18n %}
 {% load static %}
-{% load form_as_table %} 
+{% load form_as_table %}
 <html>
-<head>
-	<title>	Add New {{ form_prefix }} </title>
-        <link media="screen" href="{% static "css/base.css" %}" type="text/css" rel="stylesheet"> 
-        <link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
-
-</head>
-<body>
-<div style="padding:1.5em">
-<h2> Add New {{form_prefix|title}}</h2>
-
-{% if form.errors %}
-	<p class="fielderrors">{% trans "Please correct the errors below: " %}{{ form.field_errors }}</p>
-{% endif %}
-    <form method="post" action="{% url "station_list" %}add/{%filter lower%}{{form_prefix}}{% endfilter %}/" class="wide">
-    {% csrf_token %} 
-	<table class="table_container">
-		<tbody>
-			{% form_as_table_rows form  %}
-		</tbody>
-	</table>
-	<p class="submit"><input type="submit" value="{% trans "Submit Changes" %} &rarr;">
-						| <a href="javascript:window.close()">Cancel</a></p>
-    </form>
-</div>
-<script type="text/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script> 
-</body>
+  <head>
+    <title>  Add New {{ form_prefix }} </title>
+    <link media="screen" href="{% static "css/base.css" %}" type="text/css" rel="stylesheet">
+    <link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
+  </head>
+  <body>
+    <div style="padding:1.5em">
+      <h2> Add New {{form_prefix|title}}</h2>
+      {% if form.errors %}
+        <p class="fielderrors">{% trans "Please correct the errors below: " %}{{ form.field_errors }}</p>
+      {% endif %}
+      <form method="post" action="{% url "station_list" %}add/{%filter lower%}{{form_prefix}}{% endfilter %}/" class="wide">
+        {% csrf_token %}
+          <table class="table_container">
+            <tbody>
+              {% form_as_table_rows form  %}
+            </tbody>
+          </table>
+          <p class="submit"><input type="submit" value="{% trans "Submit Changes" %} &rarr;">
+            | <a href="javascript:window.close()">Cancel</a></p>
+      </form>
+    </div>
+    <script type="text/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
+  </body>
 </html>

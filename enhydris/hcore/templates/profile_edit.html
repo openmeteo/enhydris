@@ -1,26 +1,27 @@
 {% extends "base.html" %}
-
 {% load i18n %}
 
+
 {% block content %}
-<h2>{% trans "User profile for" %} {{ profile.user }}: </h2>
-	<p>{% trans "You can change your personal information using the form below. Make any changes necessary and then click the 'Change' button."%}
-	</p>
-    {% if form.errors %}
+  <h2>{% trans "User profile for" %} {{ profile.user }}: </h2>
+  <p>
+    {% trans "You can change your personal information using the form below. Make any changes necessary and then click the 'Change' button."%}
+  </p>
+  {% if form.errors %}
     <p class="errorlist">{% trans "Sorry there are corrections needed in your form below:" %} {{ form.non_field_errors }}</p>
-    {% endif %}
-    {% if form.is_multipart %}
+  {% endif %}
+  {% if form.is_multipart %}
     <form enctype="multipart/form-data" method="post" action=".">
-    {% else %}
+  {% else %}
     <form method="post" action=".">
-    {% endif %}
-    {% csrf_token %} 
-    <table class="table_container">
-	<tbody>
-    {{ form.as_table }}
-	</tbody>
-    </table>
-    <br/>
+  {% endif %}
+  {% csrf_token %}
+  <table class="table_container">
+    <tbody>
+      {{ form.as_table }}
+    </tbody>
+  </table>
+  <br>
   <p class="submit"><input type="submit" class="i16 submit" value="{% trans "Change" %}" /></p>
-    </form>
+  </form>
 {% endblock %}

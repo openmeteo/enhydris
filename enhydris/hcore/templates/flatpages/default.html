@@ -1,6 +1,12 @@
 {% extends "base.html" %}
-{% block title %}{{ flatpage.title }}{% endblock %}
+
+
+{% block title %}
+  {{ flatpage.title }}
+{% endblock %}
+
+
 {% block content_main %}
-<h1>{{ flatpage.title }}</h1>
-{{ flatpage.content }}
+  <h1>{{ flatpage.title }}</h1>
+  {{ flatpage.content }}
 {% endblock %}

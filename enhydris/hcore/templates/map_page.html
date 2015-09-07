@@ -3,27 +3,33 @@
 {% load static %}
 
 {% block title %}{% trans 'Entities map' %}{% endblock %}
+
+
 {% block js-globals %}
-    <script type="text/javascript">
-        var legent_displayed=true;
-    </script>
-{% endblock %}
-{% block extracss %}
-<link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
-<link media="screen" href="{% static "css/tablesorter.css" %}" type="text/css" rel="stylesheet">
-    <style type="text/css">
-    #map {
-        width: 980px;
-        height: 700px;
-        border: 1px solid #eee;
-        z-index: 1;
-    }
-    </style>
+<script type="text/javascript">
+  var legent_displayed=true;
+</script>
 {% endblock %}
 
+
+{% block extracss %}
+  <link type="text/css" href="{% static "css/ui_override.css" %}" rel="stylesheet" />
+  <link media="screen" href="{% static "css/tablesorter.css" %}" type="text/css" rel="stylesheet">
+  <style type="text/css">
+    #map {
+      width: 980px;
+      height: 700px;
+      border: 1px solid #eee;
+      z-index: 1;
+    }
+  </style>
+{% endblock %}
+
+
 {% block content %}
-           <div style="float: left;">
-                <div id="map" style="float: left;">
-                <div id="processing_indicator" style="position: absolute; margin-top:212px; margin-left: 272px; z-index: 5000;"></div></div>
-           </div>
+  <div style="float: left;">
+    <div id="map" style="float: left;">
+      <div id="processing_indicator" style="position: absolute; margin-top:212px; margin-left: 272px; z-index: 5000;"></div>
+    </div>
+  </div>
 {% endblock %}
