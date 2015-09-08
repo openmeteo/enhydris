@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load bootstrap3 %}
+{% load i18n %}
+
+
+{% block title %}{% trans "Registration" %}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-sm-offset-1 col-sm-10">
+      <h1>{% trans "Sign up" %}</h1>
+      <p>{% trans "Already registered?" %}
+        <a href="{% url 'django.contrib.auth.views.login' %}">{% trans "Login" %}.</a></p>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <form action="{% url 'registration_register' %}"
+          method="post" role="form" class="form-horizontal">
+      {% csrf_token %}
+      {% bootstrap_form form layout='horizontal' %}
+
+      {% buttons %}
+      <div class="col-sm-offset-2 col-sm-10">
+        <button type="submit" class="btn btn-primary"> {% trans "Register" %}
+        </button>
+      </div>
+      {% endbuttons %}
+    </form>
+  </div>
+
+</div>
+
+{% endblock %}

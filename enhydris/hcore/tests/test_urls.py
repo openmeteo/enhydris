@@ -15,7 +15,6 @@ class SmokeTestCase(TestCase):
               '/accounts/register/',
               '/accounts/password/reset/',
               '/accounts/password/reset/done/',
-              '/map/',
               ],
         301: ['/stations/l/',
               ],

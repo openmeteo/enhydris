@@ -2,17 +2,21 @@
 {% load i18n %}
 {% load static %}
 
-{% block title %}{% trans "Success!" %}{% endblock %}
+
+{% block title %}
+  {% trans "Success!" %}
+{% endblock %}
+
 
 {% block content_title %}
-  <h2 class="pagetitle">{% trans "Success!" %}</h2>
+  <h2 class="text-success">{% trans "Success!" %}</h2>
 {% endblock %}
+
 
 {% block content %}
 <div style="padding-top:2em;">
-    <img src="{% static "images/icons/icon_confirmation.gif" %}" /><h2 style="display:inline; padding-left:10px">{% trans msg %}</h2>
+    <i class="glyphicon glyphicon-ok"></i><h2 style="display:inline; padding-left:10px">{% trans msg %}</h2>
 	{% url "station_list" as index %}
 	<p>{% blocktrans %}Here's a link to the <a href="{{ index }}">homepage</a>.{% endblocktrans %}</p>
 </div>
 {% endblock %}
-
