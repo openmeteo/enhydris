@@ -1,6 +1,6 @@
-/* global enhydris, OpenLayers, Arg, document */
+/* global enhydris, OpenLayers, Arg */
 
-enhydris.map_module = (function namespace() {
+enhydris.mapModule = (function namespace() {
     'use strict';
     var map;
 
@@ -88,7 +88,7 @@ enhydris.map_module = (function namespace() {
     };
 
     var onFeatureUnselect = function (feature) {
-        feature;  // Does nothing but remove a lint "unused" warning
+        // jshint unused:false
         removePopup();
     };
 
@@ -144,7 +144,7 @@ enhydris.map_module = (function namespace() {
             OpenLayers.Util.applyDefaults(
                 getStyleOptions(
                     {externalGraphic: enhydris.staticUrl + '${aicon}'}),
-                OpenLayers.Feature.Vector.style['default']),
+                OpenLayers.Feature.Vector.style.default),
             {context: styleContext}),
         'select': new OpenLayers.Style(
             OpenLayers.Util.applyDefaults(
@@ -190,22 +190,23 @@ enhydris.map_module = (function namespace() {
 
     var getRectAreaResults = function () {
         var bbox = enhydris.map.getExtent().transform(
-                new OpenLayers.Projection("EPSG:900913"),
-                new OpenLayers.Projection("EPSG:4326")).toBBOX(7);
-        var query_params = Arg.all();
-        query_params.bbox = bbox;
-        var query_string = '';
-        for (var param in query_params) {
-            if (param == '') {
+                new OpenLayers.Projection('EPSG:900913'),
+                new OpenLayers.Projection('EPSG:4326')).toBBOX(7);
+        var queryParams = Arg.all();
+        queryParams.bbox = bbox;
+        var queryString = '';
+        for (var i = 0; i < queryParams.length; ++i) {
+            var param = queryParams[i];
+            if (param === '') {
                 continue;
             }
-            if (query_string) {
-                query_string += '&';
+            if (queryString) {
+                queryString += '&';
             }
-            query_string += param + '=' + query_params[param];
+            queryString += param + '=' + queryParams[param];
         }
-        window.location = window.location.pathname + '?' + query_string;
-    }
+        window.location = window.location.pathname + '?' + queryString;
+    };
 
     // Init
 
@@ -228,7 +229,7 @@ enhydris.map_module = (function namespace() {
             });
 
         map.addLayers(enhydris.mapBaseLayers);
-        var dataLayers = [createLayer('Stations','stations', '#dd0022',
+        var dataLayers = [createLayer('Stations', 'stations', '#dd0022',
                 '#990077')];
         map.addLayers(dataLayers);
 
