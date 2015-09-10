@@ -10,7 +10,6 @@ from enhydris.settings.base import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 # SECURITY_WARNING: Keep the secret key used in production secret!
 SECRET_KEY = '{{ secret_key }}'
