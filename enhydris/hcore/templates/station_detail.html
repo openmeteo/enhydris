@@ -266,11 +266,11 @@
             {% else %}
               <td>
                 <h4>{% trans "No data available" %}</h4>
-                {% comment "Many <br>" %}
-                  Extra '<br>' in order to keep screen width when no data exist.
+                {% comment %}
+                  Ugly hack to maintain a decent tab height.
                 {% endcomment %}
-                  <br><br><br><br><br><br><br><br><br><br><br>
-                  <br><br><br><br><br><br><br><br><br><br><br>
+                <br><br><br><br><br><br><br><br><br><br><br>
+                <br><br><br><br><br><br><br><br><br><br><br>
               </td>
             {% endif %}
           </table>
@@ -326,11 +326,11 @@
             {% else %}
               <td colspan="2">
                 <h4>{% trans "No data available" %}</h4>
-                {% comment "Many <br>" %}
-                  Extra '<br>' in order to keep screen width when no data exist.
+                {% comment %}
+                  Ugly hack to maintain a decent tab height.
                 {% endcomment %}
-                  <br><br><br><br><br><br><br><br><br><br><br>
-                  <br><br><br><br><br><br><br><br><br><br><br>
+                <br><br><br><br><br><br><br><br><br><br><br>
+                <br><br><br><br><br><br><br><br><br><br><br>
               </td>
             {% endif %}
           </table>
@@ -382,11 +382,11 @@
           {% else %}
             <td>
               <h4>{% trans "No data available" %}</h4>
-              {% comment "Many <br>" %}
-                Extra '<br>' in order to keep screen width when no data exist.
+              {% comment %}
+                Ugly hack to maintain a decent tab height.
               {% endcomment %}
-                <br><br><br><br><br><br><br><br><br><br>
-                <br><br><br><br><br><br><br><br><br><br><br>
+              <br><br><br><br><br><br><br><br><br><br>
+              <br><br><br><br><br><br><br><br><br><br><br>
             </td>
           {% endif %}
         </table>
@@ -432,12 +432,12 @@
         {% else %}
           <td>
             <h4>{% trans "No data available" %}</h4>
-            {% comment "Many <br>" %}
-              Extra '<br>' in order to keep screen width when no data exist.
+            {% comment %}
+              Ugly hack to maintain a decent tab height.
             {% endcomment %}
-              <br><br><br><br><br><br><br><br><br><br>
-              <br><br><br><br><br><br><br><br><br><br><br>
-            </td>
+            <br><br><br><br><br><br><br><br><br><br>
+            <br><br><br><br><br><br><br><br><br><br><br>
+          </td>
         {% endif %}
         </table>
       </div>
@@ -491,11 +491,11 @@
         {% else %}
           <td>
             <h4>{% trans "No data available" %}</h4>
-            {% comment "Many <br>" %}
-              Extra '<br>' in order to keep screen width when no data exist.
+            {% comment %}
+              Ugly hack to maintain a decent tab height.
             {% endcomment %}
-              <br><br><br><br><br><br><br><br><br><br>
-              <br><br><br><br><br><br><br><br><br><br><br>
+            <br><br><br><br><br><br><br><br><br><br>
+            <br><br><br><br><br><br><br><br><br><br><br>
           </td>
         {% endif %}
         </table>
@@ -558,11 +558,11 @@
       {% else %}
         <td colspan="2">
           <h4>{% trans "No data available" %}<h4>
-            {% comment "Many <br>" %}
-              Extra '<br>' in order to keep screen width when no data exist.
-            {% endcomment %}
-            <br><br><br><br><br><br><br><br><br><br><br>
-            <br><br><br><br><br><br><br><br><br><br><br>
+          {% comment %}
+            Ugly hack to maintain a decent tab height.
+          {% endcomment %}
+          <br><br><br><br><br><br><br><br><br><br><br>
+          <br><br><br><br><br><br><br><br><br><br><br>
         </td>
       {% endif %}
     </table>
