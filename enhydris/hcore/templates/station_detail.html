@@ -62,12 +62,6 @@
             </div>
             <div class="panel-body">
               <div id="map" class="map"></div>
-                {% if display_copyright %}
-                  <p class="well well-sm">
-                    {% trans "Station " %}&quot;{{station.name}}&quot;,
-                    {% trans "Copyright (c) " %}{{ station.copyright_years }}, {{ station.copyright_holder }}.
-                  </p>
-                {% endif %}
             </div>
           </div>
         </div>
@@ -212,6 +206,14 @@
                   </tr>
                 </table>
               </div> <!--Table -->
+              {% if display_copyright %}
+                <div class="panel-footer">
+                  © <span class="text-warning">
+                    {{ station.copyright_years }}
+                    {{ station.copyright_holder }}
+                    </span>
+                </div>
+              {% endif %}
             </div>
           </div>
         </div>
