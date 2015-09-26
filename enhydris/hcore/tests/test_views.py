@@ -996,26 +996,35 @@ class RegisterTestCase(TestCase):
 class StationTestCase(TestCase):
 
     def setUp(self):
-        self.auser = User.objects.create_user(
-            username='auser', email='irrelevant@example.com',
-            password='topsecret')
-        self.auser.save()
-        self.auser.user_permissions.add(
-            Permission.objects.get(codename='add_station'))
-
-    def tearDown(self):
-        self.auser.delete()
+        create_test_data()
 
     @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
     def test_add_station(self):
         """
         Test that the add station form appears properly.
         """
-        r = self.client.login(username='auser', password='topsecret')
+        r = self.client.login(username='admin', password='topsecret')
         self.assertTrue(r)
         response = self.client.get('/stations/add/')
         self.assertEqual(response.status_code, 200)
 
+    @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+    def test_station_invalid_SRID_submission(self):
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        post_data = {
+            'name': 'station_test',
+            'stype': StationType.objects.get(descr="Important").id,
+            'owner': Organization.objects.get(
+                    name="We're rich and we fancy it SA").id,
+            'copyright_holder': 'Copyright Holder',
+            'copyright_years': '1990-2011',
+            'ordinate': '17',
+            'abscissa': '25',
+            'srid': '210',
+        }
+        response = self.client.post('/stations/add/', post_data)
+        self.assertFormError(response, 'form', 'srid', 'Invalid SRID')
 
 class ProfileTestCase(TestCase):
 

@@ -21,6 +21,8 @@ from django.contrib.gis.geos import Polygon
 from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
 import django.db
+from django.db import transaction
+from django.db.utils import InternalError
 from django.db.models import Count, Q
 from django.http import (Http404, HttpResponse, HttpResponseForbidden,
                          HttpResponseRedirect)
@@ -29,6 +31,7 @@ from django.template import RequestContext
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from django.utils.decorators import method_decorator
 from django.utils.functional import lazy
+from django.utils.translation import ugettext_lazy as _
 
 from pthelma.timeseries import (add_months_to_datetime, datetime_from_iso,
                                 Timeseries as TTimeseries)
@@ -968,23 +971,33 @@ def _station_edit_or_create(request, station_id=None):
             form = StationForm(request.POST)
 
         if form.is_valid():
-            station = form.save()
-            if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
-                    # Make creating user the station creator
+            try:
+                # Try/Except to cacth Invalid SRID
+                with transaction.atomic():
+                    # http://stackoverflow.com/questions/20130507/
+                    # django-transactionmanagementerror-when-using-signals
+                    station = form.save()
+                    if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
+                            # Make creating user the station creator
+                            if not station_id:
+                                station.creator = request.user
+                                # Give perms to the creator
+                                user.add_row_perm(station, 'edit')
+                                user.add_row_perm(station, 'delete')
+                    station.save()
+                    #Save maintainers, many2many, then save again to
+                    #set correctly row permissions
+                    form.save_m2m()
+                    station.save()
                     if not station_id:
-                        station.creator = request.user
-                        # Give perms to the creator
-                        user.add_row_perm(station, 'edit')
-                        user.add_row_perm(station, 'delete')
-            station.save()
-            #Save maintainers, many2many, then save again to
-            #set correctly row permissions
-            form.save_m2m()
-            station.save()
-            if not station_id:
-                station_id = str(station.id)
-            return HttpResponseRedirect(reverse('station_detail',
-                                                kwargs={'pk': station_id}))
+                        station_id = str(station.id)
+                    return HttpResponseRedirect(reverse('station_detail',
+                                                        kwargs={'pk': station_id}))
+            except InternalError as e:
+                if 'Cannot find SRID' not in str(e):
+                    raise
+                form.add_error('srid', _("Invalid SRID"))
+
     else:
         if station:
             form = StationForm(instance=station,
