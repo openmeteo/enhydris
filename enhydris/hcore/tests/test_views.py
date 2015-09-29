@@ -6,6 +6,7 @@ import tempfile
 from urllib import urlencode
 
 import django
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group, Permission
@@ -17,14 +18,12 @@ from django.test.utils import override_settings
 
 from pthelma import timeseries
 
-from django.conf import settings
-
+from enhydris.hcore.forms import TimeseriesDataForm
 from enhydris.hcore.models import (
     FileType, GentityFile, Instrument, InstrumentType, IntervalType,
     Organization, PoliticalDivision, Station, StationType, TimeZone,
     Timeseries, UnitOfMeasurement, UserProfile, Variable, WaterBasin,
     WaterDivision)
-from enhydris.hcore.forms import TimeseriesDataForm
 from enhydris.hcore.views import ALLOWED_TO_EDIT, StationListBaseView
 
 
@@ -231,137 +230,137 @@ class SearchTestCase(TestCase):
         # Search for something that exists
         queryset = self.get_queryset(urlencode({
             'q': 'extremely important time series'}))
-        self.assertEquals(queryset.count(), 1)
-        self.assertEquals(queryset[0].name, 'Tharbad')
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset[0].name, 'Tharbad')
 
         # Search for something that doesn't exist
         queryset = self.get_queryset(urlencode({
             'q': 'this should not exist anywhere'}))
-        self.assertEquals(queryset.count(), 0)
+        self.assertEqual(queryset.count(), 0)
 
     def test_search_by_owner(self):
         queryset = self.get_queryset(urlencode({'q': 'owner:RiCh'}))
-        self.assertEquals(queryset.count(), 1)
-        self.assertEquals(queryset[0].owner.organization.name,
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset[0].owner.organization.name,
                           "We're rich and we fancy it SA")
         queryset = self.get_queryset(urlencode({'owner': 'poor'}))
-        self.assertEquals(queryset.count(), 2)
-        self.assertEquals(queryset[0].owner.organization.name,
+        self.assertEqual(queryset.count(), 2)
+        self.assertEqual(queryset[0].owner.organization.name,
                           "We're poor and dislike it Ltd")
         queryset = self.get_queryset(urlencode({'owner': 'nonexistent'}))
-        self.assertEquals(queryset.count(), 0)
+        self.assertEqual(queryset.count(), 0)
 
     def test_search_by_type(self):
         # The following will find both "Important" and "Unimportant" stations,
         # because the string "important" is included in "Unimportant".
         queryset = self.get_queryset(urlencode({'q': 'type:Important'}))
         queryset = queryset.distinct()
-        self.assertEquals(queryset.count(), 3)
+        self.assertEqual(queryset.count(), 3)
 
         queryset = self.get_queryset(urlencode({'type': 'Unimportant'}))
         queryset = queryset.order_by('name')
-        self.assertEquals(queryset.count(), 2)
-        self.assertEquals(queryset[0].name, 'Agios Athanasios')
-        self.assertEquals(queryset[1].name, 'Tharbad')
+        self.assertEqual(queryset.count(), 2)
+        self.assertEqual(queryset[0].name, 'Agios Athanasios')
+        self.assertEqual(queryset[1].name, 'Tharbad')
 
         queryset = self.get_queryset(urlencode({'type': 'Nonexistent'}))
-        self.assertEquals(queryset.count(), 0)
+        self.assertEqual(queryset.count(), 0)
 
     def test_search_by_water_division(self):
         queryset = self.get_queryset(urlencode({'q': 'water_division:north'}))
-        self.assertEquals(queryset.count(), 1)
-        self.assertEquals(queryset[0].name, 'Komboti')
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset[0].name, 'Komboti')
 
         queryset = self.get_queryset(urlencode({'q': 'water_division:south'}))
         queryset = queryset.order_by('name')
-        self.assertEquals(queryset.count(), 2)
-        self.assertEquals(queryset[0].name, 'Agios Athanasios')
-        self.assertEquals(queryset[1].name, 'Tharbad')
+        self.assertEqual(queryset.count(), 2)
+        self.assertEqual(queryset[0].name, 'Agios Athanasios')
+        self.assertEqual(queryset[1].name, 'Tharbad')
 
         queryset = self.get_queryset(urlencode({'q': 'water_division:east'}))
-        self.assertEquals(queryset.count(), 0)
+        self.assertEqual(queryset.count(), 0)
 
     def test_search_by_water_basin(self):
         queryset = self.get_queryset(urlencode({'q': 'water_basin:arachthos'}))
-        self.assertEquals(queryset.count(), 1)
-        self.assertEquals(queryset[0].name, 'Komboti')
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset[0].name, 'Komboti')
 
         queryset = self.get_queryset(urlencode({'water_basin': 'greyflood'}))
         queryset = queryset.order_by('name')
-        self.assertEquals(queryset.count(), 1)
-        self.assertEquals(queryset[0].name, 'Tharbad')
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset[0].name, 'Tharbad')
 
         queryset = self.get_queryset(urlencode({'water_basin': 'nonexistent'}))
-        self.assertEquals(queryset.count(), 0)
+        self.assertEqual(queryset.count(), 0)
 
     def test_search_by_variable(self):
         queryset = self.get_queryset(urlencode({'q': 'variable:rain'}))
         queryset = queryset.order_by('name')
-        self.assertEquals(queryset.count(), 2)
-        self.assertEquals(queryset[0].name, 'Agios Athanasios')
-        self.assertEquals(queryset[1].name, 'Komboti')
+        self.assertEqual(queryset.count(), 2)
+        self.assertEqual(queryset[0].name, 'Agios Athanasios')
+        self.assertEqual(queryset[1].name, 'Komboti')
 
         queryset = self.get_queryset(urlencode({'q': 'variable:temperature'}))
         queryset = queryset.order_by('name')
-        self.assertEquals(queryset.count(), 3)
-        self.assertEquals(queryset[0].name, 'Agios Athanasios')
-        self.assertEquals(queryset[1].name, 'Komboti')
-        self.assertEquals(queryset[2].name, 'Tharbad')
+        self.assertEqual(queryset.count(), 3)
+        self.assertEqual(queryset[0].name, 'Agios Athanasios')
+        self.assertEqual(queryset[1].name, 'Komboti')
+        self.assertEqual(queryset[2].name, 'Tharbad')
 
         queryset = self.get_queryset(urlencode({'q': 'variable:nonexistent'}))
-        self.assertEquals(queryset.count(), 0)
+        self.assertEqual(queryset.count(), 0)
 
     def test_search_by_gentityId(self):
         station_id = Station.objects.get(name='Komboti').id
         queryset = self.get_queryset(urlencode({'gentityId': str(station_id)}))
-        self.assertEquals(queryset.count(), 1)
-        self.assertEquals(queryset[0].name, 'Komboti')
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset[0].name, 'Komboti')
 
         queryset = self.get_queryset(urlencode({'gentityId': '98765'}))
-        self.assertEquals(queryset.count(), 0)
+        self.assertEqual(queryset.count(), 0)
 
     def test_search_by_ts_only(self):
         queryset = self.get_queryset('')
-        self.assertEquals(queryset.count(), 4)
+        self.assertEqual(queryset.count(), 4)
         queryset = self.get_queryset(urlencode({'q': 'ts_only:'}))
-        self.assertEquals(queryset.count(), 3)
+        self.assertEqual(queryset.count(), 3)
 
     def test_search_by_political_division(self):
         queryset = self.get_queryset(
             urlencode({'political_division': 'Cardolan'}))
-        self.assertEquals(queryset.count(), 1)
-        self.assertEquals(queryset[0].name, 'Tharbad')
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset[0].name, 'Tharbad')
 
         queryset = self.get_queryset(
             urlencode({'political_division': 'Arthedain'}))
-        self.assertEquals(queryset.count(), 0)
+        self.assertEqual(queryset.count(), 0)
 
         queryset = self.get_queryset(
             urlencode({'political_division': 'Karditsa'}))
-        self.assertEquals(queryset.count(), 1)
-        self.assertEquals(queryset[0].name, 'Agios Athanasios')
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset[0].name, 'Agios Athanasios')
 
         queryset = self.get_queryset(
             urlencode({'political_division': 'Arta'}))
-        self.assertEquals(queryset.count(), 1)
-        self.assertEquals(queryset[0].name, 'Komboti')
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset[0].name, 'Komboti')
 
         queryset = self.get_queryset(
             urlencode({'political_division': 'Epirus'}))
-        self.assertEquals(queryset.count(), 1)
-        self.assertEquals(queryset[0].name, 'Komboti')
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset[0].name, 'Komboti')
 
         queryset = self.get_queryset(
             urlencode({'political_division': 'Greece'}))
         queryset = queryset.order_by('name')
-        self.assertEquals(queryset.count(), 2)
-        self.assertEquals(queryset[0].name, 'Agios Athanasios')
-        self.assertEquals(queryset[1].name, 'Komboti')
+        self.assertEqual(queryset.count(), 2)
+        self.assertEqual(queryset[0].name, 'Agios Athanasios')
+        self.assertEqual(queryset[1].name, 'Komboti')
 
         queryset = self.get_queryset(
             urlencode({'political_division': 'Middle Earth'}))
-        self.assertEquals(queryset.count(), 1)
-        self.assertEquals(queryset[0].name, 'Tharbad')
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset[0].name, 'Tharbad')
 
 
 class RandomMediaRoot(override_settings):
@@ -394,7 +393,7 @@ class GentityFileTestCase(TestCase):
         gentity_id = Station.objects.get(name='Komboti').id
         r = self.client.login(username='admin', password='topsecret')
         self.assertTrue(r)
-        self.assertEquals(GentityFile.objects.filter(gentity__id=gentity_id
+        self.assertEqual(GentityFile.objects.filter(gentity__id=gentity_id
                                                      ).count(), 0)
         filetype_id = FileType.objects.get(mime_type='image/jpeg').id
         with tempfile.TemporaryFile(suffix='.jpg') as tmpfile:
@@ -410,16 +409,16 @@ class GentityFileTestCase(TestCase):
                                          'remarks_alt': '',
                                          'content': tmpfile,
                                          })
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(GentityFile.objects.filter(gentity__id=gentity_id
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(GentityFile.objects.filter(gentity__id=gentity_id
                                                      ).count(), 1)
 
         # Now try to download that gentity file
         gentity_file_id = GentityFile.objects.all()[0].id
         response = self.client.get(reverse('gentityfile_dl',
                                            kwargs={'gf_id': gentity_file_id}))
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.content, 'Irrelevant data\n')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, 'Irrelevant data\n')
 
 
 class TsTestCase(TestCase):
@@ -628,7 +627,7 @@ class OpenVTestCase(TestCase):
         # check that anonymous users cannot see the forms
         for page_url in self.pages:
             page = self.client.get(page_url)
-            self.assertEquals(
+            self.assertEqual(
                 page.status_code, 302,
                 "Status code for page '%s' was %s instead of %s" %
                 (page_url, page.status_code, 302))
@@ -636,13 +635,13 @@ class OpenVTestCase(TestCase):
                 page, '/accounts/login/?next=%s' % page_url, status_code=302,
                 target_status_code=200)
 
-        self.assertEquals(self.client.login(username='opentest',
+        self.assertEqual(self.client.login(username='opentest',
                                             password='opentest'), True)
 
         # check that logged in users can see the forms
         for page_url in self.pages:
             page = self.client.get(page_url)
-            self.assertEquals(
+            self.assertEqual(
                 page.status_code, 200,
                 "Status code for page '%s' was %s instead of %s" %
                 (page_url, page.status_code, 200))
@@ -654,7 +653,7 @@ class OpenVTestCase(TestCase):
         Check that edit forms honour the permissions.
         """
 
-        self.assertEquals(self.client.login(username='opentest',
+        self.assertEqual(self.client.login(username='opentest',
                                             password='opentest'), True)
 
         post_data = {
@@ -675,55 +674,55 @@ class OpenVTestCase(TestCase):
         # create new station as a logged in user. this should work
         url = "/stations/add/"
         resp = self.client.post(url, post_data)
-        self.assertEquals(resp.status_code, 302)
+        self.assertEqual(resp.status_code, 302)
 
         s = Station.objects.get(name='station_test')
 
         # edit my station. this should work
         url = "/stations/edit/%s/" % str(s.pk)
         resp = self.client.get(url)
-        self.assertEquals(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, "station_edit.html")
 
         # delete my station. this should work
         url = "/stations/delete/%s/" % str(s.pk)
         resp = self.client.get(url, follow=True)
-        self.assertEquals(resp.status_code, 200)
-        self.assertEquals(Station.objects.filter(name='station_test').count(),
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(Station.objects.filter(name='station_test').count(),
                           0)
 
         # try to edit a random station. this should fail
         url = "/stations/edit/%s/" % str(self.station.pk)
         resp = self.client.get(url)
-        self.assertEquals(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 403)
 
         # try to delete a random station. this should fail
         url = "/stations/delete/%s/" % str(self.station.pk)
         resp = self.client.get(url)
-        self.assertEquals(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 403)
 
         # recreate again for further tests
         url = "/stations/add/"
         resp = self.client.post(url, post_data)
-        self.assertEquals(resp.status_code, 302)
+        self.assertEqual(resp.status_code, 302)
 
         s = Station.objects.get(name='station_test')
 
         self.client.logout()
 
         # login as another user to check 403 perms
-        self.assertEquals(self.client.login(username='fail', password='fail'),
+        self.assertEqual(self.client.login(username='fail', password='fail'),
                           True)
 
         # edit station. this shouldn't work
         url = "/stations/edit/%s/" % str(s.pk)
         resp = self.client.get(url)
-        self.assertEquals(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 403)
 
         # delete station. this shouldn't work
         url = "/stations/delete/%s/" % str(s.pk)
         resp = self.client.get(url)
-        self.assertEquals(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 403)
 
         # add user to maintainers and check if it's fixed.
         s.maintainers.add(self.user2)
@@ -732,13 +731,13 @@ class OpenVTestCase(TestCase):
         # edit maintaining station. this should work
         url = "/stations/edit/%s/" % str(s.pk)
         resp = self.client.get(url)
-        self.assertEquals(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, "station_edit.html")
 
         # delete maintaining station. this shouldn't work
         url = "/stations/delete/%s/" % str(s.pk)
         resp = self.client.get(url, follow=True)
-        self.assertEquals(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 403)
 
         self.client.logout()
         s.delete()
@@ -747,7 +746,7 @@ class OpenVTestCase(TestCase):
         """
         Check that edit forms honour the permissions.
         """
-        self.assertEquals(self.client.login(username='opentest',
+        self.assertEqual(self.client.login(username='opentest',
                                             password='opentest'), True)
 
         post_data = {
@@ -768,7 +767,7 @@ class OpenVTestCase(TestCase):
         # create new station as a logged in user. this should work
         url = "/stations/add/"
         resp = self.client.post(url, post_data)
-        self.assertEquals(resp.status_code, 302)
+        self.assertEqual(resp.status_code, 302)
 
         s = Station.objects.get(name='station_test')
 
@@ -783,44 +782,44 @@ class OpenVTestCase(TestCase):
         # create new timeseries
         url = "/timeseries/add/"
         resp = self.client.post(url, post_data)
-        self.assertEquals(resp.status_code, 302)
+        self.assertEqual(resp.status_code, 302)
 
         t = Timeseries.objects.get(name="timeseries_test")
 
         # edit my timeseries. this should work
         url = "/timeseries/edit/%s/" % str(t.pk)
         resp = self.client.get(url)
-        self.assertEquals(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, "timeseries_edit.html")
 
         # delete my timeseries. this should work
         url = "/timeseries/delete/%s/" % str(t.pk)
         resp = self.client.get(url, follow=True)
-        self.assertEquals(resp.status_code, 200)
-        self.assertEquals(Station.objects.filter(
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(Station.objects.filter(
             name='timeseries_test').count(), 0)
 
         # recreate deleted timeseries for further tests
         url = "/timeseries/add/"
         resp = self.client.post(url, post_data)
         t = Timeseries.objects.get(name="timeseries_test")
-        self.assertEquals(resp.status_code, 302)
+        self.assertEqual(resp.status_code, 302)
 
         self.client.logout()
 
         # login as another user to check 403 perms
-        self.assertEquals(self.client.login(username='fail', password='fail'),
+        self.assertEqual(self.client.login(username='fail', password='fail'),
                           True)
 
         # edit my timeseries. this shouldn't work
         url = "/timeseries/edit/%s/" % str(t.pk)
         resp = self.client.get(url)
-        self.assertEquals(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 403)
 
         # delete my timeseries. this shouldn't work
         url = "/timeseries/delete/%s/" % str(t.pk)
         resp = self.client.get(url, follow=True)
-        self.assertEquals(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 403)
 
         # add user to maintainers and check if it's fixed.
         s.maintainers.add(self.user2)
@@ -829,14 +828,14 @@ class OpenVTestCase(TestCase):
         # edit maintaining timeseries. this should work
         url = "/timeseries/edit/%s/" % str(t.pk)
         resp = self.client.get(url)
-        self.assertEquals(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, "timeseries_edit.html")
 
         # delete maintaining timeseries, this should work
         url = "/timeseries/delete/%s/" % str(t.pk)
         resp = self.client.get(url, follow=True)
-        self.assertEquals(resp.status_code, 200)
-        self.assertEquals(Station.objects.filter(
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(Station.objects.filter(
             name='timeseries_test').count(), 0)
 
         s.delete()
@@ -846,7 +845,7 @@ class OpenVTestCase(TestCase):
         Check that edit forms honour the permissions.
         """
 
-        self.assertEquals(self.client.login(username='opentest',
+        self.assertEqual(self.client.login(username='opentest',
                                             password='opentest'), True)
 
         post_data = {
@@ -867,7 +866,7 @@ class OpenVTestCase(TestCase):
         # create new station as a logged in user. this should work
         url = "/stations/add/"
         resp = self.client.post(url, post_data)
-        self.assertEquals(resp.status_code, 302)
+        self.assertEqual(resp.status_code, 302)
 
         s = Station.objects.get(name='station_test')
 
@@ -880,45 +879,45 @@ class OpenVTestCase(TestCase):
         # create new instrument
         url = "/instrument/add/"
         resp = self.client.post(url, post_data)
-        self.assertEquals(resp.status_code, 302)
+        self.assertEqual(resp.status_code, 302)
 
         i = Instrument.objects.get(name="instrument_test")
 
         # edit my instrument. this should work
         url = "/instrument/edit/%s/" % str(i.pk)
         resp = self.client.get(url, follow=True)
-        self.assertEquals(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, "instrument_edit.html")
 
         # delete my station. this should work
         url = "/instrument/delete/%s/" % str(i.pk)
         resp = self.client.get(url, follow=True)
-        self.assertEquals(resp.status_code, 200)
-        self.assertEquals(Station.objects.filter(
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(Station.objects.filter(
             name='instrument_test').count(), 0)
 
         # recreate deleted instrument for further tests
         url = "/instrument/add/"
         resp = self.client.post(url, post_data)
-        self.assertEquals(resp.status_code, 302)
+        self.assertEqual(resp.status_code, 302)
 
         i = Instrument.objects.get(name="instrument_test")
 
         self.client.logout()
 
         # login as another user to check 403 perms
-        self.assertEquals(self.client.login(username='fail', password='fail'),
+        self.assertEqual(self.client.login(username='fail', password='fail'),
                           True)
 
         # edit my instrument. this shouldn't work
         url = "/instrument/edit/%s/" % str(i.pk)
         resp = self.client.get(url, follow=True)
-        self.assertEquals(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 403)
 
         # delete my instrument. this shouldn't work
         url = "/instrument/delete/%s/" % str(i.pk)
         resp = self.client.get(url, follow=True)
-        self.assertEquals(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 403)
 
         # add user to maintainers and check if it's fixed.
         s.maintainers.add(self.user2)
@@ -927,27 +926,27 @@ class OpenVTestCase(TestCase):
         # edit my instrument. this should work
         url = "/instrument/edit/%s/" % str(i.pk)
         resp = self.client.get(url, follow=True)
-        self.assertEquals(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, "instrument_edit.html")
 
         # delete my station. this should work
         url = "/instrument/delete/%s/" % str(i.pk)
         resp = self.client.get(url, follow=True)
-        self.assertEquals(resp.status_code, 200)
-        self.assertEquals(Station.objects.filter(
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(Station.objects.filter(
             name='instrument_test').count(), 0)
 
     def testGenericModelCreation(self):
         """
         Test the generic model forms
         """
-        self.assertEquals(self.client.login(username='opentest',
+        self.assertEqual(self.client.login(username='opentest',
                                             password='opentest'), True)
 
         for model in ALLOWED_TO_EDIT:
             url = "/add/%s/?_popup=1" % model
             resp = self.client.get(url)
-            self.assertEquals(resp.status_code, 200, "Error in page %s." % url)
+            self.assertEqual(resp.status_code, 200, "Error in page %s." % url)
             self.assertTemplateUsed(resp, "model_add.html")
 
         self.client.logout()
@@ -1042,7 +1041,7 @@ class ProfileTestCase(TestCase):
         response = self.client.get('/profile/auser/')
         self.assertContains(response, 'irrelevant@example.com')
         response = self.client.post('/profile/edit/', post_data)
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         response = self.client.get('/profile/auser/')
         self.assertNotContains(response, 'irrelevant@example.com')
         self.client.logout()
