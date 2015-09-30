@@ -106,7 +106,7 @@ not be allowed to create more users.
          WHERE datname='template_postgis';"
       exit
 
-   The create the database::
+   Then create the database::
 
       sudo -u postgres -s
       createuser --pwprompt enhydris_user
