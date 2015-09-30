@@ -151,7 +151,6 @@ def create_test_data():
     station1 = Station.objects.create(
         name='Komboti',
         approximate=False,
-        is_active=False,
         is_automatic=False,
         copyright_holder="We're poor and dislike it Ltd",
         copyright_years='2013',
@@ -166,7 +165,6 @@ def create_test_data():
     station2 = Station.objects.create(
         name='Agios Athanasios',
         approximate=False,
-        is_active=False,
         is_automatic=False,
         copyright_holder="We're poor and dislike it Ltd",
         copyright_years='2013',
@@ -181,7 +179,6 @@ def create_test_data():
     station3 = Station.objects.create(
         name='Tharbad',
         approximate=False,
-        is_active=False,
         is_automatic=False,
         copyright_holder="Isaac Newton",
         copyright_years='1687',
@@ -198,7 +195,6 @@ def create_test_data():
     station4 = Station.objects.create(
         name='Lefkada',
         approximate=False,
-        is_active=False,
         is_automatic=False,
         copyright_holder='Alice Brown',
         copyright_years='2014',
@@ -503,7 +499,6 @@ class TsTestCase(TestCase):
             name='station',
             owner=self.organization,
             approximate=False,
-            is_active=True,
             is_automatic=True,
             point=fromstr('POINT(24.67890 38.12345)'),
             srid=4326,
@@ -663,7 +658,6 @@ class OpenVTestCase(TestCase):
         self.station = Station.objects.create(name='station',
                                               owner=self.organization,
                                               approximate=False,
-                                              is_active=True,
                                               is_automatic=True)
         self.ts = Timeseries(name="tstest", gentity=self.station,
                              time_zone=self.tz, unit_of_measurement=self.unit,

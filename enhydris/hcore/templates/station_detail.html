@@ -156,10 +156,6 @@
                   <td colspan='2'>{% for stype in station.stype.all %}{{ stype.descr }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
                 </tr>
                 <tr>
-                  <th class="col-md-3">{% trans 'Is Active' %}</th>
-                  <td colspan='2'>{{ station.is_active }}</td>
-                </tr>
-                <tr>
                   <th class="col-md-3">{% trans 'Is Automatic' %}</th>
                   <td colspan='2'>{{ station.is_automatic }}</td>
                 </tr>
@@ -457,7 +453,6 @@
                   <th>{% trans "Type" %}</th>
                   <th>{% trans "Manufacturer" %}</th>
                   <th>{% trans "Model" %}</th>
-                  <th>{% trans "Is Active" %}</th>
                   <th>{% trans "Start Date" %}</th>
                   <th>{% trans "End Date" %}</th>
                   {% if request.user|can_edit:station %}
@@ -475,7 +470,6 @@
                       <td>{{ instrument.type }}</td>
                       <td>{{ instrument.manufacturer }}</td>
                       <td>{{ instrument.model }}</td>
-                      <td>{{ instrument.is_active }}</td>
                       <td>{{ instrument.start_date|date:"Y/m/d" }}</td>
                       <td>{{ instrument.end_date|date:"Y/m/d" }}</td>
                 {% if request.user|can_edit:station %}

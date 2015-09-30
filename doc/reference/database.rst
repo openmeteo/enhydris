@@ -432,10 +432,6 @@ Station and its related models
 
       The :class:`~enhydris.hcore.models.StationType`.
 
-   .. attribute:: enhydris.hcore.models.Station.is_active
-
-      A boolean field showing whether the station is operating.
-
    .. attribute:: enhydris.hcore.models.Station.is_automatic
 
       A boolean field showing whether the station is automatic.
@@ -515,10 +511,6 @@ Station and its related models
    .. attribute:: enhydris.hcore.models.Instrument.model
 
       The model name.
-
-   .. attribute:: enhydris.hcore.models.Instrument.is_active
-
-      A boolean indicating whether the instrument is operative.
 
    .. attribute:: enhydris.hcore.models.Instrument.start_date
 

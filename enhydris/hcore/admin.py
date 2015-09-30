@@ -155,9 +155,9 @@ class StationAdmin(admin.ModelAdmin):
     # ChangeList format
     list_display = ('id', 'name', 'short_name', 'remarks', 'water_basin',
         'water_division', 'political_division', 'srid',
-        'approximate', 'altitude', 'asrid', 'owner', 'is_active',
-        'is_automatic', 'start_date', 'end_date','show_overseers' )
-    list_filter = ('is_active', 'is_automatic', 'end_date',)
+        'approximate', 'altitude', 'asrid', 'owner', 'is_automatic',
+        'start_date', 'end_date','show_overseers')
+    list_filter = ('is_automatic', 'end_date',)
     date_hierarchy = 'start_date'
 
     # Inlines for m2m relationships
@@ -170,8 +170,8 @@ admin.site.register(Station, StationAdmin)
 class InstrumentAdmin(admin.ModelAdmin):
     # ChangeList format
     list_display = ('id', 'name', 'remarks', 'station', 'type', 'manufacturer',
-        'model', 'is_active', 'start_date', 'end_date' )
-    list_filter = ('is_active', 'start_date', 'end_date',)
+        'model', 'start_date', 'end_date' )
+    list_filter = ('start_date', 'end_date',)
 
 admin.site.register(Instrument, InstrumentAdmin)
 

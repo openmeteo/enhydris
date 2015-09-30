@@ -120,7 +120,7 @@ _station_list_csv_headers = [
     'id', 'Name', 'Alternative name', 'Short name',
     'Alt short name', 'Type', 'Owner', 'Start date', 'End date', 'Abscissa',
     'Ordinate', 'SRID', 'Approximate', 'Altitude', 'SRID', 'Water basin',
-    'Water division', 'Political division', 'Active', 'Automatic', 'Remarks',
+    'Water division', 'Political division', 'Automatic', 'Remarks',
     'Alternative remarks', 'Last modified']
 
 
@@ -135,22 +135,21 @@ def _station_csv(s):
             s.water_basin.name if s.water_basin else "",
             s.water_division.name if s.water_division else "",
             s.political_division.name if s.political_division else "",
-            s.is_active, s.is_automatic, s.remarks, s.remarks_alt,
-            s.last_modified]
+            s.is_automatic, s.remarks, s.remarks_alt, s.last_modified]
             ]
 
 
 _instrument_list_csv_headers = [
     'id', 'Station', 'Type', 'Name',
     'Alternative name', 'Manufacturer', 'Model', 'Start date', 'End date',
-    'Active', 'Remarks', 'Alternative remarks']
+    'Remarks', 'Alternative remarks']
 
 
 def _instrument_csv(i):
     return [unicode(x).encode('utf-8') for x in
            [i.id, i.station.id, i.type.descr if i.type else "", i.name,
             i.name_alt, i.manufacturer, i.model, i.start_date, i.end_date,
-            i.is_active, i.remarks, i.remarks_alt]
+            i.remarks, i.remarks_alt]
             ]
 
 

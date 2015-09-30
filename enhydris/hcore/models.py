@@ -349,7 +349,6 @@ class Station(Gpoint):
     owner = models.ForeignKey(Lentity, related_name="owned_stations")
     stype = models.ManyToManyField(StationType, verbose_name='type')
     is_automatic = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     overseers = models.ManyToManyField(Person, through='Overseer',
@@ -398,7 +397,6 @@ class Instrument(models.Model):
     type = models.ForeignKey(InstrumentType)
     manufacturer = models.CharField(max_length=50, blank=True)
     model = models.CharField(max_length=50, blank=True)
-    is_active = models.BooleanField(default=False)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     name = models.CharField(max_length=100, blank=True)

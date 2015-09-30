@@ -3,7 +3,6 @@
 <p style="color: #000044; font-size: 9pt; margin: 3px;">
     {% for stype in station.stype.all %}{{ stype.descr }}{% if not forloop.last %}, {% endif %}{% endfor %}<br />
     {% trans 'Owner: ' %}{{ station.owner }}<br />
-    {% if station.is_active %}{% trans 'Active, ' %}{% else %}{% trans 'Not active, ' %}{% endif %}
     {% if station.is_automatic %}{% trans 'Automatic' %}{% else %}{% trans 'Conventional' %}{% endif %}<br />
     {% url "station_detail" station.id as station_url %}
     <a href=" {{station_url}} ">{% trans 'Open station details' %}</a>

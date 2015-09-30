@@ -53,7 +53,6 @@ def create_test_data():
         water_basin=water_basin1,
         political_division=pd1,
         owner=organization1,
-        is_active=False,
         is_automatic=False,
         copyright_holder="Joe User",
         copyright_years=2014)
@@ -66,7 +65,6 @@ def create_test_data():
         water_basin=water_basin1,
         political_division=pd1,
         owner=organization1,
-        is_active=False,
         is_automatic=False,
         copyright_holder="Joe User",
         copyright_years=2014
