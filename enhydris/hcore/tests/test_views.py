@@ -3,6 +3,8 @@ import re
 from StringIO import StringIO
 import shutil
 import tempfile
+import time
+from unittest import skipUnless
 from urllib import urlencode
 
 import django
@@ -25,6 +27,29 @@ from enhydris.hcore.models import (
     Timeseries, UnitOfMeasurement, UserProfile, Variable, WaterBasin,
     WaterDivision)
 from enhydris.hcore.views import ALLOWED_TO_EDIT, StationListBaseView
+
+try:
+    # Experimental Selenium support. Enhydris does not require Selenium
+    # to be installed or configured. If it is, it runs the selenium tests;
+    # otherwise the tests are skipped. If you want to run this tests, pip
+    # install django_selenium_clean and add to your settings.py the snippet at
+    # https://github.com/aptiko/django-selenium-clean#executing-the-test
+    from django_selenium_clean import selenium, SeleniumTestCase, PageElement
+    from selenium.webdriver.common.by import By
+except ImportError:
+    selenium = False
+
+    # Create some dummy stuff to allow the Selenium tests to compile (even if
+    # they are always skipped).
+    class Dummy:
+        XPATH = ''
+        ID = ''
+
+        def __init__(*args, **kwargs):
+            pass
+    SeleniumTestCase = TestCase
+    PageElement = Dummy
+    By = Dummy()
 
 
 def create_test_data():
@@ -1088,3 +1113,132 @@ class ResetPasswordTestCase(TestCase):
         # Cool, now let me log in
         r = self.client.login(username='auser', password='topsecret2')
         self.assertTrue(r)
+
+
+@skipUnless(selenium, 'Selenium is missing or unconfigured')
+class CoordinatesTestCase(SeleniumTestCase):
+
+    # Elements in "Edit Station" view
+    label_ordinate = PageElement(By.XPATH, '//label[@for="id_ordinate"]')
+    field_ordinate = PageElement(By.ID, 'id_ordinate')
+    label_abscissa = PageElement(By.XPATH, '//label[@for="id_abscissa"]')
+    field_abscissa = PageElement(By.ID, 'id_abscissa')
+    field_srid = PageElement(By.ID, 'id_srid')
+    field_altitude = PageElement(By.ID, 'id_altitude')
+    field_asrid = PageElement(By.ID, 'id_asrid')
+    field_approximate = PageElement(By.ID, 'id_approximate')
+    button_coordinates = PageElement(By.ID, 'btnCoordinates')
+    field_stype = PageElement(By.ID, 'id_stype')
+    stype_option_2 = PageElement(By.XPATH,
+                                 '//select[@id="id_stype"]/option[2]')
+    field_owner = PageElement(By.ID, 'id_owner')
+    owner_option_2 = PageElement(By.XPATH,
+                                 '//select[@id="id_owner"]/option[2]')
+    field_copyright_holder = PageElement(By.ID, 'id_copyright_holder')
+    field_copyright_years = PageElement(By.ID, 'id_copyright_years')
+    button_submit = PageElement(By.XPATH, '//button[@type="submit"]')
+
+    # Elements in "View Station" view
+    button_edit = PageElement(
+        By.XPATH, '//a[starts-with(@class, "btn") and '
+                  'starts-with(@href, "/stations/edit/")]')
+
+    def setUp(self):
+        create_test_data()
+
+    @override_settings(DEBUG=True)
+    def test_coordinates(self):
+        # Login
+        r = selenium.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+
+        # Go to the add new station page and check that the simple view is
+        # active
+        selenium.get(self.live_server_url + '/stations/add/')
+        self.label_ordinate.wait_until_contains("Latitude")
+        self.assertEqual(self.label_ordinate.text, "Latitude")
+        self.assertEqual(self.label_abscissa.text, "Longitude")
+        self.assertFalse(self.field_srid.is_displayed())
+        self.assertFalse(self.field_asrid.is_displayed())
+        self.assertFalse(self.field_approximate.is_displayed())
+
+        # Switch to the advanced view and check it's ok
+        self.button_coordinates.click()
+        self.label_ordinate.wait_until_contains("Ordinate")
+        self.assertEqual(self.label_ordinate.text, "Ordinate")
+        self.assertEqual(self.label_abscissa.text, "Abscissa")
+        self.assertTrue(self.field_srid.is_displayed())
+        self.assertTrue(self.field_asrid.is_displayed())
+        self.assertTrue(self.field_approximate.is_displayed())
+        self.assertEqual(self.field_srid.get_attribute('value'), '4326')
+
+        # Go back to the simple view and check it's ok
+        self.button_coordinates.click()
+        self.label_ordinate.wait_until_contains("Latitude")
+        self.assertEqual(self.label_ordinate.text, "Latitude")
+        self.assertEqual(self.label_abscissa.text, "Longitude")
+        self.assertFalse(self.field_srid.is_displayed())
+        self.assertFalse(self.field_asrid.is_displayed())
+        self.assertFalse(self.field_approximate.is_displayed())
+
+        # Enter a latitude and longitude and other data and submit
+        self.field_ordinate.send_keys('37.97522')
+        self.field_abscissa.send_keys('23.73700')
+        self.stype_option_2.click()
+        self.owner_option_2.click()
+        self.field_copyright_holder.send_keys('Alice')
+        self.field_copyright_years.send_keys('2015')
+        self.button_submit.click()
+
+        # Wait for the response, then go to edit the station and check that
+        # it's the simple view
+        self.button_edit.wait_until_is_displayed()
+        self.button_edit.click()
+        self.label_ordinate.wait_until_contains("Latitude")
+        self.assertEqual(self.label_ordinate.text, "Latitude")
+        self.assertEqual(self.label_abscissa.text, "Longitude")
+        self.assertFalse(self.field_srid.is_displayed())
+        self.assertFalse(self.field_asrid.is_displayed())
+        self.assertFalse(self.field_approximate.is_displayed())
+        self.assertEqual(self.field_ordinate.get_attribute('value'),
+                         '37.97522')
+        self.assertEqual(self.field_abscissa.get_attribute('value'),
+                         '23.737')
+
+        # Switch to the advanced view
+        self.button_coordinates.click()
+        self.label_ordinate.wait_until_contains("Ordinate")
+        self.assertEqual(self.label_ordinate.text, "Ordinate")
+        self.assertEqual(self.label_abscissa.text, "Abscissa")
+        self.assertTrue(self.field_srid.is_displayed())
+        self.assertTrue(self.field_asrid.is_displayed())
+        self.assertTrue(self.field_approximate.is_displayed())
+        self.assertEqual(self.field_srid.get_attribute('value'), '4326')
+
+        # Enter some advanced data and submit
+        self.field_ordinate.clear()
+        self.field_ordinate.send_keys('4202810.33')
+        self.field_abscissa.clear()
+        self.field_abscissa.send_keys('476751.84')
+        self.field_srid.clear()
+        self.field_srid.send_keys('2100')
+        self.button_submit.click()
+
+        # Go to the edit page again, and check that the advanced view shows
+        self.button_edit.wait_until_is_displayed()
+        self.button_edit.click()
+        self.label_ordinate.wait_until_is_displayed()
+        time.sleep(1)  # Wait for JavaScript to take action
+        self.assertEqual(self.label_ordinate.text, "Ordinate")
+        self.assertEqual(self.label_abscissa.text, "Abscissa")
+        self.assertTrue(self.field_srid.is_displayed())
+        self.assertTrue(self.field_asrid.is_displayed())
+        self.assertTrue(self.field_approximate.is_displayed())
+        self.assertEqual(self.field_srid.get_attribute('value'), '2100')
+        self.assertEqual(self.field_ordinate.get_attribute('value'),
+                         '4202810.33')
+        self.assertEqual(self.field_abscissa.get_attribute('value'),
+                         '476751.84')
+
+        # It should be impossible to change to the simple view
+        self.assertFalse(self.button_coordinates.is_displayed())
