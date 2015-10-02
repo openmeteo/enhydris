@@ -20,10 +20,10 @@ from pthelma import timeseries
 from django.conf import settings
 
 from enhydris.hcore.models import (
-    FileType, GentityFile, Instrument, InstrumentType, IntervalType,
-    Organization, PoliticalDivision, Station, StationType, TimeZone,
-    Timeseries, UnitOfMeasurement, UserProfile, Variable, WaterBasin,
-    WaterDivision)
+    EventType, FileType, Gentity, GentityFile, GentityEvent, Instrument,
+    InstrumentType, IntervalType,Organization, PoliticalDivision, Station,
+    StationType, TimeZone, Timeseries, UnitOfMeasurement, UserProfile, Variable,
+    WaterBasin, WaterDivision)
 from enhydris.hcore.forms import TimeseriesDataForm
 from enhydris.hcore.views import ALLOWED_TO_EDIT, StationListBaseView
 
@@ -213,6 +213,8 @@ def create_test_data():
         name='Temperature',
         remarks='This is an extremely important time series, just because it '
                 'is hugely significant and markedly outstanding.')
+    # EventType
+    EventType.objects.create(descr="WAR: World Is A Ghetto")
 
 
 class SearchTestCase(TestCase):
@@ -1089,3 +1091,25 @@ class ResetPasswordTestCase(TestCase):
         # Cool, now let me log in
         r = self.client.login(username='auser', password='topsecret2')
         self.assertTrue(r)
+
+class GentityEventTestCase(TestCase):
+
+    def setUp(self):
+        create_test_data()
+
+    def test_add_gentity_event(self):
+        # Login user
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+
+        # Post data 'gentityevent_add' view
+        response = self.client.post(
+           reverse('gentityevent_add'),
+           {'date': '10/06/2015',
+            'gentity': Gentity.objects.get(name='Komboti').id,
+            'type': EventType.objects.get(descr="WAR: World Is A Ghetto").id,
+            'user': User.objects.get(username='admin').id}
+        )
+        station_id = Station.objects.get(name='Komboti').id
+        self.assertRedirects(response, reverse('station_detail',
+                                                kwargs={'pk': station_id}))

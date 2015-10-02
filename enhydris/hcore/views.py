@@ -1396,7 +1396,7 @@ def _gentityevent_edit_or_create(request, gevent_id=None):
 
             return HttpResponseRedirect(reverse(
                 'station_detail',
-                kwargs={'object_id': str(gevent.gentity.id)}))
+                kwargs={'pk': str(gevent.gentity.id)}))
     else:
         if gevent:
             form = GentityEventForm(instance=gevent, user=user,
