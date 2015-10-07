@@ -267,11 +267,11 @@ class SearchTestCase(TestCase):
         queryset = self.get_queryset(urlencode({'q': 'owner:RiCh'}))
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(queryset[0].owner.organization.name,
-                          "We're rich and we fancy it SA")
+                         "We're rich and we fancy it SA")
         queryset = self.get_queryset(urlencode({'owner': 'poor'}))
         self.assertEqual(queryset.count(), 2)
         self.assertEqual(queryset[0].owner.organization.name,
-                          "We're poor and dislike it Ltd")
+                         "We're poor and dislike it Ltd")
         queryset = self.get_queryset(urlencode({'owner': 'nonexistent'}))
         self.assertEqual(queryset.count(), 0)
 
@@ -419,7 +419,7 @@ class GentityFileTestCase(TestCase):
         r = self.client.login(username='admin', password='topsecret')
         self.assertTrue(r)
         self.assertEqual(GentityFile.objects.filter(gentity__id=gentity_id
-                                                     ).count(), 0)
+                                                    ).count(), 0)
         filetype_id = FileType.objects.get(mime_type='image/jpeg').id
         with tempfile.TemporaryFile(suffix='.jpg') as tmpfile:
             tmpfile.write('Irrelevant data\n')
@@ -436,7 +436,7 @@ class GentityFileTestCase(TestCase):
                                          })
         self.assertEqual(response.status_code, 302)
         self.assertEqual(GentityFile.objects.filter(gentity__id=gentity_id
-                                                     ).count(), 1)
+                                                    ).count(), 1)
 
         # Now try to download that gentity file
         gentity_file_id = GentityFile.objects.all()[0].id
@@ -661,7 +661,7 @@ class OpenVTestCase(TestCase):
                 target_status_code=200)
 
         self.assertEqual(self.client.login(username='opentest',
-                                            password='opentest'), True)
+                                           password='opentest'), True)
 
         # check that logged in users can see the forms
         for page_url in self.pages:
@@ -679,7 +679,7 @@ class OpenVTestCase(TestCase):
         """
 
         self.assertEqual(self.client.login(username='opentest',
-                                            password='opentest'), True)
+                                           password='opentest'), True)
 
         post_data = {
             'name': 'station_test',
@@ -714,7 +714,7 @@ class OpenVTestCase(TestCase):
         resp = self.client.get(url, follow=True)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(Station.objects.filter(name='station_test').count(),
-                          0)
+                         0)
 
         # try to edit a random station. this should fail
         url = "/stations/edit/%s/" % str(self.station.pk)
@@ -737,7 +737,7 @@ class OpenVTestCase(TestCase):
 
         # login as another user to check 403 perms
         self.assertEqual(self.client.login(username='fail', password='fail'),
-                          True)
+                         True)
 
         # edit station. this shouldn't work
         url = "/stations/edit/%s/" % str(s.pk)
@@ -772,7 +772,7 @@ class OpenVTestCase(TestCase):
         Check that edit forms honour the permissions.
         """
         self.assertEqual(self.client.login(username='opentest',
-                                            password='opentest'), True)
+                                           password='opentest'), True)
 
         post_data = {
             'name': 'station_test',
@@ -834,7 +834,7 @@ class OpenVTestCase(TestCase):
 
         # login as another user to check 403 perms
         self.assertEqual(self.client.login(username='fail', password='fail'),
-                          True)
+                         True)
 
         # edit my timeseries. this shouldn't work
         url = "/timeseries/edit/%s/" % str(t.pk)
@@ -871,7 +871,7 @@ class OpenVTestCase(TestCase):
         """
 
         self.assertEqual(self.client.login(username='opentest',
-                                            password='opentest'), True)
+                                           password='opentest'), True)
 
         post_data = {
             'name': 'station_test',
@@ -932,7 +932,7 @@ class OpenVTestCase(TestCase):
 
         # login as another user to check 403 perms
         self.assertEqual(self.client.login(username='fail', password='fail'),
-                          True)
+                         True)
 
         # edit my instrument. this shouldn't work
         url = "/instrument/edit/%s/" % str(i.pk)
@@ -966,7 +966,7 @@ class OpenVTestCase(TestCase):
         Test the generic model forms
         """
         self.assertEqual(self.client.login(username='opentest',
-                                            password='opentest'), True)
+                                           password='opentest'), True)
 
         for model in ALLOWED_TO_EDIT:
             url = "/add/%s/?_popup=1" % model
@@ -1025,6 +1025,7 @@ class StationTestCase(TestCase):
         }
         response = self.client.post('/stations/add/', post_data)
         self.assertFormError(response, 'form', 'srid', 'Invalid SRID')
+
 
 class ProfileTestCase(TestCase):
 
