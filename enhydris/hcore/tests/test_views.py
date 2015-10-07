@@ -12,7 +12,7 @@ from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group, Permission
-from django.contrib.gis.geos import fromstr
+from django.contrib.gis.geos import fromstr, Point
 from django.db import connection as dj_connection
 from django.http import HttpRequest, QueryDict
 from django.test import TestCase
@@ -158,7 +158,8 @@ def create_test_data():
         owner=organization2,
         water_division=water_division1,
         water_basin=water_basin1,
-        political_division=pd_arta)
+        political_division=pd_arta,
+        point=Point(x=21.06071, y=39.09518, srid=4326))
     station1.stype = [stype1]
     station1.save()
     station2 = Station.objects.create(
@@ -171,7 +172,8 @@ def create_test_data():
         owner=organization2,
         water_division=water_division2,
         water_basin=water_basin2,
-        political_division=pd_karditsa)
+        political_division=pd_karditsa,
+        point=Point(x=21.60121, y=39.22440, srid=4326))
     station2.stype = [stype1, stype2]
     station2.save()
     station3 = Station.objects.create(
@@ -184,7 +186,8 @@ def create_test_data():
         owner=organization1,
         water_division=water_division2,
         water_basin=water_basin3,
-        political_division=pd_cardolan)
+        political_division=pd_cardolan,
+        point=Point(x=-176.48368, y=0.19377, srid=4326))
     station3.stype = [stype2]
     station3.save()
 
@@ -1252,3 +1255,37 @@ class CoordinatesTestCase(SeleniumTestCase):
 
         # It should be impossible to change to the simple view
         self.assertFalse(self.button_coordinates.is_displayed())
+
+
+@skipUnless(selenium, 'Selenium is missing or unconfigured')
+class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
+
+    button_limit_to_map = PageElement(By.ID, 'limit-to-map')
+    td_komboti = PageElement(By.XPATH, '//td[text()="Komboti"]')
+    td_agios_athanasios = PageElement(By.XPATH,
+                                      '//td[text()="Agios Athanasios"]')
+    td_tharbad = PageElement(By.XPATH, '//td[text()="Tharbad"]')
+
+    def setUp(self):
+        create_test_data()
+
+    def test_list_stations_visible_on_map(self):
+        # Visit site and wait until three stations are shown
+        selenium.get(self.live_server_url)
+        self.td_komboti.wait_until_is_displayed()
+        self.td_agios_athanasios.wait_until_is_displayed()
+        self.td_tharbad.wait_until_is_displayed()
+
+        # Zoom station to an area that covers only two of these stations.
+        # The co-ordinates below are 21, 39, 22, 40 in srid=3857.
+        selenium.execute_script("""
+            enhydris.map.zoomToExtent([2337700, 4721700, 2449000, 4865900]);
+            """)
+
+        # Click on "List stations visible on map"
+        self.button_limit_to_map.click()
+
+        # Now only two stations should be displayed
+        self.td_komboti.wait_until_is_displayed()
+        self.td_agios_athanasios.wait_until_is_displayed()
+        self.assertFalse(self.td_tharbad.exists())

@@ -195,15 +195,16 @@ enhydris.mapModule = (function namespace() {
         var queryParams = Arg.all();
         queryParams.bbox = bbox;
         var queryString = '';
-        for (var i = 0; i < queryParams.length; ++i) {
-            var param = queryParams[i];
-            if (param === '') {
-                continue;
+        for (var param in queryParams) {
+            if (queryParams.hasOwnProperty(param)) {
+                if (param === '') {
+                    continue;
+                }
+                if (queryString) {
+                    queryString += '&';
+                }
+                queryString += param + '=' + queryParams[param];
             }
-            if (queryString) {
-                queryString += '&';
-            }
-            queryString += param + '=' + queryParams[param];
         }
         window.location = window.location.pathname + '?' + queryString;
     };
