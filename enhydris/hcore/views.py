@@ -442,8 +442,14 @@ class StationListView(StationListBaseView):
         duplicate column occurences from the list.
         """
         sort_order = self.request.GET.getlist('sort')
+
+        # Ensure sort order term to match with Station model field names
+        sort_order = [x for x in sort_order
+                      if x in Station._meta.get_all_field_names()]
+
         if not sort_order:
             sort_order = self.request.session.get('sort', ['name'])
+
         sort_order = sort_order[:]
         for i in range(len(sort_order) - 1, -1, -1):
             s = sort_order[i]
