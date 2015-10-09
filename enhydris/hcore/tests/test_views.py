@@ -260,6 +260,34 @@ class SearchTestCase(TestCase):
         view.request.GET = QueryDict(query_string)
         return view.get_queryset()
 
+    def test_invalid_sort_terms_view_call(self):
+        # Request for host.domain/?sort=999.9
+        response = self.client.get(reverse('station_list') + '?sort=999.9')
+        i = response.content.index
+
+        # Sort is only made with default ['name'] term
+        # Checking  test stations 'Komboti', 'Tharbad' alphabetical order index
+        self.assertLess(i('Komboti'), i('Tharbad'))
+
+        # Order for host.domain/?sort=name&sort=999.9
+        response = self.client.get(reverse('station_list') \
+                                   + '?sort=name&sort=999.9')
+        i = response.content.index
+
+        # Order is only made with default ['name'] term
+        # Checking  test stations 'Komboti', 'Tharbad' alphabetical order index
+        self.assertLess(i('Komboti'), i('Tharbad'))
+
+    def test_valid_sort_terms_view_call(self):
+        # Request for host.domain/?sort=water_division&sort=name
+        response = self.client.get(reverse('station_list') \
+                                   + '?sort=water_division&sort=name')
+        i = response.content.index
+
+        # Checking  test stations 'Komboti', 'Agios Athanasios', 'Tharbad'
+        # alphabetical order ['water_division', 'name']
+        self.assertTrue(i('Komboti')< i('Agios Athanasios') < i('Tharbad'))
+
     def test_search_in_timeseries_remarks(self):
         # Search for something that exists
         queryset = self.get_queryset(urlencode({
