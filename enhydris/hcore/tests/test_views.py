@@ -159,7 +159,8 @@ def create_test_data():
         water_division=water_division1,
         water_basin=water_basin1,
         political_division=pd_arta,
-        point=Point(x=21.06071, y=39.09518, srid=4326))
+        point=Point(x=21.06071, y=39.09518, srid=4326),
+        srid=4326)
     station1.stype = [stype1]
     station1.save()
     station2 = Station.objects.create(
@@ -173,7 +174,8 @@ def create_test_data():
         water_division=water_division2,
         water_basin=water_basin2,
         political_division=pd_karditsa,
-        point=Point(x=21.60121, y=39.22440, srid=4326))
+        point=Point(x=21.60121, y=39.22440, srid=4326),
+        srid=4326)
     station2.stype = [stype1, stype2]
     station2.save()
     station3 = Station.objects.create(
@@ -187,7 +189,8 @@ def create_test_data():
         water_division=water_division2,
         water_basin=water_basin3,
         political_division=pd_cardolan,
-        point=Point(x=-176.48368, y=0.19377, srid=4326))
+        point=Point(x=-176.48368, y=0.19377, srid=4326),
+        srid=4326)
     station3.stype = [stype2]
     station3.save()
 
