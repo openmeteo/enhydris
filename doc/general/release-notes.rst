@@ -102,6 +102,8 @@ Changes in 0.5 microversions
   to create one (in 0.5.1).
 - Fixed internal server error when editing station with
   ``ENHYDRIS_USERS_CAN_ADD_CONTENT=True`` (in 0.5.2).
+- Since 0.5.3, Enhydris depends on pthelma<0.12, since pthelma 0.12
+  has a backwards incompatible change.
 
 
 Version 0.2
