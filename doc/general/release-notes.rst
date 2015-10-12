@@ -6,6 +6,71 @@ Release notes
 
 .. highlight:: bash
 
+Version 0.6
+===========
+
+Overview
+--------
+
+- The skin overhaul has been completed.
+
+- The confusing fields "Nominal offset" and "Actual offset" have been
+  renamed to "Timestamp rounding" and "Timestamp offset". For this,
+  pthelma>=0.12 is also required.
+
+- Data entry of station location has been greatly simplified. The user
+  now merely specifies latitude and longitude, and only if he chooses
+  the advanced option does he need, instead, to specify ordinate,
+  abscissa, and srid.
+
+- Several bugs have been fixed.
+
+Backwards incompatible changes
+------------------------------
+
+- The ``is_active`` fields have been removed.
+
+  Stations and instruments had an is_active field.  Apparently the
+  original designers of Enhydris thought that it would be useful to
+  make queries of, e.g., active stations, as opposed to all stations
+  (including obsolete ones).
+
+  However, the correctness of this field depends on the procedures
+  each organization has. Many organizations don't have a specific
+  procedure for obsoleting a station; a station merely falls out of
+  use (e.g. an overseer stops working and (s)he is never replaced).
+  Therefore, it is unlikely that someone will go and enter the correct
+  value in the is_active field. Even if an organization does have
+  processes that could ensure correctness of the field, they could
+  merely specify an end date to a station or instrument, and therefore
+  is_active is superfluous.
+
+  Indeed, in all Hydroscope databases, the field seems to be randomly
+  chosen, and in openmeteo.org it makes even less sense, since it is an
+  open database whose users are expected to merely abandon their stations
+  and not care about "closing" them properly.
+
+  Therefore, the fields have been removed. However, the database
+  upgrade script will verify that they are not being used before going
+  on to remove them.
+
+Upgrading from 0.5
+------------------
+
+1. Backup your database (you are not going to use this backup unless
+   something goes wrong and you need to restore everything to the
+   state it was before).
+
+2. Make sure you are running the latest version of Enhydris 0.5 and
+   that you have applied all its database upgrades (running
+   :command:`python manage.py migrate` should apply all such upgrades,
+   and should do nothing if they are already applied).
+
+3. Install 0.6 and execute the database upgrade procedure::
+
+      python manage.py migrate
+
+
 Version 0.5
 ===========
 
