@@ -70,6 +70,12 @@ Upgrading from 0.5
 
       python manage.py migrate
 
+Changes in 0.6 microversions
+----------------------------
+
+- Added some explanatory text for timestamp rounding and timestamp
+  offset in the time series form (in 0.6.1).
+
 
 Version 0.5
 ===========
