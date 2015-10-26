@@ -90,7 +90,7 @@
                     break;
                 }
             }
-            $("#placeholder").append("<img style=\"display: block; margin: auto auto;\" src=\"{% static "images/progress.gif" %}\">");
+            $("#placeholder").append("<img style=\"display: block; margin: auto auto;\" src=\"{% static "images/icons/progress.gif" %}\">");
             $.getJSON('{% url "timeseries_data" %}', {object_id:{{timeseries.id}},
                 start_pos:from_pos, end_pos:to_pos}, function(chart_data){
                 d = chart_data['data'];
