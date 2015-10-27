@@ -14,14 +14,12 @@ tool for analysis and processing of meteorological time series.
 
 .. _hydrognomon: http://hydrognomon.org/
 
-Enhydris is free software, available under the GNU Affero General
-Public License, and can run on UNIX (such as GNU/Linux) or Windows.
-Written in Python/Django, it can be installed on every operating
-system on which Python runs, including GNU/Linux and Windows. It is
-free software, available under the GNU General Public License version
-3 or any later version.  It is being used by openmeteo.org_,
-`Hydrological Observatory of Athens`_, Hydroscope_, the `Athens Water
-Supply Company`_, and `WQ DREAMS`_.
+Enhydris is written in Python/Django, and can be installed on every
+operating system on which Python runs, including GNU/Linux and Windows.
+It is free software, available under the GNU General Public License
+version 3 or any later version.  It is being used by openmeteo.org_,
+`Hydrological Observatory of Athens`_, the `Athens Water Supply
+Company`_, and `WQ DREAMS`_.
 
 .. _openmeteo.org: http://openmeteo.org/
 .. _hydrological observatory of athens: http://hoa.ntua.gr/
@@ -41,7 +39,8 @@ this in the top-level directory::
 
     python enhydris/bin/enhydris-admin newinstance devinstance
 
-Then, edit :file:`devinstance/settings.py`, and then execute this::
+Then, edit file ``devinstance/settings.py``, and execute this::
 
     python devinstance/manage.py runserver
 
+Finally, point your browser at http://localhost:8000/.

@@ -30,7 +30,7 @@
         <a class="navbar-brand" href="{% url "station_list" %}">{% trans "Stations" %}</a>
       </div>
       <div class="navbar-collapse collapse">
-        <form class="navbar-form navbar-left" role="search" action='{% url "station_list" %}' method="get">
+        <form class="navbar-form navbar-left" action='{% url "station_list" %}' method="get">
           <div class="form-group">
             <div class="input-group">
               <input id="search_input" type="text" name="q"
@@ -95,7 +95,7 @@
   </div> <!-- navbar -->
 
     <div id="searchtips" class="modal fade" tabindex="-1" role="dialog"
-        aria-hidden="true" aria-labelledby="SearchTips">
+        aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">{% trans "Search tips" %}
@@ -178,7 +178,6 @@
   </footer>
 
 {% block bodyend %}{% endblock %}
-  </div>
 
 {% block basejs %}
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>

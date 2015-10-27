@@ -12,26 +12,20 @@ General documentation:
 .. toctree::
    :maxdepth: 1
 
-   general/about
    general/install
    general/release-notes
    general/copyright
 
 
-Reference:
+Developer documentation:
 
 .. toctree::
    :maxdepth: 1
 
-   reference/database
-   reference/webservice-api
-
-Contributed applications:
-
-.. toctree::
-   :maxdepth: 1
-
-   contrib/permissions
+   dev/contributing
+   dev/database
+   dev/webservice-api
+   dev/permissions
 
 Indices and tables
 ==================
