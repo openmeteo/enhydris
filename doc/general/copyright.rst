@@ -29,10 +29,20 @@ of Enhydris was originally developed by Andreas Loupasakis and
 Seraphim Mellos of Indifex_. Other contributors are Stefanos Kozanis and
 Stavros Anastasiadis.
 
-Enhydris was funded in 2009-2010 by the Ministry of Environment of
-Greece as part of the Hydroscope_ project. It was also funded in 2015 as
-an open technology project by GFOSS_.
+Enhydris was funded by several organizations:
+
+* From 2005 to 2015 by NTUA_ (Antonis Christofides was an employee and worked
+  on Enhydris as part of his work at Itia_).
+* In 2009-2010 by the `Ministry of Environment`_ of Greece as part of the
+  Hydroscope_ project.
+* In 2013-2014 by the `TEI of Epirus`_ as part of the IRMA_ project.
+* In 2015 by GRNET_ as an open technology project.
 
 .. _indifex: http://indifex.com/
+.. _ntua: http://www.ntua.gr/
+.. _itia: http://www.itia.ntua.gr/
+.. _ministry of environment: http://ypeka.gr/
 .. _hydroscope: http://hydroscope.gr/
-.. _gfoss: https://gfoss.ellak.gr/
+.. _tei of epirus: http://www.teiep.gr/en/
+.. _irma: http://www.irrigation-management.eu/
+.. _grnet: https://edet.gr/en
