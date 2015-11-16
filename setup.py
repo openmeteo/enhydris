@@ -65,6 +65,7 @@ kwargs = {
     'scripts': ['enhydris/bin/enhydris-admin'],
     'install_requires': installation_requirements,
     'test_suite': 'runtests.runtests',
+    'tests_require': ['model-mommy>=1.2.4'],
 }
 
 setup(**kwargs)

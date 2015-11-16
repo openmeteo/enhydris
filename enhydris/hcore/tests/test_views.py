@@ -11,6 +11,7 @@ import django
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.gis.geos import fromstr, Point
 from django.db import connection as dj_connection
@@ -18,14 +19,14 @@ from django.http import HttpRequest, QueryDict
 from django.test import TestCase
 from django.test.utils import override_settings
 
+from model_mommy import mommy
 from pthelma import timeseries
 
 from enhydris.hcore.forms import TimeseriesDataForm
 from enhydris.hcore.models import (
-    EventType, FileType, GentityEvent, GentityFile, Instrument,
-    InstrumentType, IntervalType, Organization, PoliticalDivision, Station,
-    StationType, Timeseries, TimeZone, UnitOfMeasurement, UserProfile,
-    Variable, WaterBasin, WaterDivision)
+    EventType, FileType, GentityEvent, GentityFile, Instrument, InstrumentType,
+    Organization, Station, StationType, Timeseries, TimeZone,
+    UnitOfMeasurement, UserProfile, Variable)
 from enhydris.hcore.views import ALLOWED_TO_EDIT, StationListBaseView
 
 try:
@@ -52,211 +53,27 @@ except ImportError:
     By = Dummy()
 
 
-def create_test_data():
-    user1 = User.objects.create_user('admin', 'anthony@itia.ntua.gr',
-                                     'topsecret')
-    user1.is_active = True
-    user1.is_superuser = True
-    user1.is_staff = True
-    user1.save()
-
-    organization1 = Organization.objects.create(
-        name="We're rich and we fancy it SA")
-    organization2 = Organization.objects.create(
-        name="We're poor and dislike it Ltd")
-    organization3 = Organization.objects.create(
-        name="We get all your money and enjoy it plc")
-
-    water_division1 = WaterDivision.objects.create(
-        name="North Syldavia Basins")
-    water_division2 = WaterDivision.objects.create(
-        name="South Syldavia Basins")
-    # water_division3
-    WaterDivision.objects.create(name="East Syldavia Basins")
-    # water_division4
-    WaterDivision.objects.create(name="West Syldavia Basins")
-
-    water_basin1 = WaterBasin.objects.create(name="Arachthos")
-    water_basin2 = WaterBasin.objects.create(name="Pinios")
-    water_basin3 = WaterBasin.objects.create(name="Greyflood")
-
-    # Political divisions
-    # +-> Greece       +-> Epirus   +-> Preveza
-    # |                |            +-> Arta
-    # |                +-> Thessaly +-> Karditsa
-    # |                             +-> Magnisia
-    # +-> Middle Earth +-> Eriador  +-> Arthedain
-    #                  |            +-> Cardolan
-    #                  +-> Gondor   +-> Lamedon
-    #                               +-> Lebbenin
-    pd = PoliticalDivision
-    pd_greece = pd.objects.create(name="Greece")
-    pd_epirus = pd.objects.create(name="Epirus", parent=pd_greece)
-    pd_thessaly = pd.objects.create(name="Thessaly", parent=pd_greece)
-    # pd_preveza
-    pd.objects.create(name="Preveza", parent=pd_epirus)
-    pd_arta = pd.objects.create(name="Arta", parent=pd_epirus)
-    pd_karditsa = pd.objects.create(name="Karditsa", parent=pd_thessaly)
-    # pd_magnisia
-    pd.objects.create(name="Magnisia", parent=pd_thessaly)
-    pd_middleearth = pd.objects.create(name="Middle Earth")
-    pd_eriador = pd.objects.create(name="Eriador", parent=pd_middleearth)
-    pd_gondor = pd.objects.create(name="Gondor", parent=pd_middleearth)
-    # pd_arthedain
-    pd.objects.create(name="Arthedain", parent=pd_eriador)
-    pd_cardolan = pd.objects.create(name="Cardolan", parent=pd_eriador)
-    # pd_lamedon
-    pd.objects.create(name="Lamedon", parent=pd_gondor)
-    # pd_lebbenin
-    pd.objects.create(name="Lamedon", parent=pd_gondor)
-
-    stype1 = StationType.objects.create(descr="Important")
-    stype2 = StationType.objects.create(descr="Unimportant")
-    stype3 = StationType.objects.create(descr="Even less significant")
-
-    # filetype1
-    FileType.objects.create(mime_type='image/jpeg')
-
-    variable1 = Variable.objects.create(descr='Rainfall')
-    variable2 = Variable.objects.create(descr='Temperature')
-
-    unit_of_measurement1 = UnitOfMeasurement.objects.create(
-        descr='millimeter', symbol='mm')
-    unit_of_measurement1.variables = [variable1]
-    unit_of_measurement1.save()
-    unit_of_measurement2 = UnitOfMeasurement.objects.create(
-        descr='Degrees Celsius', symbol=u'\u00b0C')
-    unit_of_measurement2.variables = [variable2]
-    unit_of_measurement2.save()
-
-    timezone1 = TimeZone.objects.create(code='EET', utc_offset=120)
-
-    # interval_type1
-    IntervalType.objects.create(
-        descr='Sum', value='SUM', descr_alt='Sum')
-    # interval_type2
-    IntervalType.objects.create(
-        descr='Average value', value='AVERAGE', descr_alt='Average value')
-    # interval_type3
-    IntervalType.objects.create(
-        descr='Minimum', value='MINIMUM', descr_alt='Minimum')
-    # interval_type4
-    IntervalType.objects.create(
-        descr='Maximum', value='MAXIMUM', descr_alt='Maximum')
-    # interval_type5
-    IntervalType.objects.create(
-        descr='Vector average', value='VECTOR_AVERAGE',
-        descr_alt='Vector average')
-
-    station1 = Station.objects.create(
-        name='Komboti',
-        approximate=False,
-        is_automatic=False,
-        copyright_holder="We're poor and dislike it Ltd",
-        copyright_years='2013',
-        owner=organization2,
-        water_division=water_division1,
-        water_basin=water_basin1,
-        political_division=pd_arta,
-        point=Point(x=21.06071, y=39.09518, srid=4326),
-        srid=4326)
-    station1.stype = [stype1]
-    station1.save()
-    station2 = Station.objects.create(
-        name='Agios Athanasios',
-        approximate=False,
-        is_automatic=False,
-        copyright_holder="We're poor and dislike it Ltd",
-        copyright_years='2013',
-        owner=organization2,
-        water_division=water_division2,
-        water_basin=water_basin2,
-        political_division=pd_karditsa,
-        point=Point(x=21.60121, y=39.22440, srid=4326),
-        srid=4326)
-    station2.stype = [stype1, stype2]
-    station2.save()
-    station3 = Station.objects.create(
-        name='Tharbad',
-        approximate=False,
-        is_automatic=False,
-        copyright_holder="Isaac Newton",
-        copyright_years='1687',
-        owner=organization1,
-        water_division=water_division2,
-        water_basin=water_basin3,
-        political_division=pd_cardolan,
-        point=Point(x=-176.48368, y=0.19377, srid=4326),
-        srid=4326)
-    station3.stype = [stype2]
-    station3.save()
-
-    # Station 4 has no time series
-    station4 = Station.objects.create(
-        name='Lefkada',
-        approximate=False,
-        is_automatic=False,
-        copyright_holder='Alice Brown',
-        copyright_years='2014',
-        owner=organization3)
-    station4.stype = [stype3]
-    station4.save()
-
-    # timeseries1
-    Timeseries.objects.create(
-        unit_of_measurement=unit_of_measurement1,
-        gentity=station1,
-        time_zone=timezone1,
-        variable=variable1,
-        name='Rain')
-    # timeseries2
-    Timeseries.objects.create(
-        unit_of_measurement=unit_of_measurement2,
-        gentity=station1,
-        time_zone=timezone1,
-        variable=variable2,
-        name='Air temperature')
-    # timeseries3
-    Timeseries.objects.create(
-        unit_of_measurement=unit_of_measurement1,
-        gentity=station2,
-        time_zone=timezone1,
-        variable=variable1,
-        name='Rain')
-    # timeseries4
-    Timeseries.objects.create(
-        unit_of_measurement=unit_of_measurement2,
-        gentity=station2,
-        time_zone=timezone1,
-        variable=variable2,
-        name='Air temperature')
-    # timeseries5
-    Timeseries.objects.create(
-        unit_of_measurement=unit_of_measurement2,
-        gentity=station3,
-        time_zone=timezone1,
-        variable=variable2,
-        name='Temperature',
-        remarks='This is an extremely important time series, just because it '
-                'is hugely significant and markedly outstanding.')
-
-    # EventType
-    EventType.objects.create(descr="WAR: World Is A Ghetto")
-
-
-class SearchTestCase(TestCase):
+class SortTestCase(TestCase):
 
     def setUp(self):
-        create_test_data()
+        mommy.make(Station, name="Komboti",
+                   water_division__name="North Syldavia Basins")
+        mommy.make(Station, name="Agios Athanasios",
+                   water_division__name="South Syldavia Basins")
+        mommy.make(Station, name="Tharbad",
+                   water_division__name="South Syldavia Basins")
 
-    def get_queryset(self, query_string):
-        view = StationListBaseView()
-        view.request = HttpRequest()
-        view.request.method = 'GET'
-        view.request.GET = QueryDict(query_string)
-        return view.get_queryset()
+    def test_sort(self):
+        # Request for host.domain/?sort=water_division&sort=name
+        response = self.client.get(reverse('station_list')
+                                   + '?sort=water_division&sort=name')
+        i = response.content.index
 
-    def test_invalid_sort_terms_view_call(self):
+        # Checking  test stations 'Komboti', 'Agios Athanasios', 'Tharbad'
+        # alphabetical order ['water_division', 'name']
+        self.assertTrue(i('Komboti') < i('Agios Athanasios') < i('Tharbad'))
+
+    def test_invalid_sort(self):
         # Request for host.domain/?sort=999.9
         response = self.client.get(reverse('station_list') + '?sort=999.9')
         i = response.content.index
@@ -266,7 +83,7 @@ class SearchTestCase(TestCase):
         self.assertLess(i('Komboti'), i('Tharbad'))
 
         # Order for host.domain/?sort=name&sort=999.9
-        response = self.client.get(reverse('station_list') \
+        response = self.client.get(reverse('station_list')
                                    + '?sort=name&sort=999.9')
         i = response.content.index
 
@@ -274,15 +91,66 @@ class SearchTestCase(TestCase):
         # Checking  test stations 'Komboti', 'Tharbad' alphabetical order index
         self.assertLess(i('Komboti'), i('Tharbad'))
 
-    def test_valid_sort_terms_view_call(self):
-        # Request for host.domain/?sort=water_division&sort=name
-        response = self.client.get(reverse('station_list') \
-                                   + '?sort=water_division&sort=name')
-        i = response.content.index
 
-        # Checking  test stations 'Komboti', 'Agios Athanasios', 'Tharbad'
-        # alphabetical order ['water_division', 'name']
-        self.assertTrue(i('Komboti')< i('Agios Athanasios') < i('Tharbad'))
+class SearchTestCase(TestCase):
+
+    def setUp(self):
+        # Station owners
+        rich = mommy.make(Organization,
+                          name="We're rich and we fancy it SA")
+        poor = mommy.make(Organization,
+                          name="We're poor and dislike it Ltd")
+
+        # Create three stations
+        station_komboti = mommy.make(
+            Station, name='Komboti', owner=poor,
+            political_division__name='Arta',
+            political_division__parent__name='Epirus',
+            political_division__parent__parent__name='Greece',
+            stype__descr="Important",
+            water_basin__name='Arachthos',
+            water_division__name="North Syldavia Basins")
+        greece = station_komboti.political_division.parent.parent
+        station_ai_thanassis = mommy.make(
+            Station, name='Agios Athanasios', owner=poor,
+            political_division__name='Karditsa',
+            political_division__parent__name='Thessaly',
+            political_division__parent__parent=greece,
+            stype__descr=["Important", "Unimportant"],
+            water_division__name="South Syldavia Basins")
+        station_tharbad = mommy.make(
+            Station, name='Tharbad', owner=rich,
+            political_division__name='Cardolan',
+            political_division__parent__name='Eriador',
+            political_division__parent__parent__name='Middle Earth',
+            stype__descr=["Unimportant"],
+            water_basin__name='Greyflood',
+            water_division__name="South Syldavia Basins")
+
+        # Five time series
+        kt = mommy.make(Timeseries, name='Air temperature',
+                        variable__descr='Temperature', gentity=station_komboti)
+        kr = mommy.make(Timeseries, name='Rain', gentity=station_komboti,
+                        variable__descr='Rain')
+        mommy.make(Timeseries, name='Air temperature',
+                   gentity=station_ai_thanassis, variable=kt.variable)
+        mommy.make(Timeseries, name='Rain', gentity=station_ai_thanassis,
+                   variable=kr.variable)
+        mommy.make(Timeseries, name='Temperature', gentity=station_tharbad,
+                   variable=kt.variable,
+                   remarks='This is an extremely important time series, '
+                   'just because it is hugely significant and markedly '
+                   'outstanding.')
+
+        # And a station with no time series
+        mommy.make(Station, name="Lefkada")
+
+    def get_queryset(self, query_string):
+        view = StationListBaseView()
+        view.request = HttpRequest()
+        view.request.method = 'GET'
+        view.request.GET = QueryDict(query_string)
+        return view.get_queryset()
 
     def test_search_in_timeseries_remarks(self):
         # Search for something that exists
@@ -441,11 +309,13 @@ class RandomMediaRoot(override_settings):
 
 class GentityFileTestCase(TestCase):
 
-    def setUp(self):
-        create_test_data()
-
     @RandomMediaRoot()
     def test_gentity_file(self):
+        # Create test data
+        mommy.make(User, username='admin', password=make_password('topsecret'),
+                   is_active=True, is_superuser=True, is_staff=True)
+        mommy.make(Station, name='Komboti')
+        mommy.make(FileType, mime_type='image/jpeg')
 
         # Upload a gentity file
         gentity_id = Station.objects.get(name='Komboti').id
@@ -1027,7 +897,10 @@ class RegisterTestCase(TestCase):
 class StationTestCase(TestCase):
 
     def setUp(self):
-        create_test_data()
+        mommy.make(User, username='admin', password=make_password('topsecret'),
+                   is_active=True, is_superuser=True, is_staff=True)
+        mommy.make(Organization, name="We're rich and we fancy it SA")
+        mommy.make(StationType, descr="Important")
 
     @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
     def test_add_station(self):
@@ -1159,7 +1032,10 @@ class ResetPasswordTestCase(TestCase):
 class GentityEventTestCase(TestCase):
 
     def setUp(self):
-        create_test_data()
+        mommy.make(User, username='admin', password=make_password('topsecret'),
+                   is_active=True, is_superuser=True, is_staff=True)
+        mommy.make(Station, name="Komboti")
+        mommy.make(EventType, descr="WAR: World Is A Ghetto")
 
     def test_add_gentity_event(self):
         # Gentity and Station models share the same id
@@ -1205,11 +1081,11 @@ class CoordinatesTestCase(SeleniumTestCase):
     field_approximate = PageElement(By.ID, 'id_approximate')
     button_coordinates = PageElement(By.ID, 'btnCoordinates')
     field_stype = PageElement(By.ID, 'id_stype')
-    stype_option_2 = PageElement(By.XPATH,
-                                 '//select[@id="id_stype"]/option[2]')
+    stype_option_important = PageElement(
+        By.XPATH, '//select[@id="id_stype"]/option[text()="Important"]')
     field_owner = PageElement(By.ID, 'id_owner')
-    owner_option_2 = PageElement(By.XPATH,
-                                 '//select[@id="id_owner"]/option[2]')
+    owner_option_big_tomatoes = PageElement(
+        By.XPATH, '//select[@id="id_owner"]/option[text()="Big tomatoes"]')
     field_copyright_holder = PageElement(By.ID, 'id_copyright_holder')
     field_copyright_years = PageElement(By.ID, 'id_copyright_years')
     button_submit = PageElement(By.XPATH, '//button[@type="submit"]')
@@ -1220,7 +1096,10 @@ class CoordinatesTestCase(SeleniumTestCase):
                   'starts-with(@href, "/stations/edit/")]')
 
     def setUp(self):
-        create_test_data()
+        mommy.make(User, username='admin', password=make_password('topsecret'),
+                   is_active=True, is_superuser=True, is_staff=True)
+        mommy.make(StationType, descr="Important")
+        mommy.make(Organization, name="Big tomatoes")
 
     @override_settings(DEBUG=True)
     def test_coordinates(self):
@@ -1260,8 +1139,8 @@ class CoordinatesTestCase(SeleniumTestCase):
         # Enter a latitude and longitude and other data and submit
         self.field_ordinate.send_keys('37.97522')
         self.field_abscissa.send_keys('23.73700')
-        self.stype_option_2.click()
-        self.owner_option_2.click()
+        self.stype_option_important.click()
+        self.owner_option_big_tomatoes.click()
         self.field_copyright_holder.send_keys('Alice')
         self.field_copyright_years.send_keys('2015')
         self.button_submit.click()
@@ -1330,7 +1209,12 @@ class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
     td_tharbad = PageElement(By.XPATH, '//td[text()="Tharbad"]')
 
     def setUp(self):
-        create_test_data()
+        mommy.make(Station, name="Komboti",
+                   point=Point(x=21.06071, y=39.09518, srid=4326), srid=4326)
+        mommy.make(Station, name="Agios Athanasios",
+                   point=Point(x=21.60121, y=39.22440, srid=4326), srid=4326)
+        mommy.make(Station, name="Tharbad",
+                   point=Point(x=-176.48368, y=0.19377, srid=4326), srid=4326)
 
     def test_list_stations_visible_on_map(self):
         # Visit site and wait until three stations are shown
