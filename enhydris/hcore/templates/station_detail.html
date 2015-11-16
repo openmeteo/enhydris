@@ -263,12 +263,7 @@
               </td>
             {% else %}
               <td>
-                <h4>{% trans "No data available" %}</h4>
-                {% comment %}
-                  Ugly hack to maintain a decent tab height.
-                {% endcomment %}
-                <br><br><br><br><br><br><br><br><br><br><br>
-                <br><br><br><br><br><br><br><br><br><br><br>
+                <h4 class="tab-no-data">{% trans "No data available" %}</h4>
               </td>
             {% endif %}
           </table>
@@ -323,12 +318,7 @@
             </td>
             {% else %}
               <td colspan="2">
-                <h4>{% trans "No data available" %}</h4>
-                {% comment %}
-                  Ugly hack to maintain a decent tab height.
-                {% endcomment %}
-                <br><br><br><br><br><br><br><br><br><br><br>
-                <br><br><br><br><br><br><br><br><br><br><br>
+                <h4 class="tab-no-data">{% trans "No data available" %}</h4>
               </td>
             {% endif %}
           </table>
@@ -379,12 +369,7 @@
             </td>
           {% else %}
             <td>
-              <h4>{% trans "No data available" %}</h4>
-              {% comment %}
-                Ugly hack to maintain a decent tab height.
-              {% endcomment %}
-              <br><br><br><br><br><br><br><br><br><br>
-              <br><br><br><br><br><br><br><br><br><br><br>
+              <h4 class="tab-no-data">{% trans "No data available" %}</h4>
             </td>
           {% endif %}
         </table>
@@ -429,12 +414,7 @@
           </td>
         {% else %}
           <td>
-            <h4>{% trans "No data available" %}</h4>
-            {% comment %}
-              Ugly hack to maintain a decent tab height.
-            {% endcomment %}
-            <br><br><br><br><br><br><br><br><br><br>
-            <br><br><br><br><br><br><br><br><br><br><br>
+            <h4 class="tab-no-data">{% trans "No data available" %}</h4>
           </td>
         {% endif %}
         </table>
@@ -486,12 +466,7 @@
         </td>
         {% else %}
           <td>
-            <h4>{% trans "No data available" %}</h4>
-            {% comment %}
-              Ugly hack to maintain a decent tab height.
-            {% endcomment %}
-            <br><br><br><br><br><br><br><br><br><br>
-            <br><br><br><br><br><br><br><br><br><br><br>
+            <h4 class="tab-no-data">{% trans "No data available" %}</h4>
           </td>
         {% endif %}
         </table>
@@ -553,12 +528,7 @@
         </td>
       {% else %}
         <td colspan="2">
-          <h4>{% trans "No data available" %}<h4>
-          {% comment %}
-            Ugly hack to maintain a decent tab height.
-          {% endcomment %}
-          <br><br><br><br><br><br><br><br><br><br><br>
-          <br><br><br><br><br><br><br><br><br><br><br>
+          <h4 class="tab-no-data">{% trans "No data available" %}<h4>
         </td>
       {% endif %}
     </table>
