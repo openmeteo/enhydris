@@ -12,3 +12,4 @@ pthelma>=0.9,<0.12
 django-appconf>=0.6
 gdal>=1.6
 django-tables2>=0.14
+six>=1.10
