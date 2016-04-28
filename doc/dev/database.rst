@@ -580,7 +580,7 @@ Time series and related models
 
 .. class:: enhydris.hcore.models.Timeseries
 
-   This model holds information, but not the actual data, of a time series.
+   Hold time series.
 
    .. attribute:: enhydris.hcore.models.Timeseries.gentity
 
@@ -627,10 +627,6 @@ Time series and related models
 
       A boolean field to control the visibility of timeseries in related pages.
 
-   The rest of the attributes of the
-   :class:`~enhydris.hcore.models.Timeseries` model describe the time
-   step and they are several:
-
    .. attribute:: enhydris.hcore.models.Timeseries.time_step
                   enhydris.hcore.models.Timeseries.timestamp_rounding_minutes
                   enhydris.hcore.models.Timeseries.timestamp_rounding_months
@@ -660,22 +656,63 @@ Time series and related models
       that the time series has a nonstrict time step of 10 minutes,
       which means it has no specific rounding.
 
-The time series records are stored in the ``ts_records`` table, the format of
-which is `documented in pthelma`_.  Although this table corresponds to a Django
-model, the existence of that model (which is a bit hacked and can run only on
-PostgreSQL) is only a means to create the table. The Django model should never
-be used to access the table; instead, the
-:class:`pthelma.timeseries.Timeseries` methods
-:meth:`~pthelma.timeseries.Timeseries.read_from_db`,
-:meth:`~pthelma.timeseries.Timeseries.write_to_db`, and
-:meth:`~pthelma.timeseries.Timeseries.append_to_db`, should be used.  (It is
-also likely that these internals will change in the future, and the time series
-records will be stored by a Django FileField in the
-:class:`~enhydris.hcore.models.Timeseries` table.
+   .. attribute:: enhydris.hcore.models.Timeseries.datafile
 
-.. _documented in pthelma: http://pthelma.readthedocs.org/en/latest/timeseries.html#database-format
+      The file where the time series data are stored. The attribute is a
+      Django FileField_. The format of this file is documented in
+      pthelma as `text format`_.
+
+      Usually you don't need to access this file directly; instead, use
+      methods :meth:`~enhydris.hcore.models.Timeseries.get_all_data`,
+      :meth:`~enhydris.hcore.models.Timeseries.set_data`,
+      :meth:`~enhydris.hcore.models.Timeseries.append_data`,
+      :meth:`~enhydris.hcore.models.Timeseries.get_first_line` and
+      :meth:`~enhydris.hcore.models.Timeseries.get_last_line`.
+
+   .. attribute:: enhydris.hcore.models.Timeseries.start_date
+                  enhydris.hcore.models.Timeseries.end_date
+
+      The start and end date of the time series, or ``None`` if the time
+      series is empty. These are redundant; the start and end date of
+      the time series could be found with
+      :meth:`~enhydris.hcore.models.get_first_line` and
+      :meth:`~enhydris.hcore.models.get_last_line`. However, these
+      attributes can easily be used in database queries. Normally you
+      don't need to set them; they are set automatically when the time
+      series is saved. If you write to the
+      :attr:`~enhydris.hcore.models.Timeseries.datafile`, you must
+      subsequently call :meth:`save()` to update these fields.
+
+   .. method:: enhydris.hcore.models.Timeseries.get_all_data()
+
+      Return all data of the file in a `pthelma Timeseries object`_.
+
+   .. method:: enhydris.hcore.models.Timeseries.set_data(data)
+
+      Replace all of the time series with *data*, which must be a
+      filelike object containing time series data in `text format`_ or
+      `file format`_. If it is in text format, the header is ignored.
+
+   .. method:: enhydris.hcore.models.Timeseries.append_data(data)
+
+      Same as :meth:`~enhydris.hcore.models.Timeseries.set_data`, except
+      that the data is appended to the already existing data. Raises
+      ``ValueError`` if the new data is not more recent than the old
+      data.
+
+   .. method:: enhydris.hcore.models.Timeseries.get_first_line()
+               enhydris.hcore.models.Timeseries.get_last_line()
+
+      Return the first or last line of the data file (i.e. the first or
+      last record of the time series in text format), or an empty string
+      if the time series contains no records.
+
+
+.. _text format: http://pthelma.readthedocs.io/en/latest/dev/timeseries.html#text-format
+.. _file format: http://pthelma.readthedocs.io/en/latest/dev/timeseries.html#file-format
 .. _multi-table inheritance: http://docs.djangoproject.com/en/dev/topics/db/models/#id6
 .. _django-multilingual: http://code.google.com/p/django-multilingual/
 .. _abstract base class: http://docs.djangoproject.com/en/dev/topics/db/models/#id5
-.. _filefield: http://docs.djangoprojects.com/en/dev/ref/models/fields/#filefield
-.. _imagefield: http://docs.djangoprojects.com/en/dev/ref/models/fields/#imagefield
+.. _filefield: http://docs.djangoproject.com/en/dev/ref/models/fields/#filefield
+.. _imagefield: http://docs.djangoproject.com/en/dev/ref/models/fields/#imagefield
+.. _pthelma timeseries object: http://pthelma.readthedocs.io/en/latest/dev/timeseries.html#timeseries-objects

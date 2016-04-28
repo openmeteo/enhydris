@@ -3,19 +3,21 @@ from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
 from django.contrib.gis.db.backends import postgis
-from django.db import connection as db_connection
+from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
 from django.db.models import signals
-from django.db.models.signals import post_syncdb, post_save
+from django.db.models.signals import post_save
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django.utils._os import abspathu
 
+import iso8601
 from pthelma import timeseries
 from pthelma.timeseries import IntervalType as it
 from pthelma.timeseries import TimeStep as TTimeStep
+from simpletail import ropen
 
-import enhydris.hcore.signals
 from enhydris.permissions.models import Permission
 
 
@@ -587,6 +589,23 @@ class IntervalType(Lookup):
         return self.descr
 
 
+class TimeseriesStorage(FileSystemStorage):
+    """Stores timeseries data files in settings.ENHYDRIS_TIMESERIES_DATA_DIR.
+
+    TimeseriesStorage() is essentially the same as
+    FileSystemStorage(location=settings.ENHYDRIS_TIMESERIES_DATA_DIR)), with
+    the difference that it checks the value of ENHYDRIS_TIMESERIES_DATA_DIR
+    each time it does something. This allows the setting to be overridden
+    in unit tests with override_settings(). If using FileSystemStorage,
+    it would not be overriddable, because "location" would be set when
+    models.py is read and that would be it.
+    """
+
+    def path(self, name):
+        self.location = abspathu(settings.ENHYDRIS_TIMESERIES_DATA_DIR)
+        return super(TimeseriesStorage, self).path(name)
+
+
 class Timeseries(models.Model):
     last_modified = models.DateTimeField(default=timezone.now, null=True,
                                          editable=False)
@@ -638,45 +657,106 @@ class Timeseries(models.Model):
             "2003-11-30 18:05."
         )
     )
+    datafile = models.FileField(null=True, blank=True,
+                                storage=TimeseriesStorage())
+    start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = "Time Series"
         verbose_name_plural = "Time Series"
         ordering = ('hidden',)
 
-    @property
-    def start_date(self):
-        try:
-            ts = timeseries.Timeseries(int(self.id))
-        except:
-            return None
-        # This should be removed if ticket #112 gets resolved
-        c = db_connection.cursor()
-        c.execute("SELECT timeseries_start_date(%s)", (ts.id,))
-        try:
-            r = c.fetchone()
-        except:
-            return None
+    def set_start_and_end_date(self):
+        if (not self.datafile) or (self.datafile.size < 10):
+            self.start_date = None
+            self.end_date = None
+            return
+        with open(self.datafile.path, 'r') as f:
+            self.start_date = iso8601.parse_date(f.readline().split(',')[0])
+        with ropen(self.datafile.path, bufsize=80) as f:
+            self.end_date = iso8601.parse_date(f.readline().split(',')[0])
 
-        c.close()
-        return r[0]
-
-    @property
-    def end_date(self):
+    def get_empty_timeseries_object(self):
+        sign = -1 if self.time_zone.utc_offset < 0 else 1
         try:
-            ts = timeseries.Timeseries(int(self.id))
-        except:
-            return None
-        # This should be removed if ticket #112 gets resolved
-        c = db_connection.cursor()
-        c.execute("SELECT timeseries_end_date(%s)", (ts.id,))
-        try:
-            r = c.fetchone()
-        except:
-            return None
+            location = {
+                'abscissa': self.gentity.gpoint.point[0],
+                'ordinate': self.gentity.gpoint.point[1],
+                'srid': self.gentity.gpoint.srid,
+                'altitude': self.gentity.gpoint.altitude,
+                'asrid': self.gentity.gpoint.asrid,
+            }
+        except TypeError:
+            # TypeError occurs when self.gentity.gpoint.point is None,
+            # meaning the co-ordinates aren't registered.
+            location = None
+        t = timeseries.Timeseries(
+            id=self.id,
+            time_step=ReadTimeStep(self.id, self),
+            unit=self.unit_of_measurement.symbol,
+            title=self.name,
+            timezone='{} (UTC{:+03d}{:02d})'.format(
+                self.time_zone.code,
+                abs(self.time_zone.utc_offset) / 60 * sign,
+                abs(self.time_zone.utc_offset) % 60),
+            variable=self.variable.descr,
+            precision=self.precision,
+            location=location,
+            comment='%s\n\n%s' % (self.gentity.name, self.remarks))
+        return t
 
-        c.close()
-        return r[0]
+    def get_all_data(self):
+        t = self.get_empty_timeseries_object()
+        if self.datafile:
+            with open(self.datafile.path, 'r') as f:
+                t.read(f)
+        return t
+
+    def set_data(self, data):
+        t = self.get_empty_timeseries_object()
+        t.read(data)
+        if not self.datafile:
+            self.datafile.name = '{:010}'.format(self.id)
+        with open(self.datafile.path, 'w') as f:
+            t.write(f)
+        self.save()
+        return len(t)
+
+    def append_data(self, data):
+        if not self.datafile:
+            return self.set_data(data)
+        t = self.get_empty_timeseries_object()
+        t.read(data)
+        if not len(t):
+            return 0
+        with ropen(self.datafile.path, bufsize=80) as f:
+            old_data_end_date = iso8601.parse_date(f.readline().split(',')[0]
+                                                   ).replace(tzinfo=None)
+        new_data_start_date = t.bounding_dates()[0]
+        if old_data_end_date >= new_data_start_date:
+            raise ValueError((
+                "Cannot append time series: "
+                "its first record ({}) has a date earlier than the last "
+                "record ({}) of the timeseries to append to.")
+                .format(new_data_start_date, old_data_end_date))
+        with open(self.datafile.path, 'a') as f:
+            t.write(f)
+        self.save()
+        return len(t)
+
+    def get_first_line(self):
+        if not self.datafile or self.datafile.size < 10:
+            return ''
+        with open(self.datafile.path, 'r') as f:
+            return f.readline()
+
+    def get_last_line(self):
+        if not self.datafile or self.datafile.size < 10:
+            return ''
+        with ropen(self.datafile.path, bufsize=80) as f:
+            lastline = f.readline()
+            return lastline if len(lastline) > 5 else f.readline()
 
     @property
     def related_station(self):
@@ -707,41 +787,17 @@ class Timeseries(models.Model):
                     and self.timestamp_rounding_months is None)):
                 raise Exception(_("Invalid time step: roundings must be "
                                   "both null or not null"))
+        self.set_start_and_end_date()
         super(Timeseries, self).save(force_insert, force_update, *args,
                                      **kwargs)
 
 
-# The ts_records table was never intended to be a Django model; in fact it was
-# originally created by plain SQL; however, this caused some problems (see
-# ticket #245), and therefore it was changed to be a Django model. However, it
-# should not be used as a Django model; it should be manipulated through
-# pthelma.timeseries.Timeseries methods read_from_db(), write_to_db(), and
-# append_to_db(). (Besides, in the future the internal are very likely to
-# change, and the ts_records table is likely to be removed, and instead there
-# will be a FileField in the Timeseries model.)
+# BlobField is obsolete, but migration 0009 can't work without it.
 
 class BlobField(models.Field):
 
     def db_type(self, connection):
         return 'bytea'
-
-
-# The following two lines were needed when we were using South. It's not clear
-# to me that Django>=1.7 doesn't need anything like that. If some time goes by
-# and some migrations are made and everything works fine, remove. 2015-06-25
-#
-# from south.modelsinspector import add_introspection_rules
-# add_introspection_rules([], ["^enhydris\.hcore\.models\.BlobField"])
-
-
-class TsRecords(models.Model):
-    id = models.OneToOneField(Timeseries, primary_key=True, db_column='id')
-    top = models.TextField(blank=True)
-    middle = BlobField(null=True, blank=True)
-    bottom = models.TextField()
-
-    class Meta:
-        db_table = 'ts_records'
 
 
 # Profile creation upon user registration
@@ -823,6 +879,3 @@ signals.post_save.connect(user_post_save, User)
 
 if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
     signals.post_save.connect(make_user_editor, User)
-
-
-post_syncdb.connect(enhydris.hcore.signals.after_syncdb)

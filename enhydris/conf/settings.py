@@ -55,7 +55,6 @@ SITE_ID = 1
 # time when executing "python manage.py collectstatic".
 STATIC_ROOT = '/var/cache/enhydris/static/'
 
-
 # Where media files will be stored. "media" files are static files uploaded
 # by users, e.g. images and videos of stations. The web server must be
 # configured to map the URL /enhydris-media/ to that directory. See the
@@ -67,6 +66,10 @@ MEDIA_ROOT = '/var/lib/enhydris/media/'
 # below to create appropriate links.
 STATIC_URL = '/enhydris-static/'
 MEDIA_URL = '/enhydris-media/'
+
+# Where time series will be stored. This directory should not be accessible
+# through the web server.
+ENHYDRIS_TIMESERIES_DATA_DIR = '/var/lib/enhydris/timeseries_data'
 
 # Mail server settings; used whenever the system needs to email users or
 # admins.

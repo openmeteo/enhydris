@@ -3,7 +3,6 @@ import json
 
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
-from django.db import connection
 from django.test import TestCase
 from django.test.client import MULTIPART_CONTENT, BOUNDARY, encode_multipart
 from django.test.utils import override_settings
@@ -13,7 +12,7 @@ from rest_framework.test import APITestCase
 
 import enhydris
 from enhydris.hcore import models
-from pthelma.timeseries import Timeseries
+from enhydris.hcore.tests.test_views import RandomEnhydrisTimeseriesDataDir
 
 
 def create_test_data():
@@ -245,6 +244,7 @@ class WriteTestCase(TestCase):
         self.assertEqual(models.Timeseries.objects.count(), ntimeseries - 1)
         self.client.logout()
 
+    @RandomEnhydrisTimeseriesDataDir()
     def testUploadTsDataUnauthenticated(self):
         # Attempt to upload some timeseries data, unauthenticated
         response = self.client.put(
@@ -252,11 +252,11 @@ class WriteTestCase(TestCase):
             encode_multipart(BOUNDARY,
                              {'timeseries_records': '2012-11-06 18:17,20,\n'}),
             content_type=MULTIPART_CONTENT)
-        t = Timeseries(self.timeseries1.id)
-        t.read_from_db(connection)
+        t = self.timeseries1.get_all_data()
         self.assertEqual(response.status_code, 403)
         self.assertEqual(len(t), 0)
 
+    @RandomEnhydrisTimeseriesDataDir()
     def testUploadTsDataAsWrongUser(self):
         # Attempt to upload some timeseries data as user 2; should deny
         self.assert_(self.client.login(username='user2', password='password2'))
@@ -265,12 +265,12 @@ class WriteTestCase(TestCase):
             encode_multipart(BOUNDARY,
                              {'timeseries_records': '2012-11-06 18:17,20,\n'}),
             content_type=MULTIPART_CONTENT)
-        t = Timeseries(self.timeseries1.id)
-        t.read_from_db(connection)
+        t = self.timeseries1.get_all_data()
         self.assertEqual(response.status_code, 403)
         self.assertEqual(len(t), 0)
         self.client.logout()
 
+    @RandomEnhydrisTimeseriesDataDir()
     def testUploadTsDataGarbage(self):
         self.assert_(self.client.login(username='user1', password='password1'))
         response = self.client.put(
@@ -278,12 +278,12 @@ class WriteTestCase(TestCase):
             encode_multipart(BOUNDARY,
                              {'timeseries_records': '2012-aa-06 18:17,20,\n'}),
             content_type=MULTIPART_CONTENT)
+        t = self.timeseries1.get_all_data()
         self.assertEqual(response.status_code, 400)
-        t = Timeseries(self.timeseries1.id)
-        t.read_from_db(connection)
         self.assertEqual(len(t), 0)
         self.client.logout()
 
+    @RandomEnhydrisTimeseriesDataDir()
     def testUploadTsData(self):
         self.assert_(self.client.login(username='user1', password='password1'))
         response = self.client.put(
@@ -291,8 +291,9 @@ class WriteTestCase(TestCase):
             encode_multipart(BOUNDARY,
                              {'timeseries_records': '2012-11-06 18:17,20,\n'}),
             content_type=MULTIPART_CONTENT)
-        t = Timeseries(self.timeseries1.id)
-        t.read_from_db(connection)
+
+        t = models.Timeseries.objects.get(pk=self.timeseries1.id
+                                          ).get_all_data()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '1')
         self.assertEqual(len(t), 1)
@@ -308,8 +309,8 @@ class WriteTestCase(TestCase):
                              {'timeseries_records':
                               '2012-11-06 18:18,21,\n2012-11-07 18:18,23,\n'}),
             content_type=MULTIPART_CONTENT)
-        t = Timeseries(self.timeseries1.id)
-        t.read_from_db(connection)
+        t = models.Timeseries.objects.get(pk=self.timeseries1.id
+                                          ).get_all_data()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '2')
         self.assertEqual(len(t), 3)
@@ -329,9 +330,9 @@ class WriteTestCase(TestCase):
                              {'timeseries_records': '2012-11-05 18:18,21,\n'}),
             content_type=MULTIPART_CONTENT)
         self.client.logout()
-        t = Timeseries(self.timeseries1.id)
-        t.read_from_db(connection)
-        self.assertEqual(response.status_code, 409)
+        t = models.Timeseries.objects.get(pk=self.timeseries1.id
+                                          ).get_all_data()
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(len(t), 3)
         self.client.logout()
 

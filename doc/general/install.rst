@@ -301,12 +301,16 @@ These are the settings available to Enhydris, in addition to the
    lat is in decimal degrees, positive for north/east, negative for
    west/south.
 
-.. data:: ENHYDRIS_TS_GRAPH_CACHE_DIR
+.. data:: ENHYDRIS_TIMESERIES_DATA_DIR
 
-   The directory in which timeseries graphs are cached. It is
-   automatically created if it does not exist. The default is
-   subdirectory :file:`enhydris-timeseries-graphs` of the system or
-   user temporary directory.
+   The directory where the files with the time series data are stored;
+   for example, ``/var/local/enhydris/timeseries_data``. You must
+   specify this in production. The default is ``timeseries_data``,
+   relative to the directory from which you start the server.
+
+   You might choose to put that under data:`MEDIA_ROOT`, but in that
+   case all data might be publicly available, without permission
+   checking.
 
 .. data:: ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR
           ENHYDRIS_TS_GRAPH_FINE_STEP_DENOMINATOR

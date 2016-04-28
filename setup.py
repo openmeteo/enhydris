@@ -17,6 +17,8 @@ installation_requirements = [
     "pthelma>=0.12,<1",
     "gdal>=1.6",
     "django-bootstrap3>=5.1,<6",
+    "simpletail>=0.1.2",
+    "iso8601",
 ]
 
 

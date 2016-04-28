@@ -1,4 +1,3 @@
-import base64
 import calendar
 import csv
 from datetime import datetime, timedelta
@@ -7,10 +6,8 @@ import linecache
 import math
 import mimetypes
 import os
-import re
 import tempfile
 from tempfile import mkstemp
-import urllib2
 from zipfile import ZipFile, ZIP_DEFLATED
 
 from django.contrib import messages
@@ -20,7 +17,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.geos import Polygon
 from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
-import django.db
 from django.db import transaction
 from django.db.utils import InternalError
 from django.db.models import Count, Q
@@ -33,22 +29,19 @@ from django.utils.decorators import method_decorator
 from django.utils.functional import lazy
 from django.utils.translation import ugettext_lazy as _
 
-from pthelma.timeseries import (add_months_to_datetime, datetime_from_iso,
-                                Timeseries as TTimeseries)
+from pthelma.timeseries import (add_months_to_datetime, datetime_from_iso)
 
 from django.conf import settings
 
 from enhydris.hcore.models import (
     GentityAltCode, GentityEvent, GentityFile, GentityGenericData, Instrument,
-    Overseer, PoliticalDivision, ReadTimeStep, Station, Timeseries,
-    UserProfile)
+    Overseer, PoliticalDivision, Station, Timeseries, UserProfile)
 from enhydris.hcore.decorators import (gentityfile_permission,
                                        timeseries_permission)
 from enhydris.hcore.forms import (
     GentityAltCodeForm, GentityEventForm, GentityFileForm,
     GentityGenericDataForm, InstrumentForm, OverseerForm, StationForm,
     TimeseriesForm, TimeseriesDataForm, TimeStepForm)
-from enhydris.hcore.tstmpupd import update_ts_temp_file
 
 
 class ProfileDetailView(DetailView):
@@ -400,8 +393,8 @@ class StationListBaseView(ListView):
                    '(SELECT t.gentity_id FROM hcore_timeseries t '
                    'WHERE ' + (' AND '.join(
                        ['{0} BETWEEN '
-                        'EXTRACT(YEAR FROM timeseries_start_date(t.id)) AND '
-                        'EXTRACT(YEAR FROM timeseries_end_date(t.id))'
+                        'EXTRACT(YEAR FROM t.start_date) AND '
+                        'EXTRACT(YEAR FROM t.end_date)'
                         .format(year) for year in years])) +
                    ')'])
 
@@ -615,144 +608,142 @@ def timeseries_data(request, *args, **kwargs):
         else:
             raise Http404
 
-    if request.method == "GET" and 'object_id' in request.GET:
-        response = HttpResponse(content_type='application/json')
-        response.status_code = 200
-        try:
-            object_id = int(request.GET['object_id'])
-        except ValueError:
-            raise Http404
-        afilename = os.path.join(settings.ENHYDRIS_TS_GRAPH_CACHE_DIR,
-                                 '%d.hts' % (object_id,))
-        update_ts_temp_file(settings.ENHYDRIS_TS_GRAPH_CACHE_DIR,
-                            django.db.connection, object_id)
-        chart_data = []
-        if 'start_pos' in request.GET and 'end_pos' in request.GET:
-            start_pos = int(request.GET['start_pos'])
-            end_pos = int(request.GET['end_pos'])
-        else:
-            end_pos = bufcount(afilename)
-            tot_lines = end_pos
-            if 'last' in request.GET:
-                if request.GET.get('date', False):
-                    datetimestr = request.GET['date']
-                    datetimefmt = '%Y-%m-%d'
-                    if request.GET.get('time', False):
-                        datetimestr = datetimestr + ' ' + request.GET['time']
-                        datetimefmt = datetimefmt + ' %H:%M'
-                    try:
-                        first_date = datetime.strptime(datetimestr,
-                                                       datetimefmt)
-                        last_date = inc_datetime(first_date,
-                                                 request.GET['last'], 1)
-                        (end_pos, is_exact) = find_line_at_date(last_date,
-                                                                tot_lines)
-                        if request.GET.get('exact_datetime', False
-                                           ) and is_exact != 0:
-                            raise Http404
-                    except ValueError:
-                        raise Http404
-                else:
-                    last_date = date_at_pos(end_pos)
-                    first_date = inc_datetime(last_date, request.GET['last'],
-                                              -1)
-                    # This is an almost bad workarround to exclude the first
-                    # record from sums, i.e. when we need the 144 10 minute
-                    # values from a day.
-                    if 'start_offset' in request.GET:
-                        offset = float(request.GET['start_offset'])
-                        first_date += timedelta(minutes=offset)
-                start_pos = find_line_at_date(first_date, tot_lines)[0]
-            else:
-                start_pos = 1
-        length = end_pos - start_pos + 1
-        step = int(length / settings.ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR
-                   ) or 1
-        fine_step = int(step / settings.ENHYDRIS_TS_GRAPH_FINE_STEP_DENOMINATOR
-                        ) or 1
-        if not step % fine_step == 0:
-            step = fine_step * settings.ENHYDRIS_TS_GRAPH_FINE_STEP_DENOMINATOR
-        pos = start_pos
-        amax = ''
-        prev_pos = -1
-        tick_pos = -1
-        is_vector = request.GET.get('vector', False)
-        gstats = {'max': None, 'min': None, 'count': 0,
-                  'max_tstmp': None, 'min_tstmp': None,
-                  'sum': None, 'avg': None,
-                  'vsum': None, 'vavg': None,
-                  'last': None, 'last_tstmp': None,
-                  'vectors': None}
-        afloat = 0.01
-        try:
-            linecache.checkcache(afilename)
-            while pos < start_pos + length:
-                s = linecache.getline(afilename, pos)
-                if s.isspace():
-                    pos += fine_step
-                    continue
-                t = s.split(',')
-                # Use the following exception handling to catch incoplete
-                # reads from cache. Tries only one time, next time if
-                # the error on the same line persists, it raises.
+    if (request.method != "GET") or ('object_id' not in request.GET):
+        raise Http404
+
+    response = HttpResponse(content_type='application/json')
+    response.status_code = 200
+    try:
+        object_id = int(request.GET['object_id'])
+    except ValueError:
+        raise Http404
+    afilename = Timeseries.objects.get(pk=object_id).datafile.path
+    chart_data = []
+    if 'start_pos' in request.GET and 'end_pos' in request.GET:
+        start_pos = int(request.GET['start_pos'])
+        end_pos = int(request.GET['end_pos'])
+    else:
+        end_pos = bufcount(afilename)
+        tot_lines = end_pos
+        if 'last' in request.GET:
+            if request.GET.get('date', False):
+                datetimestr = request.GET['date']
+                datetimefmt = '%Y-%m-%d'
+                if request.GET.get('time', False):
+                    datetimestr = datetimestr + ' ' + request.GET['time']
+                    datetimefmt = datetimefmt + ' %H:%M'
                 try:
-                    k = datetime_from_iso(t[0])
-                    v = t[1]
-                except:
-                    if pos > prev_pos:
-                        prev_pos = pos
-                        linecache.checkcache(afilename)
-                        continue
-                    else:
-                        raise
-                if v != '':
-                    afloat = float(v)
-                    add_to_stats(k, afloat)
-                    if amax == '':
-                        amax = afloat
-                    else:
-                        amax = afloat if afloat > amax else amax
-                if (pos - start_pos) % step == 0:
-                    tick_pos = pos
-                    if amax == '':
-                        amax = 'null'
-                    chart_data.append([calendar.timegm(k.timetuple()) * 1000,
-                                       str(amax), pos])
-                    amax = ''
-                # Sometimes linecache tries to read a file being written (from
-                # timeseries.write_file). So every 5000 lines refresh the
-                # cache.
-                if (pos - start_pos) % 5000 == 0:
-                    linecache.checkcache(afilename)
+                    first_date = datetime.strptime(datetimestr,
+                                                    datetimefmt)
+                    last_date = inc_datetime(first_date,
+                                                request.GET['last'], 1)
+                    (end_pos, is_exact) = find_line_at_date(last_date,
+                                                            tot_lines)
+                    if request.GET.get('exact_datetime', False
+                                        ) and is_exact != 0:
+                        raise Http404
+                except ValueError:
+                    raise Http404
+            else:
+                last_date = date_at_pos(end_pos)
+                first_date = inc_datetime(last_date, request.GET['last'],
+                                            -1)
+                # This is an almost bad workarround to exclude the first
+                # record from sums, i.e. when we need the 144 10 minute
+                # values from a day.
+                if 'start_offset' in request.GET:
+                    offset = float(request.GET['start_offset'])
+                    first_date += timedelta(minutes=offset)
+            start_pos = find_line_at_date(first_date, tot_lines)[0]
+        else:
+            start_pos = 1
+
+    length = end_pos - start_pos + 1
+    step = int(length / settings.ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR
+                ) or 1
+    fine_step = int(step / settings.ENHYDRIS_TS_GRAPH_FINE_STEP_DENOMINATOR
+                    ) or 1
+    if not step % fine_step == 0:
+        step = fine_step * settings.ENHYDRIS_TS_GRAPH_FINE_STEP_DENOMINATOR
+    pos = start_pos
+    amax = ''
+    prev_pos = -1
+    tick_pos = -1
+    is_vector = request.GET.get('vector', False)
+    gstats = {'max': None, 'min': None, 'count': 0,
+                'max_tstmp': None, 'min_tstmp': None,
+                'sum': None, 'avg': None,
+                'vsum': None, 'vavg': None,
+                'last': None, 'last_tstmp': None,
+                'vectors': None}
+    afloat = 0.01
+    try:
+        linecache.checkcache(afilename)
+        while pos < start_pos + length:
+            s = linecache.getline(afilename, pos)
+            if s.isspace():
                 pos += fine_step
-            if length > 0 and tick_pos < end_pos:
+                continue
+            t = s.split(',')
+            # Use the following exception handling to catch incoplete
+            # reads from cache. Tries only one time, next time if
+            # the error on the same line persists, it raises.
+            try:
+                k = datetime_from_iso(t[0])
+                v = t[1]
+            except:
+                if pos > prev_pos:
+                    prev_pos = pos
+                    linecache.checkcache(afilename)
+                    continue
+                else:
+                    raise
+            if v != '':
+                afloat = float(v)
+                add_to_stats(k, afloat)
+                if amax == '':
+                    amax = afloat
+                else:
+                    amax = afloat if afloat > amax else amax
+            if (pos - start_pos) % step == 0:
+                tick_pos = pos
                 if amax == '':
                     amax = 'null'
-                chart_data[-1] = [calendar.timegm(k.timetuple()) * 1000,
-                                  str(amax), end_pos]
-        finally:
-            linecache.clearcache()
-        if chart_data:
-            if gstats['count'] > 0:
-                gstats['avg'] = gstats['sum'] / gstats['count']
-                if is_vector:
-                    gstats['vavg'] = math.atan2(*gstats['vsum']
-                                                ) * 180 / math.pi
-                    if gstats['vavg'] < 0:
-                        gstats['vavg'] += 360
-                for item in ('max_tstmp', 'min_tstmp', 'last_tstmp'):
-                    gstats[item] = calendar.timegm(gstats[item].timetuple()
-                                                   ) * 1000
-            response.content = json.dumps({'data': chart_data,
-                                           'stats': gstats})
-        else:
-            response.content = json.dumps("")
-        callback = request.GET.get("jsoncallback", None)
-        if callback:
-            response.content = '%s(%s)' % (callback, response.content,)
-        return response
+                chart_data.append([calendar.timegm(k.timetuple()) * 1000,
+                                    str(amax), pos])
+                amax = ''
+            # Sometimes linecache tries to read a file being written (from
+            # timeseries.write_file). So every 5000 lines refresh the
+            # cache.
+            if (pos - start_pos) % 5000 == 0:
+                linecache.checkcache(afilename)
+            pos += fine_step
+        if length > 0 and tick_pos < end_pos:
+            if amax == '':
+                amax = 'null'
+            chart_data[-1] = [calendar.timegm(k.timetuple()) * 1000,
+                                str(amax), end_pos]
+    finally:
+        linecache.clearcache()
+    if chart_data:
+        if gstats['count'] > 0:
+            gstats['avg'] = gstats['sum'] / gstats['count']
+            if is_vector:
+                gstats['vavg'] = math.atan2(*gstats['vsum']
+                                            ) * 180 / math.pi
+                if gstats['vavg'] < 0:
+                    gstats['vavg'] += 360
+            for item in ('max_tstmp', 'min_tstmp', 'last_tstmp'):
+                gstats[item] = calendar.timegm(gstats[item].timetuple()
+                                                ) * 1000
+        response.content = json.dumps({'data': chart_data,
+                                        'stats': gstats})
     else:
-        raise Http404
+        response.content = json.dumps("")
+    callback = request.GET.get("jsoncallback", None)
+    if callback:
+        response.content = '%s(%s)' % (callback, response.content,)
+    return response
 
 
 class TimeseriesDetailView(DetailView):
@@ -883,43 +874,17 @@ TS_ERROR = ("There seems to be some problem with our internal infrastuctrure. "
 @timeseries_permission
 def download_timeseries(request, object_id, start_date=None, end_date=None):
     timeseries = get_object_or_404(Timeseries, pk=int(object_id))
-    sign = -1 if timeseries.time_zone.utc_offset < 0 else 1
-    try:
-        location = {
-            'abscissa': timeseries.gentity.gpoint.point[0],
-            'ordinate': timeseries.gentity.gpoint.point[1],
-            'srid': timeseries.gentity.gpoint.srid,
-            'altitude': timeseries.gentity.gpoint.altitude,
-            'asrid': timeseries.gentity.gpoint.asrid,
-        }
-    except TypeError:
-        # TypeError occurs when timeseries.gentity.gpoint.point is None,
-        # meaning the co-ordinates aren't registered.
-        location = None
-    ts = TTimeseries(
-        id=int(object_id),
-        time_step=ReadTimeStep(object_id, timeseries),
-        unit=timeseries.unit_of_measurement.symbol,
-        title=timeseries.name,
-        timezone='{} (UTC{:+03d}{:02d})'.format(
-            timeseries.time_zone.code,
-            abs(timeseries.time_zone.utc_offset) / 60 * sign,
-            abs(timeseries.time_zone.utc_offset) % 60),
-        variable=timeseries.variable.descr,
-        precision=timeseries.precision,
-        location=location,
-        comment='%s\n\n%s' % (timeseries.gentity.name, timeseries.remarks))
     start_date = (datetime_from_iso(start_date) if start_date
                   else timeseries.start_date)
     end_date = (datetime_from_iso(end_date) if end_date
                 else timeseries.end_date)
+    ts = timeseries.get_all_data()
     if start_date and end_date and ((start_date <= timeseries.end_date) or (
             end_date >= timeseries.start_date)):
-        ts.read_from_db(django.db.connection)
         ts.delete_items(None, start_date - timedelta(minutes=1))
         ts.delete_items(end_date + timedelta(minutes=1), None)
-    response = HttpResponse(content_type=
-                            'text/vnd.openmeteo.timeseries; charset=utf-8')
+    response = HttpResponse(
+        content_type='text/vnd.openmeteo.timeseries; charset=utf-8')
     response['Content-Disposition'] = \
         "attachment; filename=%s.hts" % (object_id,)
     try:
@@ -934,14 +899,12 @@ def download_timeseries(request, object_id, start_date=None, end_date=None):
 
 @timeseries_permission
 def timeseries_bottom(request, object_id):
-    ts = TTimeseries(id=int(object_id))
     try:
-        Timeseries.objects.get(pk=int(object_id))
+        atimeseries = Timeseries.objects.get(pk=int(object_id))
     except Timeseries.DoesNotExist:
         raise Http404
-    ts.read_from_db(django.db.connection, bottom_only=True)
     response = HttpResponse(content_type='text/plain; charset=utf-8')
-    ts.write(response)
+    response.write(atimeseries.get_last_line())
     return response
 
 
@@ -1158,8 +1121,6 @@ def timeseries_delete(request, timeseries_id):
     if tseries and related_station:
         if request.user.has_row_perm(related_station, 'edit') and \
                 request.user.has_perm('hcore.delete_timeseries'):
-            ts = TTimeseries(int(timeseries_id))
-            ts.delete_from_db(django.db.connection)
             tseries.delete()
             ref = request.META.get('HTTP_REFERER', None)
             if ref and not ref.endswith(reverse('timeseries_detail',

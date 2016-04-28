@@ -1,6 +1,4 @@
-import os
-
-from django import forms, db
+from django import forms
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.forms import ModelForm
@@ -471,12 +469,11 @@ class TimeseriesForm(ModelForm):
 
         if 'data' in self.cleaned_data and self.cleaned_data['data']:
             data = self.cleaned_data['data']
-            ts = timeseries.Timeseries(int(self.instance.id))
+            atimeseries = Timeseries.objects.get(pk=int(self.instance.id))
             data.seek(0)
-            ts.read_file(data)
             if self.cleaned_data['data_policy'] == 'A':
                 try:
-                    ts.append_to_db(db.connection, commit=False)
+                    atimeseries.append_data(data)
                 except Exception, e:
                     raise forms.ValidationError(_(e.message))
 
@@ -493,18 +490,23 @@ class TimeseriesForm(ModelForm):
         # Handle pushing additional data if present back to the db
         if 'data' in self.cleaned_data and self.cleaned_data['data']:
             data = self.cleaned_data['data']
-            ts = timeseries.Timeseries(int(self.instance.id))
             data.seek(0)
-            ts.read_file(data)
+
+            # Skip possible header
+            while True:
+                pos = data.tell()
+                line = data.readline()
+                if not line:
+                    break
+                if ('=' not in line) and (not line.isspace()):
+                    data.seek(pos)
+                    break
+
             if self.cleaned_data['data_policy'] == 'A':
                 pass
                 # ts.append_to_db(db.connection, commit=False)
             else:
-                afilename = os.path.join(settings.ENHYDRIS_TS_GRAPH_CACHE_DIR,
-                                         '%d.hts' % int(self.instance.id))
-                if os.path.exists(afilename):
-                    os.remove(afilename)
-                ts.write_to_db(db.connection, commit=False)
+                tseries.set_data(data)
 
         return tseries
 

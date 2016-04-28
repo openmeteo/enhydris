@@ -14,7 +14,6 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.gis.geos import fromstr, Point
-from django.db import connection as dj_connection
 from django.http import HttpRequest, QueryDict
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -307,6 +306,25 @@ class RandomMediaRoot(override_settings):
         shutil.rmtree(self.tmpdir)
 
 
+class RandomEnhydrisTimeseriesDataDir(override_settings):
+    """
+    Override ENHYDRIS_TIMESERIES_DATA_DIR to a temporary directory.
+
+    Specifying "@RandomEnhydrisTimeseriesDataDir()" as a decorator is the same
+    as "@override_settings(ENHYDRIS_TIMESERIES_DATA_DIR=tempfile.mkdtemp())",
+    except that in the end it removes the temporary directory.
+    """
+
+    def __init__(self):
+        self.tmpdir = tempfile.mkdtemp()
+        super(RandomEnhydrisTimeseriesDataDir, self).__init__(
+            ENHYDRIS_TIMESERIES_DATA_DIR=self.tmpdir)
+
+    def disable(self):
+        super(RandomEnhydrisTimeseriesDataDir, self).disable()
+        shutil.rmtree(self.tmpdir)
+
+
 class GentityFileTestCase(TestCase):
 
     @RandomMediaRoot()
@@ -392,6 +410,7 @@ class TsTestCase(TestCase):
         self.ts.delete()
         self.user.delete()
 
+    @RandomEnhydrisTimeseriesDataDir()
     def test_timeseries_data(self):
         # Upload
         with open("enhydris/hcore/tests/tsdata.hts", "r") as f:
@@ -404,9 +423,7 @@ class TsTestCase(TestCase):
         self.assertTrue(form.is_valid())
         ts = form.save()
         ts.save()
-        pts = timeseries.Timeseries(ts.id)
-        pts.read_from_db(dj_connection)
-        self.assertEqual(len(pts.items()), 12872)
+        self.assertEqual(len(ts.get_all_data()), 12872)
 
         # Download
 

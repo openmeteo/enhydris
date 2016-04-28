@@ -1,7 +1,6 @@
 from StringIO import StringIO
 
 from django.http import Http404, HttpResponse
-from django.db import connection
 from django.shortcuts import get_object_or_404
 
 from rest_framework import generics, status
@@ -10,7 +9,6 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
-from pthelma.timeseries import Timeseries
 from enhydris.hcore import models
 from enhydris.api.permissions import CanEditOrReadOnly, CanCreateStation
 from enhydris.api.serializers import StationSerializer, TimeseriesSerializer
@@ -51,24 +49,21 @@ class Tsdata(APIView):
     permission_classes = (CanEditOrReadOnly,)
 
     def get(self, request, pk, format=None):
-        ts = Timeseries(id=int(pk))
-        self.check_object_permissions(request, ts)
-        ts.read_from_db(connection)
+        timeseries = models.Timeseries.objects.get(pk=int(pk))
+        self.check_object_permissions(request, timeseries)
         result = StringIO()
-        ts.write(result)
+        timeseries.get_all_data().write(result)
         return HttpResponse(result.getvalue(), content_type="text/plain")
 
     def put(self, request, pk, format=None):
         try:
-            ts = Timeseries(id=int(pk))
-            self.check_object_permissions(request, ts)
-            result_if_error = status.HTTP_400_BAD_REQUEST
-            ts.read(StringIO(request.DATA['timeseries_records']))
-            result_if_error = status.HTTP_409_CONFLICT
-            ts.append_to_db(connection, commit=False)
-            return HttpResponse(str(len(ts)), content_type="text/plain")
+            atimeseries = models.Timeseries.objects.get(pk=int(pk))
+            self.check_object_permissions(request, atimeseries)
+            nrecords = atimeseries.append_data(StringIO(request.DATA[
+                'timeseries_records']))
+            return HttpResponse(str(nrecords), content_type="text/plain")
         except ValueError as e:
-            return HttpResponse(status=result_if_error,
+            return HttpResponse(status=status.HTTP_400_BAD_REQUEST,
                                 content=str(e),
                                 content_type="text/plain")
 

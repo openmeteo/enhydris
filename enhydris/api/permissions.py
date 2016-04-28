@@ -4,7 +4,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 
 from enhydris.hcore import models
-from pthelma.timeseries import Timeseries
 
 
 class CanEditOrReadOnly(permissions.BasePermission):
@@ -17,8 +16,6 @@ class CanEditOrReadOnly(permissions.BasePermission):
             return True
         if isinstance(obj, models.Timeseries):
             id = obj.gentity.id
-        elif isinstance(obj, Timeseries):
-            id = get_object_or_404(models.Timeseries, id=obj.id).gentity.id
         elif isinstance(obj, models.Gentity):
             id = obj.id
         else:

@@ -6,3 +6,4 @@ enhydris/urls.py
 doc/_build
 dist
 devinstance
+timeseries_data
