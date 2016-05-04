@@ -5,7 +5,6 @@ from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
-from django.contrib.gis.db.backends import postgis
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
 from django.db.models import signals
@@ -181,14 +180,6 @@ class Gpoint(Gentity):
             return round(y, 2) if abs(x) > 180 and abs(y) > 90 else y
         else:
             return None
-
-    def original_cs_name(self):
-        if self.srid:
-            srtext = postgis.models.PostGISSpatialRefSys.objects.get(
-                srid=self.srid).srtext
-            cstype, dummy, rest = srtext.partition('[')
-            csname = rest.split('"')[1]
-            return csname + ' (' + cstype + ')'
 
 
 class Gline(Gentity):

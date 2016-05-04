@@ -4,7 +4,7 @@ from StringIO import StringIO
 import shutil
 import tempfile
 import time
-from unittest import skipUnless
+from unittest import skipIf, skipUnless
 from urllib import urlencode
 
 import django
@@ -929,6 +929,12 @@ class StationTestCase(TestCase):
         response = self.client.get('/stations/add/')
         self.assertEqual(response.status_code, 200)
 
+    # We cannot catch invalid SRIDs with spatialite, because spatialite
+    # does not return any error. We therefore skip this test. See
+    # http://stackoverflow.com/questions/37005581/ for details.
+    @skipIf(settings.DATABASES['default']['ENGINE'].endswith('.spatialite'),
+            'This functionality is not available on spatialite; '
+            'fix it if you can.')
     @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
     def test_station_invalid_SRID_submission(self):
         r = self.client.login(username='admin', password='topsecret')

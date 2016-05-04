@@ -408,9 +408,10 @@ class StationListBaseView(ListView):
               SELECT id FROM hcore_gentity WHERE political_division_id IN (
                 WITH RECURSIVE mytable(garea_ptr_id) AS (
                     SELECT garea_ptr_id FROM hcore_politicaldivision
-                    WHERE garea_ptr_id IN (SELECT id FROM hcore_gentity
-                                           WHERE name ilike '%%{}%%'
-                                           OR name_alt ilike '%%{}%%')
+                    WHERE garea_ptr_id IN (
+                        SELECT id FROM hcore_gentity
+                        WHERE LOWER(name) LIKE LOWER('%%{}%%')
+                        OR LOWER(name_alt) LIKE LOWER('%%{}%%'))
                   UNION ALL
                     SELECT pd.garea_ptr_id
                     FROM hcore_politicaldivision pd, mytable

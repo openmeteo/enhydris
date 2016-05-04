@@ -131,9 +131,8 @@
                     <small>
                       <br>
                       ({{ wgs84_name }};
-                      {% trans "originally" %}
-                      {{ station.original_cs_name }}
-                      [srid={{ station.srid }}]:
+                      {% trans "converted from" %}
+                      srid={{ station.srid }},
                       x={{ station.original_abscissa }},
                       y={{ station.original_ordinate }})
                     </small>
