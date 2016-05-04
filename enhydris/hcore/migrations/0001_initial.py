@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 import enhydris.hcore.models
 import django.contrib.gis.db.models.fields
+import django.utils.timezone
 from django.conf import settings
 
 
@@ -18,7 +19,7 @@ class Migration(migrations.Migration):
             name='EventType',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('descr', models.CharField(max_length=200, blank=True)),
                 ('descr_alt', models.CharField(max_length=200, blank=True)),
             ],
@@ -31,7 +32,7 @@ class Migration(migrations.Migration):
             name='FileType',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('descr', models.CharField(max_length=200, blank=True)),
                 ('descr_alt', models.CharField(max_length=200, blank=True)),
                 ('mime_type', models.CharField(max_length=64)),
@@ -45,7 +46,7 @@ class Migration(migrations.Migration):
             name='Gentity',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('name', models.CharField(max_length=200, blank=True)),
                 ('short_name', models.CharField(max_length=50, blank=True)),
                 ('remarks', models.TextField(blank=True)),
@@ -62,7 +63,7 @@ class Migration(migrations.Migration):
             name='GentityAltCode',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('value', models.CharField(max_length=100)),
             ],
         ),
@@ -70,7 +71,7 @@ class Migration(migrations.Migration):
             name='GentityAltCodeType',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('descr', models.CharField(max_length=200, blank=True)),
                 ('descr_alt', models.CharField(max_length=200, blank=True)),
             ],
@@ -83,7 +84,7 @@ class Migration(migrations.Migration):
             name='GentityEvent',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('date', models.DateField()),
                 ('user', models.CharField(max_length=64)),
                 ('report', models.TextField(blank=True)),
@@ -97,7 +98,7 @@ class Migration(migrations.Migration):
             name='GentityFile',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('date', models.DateField(null=True, blank=True)),
                 ('content', models.FileField(upload_to=b'gentityfile')),
                 ('descr', models.CharField(max_length=100)),
@@ -111,7 +112,7 @@ class Migration(migrations.Migration):
             name='GentityGenericData',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('descr', models.CharField(max_length=100)),
                 ('remarks', models.TextField(blank=True)),
                 ('descr_alt', models.CharField(max_length=100)),
@@ -123,7 +124,7 @@ class Migration(migrations.Migration):
             name='GentityGenericDataType',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('descr', models.CharField(max_length=200, blank=True)),
                 ('descr_alt', models.CharField(max_length=200, blank=True)),
                 ('file_extension', models.CharField(max_length=16)),
@@ -137,10 +138,9 @@ class Migration(migrations.Migration):
             name='Instrument',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('manufacturer', models.CharField(max_length=50, blank=True)),
                 ('model', models.CharField(max_length=50, blank=True)),
-                ('is_active', models.BooleanField(default=False)),
                 ('start_date', models.DateField(null=True, blank=True)),
                 ('end_date', models.DateField(null=True, blank=True)),
                 ('name', models.CharField(max_length=100, blank=True)),
@@ -156,7 +156,7 @@ class Migration(migrations.Migration):
             name='InstrumentType',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('descr', models.CharField(max_length=200, blank=True)),
                 ('descr_alt', models.CharField(max_length=200, blank=True)),
             ],
@@ -169,7 +169,7 @@ class Migration(migrations.Migration):
             name='IntervalType',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('descr', models.CharField(max_length=200, blank=True)),
                 ('descr_alt', models.CharField(max_length=200, blank=True)),
                 ('value', models.CharField(max_length=50)),
@@ -183,7 +183,7 @@ class Migration(migrations.Migration):
             name='Lentity',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('remarks', models.TextField(blank=True)),
                 ('remarks_alt', models.TextField(blank=True)),
                 ('ordering_string', models.CharField(max_length=255, null=True, editable=False, blank=True)),
@@ -197,7 +197,7 @@ class Migration(migrations.Migration):
             name='Overseer',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('is_current', models.BooleanField(default=False)),
                 ('start_date', models.DateField(null=True, blank=True)),
                 ('end_date', models.DateField(null=True, blank=True)),
@@ -207,7 +207,7 @@ class Migration(migrations.Migration):
             name='StationType',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('descr', models.CharField(max_length=200, blank=True)),
                 ('descr_alt', models.CharField(max_length=200, blank=True)),
             ],
@@ -220,17 +220,20 @@ class Migration(migrations.Migration):
             name='Timeseries',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('name', models.CharField(max_length=200, blank=True)),
                 ('name_alt', models.CharField(default=b'', max_length=200, blank=True)),
                 ('hidden', models.BooleanField(default=False)),
                 ('precision', models.SmallIntegerField(null=True, blank=True)),
                 ('remarks', models.TextField(blank=True)),
                 ('remarks_alt', models.TextField(default=b'', blank=True)),
-                ('nominal_offset_minutes', models.PositiveIntegerField(null=True, blank=True)),
-                ('nominal_offset_months', models.PositiveSmallIntegerField(null=True, blank=True)),
-                ('actual_offset_minutes', models.IntegerField(null=True, blank=True)),
-                ('actual_offset_months', models.SmallIntegerField(null=True, blank=True)),
+                ('timestamp_rounding_minutes', models.PositiveIntegerField(help_text='For an hourly time series whose timestamps end in :00, set this to zero; if they end in :12, set it to 12. For a ten-minute time series with timestamps ending in :12, :22, :32, etc., set it to 2.  For daily ending at 08:00, set it to 480. Leave empty if timestamps are irregular.', null=True, blank=True)),
+                ('timestamp_rounding_months', models.PositiveSmallIntegerField(help_text='Set this to zero, except for annual time series, indicating the difference from January; for example, set it to 9 if the timestamps use a hydrological year starting in October. Leave empty if timestamps are irregular.', null=True, blank=True)),
+                ('timestamp_offset_minutes', models.IntegerField(help_text='If unsure, set this to zero. It indicates the difference of what is shown from what is meant. For example, if for an hourly time series it is -5, then 2015-10-14 11:00 means the interval from 2015-10-14 09:55 to 2015-10-14 10:55. -1440 is common for daily time series.', null=True, blank=True)),
+                ('timestamp_offset_months', models.SmallIntegerField(help_text='If unsure, set this to 1 for monthly, 12 for annual, and zero otherwise.  For a monthly time series, an offset of -475 minutes and 1 month means that 2003-11-01 00:00 (normally shown as 2003-11) denotes the interval 2003-10-31 18:05 to 2003-11-30 18:05.', null=True, blank=True)),
+                ('datafile', models.FileField(storage=enhydris.hcore.models.TimeseriesStorage(), null=True, upload_to=b'', blank=True)),
+                ('start_date', models.DateTimeField(null=True, blank=True)),
+                ('end_date', models.DateTimeField(null=True, blank=True)),
             ],
             options={
                 'ordering': ('hidden',),
@@ -242,7 +245,7 @@ class Migration(migrations.Migration):
             name='TimeStep',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('descr', models.CharField(max_length=200, blank=True)),
                 ('descr_alt', models.CharField(max_length=200, blank=True)),
                 ('length_minutes', models.PositiveIntegerField()),
@@ -257,7 +260,7 @@ class Migration(migrations.Migration):
             name='TimeZone',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('code', models.CharField(max_length=50)),
                 ('utc_offset', models.SmallIntegerField()),
             ],
@@ -269,7 +272,7 @@ class Migration(migrations.Migration):
             name='UnitOfMeasurement',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('descr', models.CharField(max_length=200, blank=True)),
                 ('descr_alt', models.CharField(max_length=200, blank=True)),
                 ('symbol', models.CharField(max_length=50)),
@@ -299,7 +302,7 @@ class Migration(migrations.Migration):
             name='Variable',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('last_modified', models.DateTimeField(auto_now=True, null=True)),
+                ('last_modified', models.DateTimeField(default=django.utils.timezone.now, null=True, editable=False)),
                 ('descr', models.CharField(max_length=200, blank=True)),
                 ('descr_alt', models.CharField(max_length=200, blank=True)),
             ],
@@ -369,18 +372,6 @@ class Migration(migrations.Migration):
                 'ordering': ('last_name', 'first_name'),
             },
             bases=('hcore.lentity',),
-        ),
-        migrations.CreateModel(
-            name='TsRecords',
-            fields=[
-                ('id', models.OneToOneField(primary_key=True, db_column=b'id', serialize=False, to='hcore.Timeseries')),
-                ('top', models.TextField(blank=True)),
-                ('middle', enhydris.hcore.models.BlobField(null=True, blank=True)),
-                ('bottom', models.TextField()),
-            ],
-            options={
-                'db_table': 'ts_records',
-            },
         ),
         migrations.AddField(
             model_name='unitofmeasurement',
@@ -476,13 +467,12 @@ class Migration(migrations.Migration):
             fields=[
                 ('gpoint_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='hcore.Gpoint')),
                 ('is_automatic', models.BooleanField(default=False)),
-                ('is_active', models.BooleanField(default=False)),
                 ('start_date', models.DateField(null=True, blank=True)),
                 ('end_date', models.DateField(null=True, blank=True)),
                 ('copyright_holder', models.TextField()),
                 ('copyright_years', models.CharField(max_length=10)),
                 ('creator', models.ForeignKey(related_name='created_stations', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('maintainers', models.ManyToManyField(related_name='maintaining_stations', to=settings.AUTH_USER_MODEL)),
+                ('maintainers', models.ManyToManyField(related_name='maintaining_stations', to=settings.AUTH_USER_MODEL, blank=True)),
             ],
             bases=('hcore.gpoint',),
         ),

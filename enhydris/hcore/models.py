@@ -827,14 +827,6 @@ class Timeseries(models.Model):
                                      **kwargs)
 
 
-# BlobField is obsolete, but migration 0009 can't work without it.
-
-class BlobField(models.Field):
-
-    def db_type(self, connection):
-        return 'bytea'
-
-
 # Profile creation upon user registration
 def user_post_save(sender, instance, **kwargs):
     profile, new = UserProfile.objects.get_or_create(user=instance)
