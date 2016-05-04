@@ -10,6 +10,7 @@ import tempfile
 from tempfile import mkstemp
 from zipfile import ZipFile, ZIP_DEFLATED
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.views import login as auth_login
@@ -18,8 +19,8 @@ from django.contrib.gis.geos import Polygon
 from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.db.utils import InternalError
 from django.db.models import Count, Q
+from django.db.utils import InternalError
 from django.http import (Http404, HttpResponse, HttpResponseForbidden,
                          HttpResponseRedirect)
 from django.shortcuts import get_object_or_404, render_to_response
@@ -29,9 +30,7 @@ from django.utils.decorators import method_decorator
 from django.utils.functional import lazy
 from django.utils.translation import ugettext_lazy as _
 
-from pthelma.timeseries import (add_months_to_datetime, datetime_from_iso)
-
-from django.conf import settings
+from pthelma.timeseries import add_months_to_datetime, datetime_from_iso
 
 from enhydris.hcore.models import (
     GentityAltCode, GentityEvent, GentityFile, GentityGenericData, Instrument,
@@ -121,14 +120,15 @@ def _station_csv(s):
     abscissa, ordinate = (s.point.transform(s.srid, clone=True)
                           if s.point else (None, None))
     return [unicode(x).encode('utf-8') for x in
-           [s.id, s.name, s.name_alt, s.short_name, s.short_name_alt,
-            '+'.join([t.descr for t in s.stype.all()]),
-            s.owner, s.start_date, s.end_date,
-            abscissa, ordinate, s.srid, s.approximate, s.altitude, s.asrid,
-            s.water_basin.name if s.water_basin else "",
-            s.water_division.name if s.water_division else "",
-            s.political_division.name if s.political_division else "",
-            s.is_automatic, s.remarks, s.remarks_alt, s.last_modified]
+            [s.id, s.name, s.name_alt, s.short_name, s.short_name_alt,
+             '+'.join([t.descr for t in s.stype.all()]),
+             s.owner, s.start_date, s.end_date,
+             abscissa, ordinate, s.srid, s.approximate, s.altitude, s.asrid,
+             s.water_basin.name if s.water_basin else "",
+             s.water_division.name if s.water_division else "",
+             s.political_division.name if s.political_division else "",
+             s.is_automatic, s.remarks, s.remarks_alt, s.last_modified
+             ]
             ]
 
 
@@ -140,9 +140,10 @@ _instrument_list_csv_headers = [
 
 def _instrument_csv(i):
     return [unicode(x).encode('utf-8') for x in
-           [i.id, i.station.id, i.type.descr if i.type else "", i.name,
-            i.name_alt, i.manufacturer, i.model, i.start_date, i.end_date,
-            i.remarks, i.remarks_alt]
+            [i.id, i.station.id, i.type.descr if i.type else "", i.name,
+             i.name_alt, i.manufacturer, i.model, i.start_date, i.end_date,
+             i.remarks, i.remarks_alt
+             ]
             ]
 
 
@@ -155,12 +156,13 @@ _timeseries_list_csv_headers = [
 
 def _timeseries_csv(t):
     return [unicode(x).encode('utf-8') for x in
-           [t.id, t.gentity.id, t.instrument.id if t.instrument else "",
-            t.variable.descr if t.variable else "",
-            t.unit_of_measurement.symbol, t.name, t.name_alt, t.precision,
-            t.time_zone.code, t.time_step.descr if t.time_step else "",
-            t.timestamp_rounding_minutes, t.timestamp_rounding_months,
-            t.timestamp_offset_minutes, t.timestamp_offset_months]
+            [t.id, t.gentity.id, t.instrument.id if t.instrument else "",
+             t.variable.descr if t.variable else "",
+             t.unit_of_measurement.symbol, t.name, t.name_alt, t.precision,
+             t.time_zone.code, t.time_step.descr if t.time_step else "",
+             t.timestamp_rounding_minutes, t.timestamp_rounding_months,
+             t.timestamp_offset_minutes, t.timestamp_offset_months
+             ]
             ]
 
 
@@ -320,8 +322,9 @@ class StationListBaseView(ListView):
             method = getattr(self, method_name)
         except AttributeError:
             if not ignore_invalid:
-                raise Http404  # FIXME: This must be changed to empty result
-                               # with error message.
+                # FIXME: This must be changed to empty result with error
+                # message.
+                raise Http404
             return queryset
         return method(queryset, value)
 
@@ -633,21 +636,19 @@ def timeseries_data(request, *args, **kwargs):
                     datetimestr = datetimestr + ' ' + request.GET['time']
                     datetimefmt = datetimefmt + ' %H:%M'
                 try:
-                    first_date = datetime.strptime(datetimestr,
-                                                    datetimefmt)
-                    last_date = inc_datetime(first_date,
-                                                request.GET['last'], 1)
+                    first_date = datetime.strptime(datetimestr, datetimefmt)
+                    last_date = inc_datetime(first_date, request.GET['last'],
+                                             1)
                     (end_pos, is_exact) = find_line_at_date(last_date,
                                                             tot_lines)
-                    if request.GET.get('exact_datetime', False
-                                        ) and is_exact != 0:
+                    if request.GET.get('exact_datetime', False) and (
+                            is_exact != 0):
                         raise Http404
                 except ValueError:
                     raise Http404
             else:
                 last_date = date_at_pos(end_pos)
-                first_date = inc_datetime(last_date, request.GET['last'],
-                                            -1)
+                first_date = inc_datetime(last_date, request.GET['last'], -1)
                 # This is an almost bad workarround to exclude the first
                 # record from sums, i.e. when we need the 144 10 minute
                 # values from a day.
@@ -659,8 +660,7 @@ def timeseries_data(request, *args, **kwargs):
             start_pos = 1
 
     length = end_pos - start_pos + 1
-    step = int(length / settings.ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR
-                ) or 1
+    step = int(length / settings.ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR) or 1
     fine_step = int(step / settings.ENHYDRIS_TS_GRAPH_FINE_STEP_DENOMINATOR
                     ) or 1
     if not step % fine_step == 0:
@@ -671,11 +671,11 @@ def timeseries_data(request, *args, **kwargs):
     tick_pos = -1
     is_vector = request.GET.get('vector', False)
     gstats = {'max': None, 'min': None, 'count': 0,
-                'max_tstmp': None, 'min_tstmp': None,
-                'sum': None, 'avg': None,
-                'vsum': None, 'vavg': None,
-                'last': None, 'last_tstmp': None,
-                'vectors': None}
+              'max_tstmp': None, 'min_tstmp': None,
+              'sum': None, 'avg': None,
+              'vsum': None, 'vavg': None,
+              'last': None, 'last_tstmp': None,
+              'vectors': None}
     afloat = 0.01
     try:
         linecache.checkcache(afilename)
@@ -710,7 +710,7 @@ def timeseries_data(request, *args, **kwargs):
                 if amax == '':
                     amax = 'null'
                 chart_data.append([calendar.timegm(k.timetuple()) * 1000,
-                                    str(amax), pos])
+                                  str(amax), pos])
                 amax = ''
             # Sometimes linecache tries to read a file being written (from
             # timeseries.write_file). So every 5000 lines refresh the
@@ -722,7 +722,7 @@ def timeseries_data(request, *args, **kwargs):
             if amax == '':
                 amax = 'null'
             chart_data[-1] = [calendar.timegm(k.timetuple()) * 1000,
-                                str(amax), end_pos]
+                              str(amax), end_pos]
     finally:
         linecache.clearcache()
     if chart_data:
@@ -734,10 +734,9 @@ def timeseries_data(request, *args, **kwargs):
                 if gstats['vavg'] < 0:
                     gstats['vavg'] += 360
             for item in ('max_tstmp', 'min_tstmp', 'last_tstmp'):
-                gstats[item] = calendar.timegm(gstats[item].timetuple()
-                                                ) * 1000
+                gstats[item] = calendar.timegm(gstats[item].timetuple()) * 1000
         response.content = json.dumps({'data': chart_data,
-                                        'stats': gstats})
+                                       'stats': gstats})
     else:
         response.content = json.dumps("")
     callback = request.GET.get("jsoncallback", None)
@@ -798,7 +797,7 @@ def get_subdivision(request, division_id):
     response.write("[")
     added = []
     for num, div in enumerate(divisions):
-        if not div.name in added:
+        if div.name not in added:
             response.write(json.dumps({"name": div.name, "id": div.pk}))
             added.append(div.name)
             if num < divisions.count() - 1:
@@ -953,14 +952,14 @@ def _station_edit_or_create(request, station_id=None):
                                 user.add_row_perm(station, 'edit')
                                 user.add_row_perm(station, 'delete')
                     station.save()
-                    #Save maintainers, many2many, then save again to
-                    #set correctly row permissions
+                    # Save maintainers, many2many, then save again to
+                    # set correctly row permissions
                     form.save_m2m()
                     station.save()
                     if not station_id:
                         station_id = str(station.id)
-                    return HttpResponseRedirect(reverse('station_detail',
-                                                        kwargs={'pk': station_id}))
+                    return HttpResponseRedirect(
+                        reverse('station_detail', kwargs={'pk': station_id}))
             except InternalError as e:
                 if 'Cannot find SRID' not in str(e):
                     raise
@@ -975,7 +974,7 @@ def _station_edit_or_create(request, station_id=None):
             form = StationForm()
 
     return render_to_response('station_edit.html',
-                              {'form': form },
+                              {'form': form},
                               context_instance=RequestContext(request))
 
 
@@ -1734,7 +1733,7 @@ class ModelAddView(CreateView):
         # Verify url parms correctness
         popup = self.request.GET.get('_popup', False)
         if not popup and self.request.method == 'GET' \
-                and not '_complete' in self.request.GET:
+                and '_complete' not in self.request.GET:
             raise Http404
 
         # Determine self.model and self.fields
@@ -1762,5 +1761,5 @@ class ModelAddView(CreateView):
 
     def get_extra_context(self):
         context = super(ModelAddView, self).get_extra_context()
-        context['form_prefix'] = model.__name__
+        context['form_prefix'] = self.model.__name__
         return context
