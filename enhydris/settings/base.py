@@ -71,6 +71,7 @@ LOGIN_REDIRECT_URL = '/'
 
 ATOMIC_REQUESTS = True
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+USE_TZ = True
 
 # Options for django-registration
 ACCOUNT_ACTIVATION_DAYS = 7

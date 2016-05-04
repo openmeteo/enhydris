@@ -19,6 +19,7 @@ installation_requirements = [
     "django-bootstrap3>=5.1,<6",
     "simpletail>=0.1.2",
     "iso8601",
+    "pytz",
 ]
 
 

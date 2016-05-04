@@ -3,6 +3,7 @@ from StringIO import StringIO
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 
+import iso8601
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
@@ -12,6 +13,7 @@ from rest_framework.reverse import reverse
 from enhydris.hcore import models
 from enhydris.api.permissions import CanEditOrReadOnly, CanCreateStation
 from enhydris.api.serializers import StationSerializer, TimeseriesSerializer
+import pytz
 
 
 modelnames = (
@@ -38,6 +40,8 @@ class ListAPIView(generics.ListAPIView):
         modified_after = '1900-01-01'
         if 'modified_after' in self.kwargs:
             modified_after = self.kwargs['modified_after']
+        modified_after = iso8601.parse_date(modified_after,
+                                            default_timezone=pytz.utc)
         return self.queryset.exclude(last_modified__lte=modified_after)
 
 

@@ -30,7 +30,8 @@ from django.utils.decorators import method_decorator
 from django.utils.functional import lazy
 from django.utils.translation import ugettext_lazy as _
 
-from pthelma.timeseries import add_months_to_datetime, datetime_from_iso
+import iso8601
+from pthelma.timeseries import add_months_to_datetime
 
 from enhydris.hcore.models import (
     GentityAltCode, GentityEvent, GentityFile, GentityGenericData, Instrument,
@@ -523,9 +524,9 @@ def bufcount(filename):
 
 def timeseries_data(request, *args, **kwargs):
 
-    def date_at_pos(pos):
+    def date_at_pos(pos, tz):
         s = linecache.getline(afilename, pos)
-        return datetime_from_iso(s.split(',')[0])
+        return iso8601.parse_date(s.split(',')[0], default_timezone=tz)
 
     def timedeltadivide(a, b):
         """Divide timedelta a by timedelta b."""
@@ -537,12 +538,12 @@ def timeseries_data(request, *args, **kwargs):
     # The second argument is 0 for exact match, -1 if no
     # exact match and the date is after the record found,
     # 1 if no exact match and the date is before the record.
-    def find_line_at_date(adatetime, totlines):
+    def find_line_at_date(adatetime, totlines, tz):
         if totlines < 2:
             return totlines
         i1, i2 = 1, totlines
-        d1 = date_at_pos(i1)
-        d2 = date_at_pos(i2)
+        d1 = date_at_pos(i1, tz)
+        d2 = date_at_pos(i2, tz)
         if adatetime <= d1:
             return (i1, 0 if d1 == adatetime else 1)
         if adatetime >= d2:
@@ -550,7 +551,7 @@ def timeseries_data(request, *args, **kwargs):
         while(True):
             i = i1 + int(round(float(i2 - i1) *
                                timedeltadivide(adatetime - d1, d2 - d1)))
-            d = date_at_pos(i)
+            d = date_at_pos(i, tz)
             if d == adatetime:
                 return (i, 0)
             if (i == i1) or (i == i2):
@@ -620,7 +621,9 @@ def timeseries_data(request, *args, **kwargs):
         object_id = int(request.GET['object_id'])
     except ValueError:
         raise Http404
-    afilename = Timeseries.objects.get(pk=object_id).datafile.path
+    timeseries = Timeseries.objects.get(pk=object_id)
+    afilename = timeseries.datafile.path
+    tz = timeseries.time_zone.as_tzinfo
     chart_data = []
     if 'start_pos' in request.GET and 'end_pos' in request.GET:
         start_pos = int(request.GET['start_pos'])
@@ -639,15 +642,15 @@ def timeseries_data(request, *args, **kwargs):
                     first_date = datetime.strptime(datetimestr, datetimefmt)
                     last_date = inc_datetime(first_date, request.GET['last'],
                                              1)
-                    (end_pos, is_exact) = find_line_at_date(last_date,
-                                                            tot_lines)
+                    (end_pos, is_exact) = find_line_at_date(
+                        last_date, tot_lines, tz)
                     if request.GET.get('exact_datetime', False) and (
                             is_exact != 0):
                         raise Http404
                 except ValueError:
                     raise Http404
             else:
-                last_date = date_at_pos(end_pos)
+                last_date = date_at_pos(end_pos, tz)
                 first_date = inc_datetime(last_date, request.GET['last'], -1)
                 # This is an almost bad workarround to exclude the first
                 # record from sums, i.e. when we need the 144 10 minute
@@ -655,7 +658,7 @@ def timeseries_data(request, *args, **kwargs):
                 if 'start_offset' in request.GET:
                     offset = float(request.GET['start_offset'])
                     first_date += timedelta(minutes=offset)
-            start_pos = find_line_at_date(first_date, tot_lines)[0]
+            start_pos = find_line_at_date(first_date, tot_lines, tz)[0]
         else:
             start_pos = 1
 
@@ -689,7 +692,7 @@ def timeseries_data(request, *args, **kwargs):
             # reads from cache. Tries only one time, next time if
             # the error on the same line persists, it raises.
             try:
-                k = datetime_from_iso(t[0])
+                k = iso8601.parse_date(t[0], default_timezone=tz)
                 v = t[1]
             except:
                 if pos > prev_pos:
@@ -873,14 +876,15 @@ TS_ERROR = ("There seems to be some problem with our internal infrastuctrure. "
 @timeseries_permission
 def download_timeseries(request, object_id, start_date=None, end_date=None):
     timeseries = get_object_or_404(Timeseries, pk=int(object_id))
-    start_date = (datetime_from_iso(start_date) if start_date
-                  else timeseries.start_date)
-    end_date = (datetime_from_iso(end_date) if end_date
-                else timeseries.end_date)
+    tz = timeseries.time_zone.as_tzinfo
+    start_date = (iso8601.parse_date(start_date, default_timezone=tz)
+                  if start_date else None)
+    end_date = (iso8601.parse_date(end_date, default_timezone=tz)
+                if end_date else None)
     ts = timeseries.get_all_data()
-    if start_date and end_date and ((start_date <= timeseries.end_date) or (
-            end_date >= timeseries.start_date)):
+    if start_date:
         ts.delete_items(None, start_date - timedelta(minutes=1))
+    if end_date:
         ts.delete_items(end_date + timedelta(minutes=1), None)
     response = HttpResponse(
         content_type='text/vnd.openmeteo.timeseries; charset=utf-8')

@@ -8,6 +8,7 @@ from django.test.client import MULTIPART_CONTENT, BOUNDARY, encode_multipart
 from django.test.utils import override_settings
 
 import iso8601
+import pytz
 from rest_framework.test import APITestCase
 
 import enhydris
@@ -69,8 +70,8 @@ def create_test_data():
         copyright_years=2014
     )
     station2.stype = [stype1]
-    station2.last_modified = iso8601.parse_date("2010-05-10 14:26:22",
-                                                default_timezone=None)
+    station2.last_modified = iso8601.parse_date(
+        "2010-05-10 14:26:22", default_timezone=pytz.utc)
     station2.save()
 
     # timeseries1
@@ -125,14 +126,14 @@ class ReadTestCase(APITestCase):
             pd_id = (ref_datum.political_division.id
                      if ref_datum.political_division else None)
             self.assertEqual(res_datum['political_division'], pd_id)
-            res_last_modified = iso8601.parse_date(res_datum['last_modified'],
-                                                   default_timezone=None)
+            res_last_modified = iso8601.parse_date(
+                res_datum['last_modified'], default_timezone=pytz.utc)
             self.assertEqual(res_last_modified, ref_datum.last_modified)
 
         # Same thing, but test with modified_after
         n_all_gentities = len(self.reference_gentities)
         for item in self.reference_gentities[:]:
-            if item.last_modified < datetime(2010, 5, 11):
+            if item.last_modified < datetime(2010, 5, 11, tzinfo=pytz.utc):
                 self.reference_gentities.remove(item)
         n_recent_gentities = len(self.reference_gentities)
         self.assertTrue(n_recent_gentities < n_all_gentities)
@@ -291,11 +292,10 @@ class WriteTestCase(TestCase):
             encode_multipart(BOUNDARY,
                              {'timeseries_records': '2012-11-06 18:17,20,\n'}),
             content_type=MULTIPART_CONTENT)
-
-        t = models.Timeseries.objects.get(pk=self.timeseries1.id
-                                          ).get_all_data()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '1')
+        t = models.Timeseries.objects.get(pk=self.timeseries1.id
+                                          ).get_all_data()
         self.assertEqual(len(t), 1)
         self.assertEqual(t.items(0)[0], datetime(2012, 11, 06, 18, 17, 0))
         self.assertEqual(t.items(0)[1], 20)
@@ -309,10 +309,10 @@ class WriteTestCase(TestCase):
                              {'timeseries_records':
                               '2012-11-06 18:18,21,\n2012-11-07 18:18,23,\n'}),
             content_type=MULTIPART_CONTENT)
-        t = models.Timeseries.objects.get(pk=self.timeseries1.id
-                                          ).get_all_data()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '2')
+        t = models.Timeseries.objects.get(pk=self.timeseries1.id
+                                          ).get_all_data()
         self.assertEqual(len(t), 3)
         self.assertEqual(t.items(0)[0], datetime(2012, 11, 06, 18, 17, 0))
         self.assertEqual(t.items(0)[1], 20)
@@ -330,9 +330,9 @@ class WriteTestCase(TestCase):
                              {'timeseries_records': '2012-11-05 18:18,21,\n'}),
             content_type=MULTIPART_CONTENT)
         self.client.logout()
+        self.assertEqual(response.status_code, 400)
         t = models.Timeseries.objects.get(pk=self.timeseries1.id
                                           ).get_all_data()
-        self.assertEqual(response.status_code, 400)
         self.assertEqual(len(t), 3)
         self.client.logout()
 

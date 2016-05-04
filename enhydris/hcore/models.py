@@ -1,3 +1,6 @@
+from datetime import timedelta
+import sys
+
 from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.models import ContentType
@@ -8,7 +11,7 @@ from django.db.models import Q
 from django.db.models import signals
 from django.db.models.signals import post_save
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils._os import abspathu
 
@@ -27,7 +30,7 @@ from enhydris.permissions.models import Permission
 
 
 class Lookup(models.Model):
-    last_modified = models.DateTimeField(default=timezone.now, null=True,
+    last_modified = models.DateTimeField(default=now, null=True,
                                          editable=False)
     descr = models.CharField(max_length=200, blank=True)
     descr_alt = models.CharField(max_length=200, blank=True)
@@ -57,7 +60,7 @@ def post_save_person_or_organization(sender, **kwargs):
 
 
 class Lentity(models.Model):
-    last_modified = models.DateTimeField(default=timezone.now, null=True,
+    last_modified = models.DateTimeField(default=now, null=True,
                                          editable=False)
     remarks = models.TextField(blank=True)
     remarks_alt = models.TextField(blank=True)
@@ -132,7 +135,7 @@ post_save.connect(post_save_person_or_organization, sender=Organization)
 
 
 class Gentity(models.Model):
-    last_modified = models.DateTimeField(default=timezone.now, null=True,
+    last_modified = models.DateTimeField(default=now, null=True,
                                          editable=False)
     water_basin = models.ForeignKey('WaterBasin', null=True, blank=True)
     water_division = models.ForeignKey('WaterDivision', null=True, blank=True)
@@ -287,7 +290,7 @@ class GentityAltCodeType(Lookup):
 
 
 class GentityAltCode(models.Model):
-    last_modified = models.DateTimeField(default=timezone.now, null=True,
+    last_modified = models.DateTimeField(default=now, null=True,
                                          editable=False)
     gentity = models.ForeignKey(Gentity)
     type = models.ForeignKey(GentityAltCodeType)
@@ -309,7 +312,7 @@ class GentityGenericDataType(Lookup):
 
 
 class GentityGenericData(models.Model):
-    last_modified = models.DateTimeField(default=timezone.now, null=True,
+    last_modified = models.DateTimeField(default=now, null=True,
                                          editable=False)
     gentity = models.ForeignKey(Gentity)
     descr = models.CharField(max_length=100)
@@ -340,7 +343,7 @@ class FileType(Lookup):
 
 
 class GentityFile(models.Model):
-    last_modified = models.DateTimeField(default=timezone.now, null=True,
+    last_modified = models.DateTimeField(default=now, null=True,
                                          editable=False)
     gentity = models.ForeignKey(Gentity)
     date = models.DateField(blank=True, null=True)
@@ -367,7 +370,7 @@ class EventType(Lookup):
 
 
 class GentityEvent(models.Model):
-    last_modified = models.DateTimeField(default=timezone.now, null=True,
+    last_modified = models.DateTimeField(default=now, null=True,
                                          editable=False)
     gentity = models.ForeignKey(Gentity)
     date = models.DateField()
@@ -457,7 +460,7 @@ signals.post_save.connect(handle_maintainer_permissions, Station)
 
 
 class Overseer(models.Model):
-    last_modified = models.DateTimeField(default=timezone.now, null=True,
+    last_modified = models.DateTimeField(default=now, null=True,
                                          editable=False)
     station = models.ForeignKey(Station)
     person = models.ForeignKey(Person)
@@ -478,7 +481,7 @@ class Instrument(models.Model):
     class Meta:
         ordering = ('name',)
 
-    last_modified = models.DateTimeField(default=timezone.now, null=True,
+    last_modified = models.DateTimeField(default=now, null=True,
                                          editable=False)
     station = models.ForeignKey(Station)
     type = models.ForeignKey(InstrumentType)
@@ -516,11 +519,39 @@ class UnitOfMeasurement(Lookup):
         return str(self.id)
 
 
+if sys.version_info >= (3, 0):
+    from datetime import timezone
+else:
+    from datetime import tzinfo
+
+    class timezone(tzinfo):
+
+        def __init__(self, offset, name=None):
+            self.offset = offset
+            self.name = name
+
+        def utcoffset(self, dt):
+            return self.offset
+
+        def dst(self, dt):
+            return None
+
+        def tzname(self, dt):
+            return self.name
+
+        def fromutc(self, dt):
+            return dt + self.offset
+
+
 class TimeZone(models.Model):
-    last_modified = models.DateTimeField(default=timezone.now, null=True,
+    last_modified = models.DateTimeField(default=now, null=True,
                                          editable=False)
     code = models.CharField(max_length=50)
     utc_offset = models.SmallIntegerField()
+
+    @property
+    def as_tzinfo(self):
+        return timezone(timedelta(minutes=self.utc_offset), self.code)
 
     def __unicode__(self):
         return '%s (UTC%+03d%02d)' % (
@@ -607,7 +638,7 @@ class TimeseriesStorage(FileSystemStorage):
 
 
 class Timeseries(models.Model):
-    last_modified = models.DateTimeField(default=timezone.now, null=True,
+    last_modified = models.DateTimeField(default=now, null=True,
                                          editable=False)
     gentity = models.ForeignKey(Gentity, related_name="timeseries")
     variable = models.ForeignKey(Variable)
@@ -673,9 +704,13 @@ class Timeseries(models.Model):
             self.end_date = None
             return
         with open(self.datafile.path, 'r') as f:
-            self.start_date = iso8601.parse_date(f.readline().split(',')[0])
+            self.start_date = iso8601.parse_date(
+                f.readline().split(',')[0],
+                default_timezone=self.time_zone.as_tzinfo)
         with ropen(self.datafile.path, bufsize=80) as f:
-            self.end_date = iso8601.parse_date(f.readline().split(',')[0])
+            self.end_date = iso8601.parse_date(
+                f.readline().split(',')[0],
+                default_timezone=self.time_zone.as_tzinfo)
 
     def get_empty_timeseries_object(self):
         sign = -1 if self.time_zone.utc_offset < 0 else 1
