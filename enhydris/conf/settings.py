@@ -34,12 +34,8 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'enhydris_db',
-        'USER': 'enhydris_user',
-        'PASSWORD': 'topsecret',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
+        'NAME': 'enhydris.db',
     }
 }
 

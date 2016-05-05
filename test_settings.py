@@ -8,12 +8,8 @@ ADMINS = (
 MANAGERS = ADMINS
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'openmeteo',
-        'USER': 'openmeteo',
-        'PASSWORD': 'openmeteo',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
+        'NAME': 'enhydris.db',
     }
 }
 TIME_ZONE = 'Europe/Athens'
