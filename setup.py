@@ -7,7 +7,6 @@ from setuptools import setup, find_packages
 
 
 installation_requirements = [
-    "psycopg2>=2.2,<3",
     "Django>=1.8,<1.9",
     "django-registration-redux>=1.2,<2",
     "djangorestframework>=3.1,<3.2",

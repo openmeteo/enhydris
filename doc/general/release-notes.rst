@@ -6,6 +6,68 @@ Release notes
 
 .. highlight:: bash
 
+Version 0.8
+===========
+
+Overview
+--------
+
+- The time series data are now stored in files instead of in database
+  blobs. They are stored uncompressed, which means that much more disk
+  space is consumed, but it has way more benefits. If disk space is
+  important to you, use a file system with transparent compression.
+
+- Experimental spatialite support.
+
+Upgrading from 0.6
+------------------
+
+The upgrade procedure is slightly complicated, and uses the intermediate
+Enhydris version 0.7, which exists only for this purpose.
+
+(Note for developers: the reason for this procedure is that the
+migrations have been reset. Previously the migrations contained
+PostgreSQL-specific stuff.)
+
+The upgrade procedure is as follows:
+
+1. Backup your database, your media files, and your configuration (you
+   are not going to use this backup unless something goes wrong and you
+   need to restore everything to the state it was before).
+
+2. Make sure you are running Enhydris 0.6.
+
+3. Follow the Enhydris 0.8 installation instructions to install
+   Enhydris in a new virtualenv; however, rather than installing
+   Enhydris 0.8, install, instead, Enhydris 0.7, like this::
+
+       pip install 'enhydris>=0.7,<0.8'
+
+4. Open your ``settings.py`` and add the configuration setting
+   :data:`ENHYDRIS_TIMESERIES_DATA_DIR`. Make sure your server has
+   enough space for that directory (four times as much as your current
+   database, and possibly more), and that it will be backing it up.
+
+5. Apply the database upgrades::
+
+       python manage.py migrate
+
+6. Install Enhydris 0.8::
+
+       pip install --upgrade --no-deps 'enhydris>=0.8,<0.9'
+
+7. Have your database password ready and run the following to empty
+   the `django_migrations` database table::
+
+       python manage.py dbshell
+       delete from django_migrations;
+       \q
+
+8. Repopulate the `django_migrations` table::
+
+       python manage.py migrate --fake
+
+
 Version 0.6
 ===========
 
