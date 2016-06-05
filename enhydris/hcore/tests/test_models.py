@@ -1,0 +1,56 @@
+from datetime import datetime, timedelta
+from six import StringIO
+import textwrap
+
+from django.test import TestCase
+
+from model_mommy import mommy
+
+from enhydris.hcore.models import Station, Timeseries, timezone
+
+
+class TimeseriesTestCase(TestCase):
+
+    def setUp(self):
+        self.station_komboti = mommy.make(Station, name='Komboti')
+        self.ts_komboti_rain = mommy.make(
+            Timeseries, gentity=self.station_komboti, name='Rain',
+            unit_of_measurement__symbol='mm', time_zone__code='EET',
+            time_zone__utc_offset=120)
+
+        self.ts_komboti_rain.set_data(StringIO(textwrap.dedent(
+            """\
+            2015-10-22 15:00,0,
+            2015-10-22 15:10,0.1,
+            2015-10-22 15:20,0.2,
+            """)))
+
+    def test_get_all_data(self):
+        t = self.ts_komboti_rain.get_all_data()
+        self.assertEqual(len(t), 3)
+        self.assertAlmostEqual(t['2015-10-22 15:00'], 0)
+        self.assertAlmostEqual(t['2015-10-22 15:10'], 0.1)
+        self.assertAlmostEqual(t['2015-10-22 15:20'], 0.2)
+
+    def test_start_date_end_date(self):
+        atzinfo = timezone(timedelta(minutes=120), 'EET')
+        start_date = datetime(2015, 10, 22, 15, 0, tzinfo=atzinfo)
+        end_date = datetime(2015, 10, 22, 15, 20, tzinfo=atzinfo)
+
+        self.assertEqual(self.ts_komboti_rain.start_date, start_date)
+        self.assertEqual(
+            self.ts_komboti_rain.start_date.tzinfo.utcoffset(start_date),
+            timedelta(minutes=120))
+        self.assertEqual(self.ts_komboti_rain.end_date, end_date)
+        self.assertEqual(
+            self.ts_komboti_rain.end_date.tzinfo.utcoffset(end_date),
+            timedelta(minutes=120))
+
+        # Reload from database to make sure results are the same
+        t = Timeseries.objects.get(pk=self.ts_komboti_rain.id)
+        self.assertEqual(t.start_date, start_date)
+        self.assertEqual(t.start_date.tzinfo.utcoffset(start_date),
+                         timedelta(minutes=120))
+        self.assertEqual(t.end_date, end_date)
+        self.assertEqual(t.start_date.tzinfo.utcoffset(end_date),
+                         timedelta(minutes=120))

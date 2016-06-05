@@ -533,6 +533,17 @@ else:
         def fromutc(self, dt):
             return dt + self.offset
 
+        def __str__(self):
+            return '{} ({:+03}{:02})'.format(
+                self.name,
+                int(self.offset.total_seconds() / 3600),
+                int((self.offset.total_seconds() % 3600) / 60))
+
+        def __repr__(self):
+            return '<{}.{} object: {}>'.format(
+                self.__class__.__module__, self.__class__.__name__,
+                self.__str__())
+
 
 class TimeZone(models.Model):
     last_modified = models.DateTimeField(default=now, null=True,
@@ -681,25 +692,33 @@ class Timeseries(models.Model):
     )
     datafile = models.FileField(null=True, blank=True,
                                 storage=TimeseriesStorage())
-    start_date = models.DateTimeField(null=True, blank=True)
-    end_date = models.DateTimeField(null=True, blank=True)
+    start_date_utc = models.DateTimeField(null=True, blank=True)
+    end_date_utc = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = "Time Series"
         verbose_name_plural = "Time Series"
         ordering = ('hidden',)
 
+    @property
+    def start_date(self):
+        return self.start_date_utc.astimezone(tz=self.time_zone.as_tzinfo)
+
+    @property
+    def end_date(self):
+        return self.end_date_utc.astimezone(tz=self.time_zone.as_tzinfo)
+
     def set_start_and_end_date(self):
         if (not self.datafile) or (self.datafile.size < 10):
-            self.start_date = None
-            self.end_date = None
+            self.start_date_utc = None
+            self.end_date_utc = None
             return
         with open(self.datafile.path, 'r') as f:
-            self.start_date = iso8601.parse_date(
+            self.start_date_utc = iso8601.parse_date(
                 f.readline().split(',')[0],
                 default_timezone=self.time_zone.as_tzinfo)
         with ropen(self.datafile.path, bufsize=80) as f:
-            self.end_date = iso8601.parse_date(
+            self.end_date_utc = iso8601.parse_date(
                 f.readline().split(',')[0],
                 default_timezone=self.time_zone.as_tzinfo)
 
