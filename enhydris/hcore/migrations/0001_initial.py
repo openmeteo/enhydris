@@ -232,8 +232,8 @@ class Migration(migrations.Migration):
                 ('timestamp_offset_minutes', models.IntegerField(help_text='If unsure, set this to zero. It indicates the difference of what is shown from what is meant. For example, if for an hourly time series it is -5, then 2015-10-14 11:00 means the interval from 2015-10-14 09:55 to 2015-10-14 10:55. -1440 is common for daily time series.', null=True, blank=True)),
                 ('timestamp_offset_months', models.SmallIntegerField(help_text='If unsure, set this to 1 for monthly, 12 for annual, and zero otherwise.  For a monthly time series, an offset of -475 minutes and 1 month means that 2003-11-01 00:00 (normally shown as 2003-11) denotes the interval 2003-10-31 18:05 to 2003-11-30 18:05.', null=True, blank=True)),
                 ('datafile', models.FileField(storage=enhydris.hcore.models.TimeseriesStorage(), null=True, upload_to=b'', blank=True)),
-                ('start_date', models.DateTimeField(null=True, blank=True)),
-                ('end_date', models.DateTimeField(null=True, blank=True)),
+                ('start_date_utc', models.DateTimeField(null=True, blank=True)),
+                ('end_date_utc', models.DateTimeField(null=True, blank=True)),
             ],
             options={
                 'ordering': ('hidden',),
