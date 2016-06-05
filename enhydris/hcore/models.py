@@ -702,10 +702,14 @@ class Timeseries(models.Model):
 
     @property
     def start_date(self):
+        if self.start_date_utc is None:
+            return None
         return self.start_date_utc.astimezone(tz=self.time_zone.as_tzinfo)
 
     @property
     def end_date(self):
+        if self.end_date_utc is None:
+            return None
         return self.end_date_utc.astimezone(tz=self.time_zone.as_tzinfo)
 
     def set_start_and_end_date(self):

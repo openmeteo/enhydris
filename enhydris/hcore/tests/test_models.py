@@ -54,3 +54,11 @@ class TimeseriesTestCase(TestCase):
         self.assertEqual(t.end_date, end_date)
         self.assertEqual(t.start_date.tzinfo.utcoffset(end_date),
                          timedelta(minutes=120))
+
+        # Empty the time series and try again
+        self.ts_komboti_rain.set_data(StringIO(''))
+        self.assertIsNone(self.ts_komboti_rain.start_date)
+        self.assertIsNone(self.ts_komboti_rain.end_date)
+        t = Timeseries.objects.get(pk=self.ts_komboti_rain.id)
+        self.assertIsNone(t.start_date)
+        self.assertIsNone(t.end_date)
