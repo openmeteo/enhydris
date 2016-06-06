@@ -2,7 +2,8 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import django.core.files.storage
+
+import enhydris.hcore.models
 
 
 class Migration(migrations.Migration):
@@ -15,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='timeseries',
             name='datafile',
-            field=models.FileField(storage=django.core.files.storage.FileSystemStorage(location=b'timeseries_data'), null=True, upload_to=b''),
+            field=models.FileField(storage=enhydris.hcore.models.TimeseriesStorage(), null=True, upload_to=b'', blank=True),
         ),
     ]
