@@ -1,3 +1,5 @@
+from io import StringIO
+
 from django import forms
 from django.conf import settings
 from django.contrib.gis.geos import Point
@@ -376,7 +378,7 @@ class TimeseriesForm(ModelForm):
 
     class Meta:
         model = Timeseries
-        exclude = []
+        exclude = ['datafile']
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -408,10 +410,13 @@ class TimeseriesForm(ModelForm):
         if ('data' not in self.cleaned_data) or not self.cleaned_data['data']:
             return None
         self.cleaned_data['data'].seek(0)
+        s = self.cleaned_data['data'].read()
+        if isinstance(s, bytes):
+            s = s.decode('utf-8')
         ts = timeseries.Timeseries()
 
         try:
-            ts.read_file(self.cleaned_data['data'])
+            ts.read_file(StringIO(s))
         except Exception as e:
             raise forms.ValidationError(str(e))
 
@@ -474,7 +479,7 @@ class TimeseriesForm(ModelForm):
             if self.cleaned_data['data_policy'] == 'A':
                 try:
                     atimeseries.append_data(data)
-                except Exception, e:
+                except Exception as e:
                     raise forms.ValidationError(_(e.message))
 
         return self.cleaned_data
@@ -491,6 +496,10 @@ class TimeseriesForm(ModelForm):
         if 'data' in self.cleaned_data and self.cleaned_data['data']:
             data = self.cleaned_data['data']
             data.seek(0)
+            s = data.read()
+            if isinstance(s, bytes):
+                s = s.decode('utf-8')
+            data = StringIO(s)
 
             # Skip possible header
             while True:

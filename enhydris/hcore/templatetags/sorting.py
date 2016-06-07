@@ -23,10 +23,10 @@ def sorter(column, sort_order, label):
     sign = ''
     indicator = ''
     if sort_order and (sort_order[0] == column):
-        indicator = u'&nbsp;↓'
+        indicator = '&nbsp;↓'
         sign = '-'
     elif sort_order and (sort_order[0] == '-' + column):
-        indicator = u'&nbsp;↑'
+        indicator = '&nbsp;↑'
     target = '?sort={}{}&{}'.format(
         sign, column, '&'.join(['sort=' + x for x in sort_order]))
     return '<a href="%s">%s%s</a>' % (html.escape(target), label, indicator)

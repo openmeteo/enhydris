@@ -46,7 +46,7 @@ class DoGetLatestStations:
     def __call__(self, parser, token):
         tokens = token.contents.split()
         if not tokens[1].isdigit():
-            raise TemplateSyntaxError, (
+            raise TemplateSyntaxError(
                 "The argument for '%s' must be an integer" % tokens[0])
         return LastModifiedStations(tokens[1])
 

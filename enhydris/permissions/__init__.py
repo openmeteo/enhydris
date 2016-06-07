@@ -19,7 +19,7 @@ class MetaClass(type):
             frame = frame.f_back
             if classname in frame.f_locals:
                 old_class = frame.f_locals.get(classname)
-                for name, func in classdict.items():
+                for name, func in list(classdict.items()):
                     if inspect.isfunction(func):
                         setattr(old_class, name, func)
                 return old_class
@@ -28,8 +28,8 @@ class MetaClass(type):
             del frame
 
 
-class MetaObject(object):
-    __metaclass__ = MetaClass
+class MetaObject(object, metaclass=MetaClass):
+    pass
 
 
 class User(MetaObject):

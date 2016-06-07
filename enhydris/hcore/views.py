@@ -120,7 +120,7 @@ _station_list_csv_headers = [
 def _station_csv(s):
     abscissa, ordinate = (s.point.transform(s.srid, clone=True)
                           if s.point else (None, None))
-    return [unicode(x).encode('utf-8') for x in
+    return [str(x).encode('utf-8') for x in
             [s.id, s.name, s.name_alt, s.short_name, s.short_name_alt,
              '+'.join([t.descr for t in s.stype.all()]),
              s.owner, s.start_date, s.end_date,
@@ -140,7 +140,7 @@ _instrument_list_csv_headers = [
 
 
 def _instrument_csv(i):
-    return [unicode(x).encode('utf-8') for x in
+    return [str(x).encode('utf-8') for x in
             [i.id, i.station.id, i.type.descr if i.type else "", i.name,
              i.name_alt, i.manufacturer, i.model, i.start_date, i.end_date,
              i.remarks, i.remarks_alt
@@ -156,7 +156,7 @@ _timeseries_list_csv_headers = [
 
 
 def _timeseries_csv(t):
-    return [unicode(x).encode('utf-8') for x in
+    return [str(x).encode('utf-8') for x in
             [t.id, t.gentity.id, t.instrument.id if t.instrument else "",
              t.variable.descr if t.variable else "",
              t.unit_of_measurement.symbol, t.name, t.name_alt, t.precision,

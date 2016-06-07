@@ -1,11 +1,12 @@
 from itertools import takewhile
+from io import StringIO
 import re
-from StringIO import StringIO
+import os
 import shutil
 import tempfile
 import time
 from unittest import skipIf, skipUnless
-from urllib import urlencode
+from urllib.parse import urlencode
 
 import django
 from django.conf import settings
@@ -66,28 +67,28 @@ class SortTestCase(TestCase):
         # Request for host.domain/?sort=water_division&sort=name
         response = self.client.get(reverse('station_list')
                                    + '?sort=water_division&sort=name')
-        i = response.content.index
 
         # Checking  test stations 'Komboti', 'Agios Athanasios', 'Tharbad'
         # alphabetical order ['water_division', 'name']
+        i = response.content.decode('utf-8').index
         self.assertTrue(i('Komboti') < i('Agios Athanasios') < i('Tharbad'))
 
     def test_invalid_sort(self):
         # Request for host.domain/?sort=999.9
         response = self.client.get(reverse('station_list') + '?sort=999.9')
-        i = response.content.index
 
         # Sort is only made with default ['name'] term
         # Checking  test stations 'Komboti', 'Tharbad' alphabetical order index
+        i = response.content.decode('utf-8').index
         self.assertLess(i('Komboti'), i('Tharbad'))
 
         # Order for host.domain/?sort=name&sort=999.9
         response = self.client.get(reverse('station_list')
                                    + '?sort=name&sort=999.9')
-        i = response.content.index
 
         # Order is only made with default ['name'] term
         # Checking  test stations 'Komboti', 'Tharbad' alphabetical order index
+        i = response.content.decode('utf-8').index
         self.assertLess(i('Komboti'), i('Tharbad'))
 
 
@@ -327,6 +328,12 @@ class RandomEnhydrisTimeseriesDataDir(override_settings):
 
 class GentityFileTestCase(TestCase):
 
+    def setUp(self):
+        self.tempdir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.tempdir)
+
     @RandomMediaRoot()
     def test_gentity_file(self):
         # Create test data
@@ -342,9 +349,9 @@ class GentityFileTestCase(TestCase):
         self.assertEqual(GentityFile.objects.filter(gentity__id=gentity_id
                                                     ).count(), 0)
         filetype_id = FileType.objects.get(mime_type='image/jpeg').id
-        with tempfile.TemporaryFile(suffix='.jpg') as tmpfile:
-            tmpfile.write('Irrelevant data\n')
-            tmpfile.seek(0)
+        with open(os.path.join(self.tempdir, 'aaa.jpg'), 'w+b') as f:
+            f.write(b'Irrelevant data\n')
+            f.seek(0)
             response = self.client.post(reverse('gentityfile_add'),
                                         {'gentity': gentity_id,
                                          'date': '',
@@ -353,7 +360,7 @@ class GentityFileTestCase(TestCase):
                                          'remarks': '',
                                          'descr_alt': 'An alt description',
                                          'remarks_alt': '',
-                                         'content': tmpfile,
+                                         'content': f,
                                          })
         self.assertEqual(response.status_code, 302)
         self.assertEqual(GentityFile.objects.filter(gentity__id=gentity_id
@@ -364,7 +371,7 @@ class GentityFileTestCase(TestCase):
         response = self.client.get(reverse('gentityfile_dl',
                                            kwargs={'gf_id': gentity_file_id}))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'Irrelevant data\n')
+        self.assertEqual(response.content, b'Irrelevant data\n')
 
 
 class TsTestCase(TestCase):
@@ -413,7 +420,7 @@ class TsTestCase(TestCase):
     @RandomEnhydrisTimeseriesDataDir()
     def test_timeseries_data(self):
         # Upload
-        with open("enhydris/hcore/tests/tsdata.hts", "r") as f:
+        with open("enhydris/hcore/tests/tsdata.hts", "rb") as f:
             file_dict = {'data': SimpleUploadedFile(f.name, f.read())}
         post_dict = {'gentity': self.station.pk, 'variable': self.var.pk,
                      'unit_of_measurement': self.unit.pk,
@@ -428,7 +435,7 @@ class TsTestCase(TestCase):
         # Download
 
         def nrecords():
-            lines = response.content.splitlines()
+            lines = response.content.decode('utf-8').splitlines()
             linecount = len(lines)
             headerlinecount = sum([1 for x in takewhile(lambda x: x != '',
                                                         lines)]) + 1
@@ -440,14 +447,15 @@ class TsTestCase(TestCase):
         url = "/timeseries/d/{}/download/".format(self.ts.pk)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content.splitlines()[0].strip(), 'Version=2')
+        self.assertEqual(response.content.decode('utf-8').splitlines()[0]
+                         .strip(), 'Version=2')
         self.assertEqual(nrecords(), 12872)
 
         url = "/timeseries/d/{}/download/?version=3".format(self.ts.pk)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         ats = timeseries.Timeseries()
-        ats.read_file(StringIO(response.content))
+        ats.read_file(StringIO(response.content.decode('utf-8')))
         self.assertAlmostEqual(ats.location['abscissa'], 24.67890, places=6)
         self.assertAlmostEqual(ats.location['ordinate'], 38.12345, places=6)
         self.assertEqual(ats.location['srid'], 4326)
@@ -502,7 +510,7 @@ class TsTestCase(TestCase):
         url = "/timeseries/data/?object_id={}".format(self.ts.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, '{"stats": {}, "data": []}')
+        self.assertEqual(response.content, b'{"data": [], "stats": {}}')
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
@@ -1072,8 +1080,8 @@ class GentityEventTestCase(TestCase):
         gentity_id = Station.objects.get(name='Komboti').id
 
         # Before uploading, there should be 0 events in the database
-        self.assertEquals(GentityEvent.objects.filter(gentity__id=gentity_id
-                                                      ).count(), 0)
+        self.assertEqual(GentityEvent.objects.filter(gentity__id=gentity_id
+                                                     ).count(), 0)
 
         # Login user as admin
         r = self.client.login(username='admin', password='topsecret')
@@ -1093,8 +1101,8 @@ class GentityEventTestCase(TestCase):
                                                kwargs={'pk': gentity_id}))
 
         # Check that the database contains one event in the datebase
-        self.assertEquals(GentityEvent.objects.filter(gentity__id=gentity_id
-                                                      ).count(), 1)
+        self.assertEqual(GentityEvent.objects.filter(gentity__id=gentity_id
+                                                     ).count(), 1)
 
 
 @skipUnless(selenium, 'Selenium is missing or unconfigured')

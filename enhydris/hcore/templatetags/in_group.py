@@ -21,7 +21,7 @@ def in_group(user, group):
     else: group_list = [group]
     user_groups = []
     for group in user.groups.all(): user_groups.append(str(group.name))
-    if filter(lambda x:x in user_groups, group_list): return True
+    if [x for x in group_list if x in user_groups]: return True
     else: return False
 in_group.is_safe = True
 

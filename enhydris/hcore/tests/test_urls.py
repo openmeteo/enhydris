@@ -38,7 +38,7 @@ class SmokeTestCase(TestCase):
         for expected_code in self.pages:
             for page_url in self.pages[expected_code]:
                 page = self.client.get(page_url)
-                self.assertEquals(
+                self.assertEqual(
                     page.status_code, expected_code,
                     "Status code for page '%s' was %s instead of %s" %
                     (page_url, page.status_code, expected_code))

@@ -38,7 +38,7 @@ class Lookup(models.Model):
         abstract = True
         ordering = ('descr',)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.descr or self.descr_alt
 
 
@@ -70,7 +70,7 @@ class Lentity(models.Model):
         verbose_name_plural = "Lentities"
         ordering = ('ordering_string',)
 
-    def __unicode__(self):
+    def __str__(self):
         return (self.remarks or self.remarks_alt or self.name_any
                 or str(self.id))
 
@@ -104,7 +104,7 @@ class Person(Lentity):
     class Meta:
         ordering = ('last_name', 'first_name',)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.last_name + ' ' + self.initials
 
 
@@ -121,7 +121,7 @@ class Organization(Lentity):
     class Meta:
         ordering = ('name',)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.acronym if self.acronym else self.name
 
 
@@ -151,7 +151,7 @@ class Gentity(models.Model):
         verbose_name_plural = "Gentities"
         ordering = ('name',)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.short_name or self.short_name_alt or self.name \
             or self.name_alt or str(self.id)
 
@@ -197,7 +197,7 @@ class Garea(Gentity):
     f_dependencies = ['Gentity']
     mpoly = models.MultiPolygonField(null=True, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.area:
             return str(self.id) + " (" + str(self.area) + ")"
         return str(self.id)
@@ -252,11 +252,11 @@ class PoliticalDivision(Garea):
 
     f_dependencies = ['Garea']
 
-    def __unicode__(self):
+    def __str__(self):
         result = self.short_name or self.name or self.short_name_alt \
             or self.name_alt or str(self.id)
         if self.parent:
-            result = result + ', ' + self.parent.__unicode__()
+            result = result + ', ' + self.parent.__str__()
         return result
 
 
@@ -264,7 +264,7 @@ class WaterDivision(Garea):
     # TODO: Fill in the model
     f_dependencies = ['Garea']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name or str(self.id)
 
 
@@ -272,7 +272,7 @@ class WaterBasin(Garea):
     parent = models.ForeignKey('self', null=True, blank=True)
     f_dependencies = ['Garea']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name or str(self.id)
 
 
@@ -287,7 +287,7 @@ class GentityAltCode(models.Model):
     type = models.ForeignKey(GentityAltCodeType)
     value = models.CharField(max_length=100)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.type.descr+' '+self.value
 
     @property
@@ -313,7 +313,7 @@ class GentityGenericData(models.Model):
     content = models.TextField(blank=True)
     data_type = models.ForeignKey(GentityGenericDataType)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.descr or self.descr_alt or str(self.id)
 
     @property
@@ -327,7 +327,7 @@ class GentityGenericData(models.Model):
 class FileType(Lookup):
     mime_type = models.CharField(max_length=64)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.mime_type:
             return self.mime_type
         return str(self.id)
@@ -345,7 +345,7 @@ class GentityFile(models.Model):
     descr_alt = models.CharField(max_length=100)
     remarks_alt = models.TextField(blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.descr or self.descr_alt or str(self.id)
 
     @property
@@ -373,8 +373,8 @@ class GentityEvent(models.Model):
     class Meta:
         ordering = ['-date']
 
-    def __unicode__(self):
-        return str(self.date)+' '+self.type.__unicode__()
+    def __str__(self):
+        return str(self.date)+' '+self.type.__str__()
 
     @property
     def related_station(self):
@@ -442,7 +442,7 @@ class Station(Gpoint):
     objects = StationManager()
 
     def show_overseers(self):
-        return " ".join([i.__unicode__() for i in self.overseers.all()])
+        return " ".join([i.__str__() for i in self.overseers.all()])
 
     show_overseers.short_description = "List of Overseers"
 
@@ -459,8 +459,8 @@ class Overseer(models.Model):
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
 
-    def __unicode__(self):
-        return self.person.__unicode__()
+    def __str__(self):
+        return self.person.__str__()
 
 
 class InstrumentType(Lookup):
@@ -485,7 +485,7 @@ class Instrument(models.Model):
     name_alt = models.CharField(max_length=100, blank=True)
     remarks_alt = models.TextField(blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         # This gets commended out because it causes significant delays #XXX:
         # return self.name or self.name_alt or self.type.descr or str(self.id)
         return self.name or str(self.id)
@@ -504,7 +504,7 @@ class UnitOfMeasurement(Lookup):
     symbol = models.CharField(max_length=50)
     variables = models.ManyToManyField(Variable)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.symbol:
             return self.symbol
         return str(self.id)
@@ -555,7 +555,7 @@ class TimeZone(models.Model):
     def as_tzinfo(self):
         return timezone(timedelta(minutes=self.utc_offset), self.code)
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s (UTC%+03d%02d)' % (
             self.code,
             (abs(self.utc_offset) / 60) * (-1 if self.utc_offset < 0 else 1),
@@ -574,7 +574,7 @@ class TimeStep(Lookup):
     length_minutes = models.PositiveIntegerField()
     length_months = models.PositiveSmallIntegerField()
 
-    def __unicode__(self):
+    def __str__(self):
         """
         Return timestep descriptions in a more human readable format
         """
@@ -611,14 +611,14 @@ class TimeStep(Lookup):
         if not _int_xor(self.length_minutes, self.length_months):
             raise Exception(_(
                 "%s is not a valid time step; exactly one of minutes and "
-                "months must be zero") % self.__unicode__())
+                "months must be zero") % self.__str__())
         super(TimeStep, self).save(force_insert, force_update, *args, **kwargs)
 
 
 class IntervalType(Lookup):
     value = models.CharField(max_length=50)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.descr
 
 
@@ -747,7 +747,7 @@ class Timeseries(models.Model):
             title=self.name,
             timezone='{} (UTC{:+03d}{:02d})'.format(
                 self.time_zone.code,
-                abs(self.time_zone.utc_offset) / 60 * sign,
+                abs(self.time_zone.utc_offset) // 60 * sign,
                 abs(self.time_zone.utc_offset) % 60),
             variable=self.variable.descr,
             precision=self.precision,
@@ -814,7 +814,7 @@ class Timeseries(models.Model):
         except:
             return None
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
@@ -889,31 +889,31 @@ class UserProfile(models.Model):
                                     max_length=100)
     email_is_public = models.BooleanField(default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         name = self.user.get_full_name()
         if name:
-            return unicode("%s" % self.user.get_full_name())
+            return str("%s" % self.user.get_full_name())
         else:
-            return unicode("%s" % self.user.username)
+            return str("%s" % self.user.username)
 
     class Meta:
         verbose_name = _('Profile')
         verbose_name_plural = _('Profiles')
 
     def first_name(self):
-        return u"%s" % self.fname
+        return "%s" % self.fname
 
     def last_name(self):
-        return u"%s" % self.lname
+        return "%s" % self.lname
 
     def full_name(self):
         if (self.fname is None and self.lname is None) \
                 or (self.fname == self.lname == ''):
             return "No name specified"
-        return u"%s %s" % (self.fname, self.lname)
+        return "%s %s" % (self.fname, self.lname)
 
     def email(self):
-        return u"%s" % self.user.email
+        return "%s" % self.user.email
 
 
 signals.post_save.connect(user_post_save, User)
