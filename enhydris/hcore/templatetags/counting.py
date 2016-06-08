@@ -6,9 +6,10 @@ from django.conf import settings
 from django.template import Library, Node, TemplateSyntaxError
 from django.db.models import get_model
 
-from enhydris.hcore.models import *
+from enhydris.hcore.models import Station
 
 register = Library()
+
 
 def do_count(appmodel):
     try:
@@ -19,7 +20,7 @@ def do_count(appmodel):
 
     return count
 
-register.simple_tag( do_count )
+register.simple_tag(do_count)
 
 
 class LastModifiedStations(Node):
@@ -29,14 +30,17 @@ class LastModifiedStations(Node):
     def render(self, context):
         try:
             station_objects = Station.objects.all()
-            if len(settings.ENHYDRIS_SITE_STATION_FILTER)>0:
-                station_objects = station_objects.filter(**settings.ENHYDRIS_SITE_STATION_FILTER)
-            latest_stations = station_objects.all().order_by('last_modified').reverse()[:self.number]
+            if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
+                station_objects = station_objects.filter(
+                    **settings.ENHYDRIS_SITE_STATION_FILTER)
+            latest_stations = station_objects.all().order_by(
+                'last_modified').reverse()[:self.number]
         except ValueError:
             latest_stations = None
 
         context['latest_stations'] = latest_stations
         return ''
+
 
 class DoGetLatestStations:
 

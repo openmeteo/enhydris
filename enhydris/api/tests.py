@@ -192,7 +192,8 @@ class WriteTestCase(TestCase):
                          name='Test Timeseries 1221').count(), 0)
 
         # Now try again, this time logged on as user 2; again should deny
-        self.assertTrue(self.client.login(username='user2', password='password2'))
+        self.assertTrue(self.client.login(username='user2',
+                                          password='password2'))
         response = self.client.post("/api/Timeseries/", data=d,
                                     content_type='application/json')
         self.assertEqual(response.status_code, 403)
@@ -201,7 +202,8 @@ class WriteTestCase(TestCase):
         self.client.logout()
 
         # Now try again, this time logged on as user 1; should accept
-        self.assertTrue(self.client.login(username='user1', password='password1'))
+        self.assertTrue(self.client.login(username='user1',
+                                          password='password1'))
         response = self.client.post("/api/Timeseries/", data=d,
                                     content_type='application/json')
         self.assertEqual(response.status_code, 201)
@@ -226,7 +228,8 @@ class WriteTestCase(TestCase):
         self.assertEqual(models.Timeseries.objects.count(), ntimeseries)
 
         # Try again as user2 - should fail
-        self.assertTrue(self.client.login(username='user2', password='password2'))
+        self.assertTrue(self.client.login(username='user2',
+                                          password='password2'))
         response = self.client.delete(
             "/api/Timeseries/{}/".format(self.timeseries1.id))
         self.assertEqual(response.status_code, 403)
@@ -236,7 +239,8 @@ class WriteTestCase(TestCase):
         self.client.logout()
 
         # Try again as user1 - should succeed
-        self.assertTrue(self.client.login(username='user1', password='password1'))
+        self.assertTrue(self.client.login(username='user1',
+                                          password='password1'))
         response = self.client.delete(
             "/api/Timeseries/{}/".format(self.timeseries1.id))
         self.assertEqual(response.status_code, 204)
@@ -260,7 +264,8 @@ class WriteTestCase(TestCase):
     @RandomEnhydrisTimeseriesDataDir()
     def testUploadTsDataAsWrongUser(self):
         # Attempt to upload some timeseries data as user 2; should deny
-        self.assertTrue(self.client.login(username='user2', password='password2'))
+        self.assertTrue(self.client.login(username='user2',
+                                          password='password2'))
         response = self.client.put(
             "/api/tsdata/{}/".format(self.timeseries1.id),
             encode_multipart(BOUNDARY,
@@ -273,7 +278,8 @@ class WriteTestCase(TestCase):
 
     @RandomEnhydrisTimeseriesDataDir()
     def testUploadTsDataGarbage(self):
-        self.assertTrue(self.client.login(username='user1', password='password1'))
+        self.assertTrue(self.client.login(username='user1',
+                                          password='password1'))
         response = self.client.put(
             "/api/tsdata/{}/".format(self.timeseries1.id),
             encode_multipart(BOUNDARY,
@@ -286,7 +292,8 @@ class WriteTestCase(TestCase):
 
     @RandomEnhydrisTimeseriesDataDir()
     def testUploadTsData(self):
-        self.assertTrue(self.client.login(username='user1', password='password1'))
+        self.assertTrue(self.client.login(username='user1',
+                                          password='password1'))
         response = self.client.put(
             "/api/tsdata/{}/".format(self.timeseries1.id),
             encode_multipart(BOUNDARY,
@@ -302,7 +309,8 @@ class WriteTestCase(TestCase):
         self.client.logout()
 
         # Append two more records
-        self.assertTrue(self.client.login(username='user1', password='password1'))
+        self.assertTrue(self.client.login(username='user1',
+                                          password='password1'))
         response = self.client.put(
             "/api/tsdata/{}/".format(self.timeseries1.id),
             encode_multipart(BOUNDARY,
@@ -323,7 +331,8 @@ class WriteTestCase(TestCase):
         self.client.logout()
 
         # Try to append an earlier record; should fail
-        self.assertTrue(self.client.login(username='user1', password='password1'))
+        self.assertTrue(self.client.login(username='user1',
+                                          password='password1'))
         response = self.client.put(
             "/api/tsdata/{}/".format(self.timeseries1.id),
             encode_multipart(BOUNDARY,

@@ -8,16 +8,16 @@ from django.utils.translation import ugettext_lazy as _
 
 from ajax_select.fields import AutoCompleteSelectMultipleField
 from captcha.fields import CaptchaField
+from pthelma import timeseries
 from registration.forms import RegistrationFormTermsOfService
 
-from pthelma import timeseries
-from enhydris.hcore.widgets import SelectWithPop
 from enhydris.hcore.models import (
-    Station, Instrument, Person, Overseer, FileType, GentityFile,
-    GentityGenericDataType, GentityGenericData, GentityAltCodeType,
-    GentityAltCode, EventType, GentityEvent, Gentity, Gpoint,
-    PoliticalDivision, WaterBasin, WaterDivision, Lentity, InstrumentType,
-    TimeStep, Variable, UnitOfMeasurement, TimeZone, IntervalType, Timeseries)
+    EventType, FileType, Gentity, GentityAltCode, GentityAltCodeType,
+    GentityEvent, GentityFile, GentityGenericData, GentityGenericDataType,
+    Gpoint, Instrument, InstrumentType, IntervalType, Lentity, Overseer,
+    Person, PoliticalDivision, Station, Timeseries, TimeStep, TimeZone,
+    UnitOfMeasurement, Variable, WaterBasin, WaterDivision)
+from enhydris.hcore.widgets import SelectWithPop
 
 
 class OverseerForm(ModelForm):

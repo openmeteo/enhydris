@@ -1,7 +1,7 @@
 from django import template
-from django.utils.safestring import SafeUnicode
 
-register=template.Library()
+register = template.Library()
+
 
 @register.filter
 def in_group(user, group):
@@ -16,12 +16,17 @@ def in_group(user, group):
     No white space allowed.
     """
     import re
-    if re.search(',', group): group_list = re.sub('\s+','',group).split(',')
-    elif re.search(' ', group): group_list = group.split()
-    else: group_list = [group]
+    if re.search(',', group):
+        group_list = re.sub('\s+', '', group).split(',')
+    elif re.search(' ', group):
+        group_list = group.split()
+    else:
+        group_list = [group]
     user_groups = []
-    for group in user.groups.all(): user_groups.append(str(group.name))
-    if [x for x in group_list if x in user_groups]: return True
-    else: return False
+    for group in user.groups.all():
+        user_groups.append(str(group.name))
+    if [x for x in group_list if x in user_groups]:
+        return True
+    else:
+        return False
 in_group.is_safe = True
-

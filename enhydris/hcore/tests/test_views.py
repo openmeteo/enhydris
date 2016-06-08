@@ -1,5 +1,5 @@
-from itertools import takewhile
 from io import StringIO
+from itertools import takewhile
 import re
 import os
 import shutil
