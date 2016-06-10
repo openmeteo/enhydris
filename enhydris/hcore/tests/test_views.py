@@ -497,6 +497,13 @@ class TsTestCase(TestCase):
 
         self.client.logout()
 
+    @RandomEnhydrisTimeseriesDataDir()
+    def test_get_empty_timeseries_data_for_chart(self):
+        url = "/timeseries/data/?object_id={}".format(self.ts.id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, '{"stats": {}, "data": []}')
+
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class OpenVTestCase(TestCase):

@@ -623,7 +623,11 @@ def timeseries_data(request, *args, **kwargs):
     except ValueError:
         raise Http404
     timeseries = Timeseries.objects.get(pk=object_id)
-    afilename = timeseries.datafile.path
+    try:
+        afilename = timeseries.datafile.path
+    except ValueError:
+        response.content = json.dumps({'data': [], 'stats': {}})
+        return response
     tz = timeseries.time_zone.as_tzinfo
     chart_data = []
     if 'start_pos' in request.GET and 'end_pos' in request.GET:
