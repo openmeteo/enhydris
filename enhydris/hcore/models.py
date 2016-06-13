@@ -9,15 +9,13 @@ from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
 from django.db.models import signals
 from django.db.models.signals import post_save
-from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils._os import abspathu
 
 import iso8601
-from pthelma import timeseries
-from pthelma.timeseries import IntervalType as it
-from pthelma.timeseries import TimeStep as TTimeStep
+import pandas as pd
+import pd2hts
 from simpletail import ropen
 
 from enhydris.permissions.models import Permission
@@ -726,7 +724,7 @@ class Timeseries(models.Model):
                 f.readline().split(',')[0],
                 default_timezone=self.time_zone.as_tzinfo)
 
-    def get_empty_timeseries_object(self):
+    def set_extra_timeseries_properties(self, adataframe):
         sign = -1 if self.time_zone.utc_offset < 0 else 1
         try:
             location = {
@@ -740,49 +738,61 @@ class Timeseries(models.Model):
             # TypeError occurs when self.gentity.gpoint.point is None,
             # meaning the co-ordinates aren't registered.
             location = None
-        t = timeseries.Timeseries(
-            id=self.id,
-            time_step=ReadTimeStep(self.id, self),
-            unit=self.unit_of_measurement.symbol,
-            title=self.name,
-            timezone='{} (UTC{:+03d}{:02d})'.format(
-                self.time_zone.code,
-                abs(self.time_zone.utc_offset) // 60 * sign,
-                abs(self.time_zone.utc_offset) % 60),
-            variable=self.variable.descr,
-            precision=self.precision,
-            location=location,
-            comment='%s\n\n%s' % (self.gentity.name, self.remarks))
-        return t
+        adataframe.time_step = '{},{}'.format(
+            self.time_step.length_minutes if self.time_step else 0,
+            self.time_step.length_months if self.time_step else 0)
+        adataframe.timestamp_rounding = (
+            None if None in (self.timestamp_rounding_minutes,
+                             self.timestamp_rounding_months)
+            else '{},{}'.format(self.timestamp_rounding_minutes,
+                                self.timestamp_rounding_months))
+        adataframe.timestamp_offset = (
+            None if None in (self.timestamp_offset_minutes,
+                             self.timestamp_offset_months)
+            else '{},{}'.format(self.timestamp_offset_minutes,
+                                self.timestamp_offset_months))
+        adataframe.interval_type = (
+            None if not self.interval_type else
+            self.interval_type.value.lower())
+        adataframe.unit = self.unit_of_measurement.symbol
+        adataframe.title = self.name
+        adataframe.timezone = '{} (UTC{:+03d}{:02d})'.format(
+            self.time_zone.code,
+            abs(self.time_zone.utc_offset) // 60 * sign,
+            abs(self.time_zone.utc_offset) % 60)
+        adataframe.variable = self.variable.descr
+        adataframe.precision = self.precision
+        adataframe.location = location
+        adataframe.comment = '%s\n\n%s' % (self.gentity.name, self.remarks)
 
     def get_all_data(self):
-        t = self.get_empty_timeseries_object()
         if self.datafile:
             with open(self.datafile.path, 'r') as f:
-                t.read(f)
-        return t
+                result = pd2hts.read(f)
+                self.set_extra_timeseries_properties(result)
+        else:
+            result = pd.DataFrame()
+        return result
 
     def set_data(self, data):
-        t = self.get_empty_timeseries_object()
-        t.read(data)
+        adataframe = pd2hts.read(data)
         if not self.datafile:
             self.datafile.name = '{:010}'.format(self.id)
         with open(self.datafile.path, 'w') as f:
-            t.write(f)
+            pd2hts.write(adataframe, f)
         self.save()
-        return len(t)
+        return len(adataframe)
 
     def append_data(self, data):
         if not self.datafile:
             return self.set_data(data)
-        t = self.get_empty_timeseries_object()
-        t.read(data)
-        if not len(t):
+        adataframe = pd2hts.read(data)
+        if not len(adataframe):
             return 0
         with ropen(self.datafile.path, bufsize=80) as f:
             old_data_end_date = iso8601.parse_date(f.readline().split(',')[0]
                                                    ).replace(tzinfo=None)
-        new_data_start_date = t.bounding_dates()[0]
+        new_data_start_date = adataframe.index[0]
         if old_data_end_date >= new_data_start_date:
             raise ValueError((
                 "Cannot append time series: "
@@ -790,9 +800,9 @@ class Timeseries(models.Model):
                 "record ({}) of the timeseries to append to.")
                 .format(new_data_start_date, old_data_end_date))
         with open(self.datafile.path, 'a') as f:
-            t.write(f)
+            pd2hts.write(adataframe, f)
         self.save()
-        return len(t)
+        return len(adataframe)
 
     def get_first_line(self):
         if not self.datafile or self.datafile.size < 10:
@@ -851,30 +861,6 @@ def make_user_editor(sender, instance, **kwargs):
     if not user.is_superuser:
         group, created = Group.objects.get_or_create(name='editors')
         user.groups.add(group)
-
-
-def ReadTimeStep(id, timeseries_instance=None):
-    """Read time step from Timeseries Object."""
-    if timeseries_instance is None:
-        timeseries_instance = get_object_or_404(Timeseries, pk=int(id))
-    t = timeseries_instance
-    return TTimeStep(
-        length_minutes=t.time_step.length_minutes if t.time_step else 0,
-        length_months=t.time_step.length_months if t.time_step else 0,
-        timestamp_rounding=(None if None in (t.timestamp_rounding_minutes,
-                                             t.timestamp_rounding_months)
-                            else (t.timestamp_rounding_minutes,
-                                  t.timestamp_rounding_months)),
-        timestamp_offset=(None if None in (t.timestamp_offset_minutes,
-                                           t.timestamp_offset_months)
-                          else (t.timestamp_offset_minutes,
-                                t.timestamp_offset_months)),
-        interval_type=(None if not t.interval_type else
-                       {'sum': it.SUM,
-                        'average': it.AVERAGE,
-                        'vector_average': it.VECTOR_AVERAGE,
-                        'minimum': it.MINIMUM,
-                        'maximum': it.MAXIMUM}[t.interval_type.value.lower()]))
 
 
 class UserProfile(models.Model):

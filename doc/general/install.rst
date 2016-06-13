@@ -16,7 +16,6 @@ Python with setuptools and pip                        2.7 [1]
 Database supported by GeoDjango                       [2]
 GDAL                                                  1.9
 PIL or Pillow with freetype                           1.1.7 [3]
-Dickinson                                             0.2.1 [4]
 ===================================================== ============
 
 [1] Enhydris runs on Python 2.7.  It does not run on Python 3.
@@ -34,27 +33,12 @@ better to install a prepackaged version for your operating
 system. It must be compiled with libfreetype support. This is common
 in Linux distributions.
 
-[4] Dickinson_ is not required directly by Enhydris, but by pthelma_,
-which is required by Enhydris.
-
-.. _dickinson: http://dickinson.readthedocs.org/
-.. _pthelma: http://pthelma.readthedocs.org/
-
 .. note::
 
    Example: Installing prerequisites on Debian/Ubuntu::
 
-      apt-get install python postgresql python-setuptools python-pip \
-          python-pil python-gdal
-
-      # Install Dickinson
-      cd /tmp
-      wget https://github.com/openmeteo/dickinson/archive/0.2.1.tar.gz
-      tar xzf 0.2.1.tar.gz
-      cd dickinson-0.2.1
-      ./configure
-      make
-      sudo make install
+      apt-get install python3 postgresql python3-setuptools python3-pip \
+          python3-pil python3-gdal
 
 Install Enhydris
 ================
@@ -62,13 +46,14 @@ Install Enhydris
 Install Enhydris with :command:`pip install enhydris`, probably
 specifying a version and using a virtualenv, like this::
 
-    virtualenv --system-site-packages [virtualenv_target_dir]
+    virtualenv --system-site-packages --python=/usr/bin/python3 \
+        [virtualenv_target_dir]
     pip install 'enhydris>=0.8,<0.9'
 
 You may or may not want to use the ``--system-site-packages`` parameter.
 The main reason to use it is that it will then use your systemwide
-``python-gdal``  and ``python-pil`` (and ``python-psycopg2``, if you use
-PostgreSQL), which means it won't need to compile these for the
+``python3-gdal``  and ``python3-pil`` (and ``python3-psycopg2``, if you
+use PostgreSQL), which means it won't need to compile these for the
 virtualenv.
 
 Configuring Enhydris
@@ -115,7 +100,7 @@ The above commands will also ask you to create a Enhydris superuser.
    Here is a **Debian Jessie example**::
 
       # Install PostgreSQL and PostGIS
-      apt-get install postgis postgresql-9.4-postgis python-psycopg2
+      apt-get install postgis postgresql-9.4-postgis
 
       # Create database template
       sudo -u postgres -s

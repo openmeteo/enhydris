@@ -1,5 +1,6 @@
 from io import StringIO
 from itertools import takewhile
+import json
 import re
 import os
 import shutil
@@ -20,7 +21,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from model_mommy import mommy
-from pthelma import timeseries
+import pd2hts
 
 from enhydris.hcore.forms import TimeseriesDataForm
 from enhydris.hcore.models import (
@@ -454,13 +455,16 @@ class TsTestCase(TestCase):
         url = "/timeseries/d/{}/download/?version=3".format(self.ts.pk)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        ats = timeseries.Timeseries()
-        ats.read_file(StringIO(response.content.decode('utf-8')))
-        self.assertAlmostEqual(ats.location['abscissa'], 24.67890, places=6)
-        self.assertAlmostEqual(ats.location['ordinate'], 38.12345, places=6)
-        self.assertEqual(ats.location['srid'], 4326)
-        self.assertAlmostEqual(ats.location['altitude'], 219.22, places=2)
-        self.assertTrue(ats.location['asrid'] is None)
+        adataframe = pd2hts.read_file(StringIO(response.content.decode('utf-8')
+                                               ))
+        self.assertAlmostEqual(adataframe.location['abscissa'], 24.67890,
+                               places=6)
+        self.assertAlmostEqual(adataframe.location['ordinate'], 38.12345,
+                               places=6)
+        self.assertEqual(adataframe.location['srid'], 4326)
+        self.assertAlmostEqual(adataframe.location['altitude'], 219.22,
+                               places=2)
+        self.assertTrue(adataframe.location['asrid'] is None)
         self.assertEqual(nrecords(), 12872)
 
         url = "/timeseries/d/{}/download/1960-11-04/".format(self.ts.pk)
@@ -510,7 +514,11 @@ class TsTestCase(TestCase):
         url = "/timeseries/data/?object_id={}".format(self.ts.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, b'{"data": [], "stats": {}}')
+        aobject = json.loads(response.content.decode('utf-8'))
+        self.assertTrue(isinstance(aobject, dict))
+        self.assertEqual(len(aobject), 2)
+        self.assertEqual(aobject['stats'], {})
+        self.assertEqual(aobject['data'], [])
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)

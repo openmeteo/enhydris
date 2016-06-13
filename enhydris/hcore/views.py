@@ -31,7 +31,8 @@ from django.utils.functional import lazy
 from django.utils.translation import ugettext_lazy as _
 
 import iso8601
-from pthelma.timeseries import add_months_to_datetime
+import pandas as pd
+import pd2hts
 
 from enhydris.hcore.models import (
     GentityAltCode, GentityEvent, GentityFile, GentityGenericData, Instrument,
@@ -42,6 +43,19 @@ from enhydris.hcore.forms import (
     GentityAltCodeForm, GentityEventForm, GentityFileForm,
     GentityGenericDataForm, InstrumentForm, OverseerForm, StationForm,
     TimeseriesForm, TimeseriesDataForm, TimeStepForm)
+
+
+def add_months_to_datetime(adatetime, months):
+    m, y, d = adatetime.month, adatetime.year, adatetime.day
+    m += months
+    while m > 12:
+        m -= 12
+        y += 1
+    while m < 1:
+        m += 12
+        y -= 1
+    d = min(d, calendar.monthrange(y, m)[1])
+    return adatetime.replace(year=y, month=m, day=d)
 
 
 class ProfileDetailView(DetailView):
@@ -878,19 +892,25 @@ TS_ERROR = ("There seems to be some problem with our internal infrastuctrure. "
             "the matter as soon as possible.  Please try again later.")
 
 
+def get_date_from_string(adate, tz):
+    if not adate:
+        return None
+    result = iso8601.parse_date(adate, default_timezone=tz)
+    if result.isoformat() < pd.Timestamp.min.isoformat():
+        result = pd.Timestamp.min
+    if result.isoformat() > pd.Timestamp.max.isoformat():
+        result = pd.Timestamp.max
+    return result
+
+
 @timeseries_permission
 def download_timeseries(request, object_id, start_date=None, end_date=None):
     timeseries = get_object_or_404(Timeseries, pk=int(object_id))
     tz = timeseries.time_zone.as_tzinfo
-    start_date = (iso8601.parse_date(start_date, default_timezone=tz)
-                  if start_date else None)
-    end_date = (iso8601.parse_date(end_date, default_timezone=tz)
-                if end_date else None)
-    ts = timeseries.get_all_data()
-    if start_date:
-        ts.delete_items(None, start_date - timedelta(minutes=1))
-    if end_date:
-        ts.delete_items(end_date + timedelta(minutes=1), None)
+    start_date = get_date_from_string(start_date, tz)
+    end_date = get_date_from_string(end_date, tz)
+    adataframe = timeseries.get_all_data()[start_date:end_date]
+    timeseries.set_extra_timeseries_properties(adataframe)
     response = HttpResponse(
         content_type='text/vnd.openmeteo.timeseries; charset=utf-8')
     response['Content-Disposition'] = \
@@ -901,7 +921,7 @@ def download_timeseries(request, object_id, start_date=None, end_date=None):
         raise Http404
     if file_version not in (2, 3):
         raise Http404
-    ts.write_file(response, version=file_version)
+    pd2hts.write_file(adataframe, response, version=file_version)
     return response
 
 

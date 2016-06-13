@@ -271,9 +271,9 @@ class WriteTestCase(TestCase):
             encode_multipart(BOUNDARY,
                              {'timeseries_records': '2012-11-06 18:17,20,\n'}),
             content_type=MULTIPART_CONTENT)
-        t = self.timeseries1.get_all_data()
+        adataframe = self.timeseries1.get_all_data()
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(len(t), 0)
+        self.assertEqual(len(adataframe), 0)
         self.client.logout()
 
     @RandomEnhydrisTimeseriesDataDir()
@@ -285,9 +285,9 @@ class WriteTestCase(TestCase):
             encode_multipart(BOUNDARY,
                              {'timeseries_records': '2012-aa-06 18:17,20,\n'}),
             content_type=MULTIPART_CONTENT)
-        t = self.timeseries1.get_all_data()
+        adataframe = self.timeseries1.get_all_data()
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(len(t), 0)
+        self.assertEqual(len(adataframe), 0)
         self.client.logout()
 
     @RandomEnhydrisTimeseriesDataDir()
@@ -301,11 +301,11 @@ class WriteTestCase(TestCase):
             content_type=MULTIPART_CONTENT)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode('utf-8'), '1')
-        t = models.Timeseries.objects.get(pk=self.timeseries1.id
-                                          ).get_all_data()
-        self.assertEqual(len(t), 1)
-        self.assertEqual(t.items(0)[0], datetime(2012, 11, 0o6, 18, 17, 0))
-        self.assertEqual(t.items(0)[1], 20)
+        adataframe = models.Timeseries.objects.get(pk=self.timeseries1.id
+                                                   ).get_all_data()
+        self.assertEqual(len(adataframe), 1)
+        self.assertEqual(adataframe.index[0], datetime(2012, 11, 6, 18, 17, 0))
+        self.assertEqual(adataframe.iloc[0].value, 20)
         self.client.logout()
 
         # Append two more records
@@ -319,15 +319,18 @@ class WriteTestCase(TestCase):
             content_type=MULTIPART_CONTENT)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode('utf-8'), '2')
-        t = models.Timeseries.objects.get(pk=self.timeseries1.id
-                                          ).get_all_data()
-        self.assertEqual(len(t), 3)
-        self.assertEqual(t.items(0)[0], datetime(2012, 11, 0o6, 18, 17, 0))
-        self.assertEqual(t.items(0)[1], 20)
-        self.assertEqual(t.items(1)[0], datetime(2012, 11, 0o6, 18, 18, 0))
-        self.assertEqual(t.items(1)[1], 21)
-        self.assertEqual(t.items(2)[0], datetime(2012, 11, 0o7, 18, 18, 0))
-        self.assertEqual(t.items(2)[1], 23)
+        adataframe = models.Timeseries.objects.get(pk=self.timeseries1.id
+                                                   ).get_all_data()
+        self.assertEqual(len(adataframe), 3)
+        self.assertEqual(adataframe.index[0],
+                         datetime(2012, 11, 6, 18, 17, 0))
+        self.assertEqual(adataframe.iloc[0].value, 20)
+        self.assertEqual(adataframe.index[1],
+                         datetime(2012, 11, 6, 18, 18, 0))
+        self.assertEqual(adataframe.iloc[1].value, 21)
+        self.assertEqual(adataframe.index[2],
+                         datetime(2012, 11, 7, 18, 18, 0))
+        self.assertEqual(adataframe.iloc[2].value, 23)
         self.client.logout()
 
         # Try to append an earlier record; should fail

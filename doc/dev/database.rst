@@ -660,7 +660,7 @@ Time series and related models
 
       The file where the time series data are stored. The attribute is a
       Django FileField_. The format of this file is documented in
-      pthelma as `text format`_.
+      pd2hts as `text format`_.
 
       Usually you don't need to access this file directly; instead, use
       methods :meth:`~enhydris.hcore.models.Timeseries.get_all_data`,
@@ -685,7 +685,7 @@ Time series and related models
 
    .. method:: enhydris.hcore.models.Timeseries.get_all_data()
 
-      Return all data of the file in a `pthelma Timeseries object`_.
+      Return all data of the file in a pandas DataFrame.
 
    .. method:: enhydris.hcore.models.Timeseries.set_data(data)
 
@@ -708,11 +708,8 @@ Time series and related models
       if the time series contains no records.
 
 
-.. _text format: http://pthelma.readthedocs.io/en/latest/dev/timeseries.html#text-format
-.. _file format: http://pthelma.readthedocs.io/en/latest/dev/timeseries.html#file-format
 .. _multi-table inheritance: http://docs.djangoproject.com/en/dev/topics/db/models/#id6
 .. _django-multilingual: http://code.google.com/p/django-multilingual/
 .. _abstract base class: http://docs.djangoproject.com/en/dev/topics/db/models/#id5
 .. _filefield: http://docs.djangoproject.com/en/dev/ref/models/fields/#filefield
 .. _imagefield: http://docs.djangoproject.com/en/dev/ref/models/fields/#imagefield
-.. _pthelma timeseries object: http://pthelma.readthedocs.io/en/latest/dev/timeseries.html#timeseries-objects

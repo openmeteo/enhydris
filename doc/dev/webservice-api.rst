@@ -96,50 +96,6 @@ At ``http://base-address/api/tsdata/id/`` (where ``id`` is the actual
 id of the timeseries object) you can get the timeseries data in
 `text format`_.
 
-.. _text format: http://pthelma.readthedocs.org/en/latest/timeseries.html#text-format
-
-.. admonition:: Backwards-compatibility
-
-   The API implementation was changed in several changesets, starting
-   with 639e4c810457. Before that, django-piston_ was being used for
-   the api; it was changed to django-rest-framework_.
-
-   Not all API features have been reimplemented.  Notably, piston's
-   output could be used with Django's loaddata management command to
-   load data to an empty instance; this is no longer possible, because
-   the returned objects do not contain a "model" attribute.
-
-   .. _django-piston: https://bitbucket.org/jespern/django-piston/
-   .. _django-rest-framework: http://django-rest-framework.org/
-
-   Furthermore, there was also the possibility to get gentity files at
-   `http://base-address/api/gfdata/id`` (where ``id`` was the actual
-   id of the GentityFile object). Finally, there was the "station
-   information and lists" feature, documented below:
-
-   **(Temporarily?) obsolete documentation on station information and lists**
-
-   There are also some more calls which provide station details in a more
-   human readable format, including a station's geodata which may be used
-   by 3rd party application to incorporate the displaying of enhydris
-   stations in their maps. These API calls reside under the
-   ``/api/Station/info/`` url and are similar to the ones above. If you
-   do not specify any additional parameters, you get information for all
-   Stations hosted in Enhydris and if you want the details for a specific
-   station, you just need to append its id to the end of the url like
-   above (eg ``/api/Station/info/1000``).  See :class:`models.Gentity`
-   and :class:`models.Station` for a description of the meaning of the
-   fields.
-
-   There is also another feature which enables users to request a sublist
-   of stations by providing the station ids in a comma separated list by
-   using the ``/api/Station/info/list`` url. This call supports only the
-   POST method and the comma separated list must be given under the
-   varible name ``station_list``.  For example::
-           
-       curl -X POST -d "station_list=10001,10002,10003" http://openmeteo.org/db/api/Station/info/list/
-
-
 Cached time series data
 =======================
 

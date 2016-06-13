@@ -26,11 +26,11 @@ class TimeseriesTestCase(TestCase):
             """)))
 
     def test_get_all_data(self):
-        t = self.ts_komboti_rain.get_all_data()
-        self.assertEqual(len(t), 3)
-        self.assertAlmostEqual(t['2015-10-22 15:00'], 0)
-        self.assertAlmostEqual(t['2015-10-22 15:10'], 0.1)
-        self.assertAlmostEqual(t['2015-10-22 15:20'], 0.2)
+        adataframe = self.ts_komboti_rain.get_all_data()
+        self.assertEqual(len(adataframe), 3)
+        self.assertAlmostEqual(adataframe.ix['2015-10-22 15:00'].value, 0)
+        self.assertAlmostEqual(adataframe.ix['2015-10-22 15:10'].value, 0.1)
+        self.assertAlmostEqual(adataframe.ix['2015-10-22 15:20'].value, 0.2)
 
     def test_start_date_end_date(self):
         atzinfo = timezone(timedelta(minutes=120), 'EET')

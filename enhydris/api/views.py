@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 import iso8601
+import pd2hts
 import pytz
 
 from enhydris.hcore import models
@@ -56,9 +57,9 @@ class Tsdata(APIView):
     def get(self, request, pk, format=None):
         timeseries = models.Timeseries.objects.get(pk=int(pk))
         self.check_object_permissions(request, timeseries)
-        result = StringIO()
-        timeseries.get_all_data().write(result)
-        return HttpResponse(result.getvalue(), content_type="text/plain")
+        response = HttpResponse(content_type='text/plain')
+        pd2hts.write(timeseries.get_all_data(), response)
+        return response
 
     def put(self, request, pk, format=None):
         try:
@@ -67,7 +68,7 @@ class Tsdata(APIView):
             nrecords = atimeseries.append_data(StringIO(request.DATA[
                 'timeseries_records']))
             return HttpResponse(str(nrecords), content_type="text/plain")
-        except ValueError as e:
+        except (ValueError, iso8601.ParseError) as e:
             return HttpResponse(status=status.HTTP_400_BAD_REQUEST,
                                 content=str(e),
                                 content_type="text/plain")

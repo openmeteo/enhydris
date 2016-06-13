@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from ajax_select.fields import AutoCompleteSelectMultipleField
 from captcha.fields import CaptchaField
-from pthelma import timeseries
+import pd2hts
 from registration.forms import RegistrationFormTermsOfService
 
 from enhydris.hcore.models import (
@@ -413,10 +413,9 @@ class TimeseriesForm(ModelForm):
         s = self.cleaned_data['data'].read()
         if isinstance(s, bytes):
             s = s.decode('utf-8')
-        ts = timeseries.Timeseries()
 
         try:
-            ts.read_file(StringIO(s))
+            pd2hts.read_file(StringIO(s))
         except Exception as e:
             raise forms.ValidationError(str(e))
 
