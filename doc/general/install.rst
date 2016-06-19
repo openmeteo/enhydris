@@ -12,15 +12,15 @@ Prerequisites
 ===================================================== ============
 Prerequisite                                          Version
 ===================================================== ============
-Python with setuptools and pip                        2.7 [1]
+Python with setuptools and pip                        3 [1]
 Database supported by GeoDjango                       [2]
 GDAL                                                  1.9
 PIL or Pillow with freetype                           1.1.7 [3]
 ===================================================== ============
 
-[1] Enhydris runs on Python 2.7.  It does not run on Python 3.
-setuptools and pip are needed in order to install the rest of the Python
-modules.
+[1] Enhydris runs on all supported versions of Python 3.  It does not
+run on Python 2.  setuptools and pip are needed in order to install
+the rest of the Python modules.
 
 [2] Enhydris has been tested with PostgreSQL+PostGIS and spatialite, the
 latter only in development.
@@ -35,10 +35,15 @@ in Linux distributions.
 
 .. note::
 
-   Example: Installing prerequisites on Debian/Ubuntu::
+   Example: Installing prerequisites on Debian/Ubuntu
+
+   In this example, we also install package ``python3-pandas`` to avoid
+   compilation.
+
+   ::
 
       apt-get install python3 postgresql python3-setuptools python3-pip \
-          python3-pil python3-gdal
+          python3-pil python3-gdal python3-pandas
 
 Install Enhydris
 ================
@@ -48,13 +53,13 @@ specifying a version and using a virtualenv, like this::
 
     virtualenv --system-site-packages --python=/usr/bin/python3 \
         [virtualenv_target_dir]
-    pip install 'enhydris>=0.8,<0.9'
+    pip install 'enhydris>=1,<2'
 
 You may or may not want to use the ``--system-site-packages`` parameter.
 The main reason to use it is that it will then use your systemwide
-``python3-gdal``  and ``python3-pil`` (and ``python3-psycopg2``, if you
-use PostgreSQL), which means it won't need to compile these for the
-virtualenv.
+``python3-gdal``, ``python3-pil`` and ``python3-pandas`` (and
+``python3-psycopg2``, if you use PostgreSQL), which means it won't need
+to compile these for the virtualenv.
 
 Configuring Enhydris
 ====================
