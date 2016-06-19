@@ -6,6 +6,31 @@ Release notes
 
 .. highlight:: bash
 
+Version 1.0
+===========
+
+Overview
+--------
+
+This version has important internal changes, but no change in
+functionality (except for the fix of a minor bug, that the time series
+chart would apparently "hang" with a waiting cursor showing for ever
+when a time series was empty). These important changes are:
+
+- Python 3 is now supported, and there is no more support for Python 2.
+
+- Pthelma is not used anymore; instead, there is a dependency on
+  ``pandas`` and on the new ``pd2hts`` module.
+
+Upgrading from 0.8
+------------------
+
+Make sure you are running Enhydris 0.8. Discard your virtualenv and
+follow the Enhydris installation instructions to install the necessary
+operating system packages and install Enhydris in a new Python 3
+virtualenv. You don't need to change anything in the configuration or
+perform any database migration.
+
 Version 0.8
 ===========
 
