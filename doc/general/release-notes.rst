@@ -31,6 +31,14 @@ operating system packages and install Enhydris in a new Python 3
 virtualenv. You don't need to change anything in the configuration or
 perform any database migration.
 
+Changes in 1.0 microversions
+----------------------------
+
+- When downloading time series and specifying a start date, the
+  resulting time series could start on a slightly different start date
+  because of some confusion with the time zone. The bug was fixed in
+  1.0.1.
+
 Version 0.8
 ===========
 

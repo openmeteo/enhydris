@@ -5,6 +5,7 @@ import re
 import os
 import shutil
 import tempfile
+import textwrap
 import time
 from unittest import skipIf, skipUnless
 from urllib.parse import urlencode
@@ -389,7 +390,7 @@ class TsTestCase(TestCase):
         self.unit = UnitOfMeasurement.objects.create(symbol='+')
         self.unit.variables.add(self.var)
         self.unit.save()
-        self.tz = TimeZone.objects.create(code='UTC', utc_offset='0')
+        self.tz = TimeZone.objects.create(code='EET', utc_offset=120)
         self.tz.save()
         self.station = Station.objects.create(
             name='station',
@@ -403,7 +404,7 @@ class TsTestCase(TestCase):
         self.ts = Timeseries(name="tstest", gentity=self.station,
                              time_zone=self.tz,
                              unit_of_measurement=self.unit,
-                             variable=self.var)
+                             variable=self.var, precision=1)
         self.ts.save()
         self.user = User.objects.create_user('test', 'test@test.com',
                                              'test')
@@ -519,6 +520,36 @@ class TsTestCase(TestCase):
         self.assertEqual(len(aobject), 2)
         self.assertEqual(aobject['stats'], {})
         self.assertEqual(aobject['data'], [])
+
+    @RandomEnhydrisTimeseriesDataDir()
+    def test_timeseries_with_timezone_data(self):
+        """There was this bug where you'd ask to download from start date,
+        and the start date was interpreted as aware whereas the time series
+        data was interpreted as naive. This test checks there's no such
+        bug."""
+        data = textwrap.dedent("""\
+                               2005-08-23 18:53,93,
+                               2005-08-23 19:53,108.7,
+                               2005-08-23 20:53,28.3,
+                               2005-08-23 21:53,1.7,
+                               2005-08-23 22:53,42.4,
+            """)
+        self.ts.set_data(StringIO(data))
+        url = '/timeseries/d/{}/download/2005-08-23T19:54/'.format(self.ts.pk)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        result = response.content.decode('utf-8')
+
+        # Remove header, leave only data
+        emptylinepos = result.find('\r\n\r\n')
+        self.assertTrue(emptylinepos > 0)
+        result = result[emptylinepos + 4:]
+
+        self.assertEqual(result, textwrap.dedent("""\
+                                                 2005-08-23 20:53,28.3,\r
+                                                 2005-08-23 21:53,1.7,\r
+                                                 2005-08-23 22:53,42.4,\r
+                                                 """))
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)

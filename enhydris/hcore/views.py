@@ -909,6 +909,14 @@ def download_timeseries(request, object_id, start_date=None, end_date=None):
     tz = timeseries.time_zone.as_tzinfo
     start_date = get_date_from_string(start_date, tz)
     end_date = get_date_from_string(end_date, tz)
+
+    # The time series data are naive, so we also make start_date and end_date
+    # naive.
+    if start_date:
+        start_date = start_date.replace(tzinfo=None)
+    if end_date:
+        end_date = end_date.replace(tzinfo=None)
+
     adataframe = timeseries.get_all_data()[start_date:end_date]
     timeseries.set_extra_timeseries_properties(adataframe)
     response = HttpResponse(
