@@ -342,7 +342,7 @@ class GentityFileTestCase(TestCase):
         mommy.make(User, username='admin', password=make_password('topsecret'),
                    is_active=True, is_superuser=True, is_staff=True)
         mommy.make(Station, name='Komboti')
-        mommy.make(FileType, mime_type='image/jpeg')
+        mommy.make(FileType, mime_type='image/gif')
 
         # Upload a gentity file
         gentity_id = Station.objects.get(name='Komboti').id
@@ -350,9 +350,11 @@ class GentityFileTestCase(TestCase):
         self.assertTrue(r)
         self.assertEqual(GentityFile.objects.filter(gentity__id=gentity_id
                                                     ).count(), 0)
-        filetype_id = FileType.objects.get(mime_type='image/jpeg').id
+        filetype_id = FileType.objects.get(mime_type='image/gif').id
+        small_gif = b'GIF89a\x01\x00\x01\x00\x00\xff\x00,\x00\x00\x00\x00' \
+            b'\x01\x00\x01\x00\x00\x02\x00;'
         with open(os.path.join(self.tempdir, 'aaa.jpg'), 'w+b') as f:
-            f.write(b'Irrelevant data\n')
+            f.write(small_gif)
             f.seek(0)
             response = self.client.post(reverse('gentityfile_add'),
                                         {'gentity': gentity_id,
@@ -373,7 +375,7 @@ class GentityFileTestCase(TestCase):
         response = self.client.get(reverse('gentityfile_dl',
                                            kwargs={'gf_id': gentity_file_id}))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, b'Irrelevant data\n')
+        self.assertEqual(response.content, small_gif)
 
 
 class TsTestCase(TestCase):

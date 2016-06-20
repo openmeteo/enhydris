@@ -8,6 +8,7 @@ import mimetypes
 import os
 import tempfile
 from tempfile import mkstemp
+from wsgiref.util import FileWrapper
 from zipfile import ZipFile, ZIP_DEFLATED
 
 from django.conf import settings
@@ -16,7 +17,6 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.views import login as auth_login
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.geos import Polygon
-from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.db.models import Count, Q
@@ -842,7 +842,7 @@ def download_gentityfile(request, gf_id):
     gfile = get_object_or_404(GentityFile, pk=int(gf_id))
     try:
         filename = gfile.content.file.name
-        wrapper = FileWrapper(open(filename))
+        wrapper = FileWrapper(open(filename, 'rb'))
     except IOError:
         raise Http404
     download_name = gfile.content.name.split('/')[-1]
