@@ -38,6 +38,8 @@ Changes in 1.0 microversions
   resulting time series could start on a slightly different start date
   because of some confusion with the time zone. The bug was fixed in
   1.0.1.
+- Gentity files could not be downloading because of a bug in the downloading
+  code. Fixed in 1.0.2.
 
 Version 0.8
 ===========
