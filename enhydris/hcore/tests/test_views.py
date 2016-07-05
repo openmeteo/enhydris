@@ -434,7 +434,7 @@ class TsTestCase(TestCase):
         self.assertTrue(form.is_valid())
         ts = form.save()
         ts.save()
-        self.assertEqual(len(ts.get_all_data()), 12872)
+        self.assertEqual(len(ts.get_data()), 12872)
 
         # Download
 

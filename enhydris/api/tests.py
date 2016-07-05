@@ -257,7 +257,7 @@ class WriteTestCase(TestCase):
             encode_multipart(BOUNDARY,
                              {'timeseries_records': '2012-11-06 18:17,20,\n'}),
             content_type=MULTIPART_CONTENT)
-        t = self.timeseries1.get_all_data()
+        t = self.timeseries1.get_data()
         self.assertEqual(response.status_code, 403)
         self.assertEqual(len(t), 0)
 
@@ -271,7 +271,7 @@ class WriteTestCase(TestCase):
             encode_multipart(BOUNDARY,
                              {'timeseries_records': '2012-11-06 18:17,20,\n'}),
             content_type=MULTIPART_CONTENT)
-        adataframe = self.timeseries1.get_all_data()
+        adataframe = self.timeseries1.get_data()
         self.assertEqual(response.status_code, 403)
         self.assertEqual(len(adataframe), 0)
         self.client.logout()
@@ -285,7 +285,7 @@ class WriteTestCase(TestCase):
             encode_multipart(BOUNDARY,
                              {'timeseries_records': '2012-aa-06 18:17,20,\n'}),
             content_type=MULTIPART_CONTENT)
-        adataframe = self.timeseries1.get_all_data()
+        adataframe = self.timeseries1.get_data()
         self.assertEqual(response.status_code, 400)
         self.assertEqual(len(adataframe), 0)
         self.client.logout()
@@ -302,7 +302,7 @@ class WriteTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode('utf-8'), '1')
         adataframe = models.Timeseries.objects.get(pk=self.timeseries1.id
-                                                   ).get_all_data()
+                                                   ).get_data()
         self.assertEqual(len(adataframe), 1)
         self.assertEqual(adataframe.index[0], datetime(2012, 11, 6, 18, 17, 0))
         self.assertEqual(adataframe.iloc[0].value, 20)
@@ -320,7 +320,7 @@ class WriteTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode('utf-8'), '2')
         adataframe = models.Timeseries.objects.get(pk=self.timeseries1.id
-                                                   ).get_all_data()
+                                                   ).get_data()
         self.assertEqual(len(adataframe), 3)
         self.assertEqual(adataframe.index[0],
                          datetime(2012, 11, 6, 18, 17, 0))
@@ -343,8 +343,7 @@ class WriteTestCase(TestCase):
             content_type=MULTIPART_CONTENT)
         self.client.logout()
         self.assertEqual(response.status_code, 400)
-        t = models.Timeseries.objects.get(pk=self.timeseries1.id
-                                          ).get_all_data()
+        t = models.Timeseries.objects.get(pk=self.timeseries1.id).get_data()
         self.assertEqual(len(t), 3)
         self.client.logout()
 

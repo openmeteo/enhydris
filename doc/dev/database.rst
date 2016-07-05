@@ -663,7 +663,7 @@ Time series and related models
       pd2hts as `text format`_.
 
       Usually you don't need to access this file directly; instead, use
-      methods :meth:`~enhydris.hcore.models.Timeseries.get_all_data`,
+      methods :meth:`~enhydris.hcore.models.Timeseries.get_data`,
       :meth:`~enhydris.hcore.models.Timeseries.set_data`,
       :meth:`~enhydris.hcore.models.Timeseries.append_data`,
       :meth:`~enhydris.hcore.models.Timeseries.get_first_line` and
@@ -683,9 +683,12 @@ Time series and related models
       :attr:`~enhydris.hcore.models.Timeseries.datafile`, you must
       subsequently call :meth:`save()` to update these fields.
 
-   .. method:: enhydris.hcore.models.Timeseries.get_all_data()
+   .. method:: enhydris.hcore.models.Timeseries.get_data(start_date=None, end_date=None)
 
-      Return all data of the file in a pandas DataFrame.
+      Return the data of the file in a pandas DataFrame. If *start_date* or
+      *end_date* are specified, only this part of the data is returned.
+
+      An old, deprecated synonym for this method is ``get_all_data()``.
 
    .. method:: enhydris.hcore.models.Timeseries.set_data(data)
 

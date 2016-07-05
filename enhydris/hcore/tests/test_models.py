@@ -26,11 +26,31 @@ class TimeseriesTestCase(TestCase):
             """)))
 
     def test_get_all_data(self):
-        adataframe = self.ts_komboti_rain.get_all_data()
+        adataframe = self.ts_komboti_rain.get_data()
         self.assertEqual(len(adataframe), 3)
         self.assertAlmostEqual(adataframe.ix['2015-10-22 15:00'].value, 0)
         self.assertAlmostEqual(adataframe.ix['2015-10-22 15:10'].value, 0.1)
         self.assertAlmostEqual(adataframe.ix['2015-10-22 15:20'].value, 0.2)
+
+    def test_get_data_with_start_date(self):
+        adataframe = self.ts_komboti_rain.get_data(
+            start_date='2015-10-22 15:10')
+        self.assertEqual(len(adataframe), 2)
+        self.assertAlmostEqual(adataframe.ix['2015-10-22 15:10'].value, 0.1)
+        self.assertAlmostEqual(adataframe.ix['2015-10-22 15:20'].value, 0.2)
+
+    def test_get_data_with_end_date(self):
+        adataframe = self.ts_komboti_rain.get_data(
+            end_date=datetime(2015, 10, 22, 15, 10))
+        self.assertEqual(len(adataframe), 2)
+        self.assertAlmostEqual(adataframe.ix['2015-10-22 15:00'].value, 0)
+        self.assertAlmostEqual(adataframe.ix['2015-10-22 15:10'].value, 0.1)
+
+    def test_get_data_with_start_and_end_date(self):
+        adataframe = self.ts_komboti_rain.get_data(
+            start_date='2015-10-22 15:05', end_date='2015-10-22 15:15')
+        self.assertEqual(len(adataframe), 1)
+        self.assertAlmostEqual(adataframe.ix['2015-10-22 15:10'].value, 0.1)
 
     def test_start_date_end_date(self):
         atzinfo = timezone(timedelta(minutes=120), 'EET')

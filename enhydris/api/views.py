@@ -58,7 +58,7 @@ class Tsdata(APIView):
         timeseries = models.Timeseries.objects.get(pk=int(pk))
         self.check_object_permissions(request, timeseries)
         response = HttpResponse(content_type='text/plain')
-        pd2hts.write(timeseries.get_all_data(), response)
+        pd2hts.write(timeseries.get_data(), response)
         return response
 
     def put(self, request, pk, format=None):

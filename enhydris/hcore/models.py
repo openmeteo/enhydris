@@ -765,14 +765,16 @@ class Timeseries(models.Model):
         adataframe.location = location
         adataframe.comment = '%s\n\n%s' % (self.gentity.name, self.remarks)
 
-    def get_all_data(self):
+    def get_data(self, start_date=None, end_date=None):
         if self.datafile:
-            with open(self.datafile.path, 'r') as f:
-                result = pd2hts.read(f)
+            with open(self.datafile.path, 'r', newline='\n') as f:
+                result = pd2hts.read(f, start_date=start_date,
+                                     end_date=end_date)
                 self.set_extra_timeseries_properties(result)
         else:
             result = pd.DataFrame()
         return result
+    get_all_data = get_data
 
     def set_data(self, data):
         adataframe = pd2hts.read(data)
