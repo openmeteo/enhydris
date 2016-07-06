@@ -6,6 +6,16 @@ Release notes
 
 .. highlight:: bash
 
+Version 1.1
+===========
+
+This version only changes an internal API;
+:meth:`enhydris.hcore.models.Timeseries.get_all_data()` is renamed to
+:meth:`enhydris.hcore.models.Timeseries.get_data()` and accepts
+arguments to specify a start and end date. Upgrading from 1.0 is
+trivial; just :command:`pip install enhydris>=1.1,<2`. You can upgrade
+here directly from 0.8 by following the upgrade instructions for 1.0.
+
 Version 1.0
 ===========
 
