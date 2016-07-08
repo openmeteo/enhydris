@@ -17,6 +17,8 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.gis.geos import fromstr, Point
+from django.db import connections
+from django.db.utils import DEFAULT_DB_ALIAS
 from django.http import HttpRequest, QueryDict
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -54,6 +56,28 @@ except ImportError:
     SeleniumTestCase = TestCase
     PageElement = Dummy
     By = Dummy()
+
+
+def check_if_connected_to_old_sqlite():
+    """Return True if connected to sqlite<3.8.3
+
+    Used to skip a test, notably on Travis, which currently runs an old sqlite
+    version.
+
+    The correct way would have been to remove the functionality, not just skip
+    the test, because the functionality is still there and will cause an
+    internal server error, but this would be too much work given that we use
+    SQLite only for development.
+    """
+    if not isinstance(
+            connections[DEFAULT_DB_ALIAS],
+            django.contrib.gis.db.backends.spatialite.base.DatabaseWrapper):
+        return False
+    import sqlite3
+    major, minor, micro = [int(x)
+                           for x in sqlite3.sqlite_version.split('.')[:3]]
+    return (major < 3) or (major == 3 and minor < 8) or (
+        major == 3 and minor == 8 and micro < 3)
 
 
 class SortTestCase(TestCase):
@@ -254,6 +278,7 @@ class SearchTestCase(TestCase):
         queryset = self.get_queryset(urlencode({'q': 'ts_only:'}))
         self.assertEqual(queryset.count(), 3)
 
+    @skipIf(check_if_connected_to_old_sqlite(), "Use sqlite>=3.8.3")
     def test_search_by_political_division(self):
         queryset = self.get_queryset(
             urlencode({'political_division': 'Cardolan'}))
