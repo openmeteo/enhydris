@@ -68,6 +68,12 @@ kwargs = {
     'install_requires': installation_requirements,
     'test_suite': 'runtests.runtests',
     'tests_require': ['model-mommy>=1.2.4'],
+    'classifiers': [
+        "Development Status :: 4 - Beta",
+        "License :: OSI Approved :: "
+            "GNU Affero General Public License v3 or later (AGPLv3+)",
+        "Topic :: Scientific/Engineering :: Atmospheric Science",
+    ],
 }
 
 setup(**kwargs)
