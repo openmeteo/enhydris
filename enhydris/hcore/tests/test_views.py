@@ -525,10 +525,13 @@ class TsTestCase(TestCase):
 
     @RandomEnhydrisTimeseriesDataDir()
     def test_timeseries_with_timezone_data(self):
-        """There was this bug where you'd ask to download from start date,
+        """Test that there's no aware/naive date confusion
+
+        There was this bug where you'd ask to download from start date,
         and the start date was interpreted as aware whereas the time series
         data was interpreted as naive. This test checks there's no such
-        bug."""
+        bug.
+        """
         data = textwrap.dedent("""\
                                2005-08-23 18:53,93,
                                2005-08-23 19:53,108.7,
@@ -538,6 +541,8 @@ class TsTestCase(TestCase):
             """)
         self.ts.set_data(StringIO(data))
         url = '/timeseries/d/{}/download/2005-08-23T19:54/'.format(self.ts.pk)
+        if not settings.ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
+            self.client.login(username='test', password='test')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         result = response.content.decode('utf-8')
