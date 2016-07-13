@@ -17,6 +17,8 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.gis.geos import fromstr, Point
+from django.db import connections
+from django.db.utils import DEFAULT_DB_ALIAS
 from django.http import HttpRequest, QueryDict
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -29,6 +31,7 @@ from enhydris.hcore.models import (
     EventType, FileType, GentityEvent, GentityFile, Instrument, InstrumentType,
     Organization, Station, StationType, Timeseries, TimeZone,
     UnitOfMeasurement, UserProfile, Variable)
+from enhydris.hcore.tests.test_models import RandomEnhydrisTimeseriesDataDir
 from enhydris.hcore.views import ALLOWED_TO_EDIT, StationListBaseView
 
 try:
@@ -53,6 +56,28 @@ except ImportError:
     SeleniumTestCase = TestCase
     PageElement = Dummy
     By = Dummy()
+
+
+def check_if_connected_to_old_sqlite():
+    """Return True if connected to sqlite<3.8.3
+
+    Used to skip a test, notably on Travis, which currently runs an old sqlite
+    version.
+
+    The correct way would have been to remove the functionality, not just skip
+    the test, because the functionality is still there and will cause an
+    internal server error, but this would be too much work given that we use
+    SQLite only for development.
+    """
+    if not isinstance(
+            connections[DEFAULT_DB_ALIAS],
+            django.contrib.gis.db.backends.spatialite.base.DatabaseWrapper):
+        return False
+    import sqlite3
+    major, minor, micro = [int(x)
+                           for x in sqlite3.sqlite_version.split('.')[:3]]
+    return (major < 3) or (major == 3 and minor < 8) or (
+        major == 3 and minor == 8 and micro < 3)
 
 
 class SortTestCase(TestCase):
@@ -253,6 +278,7 @@ class SearchTestCase(TestCase):
         queryset = self.get_queryset(urlencode({'q': 'ts_only:'}))
         self.assertEqual(queryset.count(), 3)
 
+    @skipIf(check_if_connected_to_old_sqlite(), "Use sqlite>=3.8.3")
     def test_search_by_political_division(self):
         queryset = self.get_queryset(
             urlencode({'political_division': 'Cardolan'}))
@@ -306,25 +332,6 @@ class RandomMediaRoot(override_settings):
 
     def disable(self):
         super(RandomMediaRoot, self).disable()
-        shutil.rmtree(self.tmpdir)
-
-
-class RandomEnhydrisTimeseriesDataDir(override_settings):
-    """
-    Override ENHYDRIS_TIMESERIES_DATA_DIR to a temporary directory.
-
-    Specifying "@RandomEnhydrisTimeseriesDataDir()" as a decorator is the same
-    as "@override_settings(ENHYDRIS_TIMESERIES_DATA_DIR=tempfile.mkdtemp())",
-    except that in the end it removes the temporary directory.
-    """
-
-    def __init__(self):
-        self.tmpdir = tempfile.mkdtemp()
-        super(RandomEnhydrisTimeseriesDataDir, self).__init__(
-            ENHYDRIS_TIMESERIES_DATA_DIR=self.tmpdir)
-
-    def disable(self):
-        super(RandomEnhydrisTimeseriesDataDir, self).disable()
         shutil.rmtree(self.tmpdir)
 
 
@@ -525,10 +532,13 @@ class TsTestCase(TestCase):
 
     @RandomEnhydrisTimeseriesDataDir()
     def test_timeseries_with_timezone_data(self):
-        """There was this bug where you'd ask to download from start date,
+        """Test that there's no aware/naive date confusion
+
+        There was this bug where you'd ask to download from start date,
         and the start date was interpreted as aware whereas the time series
         data was interpreted as naive. This test checks there's no such
-        bug."""
+        bug.
+        """
         data = textwrap.dedent("""\
                                2005-08-23 18:53,93,
                                2005-08-23 19:53,108.7,
@@ -538,6 +548,8 @@ class TsTestCase(TestCase):
             """)
         self.ts.set_data(StringIO(data))
         url = '/timeseries/d/{}/download/2005-08-23T19:54/'.format(self.ts.pk)
+        if not settings.ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
+            self.client.login(username='test', password='test')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         result = response.content.decode('utf-8')

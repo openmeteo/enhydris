@@ -6,15 +6,32 @@ Release notes
 
 .. highlight:: bash
 
-Version 1.1
-===========
+Versions later than 1.0
+=======================
 
-This version only changes an internal API;
-:meth:`enhydris.hcore.models.Timeseries.get_all_data()` is renamed to
-:meth:`enhydris.hcore.models.Timeseries.get_data()` and accepts
-arguments to specify a start and end date. Upgrading from 1.0 is
-trivial; just :command:`pip install enhydris>=1.1,<2`. You can upgrade
-here directly from 0.8 by following the upgrade instructions for 1.0.
+Upgrading
+---------
+
+If you are already running Enhydris version 1.0 or later, you can upgrade to
+any later 1.x version with this procedure:
+
+1. Backup your database (you are not going to use this backup unless
+   something goes wrong and you need to restore everything to the
+   state it was before).
+
+2. Install the new version and execute the database upgrade procedure::
+
+      python manage.py migrate
+
+Changes in 1.x minor- and micro- versions
+-----------------------------------------
+
+- Version 1.1.0 changes an internal API;
+  :meth:`enhydris.hcore.models.Timeseries.get_all_data()` is renamed to
+  :meth:`enhydris.hcore.models.Timeseries.get_data()` and accepts arguments to
+  specify a start and end date.
+- Version 1.1.1 puts the navbar inside a {% block %}, so that it can be
+  overriden in custom skins.
 
 Version 1.0
 ===========

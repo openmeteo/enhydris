@@ -1,14 +1,37 @@
 from datetime import datetime, timedelta
 from six import StringIO
+import shutil
+import tempfile
 import textwrap
 
 from django.test import TestCase
+from django.test.utils import override_settings
 
 from model_mommy import mommy
 
 from enhydris.hcore.models import Station, Timeseries, timezone
 
 
+class RandomEnhydrisTimeseriesDataDir(override_settings):
+    """
+    Override ENHYDRIS_TIMESERIES_DATA_DIR to a temporary directory.
+
+    Specifying "@RandomEnhydrisTimeseriesDataDir()" as a decorator is the same
+    as "@override_settings(ENHYDRIS_TIMESERIES_DATA_DIR=tempfile.mkdtemp())",
+    except that in the end it removes the temporary directory.
+    """
+
+    def __init__(self):
+        self.tmpdir = tempfile.mkdtemp()
+        super(RandomEnhydrisTimeseriesDataDir, self).__init__(
+            ENHYDRIS_TIMESERIES_DATA_DIR=self.tmpdir)
+
+    def disable(self):
+        super(RandomEnhydrisTimeseriesDataDir, self).disable()
+        shutil.rmtree(self.tmpdir)
+
+
+@RandomEnhydrisTimeseriesDataDir()
 class TimeseriesTestCase(TestCase):
 
     def setUp(self):
