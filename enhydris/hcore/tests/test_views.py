@@ -69,11 +69,13 @@ def check_if_connected_to_old_sqlite():
     internal server error, but this would be too much work given that we use
     SQLite only for development.
     """
-    if not isinstance(
-            connections[DEFAULT_DB_ALIAS],
-            django.contrib.gis.db.backends.spatialite.base.DatabaseWrapper):
+    try:
+        from django.contrib.gis.db.backends.spatialite import base
+        import sqlite3
+    except ImportError:
         return False
-    import sqlite3
+    if not isinstance(connections[DEFAULT_DB_ALIAS], base.DatabaseWrapper):
+        return False
     major, minor, micro = [int(x)
                            for x in sqlite3.sqlite_version.split('.')[:3]]
     return (major < 3) or (major == 3 and minor < 8) or (
@@ -436,6 +438,19 @@ class TsTestCase(TestCase):
         post_dict = {'gentity': self.station.pk, 'variable': self.var.pk,
                      'unit_of_measurement': self.unit.pk,
                      'time_zone': self.tz.pk
+                     }
+        form = TimeseriesDataForm(post_dict, file_dict, instance=self.ts)
+        self.assertTrue(form.is_valid())
+        ts = form.save()
+        ts.save()
+        self.assertEqual(len(ts.get_data()), 12871)
+
+        # Append
+        with open("enhydris/hcore/tests/tsdata2.hts", "rb") as f:
+            file_dict = {'data': SimpleUploadedFile(f.name, f.read())}
+        post_dict = {'gentity': self.station.pk, 'variable': self.var.pk,
+                     'unit_of_measurement': self.unit.pk,
+                     'time_zone': self.tz.pk, 'data_policy': 'A',
                      }
         form = TimeseriesDataForm(post_dict, file_dict, instance=self.ts)
         self.assertTrue(form.is_valid())

@@ -1,0 +1,13 @@
+Version=2
+Unit=mm
+Count=1
+Title=
+Comment=ΑΒΑΣ
+Comment=
+Comment=ΜΟΝΑΔΕΣ (mm)
+Timezone=EET (UTC+0200)
+Time_step=1440,0
+Timestamp_offset=0,0
+Variable=ΒΡΟΧΟΠΤΩΣΗ
+
+1997-03-31 08:00,10,

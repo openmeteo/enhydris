@@ -378,7 +378,7 @@ class TimeseriesForm(ModelForm):
 
     class Meta:
         model = Timeseries
-        exclude = ['datafile']
+        exclude = ['start_date_utc', 'end_date_utc', 'datafile']
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -406,7 +406,8 @@ class TimeseriesForm(ModelForm):
             self.fields["instrument"].empty_label = None
 
     def clean_data(self):
-        # Check if file contains valid timeseries data.
+        """Check if file contains valid timeseries data."""
+
         if ('data' not in self.cleaned_data) or not self.cleaned_data['data']:
             return None
         self.cleaned_data['data'].seek(0)
@@ -414,11 +415,25 @@ class TimeseriesForm(ModelForm):
         if isinstance(s, bytes):
             s = s.decode('utf-8')
 
+        # Skip possible header
+        data = StringIO(s)
+        while True:
+            pos = data.tell()
+            line = data.readline()
+            if not line:
+                break
+            if ('=' not in line) and (not line.isspace()):
+                data.seek(pos)
+                break
+        s = data.read()  # Read from the current position  onwards
+        self.cleaned_data['data'] = StringIO(s)
+
         try:
-            pd2hts.read_file(StringIO(s))
+            pd2hts.read(self.cleaned_data['data'])
         except Exception as e:
             raise forms.ValidationError(str(e))
 
+        self.cleaned_data['data'].seek(0)
         return self.cleaned_data['data']
 
     def clean(self):
@@ -479,7 +494,7 @@ class TimeseriesForm(ModelForm):
                 try:
                     atimeseries.append_data(data)
                 except Exception as e:
-                    raise forms.ValidationError(_(e.message))
+                    raise forms.ValidationError(str(e))
 
         return self.cleaned_data
 
@@ -495,20 +510,6 @@ class TimeseriesForm(ModelForm):
         if 'data' in self.cleaned_data and self.cleaned_data['data']:
             data = self.cleaned_data['data']
             data.seek(0)
-            s = data.read()
-            if isinstance(s, bytes):
-                s = s.decode('utf-8')
-            data = StringIO(s)
-
-            # Skip possible header
-            while True:
-                pos = data.tell()
-                line = data.readline()
-                if not line:
-                    break
-                if ('=' not in line) and (not line.isspace()):
-                    data.seek(pos)
-                    break
 
             if self.cleaned_data['data_policy'] == 'A':
                 pass
