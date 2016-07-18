@@ -32,6 +32,8 @@ Changes in 1.x minor- and micro- versions
   specify a start and end date.
 - Version 1.1.1 puts the navbar inside a {% block %}, so that it can be
   overriden in custom skins.
+- Version 1.1.2 fixes two bugs when editing time series: appending wasn't
+  working properly, and start and end dates were shown as editable fields.
 
 Version 1.0
 ===========
