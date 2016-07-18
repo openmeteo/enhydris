@@ -378,7 +378,7 @@ class TimeseriesForm(ModelForm):
 
     class Meta:
         model = Timeseries
-        exclude = ['datafile']
+        exclude = ['start_date_utc', 'end_date_utc', 'datafile']
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
