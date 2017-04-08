@@ -12,7 +12,7 @@
       <p>{% trans "Not yet registered?" %}
         <a href="{% url 'registration_register' %}">{% trans "Register here" %}</a></p>
       <p>{% trans "Trouble signing in?" %}
-        <a href="{% url 'django.contrib.auth.views.password_reset' %}">{% trans "Reset password" %}</a></p>
+        <a href="{% url 'password_reset' %}">{% trans "Reset password" %}</a></p>
     </div>
   </div>
   {% if form.errors %}
@@ -23,7 +23,7 @@
   </div>
   {% endif %}
   <div class="col-md-6">
-    <form action="{% url 'django.contrib.auth.views.login' %}"
+    <form action="{% url 'auth_login' %}"
         method="post"
         role="form"
         class="form-horizontal">

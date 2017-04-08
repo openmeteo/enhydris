@@ -84,6 +84,23 @@ def check_if_connected_to_old_sqlite():
         major == 3 and minor == 8 and micro < 3)
 
 
+class StationsTestCase(TestCase):
+
+    def setUp(self):
+        mommy.make(Station, name="Komboti",
+                   point=Point(x=21.06071, y=39.09518, srid=4326), srid=4326)
+        mommy.make(Station, name="Agios Athanasios",
+                   point=Point(x=21.60121, y=39.22440, srid=4326), srid=4326)
+        mommy.make(Station, name="Tharbad",
+                   point=Point(x=-176.48368, y=0.19377, srid=4326), srid=4326)
+
+    def test_station_list(self):
+        response = self.client.get('/')
+        self.assertContains(
+            response, '<a href="?sort=-name&amp;sort=name">Name&nbsp;↓</a>',
+            html=True)
+
+
 class SortTestCase(TestCase):
 
     def setUp(self):

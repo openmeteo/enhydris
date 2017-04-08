@@ -8,7 +8,7 @@
   <h1>{% trans "Success!" %}</h1>
   <p class="lead">{% trans "Account successfully activated" %}.</p>
   <p>{% trans "You can now sign in to the website" %}.</p>
-  <p><a href="{% url 'django.contrib.auth.views.login' %}"
+  <p><a href="{% url 'auth_login' %}"
 		class="btn btn-success"
         role="button">{% trans "Login" %}</a>
   </p>

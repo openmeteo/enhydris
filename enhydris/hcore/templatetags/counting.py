@@ -2,9 +2,9 @@
 These template tags are for counting. Used in the frontpage stats
 """
 
+from django.apps import apps
 from django.conf import settings
 from django.template import Library, Node, TemplateSyntaxError
-from django.db.models import get_model
 
 from enhydris.hcore.models import Station
 
@@ -13,7 +13,8 @@ register = Library()
 
 def do_count(appmodel):
     try:
-        model = get_model(*appmodel.split('.'))
+        model = apps.get_app_config('enhydris.hcore').get_model(
+            *appmodel.split('.'))
         count = model.objects.all().count()
     except:
         count = 0

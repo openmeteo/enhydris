@@ -34,7 +34,7 @@
         </table>
         <br>
         <a class="btn btn-xs btn-primary" href="{% url "profile_edit" %}">{% trans "Edit your user profile" %}</a>
-        <a class="btn btn-xs btn-primary" href="{% url 'django.contrib.auth.views.password_reset' %}">{% trans "Change your password" %}</a>
+        <a class="btn btn-xs btn-primary" href="{% url 'password_reset' %}">{% trans "Change your password" %}</a>
         {% if user.is_staff %}
           <a class="btn btn-xs btn-primary" href="{% url "station_list" %}admin/">{% trans "Access the admin panel" %}</a>
           {% endif %}

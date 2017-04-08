@@ -16,6 +16,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.views import login as auth_login
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.gis.db.models import Extent
 from django.contrib.gis.geos import Polygon
 from django.core.urlresolvers import reverse
 from django.db import transaction
@@ -23,8 +24,7 @@ from django.db.models import Count, Q
 from django.db.utils import InternalError
 from django.http import (Http404, HttpResponse, HttpResponseForbidden,
                          HttpResponseRedirect)
-from django.shortcuts import get_object_or_404, render_to_response
-from django.template import RequestContext
+from django.shortcuts import get_object_or_404, render
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from django.utils.decorators import method_decorator
 from django.utils.functional import lazy
@@ -455,8 +455,8 @@ class StationListView(StationListBaseView):
         sort_order = self.request.GET.getlist('sort')
 
         # Ensure sort order term to match with Station model field names
-        sort_order = [x for x in sort_order
-                      if x in Station._meta.get_all_field_names()]
+        field_names = [x.name for x in Station._meta.get_fields()]
+        sort_order = [x for x in sort_order if x in field_names]
 
         if not sort_order:
             sort_order = self.request.session.get('sort', ['name'])
@@ -506,7 +506,7 @@ class BoundingBoxView(StationListBaseView):
         # Determine queryset's extent
         queryset = self.get_queryset(distinct=False)
         try:
-            extent = list(queryset.extent())
+            extent = list(queryset.aggregate(Extent('point')))['point__extent']
         except TypeError:
             # Type error is raised if queryset is empty, or if all the
             # stations it contains are with unspecified co-ordinates.
@@ -799,8 +799,7 @@ class InstrumentDetailView(DetailView):
 
 
 def map_view(request, *args, **kwargs):
-    return render_to_response('map_page.html',
-                              context_instance=RequestContext(request))
+    return render(request, 'map_page.html')
 
 
 def get_subdivision(request, division_id):
@@ -1010,9 +1009,7 @@ def _station_edit_or_create(request, station_id=None):
         else:
             form = StationForm()
 
-    return render_to_response('station_edit.html',
-                              {'form': form},
-                              context_instance=RequestContext(request))
+    return render(request, 'station_edit.html', {'form': form})
 
 
 @login_required
@@ -1054,10 +1051,8 @@ def station_delete(request, station_id):
         if ref and not ref.endswith(reverse('station_detail',
                                             args=[station_id])):
             return HttpResponseRedirect(ref)
-        return render_to_response(
-            'success.html',
-            {'msg': 'Station deleted successfully', },
-            context_instance=RequestContext(request))
+        return render(request, 'success.html',
+                      {'msg': 'Station deleted successfully', })
     return HttpResponseForbidden('Forbidden', content_type='text/plain')
 
 
@@ -1124,8 +1119,7 @@ def _timeseries_edit_or_create(request, tseries_id=None):
                                   gentity_id=station_id,
                                   instrument_id=instrument_id)
 
-    return render_to_response('timeseries_edit.html', {'form': form},
-                              context_instance=RequestContext(request))
+    return render(request, 'timeseries_edit.html', {'form': form})
 
 
 @permission_required('hcore.add_timeseries')
@@ -1162,10 +1156,8 @@ def timeseries_delete(request, timeseries_id):
             if ref and not ref.endswith(reverse('timeseries_detail',
                                                 args=[timeseries_id])):
                 return HttpResponseRedirect(ref)
-            return render_to_response(
-                'success.html',
-                {'msg': 'Timeseries deleted successfully', },
-                context_instance=RequestContext(request))
+            return render(request, 'success.html',
+                          {'msg': 'Timeseries deleted successfully', })
     return HttpResponseForbidden('Forbidden',
                                  content_type='text/plain')
 
@@ -1221,8 +1213,7 @@ def _gentityfile_edit_or_create(request, gfile_id=None):
         else:
             form = GentityFileForm(user=user, gentity_id=station_id)
 
-    return render_to_response('gentityfile_edit.html', {'form': form},
-                              context_instance=RequestContext(request))
+    return render(request, 'gentityfile_edit.html', {'form': form})
 
 
 @permission_required('hcore.add_gentityfile')
@@ -1258,10 +1249,8 @@ def gentityfile_delete(request, gentityfile_id):
             ref = request.META.get('HTTP_REFERER', None)
             if ref:
                 return HttpResponseRedirect(ref)
-            return render_to_response(
-                'success.html',
-                {'msg': 'GentityFile deleted successfully', },
-                context_instance=RequestContext(request))
+            return render(request, 'success.html',
+                          {'msg': 'GentityFile deleted successfully', })
     return HttpResponseForbidden('Forbidden',
                                  content_type='text/plain')
 
@@ -1320,8 +1309,7 @@ def _gentitygenericdata_edit_or_create(request, ggenericdata_id=None):
         else:
             form = GentityGenericDataForm(user=user, gentity_id=station_id)
 
-    return render_to_response('gentitygenericdata_edit.html', {'form': form},
-                              context_instance=RequestContext(request))
+    return render(request, 'gentitygenericdata_edit.html', {'form': form})
 
 
 @permission_required('hcore.add_gentityfile')
@@ -1358,10 +1346,8 @@ def gentitygenericdata_delete(request, ggenericdata_id):
             ref = request.META.get('HTTP_REFERER', None)
             if ref:
                 return HttpResponseRedirect(ref)
-            return render_to_response(
-                'success.html',
-                {'msg': 'GentityGenericData deleted successfully', },
-                context_instance=RequestContext(request))
+            return render(request, 'success.html',
+                          {'msg': 'GentityGenericData deleted successfully'})
     return HttpResponseForbidden('Forbidden', content_type='text/plain')
 
 
@@ -1419,8 +1405,7 @@ def _gentityevent_edit_or_create(request, gevent_id=None):
         else:
             form = GentityEventForm(user=user, gentity_id=station_id)
 
-    return render_to_response('gentityevent_edit.html', {'form': form},
-                              context_instance=RequestContext(request))
+    return render(request, 'gentityevent_edit.html', {'form': form})
 
 
 @permission_required('hcore.add_gentityevent')
@@ -1456,9 +1441,8 @@ def gentityevent_delete(request, gentityevent_id):
             ref = request.META.get('HTTP_REFERER', None)
             if ref:
                 return HttpResponseRedirect(ref)
-            return render_to_response(
-                'success.html', {'msg': 'GentityEvent deleted successfully', },
-                context_instance=RequestContext(request))
+            return render(request, 'success.html',
+                          {'msg': 'GentityEvent deleted successfully'})
     return HttpResponseForbidden('Forbidden', content_type='text/plain')
 
 
@@ -1509,9 +1493,7 @@ def _gentityaltcode_edit_or_create(request, galtcode_id=None):
         else:
             form = GentityAltCodeForm(user=user, gentity_id=station_id)
 
-    return render_to_response('gentityaltcode_edit.html',
-                              {'form': form},
-                              context_instance=RequestContext(request))
+    return render(request, 'gentityaltcode_edit.html', {'form': form})
 
 
 @permission_required('hcore.add_gentityaltcode')
@@ -1548,10 +1530,8 @@ def gentityaltcode_delete(request, gentityaltcode_id):
             ref = request.META.get('HTTP_REFERER', None)
             if ref:
                 return HttpResponseRedirect(ref)
-            return render_to_response(
-                'success.html',
-                {'msg': 'GentityAltCode deleted successfully', },
-                context_instance=RequestContext(request))
+            return render(request, 'success.html',
+                          {'msg': 'GentityAltCode deleted successfully'})
     return HttpResponseForbidden('Forbidden',
                                  content_type='text/plain')
 
@@ -1608,8 +1588,7 @@ def _overseer_edit_or_create(request, overseer_id=None, station_id=None):
         else:
             form = OverseerForm(user=user, gentity_id=station_id)
 
-    return render_to_response('overseer_edit.html', {'form': form},
-                              context_instance=RequestContext(request))
+    return render(request, 'overseer_edit.html', {'form': form})
 
 
 @permission_required('hcore.add_overseer')
@@ -1645,10 +1624,8 @@ def overseer_delete(request, overseer_id):
             ref = request.META.get('HTTP_REFERER', None)
             if ref:
                 return HttpResponseRedirect(ref)
-            return render_to_response(
-                'success.html',
-                {'msg': 'Overseer deleted successfully', },
-                context_instance=RequestContext(request))
+            return render(request, 'success.html',
+                          {'msg': 'Overseer deleted successfully'})
     return HttpResponseForbidden('Forbidden', content_type='text/plain')
 
 
@@ -1703,9 +1680,7 @@ def _instrument_edit_or_create(request, instrument_id=None):
         else:
             form = InstrumentForm(user=user, gentity_id=station_id)
 
-    return render_to_response(
-        'instrument_edit.html', {'form': form},
-        context_instance=RequestContext(request))
+    return render(request, 'instrument_edit.html', {'form': form})
 
 
 @permission_required('hcore.add_instrument')
@@ -1742,10 +1717,8 @@ def instrument_delete(request, instrument_id):
             if ref and not ref.endswith(reverse('instrument_detail',
                                                 args=[instrument_id])):
                 return HttpResponseRedirect(ref)
-            return render_to_response(
-                'success.html',
-                {'msg': 'Instrument deleted successfully', },
-                context_instance=RequestContext(request))
+            return render(request, 'success.html',
+                          {'msg': 'Instrument deleted successfully'})
     return HttpResponseForbidden('Forbidden', content_type='text/plain')
 
 

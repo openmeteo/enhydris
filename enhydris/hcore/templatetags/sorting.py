@@ -1,7 +1,7 @@
 # coding=UTF-8
 
 from django import template
-from django.utils import html
+from django.utils.html import format_html, mark_safe
 
 register = template.Library()
 
@@ -29,4 +29,5 @@ def sorter(column, sort_order, label):
         indicator = '&nbsp;↑'
     target = '?sort={}{}&{}'.format(
         sign, column, '&'.join(['sort=' + x for x in sort_order]))
-    return '<a href="%s">%s%s</a>' % (html.escape(target), label, indicator)
+    return format_html('<a href="{}">{}{}</a>', target, label,
+                       mark_safe(indicator))

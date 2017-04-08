@@ -34,7 +34,6 @@ class SmokeTestCase(TestCase):
     @override_settings(REGISTRATION_OPEN=True)
     def testStatusCode(self):
         """Test that the response status code is correct"""
-
         for expected_code in self.pages:
             for page_url in self.pages[expected_code]:
                 page = self.client.get(page_url)
