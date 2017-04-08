@@ -1,6 +1,25 @@
 import os
 import tempfile
 
+# Development settings (to be overriden in production settings.py)
+DEBUG = True
+SECRET_KEY = 'topsecret'
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
+        'NAME': 'enhydris.db',
+    }
+}
+SITE_ID = 1
+STATIC_URL = '/static/'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST = 'smtp.my.domain'
+DEFAULT_FROM_EMAIL = 'user@host.domain'
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+EMAIL_HOST_USER = 'automaticsender@my.domain'
+EMAIL_HOST_PASSWORD = 'mypassword'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 ROOT_URLCONF = 'enhydris.urls'
 
@@ -108,3 +127,8 @@ ENHYDRIS_MAP_BASE_LAYERS = [
 ]
 ENHYDRIS_MAP_BOUNDS = ((19.3, 34.75), (29.65, 41.8))
 ENHYDRIS_MAP_MARKERS = {'0': 'images/drop_marker.png'}
+
+try:
+    from settings_selenium import *
+except ImportError:
+    pass

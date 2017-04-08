@@ -65,7 +65,7 @@ class Tsdata(APIView):
         try:
             atimeseries = models.Timeseries.objects.get(pk=int(pk))
             self.check_object_permissions(request, atimeseries)
-            nrecords = atimeseries.append_data(StringIO(request.DATA[
+            nrecords = atimeseries.append_data(StringIO(request.data[
                 'timeseries_records']))
             return HttpResponse(str(nrecords), content_type="text/plain")
         except (ValueError, iso8601.ParseError) as e:

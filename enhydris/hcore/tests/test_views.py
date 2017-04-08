@@ -40,6 +40,8 @@ try:
     # otherwise the tests are skipped. If you want to run this tests, pip
     # install django_selenium_clean and add to your settings.py the snippet at
     # https://github.com/aptiko/django-selenium-clean#executing-the-test
+    if not getattr(settings, 'SELENIUM_WEBDRIVERS', False):
+        raise ImportError
     from django_selenium_clean import selenium, SeleniumTestCase, PageElement
     from selenium.webdriver.common.by import By
 except ImportError:

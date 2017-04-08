@@ -1,10 +1,9 @@
 *.pyc
 *.egg
 *.egg-info
-enhydris/settings/local.py
 enhydris/urls.py
 doc/_build
 dist
-devinstance
 timeseries_data
 enhydris.db
+settings_selenium.py
