@@ -1,6 +1,6 @@
 Django>=1.8,<1.10
 django-registration-redux>=1.2,<2
-djangorestframework>=3.3,<4
+djangorestframework>=3.4,<4
 django-ajax-selects>=1.3.4,<2
 Markdown>=2.1,<3
 django-simple-captcha>=0.4
