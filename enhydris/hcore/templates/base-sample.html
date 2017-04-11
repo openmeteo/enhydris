@@ -13,7 +13,9 @@
       {% bootstrap_css %}
       <link rel="stylesheet" media="screen" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/css/bootstrap-datepicker.min.css">
     {% endblock %}
-    {% block shortcut_icon %}{% endblock %}
+    {% block shortcut_icon %}
+      <link rel="icon" type="image/x-icon" href="{% static "images/favicon.ico" %}">
+    {% endblock %}
     {% block extracss %}{% endblock %}
     {% block extra_head %}{% endblock %}
 </head>
