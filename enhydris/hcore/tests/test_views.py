@@ -12,6 +12,7 @@ from urllib.parse import urlencode
 
 import django
 from django.conf import settings
+from django.contrib.staticfiles import finders as staticfiles_finders
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.contrib.auth.hashers import make_password
@@ -23,6 +24,7 @@ from django.http import HttpRequest, QueryDict
 from django.test import TestCase
 from django.test.utils import override_settings
 
+from bs4 import BeautifulSoup
 from model_mommy import mommy
 import pd2hts
 
@@ -1021,7 +1023,8 @@ class StationTestCase(TestCase):
         mommy.make(Organization, name="We're rich and we fancy it SA")
         mommy.make(StationType, descr="Important")
 
-    @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+    @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True,
+                       STATIC_ROOT='/dummy')
     def test_add_station(self):
         """
         Test that the add station form appears properly.
@@ -1030,6 +1033,17 @@ class StationTestCase(TestCase):
         self.assertTrue(r)
         response = self.client.get('/stations/add/')
         self.assertEqual(response.status_code, 200)
+
+        # Check that the "add another" icon from admin appears properly
+        soup = BeautifulSoup(response.content)
+        icon_urls = set()
+        for element in soup.find_all("a", class_="add-another"):
+            icon_urls.add(element.img['src'])
+        self.assertEqual(len(icon_urls), 1)
+        icon_url = icon_urls.pop()
+        self.assertTrue(icon_url.startswith(settings.STATIC_URL))
+        path = icon_url[len(settings.STATIC_URL):]
+        self.assertTrue(os.path.exists(staticfiles_finders.find(path)))
 
     # We cannot catch invalid SRIDs with spatialite, because spatialite
     # does not return any error. We therefore skip this test. See
