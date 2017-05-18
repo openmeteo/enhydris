@@ -1243,8 +1243,11 @@ class CoordinatesTestCase(SeleniumTestCase):
     @override_settings(DEBUG=True)
     def test_coordinates(self):
         # Login
-        r = selenium.login(username='admin', password='topsecret')
-        self.assertTrue(r)
+        selenium.get(self.live_server_url + '/accounts/login/')
+        PageElement(By.ID, 'id_username').wait_until_is_displayed()
+        PageElement(By.ID, 'id_username').send_keys('admin')
+        PageElement(By.ID, 'id_password').send_keys('topsecret')
+        PageElement(By.XPATH, '//button[@type="submit"]').click()
 
         # Go to the add new station page and check that the simple view is
         # active
