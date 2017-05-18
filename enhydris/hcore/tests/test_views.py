@@ -1035,7 +1035,7 @@ class StationTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Check that the "add another" icon from admin appears properly
-        soup = BeautifulSoup(response.content)
+        soup = BeautifulSoup(response.content, 'html.parser')
         icon_urls = set()
         for element in soup.find_all("a", class_="add-another"):
             icon_urls.add(element.img['src'])
