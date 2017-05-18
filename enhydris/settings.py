@@ -10,6 +10,9 @@ DATABASES = {
         'NAME': 'enhydris.db',
     }
 }
+if os.path.exists('/usr/lib/x86_64-linux-gnu/mod_spatialite.so'):
+    # This is necessary for spatialite>=4.2
+    SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
 SITE_ID = 1
 STATIC_URL = '/static/'
 EMAIL_USE_TLS = True
@@ -127,8 +130,12 @@ ENHYDRIS_MAP_BASE_LAYERS = [
 ]
 ENHYDRIS_MAP_BOUNDS = ((19.3, 34.75), (29.65, 41.8))
 ENHYDRIS_MAP_MARKERS = {'0': 'images/drop_marker.png'}
-
-try:
-    from settings_selenium import *
-except ImportError:
-    pass
+if os.environ.get('SELENIUM_BROWSER', False):
+    from selenium import webdriver
+    SELENIUM_WEBDRIVERS = {
+        'default': {
+            'callable': webdriver.__dict__[os.environ['SELENIUM_BROWSER']],
+            'args': (),
+            'kwargs': {},
+        }
+    }
