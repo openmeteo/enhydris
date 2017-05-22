@@ -12,9 +12,11 @@ Enhydris - Web-based hydro/meteorological database
 
 .. image:: https://img.shields.io/pypi/l/enhydris.svg
     :alt: License
+    :target: #
 
 .. image:: https://img.shields.io/pypi/status/enhydris.svg
     :alt: Status
+    :target: #
 
 .. image:: https://img.shields.io/pypi/v/enhydris.svg
     :alt: Latest version
