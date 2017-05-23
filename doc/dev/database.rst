@@ -694,7 +694,7 @@ Time series and related models
 
       Replace all of the time series with *data*, which must be a
       filelike object containing time series data in `text format`_ or
-      `file format`_. If it is in text format, the header is ignored.
+      `file format`_. If it is in file format, the header is ignored.
 
    .. method:: enhydris.hcore.models.Timeseries.append_data(data)
 
@@ -711,6 +711,8 @@ Time series and related models
       if the time series contains no records.
 
 
+.. _text format: https://github.com/openmeteo/pd2hts#text-format
+.. _file format: https://github.com/openmeteo/pd2hts#file-format
 .. _multi-table inheritance: http://docs.djangoproject.com/en/dev/topics/db/models/#id6
 .. _django-multilingual: http://code.google.com/p/django-multilingual/
 .. _abstract base class: http://docs.djangoproject.com/en/dev/topics/db/models/#id5

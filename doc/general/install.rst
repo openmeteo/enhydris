@@ -18,9 +18,9 @@ GDAL                                                  1.9
 PIL or Pillow with freetype                           1.1.7 [3]
 ===================================================== ============
 
-[1] Enhydris runs on all supported versions of Python 3.  It does not
-run on Python 2.  setuptools and pip are needed in order to install
-the rest of the Python modules.
+[1] Enhydris runs on Python 3.4 or later.  It does not run on Python 2.
+setuptools and pip are needed in order to install the rest of the Python
+modules.
 
 [2] Enhydris has been tested with PostgreSQL+PostGIS and spatialite, the
 latter only in development.
@@ -48,12 +48,16 @@ in Linux distributions.
 Install Enhydris
 ================
 
-Install Enhydris with :command:`pip install enhydris`, probably
-specifying a version and using a virtualenv, like this::
+Install Enhydris by cloning it and then installing the requirements
+specified in :file:`requirements.txt`, probably in a virtualenv, like
+this::
 
+    cd /opt
+    git clone https://github.com/openmeteo/enhydris.git
+    git checkout 1.2
     virtualenv --system-site-packages --python=/usr/bin/python3 \
-        [virtualenv_target_dir]
-    pip install 'enhydris>=1,<2'
+        enhydris/venv
+    ./enhydris/venv/bin/pip install -r enhydris/requirements.txt
 
 You may or may not want to use the ``--system-site-packages`` parameter.
 The main reason to use it is that it will then use your systemwide
@@ -61,20 +65,25 @@ The main reason to use it is that it will then use your systemwide
 ``python3-psycopg2``, if you use PostgreSQL), which means it won't need
 to compile these for the virtualenv.
 
+.. note::
+
+   Versions between 0.5 and 1.1 are installed in a different way. Please
+   consult the documentation for version 1.1.
+
 Configuring Enhydris
 ====================
 
-Execute :command:`enhydris-admin newinstance` to create a new Enhydris
-configuration directory; for example::
+Create a Django settings file, either in
+:file:`enhydris/settings/local.py`, or wherever you like. It should begin
+with this::
 
-    cd /etc
-    enhydris-admin newinstance myinstance
+    from enhydris.settings import *
 
-The above will create directory :file:`/etc/myinstance` with some
-files in it.
+and it then it should go on to override ``DEBUG``, ``SECRET_KEY``,
+``DATABASES`` and ``STATIC_ROOT``. More settings you may want to
+override are the `Django settings`_ and the :ref:`Enhydris settings
+<settings>`.
 
-Open the created file :file:`settings.py` and edit it according to the
-comments you will find in the file.
 
 Initializing the database
 =========================
@@ -194,7 +203,7 @@ Settings reference
 These are the settings available to Enhydris, in addition to the
 `Django settings`_.
 
-.. _django settings: http://docs.djangoproject.com/en/1.8/ref/settings/
+.. _django settings: http://docs.djangoproject.com/en/1.11/ref/settings/
 
 .. data:: ENHYDRIS_FILTER_DEFAULT_COUNTRY
 

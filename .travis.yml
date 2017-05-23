@@ -1,27 +1,31 @@
+sudo: false
+
 language: python
 
 python:
- - "3.3"
  - "3.4"
  - "3.5"
+ - "3.6"
 
 addons:
   apt:
     packages:
+      - libgdal1h
       - gdal-bin
       - libgdal-dev
 
 install:
- # Work around https://github.com/macropin/django-registration/issues/103,
- # which to date has been fixed but not released.
- - pip install 'django-registration-redux<2'
-
  - CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install 'gdal<1.11'
 
  - pip install codecov
+ - pip install -r requirements.txt
+ - pip install -r requirements-test.txt
 
 script:
- - coverage run setup.py test
+ - coverage run manage.py test -v2
+
+env:
+  - SELENIUM_BROWSER=PhantomJS
 
 after_success:
  - codecov

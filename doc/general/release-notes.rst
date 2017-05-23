@@ -6,14 +6,34 @@ Release notes
 
 .. highlight:: bash
 
-Versions later than 1.0
-=======================
+Version DEV
+===========
+
+Upgrading from 1.1
+------------------
+
+Enhydris is no longer pip-installable. Instead, it is a typical Django
+application with its :file:`manage.py` and all. Install it as described
+in :ref:`install` and execute the database upgrade procedure::
+
+    python manage.py migrate
+
+Changes from 1.1.2
+------------------
+
+- Now a normal Django project, no longer pip-installable.
+- Django 1.11 and only that is now supported.
+- A favicon has been added.
+- Some minor bugs have been fixed.
+
+Version 1.1
+===========
 
 Upgrading
 ---------
 
-If you are already running Enhydris version 1.0 or later, you can upgrade to
-any later 1.x version with this procedure:
+If you are already running Enhydris version 1.0, you can upgrade to
+1.1.x with this procedure:
 
 1. Backup your database (you are not going to use this backup unless
    something goes wrong and you need to restore everything to the
@@ -23,8 +43,8 @@ any later 1.x version with this procedure:
 
       python manage.py migrate
 
-Changes in 1.x minor- and micro- versions
------------------------------------------
+Changes in 1.1 microversions
+----------------------------
 
 - Version 1.1.0 changes an internal API;
   :meth:`enhydris.hcore.models.Timeseries.get_all_data()` is renamed to
