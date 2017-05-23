@@ -1,5 +1,4 @@
 import os
-import tempfile
 
 # Development settings (to be overriden in production settings.py)
 DEBUG = True

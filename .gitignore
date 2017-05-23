@@ -6,4 +6,7 @@ doc/_build
 dist
 timeseries_data
 enhydris.db
-settings_selenium.py
+enhydris/settings/local.py
+
+# Selenium log files
+*driver.log
