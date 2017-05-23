@@ -25,8 +25,10 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from bs4 import BeautifulSoup
+from django_selenium_clean import PageElement, SeleniumTestCase
 from model_mommy import mommy
 import pd2hts
+from selenium.webdriver.common.by import By
 
 from enhydris.hcore.forms import TimeseriesDataForm
 from enhydris.hcore.models import (
@@ -35,31 +37,6 @@ from enhydris.hcore.models import (
     UnitOfMeasurement, UserProfile, Variable)
 from enhydris.hcore.tests.test_models import RandomEnhydrisTimeseriesDataDir
 from enhydris.hcore.views import ALLOWED_TO_EDIT, StationListBaseView
-
-try:
-    # Experimental Selenium support. Enhydris does not require Selenium
-    # to be installed or configured. If it is, it runs the selenium tests;
-    # otherwise the tests are skipped. If you want to run this tests, pip
-    # install django_selenium_clean and add to your settings.py the snippet at
-    # https://github.com/aptiko/django-selenium-clean#executing-the-test
-    if not getattr(settings, 'SELENIUM_WEBDRIVERS', False):
-        raise ImportError
-    from django_selenium_clean import selenium, SeleniumTestCase, PageElement
-    from selenium.webdriver.common.by import By
-except ImportError:
-    selenium = False
-
-    # Create some dummy stuff to allow the Selenium tests to compile (even if
-    # they are always skipped).
-    class Dummy:
-        XPATH = ''
-        ID = ''
-
-        def __init__(*args, **kwargs):
-            pass
-    SeleniumTestCase = TestCase
-    PageElement = Dummy
-    By = Dummy()
 
 
 def check_if_connected_to_old_sqlite():
@@ -115,8 +92,8 @@ class SortTestCase(TestCase):
 
     def test_sort(self):
         # Request for host.domain/?sort=water_division&sort=name
-        response = self.client.get(reverse('station_list')
-                                   + '?sort=water_division&sort=name')
+        response = self.client.get(reverse('station_list') +
+                                   '?sort=water_division&sort=name')
 
         # Checking  test stations 'Komboti', 'Agios Athanasios', 'Tharbad'
         # alphabetical order ['water_division', 'name']
@@ -133,8 +110,8 @@ class SortTestCase(TestCase):
         self.assertLess(i('Komboti'), i('Tharbad'))
 
         # Order for host.domain/?sort=name&sort=999.9
-        response = self.client.get(reverse('station_list')
-                                   + '?sort=name&sort=999.9')
+        response = self.client.get(reverse('station_list') +
+                                   '?sort=name&sort=999.9')
 
         # Order is only made with default ['name'] term
         # Checking  test stations 'Komboti', 'Tharbad' alphabetical order index
@@ -1206,7 +1183,8 @@ class GentityEventTestCase(TestCase):
                                                      ).count(), 1)
 
 
-@skipUnless(selenium, 'Selenium is missing or unconfigured')
+@skipUnless(getattr(settings, 'SELENIUM_WEBDRIVERS', False),
+            'Selenium is unconfigured')
 class CoordinatesTestCase(SeleniumTestCase):
 
     # Elements in "Edit Station" view
@@ -1243,7 +1221,7 @@ class CoordinatesTestCase(SeleniumTestCase):
     @override_settings(DEBUG=True)
     def test_coordinates(self):
         # Login
-        selenium.get(self.live_server_url + '/accounts/login/')
+        self.selenium.get(self.live_server_url + '/accounts/login/')
         PageElement(By.ID, 'id_username').wait_until_is_displayed()
         PageElement(By.ID, 'id_username').send_keys('admin')
         PageElement(By.ID, 'id_password').send_keys('topsecret')
@@ -1251,7 +1229,7 @@ class CoordinatesTestCase(SeleniumTestCase):
 
         # Go to the add new station page and check that the simple view is
         # active
-        selenium.get(self.live_server_url + '/stations/add/')
+        self.selenium.get(self.live_server_url + '/stations/add/')
         self.label_ordinate.wait_until_contains("Latitude")
         self.assertEqual(self.label_ordinate.text, "Latitude")
         self.assertEqual(self.label_abscissa.text, "Longitude")
@@ -1341,7 +1319,8 @@ class CoordinatesTestCase(SeleniumTestCase):
         self.assertFalse(self.button_coordinates.is_displayed())
 
 
-@skipUnless(selenium, 'Selenium is missing or unconfigured')
+@skipUnless(getattr(settings, 'SELENIUM_WEBDRIVERS', False),
+            'Selenium is unconfigured')
 class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
 
     button_limit_to_map = PageElement(By.ID, 'limit-to-map')
@@ -1360,14 +1339,14 @@ class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
 
     def test_list_stations_visible_on_map(self):
         # Visit site and wait until three stations are shown
-        selenium.get(self.live_server_url)
+        self.selenium.get(self.live_server_url)
         self.td_komboti.wait_until_is_displayed()
         self.td_agios_athanasios.wait_until_is_displayed()
         self.td_tharbad.wait_until_is_displayed()
 
         # Zoom station to an area that covers only two of these stations.
         # The co-ordinates below are 21, 39, 22, 40 in srid=3857.
-        selenium.execute_script("""
+        self.selenium.execute_script("""
             enhydris.map.zoomToExtent([2337700, 4721700, 2449000, 4865900]);
             """)
 
