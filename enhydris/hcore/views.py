@@ -36,7 +36,7 @@ import pd2hts
 
 from enhydris.hcore.models import (
     GentityAltCode, GentityEvent, GentityFile, GentityGenericData, Instrument,
-    Overseer, PoliticalDivision, Station, Timeseries, UserProfile)
+    Overseer, Station, Timeseries, UserProfile)
 from enhydris.hcore.decorators import (gentityfile_permission,
                                        timeseries_permission)
 from enhydris.hcore.forms import (
@@ -802,35 +802,6 @@ def map_view(request, *args, **kwargs):
     return render(request, 'map_page.html')
 
 
-def get_subdivision(request, division_id):
-    """Ajax call to refresh divisions in filter table"""
-    response = HttpResponse(content_type='application/json;charset=utf8')
-    try:
-        div = PoliticalDivision.objects.get(pk=division_id)
-    except:
-        response.write("[]")
-        return response
-    parent_divs = PoliticalDivision.objects.filter(
-        Q(name=div.name) & Q(name_alt=div.name_alt) &
-        Q(short_name=div.short_name) & Q(short_name_alt=div.short_name_alt))
-    divisions = PoliticalDivision.objects.filter(
-        parent__in=[p.id for p in parent_divs])
-    response.write("[")
-    added = []
-    for num, div in enumerate(divisions):
-        if div.name not in added:
-            response.write(json.dumps({"name": div.name, "id": div.pk}))
-            added.append(div.name)
-            if num < divisions.count() - 1:
-                response.write(',')
-    response.write("]")
-    return response
-
-
-GF_ERROR = ("The file you requested is temporary unavailable. Please try again"
-            " later.")
-
-
 @gentityfile_permission
 def download_gentityfile(request, gf_id):
     """
@@ -956,8 +927,8 @@ def _station_edit_or_create(request, station_id=None):
     if station_id:
         # User is editing a station
         station = get_object_or_404(Station, id=station_id)
-        if not (user.has_row_perm(station, 'edit')
-                and user.has_perm('hcore.change_station')):
+        if not (user.has_row_perm(station, 'edit') and
+                user.has_perm('hcore.change_station')):
             return HttpResponseForbidden('Forbidden',
                                          content_type='text/plain')
     else:

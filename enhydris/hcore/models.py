@@ -1,12 +1,10 @@
-from datetime import timedelta
-import sys
+from datetime import timedelta, timezone
 
 from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
 from django.core.files.storage import FileSystemStorage
-from django.db.models import Q
 from django.db.models import signals
 from django.db.models.signals import post_save
 from django.utils.timezone import now
@@ -69,8 +67,8 @@ class Lentity(models.Model):
         ordering = ('ordering_string',)
 
     def __str__(self):
-        return (self.remarks or self.remarks_alt or self.name_any
-                or str(self.id))
+        return (self.remarks or self.remarks_alt or self.name_any or
+                str(self.id))
 
     @property
     def name_any(self):
@@ -206,47 +204,9 @@ class Garea(Gentity):
 #
 
 
-class PoliticalDivisionManager(models.Manager):
-    """This is the default model Manager enhanced with utility methods."""
-
-    def get_leaf_subdivisions(self, local_parent):
-        """Gets a parent PoliticalDivision and returns all its tree leaves.
-
-        Leaves are the last political division level elements. The method
-        iterates on every node of the parent subtree and returns only the
-        bottom level elements.
-        CAUTION! This returns a "list" not a "QuerySet"!!!
-        """
-
-        child = None
-        children = []
-        object = PoliticalDivision.objects.get(pk=local_parent)
-        parents = PoliticalDivision.objects.all().filter(
-            Q(name=object.name) &
-            Q(short_name=object.short_name) &
-            Q(name_alt=object.name_alt) &
-            Q(short_name_alt=object.short_name_alt))
-        for parent in parents:
-            children.append(parent)
-            for child in self.filter(parent=parent.id):
-                try:
-                    children.extend(self.get_leaf_subdivisions(child.id))
-                except TypeError:
-                    # This is the case we have only an object instance,
-                    # not a list
-                    children.append(self.get_leaf_subdivisions(child.id))
-
-        if children:
-            return children
-        if not child:
-            return [p for p in parents]
-
-
 class PoliticalDivision(Garea):
     parent = models.ForeignKey('self', null=True, blank=True)
     code = models.CharField(max_length=5, blank=True)
-
-    objects = PoliticalDivisionManager()
 
     f_dependencies = ['Garea']
 
@@ -391,16 +351,6 @@ class StationType(Lookup):
     pass
 
 
-class StationManager(models.GeoManager):
-    """Default manager enhanced with utility methods."""
-
-    def get_by_political_division(self, political_division):
-        """Get all stations which belong to the specific political division."""
-        leaves = PoliticalDivision.objects.get_leaf_subdivisions(
-            political_division)
-        return Station.objects.filter(political_division__in=leaves)
-
-
 def handle_maintainer_permissions(sender, instance, **kwargs):
 
     if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
@@ -436,8 +386,6 @@ class Station(Gpoint):
                                          related_name='maintaining_stations')
 
     f_dependencies = ['Gpoint']
-    # Managers
-    objects = StationManager()
 
     def show_overseers(self):
         return " ".join([i.__str__() for i in self.overseers.all()])
@@ -506,41 +454,6 @@ class UnitOfMeasurement(Lookup):
         if self.symbol:
             return self.symbol
         return str(self.id)
-
-
-if sys.version_info >= (3, 0):
-    from datetime import timezone
-else:
-    from datetime import tzinfo
-
-    class timezone(tzinfo):
-
-        def __init__(self, offset, name=None):
-            self.offset = offset
-            self.name = name
-
-        def utcoffset(self, dt):
-            return self.offset
-
-        def dst(self, dt):
-            return None
-
-        def tzname(self, dt):
-            return self.name
-
-        def fromutc(self, dt):
-            return dt + self.offset
-
-        def __str__(self):
-            return '{} ({:+03}{:02})'.format(
-                self.name,
-                int(self.offset.total_seconds() / 3600),
-                int((self.offset.total_seconds() % 3600) / 60))
-
-        def __repr__(self):
-            return '<{}.{} object: {}>'.format(
-                self.__class__.__module__, self.__class__.__name__,
-                self.__str__())
 
 
 class TimeZone(models.Model):
@@ -842,10 +755,10 @@ class Timeseries(models.Model):
                     or self.timestamp_offset_months is None:
                 raise Exception(_("Invalid time step: if time_step is not "
                                   "null, offset must be provided"))
-            if ((self.timestamp_rounding_minutes is None
-                 and self.timestamp_rounding_months is not None)
-                or (self.timestamp_rounding_minutes is not None
-                    and self.timestamp_rounding_months is None)):
+            if ((self.timestamp_rounding_minutes is None and
+                 self.timestamp_rounding_months is not None) or
+                (self.timestamp_rounding_minutes is not None and
+                 self.timestamp_rounding_months is None)):
                 raise Exception(_("Invalid time step: roundings must be "
                                   "both null or not null"))
         self.set_start_and_end_date()

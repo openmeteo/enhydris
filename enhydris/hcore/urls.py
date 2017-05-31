@@ -18,9 +18,6 @@ urlpatterns = [
     url(r'^stations/delete/(?P<station_id>\d+)/$', views.station_delete, {},
         'station_delete'),
 
-    url(r'^get_subdivision/(?P<division_id>\d+)/$', views.get_subdivision, {},
-        'get_subdivision'),
-
     url(r'^instruments/d/(?P<pk>\d+)/$',
         views.InstrumentDetailView.as_view(), name='instrument_detail'),
     url(r'^instrument/edit/(?P<instrument_id>\d+)/$', views.instrument_edit,
