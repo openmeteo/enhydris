@@ -164,16 +164,20 @@ class Gpoint(Gentity):
         super(Gpoint, self).save(force_insert, force_update, *args, **kwargs)
 
     def original_abscissa(self):
-        if self.point:
+        if self.point and self.srid:
             (x, y) = self.point.transform(self.srid, clone=True)
             return round(x, 2) if abs(x) > 180 and abs(y) > 90 else x
+        elif self.point:
+            return self.point.x
         else:
             return None
 
     def original_ordinate(self):
-        if self.point:
+        if self.point and self.srid:
             (x, y) = self.point.transform(self.srid, clone=True)
             return round(y, 2) if abs(x) > 180 and abs(y) > 90 else y
+        elif self.point:
+            return self.point.y
         else:
             return None
 
