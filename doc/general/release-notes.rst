@@ -32,16 +32,8 @@ Version 1.1
 Upgrading
 ---------
 
-If you are already running Enhydris version 1.0, you can upgrade to
-1.1.x with this procedure:
-
-1. Backup your database (you are not going to use this backup unless
-   something goes wrong and you need to restore everything to the
-   state it was before).
-
-2. Install the new version and execute the database upgrade procedure::
-
-      python manage.py migrate
+There are no database migrations since version 0.8, so you just need to
+install the new version and you're good to go.
 
 Changes in 1.1 microversions
 ----------------------------
