@@ -6,7 +6,7 @@ Release notes
 
 .. highlight:: bash
 
-Version DEV
+Version 2.0
 ===========
 
 Upgrading from 1.1
