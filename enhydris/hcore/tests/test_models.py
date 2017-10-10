@@ -4,6 +4,7 @@ import shutil
 import tempfile
 import textwrap
 
+from django.contrib.gis.geos import Point
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -105,3 +106,26 @@ class TimeseriesTestCase(TestCase):
         t = Timeseries.objects.get(pk=self.ts_komboti_rain.id)
         self.assertIsNone(t.start_date)
         self.assertIsNone(t.end_date)
+
+
+class StationTestCase(TestCase):
+
+    def test_original_coordinates(self):
+        station_komboti = mommy.make(
+            Station,
+            name='Komboti',
+            point=Point(x=21.06071, y=39.09518, srid=4326),
+            srid=2100)
+        s = Station.objects.get(name='Komboti')
+        self.assertAlmostEqual(s.original_abscissa(), 245648.96, places=1)
+        self.assertAlmostEqual(s.original_ordinate(), 4331165.20, places=1)
+
+    def test_original_coordinates_with_null_srid(self):
+        station_komboti = mommy.make(
+            Station,
+            name='Komboti',
+            point=Point(x=21.06071, y=39.09518, srid=4326),
+            srid=None)
+        s = Station.objects.get(name='Komboti')
+        self.assertAlmostEqual(s.original_abscissa(), 21.06071)
+        self.assertAlmostEqual(s.original_ordinate(), 39.09518)
