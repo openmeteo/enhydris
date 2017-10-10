@@ -1225,7 +1225,8 @@ class CoordinatesTestCase(SeleniumTestCase):
         PageElement(By.ID, 'id_username').wait_until_is_displayed()
         PageElement(By.ID, 'id_username').send_keys('admin')
         PageElement(By.ID, 'id_password').send_keys('topsecret')
-        PageElement(By.XPATH, '//button[@type="submit"]').click()
+        submit_button = PageElement(By.XPATH, '//button[@type="submit"]')
+        submit_button.click()
 
         # Go to the add new station page and check that the simple view is
         # active
@@ -1263,6 +1264,10 @@ class CoordinatesTestCase(SeleniumTestCase):
         self.owner_option_big_tomatoes.click()
         self.field_copyright_holder.send_keys('Alice')
         self.field_copyright_years.send_keys('2015')
+        self.selenium.execute_script(
+            '''document.evaluate('//button[@type="submit"]', document, null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+            .singleNodeValue.scrollIntoView()''')
         self.button_submit.click()
 
         # Wait for the response, then go to edit the station and check that
@@ -1297,6 +1302,10 @@ class CoordinatesTestCase(SeleniumTestCase):
         self.field_abscissa.send_keys('476751.84')
         self.field_srid.clear()
         self.field_srid.send_keys('2100')
+        self.selenium.execute_script(
+            '''document.evaluate('//button[@type="submit"]', document, null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+            .singleNodeValue.scrollIntoView()''')
         self.button_submit.click()
 
         # Go to the edit page again, and check that the advanced view shows
