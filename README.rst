@@ -10,18 +10,6 @@ Enhydris - Web-based hydro/meteorological database
     :alt: Coverage
     :target: https://codecov.io/gh/openmeteo/enhydris
 
-.. image:: https://img.shields.io/pypi/l/enhydris.svg
-    :alt: License
-    :target: #
-
-.. image:: https://img.shields.io/pypi/status/enhydris.svg
-    :alt: Status
-    :target: #
-
-.. image:: https://img.shields.io/pypi/v/enhydris.svg
-    :alt: Latest version
-    :target: https://pypi.python.org/pypi/enhydris
-
 Enhydris is a system for the storage and management of hydrological
 and meteorological time series. You can see it in action at
 http://openmeteo.org/.
