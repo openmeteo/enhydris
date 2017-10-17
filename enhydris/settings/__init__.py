@@ -1,6 +1,6 @@
 import os
 
-# Development settings (to be overriden in production settings.py)
+# Development settings (to be overridden in production settings.py)
 DEBUG = True
 SECRET_KEY = 'topsecret'
 DATABASES = {
@@ -25,7 +25,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 ROOT_URLCONF = 'enhydris.urls'
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -49,10 +49,10 @@ INSTALLED_APPS = (
     # this reason, it must be listed in INSTALLED_APPS before
     # django.contrib.admin.
     'django.contrib.admin',
-    # Registration templates it must be listed in INSTALLED_APPS after
-    # 'enhydris.hcore' in order to overide django-default templates.
+    # enhydris.hcore overrides some templates from registration; for this
+    # reason, it must be listed in INSTALLED_APPS before registration.
     'registration',
-)
+]
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
