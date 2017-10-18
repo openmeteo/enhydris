@@ -22,6 +22,9 @@ install:
  - pip install -r requirements-test.txt
 
 script:
+ - wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2
+ - tar xjf phantomjs-2.1.1-linux-x86_64.tar.bz2
+ - export PATH=`pwd`/phantomjs-2.1.1-linux-x86_64/bin:$PATH
  - coverage run --include="./*" --omit="*/tests/*","*/tests.py" manage.py test -v2
 
 env:
