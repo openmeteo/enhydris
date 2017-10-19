@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+
+
+{% block title %}
+  {% trans "Confirm deletion" %}
+{% endblock %}
+
+
+{% block content %}
+<div class="col-md-12">
+    <p>
+        {% blocktrans %}
+            Are you certain you want to delete {{ object_description }}? This
+            cannot be undone.
+        {% endblocktrans %}
+    </p>
+    <form action="" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">{% trans "Yes, delete" %}</button>
+        <a href="{% url 'station_list' %}" class="btn btn-primary">{% trans "No. Get me out of here." %}</a>
+    </form>
+</div>
+{% endblock %}

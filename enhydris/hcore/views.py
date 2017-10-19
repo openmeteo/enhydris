@@ -22,8 +22,8 @@ from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.db.models import Count, Q
 from django.db.utils import InternalError
-from django.http import (Http404, HttpResponse, HttpResponseForbidden,
-                         HttpResponseRedirect)
+from django.http import (Http404, HttpResponse, HttpResponseBadRequest,
+                         HttpResponseForbidden, HttpResponseRedirect)
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from django.utils.decorators import method_decorator
@@ -1014,17 +1014,26 @@ def station_delete(request, station_id):
     case he is an admin, manager, etc he must be able to delete all of them
     (handled by django.contrib.auth)
     """
-    station = Station.objects.get(id=station_id)
-    if request.user.has_row_perm(station, 'delete') and \
+    station = get_object_or_404(Station, id=station_id)
+
+    # Check permissions
+    if not request.user.has_row_perm(station, 'delete') or not \
             request.user.has_perm('hcore.delete_station'):
+        return HttpResponseForbidden('Forbidden', content_type='text/plain')
+
+    # Proceed with the deletion if it's a POST request
+    if request.method == 'POST':
         station.delete()
-        ref = request.META.get('HTTP_REFERER', None)
-        if ref and not ref.endswith(reverse('station_detail',
-                                            args=[station_id])):
-            return HttpResponseRedirect(ref)
         return render(request, 'success.html',
                       {'msg': 'Station deleted successfully', })
-    return HttpResponseForbidden('Forbidden', content_type='text/plain')
+
+    # Ask for confirmation if it's a GET request
+    if request.method == 'GET':
+        return render(request, 'delete_confirm.html',
+                      {'object_description': _('station {}').format(
+                          station.id)})
+
+    return HttpResponseBadRequest('Bad request', content_type='text/plain')
 
 
 """
@@ -1119,18 +1128,27 @@ def timeseries_delete(request, timeseries_id):
     """
     tseries = get_object_or_404(Timeseries, id=timeseries_id)
     related_station = tseries.related_station
-    if tseries and related_station:
-        if request.user.has_row_perm(related_station, 'edit') and \
-                request.user.has_perm('hcore.delete_timeseries'):
-            tseries.delete()
-            ref = request.META.get('HTTP_REFERER', None)
-            if ref and not ref.endswith(reverse('timeseries_detail',
-                                                args=[timeseries_id])):
-                return HttpResponseRedirect(ref)
-            return render(request, 'success.html',
-                          {'msg': 'Timeseries deleted successfully', })
-    return HttpResponseForbidden('Forbidden',
-                                 content_type='text/plain')
+
+    # Check permissions
+    if not tseries or not related_station or not \
+            request.user.has_row_perm(related_station, 'edit') or not \
+            request.user.has_perm('hcore.delete_timeseries'):
+        return HttpResponseForbidden('Forbidden',
+                                     content_type='text/plain')
+
+    # Proceed with the deletion if it's a POST request
+    if request.method == 'POST':
+        tseries.delete()
+        return render(request, 'success.html',
+                      {'msg': 'Timeseries deleted successfully', })
+
+    # Ask for confirmation if it's a GET request
+    if request.method == 'GET':
+        return render(request, 'delete_confirm.html',
+                      {'object_description': _('timeseries {}').format(
+                          tseries.id)})
+
+    return HttpResponseBadRequest('Bad request', content_type='text/plain')
 
 
 """
@@ -1213,17 +1231,26 @@ def gentityfile_delete(request, gentityfile_id):
     """
     gfile = get_object_or_404(GentityFile, id=gentityfile_id)
     related_station = gfile.related_station
-    if gfile and related_station:
-        if request.user.has_row_perm(related_station, 'edit') and \
-                request.user.has_perm('hcore.delete_gentityfile'):
-            gfile.delete()
-            ref = request.META.get('HTTP_REFERER', None)
-            if ref:
-                return HttpResponseRedirect(ref)
-            return render(request, 'success.html',
-                          {'msg': 'GentityFile deleted successfully', })
-    return HttpResponseForbidden('Forbidden',
-                                 content_type='text/plain')
+
+    # Check permissions
+    if not gfile or not related_station or \
+            not request.user.has_row_perm(related_station, 'edit') or \
+            not request.user.has_perm('hcore.delete_gentityfile'):
+        return HttpResponseForbidden('Forbidden', content_type='text/plain')
+
+    # Proceed with the deletion if it's a POST request
+    if request.method == 'POST':
+        gfile.delete()
+        return render(request, 'success.html',
+                      {'msg': 'GentityFile deleted successfully', })
+
+    # Ask for confirmation if it's a GET request
+    if request.method == 'GET':
+        return render(request, 'delete_confirm.html',
+                      {'object_description': _('file {}').format(
+                          gfile.id)})
+
+    return HttpResponseBadRequest('Bad request', content_type='text/plain')
 
 
 """
@@ -1310,16 +1337,26 @@ def gentitygenericdata_delete(request, ggenericdata_id):
     """
     ggenericdata = get_object_or_404(GentityGenericData, id=ggenericdata_id)
     related_station = ggenericdata.related_station
-    if ggenericdata and related_station:
-        if request.user.has_row_perm(related_station, 'edit') and \
-                request.user.has_perm('hcore.delete_gentityfile'):
-            ggenericdata.delete()
-            ref = request.META.get('HTTP_REFERER', None)
-            if ref:
-                return HttpResponseRedirect(ref)
-            return render(request, 'success.html',
-                          {'msg': 'GentityGenericData deleted successfully'})
-    return HttpResponseForbidden('Forbidden', content_type='text/plain')
+
+    # Check permissions
+    if not ggenericdata or not related_station or \
+            not request.user.has_row_perm(related_station, 'edit') or \
+            not request.user.has_perm('hcore.delete_gentityfile'):
+        return HttpResponseForbidden('Forbidden', content_type='text/plain')
+
+    # Proceed with the deletion if it's a POST request
+    if request.method == 'POST':
+        ggenericdata.delete()
+        return render(request, 'success.html',
+                      {'msg': 'GentityGenericData deleted successfully'})
+
+    # Ask for confirmation if it's a GET request
+    if request.method == 'GET':
+        return render(request, 'delete_confirm.html',
+                      {'object_description': _('generic data {}').format(
+                          ggenericdata.id)})
+
+    return HttpResponseBadRequest('Bad request', content_type='text/plain')
 
 
 """
@@ -1405,16 +1442,26 @@ def gentityevent_delete(request, gentityevent_id):
     """
     gevent = get_object_or_404(GentityEvent, id=gentityevent_id)
     related_station = gevent.related_station
-    if gevent and related_station:
-        if request.user.has_row_perm(related_station, 'edit') and \
-                request.user.has_perm('hcore.delete_gentityevent'):
-            gevent.delete()
-            ref = request.META.get('HTTP_REFERER', None)
-            if ref:
-                return HttpResponseRedirect(ref)
-            return render(request, 'success.html',
-                          {'msg': 'GentityEvent deleted successfully'})
-    return HttpResponseForbidden('Forbidden', content_type='text/plain')
+
+    # Check permissions
+    if not gevent or not related_station or \
+            not request.user.has_row_perm(related_station, 'edit') or \
+            not request.user.has_perm('hcore.delete_gentityevent'):
+        return HttpResponseForbidden('Forbidden', content_type='text/plain')
+
+    # Proceed with the deletion if it's a POST request
+    if request.method == 'POST':
+        gevent.delete()
+        return render(request, 'success.html',
+                      {'msg': 'GentityEvent deleted successfully'})
+
+    # Ask for confirmation if it's a GET request
+    if request.method == 'GET':
+        return render(request, 'delete_confirm.html',
+                      {'object_description': _('event {}').format(
+                          gevent.id)})
+
+    return HttpResponseBadRequest('Bad request', content_type='text/plain')
 
 
 def _gentityaltcode_edit_or_create(request, galtcode_id=None):
@@ -1494,17 +1541,27 @@ def gentityaltcode_delete(request, gentityaltcode_id):
     """
     galtcode = get_object_or_404(GentityAltCode, id=gentityaltcode_id)
     related_station = galtcode.related_station
-    if galtcode and related_station:
-        if request.user.has_row_perm(related_station, 'edit') and \
-                request.user.has_perm('hcore.delete_gentityaltcode'):
-            galtcode.delete()
-            ref = request.META.get('HTTP_REFERER', None)
-            if ref:
-                return HttpResponseRedirect(ref)
-            return render(request, 'success.html',
-                          {'msg': 'GentityAltCode deleted successfully'})
-    return HttpResponseForbidden('Forbidden',
-                                 content_type='text/plain')
+
+    # Check permissions
+    if not galtcode or not related_station or \
+            not request.user.has_row_perm(related_station, 'edit') or \
+            not request.user.has_perm('hcore.delete_gentityaltcode'):
+        return HttpResponseForbidden('Forbidden', content_type='text/plain')
+
+    # Proceed with the deletion if it's a POST request
+    if request.method == 'POST':
+        galtcode.delete()
+        return render(request, 'success.html',
+                      {'msg': 'GentityAltCode deleted successfully'})
+
+    # Ask for confirmation if it's a GET request
+    if request.method == 'GET':
+        return render(request, 'delete_confirm.html',
+                      {'object_description': _('code {}').format(
+                          galtcode.id)})
+
+    return HttpResponseBadRequest('Bad request', content_type='text/plain')
+
 
 """
 Overseer Views
@@ -1588,16 +1645,26 @@ def overseer_delete(request, overseer_id):
     """
     overseer = get_object_or_404(Overseer, id=overseer_id)
     related_station = overseer.station
-    if overseer and related_station:
-        if request.user.has_row_perm(related_station, 'edit') and \
-                request.user.has_perm('hcore.delete_overseer'):
-            overseer.delete()
-            ref = request.META.get('HTTP_REFERER', None)
-            if ref:
-                return HttpResponseRedirect(ref)
-            return render(request, 'success.html',
-                          {'msg': 'Overseer deleted successfully'})
-    return HttpResponseForbidden('Forbidden', content_type='text/plain')
+
+    # Check permissions
+    if not overseer or not related_station or \
+            not request.user.has_row_perm(related_station, 'edit') or \
+            not request.user.has_perm('hcore.delete_overseer'):
+        return HttpResponseForbidden('Forbidden', content_type='text/plain')
+
+    # Proceed with the deletion if it's a POST request
+    if request.method == 'POST':
+        overseer.delete()
+        return render(request, 'success.html',
+                      {'msg': 'Overseer deleted successfully'})
+
+    # Ask for confirmation if it's a GET request
+    if request.method == 'GET':
+        return render(request, 'delete_confirm.html',
+                      {'object_description': _('overseer {}').format(
+                          overseer.id)})
+
+    return HttpResponseBadRequest('Bad request', content_type='text/plain')
 
 
 """
@@ -1680,17 +1747,26 @@ def instrument_delete(request, instrument_id):
     """
     instrument = get_object_or_404(Instrument, id=instrument_id)
     related_station = instrument.station
-    if instrument and related_station:
-        if request.user.has_row_perm(related_station, 'edit') and \
-                request.user.has_perm('hcore.delete_instrument'):
-            instrument.delete()
-            ref = request.META.get('HTTP_REFERER', None)
-            if ref and not ref.endswith(reverse('instrument_detail',
-                                                args=[instrument_id])):
-                return HttpResponseRedirect(ref)
-            return render(request, 'success.html',
-                          {'msg': 'Instrument deleted successfully'})
-    return HttpResponseForbidden('Forbidden', content_type='text/plain')
+
+    # Check permissions
+    if not instrument or not related_station or \
+            not request.user.has_row_perm(related_station, 'edit') or \
+            not request.user.has_perm('hcore.delete_instrument'):
+        return HttpResponseForbidden('Forbidden', content_type='text/plain')
+
+    # Proceed with the deletion if it's a POST request
+    if request.method == 'POST':
+        instrument.delete()
+        return render(request, 'success.html',
+                      {'msg': 'Instrument deleted successfully'})
+
+    # Ask for confirmation if it's a GET request
+    if request.method == 'GET':
+        return render(request, 'delete_confirm.html',
+                      {'object_description': _('instrument {}').format(
+                          instrument.id)})
+
+    return HttpResponseBadRequest('Bad request', content_type='text/plain')
 
 
 """

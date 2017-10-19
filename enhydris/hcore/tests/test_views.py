@@ -32,9 +32,10 @@ from selenium.webdriver.common.by import By
 
 from enhydris.hcore.forms import TimeseriesDataForm
 from enhydris.hcore.models import (
-    EventType, FileType, GentityEvent, GentityFile, Instrument, InstrumentType,
-    Organization, Station, StationType, Timeseries, TimeZone,
-    UnitOfMeasurement, UserProfile, Variable)
+    EventType, FileType, GentityAltCode, GentityEvent, GentityFile,
+    GentityGenericData, Instrument, InstrumentType, Organization, Overseer,
+    Station, StationType, Timeseries, TimeZone, UnitOfMeasurement, UserProfile,
+    Variable)
 from enhydris.hcore.tests.test_models import RandomEnhydrisTimeseriesDataDir
 from enhydris.hcore.views import ALLOWED_TO_EDIT, StationListBaseView
 
@@ -66,6 +67,8 @@ def check_if_connected_to_old_sqlite():
 class StationsTestCase(TestCase):
 
     def setUp(self):
+        mommy.make(User, username='admin', password=make_password('topsecret'),
+                   is_active=True, is_superuser=True, is_staff=True)
         mommy.make(Station, name="Komboti",
                    point=Point(x=21.06071, y=39.09518, srid=4326), srid=4326)
         mommy.make(Station, name="Agios Athanasios",
@@ -78,6 +81,186 @@ class StationsTestCase(TestCase):
         self.assertContains(
             response, '<a href="?sort=-name&amp;sort=name">Name&nbsp;↓</a>',
             html=True)
+
+    def test_station_cannot_be_deleted_with_get(self):
+        komboti = Station.objects.get(name='Komboti')
+        self.assertEqual(Station.objects.all().count(), 3)
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.get('/stations/delete/{}/'.format(komboti.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(Station.objects.all().count(), 3)
+
+    def test_station_can_be_deleted_with_post(self):
+        komboti = Station.objects.get(name='Komboti')
+        self.assertEqual(Station.objects.all().count(), 3)
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.post('/stations/delete/{}/'.format(komboti.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(Station.objects.all().count(), 2)
+
+
+class InstrumentsTestCase(TestCase):
+
+    def setUp(self):
+        mommy.make(User, username='admin', password=make_password('topsecret'),
+                   is_active=True, is_superuser=True, is_staff=True)
+        self.instrument = mommy.make(Instrument)
+
+    def test_instrument_cannot_be_deleted_with_get(self):
+        self.assertEqual(Instrument.objects.all().count(), 1)
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.get('/instrument/delete/{}/'.format(
+            self.instrument.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(Instrument.objects.all().count(), 1)
+
+    def test_instrument_can_be_deleted_with_post(self):
+        self.assertEqual(Instrument.objects.all().count(), 1)
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.post('/instrument/delete/{}/'.format(
+            self.instrument.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(Instrument.objects.all().count(), 0)
+
+
+class GentityEventsTestCase(TestCase):
+
+    def setUp(self):
+        mommy.make(User, username='admin', password=make_password('topsecret'),
+                   is_active=True, is_superuser=True, is_staff=True)
+        self.station = mommy.make(Station)
+        self.gentity_event = mommy.make(GentityEvent, gentity=self.station)
+
+    def test_gentity_event_cannot_be_deleted_with_get(self):
+        self.assertEqual(GentityEvent.objects.all().count(), 1)
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.get('/gentityevent/delete/{}/'.format(
+            self.gentity_event.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(GentityEvent.objects.all().count(), 1)
+
+    def test_gentity_event_can_be_deleted_with_post(self):
+        self.assertEqual(GentityEvent.objects.all().count(), 1)
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.post('/gentityevent/delete/{}/'.format(
+            self.gentity_event.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(GentityEvent.objects.all().count(), 0)
+
+
+class GentityGenericDataTestCase(TestCase):
+
+    def setUp(self):
+        mommy.make(User, username='admin', password=make_password('topsecret'),
+                   is_active=True, is_superuser=True, is_staff=True)
+        self.station = mommy.make(Station)
+        self.generic_data = mommy.make(GentityGenericData,
+                                       gentity=self.station)
+
+    def test_generic_data_cannot_be_deleted_with_get(self):
+        self.assertEqual(GentityGenericData.objects.all().count(), 1)
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.get('/gentitygenericdata/delete/{}/'.format(
+            self.generic_data.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(GentityGenericData.objects.all().count(), 1)
+
+    def test_generic_data_can_be_deleted_with_post(self):
+        self.assertEqual(GentityGenericData.objects.all().count(), 1)
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.post('/gentitygenericdata/delete/{}/'.format(
+            self.generic_data.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(GentityGenericData.objects.all().count(), 0)
+
+
+class GentityFilesTestCase(TestCase):
+
+    def setUp(self):
+        mommy.make(User, username='admin', password=make_password('topsecret'),
+                   is_active=True, is_superuser=True, is_staff=True)
+        self.station = mommy.make(Station)
+        self.gentity_file = mommy.make(GentityFile, gentity=self.station)
+
+    def test_gentity_file_cannot_be_deleted_with_get(self):
+        self.assertEqual(GentityFile.objects.all().count(), 1)
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.get('/gentityfile/delete/{}/'.format(
+            self.gentity_file.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(GentityFile.objects.all().count(), 1)
+
+    def test_gentity_file_can_be_deleted_with_post(self):
+        self.assertEqual(GentityFile.objects.all().count(), 1)
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.post('/gentityfile/delete/{}/'.format(
+            self.gentity_file.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(GentityFile.objects.all().count(), 0)
+
+
+class GentityAltCodesTestCase(TestCase):
+
+    def setUp(self):
+        mommy.make(User, username='admin', password=make_password('topsecret'),
+                   is_active=True, is_superuser=True, is_staff=True)
+        self.station = mommy.make(Station)
+        self.gentity_alt_code = mommy.make(GentityAltCode,
+                                           gentity=self.station)
+
+    def test_gentity_alt_code_cannot_be_deleted_with_get(self):
+        self.assertEqual(GentityAltCode.objects.all().count(), 1)
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.get('/gentityaltcode/delete/{}/'.format(
+            self.gentity_alt_code.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(GentityAltCode.objects.all().count(), 1)
+
+    def test_gentity_alt_code_can_be_deleted_with_post(self):
+        self.assertEqual(GentityAltCode.objects.all().count(), 1)
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.post('/gentityaltcode/delete/{}/'.format(
+            self.gentity_alt_code.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(GentityAltCode.objects.all().count(), 0)
+
+
+class OverseersTestCase(TestCase):
+
+    def setUp(self):
+        mommy.make(User, username='admin', password=make_password('topsecret'),
+                   is_active=True, is_superuser=True, is_staff=True)
+        self.overseer = mommy.make(Overseer)
+
+    def test_overseer_cannot_be_deleted_with_get(self):
+        self.assertEqual(Overseer.objects.all().count(), 1)
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.get('/overseer/delete/{}/'.format(
+            self.overseer.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(Overseer.objects.all().count(), 1)
+
+    def test_overseer_can_be_deleted_with_post(self):
+        self.assertEqual(Overseer.objects.all().count(), 1)
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.post('/overseer/delete/{}/'.format(
+            self.overseer.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(Overseer.objects.all().count(), 0)
 
 
 class SortTestCase(TestCase):
@@ -389,7 +572,8 @@ class TsTestCase(TestCase):
     """Test timeseries data upload/download code."""
 
     def setUp(self):
-        # create dependecies of timeseries.
+        mommy.make(User, username='admin', password=make_password('topsecret'),
+                   is_active=True, is_superuser=True, is_staff=True)
         self.stype = StationType.objects.create(descr='stype')
         self.stype.save()
         self.organization = Organization.objects.create(name='org')
@@ -418,15 +602,6 @@ class TsTestCase(TestCase):
         self.user = User.objects.create_user('test', 'test@test.com',
                                              'test')
         self.user.save()
-
-    def tearDown(self):
-        self.stype.delete()
-        self.organization.delete()
-        self.var.delete()
-        self.unit.delete()
-        self.tz.delete()
-        self.ts.delete()
-        self.user.delete()
 
     @RandomEnhydrisTimeseriesDataDir()
     def test_timeseries_data(self):
@@ -578,6 +753,22 @@ class TsTestCase(TestCase):
                                                  2005-08-23 22:53,42.4,\r
                                                  """))
 
+    def test_timeseries_cannot_be_deleted_with_get(self):
+        self.assertEqual(Timeseries.objects.all().count(), 1)
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.get('/timeseries/delete/{}/'.format(self.ts.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(Timeseries.objects.all().count(), 1)
+
+    def test_timeseries_can_be_deleted_with_post(self):
+        self.assertEqual(Timeseries.objects.all().count(), 1)
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.post('/timeseries/delete/{}/'.format(self.ts.id))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(Timeseries.objects.all().count(), 0)
+
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class OpenVTestCase(TestCase):
@@ -631,15 +822,6 @@ class OpenVTestCase(TestCase):
                              time_zone=self.tz, unit_of_measurement=self.unit,
                              variable=self.var)
         self.ts.save()
-
-    def tearDown(self):
-        self.user.delete()
-        self.stype.delete()
-        self.organization.delete()
-        self.var.delete()
-        self.unit.delete()
-        self.tz.delete()
-        self.ts.delete()
 
     def testStatusCode(self):
         """Test that the response status code is correct"""
@@ -710,7 +892,7 @@ class OpenVTestCase(TestCase):
 
         # delete my station. this should work
         url = "/stations/delete/%s/" % str(s.pk)
-        resp = self.client.get(url, follow=True)
+        resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(Station.objects.filter(name='station_test').count(),
                          0)
@@ -722,7 +904,7 @@ class OpenVTestCase(TestCase):
 
         # try to delete a random station. this should fail
         url = "/stations/delete/%s/" % str(self.station.pk)
-        resp = self.client.get(url)
+        resp = self.client.post(url)
         self.assertEqual(resp.status_code, 403)
 
         # recreate again for further tests
@@ -745,7 +927,7 @@ class OpenVTestCase(TestCase):
 
         # delete station. this shouldn't work
         url = "/stations/delete/%s/" % str(s.pk)
-        resp = self.client.get(url)
+        resp = self.client.post(url)
         self.assertEqual(resp.status_code, 403)
 
         # add user to maintainers and check if it's fixed.
@@ -760,7 +942,7 @@ class OpenVTestCase(TestCase):
 
         # delete maintaining station. this shouldn't work
         url = "/stations/delete/%s/" % str(s.pk)
-        resp = self.client.get(url, follow=True)
+        resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 403)
 
         self.client.logout()
@@ -818,7 +1000,7 @@ class OpenVTestCase(TestCase):
 
         # delete my timeseries. this should work
         url = "/timeseries/delete/%s/" % str(t.pk)
-        resp = self.client.get(url, follow=True)
+        resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(Station.objects.filter(
             name='timeseries_test').count(), 0)
@@ -842,7 +1024,7 @@ class OpenVTestCase(TestCase):
 
         # delete my timeseries. this shouldn't work
         url = "/timeseries/delete/%s/" % str(t.pk)
-        resp = self.client.get(url, follow=True)
+        resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 403)
 
         # add user to maintainers and check if it's fixed.
@@ -857,7 +1039,7 @@ class OpenVTestCase(TestCase):
 
         # delete maintaining timeseries, this should work
         url = "/timeseries/delete/%s/" % str(t.pk)
-        resp = self.client.get(url, follow=True)
+        resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(Station.objects.filter(
             name='timeseries_test').count(), 0)
@@ -913,9 +1095,9 @@ class OpenVTestCase(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, "instrument_edit.html")
 
-        # delete my station. this should work
+        # delete my instrument. this should work
         url = "/instrument/delete/%s/" % str(i.pk)
-        resp = self.client.get(url, follow=True)
+        resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(Station.objects.filter(
             name='instrument_test').count(), 0)
@@ -940,7 +1122,7 @@ class OpenVTestCase(TestCase):
 
         # delete my instrument. this shouldn't work
         url = "/instrument/delete/%s/" % str(i.pk)
-        resp = self.client.get(url, follow=True)
+        resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 403)
 
         # add user to maintainers and check if it's fixed.
@@ -953,9 +1135,9 @@ class OpenVTestCase(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, "instrument_edit.html")
 
-        # delete my station. this should work
+        # delete my instrument. this should work
         url = "/instrument/delete/%s/" % str(i.pk)
-        resp = self.client.get(url, follow=True)
+        resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(Station.objects.filter(
             name='instrument_test').count(), 0)

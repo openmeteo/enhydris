@@ -16,20 +16,6 @@
     {% if station %}enhydris.agentityId = {{station.id}};{% endif %}
   </script>
   <script type="text/javascript">
-    $(document).ready(function(){
-      $(".verification_required").click(function(){
-        return confirmPost();
-      });
-    });
-
-    function confirmPost(){
-      var agree=confirm("Are you sure you want to delete this object?");
-        if (agree)
-          return true;
-        else
-          return false ;
-      }
-
     function togl(name) {
       $("#"+ name).stop().toggle()
     }
@@ -75,7 +61,7 @@
                   <a class="btn btn-xs btn-primary" href='{% url "station_edit" station.id%}'>{% trans "Edit" %}</a>
                 {% endif %}
                 {% if request.user|can_delete:station %}
-                  <a onClick='return confirmPost()' href='{% url "station_delete" station.id%}' class="btn btn-xs btn-danger" >{% trans "Delete" %}</a>
+                  <a href='{% url "station_delete" station.id%}' class="btn btn-xs btn-danger" >{% trans "Delete" %}</a>
                 {% endif %}
               <sub>
               <sub>
