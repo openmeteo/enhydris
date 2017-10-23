@@ -413,7 +413,12 @@ class TimeseriesForm(ModelForm):
         self.cleaned_data['data'].seek(0)
         s = self.cleaned_data['data'].read()
         if isinstance(s, bytes):
-            s = s.decode('utf-8')
+            try:
+                s = s.decode('utf-8')
+            except UnicodeDecodeError as e:
+                raise forms.ValidationError(_(
+                    'The data has incorrect encoding; it must be utf-8. The '
+                    'full error was: "{}"').format(str(e)))
 
         # Skip possible header
         data = StringIO(s)
@@ -425,7 +430,7 @@ class TimeseriesForm(ModelForm):
             if ('=' not in line) and (not line.isspace()):
                 data.seek(pos)
                 break
-        s = data.read()  # Read from the current position  onwards
+        s = data.read()  # Read from the current position onwards
         self.cleaned_data['data'] = StringIO(s)
 
         try:

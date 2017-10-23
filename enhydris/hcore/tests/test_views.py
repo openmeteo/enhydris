@@ -777,6 +777,15 @@ class TsTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertEqual(Timeseries.objects.all().count(), 0)
 
+    def test_timeseries_with_wrong_encoding_causes_graceful_error(self):
+        file_dict = {'data': SimpleUploadedFile('filename', b'\xC0\xC0\xC0')}
+        post_dict = {'gentity': self.station.pk, 'variable': self.var.pk,
+                     'unit_of_measurement': self.unit.pk,
+                     'time_zone': self.tz.pk
+                     }
+        form = TimeseriesDataForm(post_dict, file_dict, instance=self.ts)
+        self.assertFalse(form.is_valid())
+
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class OpenVTestCase(TestCase):
