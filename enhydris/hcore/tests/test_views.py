@@ -100,6 +100,14 @@ class StationsTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertEqual(Station.objects.all().count(), 2)
 
+    def test_delete_nonexistent_station_returns_404(self):
+        r = self.client.post('/stations/delete/9999/')
+        self.assertEqual(r.status_code, 302)  # Redirect to login
+        r = self.client.login(username='admin', password='topsecret')
+        self.assertTrue(r)
+        r = self.client.post('/stations/delete/9999/')
+        self.assertEqual(r.status_code, 404)
+
 
 class InstrumentsTestCase(TestCase):
 
