@@ -23,7 +23,8 @@ for _x in api_views.modelnames:
             class Meta:
                 model = model
                 exclude = ()
-        detail_view = RetrieveAPIView.as_view(queryset=model.objects.all())
+        detail_view = RetrieveAPIView.as_view(queryset=model.objects.all(),
+                                              serializer_class=serializer)
         list_view = api_views.ListAPIView.as_view(queryset=model.objects.all(),
                                         serializer_class=serializer)
     _urls.append(url(r'^{0}/$'.format(_x), list_view, name=_x + '-list'))

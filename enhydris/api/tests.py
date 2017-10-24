@@ -8,6 +8,7 @@ from django.test.client import MULTIPART_CONTENT, BOUNDARY, encode_multipart
 from django.test.utils import override_settings
 
 import iso8601
+from model_mommy import mommy
 import pytz
 from rest_framework.test import APITestCase
 
@@ -496,3 +497,183 @@ class CreateStationTestCase(TestCase):
         self.assertEqual(models.Station.objects.filter(
             name='Test Station 1507').count(), 1)
         self.client.logout()
+
+
+class WaterDivisionTestCase(TestCase):
+
+    def setUp(self):
+        self.water_division = mommy.make(models.WaterDivision)
+
+    def test_get_water_division(self):
+        r = self.client.get(
+            '/api/WaterDivision/{}/'.format(self.water_division.id))
+        self.assertEqual(r.status_code, 200)
+
+
+class GentityAltCodeTypeTestCase(TestCase):
+
+    def setUp(self):
+        self.gentity_alt_code_type = mommy.make(models.GentityAltCodeType)
+
+    def test_get_gentity_alt_code_type(self):
+        r = self.client.get(
+            '/api/GentityAltCodeType/{}/'.format(
+                self.gentity_alt_code_type.id))
+        self.assertEqual(r.status_code, 200)
+
+
+class OrganizationTestCase(TestCase):
+
+    def setUp(self):
+        self.organization = mommy.make(models.Organization)
+
+    def test_get_organization(self):
+        r = self.client.get(
+            '/api/Organization/{}/'.format(
+                self.organization.id))
+        self.assertEqual(r.status_code, 200)
+
+
+class PersonTestCase(TestCase):
+
+    def setUp(self):
+        self.person = mommy.make(models.Person)
+
+    def test_get_person(self):
+        r = self.client.get(
+            '/api/Person/{}/'.format(
+                self.person.id))
+        self.assertEqual(r.status_code, 200)
+
+
+class StationTypeTestCase(TestCase):
+
+    def setUp(self):
+        self.station_type = mommy.make(models.StationType)
+
+    def test_get_station_type(self):
+        r = self.client.get(
+            '/api/StationType/{}/'.format(
+                self.station_type.id))
+        self.assertEqual(r.status_code, 200)
+
+
+class TimeZoneTestCase(TestCase):
+
+    def setUp(self):
+        self.time_zone = mommy.make(models.TimeZone)
+
+    def test_get_time_zone(self):
+        r = self.client.get(
+            '/api/TimeZone/{}/'.format(
+                self.time_zone.id))
+        self.assertEqual(r.status_code, 200)
+
+
+class PoliticalDivisionTestCase(TestCase):
+
+    def setUp(self):
+        self.political_division = mommy.make(models.PoliticalDivision)
+
+    def test_get_political_division(self):
+        r = self.client.get(
+            '/api/PoliticalDivision/{}/'.format(
+                self.political_division.id))
+        self.assertEqual(r.status_code, 200)
+
+
+class IntervalTypeTestCase(TestCase):
+
+    def setUp(self):
+        self.interval_type = mommy.make(models.IntervalType)
+
+    def test_get_interval_type(self):
+        r = self.client.get(
+            '/api/IntervalType/{}/'.format(
+                self.interval_type.id))
+        self.assertEqual(r.status_code, 200)
+
+
+class FileTypeTestCase(TestCase):
+
+    def setUp(self):
+        self.file_type = mommy.make(models.FileType)
+
+    def test_get_file_type(self):
+        r = self.client.get(
+            '/api/FileType/{}/'.format(
+                self.file_type.id))
+        self.assertEqual(r.status_code, 200)
+
+
+class EventTypeTestCase(TestCase):
+
+    def setUp(self):
+        self.event_type = mommy.make(models.EventType)
+
+    def test_get_event_type(self):
+        r = self.client.get(
+            '/api/EventType/{}/'.format(
+                self.event_type.id))
+        self.assertEqual(r.status_code, 200)
+
+
+class InstrumentTypeTestCase(TestCase):
+
+    def setUp(self):
+        self.instrument_type = mommy.make(models.InstrumentType)
+
+    def test_get_instrument_type(self):
+        r = self.client.get(
+            '/api/InstrumentType/{}/'.format(
+                self.instrument_type.id))
+        self.assertEqual(r.status_code, 200)
+
+
+class WaterBasinTestCase(TestCase):
+
+    def setUp(self):
+        self.water_basin = mommy.make(models.WaterBasin)
+
+    def test_get_water_basin(self):
+        r = self.client.get(
+            '/api/WaterBasin/{}/'.format(
+                self.water_basin.id))
+        self.assertEqual(r.status_code, 200)
+
+
+class TimeStepTestCase(TestCase):
+
+    def setUp(self):
+        self.time_step = mommy.make(models.TimeStep,
+                                    length_minutes=10, length_months=0)
+
+    def test_get_time_step(self):
+        r = self.client.get(
+            '/api/TimeStep/{}/'.format(
+                self.time_step.id))
+        self.assertEqual(r.status_code, 200)
+
+
+class VariableTestCase(TestCase):
+
+    def setUp(self):
+        self.variable = mommy.make(models.Variable)
+
+    def test_get_variable(self):
+        r = self.client.get(
+            '/api/Variable/{}/'.format(
+                self.variable.id))
+        self.assertEqual(r.status_code, 200)
+
+
+class UnitOfMeasurementTestCase(TestCase):
+
+    def setUp(self):
+        self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
+
+    def test_get_unit_of_measurement(self):
+        r = self.client.get(
+            '/api/UnitOfMeasurement/{}/'.format(
+                self.unit_of_measurement.id))
+        self.assertEqual(r.status_code, 200)
