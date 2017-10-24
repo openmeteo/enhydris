@@ -9,8 +9,11 @@ Release notes
 Version 2.0
 ===========
 
-Upgrading from 1.1
-------------------
+Upgrading
+---------
+
+You can upgrade directly from versions 0.8 and later. If you have an older
+version, first upgrade to 0.8.
 
 Enhydris is no longer pip-installable. Instead, it is a typical Django
 application with its :file:`manage.py` and all. Install it as described
@@ -24,7 +27,7 @@ Changes from 1.1.2
 - Now a normal Django project, no longer pip-installable.
 - Django 1.11 and only that is now supported.
 - A favicon has been added.
-- Some minor bugs have been fixed.
+- Several bugs have been fixed. Notably, object deletions are confirmed.
 
 Version 1.1
 ===========
