@@ -14,14 +14,6 @@ if os.path.exists('/usr/lib/x86_64-linux-gnu/mod_spatialite.so'):
     SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
 SITE_ID = 1
 STATIC_URL = '/static/'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST = 'smtp.my.domain'
-DEFAULT_FROM_EMAIL = 'user@host.domain'
-SERVER_EMAIL = DEFAULT_FROM_EMAIL
-EMAIL_HOST_USER = 'automaticsender@my.domain'
-EMAIL_HOST_PASSWORD = 'mypassword'
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 ROOT_URLCONF = 'enhydris.urls'
 
