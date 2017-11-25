@@ -29,6 +29,13 @@ Changes from 1.1.2
 - A favicon has been added.
 - Several bugs have been fixed. Notably, object deletions are confirmed.
 
+Changes in 2.0 microversions
+----------------------------
+
+- Version 2.0.1 removes ``EMAIL_BACKEND`` from the base settings and leaves the
+  Django default (this broke some production sites that did not specify
+  ``EMAIL_BACKEND`` and were expecting the Django default.)
+
 Version 1.1
 ===========
 
