@@ -364,3 +364,8 @@ These are the settings available to Enhydris, in addition to the
       ENHYDRIS_MAP_MARKERS = {
           '0': 'images/drop_marker.png', 
       }
+
+.. data:: ENHYDRIS_STATIONS_PER_PAGE
+
+   Number of stations per page for the paginatin of the station list. The
+   default is 100.
