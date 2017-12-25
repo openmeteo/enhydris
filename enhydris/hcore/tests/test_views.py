@@ -108,6 +108,31 @@ class StationsTestCase(TestCase):
         r = self.client.post('/stations/delete/9999/')
         self.assertEqual(r.status_code, 404)
 
+    @override_settings(ENHYDRIS_STATIONS_PER_PAGE=2)
+    def test_two_pages(self):
+        response = self.client.get('/')
+        self.assertContains(response, "<a href='?page=2'>2</a>", html=True)
+        self.assertNotContains(response, "<a href='?page=3'>3</a>", html=True)
+
+    @override_settings(ENHYDRIS_STATIONS_PER_PAGE=2)
+    def test_next_page_url(self):
+        response = self.client.get('/')
+        soup = BeautifulSoup(response.content, 'html.parser')
+        next_page_url = soup.find('a', id='next-page').get('href')
+        self.assertEqual(next_page_url, '?page=2')
+
+    @override_settings(ENHYDRIS_STATIONS_PER_PAGE=2)
+    def test_previous_page_url(self):
+        response = self.client.get('/?page=2')
+        soup = BeautifulSoup(response.content, 'html.parser')
+        next_page_url = soup.find('a', id='previous-page').get('href')
+        self.assertEqual(next_page_url, '?page=1')
+
+    @override_settings(ENHYDRIS_STATIONS_PER_PAGE=100)
+    def test_one_page(self):
+        response = self.client.get('/')
+        self.assertNotContains(response, "<a href='?page=2'>2</a>", html=True)
+
 
 class InstrumentsTestCase(TestCase):
 

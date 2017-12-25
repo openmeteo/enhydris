@@ -18,6 +18,7 @@ from django.contrib.auth.views import login as auth_login
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db.models import Extent
 from django.contrib.gis.geos import Polygon
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.db.models import Count, Q
@@ -256,6 +257,9 @@ def _prepare_csv(queryset):
 class StationListBaseView(ListView):
     template_name = ''
     model = Station
+
+    def get_paginate_by(self, queryset):
+        return getattr(settings, 'ENHYDRIS_STATIONS_PER_PAGE', 100)
 
     def get_queryset(self, distinct=True, **kwargs):
         result = super(StationListBaseView, self).get_queryset(**kwargs)
