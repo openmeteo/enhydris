@@ -35,6 +35,8 @@ Changes in 2.0 microversions
 - Version 2.0.1 removes ``EMAIL_BACKEND`` from the base settings and leaves the
   Django default (this broke some production sites that did not specify
   ``EMAIL_BACKEND`` and were expecting the Django default.)
+- Version 2.0.2 adds pagination to the list of stations and requires a
+  Django-1.11-compatible version of django-simple-captcha.
 
 Version 1.1
 ===========
