@@ -1353,7 +1353,7 @@ class ResetPasswordTestCase(TestCase):
         self.assertEqual(len(django.core.mail.outbox), 1)
 
         # Get the link from the email
-        m = re.search('http://[^/]+(\S+)', django.core.mail.outbox[0].body)
+        m = re.search(r'http://[^/]+(\S+)', django.core.mail.outbox[0].body)
         reset_link = m.group(1)
 
         # Visit the link and submit the form
