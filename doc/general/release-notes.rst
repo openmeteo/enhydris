@@ -37,6 +37,9 @@ Changes in 2.0 microversions
   ``EMAIL_BACKEND`` and were expecting the Django default.)
 - Version 2.0.2 adds pagination to the list of stations and requires a
   Django-1.11-compatible version of django-simple-captcha.
+- Version 2.0.3 fixes an undocumented CSV view that sends you a zip file with
+  stations, instruments and time series in CSV when you add ?format=csv to a
+  stations list URL. Apparently this had been broken since version 1.0.
 
 Version 1.1
 ===========
