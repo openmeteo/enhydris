@@ -188,9 +188,8 @@ def _prepare_csv(queryset):
     zipfile = ZipFile(zipfilename, 'w', ZIP_DEFLATED)
 
     stationsfilename = os.path.join(tempdir, 'stations.csv')
-    stationsfile = open(stationsfilename, 'w')
+    stationsfile = open(stationsfilename, 'w', encoding='utf-8-sig')
     try:
-        stationsfile.write(b'\xef\xbb\xbf')  # BOM
         csvwriter = csv.writer(stationsfile)
         csvwriter.writerow(_station_list_csv_headers)
         for station in queryset:
@@ -200,9 +199,8 @@ def _prepare_csv(queryset):
     zipfile.write(stationsfilename, 'stations.csv')
 
     instrumentsfilename = os.path.join(tempdir, 'instruments.csv')
-    instrumentsfile = open(instrumentsfilename, 'w')
+    instrumentsfile = open(instrumentsfilename, 'w', encoding='utf-8-sig')
     try:
-        instrumentsfile.write(b'\xef\xbb\xbf')  # BOM
         csvwriter = csv.writer(instrumentsfile)
         csvwriter.writerow(_instrument_list_csv_headers)
         for station in queryset:
@@ -213,9 +211,8 @@ def _prepare_csv(queryset):
     zipfile.write(instrumentsfilename, 'instruments.csv')
 
     timeseriesfilename = os.path.join(tempdir, 'timeseries.csv')
-    timeseriesfile = open(timeseriesfilename, 'w')
+    timeseriesfile = open(timeseriesfilename, 'w', encoding='utf-8-sig')
     try:
-        timeseriesfile.write(b'\xef\xbb\xbf')  # BOM
         csvwriter = csv.writer(timeseriesfile)
         csvwriter.writerow(_timeseries_list_csv_headers)
         for station in queryset:
@@ -479,7 +476,7 @@ class StationListView(StationListBaseView):
         # for some people (Hydroexigiantiki) who needed it.
         if request.GET.get("format", "").lower() == "csv":
             zipfilename = _prepare_csv(self.get_queryset())
-            response = HttpResponse(file(zipfilename, 'rb').read(),
+            response = HttpResponse(open(zipfilename, 'rb').read(),
                                     content_type='application/zip')
             response['Content-Disposition'] = 'attachment; filename=data.zip'
             response['Content-Length'] = str(os.path.getsize(zipfilename))

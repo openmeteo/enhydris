@@ -9,6 +9,7 @@ import textwrap
 import time
 from unittest import skipIf, skipUnless
 from urllib.parse import urlencode
+from zipfile import ZipFile
 
 import django
 from django.conf import settings
@@ -81,6 +82,14 @@ class StationsTestCase(TestCase):
         self.assertContains(
             response, '<a href="?sort=-name&amp;sort=name">Name&nbsp;↓</a>',
             html=True)
+
+    def test_station_list_csv(self):
+        response = self.client.get('/?format=csv')
+        with tempfile.TemporaryFile() as t:
+            t.write(response.content)
+            with ZipFile(t) as f:
+                stations_csv = f.open('stations.csv').read().decode()
+                self.assertTrue('Agios Athanasios' in stations_csv)
 
     def test_station_cannot_be_deleted_with_get(self):
         komboti = Station.objects.get(name='Komboti')
