@@ -89,7 +89,7 @@ class StationsTestCase(TestCase):
             t.write(response.content)
             with ZipFile(t) as f:
                 stations_csv = f.open('stations.csv').read().decode()
-                self.assertTrue('Agios Athanasios' in stations_csv)
+                self.assertTrue(',Agios Athanasios,' in stations_csv)
 
     def test_station_cannot_be_deleted_with_get(self):
         komboti = Station.objects.get(name='Komboti')
