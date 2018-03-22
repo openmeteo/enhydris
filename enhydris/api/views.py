@@ -55,11 +55,14 @@ class Tsdata(APIView):
     permission_classes = (CanEditOrReadOnly,)
 
     def get(self, request, pk, format=None):
-        timeseries = models.Timeseries.objects.get(pk=int(pk))
-        self.check_object_permissions(request, timeseries)
-        response = HttpResponse(content_type='text/plain')
-        pd2hts.write(timeseries.get_data(), response)
-        return response
+        try:
+            timeseries = models.Timeseries.objects.get(pk=int(pk))
+            self.check_object_permissions(request, timeseries)
+            response = HttpResponse(content_type='text/plain')
+            pd2hts.write(timeseries.get_data(), response)
+            return response
+        except models.Timeseries.DoesNotExist:
+            raise Http404
 
     def put(self, request, pk, format=None):
         try:
