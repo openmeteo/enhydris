@@ -629,9 +629,9 @@ def timeseries_data(request, *args, **kwargs):
     response.status_code = 200
     try:
         object_id = int(request.GET['object_id'])
-    except ValueError:
+        timeseries = Timeseries.objects.get(pk=object_id)
+    except (ValueError, Timeseries.DoesNotExist):
         raise Http404
-    timeseries = Timeseries.objects.get(pk=object_id)
     try:
         afilename = timeseries.datafile.path
     except ValueError:

@@ -761,6 +761,11 @@ class TsTestCase(TestCase):
         self.assertEqual(aobject['data'], [])
 
     @RandomEnhydrisTimeseriesDataDir()
+    def test_get_nonexisting_timeseries_data(self):
+        response = self.client.get("/timeseries/data/?object_id= 99999999999")
+        self.assertEqual(response.status_code, 404)
+
+    @RandomEnhydrisTimeseriesDataDir()
     def test_timeseries_with_timezone_data(self):
         """Test that there's no aware/naive date confusion
 
