@@ -91,6 +91,23 @@ class StationsTestCase(TestCase):
                 stations_csv = f.open('stations.csv').read().decode()
                 self.assertTrue('Agios Athanasios' in stations_csv)
 
+    def test_station_list_csv_with_null_srid(self):
+        mommy.make(Station, name="SRID Point, NoSRID Station",
+                   point=Point(x=-176.48368, y=0.19377, srid=4326), srid=None)
+        mommy.make(Station, name="NoSRID Point, NoSRID Station",
+                   point=Point(x=-176.48368, y=0.19377, srid=None), srid=None)
+        mommy.make(Station, name="NoSRID Point, SRID Station",
+                   point=Point(x=-176.48368, y=0.19377, srid=None), srid=4326)
+        response = self.client.get('/?format=csv')
+        with tempfile.TemporaryFile() as t:
+            t.write(response.content)
+            with ZipFile(t) as f:
+                stations_csv = f.open('stations.csv').read().decode()
+                self.assertTrue('Agios Athanasios' in stations_csv)
+                self.assertTrue('SRID Point, NoSRID Station' in stations_csv)
+                self.assertTrue('NoSRID Point, NoSRID Station' in stations_csv)
+                self.assertTrue('NoSRID Point, SRID Station' in stations_csv)
+
     def test_station_cannot_be_deleted_with_get(self):
         komboti = Station.objects.get(name='Komboti')
         self.assertEqual(Station.objects.all().count(), 3)
