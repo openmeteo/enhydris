@@ -76,6 +76,12 @@ class StationsTestCase(TestCase):
                    point=Point(x=21.60121, y=39.22440, srid=4326), srid=4326)
         mommy.make(Station, name="Tharbad",
                    point=Point(x=-176.48368, y=0.19377, srid=4326), srid=4326)
+        mommy.make(Station, name="SRID Point, NoSRID Station",
+                   point=Point(x=-176.48368, y=0.19377, srid=4326), srid=None)
+        mommy.make(Station, name="NoSRID Point, SRID Station",
+                   point=Point(x=-176.48368, y=0.19377, srid=None), srid=4326)
+        mommy.make(Station, name="NoSRID Point, NoSRID Station",
+                   point=Point(x=-176.48368, y=0.19377, srid=None), srid=None)
 
     def test_station_list(self):
         response = self.client.get('/')
@@ -91,23 +97,47 @@ class StationsTestCase(TestCase):
                 stations_csv = f.open('stations.csv').read().decode()
                 self.assertTrue(',Agios Athanasios,' in stations_csv)
 
+    def test_station_list_csv_station_no_srid(self):
+        response = self.client.get('/?format=csv')
+        with tempfile.TemporaryFile() as t:
+            t.write(response.content)
+            with ZipFile(t) as f:
+                stations_csv = f.open('stations.csv').read().decode()
+                self.assertTrue('SRID Point, NoSRID Station' in stations_csv)
+
+    def test_station_list_csv_point_no_srid(self):
+        response = self.client.get('/?format=csv')
+        with tempfile.TemporaryFile() as t:
+            t.write(response.content)
+            with ZipFile(t) as f:
+                stations_csv = f.open('stations.csv').read().decode()
+                self.assertTrue('NoSRID Point, SRID Station' in stations_csv)
+
+    def test_station_list_csv_station_and_point_with_no_srid(self):
+        response = self.client.get('/?format=csv')
+        with tempfile.TemporaryFile() as t:
+            t.write(response.content)
+            with ZipFile(t) as f:
+                stations_csv = f.open('stations.csv').read().decode()
+                self.assertTrue('NoSRID Point, NoSRID Station' in stations_csv)
+
     def test_station_cannot_be_deleted_with_get(self):
         komboti = Station.objects.get(name='Komboti')
-        self.assertEqual(Station.objects.all().count(), 3)
+        self.assertEqual(Station.objects.all().count(), 6)
         r = self.client.login(username='admin', password='topsecret')
         self.assertTrue(r)
         r = self.client.get('/stations/delete/{}/'.format(komboti.id))
         self.assertEqual(r.status_code, 200)
-        self.assertEqual(Station.objects.all().count(), 3)
+        self.assertEqual(Station.objects.all().count(), 6)
 
     def test_station_can_be_deleted_with_post(self):
         komboti = Station.objects.get(name='Komboti')
-        self.assertEqual(Station.objects.all().count(), 3)
+        self.assertEqual(Station.objects.all().count(), 6)
         r = self.client.login(username='admin', password='topsecret')
         self.assertTrue(r)
         r = self.client.post('/stations/delete/{}/'.format(komboti.id))
         self.assertEqual(r.status_code, 200)
-        self.assertEqual(Station.objects.all().count(), 2)
+        self.assertEqual(Station.objects.all().count(), 5)
 
     def test_delete_nonexistent_station_returns_404(self):
         r = self.client.post('/stations/delete/9999/')
@@ -117,7 +147,7 @@ class StationsTestCase(TestCase):
         r = self.client.post('/stations/delete/9999/')
         self.assertEqual(r.status_code, 404)
 
-    @override_settings(ENHYDRIS_STATIONS_PER_PAGE=2)
+    @override_settings(ENHYDRIS_STATIONS_PER_PAGE=3)
     def test_two_pages(self):
         response = self.client.get('/')
         self.assertContains(response, "<a href='?page=2'>2</a>", html=True)
