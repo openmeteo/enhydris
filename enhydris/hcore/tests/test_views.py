@@ -21,7 +21,7 @@ from django.contrib.auth.models import User, Group, Permission
 from django.contrib.gis.geos import fromstr, Point
 from django.db import connections
 from django.db.utils import DEFAULT_DB_ALIAS
-from django.http import HttpRequest, QueryDict
+from django.http import Http404, HttpRequest, QueryDict
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -374,7 +374,7 @@ class SortTestCase(TestCase):
         self.assertLess(i('Komboti'), i('Tharbad'))
 
 
-class SearchTestCase(TestCase):
+class SearchTestCaseBase(TestCase):
 
     def setUp(self):
         # Station owners
@@ -409,20 +409,28 @@ class SearchTestCase(TestCase):
             water_basin__name='Greyflood',
             water_division__name="South Syldavia Basins")
 
+        # A time zone
+        timezone = mommy.make(TimeZone, code='UTC', utc_offset=0)
+
         # Five time series
-        kt = mommy.make(Timeseries, name='Air temperature',
-                        variable__descr='Temperature', gentity=station_komboti)
-        kr = mommy.make(Timeseries, name='Rain', gentity=station_komboti,
-                        variable__descr='Rain')
-        mommy.make(Timeseries, name='Air temperature',
-                   gentity=station_ai_thanassis, variable=kt.variable)
-        mommy.make(Timeseries, name='Rain', gentity=station_ai_thanassis,
-                   variable=kr.variable)
-        mommy.make(Timeseries, name='Temperature', gentity=station_tharbad,
-                   variable=kt.variable,
-                   remarks='This is an extremely important time series, '
-                   'just because it is hugely significant and markedly '
-                   'outstanding.')
+        self.komboti_temperature = mommy.make(
+            Timeseries, name='Air temperature', variable__descr='Temperature',
+            gentity=station_komboti, time_zone=timezone)
+        self.komboti_rain = mommy.make(
+            Timeseries, name='Rain', gentity=station_komboti,
+            variable__descr='Rain', time_zone=timezone)
+        self.ai_thanassis_temperature = mommy.make(
+            Timeseries, name='Air temperature', gentity=station_ai_thanassis,
+            variable=self.komboti_temperature.variable, time_zone=timezone)
+        self.ai_thanassis_rain = mommy.make(
+            Timeseries, name='Rain', gentity=station_ai_thanassis,
+            variable=self.komboti_rain.variable, time_zone=timezone)
+        self.tharbad_temperature = mommy.make(
+            Timeseries, name='Temperature', gentity=station_tharbad,
+            variable=self.komboti_temperature.variable,
+            remarks='This is an extremely important time series, '
+            'just because it is hugely significant and markedly '
+            'outstanding.', time_zone=timezone)
 
         # And a station with no time series
         mommy.make(Station, name="Lefkada")
@@ -433,6 +441,9 @@ class SearchTestCase(TestCase):
         view.request.method = 'GET'
         view.request.GET = QueryDict(query_string)
         return view.get_queryset()
+
+
+class SearchTestCase(SearchTestCaseBase):
 
     def test_search_in_timeseries_remarks(self):
         # Search for something that exists
@@ -570,6 +581,63 @@ class SearchTestCase(TestCase):
             urlencode({'political_division': 'Middle Earth'}))
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(queryset[0].name, 'Tharbad')
+
+
+@skipIf(settings.DATABASES['default']['ENGINE'].endswith('.spatialite'),
+        'This functionality is not available on spatialite')
+@RandomEnhydrisTimeseriesDataDir()
+class SearchTsHasYearsTestCase(SearchTestCaseBase):
+
+    def setUp(self):
+        super().setUp()
+
+        # Add some timeseries data
+        self.komboti_temperature.set_data(StringIO(textwrap.dedent(
+            """\
+            2005-08-23 18:53,93,
+            2010-08-23 22:53,42.4,
+            """
+        )))
+        self.komboti_rain.set_data(StringIO(textwrap.dedent(
+            """\
+            2011-08-23 18:53,93,
+            2015-08-23 22:53,42.4,
+            """
+        )))
+        self.ai_thanassis_temperature.set_data(StringIO(textwrap.dedent(
+            """\
+            2005-08-23 18:53,93,
+            2010-08-23 22:53,42.4,
+            """
+        )))
+        self.ai_thanassis_rain.set_data(StringIO(textwrap.dedent(
+            """\
+            2009-08-23 18:53,93,
+            2017-08-23 22:53,42.4,
+            """
+        )))
+
+    def test_search_with_year_existing_somewhere(self):
+        queryset = self.get_queryset(
+            urlencode({'ts_has_years': '2005,2012,2016'}))
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset[0].name, 'Agios Athanasios')
+
+    def test_search_with_years_existing_everywhere(self):
+        queryset = self.get_queryset(
+            urlencode({'ts_has_years': '2005,2012'})).order_by('name')
+        self.assertEqual(queryset.count(), 2)
+        self.assertEqual(queryset[0].name, 'Agios Athanasios')
+        self.assertEqual(queryset[1].name, 'Komboti')
+
+    def test_search_with_year_existing_nowhere(self):
+        queryset = self.get_queryset(
+            urlencode({'ts_has_years': '2005,2012,2018'}))
+        self.assertEqual(queryset.count(), 0)
+
+    def test_search_with_garbage(self):
+        with self.assertRaises(Http404):
+            self.get_queryset(urlencode({'ts_has_years': 'hello,world'}))
 
 
 class RandomMediaRoot(override_settings):

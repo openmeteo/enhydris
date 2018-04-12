@@ -401,14 +401,15 @@ class StationListBaseView(ListView):
         except ValueError:
             raise Http404  # FIXME: Return empty result plus error message
         return queryset.extra(
-            where=['hcore_station.gpoint_ptr_id IN '
-                   '(SELECT t.gentity_id FROM hcore_timeseries t '
-                   'WHERE ' + (' AND '.join(
-                       ['{0} BETWEEN '
-                        'EXTRACT(YEAR FROM t.start_date) AND '
-                        'EXTRACT(YEAR FROM t.end_date)'
-                        .format(year) for year in years])) +
-                   ')'])
+            where=[' AND '.join([
+                'hcore_station.gpoint_ptr_id IN '
+                '(SELECT t.gentity_id FROM hcore_timeseries t '
+                'WHERE ' + str(year) + ' BETWEEN '
+                'EXTRACT(YEAR FROM t.start_date_utc) AND '
+                'EXTRACT(YEAR FROM t.end_date_utc))'
+                for year in years]
+            )]
+        )
 
     def filter_by_political_division(self, queryset, value):
         return queryset.extra(where=['''
