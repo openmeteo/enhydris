@@ -376,7 +376,10 @@ class SortTestCase(TestCase):
 
 class SearchTestCaseBase(TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
         # Station owners
         rich = mommy.make(Organization,
                           name="We're rich and we fancy it SA")
@@ -413,21 +416,21 @@ class SearchTestCaseBase(TestCase):
         timezone = mommy.make(TimeZone, code='UTC', utc_offset=0)
 
         # Five time series
-        self.komboti_temperature = mommy.make(
+        cls.komboti_temperature = mommy.make(
             Timeseries, name='Air temperature', variable__descr='Temperature',
             gentity=station_komboti, time_zone=timezone)
-        self.komboti_rain = mommy.make(
+        cls.komboti_rain = mommy.make(
             Timeseries, name='Rain', gentity=station_komboti,
             variable__descr='Rain', time_zone=timezone)
-        self.ai_thanassis_temperature = mommy.make(
+        cls.ai_thanassis_temperature = mommy.make(
             Timeseries, name='Air temperature', gentity=station_ai_thanassis,
-            variable=self.komboti_temperature.variable, time_zone=timezone)
-        self.ai_thanassis_rain = mommy.make(
+            variable=cls.komboti_temperature.variable, time_zone=timezone)
+        cls.ai_thanassis_rain = mommy.make(
             Timeseries, name='Rain', gentity=station_ai_thanassis,
-            variable=self.komboti_rain.variable, time_zone=timezone)
-        self.tharbad_temperature = mommy.make(
+            variable=cls.komboti_rain.variable, time_zone=timezone)
+        cls.tharbad_temperature = mommy.make(
             Timeseries, name='Temperature', gentity=station_tharbad,
-            variable=self.komboti_temperature.variable,
+            variable=cls.komboti_temperature.variable,
             remarks='This is an extremely important time series, '
             'just because it is hugely significant and markedly '
             'outstanding.', time_zone=timezone)
@@ -588,29 +591,30 @@ class SearchTestCase(SearchTestCaseBase):
 @RandomEnhydrisTimeseriesDataDir()
 class SearchTsHasYearsTestCase(SearchTestCaseBase):
 
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
 
         # Add some timeseries data
-        self.komboti_temperature.set_data(StringIO(textwrap.dedent(
+        cls.komboti_temperature.set_data(StringIO(textwrap.dedent(
             """\
             2005-08-23 18:53,93,
             2010-08-23 22:53,42.4,
             """
         )))
-        self.komboti_rain.set_data(StringIO(textwrap.dedent(
+        cls.komboti_rain.set_data(StringIO(textwrap.dedent(
             """\
             2011-08-23 18:53,93,
             2015-08-23 22:53,42.4,
             """
         )))
-        self.ai_thanassis_temperature.set_data(StringIO(textwrap.dedent(
+        cls.ai_thanassis_temperature.set_data(StringIO(textwrap.dedent(
             """\
             2005-08-23 18:53,93,
             2010-08-23 22:53,42.4,
             """
         )))
-        self.ai_thanassis_rain.set_data(StringIO(textwrap.dedent(
+        cls.ai_thanassis_rain.set_data(StringIO(textwrap.dedent(
             """\
             2009-08-23 18:53,93,
             2017-08-23 22:53,42.4,
