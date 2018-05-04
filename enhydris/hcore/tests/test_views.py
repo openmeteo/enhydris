@@ -21,7 +21,7 @@ from django.contrib.auth.models import User, Group, Permission
 from django.contrib.gis.geos import fromstr, Point
 from django.db import connections
 from django.db.utils import DEFAULT_DB_ALIAS
-from django.http import HttpRequest, QueryDict
+from django.http import Http404, HttpRequest, QueryDict
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -76,6 +76,12 @@ class StationsTestCase(TestCase):
                    point=Point(x=21.60121, y=39.22440, srid=4326), srid=4326)
         mommy.make(Station, name="Tharbad",
                    point=Point(x=-176.48368, y=0.19377, srid=4326), srid=4326)
+        mommy.make(Station, name="SRID Point, NoSRID Station",
+                   point=Point(x=-176.48368, y=0.19377, srid=4326), srid=None)
+        mommy.make(Station, name="NoSRID Point, SRID Station",
+                   point=Point(x=-176.48368, y=0.19377, srid=None), srid=4326)
+        mommy.make(Station, name="NoSRID Point, NoSRID Station",
+                   point=Point(x=-176.48368, y=0.19377, srid=None), srid=None)
 
     def test_station_list(self):
         response = self.client.get('/')
@@ -89,25 +95,49 @@ class StationsTestCase(TestCase):
             t.write(response.content)
             with ZipFile(t) as f:
                 stations_csv = f.open('stations.csv').read().decode()
-                self.assertTrue('Agios Athanasios' in stations_csv)
+                self.assertTrue(',Agios Athanasios,' in stations_csv)
+
+    def test_station_list_csv_station_no_srid(self):
+        response = self.client.get('/?format=csv')
+        with tempfile.TemporaryFile() as t:
+            t.write(response.content)
+            with ZipFile(t) as f:
+                stations_csv = f.open('stations.csv').read().decode()
+                self.assertTrue('SRID Point, NoSRID Station' in stations_csv)
+
+    def test_station_list_csv_point_no_srid(self):
+        response = self.client.get('/?format=csv')
+        with tempfile.TemporaryFile() as t:
+            t.write(response.content)
+            with ZipFile(t) as f:
+                stations_csv = f.open('stations.csv').read().decode()
+                self.assertTrue('NoSRID Point, SRID Station' in stations_csv)
+
+    def test_station_list_csv_station_and_point_with_no_srid(self):
+        response = self.client.get('/?format=csv')
+        with tempfile.TemporaryFile() as t:
+            t.write(response.content)
+            with ZipFile(t) as f:
+                stations_csv = f.open('stations.csv').read().decode()
+                self.assertTrue('NoSRID Point, NoSRID Station' in stations_csv)
 
     def test_station_cannot_be_deleted_with_get(self):
         komboti = Station.objects.get(name='Komboti')
-        self.assertEqual(Station.objects.all().count(), 3)
+        self.assertEqual(Station.objects.all().count(), 6)
         r = self.client.login(username='admin', password='topsecret')
         self.assertTrue(r)
         r = self.client.get('/stations/delete/{}/'.format(komboti.id))
         self.assertEqual(r.status_code, 200)
-        self.assertEqual(Station.objects.all().count(), 3)
+        self.assertEqual(Station.objects.all().count(), 6)
 
     def test_station_can_be_deleted_with_post(self):
         komboti = Station.objects.get(name='Komboti')
-        self.assertEqual(Station.objects.all().count(), 3)
+        self.assertEqual(Station.objects.all().count(), 6)
         r = self.client.login(username='admin', password='topsecret')
         self.assertTrue(r)
         r = self.client.post('/stations/delete/{}/'.format(komboti.id))
         self.assertEqual(r.status_code, 200)
-        self.assertEqual(Station.objects.all().count(), 2)
+        self.assertEqual(Station.objects.all().count(), 5)
 
     def test_delete_nonexistent_station_returns_404(self):
         r = self.client.post('/stations/delete/9999/')
@@ -117,7 +147,7 @@ class StationsTestCase(TestCase):
         r = self.client.post('/stations/delete/9999/')
         self.assertEqual(r.status_code, 404)
 
-    @override_settings(ENHYDRIS_STATIONS_PER_PAGE=2)
+    @override_settings(ENHYDRIS_STATIONS_PER_PAGE=3)
     def test_two_pages(self):
         response = self.client.get('/')
         self.assertContains(response, "<a href='?page=2'>2</a>", html=True)
@@ -344,9 +374,12 @@ class SortTestCase(TestCase):
         self.assertLess(i('Komboti'), i('Tharbad'))
 
 
-class SearchTestCase(TestCase):
+class SearchTestCaseBase(TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
         # Station owners
         rich = mommy.make(Organization,
                           name="We're rich and we fancy it SA")
@@ -379,20 +412,28 @@ class SearchTestCase(TestCase):
             water_basin__name='Greyflood',
             water_division__name="South Syldavia Basins")
 
+        # A time zone
+        timezone = mommy.make(TimeZone, code='UTC', utc_offset=0)
+
         # Five time series
-        kt = mommy.make(Timeseries, name='Air temperature',
-                        variable__descr='Temperature', gentity=station_komboti)
-        kr = mommy.make(Timeseries, name='Rain', gentity=station_komboti,
-                        variable__descr='Rain')
-        mommy.make(Timeseries, name='Air temperature',
-                   gentity=station_ai_thanassis, variable=kt.variable)
-        mommy.make(Timeseries, name='Rain', gentity=station_ai_thanassis,
-                   variable=kr.variable)
-        mommy.make(Timeseries, name='Temperature', gentity=station_tharbad,
-                   variable=kt.variable,
-                   remarks='This is an extremely important time series, '
-                   'just because it is hugely significant and markedly '
-                   'outstanding.')
+        cls.komboti_temperature = mommy.make(
+            Timeseries, name='Air temperature', variable__descr='Temperature',
+            gentity=station_komboti, time_zone=timezone)
+        cls.komboti_rain = mommy.make(
+            Timeseries, name='Rain', gentity=station_komboti,
+            variable__descr='Rain', time_zone=timezone)
+        cls.ai_thanassis_temperature = mommy.make(
+            Timeseries, name='Air temperature', gentity=station_ai_thanassis,
+            variable=cls.komboti_temperature.variable, time_zone=timezone)
+        cls.ai_thanassis_rain = mommy.make(
+            Timeseries, name='Rain', gentity=station_ai_thanassis,
+            variable=cls.komboti_rain.variable, time_zone=timezone)
+        cls.tharbad_temperature = mommy.make(
+            Timeseries, name='Temperature', gentity=station_tharbad,
+            variable=cls.komboti_temperature.variable,
+            remarks='This is an extremely important time series, '
+            'just because it is hugely significant and markedly '
+            'outstanding.', time_zone=timezone)
 
         # And a station with no time series
         mommy.make(Station, name="Lefkada")
@@ -403,6 +444,9 @@ class SearchTestCase(TestCase):
         view.request.method = 'GET'
         view.request.GET = QueryDict(query_string)
         return view.get_queryset()
+
+
+class SearchTestCase(SearchTestCaseBase):
 
     def test_search_in_timeseries_remarks(self):
         # Search for something that exists
@@ -540,6 +584,64 @@ class SearchTestCase(TestCase):
             urlencode({'political_division': 'Middle Earth'}))
         self.assertEqual(queryset.count(), 1)
         self.assertEqual(queryset[0].name, 'Tharbad')
+
+
+@skipIf(settings.DATABASES['default']['ENGINE'].endswith('.spatialite'),
+        'This functionality is not available on spatialite')
+@RandomEnhydrisTimeseriesDataDir()
+class SearchTsHasYearsTestCase(SearchTestCaseBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        # Add some timeseries data
+        cls.komboti_temperature.set_data(StringIO(textwrap.dedent(
+            """\
+            2005-08-23 18:53,93,
+            2010-08-23 22:53,42.4,
+            """
+        )))
+        cls.komboti_rain.set_data(StringIO(textwrap.dedent(
+            """\
+            2011-08-23 18:53,93,
+            2015-08-23 22:53,42.4,
+            """
+        )))
+        cls.ai_thanassis_temperature.set_data(StringIO(textwrap.dedent(
+            """\
+            2005-08-23 18:53,93,
+            2010-08-23 22:53,42.4,
+            """
+        )))
+        cls.ai_thanassis_rain.set_data(StringIO(textwrap.dedent(
+            """\
+            2009-08-23 18:53,93,
+            2017-08-23 22:53,42.4,
+            """
+        )))
+
+    def test_search_with_year_existing_somewhere(self):
+        queryset = self.get_queryset(
+            urlencode({'ts_has_years': '2005,2012,2016'}))
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset[0].name, 'Agios Athanasios')
+
+    def test_search_with_years_existing_everywhere(self):
+        queryset = self.get_queryset(
+            urlencode({'ts_has_years': '2005,2012'})).order_by('name')
+        self.assertEqual(queryset.count(), 2)
+        self.assertEqual(queryset[0].name, 'Agios Athanasios')
+        self.assertEqual(queryset[1].name, 'Komboti')
+
+    def test_search_with_year_existing_nowhere(self):
+        queryset = self.get_queryset(
+            urlencode({'ts_has_years': '2005,2012,2018'}))
+        self.assertEqual(queryset.count(), 0)
+
+    def test_search_with_garbage(self):
+        with self.assertRaises(Http404):
+            self.get_queryset(urlencode({'ts_has_years': 'hello,world'}))
 
 
 class RandomMediaRoot(override_settings):
@@ -759,6 +861,11 @@ class TsTestCase(TestCase):
         self.assertEqual(len(aobject), 2)
         self.assertEqual(aobject['stats'], {})
         self.assertEqual(aobject['data'], [])
+
+    @RandomEnhydrisTimeseriesDataDir()
+    def test_get_nonexisting_timeseries_data(self):
+        response = self.client.get("/timeseries/data/?object_id= 99999999999")
+        self.assertEqual(response.status_code, 404)
 
     @RandomEnhydrisTimeseriesDataDir()
     def test_timeseries_with_timezone_data(self):
@@ -1362,7 +1469,7 @@ class ResetPasswordTestCase(TestCase):
         self.assertEqual(len(django.core.mail.outbox), 1)
 
         # Get the link from the email
-        m = re.search('http://[^/]+(\S+)', django.core.mail.outbox[0].body)
+        m = re.search(r'http://[^/]+(\S+)', django.core.mail.outbox[0].body)
         reset_link = m.group(1)
 
         # Visit the link and submit the form

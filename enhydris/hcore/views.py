@@ -133,18 +133,15 @@ _station_list_csv_headers = [
 
 
 def _station_csv(s):
-    abscissa, ordinate = (s.point.transform(s.srid, clone=True)
-                          if s.point else (None, None))
-    return [str(x).encode('utf-8') for x in
-            [s.id, s.name, s.name_alt, s.short_name, s.short_name_alt,
-             '+'.join([t.descr for t in s.stype.all()]),
-             s.owner, s.start_date, s.end_date,
-             abscissa, ordinate, s.srid, s.approximate, s.altitude, s.asrid,
-             s.water_basin.name if s.water_basin else "",
-             s.water_division.name if s.water_division else "",
-             s.political_division.name if s.political_division else "",
-             s.is_automatic, s.remarks, s.remarks_alt, s.last_modified
-             ]
+    return [s.id, s.name, s.name_alt, s.short_name, s.short_name_alt,
+            '+'.join([t.descr for t in s.stype.all()]),
+            s.owner, s.start_date, s.end_date,
+            s.original_abscissa(), s.original_ordinate(),
+            s.srid, s.approximate, s.altitude, s.asrid,
+            s.water_basin.name if s.water_basin else "",
+            s.water_division.name if s.water_division else "",
+            s.political_division.name if s.political_division else "",
+            s.is_automatic, s.remarks, s.remarks_alt, s.last_modified
             ]
 
 
@@ -155,11 +152,9 @@ _instrument_list_csv_headers = [
 
 
 def _instrument_csv(i):
-    return [str(x).encode('utf-8') for x in
-            [i.id, i.station.id, i.type.descr if i.type else "", i.name,
-             i.name_alt, i.manufacturer, i.model, i.start_date, i.end_date,
-             i.remarks, i.remarks_alt
-             ]
+    return [i.id, i.station.id, i.type.descr if i.type else "", i.name,
+            i.name_alt, i.manufacturer, i.model, i.start_date, i.end_date,
+            i.remarks, i.remarks_alt
             ]
 
 
@@ -171,14 +166,12 @@ _timeseries_list_csv_headers = [
 
 
 def _timeseries_csv(t):
-    return [str(x).encode('utf-8') for x in
-            [t.id, t.gentity.id, t.instrument.id if t.instrument else "",
-             t.variable.descr if t.variable else "",
-             t.unit_of_measurement.symbol, t.name, t.name_alt, t.precision,
-             t.time_zone.code, t.time_step.descr if t.time_step else "",
-             t.timestamp_rounding_minutes, t.timestamp_rounding_months,
-             t.timestamp_offset_minutes, t.timestamp_offset_months
-             ]
+    return [t.id, t.gentity.id, t.instrument.id if t.instrument else "",
+            t.variable.descr if t.variable else "",
+            t.unit_of_measurement.symbol, t.name, t.name_alt, t.precision,
+            t.time_zone.code, t.time_step.descr if t.time_step else "",
+            t.timestamp_rounding_minutes, t.timestamp_rounding_months,
+            t.timestamp_offset_minutes, t.timestamp_offset_months
             ]
 
 
@@ -408,14 +401,15 @@ class StationListBaseView(ListView):
         except ValueError:
             raise Http404  # FIXME: Return empty result plus error message
         return queryset.extra(
-            where=['hcore_station.gpoint_ptr_id IN '
-                   '(SELECT t.gentity_id FROM hcore_timeseries t '
-                   'WHERE ' + (' AND '.join(
-                       ['{0} BETWEEN '
-                        'EXTRACT(YEAR FROM t.start_date) AND '
-                        'EXTRACT(YEAR FROM t.end_date)'
-                        .format(year) for year in years])) +
-                   ')'])
+            where=[' AND '.join([
+                'hcore_station.gpoint_ptr_id IN '
+                '(SELECT t.gentity_id FROM hcore_timeseries t '
+                'WHERE ' + str(year) + ' BETWEEN '
+                'EXTRACT(YEAR FROM t.start_date_utc) AND '
+                'EXTRACT(YEAR FROM t.end_date_utc))'
+                for year in years]
+            )]
+        )
 
     def filter_by_political_division(self, queryset, value):
         return queryset.extra(where=['''
@@ -635,9 +629,9 @@ def timeseries_data(request, *args, **kwargs):
     response.status_code = 200
     try:
         object_id = int(request.GET['object_id'])
-    except ValueError:
+        timeseries = Timeseries.objects.get(pk=object_id)
+    except (ValueError, Timeseries.DoesNotExist):
         raise Http404
-    timeseries = Timeseries.objects.get(pk=object_id)
     try:
         afilename = timeseries.datafile.path
     except ValueError:

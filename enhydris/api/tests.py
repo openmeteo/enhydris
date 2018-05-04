@@ -165,6 +165,16 @@ class ReadTestCase(APITestCase):
                                                    default_timezone=None)
             self.assertEqual(res_last_modified, ref_datum.last_modified)
 
+        @RandomEnhydrisTimeseriesDataDir()
+        def test_get_nonexisting_timeseries_data_using_url_query(self):
+            response = self.client.get("/api/tsdata/?pk=9999999999999")
+            self.assertEqual(response.status_code, 404)
+
+        @RandomEnhydrisTimeseriesDataDir()
+        def test_get_nonexisting_timeseries_data_using_url_parameter(self):
+            response = self.client.get('/api/tsdata/9999999', follow=True)
+            self.assertEqual(response.status_code, 404)
+
 
 class WriteTestCase(TestCase):
 
