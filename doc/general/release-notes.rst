@@ -40,6 +40,7 @@ Changes in 2.0 microversions
 - Version 2.0.3 fixes an undocumented CSV view that sends you a zip file with
   stations, instruments and time series in CSV when you add ?format=csv to a
   stations list URL. Apparently this had been broken since version 1.0.
+- Version 2.0.4 fixes several crashes.
 
 Version 1.1
 ===========
