@@ -1,15 +1,7 @@
-import calendar
-import csv
-from datetime import datetime, timedelta
-import json
-import linecache
-import math
 import mimetypes
 import os
-import tempfile
 from tempfile import mkstemp
 from wsgiref.util import FileWrapper
-from zipfile import ZipFile, ZIP_DEFLATED
 
 from django.conf import settings
 from django.contrib import messages
@@ -18,7 +10,6 @@ from django.contrib.auth.views import login as auth_login
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db.models import Extent
 from django.contrib.gis.geos import Polygon
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.db.models import Count, Q
@@ -40,7 +31,8 @@ import iso8601
 import pandas as pd
 import pd2hts
 
-from enhydris.models import (
+from .csv import prepare_csv
+from .models import (
     GentityAltCode,
     GentityEvent,
     GentityFile,
@@ -51,7 +43,7 @@ from enhydris.models import (
     Timeseries,
     UserProfile,
 )
-from enhydris.forms import (
+from .forms import (
     GentityAltCodeForm,
     GentityEventForm,
     GentityFileForm,
@@ -63,19 +55,6 @@ from enhydris.forms import (
     TimeseriesDataForm,
     TimeStepForm,
 )
-
-
-def add_months_to_datetime(adatetime, months):
-    m, y, d = adatetime.month, adatetime.year, adatetime.day
-    m += months
-    while m > 12:
-        m -= 12
-        y += 1
-    while m < 1:
-        m += 12
-        y -= 1
-    d = min(d, calendar.monthrange(y, m)[1])
-    return adatetime.replace(year=y, month=m, day=d)
 
 
 class ProfileDetailView(DetailView):
@@ -142,203 +121,6 @@ class StationDetailView(DetailView):
 class StationBriefView(DetailView):
     model = Station
     template_name = "station_brief.html"
-
-
-_station_list_csv_headers = [
-    "id",
-    "Name",
-    "Alternative name",
-    "Short name",
-    "Alt short name",
-    "Type",
-    "Owner",
-    "Start date",
-    "End date",
-    "Abscissa",
-    "Ordinate",
-    "SRID",
-    "Approximate",
-    "Altitude",
-    "SRID",
-    "Water basin",
-    "Water division",
-    "Political division",
-    "Automatic",
-    "Remarks",
-    "Alternative remarks",
-    "Last modified",
-]
-
-
-def _station_csv(s):
-    return [
-        s.id,
-        s.name,
-        s.name_alt,
-        s.short_name,
-        s.short_name_alt,
-        "+".join([t.descr for t in s.stype.all()]),
-        s.owner,
-        s.start_date,
-        s.end_date,
-        s.original_abscissa(),
-        s.original_ordinate(),
-        s.srid,
-        s.approximate,
-        s.altitude,
-        s.asrid,
-        s.water_basin.name if s.water_basin else "",
-        s.water_division.name if s.water_division else "",
-        s.political_division.name if s.political_division else "",
-        s.is_automatic,
-        s.remarks,
-        s.remarks_alt,
-        s.last_modified,
-    ]
-
-
-_instrument_list_csv_headers = [
-    "id",
-    "Station",
-    "Type",
-    "Name",
-    "Alternative name",
-    "Manufacturer",
-    "Model",
-    "Start date",
-    "End date",
-    "Remarks",
-    "Alternative remarks",
-]
-
-
-def _instrument_csv(i):
-    return [
-        i.id,
-        i.station.id,
-        i.type.descr if i.type else "",
-        i.name,
-        i.name_alt,
-        i.manufacturer,
-        i.model,
-        i.start_date,
-        i.end_date,
-        i.remarks,
-        i.remarks_alt,
-    ]
-
-
-_timeseries_list_csv_headers = [
-    "id",
-    "Station",
-    "Instrument",
-    "Variable",
-    "Unit",
-    "Name",
-    "Alternative name",
-    "Precision",
-    "Time zone",
-    "Time step",
-    "Nom. Offs. Min.",
-    "Nom. Offs. Mon.",
-    "Act. Offs. Min.",
-    "Act. Offs.  Mon.",
-    "Remarks",
-    "Alternative Remarks",
-]
-
-
-def _timeseries_csv(t):
-    return [
-        t.id,
-        t.gentity.id,
-        t.instrument.id if t.instrument else "",
-        t.variable.descr if t.variable else "",
-        t.unit_of_measurement.symbol,
-        t.name,
-        t.name_alt,
-        t.precision,
-        t.time_zone.code,
-        t.time_step.descr if t.time_step else "",
-        t.timestamp_rounding_minutes,
-        t.timestamp_rounding_months,
-        t.timestamp_offset_minutes,
-        t.timestamp_offset_months,
-    ]
-
-
-def _prepare_csv(queryset):
-    tempdir = tempfile.mkdtemp()
-    zipfilename = os.path.join(tempdir, "data.zip")
-    zipfile = ZipFile(zipfilename, "w", ZIP_DEFLATED)
-
-    stationsfilename = os.path.join(tempdir, "stations.csv")
-    stationsfile = open(stationsfilename, "w", encoding="utf-8-sig")
-    try:
-        csvwriter = csv.writer(stationsfile)
-        csvwriter.writerow(_station_list_csv_headers)
-        for station in queryset:
-            csvwriter.writerow(_station_csv(station))
-    finally:
-        stationsfile.close()
-    zipfile.write(stationsfilename, "stations.csv")
-
-    instrumentsfilename = os.path.join(tempdir, "instruments.csv")
-    instrumentsfile = open(instrumentsfilename, "w", encoding="utf-8-sig")
-    try:
-        csvwriter = csv.writer(instrumentsfile)
-        csvwriter.writerow(_instrument_list_csv_headers)
-        for station in queryset:
-            for instrument in station.instrument_set.all():
-                csvwriter.writerow(_instrument_csv(instrument))
-    finally:
-        instrumentsfile.close()
-    zipfile.write(instrumentsfilename, "instruments.csv")
-
-    timeseriesfilename = os.path.join(tempdir, "timeseries.csv")
-    timeseriesfile = open(timeseriesfilename, "w", encoding="utf-8-sig")
-    try:
-        csvwriter = csv.writer(timeseriesfile)
-        csvwriter.writerow(_timeseries_list_csv_headers)
-        for station in queryset:
-            for timeseries in station.timeseries.order_by("instrument__id"):
-                csvwriter.writerow(_timeseries_csv(timeseries))
-    finally:
-        timeseriesfile.close()
-    zipfile.write(timeseriesfilename, "timeseries.csv")
-
-    import textwrap
-
-    readmefilename = os.path.join(tempdir, "README")
-    readmefile = open(readmefilename, "w")
-    readmefile.write(
-        textwrap.dedent(
-            """\
-        The functionality which provides you with CSV versions of the station,
-        instrument and time series list is a quick way to enable HUMANS to
-        examine these lists with tools such as spreadsheets. It is not
-        intended to be used by any automation tools: headings, columns, file
-        structure and everything is subject to change without notice.
-
-        If you are a developer and need to write automation tools, do not rely
-        on the CSV files. Instead, use the documented API
-        (http://openmeteo.org/doc/api.html), or contact us (the Enhydris
-        developers, not the web site maintainers) and insist that we support
-        one of these open standards appropriate for such information
-        interchange.
-        """
-        )
-    )
-    readmefile.close()
-    zipfile.write(readmefilename, "README")
-
-    zipfile.close()
-    os.remove(stationsfilename)
-    os.remove(instrumentsfilename)
-    os.remove(timeseriesfilename)
-    os.remove(readmefilename)
-
-    return zipfilename
 
 
 class StationListBaseView(ListView):
@@ -579,9 +361,9 @@ class StationListView(StationListBaseView):
 
     def get(self, request, *args, **kwargs):
         # The CSV is an undocumented feature we quickly and dirtily created
-        # for some people (Hydroexigiantiki) who needed it.
+        # for some people who needed it.
         if request.GET.get("format", "").lower() == "csv":
-            zipfilename = _prepare_csv(self.get_queryset())
+            zipfilename = prepare_csv(self.get_queryset())
             response = HttpResponse(
                 open(zipfilename, "rb").read(), content_type="application/zip"
             )
@@ -630,250 +412,6 @@ class BoundingBoxView(StationListBaseView):
         return HttpResponse(
             ",".join([str(e) for e in extent]), content_type="text/plain"
         )
-
-
-def bufcount(filename):
-    lines = 0
-    with open(filename) as f:
-        buf_size = 1024 * 1024
-        read_f = f.read  # loop optimization
-        buf = read_f(buf_size)
-        while buf:
-            lines += buf.count("\n")
-            buf = read_f(buf_size)
-    return lines
-
-
-def timeseries_data(request, *args, **kwargs):
-    def date_at_pos(pos, tz):
-        s = linecache.getline(afilename, pos)
-        return iso8601.parse_date(s.split(",")[0], default_timezone=tz)
-
-    def timedeltadivide(a, b):
-        """Divide timedelta a by timedelta b."""
-        a = a.days * 86400 + a.seconds
-        b = b.days * 86400 + b.seconds
-        return float(a) / float(b)
-
-    # Return the nearest record number to the specified date
-    # The second argument is 0 for exact match, -1 if no
-    # exact match and the date is after the record found,
-    # 1 if no exact match and the date is before the record.
-    def find_line_at_date(adatetime, totlines, tz):
-        if totlines < 2:
-            return totlines
-        i1, i2 = 1, totlines
-        d1 = date_at_pos(i1, tz)
-        d2 = date_at_pos(i2, tz)
-        if adatetime <= d1:
-            return (i1, 0 if d1 == adatetime else 1)
-        if adatetime >= d2:
-            return (i2, 0 if d2 == adatetime else -1)
-        while True:
-            i = i1 + int(
-                round(float(i2 - i1) * timedeltadivide(adatetime - d1, d2 - d1))
-            )
-            d = date_at_pos(i, tz)
-            if d == adatetime:
-                return (i, 0)
-            if (i == i1) or (i == i2):
-                return (i, -1 if i == i1 else 1)
-            if d < adatetime:
-                d1, i1 = d, i
-            if d > adatetime:
-                d2, i2 = d, i
-
-    def add_to_stats(date, value):
-        if not gstats["max"]:
-            gstats["max"] = value
-            gstats["min"] = value
-            gstats["sum"] = 0
-            gstats["vsum"] = [0.0, 0.0]
-            gstats["count"] = 0
-            gstats["vectors"] = [0] * 8
-        if value >= gstats["max"]:
-            gstats["max"] = value
-            gstats["max_tstmp"] = date
-        if value <= gstats["min"]:
-            gstats["min"] = value
-            gstats["min_tstmp"] = date
-        if is_vector:
-            value2 = value
-            if value2 >= 360:
-                value2 -= 360
-            if value2 < 0:
-                value2 += 360
-            if value2 < 0 or value2 > 360:
-                return
-            # reversed order of x, y since atan2 definition is
-            # math.atan2(y, x)
-            gstats["vsum"][1] += math.cos(value2 * math.pi / 180)
-            gstats["vsum"][0] += math.sin(value2 * math.pi / 180)
-            value2 = value2 + 22.5 if value2 < 337.5 else value2 - 337.5
-            gstats["vectors"][int(value2 / 45)] += 1
-        gstats["sum"] += value
-        gstats["last"] = value
-        gstats["last_tstmp"] = date
-        gstats["count"] += 1
-
-    def inc_datetime(adate, unit, steps):
-        if unit == "day":
-            return adate + steps * timedelta(days=1)
-        elif unit == "week":
-            return adate + steps * timedelta(weeks=1)
-        elif unit == "month":
-            return add_months_to_datetime(adate, steps)
-        elif unit == "year":
-            return add_months_to_datetime(adate, 12 * steps)
-        elif unit == "moment":
-            return adate
-        elif unit == "hour":
-            return adate + steps * timedelta(minutes=60)
-        elif unit == "twohour":
-            return adate + steps * timedelta(minutes=120)
-        else:
-            raise Http404
-
-    if (request.method != "GET") or ("object_id" not in request.GET):
-        raise Http404
-
-    response = HttpResponse(content_type="application/json")
-    response.status_code = 200
-    try:
-        object_id = int(request.GET["object_id"])
-        timeseries = Timeseries.objects.get(pk=object_id)
-    except (ValueError, Timeseries.DoesNotExist):
-        raise Http404
-    try:
-        afilename = timeseries.datafile.path
-    except ValueError:
-        response.content = json.dumps({"data": [], "stats": {}})
-        return response
-    tz = timeseries.time_zone.as_tzinfo
-    chart_data = []
-    if "start_pos" in request.GET and "end_pos" in request.GET:
-        start_pos = int(request.GET["start_pos"])
-        end_pos = int(request.GET["end_pos"])
-    else:
-        end_pos = bufcount(afilename)
-        tot_lines = end_pos
-        if "last" in request.GET:
-            if request.GET.get("date", False):
-                datetimestr = request.GET["date"]
-                datetimefmt = "%Y-%m-%d"
-                if request.GET.get("time", False):
-                    datetimestr = datetimestr + " " + request.GET["time"]
-                    datetimefmt = datetimefmt + " %H:%M"
-                try:
-                    first_date = datetime.strptime(datetimestr, datetimefmt)
-                    last_date = inc_datetime(first_date, request.GET["last"], 1)
-                    (end_pos, is_exact) = find_line_at_date(last_date, tot_lines, tz)
-                    if request.GET.get("exact_datetime", False) and (is_exact != 0):
-                        raise Http404
-                except ValueError:
-                    raise Http404
-            else:
-                last_date = date_at_pos(end_pos, tz)
-                first_date = inc_datetime(last_date, request.GET["last"], -1)
-                # This is an almost bad workarround to exclude the first
-                # record from sums, i.e. when we need the 144 10 minute
-                # values from a day.
-                if "start_offset" in request.GET:
-                    offset = float(request.GET["start_offset"])
-                    first_date += timedelta(minutes=offset)
-            start_pos = find_line_at_date(first_date, tot_lines, tz)[0]
-        else:
-            start_pos = 1
-
-    length = end_pos - start_pos + 1
-    step = int(length / settings.ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR) or 1
-    fine_step = int(step / settings.ENHYDRIS_TS_GRAPH_FINE_STEP_DENOMINATOR) or 1
-    if not step % fine_step == 0:
-        step = fine_step * settings.ENHYDRIS_TS_GRAPH_FINE_STEP_DENOMINATOR
-    pos = start_pos
-    amax = ""
-    prev_pos = -1
-    tick_pos = -1
-    is_vector = request.GET.get("vector", False)
-    gstats = {
-        "max": None,
-        "min": None,
-        "count": 0,
-        "max_tstmp": None,
-        "min_tstmp": None,
-        "sum": None,
-        "avg": None,
-        "vsum": None,
-        "vavg": None,
-        "last": None,
-        "last_tstmp": None,
-        "vectors": None,
-    }
-    afloat = 0.01
-    try:
-        linecache.checkcache(afilename)
-        while pos < start_pos + length:
-            s = linecache.getline(afilename, pos)
-            if s.isspace():
-                pos += fine_step
-                continue
-            t = s.split(",")
-            # Use the following exception handling to catch incoplete
-            # reads from cache. Tries only one time, next time if
-            # the error on the same line persists, it raises.
-            try:
-                k = iso8601.parse_date(t[0], default_timezone=tz)
-                v = t[1]
-            except:
-                if pos > prev_pos:
-                    prev_pos = pos
-                    linecache.checkcache(afilename)
-                    continue
-                else:
-                    raise
-            if v != "":
-                afloat = float(v)
-                add_to_stats(k, afloat)
-                if amax == "":
-                    amax = afloat
-                else:
-                    amax = afloat if afloat > amax else amax
-            if (pos - start_pos) % step == 0:
-                tick_pos = pos
-                if amax == "":
-                    amax = "null"
-                chart_data.append(
-                    [calendar.timegm(k.timetuple()) * 1000, str(amax), pos]
-                )
-                amax = ""
-            # Sometimes linecache tries to read a file being written (from
-            # timeseries.write_file). So every 5000 lines refresh the
-            # cache.
-            if (pos - start_pos) % 5000 == 0:
-                linecache.checkcache(afilename)
-            pos += fine_step
-        if length > 0 and tick_pos < end_pos:
-            if amax == "":
-                amax = "null"
-            chart_data[-1] = [calendar.timegm(k.timetuple()) * 1000, str(amax), end_pos]
-    finally:
-        linecache.clearcache()
-    if chart_data:
-        if gstats["count"] > 0:
-            gstats["avg"] = gstats["sum"] / gstats["count"]
-            if is_vector:
-                gstats["vavg"] = math.atan2(*gstats["vsum"]) * 180 / math.pi
-                if gstats["vavg"] < 0:
-                    gstats["vavg"] += 360
-            for item in ("max_tstmp", "min_tstmp", "last_tstmp"):
-                gstats[item] = calendar.timegm(gstats[item].timetuple()) * 1000
-        response.content = json.dumps({"data": chart_data, "stats": gstats})
-    else:
-        response.content = json.dumps("")
-    callback = request.GET.get("jsoncallback", None)
-    if callback:
-        response.content = "%s(%s)" % (callback, response.content)
-    return response
 
 
 class TimeseriesDetailView(DetailView):
@@ -959,16 +497,13 @@ def download_gentitygenericdata(request, gg_id):
     the content to the user.
     """
     ggenericdata = get_object_or_404(GentityGenericData, pk=int(gg_id))
-    try:
-        s = ggenericdata.content
-        if s.find("\r") < 0:
-            s = s.replace("\n", "\r\n")
-        (afile_handle, afilename) = mkstemp()
-        os.write(afile_handle, s)
-        afile = open(afilename, "r")
-        wrapper = FileWrapper(afile)
-    except:
-        raise Http404
+    s = ggenericdata.content
+    if s.find("\r") < 0:
+        s = s.replace("\n", "\r\n")
+    (afile_handle, afilename) = mkstemp()
+    os.write(afile_handle, s)
+    afile = open(afilename, "r")
+    wrapper = FileWrapper(afile)
     download_name = "GenericData-id_%s.%s" % (
         gg_id,
         ggenericdata.data_type.file_extension,

@@ -980,7 +980,7 @@ class TsTestCase(TestCase):
 
     @RandomEnhydrisTimeseriesDataDir()
     def test_get_empty_timeseries_data_for_chart(self):
-        url = "/timeseries/data/?object_id={}".format(self.ts.id)
+        url = "/api/timeseries_data/?object_id={}".format(self.ts.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         aobject = json.loads(response.content.decode("utf-8"))
@@ -991,7 +991,7 @@ class TsTestCase(TestCase):
 
     @RandomEnhydrisTimeseriesDataDir()
     def test_get_nonexisting_timeseries_data(self):
-        response = self.client.get("/timeseries/data/?object_id= 99999999999")
+        response = self.client.get("/api/timeseries_data/?object_id= 99999999999")
         self.assertEqual(response.status_code, 404)
 
     @RandomEnhydrisTimeseriesDataDir()

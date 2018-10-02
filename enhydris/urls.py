@@ -50,7 +50,6 @@ urlpatterns = [
         views.TimeseriesDetailView.as_view(),
         name="timeseries_detail",
     ),
-    url(r"^timeseries/data/$", views.timeseries_data, {}, "timeseries_data"),
     url(
         r"^timeseries/d/(?P<object_id>\d+)/download/"
         r"((?P<start_date>[^/]*)/((?P<end_date>[^/]*)/)?)?$",

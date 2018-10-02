@@ -10,6 +10,7 @@ from enhydris import models
 _urls = [
     url(r"^$", api_views.api_root),
     url(r"^tsdata/(?P<pk>\d+)/$", api_views.Tsdata.as_view(), name="tsdata"),
+    url(r"^timeseries_data/$", api_views.timeseries_data, {}, "timeseries_data"),
 ]
 for _x in api_views.modelnames:
     model = models.__dict__[_x]
