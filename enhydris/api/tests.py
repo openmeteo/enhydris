@@ -13,8 +13,8 @@ import pytz
 from rest_framework.test import APITestCase
 
 import enhydris
-from enhydris.hcore import models
-from enhydris.hcore.tests.test_views import RandomEnhydrisTimeseriesDataDir
+from enhydris import models
+from enhydris.tests.test_views import RandomEnhydrisTimeseriesDataDir
 
 
 def create_test_data():

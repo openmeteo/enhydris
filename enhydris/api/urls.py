@@ -5,7 +5,7 @@ from rest_framework.generics import RetrieveAPIView
 from rest_framework.urlpatterns import format_suffix_patterns
 
 import enhydris.api.views as api_views
-from enhydris.hcore import models
+from enhydris import models
 
 _urls = [url(r'^$', api_views.api_root),
          url(r'^tsdata/(?P<pk>\d+)/$', api_views.Tsdata.as_view(),

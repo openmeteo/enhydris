@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from enhydris.hcore import models
+from enhydris import models
 
 
 class StationSerializer(serializers.ModelSerializer):

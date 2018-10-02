@@ -1,6 +1,6 @@
 import unittest
 from django.contrib.auth.models import User, Group
-from enhydris.hcore.models import Gentity
+from enhydris.models import Gentity
 
 class PermissionsTestCase(unittest.TestCase):
     def setUp(self):

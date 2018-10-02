@@ -1,12 +1,11 @@
 *.pyc
 *.egg
 *.egg-info
-enhydris/urls.py
 doc/_build
 dist
 timeseries_data
 enhydris.db
-enhydris/settings/local.py
+enhydris_project/settings/local.py
 
 # Selenium log files
 *driver.log

@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import permissions
 
-from enhydris.hcore import models
+from enhydris import models
 
 
 class CanEditOrReadOnly(permissions.BasePermission):
@@ -33,6 +33,6 @@ class CanCreateStation(permissions.BasePermission):
         if request.method != 'POST' or not request.user.is_authenticated():
             return False
         if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT or request.user.has_perm(
-                'hcore.add_station'):
+                'enhydris.add_station'):
             return True
         return False

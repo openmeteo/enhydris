@@ -13,7 +13,7 @@ import iso8601
 import pd2hts
 import pytz
 
-from enhydris.hcore import models
+from enhydris import models
 from enhydris.api.permissions import CanEditOrReadOnly, CanCreateStation
 from enhydris.api.serializers import StationSerializer, TimeseriesSerializer
 

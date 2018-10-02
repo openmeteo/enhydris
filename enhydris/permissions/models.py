@@ -149,7 +149,7 @@ class User(MetaObject):
 
         For example:
 
-        $ from hcore.models import Station
+        $ from enhydris.models import Station
         ...
         $ user.get_rows_with_permission(Station,'edit')
 
