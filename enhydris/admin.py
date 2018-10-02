@@ -156,7 +156,7 @@ class StationAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'short_name', 'remarks', 'water_basin',
         'water_division', 'political_division', 'srid',
         'approximate', 'altitude', 'asrid', 'owner', 'is_automatic',
-        'start_date', 'end_date','show_overseers')
+        'start_date', 'end_date')
     list_filter = ('is_automatic', 'end_date',)
     date_hierarchy = 'start_date'
 

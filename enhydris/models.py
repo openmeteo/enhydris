@@ -44,11 +44,17 @@ class Lookup(models.Model):
 
 
 def post_save_person_or_organization(sender, **kwargs):
+    """Create and save ordering_string upon saving a person or organization.
+
+    When we want to sort a list of lentities that has both people and organizations,
+    we need a common sorting field. We calculate and save this sorting field upon
+    saving the person or organization.
+    """
     instance = kwargs['instance']
     try:
         string = instance.name
-    except:
-        string = instance.last_name + instance.first_name
+    except AttributeError:
+        string = "{} {}".format(instance.last_name, instance.first_name)
     lentity = instance.lentity_ptr
     lentity.ordering_string = string
     super(Lentity, lentity).save()
@@ -67,23 +73,7 @@ class Lentity(models.Model):
         ordering = ('ordering_string',)
 
     def __str__(self):
-        return (self.remarks or self.remarks_alt or self.name_any or
-                str(self.id))
-
-    @property
-    def name_any(self):
-        len_name = ""
-        try:
-            lentity = Person.objects.get(pk=self.id)
-            len_name = lentity.last_name+" "+lentity.first_name
-        except Person.DoesNotExist:
-            try:
-                lentity = Organization.objects.get(pk=self.id)
-                len_name = lentity.name
-            except Organization.DoesNotExist:
-                pass
-
-        return len_name
+        return self.ordering_string or str(self.pk)
 
 
 class Person(Lentity):
@@ -160,9 +150,6 @@ class Gpoint(Gentity):
     f_dependencies = ['Gentity']
     point = models.PointField(null=True, blank=True)
 
-    def save(self, force_insert=False, force_update=False, *args, **kwargs):
-        super(Gpoint, self).save(force_insert, force_update, *args, **kwargs)
-
     def original_abscissa(self):
         if self.point and self.srid:
             (x, y) = self.point.transform(self.srid, clone=True)
@@ -223,7 +210,6 @@ class PoliticalDivision(Garea):
 
 
 class WaterDivision(Garea):
-    # TODO: Fill in the model
     f_dependencies = ['Garea']
 
     def __str__(self):
@@ -256,7 +242,7 @@ class GentityAltCode(models.Model):
     def related_station(self):
         try:
             return Station.objects.get(id=self.gentity.id)
-        except:
+        except Station.DoesNotExist:
             return None
 
 
@@ -282,7 +268,7 @@ class GentityGenericData(models.Model):
     def related_station(self):
         try:
             return Station.objects.get(id=self.gentity.id)
-        except:
+        except Station.DoesNotExist:
             return None
 
 
@@ -314,7 +300,7 @@ class GentityFile(models.Model):
     def related_station(self):
         try:
             return Station.objects.get(id=self.gentity.id)
-        except:
+        except Station.DoesNotExist:
             return None
 
 
@@ -342,7 +328,7 @@ class GentityEvent(models.Model):
     def related_station(self):
         try:
             return Station.objects.get(id=self.gentity.id)
-        except:
+        except Station.DoesNotExist:
             return None
 
 
@@ -356,6 +342,7 @@ class StationType(Lookup):
 
 
 def handle_maintainer_permissions(sender, instance, **kwargs):
+    # TODO: Part of the broken permissions system that needs overhaul
 
     if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
         old_perms = Permission.objects.filter(
@@ -391,11 +378,6 @@ class Station(Gpoint):
 
     f_dependencies = ['Gpoint']
 
-    def show_overseers(self):
-        return " ".join([i.__str__() for i in self.overseers.all()])
-
-    show_overseers.short_description = "List of Overseers"
-
 
 signals.post_save.connect(handle_maintainer_permissions, Station)
 
@@ -410,7 +392,7 @@ class Overseer(models.Model):
     end_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
-        return self.person.__str__()
+        return str(self.person)
 
 
 class InstrumentType(Lookup):
@@ -419,10 +401,6 @@ class InstrumentType(Lookup):
 
 
 class Instrument(models.Model):
-
-    class Meta:
-        ordering = ('name',)
-
     last_modified = models.DateTimeField(default=now, null=True,
                                          editable=False)
     station = models.ForeignKey(Station)
@@ -436,9 +414,10 @@ class Instrument(models.Model):
     name_alt = models.CharField(max_length=100, blank=True)
     remarks_alt = models.TextField(blank=True)
 
+    class Meta:
+        ordering = ('name',)
+
     def __str__(self):
-        # This gets commended out because it causes significant delays #XXX:
-        # return self.name or self.name_alt or self.type.descr or str(self.id)
         return self.name or str(self.id)
 
 
@@ -741,7 +720,7 @@ class Timeseries(models.Model):
     def related_station(self):
         try:
             return Station.objects.get(id=self.gentity.id)
-        except:
+        except Station.DoesNotExist:
             return None
 
     def __str__(self):
