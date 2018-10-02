@@ -65,6 +65,7 @@ class Lentity(models.Model):
     class Meta:
         verbose_name_plural = "Lentities"
         ordering = ('ordering_string',)
+        db_table = 'enhydris_lentity'
 
     def __str__(self):
         return (self.remarks or self.remarks_alt or self.name_any or
@@ -99,6 +100,7 @@ class Person(Lentity):
 
     class Meta:
         ordering = ('last_name', 'first_name',)
+        db_table = 'enhydris_person'
 
     def __str__(self):
         return self.last_name + ' ' + self.initials
@@ -116,6 +118,7 @@ class Organization(Lentity):
 
     class Meta:
         ordering = ('name',)
+        db_table = 'enhydris_organization'
 
     def __str__(self):
         return self.acronym if self.acronym else self.name
@@ -146,6 +149,7 @@ class Gentity(models.Model):
     class Meta:
         verbose_name_plural = "Gentities"
         ordering = ('name',)
+        db_table = 'enhydris_gentity'
 
     def __str__(self):
         return self.short_name or self.short_name_alt or self.name \
@@ -159,6 +163,9 @@ class Gpoint(Gentity):
     asrid = models.IntegerField(null=True, blank=True)
     f_dependencies = ['Gentity']
     point = models.PointField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'enhydris_gpoint'
 
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         super(Gpoint, self).save(force_insert, force_update, *args, **kwargs)
@@ -191,11 +198,17 @@ class Gline(Gentity):
     f_dependecies = ['Gentity']
     linestring = models.LineStringField(null=True, blank=True)
 
+    class Meta:
+        db_table = 'enhydris_gline'
+
 
 class Garea(Gentity):
     area = models.FloatField(null=True, blank=True)
     f_dependencies = ['Gentity']
     mpoly = models.MultiPolygonField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'enhydris_garea'
 
     def __str__(self):
         if self.area:
@@ -214,6 +227,9 @@ class PoliticalDivision(Garea):
 
     f_dependencies = ['Garea']
 
+    class Meta:
+        db_table = 'enhydris_politicaldivision'
+
     def __str__(self):
         result = self.short_name or self.name or self.short_name_alt \
             or self.name_alt or str(self.id)
@@ -226,6 +242,9 @@ class WaterDivision(Garea):
     # TODO: Fill in the model
     f_dependencies = ['Garea']
 
+    class Meta:
+        db_table = 'enhydris_waterdivision'
+
     def __str__(self):
         return self.name or str(self.id)
 
@@ -234,12 +253,16 @@ class WaterBasin(Garea):
     parent = models.ForeignKey('self', null=True, blank=True)
     f_dependencies = ['Garea']
 
+    class Meta:
+        db_table = 'enhydris_waterbasin'
+
     def __str__(self):
         return self.name or str(self.id)
 
 
 class GentityAltCodeType(Lookup):
-    pass
+    class Meta:
+        db_table = 'enhydris_gentityaltcodetype'
 
 
 class GentityAltCode(models.Model):
@@ -248,6 +271,9 @@ class GentityAltCode(models.Model):
     gentity = models.ForeignKey(Gentity)
     type = models.ForeignKey(GentityAltCodeType)
     value = models.CharField(max_length=100)
+
+    class Meta:
+        db_table = 'enhydris_gentityaltcode'
 
     def __str__(self):
         return self.type.descr+' '+self.value
@@ -263,6 +289,9 @@ class GentityAltCode(models.Model):
 class GentityGenericDataType(Lookup):
     file_extension = models.CharField(max_length=16)
 
+    class Meta:
+        db_table = 'enhydris_gentitygenericdatatype'
+
 
 class GentityGenericData(models.Model):
     last_modified = models.DateTimeField(default=now, null=True,
@@ -274,6 +303,9 @@ class GentityGenericData(models.Model):
     remarks_alt = models.TextField(blank=True)
     content = models.TextField(blank=True)
     data_type = models.ForeignKey(GentityGenericDataType)
+
+    class Meta:
+        db_table = 'enhydris_gentitygenericdata'
 
     def __str__(self):
         return self.descr or self.descr_alt or str(self.id)
@@ -288,6 +320,9 @@ class GentityGenericData(models.Model):
 
 class FileType(Lookup):
     mime_type = models.CharField(max_length=64)
+
+    class Meta:
+        db_table = 'enhydris_filetype'
 
     def __str__(self):
         if self.mime_type:
@@ -307,6 +342,9 @@ class GentityFile(models.Model):
     descr_alt = models.CharField(max_length=100)
     remarks_alt = models.TextField(blank=True)
 
+    class Meta:
+        db_table = 'enhydris_gentityfile'
+
     def __str__(self):
         return self.descr or self.descr_alt or str(self.id)
 
@@ -319,7 +357,8 @@ class GentityFile(models.Model):
 
 
 class EventType(Lookup):
-    pass
+    class Meta:
+        db_table = 'enhydris_eventtype'
 
 
 class GentityEvent(models.Model):
@@ -334,6 +373,7 @@ class GentityEvent(models.Model):
 
     class Meta:
         ordering = ['-date']
+        db_table = 'enhydris_gentityevent'
 
     def __str__(self):
         return str(self.date)+' '+self.type.__str__()
@@ -352,7 +392,8 @@ class GentityEvent(models.Model):
 
 
 class StationType(Lookup):
-    pass
+    class Meta:
+        db_table = 'enhydris_stationtype'
 
 
 def handle_maintainer_permissions(sender, instance, **kwargs):
@@ -389,6 +430,9 @@ class Station(Gpoint):
     maintainers = models.ManyToManyField(User, blank=True,
                                          related_name='maintaining_stations')
 
+    class Meta:
+        db_table = 'enhydris_station'
+
     f_dependencies = ['Gpoint']
 
     def show_overseers(self):
@@ -409,18 +453,23 @@ class Overseer(models.Model):
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
 
+    class Meta:
+        db_table = 'enhydris_overseer'
+
     def __str__(self):
         return self.person.__str__()
 
 
 class InstrumentType(Lookup):
-    pass
+    class Meta:
+        db_table = 'enhydris_instrumenttype'
 
 
 class Instrument(models.Model):
 
     class Meta:
         ordering = ('name',)
+        db_table = 'enhydris_instrument'
 
     last_modified = models.DateTimeField(default=now, null=True,
                                          editable=False)
@@ -447,12 +496,16 @@ class Instrument(models.Model):
 
 
 class Variable(Lookup):
-    pass
+    class Meta:
+        db_table = 'enhydris_variable'
 
 
 class UnitOfMeasurement(Lookup):
     symbol = models.CharField(max_length=50)
     variables = models.ManyToManyField(Variable)
+
+    class Meta:
+        db_table = 'enhydris_unitofmeasurement'
 
     def __str__(self):
         if self.symbol:
@@ -478,6 +531,7 @@ class TimeZone(models.Model):
 
     class Meta:
         ordering = ('utc_offset',)
+        db_table = 'enhydris_timezone'
 
 
 def _int_xor(i1, i2):
@@ -488,6 +542,9 @@ def _int_xor(i1, i2):
 class TimeStep(Lookup):
     length_minutes = models.PositiveIntegerField()
     length_months = models.PositiveSmallIntegerField()
+
+    class Meta:
+        db_table = 'enhydris_timestep'
 
     def __str__(self):
         """
@@ -532,6 +589,9 @@ class TimeStep(Lookup):
 
 class IntervalType(Lookup):
     value = models.CharField(max_length=50)
+
+    class Meta:
+        db_table = 'enhydris_intervaltype'
 
     def __str__(self):
         return self.descr
@@ -614,6 +674,7 @@ class Timeseries(models.Model):
         verbose_name = "Time Series"
         verbose_name_plural = "Time Series"
         ordering = ('hidden',)
+        db_table = 'enhydris_timeseries'
 
     @property
     def start_date(self):
@@ -804,6 +865,7 @@ class UserProfile(models.Model):
     class Meta:
         verbose_name = _('Profile')
         verbose_name_plural = _('Profiles')
+        db_table = 'enhydris_userprofile'
 
     def first_name(self):
         return "%s" % self.fname
