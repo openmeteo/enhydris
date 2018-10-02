@@ -20,8 +20,7 @@ def timeseries_permission(function=None, redirect_field_name=REDIRECT_FIELD_NAME
         return function
 
     actual_decorator = user_passes_test(
-        lambda u: u.is_authenticated(),
-        redirect_field_name=redirect_field_name
+        lambda u: u.is_authenticated(), redirect_field_name=redirect_field_name
     )
 
     if function:
@@ -40,8 +39,7 @@ def gentityfile_permission(function=None, redirect_field_name=REDIRECT_FIELD_NAM
         return function
 
     actual_decorator = user_passes_test(
-        lambda u: u.is_authenticated(),
-        redirect_field_name=redirect_field_name
+        lambda u: u.is_authenticated(), redirect_field_name=redirect_field_name
     )
 
     if function:

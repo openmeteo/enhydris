@@ -16,25 +16,27 @@ from enhydris.views import ProfileDetailView, ProfileEditView
 admin.autodiscover()
 
 urlpatterns = [
-    url(r'^accounts/', include(registration_urls)),
-
-    url(r'^profile/$', ProfileDetailView.as_view(),
-        name='current_user_profile'),
-    url(r'^profile/edit/$',
-        ProfileEditView.as_view(),
-        name='profile_edit'),
-    url(r'^profile/(?P<slug>[^/]+)/$', ProfileDetailView.as_view(),
-        name='profile_detail'),
-
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^ajax/', include(ajax_select_urls)),
-    url(r'^api/', include(enhydris_api_urls)),
-    url(r'^captcha/', include(captcha_urls)),
-    url(r'', include(enhydris_urls)),
+    url(r"^accounts/", include(registration_urls)),
+    url(r"^profile/$", ProfileDetailView.as_view(), name="current_user_profile"),
+    url(r"^profile/edit/$", ProfileEditView.as_view(), name="profile_edit"),
+    url(
+        r"^profile/(?P<slug>[^/]+)/$",
+        ProfileDetailView.as_view(),
+        name="profile_detail",
+    ),
+    url(r"^admin/", include(admin.site.urls)),
+    url(r"^ajax/", include(ajax_select_urls)),
+    url(r"^api/", include(enhydris_api_urls)),
+    url(r"^captcha/", include(captcha_urls)),
+    url(r"", include(enhydris_urls)),
 ]
 
-if getattr(settings, 'REGISTRATION_OPEN', True):
+if getattr(settings, "REGISTRATION_OPEN", True):
     urlpatterns.insert(
-        0, url(r'^accounts/register/$',
-               RegistrationView.as_view(form_class=RegistrationForm),
-               name='registration_register'))
+        0,
+        url(
+            r"^accounts/register/$",
+            RegistrationView.as_view(form_class=RegistrationForm),
+            name="registration_register",
+        ),
+    )

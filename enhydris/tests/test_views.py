@@ -33,10 +33,24 @@ from selenium.webdriver.common.by import By
 
 from enhydris.forms import TimeseriesDataForm
 from enhydris.models import (
-    EventType, FileType, GentityAltCode, GentityEvent, GentityFile,
-    GentityGenericData, Instrument, InstrumentType, Organization, Overseer,
-    Station, StationType, Timeseries, TimeZone, UnitOfMeasurement, UserProfile,
-    Variable)
+    EventType,
+    FileType,
+    GentityAltCode,
+    GentityEvent,
+    GentityFile,
+    GentityGenericData,
+    Instrument,
+    InstrumentType,
+    Organization,
+    Overseer,
+    Station,
+    StationType,
+    Timeseries,
+    TimeZone,
+    UnitOfMeasurement,
+    UserProfile,
+    Variable,
+)
 from enhydris.tests.test_models import RandomEnhydrisTimeseriesDataDir
 from enhydris.views import ALLOWED_TO_EDIT, StationListBaseView
 
@@ -59,381 +73,466 @@ def check_if_connected_to_old_sqlite():
         return False
     if not isinstance(connections[DEFAULT_DB_ALIAS], base.DatabaseWrapper):
         return False
-    major, minor, micro = [int(x)
-                           for x in sqlite3.sqlite_version.split('.')[:3]]
-    return (major < 3) or (major == 3 and minor < 8) or (
-        major == 3 and minor == 8 and micro < 3)
+    major, minor, micro = [int(x) for x in sqlite3.sqlite_version.split(".")[:3]]
+    return (
+        (major < 3)
+        or (major == 3 and minor < 8)
+        or (major == 3 and minor == 8 and micro < 3)
+    )
 
 
 class StationsTestCase(TestCase):
-
     def setUp(self):
-        mommy.make(User, username='admin', password=make_password('topsecret'),
-                   is_active=True, is_superuser=True, is_staff=True)
-        mommy.make(Station, name="Komboti",
-                   point=Point(x=21.06071, y=39.09518, srid=4326), srid=4326)
-        mommy.make(Station, name="Agios Athanasios",
-                   point=Point(x=21.60121, y=39.22440, srid=4326), srid=4326)
-        mommy.make(Station, name="Tharbad",
-                   point=Point(x=-176.48368, y=0.19377, srid=4326), srid=4326)
-        mommy.make(Station, name="SRID Point, NoSRID Station",
-                   point=Point(x=-176.48368, y=0.19377, srid=4326), srid=None)
-        mommy.make(Station, name="NoSRID Point, SRID Station",
-                   point=Point(x=-176.48368, y=0.19377, srid=None), srid=4326)
-        mommy.make(Station, name="NoSRID Point, NoSRID Station",
-                   point=Point(x=-176.48368, y=0.19377, srid=None), srid=None)
+        mommy.make(
+            User,
+            username="admin",
+            password=make_password("topsecret"),
+            is_active=True,
+            is_superuser=True,
+            is_staff=True,
+        )
+        mommy.make(
+            Station,
+            name="Komboti",
+            point=Point(x=21.06071, y=39.09518, srid=4326),
+            srid=4326,
+        )
+        mommy.make(
+            Station,
+            name="Agios Athanasios",
+            point=Point(x=21.60121, y=39.22440, srid=4326),
+            srid=4326,
+        )
+        mommy.make(
+            Station,
+            name="Tharbad",
+            point=Point(x=-176.48368, y=0.19377, srid=4326),
+            srid=4326,
+        )
+        mommy.make(
+            Station,
+            name="SRID Point, NoSRID Station",
+            point=Point(x=-176.48368, y=0.19377, srid=4326),
+            srid=None,
+        )
+        mommy.make(
+            Station,
+            name="NoSRID Point, SRID Station",
+            point=Point(x=-176.48368, y=0.19377, srid=None),
+            srid=4326,
+        )
+        mommy.make(
+            Station,
+            name="NoSRID Point, NoSRID Station",
+            point=Point(x=-176.48368, y=0.19377, srid=None),
+            srid=None,
+        )
 
     def test_station_list(self):
-        response = self.client.get('/')
+        response = self.client.get("/")
         self.assertContains(
-            response, '<a href="?sort=-name&amp;sort=name">Name&nbsp;↓</a>',
-            html=True)
+            response, '<a href="?sort=-name&amp;sort=name">Name&nbsp;↓</a>', html=True
+        )
 
     def test_station_list_csv(self):
-        response = self.client.get('/?format=csv')
+        response = self.client.get("/?format=csv")
         with tempfile.TemporaryFile() as t:
             t.write(response.content)
             with ZipFile(t) as f:
-                stations_csv = f.open('stations.csv').read().decode()
-                self.assertTrue(',Agios Athanasios,' in stations_csv)
+                stations_csv = f.open("stations.csv").read().decode()
+                self.assertTrue(",Agios Athanasios," in stations_csv)
 
     def test_station_list_csv_station_no_srid(self):
-        response = self.client.get('/?format=csv')
+        response = self.client.get("/?format=csv")
         with tempfile.TemporaryFile() as t:
             t.write(response.content)
             with ZipFile(t) as f:
-                stations_csv = f.open('stations.csv').read().decode()
-                self.assertTrue('SRID Point, NoSRID Station' in stations_csv)
+                stations_csv = f.open("stations.csv").read().decode()
+                self.assertTrue("SRID Point, NoSRID Station" in stations_csv)
 
     def test_station_list_csv_point_no_srid(self):
-        response = self.client.get('/?format=csv')
+        response = self.client.get("/?format=csv")
         with tempfile.TemporaryFile() as t:
             t.write(response.content)
             with ZipFile(t) as f:
-                stations_csv = f.open('stations.csv').read().decode()
-                self.assertTrue('NoSRID Point, SRID Station' in stations_csv)
+                stations_csv = f.open("stations.csv").read().decode()
+                self.assertTrue("NoSRID Point, SRID Station" in stations_csv)
 
     def test_station_list_csv_station_and_point_with_no_srid(self):
-        response = self.client.get('/?format=csv')
+        response = self.client.get("/?format=csv")
         with tempfile.TemporaryFile() as t:
             t.write(response.content)
             with ZipFile(t) as f:
-                stations_csv = f.open('stations.csv').read().decode()
-                self.assertTrue('NoSRID Point, NoSRID Station' in stations_csv)
+                stations_csv = f.open("stations.csv").read().decode()
+                self.assertTrue("NoSRID Point, NoSRID Station" in stations_csv)
 
     def test_station_cannot_be_deleted_with_get(self):
-        komboti = Station.objects.get(name='Komboti')
+        komboti = Station.objects.get(name="Komboti")
         self.assertEqual(Station.objects.all().count(), 6)
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.get('/stations/delete/{}/'.format(komboti.id))
+        r = self.client.get("/stations/delete/{}/".format(komboti.id))
         self.assertEqual(r.status_code, 200)
         self.assertEqual(Station.objects.all().count(), 6)
 
     def test_station_can_be_deleted_with_post(self):
-        komboti = Station.objects.get(name='Komboti')
+        komboti = Station.objects.get(name="Komboti")
         self.assertEqual(Station.objects.all().count(), 6)
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.post('/stations/delete/{}/'.format(komboti.id))
+        r = self.client.post("/stations/delete/{}/".format(komboti.id))
         self.assertEqual(r.status_code, 200)
         self.assertEqual(Station.objects.all().count(), 5)
 
     def test_delete_nonexistent_station_returns_404(self):
-        r = self.client.post('/stations/delete/9999/')
+        r = self.client.post("/stations/delete/9999/")
         self.assertEqual(r.status_code, 302)  # Redirect to login
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.post('/stations/delete/9999/')
+        r = self.client.post("/stations/delete/9999/")
         self.assertEqual(r.status_code, 404)
 
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=3)
     def test_two_pages(self):
-        response = self.client.get('/')
+        response = self.client.get("/")
         self.assertContains(response, "<a href='?page=2'>2</a>", html=True)
         self.assertNotContains(response, "<a href='?page=3'>3</a>", html=True)
 
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=2)
     def test_next_page_url(self):
-        response = self.client.get('/')
-        soup = BeautifulSoup(response.content, 'html.parser')
-        next_page_url = soup.find('a', id='next-page').get('href')
-        self.assertEqual(next_page_url, '?page=2')
+        response = self.client.get("/")
+        soup = BeautifulSoup(response.content, "html.parser")
+        next_page_url = soup.find("a", id="next-page").get("href")
+        self.assertEqual(next_page_url, "?page=2")
 
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=2)
     def test_previous_page_url(self):
-        response = self.client.get('/?page=2')
-        soup = BeautifulSoup(response.content, 'html.parser')
-        next_page_url = soup.find('a', id='previous-page').get('href')
-        self.assertEqual(next_page_url, '?page=1')
+        response = self.client.get("/?page=2")
+        soup = BeautifulSoup(response.content, "html.parser")
+        next_page_url = soup.find("a", id="previous-page").get("href")
+        self.assertEqual(next_page_url, "?page=1")
 
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=100)
     def test_one_page(self):
-        response = self.client.get('/')
+        response = self.client.get("/")
         self.assertNotContains(response, "<a href='?page=2'>2</a>", html=True)
 
 
 class InstrumentsTestCase(TestCase):
-
     def setUp(self):
-        mommy.make(User, username='admin', password=make_password('topsecret'),
-                   is_active=True, is_superuser=True, is_staff=True)
+        mommy.make(
+            User,
+            username="admin",
+            password=make_password("topsecret"),
+            is_active=True,
+            is_superuser=True,
+            is_staff=True,
+        )
         self.instrument = mommy.make(Instrument)
 
     def test_instrument_cannot_be_deleted_with_get(self):
         self.assertEqual(Instrument.objects.all().count(), 1)
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.get('/instrument/delete/{}/'.format(
-            self.instrument.id))
+        r = self.client.get("/instrument/delete/{}/".format(self.instrument.id))
         self.assertEqual(r.status_code, 200)
         self.assertEqual(Instrument.objects.all().count(), 1)
 
     def test_instrument_can_be_deleted_with_post(self):
         self.assertEqual(Instrument.objects.all().count(), 1)
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.post('/instrument/delete/{}/'.format(
-            self.instrument.id))
+        r = self.client.post("/instrument/delete/{}/".format(self.instrument.id))
         self.assertEqual(r.status_code, 200)
         self.assertEqual(Instrument.objects.all().count(), 0)
 
 
 class GentityEventsTestCase(TestCase):
-
     def setUp(self):
-        mommy.make(User, username='admin', password=make_password('topsecret'),
-                   is_active=True, is_superuser=True, is_staff=True)
+        mommy.make(
+            User,
+            username="admin",
+            password=make_password("topsecret"),
+            is_active=True,
+            is_superuser=True,
+            is_staff=True,
+        )
         self.station = mommy.make(Station)
         self.gentity_event = mommy.make(GentityEvent, gentity=self.station)
 
     def test_gentity_event_cannot_be_deleted_with_get(self):
         self.assertEqual(GentityEvent.objects.all().count(), 1)
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.get('/gentityevent/delete/{}/'.format(
-            self.gentity_event.id))
+        r = self.client.get("/gentityevent/delete/{}/".format(self.gentity_event.id))
         self.assertEqual(r.status_code, 200)
         self.assertEqual(GentityEvent.objects.all().count(), 1)
 
     def test_gentity_event_can_be_deleted_with_post(self):
         self.assertEqual(GentityEvent.objects.all().count(), 1)
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.post('/gentityevent/delete/{}/'.format(
-            self.gentity_event.id))
+        r = self.client.post("/gentityevent/delete/{}/".format(self.gentity_event.id))
         self.assertEqual(r.status_code, 200)
         self.assertEqual(GentityEvent.objects.all().count(), 0)
 
 
 class GentityGenericDataTestCase(TestCase):
-
     def setUp(self):
-        mommy.make(User, username='admin', password=make_password('topsecret'),
-                   is_active=True, is_superuser=True, is_staff=True)
+        mommy.make(
+            User,
+            username="admin",
+            password=make_password("topsecret"),
+            is_active=True,
+            is_superuser=True,
+            is_staff=True,
+        )
         self.station = mommy.make(Station)
-        self.generic_data = mommy.make(GentityGenericData,
-                                       gentity=self.station)
+        self.generic_data = mommy.make(GentityGenericData, gentity=self.station)
 
     def test_generic_data_cannot_be_deleted_with_get(self):
         self.assertEqual(GentityGenericData.objects.all().count(), 1)
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.get('/gentitygenericdata/delete/{}/'.format(
-            self.generic_data.id))
+        r = self.client.get(
+            "/gentitygenericdata/delete/{}/".format(self.generic_data.id)
+        )
         self.assertEqual(r.status_code, 200)
         self.assertEqual(GentityGenericData.objects.all().count(), 1)
 
     def test_generic_data_can_be_deleted_with_post(self):
         self.assertEqual(GentityGenericData.objects.all().count(), 1)
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.post('/gentitygenericdata/delete/{}/'.format(
-            self.generic_data.id))
+        r = self.client.post(
+            "/gentitygenericdata/delete/{}/".format(self.generic_data.id)
+        )
         self.assertEqual(r.status_code, 200)
         self.assertEqual(GentityGenericData.objects.all().count(), 0)
 
 
 class GentityFilesTestCase(TestCase):
-
     def setUp(self):
-        mommy.make(User, username='admin', password=make_password('topsecret'),
-                   is_active=True, is_superuser=True, is_staff=True)
+        mommy.make(
+            User,
+            username="admin",
+            password=make_password("topsecret"),
+            is_active=True,
+            is_superuser=True,
+            is_staff=True,
+        )
         self.station = mommy.make(Station)
         self.gentity_file = mommy.make(GentityFile, gentity=self.station)
 
     def test_gentity_file_cannot_be_deleted_with_get(self):
         self.assertEqual(GentityFile.objects.all().count(), 1)
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.get('/gentityfile/delete/{}/'.format(
-            self.gentity_file.id))
+        r = self.client.get("/gentityfile/delete/{}/".format(self.gentity_file.id))
         self.assertEqual(r.status_code, 200)
         self.assertEqual(GentityFile.objects.all().count(), 1)
 
     def test_gentity_file_can_be_deleted_with_post(self):
         self.assertEqual(GentityFile.objects.all().count(), 1)
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.post('/gentityfile/delete/{}/'.format(
-            self.gentity_file.id))
+        r = self.client.post("/gentityfile/delete/{}/".format(self.gentity_file.id))
         self.assertEqual(r.status_code, 200)
         self.assertEqual(GentityFile.objects.all().count(), 0)
 
 
 class GentityAltCodesTestCase(TestCase):
-
     def setUp(self):
-        mommy.make(User, username='admin', password=make_password('topsecret'),
-                   is_active=True, is_superuser=True, is_staff=True)
+        mommy.make(
+            User,
+            username="admin",
+            password=make_password("topsecret"),
+            is_active=True,
+            is_superuser=True,
+            is_staff=True,
+        )
         self.station = mommy.make(Station)
-        self.gentity_alt_code = mommy.make(GentityAltCode,
-                                           gentity=self.station)
+        self.gentity_alt_code = mommy.make(GentityAltCode, gentity=self.station)
 
     def test_gentity_alt_code_cannot_be_deleted_with_get(self):
         self.assertEqual(GentityAltCode.objects.all().count(), 1)
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.get('/gentityaltcode/delete/{}/'.format(
-            self.gentity_alt_code.id))
+        r = self.client.get(
+            "/gentityaltcode/delete/{}/".format(self.gentity_alt_code.id)
+        )
         self.assertEqual(r.status_code, 200)
         self.assertEqual(GentityAltCode.objects.all().count(), 1)
 
     def test_gentity_alt_code_can_be_deleted_with_post(self):
         self.assertEqual(GentityAltCode.objects.all().count(), 1)
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.post('/gentityaltcode/delete/{}/'.format(
-            self.gentity_alt_code.id))
+        r = self.client.post(
+            "/gentityaltcode/delete/{}/".format(self.gentity_alt_code.id)
+        )
         self.assertEqual(r.status_code, 200)
         self.assertEqual(GentityAltCode.objects.all().count(), 0)
 
 
 class OverseersTestCase(TestCase):
-
     def setUp(self):
-        mommy.make(User, username='admin', password=make_password('topsecret'),
-                   is_active=True, is_superuser=True, is_staff=True)
+        mommy.make(
+            User,
+            username="admin",
+            password=make_password("topsecret"),
+            is_active=True,
+            is_superuser=True,
+            is_staff=True,
+        )
         self.overseer = mommy.make(Overseer)
 
     def test_overseer_cannot_be_deleted_with_get(self):
         self.assertEqual(Overseer.objects.all().count(), 1)
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.get('/overseer/delete/{}/'.format(
-            self.overseer.id))
+        r = self.client.get("/overseer/delete/{}/".format(self.overseer.id))
         self.assertEqual(r.status_code, 200)
         self.assertEqual(Overseer.objects.all().count(), 1)
 
     def test_overseer_can_be_deleted_with_post(self):
         self.assertEqual(Overseer.objects.all().count(), 1)
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.post('/overseer/delete/{}/'.format(
-            self.overseer.id))
+        r = self.client.post("/overseer/delete/{}/".format(self.overseer.id))
         self.assertEqual(r.status_code, 200)
         self.assertEqual(Overseer.objects.all().count(), 0)
 
 
 class SortTestCase(TestCase):
-
     def setUp(self):
-        mommy.make(Station, name="Komboti",
-                   water_division__name="North Syldavia Basins")
-        mommy.make(Station, name="Agios Athanasios",
-                   water_division__name="South Syldavia Basins")
-        mommy.make(Station, name="Tharbad",
-                   water_division__name="South Syldavia Basins")
+        mommy.make(
+            Station, name="Komboti", water_division__name="North Syldavia Basins"
+        )
+        mommy.make(
+            Station,
+            name="Agios Athanasios",
+            water_division__name="South Syldavia Basins",
+        )
+        mommy.make(
+            Station, name="Tharbad", water_division__name="South Syldavia Basins"
+        )
 
     def test_sort(self):
         # Request for host.domain/?sort=water_division&sort=name
-        response = self.client.get(reverse('station_list') +
-                                   '?sort=water_division&sort=name')
+        response = self.client.get(
+            reverse("station_list") + "?sort=water_division&sort=name"
+        )
 
         # Checking  test stations 'Komboti', 'Agios Athanasios', 'Tharbad'
         # alphabetical order ['water_division', 'name']
-        i = response.content.decode('utf-8').index
-        self.assertTrue(i('Komboti') < i('Agios Athanasios') < i('Tharbad'))
+        i = response.content.decode("utf-8").index
+        self.assertTrue(i("Komboti") < i("Agios Athanasios") < i("Tharbad"))
 
     def test_invalid_sort(self):
         # Request for host.domain/?sort=999.9
-        response = self.client.get(reverse('station_list') + '?sort=999.9')
+        response = self.client.get(reverse("station_list") + "?sort=999.9")
 
         # Sort is only made with default ['name'] term
         # Checking  test stations 'Komboti', 'Tharbad' alphabetical order index
-        i = response.content.decode('utf-8').index
-        self.assertLess(i('Komboti'), i('Tharbad'))
+        i = response.content.decode("utf-8").index
+        self.assertLess(i("Komboti"), i("Tharbad"))
 
         # Order for host.domain/?sort=name&sort=999.9
-        response = self.client.get(reverse('station_list') +
-                                   '?sort=name&sort=999.9')
+        response = self.client.get(reverse("station_list") + "?sort=name&sort=999.9")
 
         # Order is only made with default ['name'] term
         # Checking  test stations 'Komboti', 'Tharbad' alphabetical order index
-        i = response.content.decode('utf-8').index
-        self.assertLess(i('Komboti'), i('Tharbad'))
+        i = response.content.decode("utf-8").index
+        self.assertLess(i("Komboti"), i("Tharbad"))
 
 
 class SearchTestCaseBase(TestCase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
 
         # Station owners
-        rich = mommy.make(Organization,
-                          name="We're rich and we fancy it SA")
-        poor = mommy.make(Organization,
-                          name="We're poor and dislike it Ltd")
+        rich = mommy.make(Organization, name="We're rich and we fancy it SA")
+        poor = mommy.make(Organization, name="We're poor and dislike it Ltd")
 
         # Create three stations
         station_komboti = mommy.make(
-            Station, name='Komboti', owner=poor,
-            political_division__name='Arta',
-            political_division__parent__name='Epirus',
-            political_division__parent__parent__name='Greece',
+            Station,
+            name="Komboti",
+            owner=poor,
+            political_division__name="Arta",
+            political_division__parent__name="Epirus",
+            political_division__parent__parent__name="Greece",
             stype__descr="Important",
-            water_basin__name='Arachthos',
-            water_division__name="North Syldavia Basins")
+            water_basin__name="Arachthos",
+            water_division__name="North Syldavia Basins",
+        )
         greece = station_komboti.political_division.parent.parent
         station_ai_thanassis = mommy.make(
-            Station, name='Agios Athanasios', owner=poor,
-            political_division__name='Karditsa',
-            political_division__parent__name='Thessaly',
+            Station,
+            name="Agios Athanasios",
+            owner=poor,
+            political_division__name="Karditsa",
+            political_division__parent__name="Thessaly",
             political_division__parent__parent=greece,
             stype__descr=["Important", "Unimportant"],
-            water_division__name="South Syldavia Basins")
+            water_division__name="South Syldavia Basins",
+        )
         station_tharbad = mommy.make(
-            Station, name='Tharbad', owner=rich,
-            political_division__name='Cardolan',
-            political_division__parent__name='Eriador',
-            political_division__parent__parent__name='Middle Earth',
+            Station,
+            name="Tharbad",
+            owner=rich,
+            political_division__name="Cardolan",
+            political_division__parent__name="Eriador",
+            political_division__parent__parent__name="Middle Earth",
             stype__descr=["Unimportant"],
-            water_basin__name='Greyflood',
-            water_division__name="South Syldavia Basins")
+            water_basin__name="Greyflood",
+            water_division__name="South Syldavia Basins",
+        )
 
         # A time zone
-        timezone = mommy.make(TimeZone, code='UTC', utc_offset=0)
+        timezone = mommy.make(TimeZone, code="UTC", utc_offset=0)
 
         # Five time series
         cls.komboti_temperature = mommy.make(
-            Timeseries, name='Air temperature', variable__descr='Temperature',
-            gentity=station_komboti, time_zone=timezone)
+            Timeseries,
+            name="Air temperature",
+            variable__descr="Temperature",
+            gentity=station_komboti,
+            time_zone=timezone,
+        )
         cls.komboti_rain = mommy.make(
-            Timeseries, name='Rain', gentity=station_komboti,
-            variable__descr='Rain', time_zone=timezone)
+            Timeseries,
+            name="Rain",
+            gentity=station_komboti,
+            variable__descr="Rain",
+            time_zone=timezone,
+        )
         cls.ai_thanassis_temperature = mommy.make(
-            Timeseries, name='Air temperature', gentity=station_ai_thanassis,
-            variable=cls.komboti_temperature.variable, time_zone=timezone)
-        cls.ai_thanassis_rain = mommy.make(
-            Timeseries, name='Rain', gentity=station_ai_thanassis,
-            variable=cls.komboti_rain.variable, time_zone=timezone)
-        cls.tharbad_temperature = mommy.make(
-            Timeseries, name='Temperature', gentity=station_tharbad,
+            Timeseries,
+            name="Air temperature",
+            gentity=station_ai_thanassis,
             variable=cls.komboti_temperature.variable,
-            remarks='This is an extremely important time series, '
-            'just because it is hugely significant and markedly '
-            'outstanding.', time_zone=timezone)
+            time_zone=timezone,
+        )
+        cls.ai_thanassis_rain = mommy.make(
+            Timeseries,
+            name="Rain",
+            gentity=station_ai_thanassis,
+            variable=cls.komboti_rain.variable,
+            time_zone=timezone,
+        )
+        cls.tharbad_temperature = mommy.make(
+            Timeseries,
+            name="Temperature",
+            gentity=station_tharbad,
+            variable=cls.komboti_temperature.variable,
+            remarks="This is an extremely important time series, "
+            "just because it is hugely significant and markedly "
+            "outstanding.",
+            time_zone=timezone,
+        )
 
         # And a station with no time series
         mommy.make(Station, name="Lefkada")
@@ -441,207 +540,217 @@ class SearchTestCaseBase(TestCase):
     def get_queryset(self, query_string):
         view = StationListBaseView()
         view.request = HttpRequest()
-        view.request.method = 'GET'
+        view.request.method = "GET"
         view.request.GET = QueryDict(query_string)
         return view.get_queryset()
 
 
 class SearchTestCase(SearchTestCaseBase):
-
     def test_search_in_timeseries_remarks(self):
         # Search for something that exists
-        queryset = self.get_queryset(urlencode({
-            'q': 'extremely important time series'}))
+        queryset = self.get_queryset(
+            urlencode({"q": "extremely important time series"})
+        )
         self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, 'Tharbad')
+        self.assertEqual(queryset[0].name, "Tharbad")
 
         # Search for something that doesn't exist
-        queryset = self.get_queryset(urlencode({
-            'q': 'this should not exist anywhere'}))
+        queryset = self.get_queryset(urlencode({"q": "this should not exist anywhere"}))
         self.assertEqual(queryset.count(), 0)
 
     def test_search_by_owner(self):
-        queryset = self.get_queryset(urlencode({'q': 'owner:RiCh'}))
+        queryset = self.get_queryset(urlencode({"q": "owner:RiCh"}))
         self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].owner.organization.name,
-                         "We're rich and we fancy it SA")
-        queryset = self.get_queryset(urlencode({'owner': 'poor'}))
+        self.assertEqual(
+            queryset[0].owner.organization.name, "We're rich and we fancy it SA"
+        )
+        queryset = self.get_queryset(urlencode({"owner": "poor"}))
         self.assertEqual(queryset.count(), 2)
-        self.assertEqual(queryset[0].owner.organization.name,
-                         "We're poor and dislike it Ltd")
-        queryset = self.get_queryset(urlencode({'owner': 'nonexistent'}))
+        self.assertEqual(
+            queryset[0].owner.organization.name, "We're poor and dislike it Ltd"
+        )
+        queryset = self.get_queryset(urlencode({"owner": "nonexistent"}))
         self.assertEqual(queryset.count(), 0)
 
     def test_search_by_type(self):
         # The following will find both "Important" and "Unimportant" stations,
         # because the string "important" is included in "Unimportant".
-        queryset = self.get_queryset(urlencode({'q': 'type:Important'}))
+        queryset = self.get_queryset(urlencode({"q": "type:Important"}))
         queryset = queryset.distinct()
         self.assertEqual(queryset.count(), 3)
 
-        queryset = self.get_queryset(urlencode({'type': 'Unimportant'}))
-        queryset = queryset.order_by('name')
+        queryset = self.get_queryset(urlencode({"type": "Unimportant"}))
+        queryset = queryset.order_by("name")
         self.assertEqual(queryset.count(), 2)
-        self.assertEqual(queryset[0].name, 'Agios Athanasios')
-        self.assertEqual(queryset[1].name, 'Tharbad')
+        self.assertEqual(queryset[0].name, "Agios Athanasios")
+        self.assertEqual(queryset[1].name, "Tharbad")
 
-        queryset = self.get_queryset(urlencode({'type': 'Nonexistent'}))
+        queryset = self.get_queryset(urlencode({"type": "Nonexistent"}))
         self.assertEqual(queryset.count(), 0)
 
     def test_search_by_water_division(self):
-        queryset = self.get_queryset(urlencode({'q': 'water_division:north'}))
+        queryset = self.get_queryset(urlencode({"q": "water_division:north"}))
         self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, 'Komboti')
+        self.assertEqual(queryset[0].name, "Komboti")
 
-        queryset = self.get_queryset(urlencode({'q': 'water_division:south'}))
-        queryset = queryset.order_by('name')
+        queryset = self.get_queryset(urlencode({"q": "water_division:south"}))
+        queryset = queryset.order_by("name")
         self.assertEqual(queryset.count(), 2)
-        self.assertEqual(queryset[0].name, 'Agios Athanasios')
-        self.assertEqual(queryset[1].name, 'Tharbad')
+        self.assertEqual(queryset[0].name, "Agios Athanasios")
+        self.assertEqual(queryset[1].name, "Tharbad")
 
-        queryset = self.get_queryset(urlencode({'q': 'water_division:east'}))
+        queryset = self.get_queryset(urlencode({"q": "water_division:east"}))
         self.assertEqual(queryset.count(), 0)
 
     def test_search_by_water_basin(self):
-        queryset = self.get_queryset(urlencode({'q': 'water_basin:arachthos'}))
+        queryset = self.get_queryset(urlencode({"q": "water_basin:arachthos"}))
         self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, 'Komboti')
+        self.assertEqual(queryset[0].name, "Komboti")
 
-        queryset = self.get_queryset(urlencode({'water_basin': 'greyflood'}))
-        queryset = queryset.order_by('name')
+        queryset = self.get_queryset(urlencode({"water_basin": "greyflood"}))
+        queryset = queryset.order_by("name")
         self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, 'Tharbad')
+        self.assertEqual(queryset[0].name, "Tharbad")
 
-        queryset = self.get_queryset(urlencode({'water_basin': 'nonexistent'}))
+        queryset = self.get_queryset(urlencode({"water_basin": "nonexistent"}))
         self.assertEqual(queryset.count(), 0)
 
     def test_search_by_variable(self):
-        queryset = self.get_queryset(urlencode({'q': 'variable:rain'}))
-        queryset = queryset.order_by('name')
+        queryset = self.get_queryset(urlencode({"q": "variable:rain"}))
+        queryset = queryset.order_by("name")
         self.assertEqual(queryset.count(), 2)
-        self.assertEqual(queryset[0].name, 'Agios Athanasios')
-        self.assertEqual(queryset[1].name, 'Komboti')
+        self.assertEqual(queryset[0].name, "Agios Athanasios")
+        self.assertEqual(queryset[1].name, "Komboti")
 
-        queryset = self.get_queryset(urlencode({'q': 'variable:temperature'}))
-        queryset = queryset.order_by('name')
+        queryset = self.get_queryset(urlencode({"q": "variable:temperature"}))
+        queryset = queryset.order_by("name")
         self.assertEqual(queryset.count(), 3)
-        self.assertEqual(queryset[0].name, 'Agios Athanasios')
-        self.assertEqual(queryset[1].name, 'Komboti')
-        self.assertEqual(queryset[2].name, 'Tharbad')
+        self.assertEqual(queryset[0].name, "Agios Athanasios")
+        self.assertEqual(queryset[1].name, "Komboti")
+        self.assertEqual(queryset[2].name, "Tharbad")
 
-        queryset = self.get_queryset(urlencode({'q': 'variable:nonexistent'}))
+        queryset = self.get_queryset(urlencode({"q": "variable:nonexistent"}))
         self.assertEqual(queryset.count(), 0)
 
     def test_search_by_gentityId(self):
-        station_id = Station.objects.get(name='Komboti').id
-        queryset = self.get_queryset(urlencode({'gentityId': str(station_id)}))
+        station_id = Station.objects.get(name="Komboti").id
+        queryset = self.get_queryset(urlencode({"gentityId": str(station_id)}))
         self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, 'Komboti')
+        self.assertEqual(queryset[0].name, "Komboti")
 
-        queryset = self.get_queryset(urlencode({'gentityId': '98765'}))
+        queryset = self.get_queryset(urlencode({"gentityId": "98765"}))
         self.assertEqual(queryset.count(), 0)
 
     def test_search_by_ts_only(self):
-        queryset = self.get_queryset('')
+        queryset = self.get_queryset("")
         self.assertEqual(queryset.count(), 4)
-        queryset = self.get_queryset(urlencode({'q': 'ts_only:'}))
+        queryset = self.get_queryset(urlencode({"q": "ts_only:"}))
         self.assertEqual(queryset.count(), 3)
 
     @skipIf(check_if_connected_to_old_sqlite(), "Use sqlite>=3.8.3")
     def test_search_by_political_division(self):
-        queryset = self.get_queryset(
-            urlencode({'political_division': 'Cardolan'}))
+        queryset = self.get_queryset(urlencode({"political_division": "Cardolan"}))
         self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, 'Tharbad')
+        self.assertEqual(queryset[0].name, "Tharbad")
 
-        queryset = self.get_queryset(
-            urlencode({'political_division': 'Arthedain'}))
+        queryset = self.get_queryset(urlencode({"political_division": "Arthedain"}))
         self.assertEqual(queryset.count(), 0)
 
-        queryset = self.get_queryset(
-            urlencode({'political_division': 'Karditsa'}))
+        queryset = self.get_queryset(urlencode({"political_division": "Karditsa"}))
         self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, 'Agios Athanasios')
+        self.assertEqual(queryset[0].name, "Agios Athanasios")
 
-        queryset = self.get_queryset(
-            urlencode({'political_division': 'Arta'}))
+        queryset = self.get_queryset(urlencode({"political_division": "Arta"}))
         self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, 'Komboti')
+        self.assertEqual(queryset[0].name, "Komboti")
 
-        queryset = self.get_queryset(
-            urlencode({'political_division': 'Epirus'}))
+        queryset = self.get_queryset(urlencode({"political_division": "Epirus"}))
         self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, 'Komboti')
+        self.assertEqual(queryset[0].name, "Komboti")
 
-        queryset = self.get_queryset(
-            urlencode({'political_division': 'Greece'}))
-        queryset = queryset.order_by('name')
+        queryset = self.get_queryset(urlencode({"political_division": "Greece"}))
+        queryset = queryset.order_by("name")
         self.assertEqual(queryset.count(), 2)
-        self.assertEqual(queryset[0].name, 'Agios Athanasios')
-        self.assertEqual(queryset[1].name, 'Komboti')
+        self.assertEqual(queryset[0].name, "Agios Athanasios")
+        self.assertEqual(queryset[1].name, "Komboti")
 
-        queryset = self.get_queryset(
-            urlencode({'political_division': 'Middle Earth'}))
+        queryset = self.get_queryset(urlencode({"political_division": "Middle Earth"}))
         self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, 'Tharbad')
+        self.assertEqual(queryset[0].name, "Tharbad")
 
 
-@skipIf(settings.DATABASES['default']['ENGINE'].endswith('.spatialite'),
-        'This functionality is not available on spatialite')
+@skipIf(
+    settings.DATABASES["default"]["ENGINE"].endswith(".spatialite"),
+    "This functionality is not available on spatialite",
+)
 @RandomEnhydrisTimeseriesDataDir()
 class SearchTsHasYearsTestCase(SearchTestCaseBase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
 
         # Add some timeseries data
-        cls.komboti_temperature.set_data(StringIO(textwrap.dedent(
-            """\
+        cls.komboti_temperature.set_data(
+            StringIO(
+                textwrap.dedent(
+                    """\
             2005-08-23 18:53,93,
             2010-08-23 22:53,42.4,
             """
-        )))
-        cls.komboti_rain.set_data(StringIO(textwrap.dedent(
-            """\
+                )
+            )
+        )
+        cls.komboti_rain.set_data(
+            StringIO(
+                textwrap.dedent(
+                    """\
             2011-08-23 18:53,93,
             2015-08-23 22:53,42.4,
             """
-        )))
-        cls.ai_thanassis_temperature.set_data(StringIO(textwrap.dedent(
-            """\
+                )
+            )
+        )
+        cls.ai_thanassis_temperature.set_data(
+            StringIO(
+                textwrap.dedent(
+                    """\
             2005-08-23 18:53,93,
             2010-08-23 22:53,42.4,
             """
-        )))
-        cls.ai_thanassis_rain.set_data(StringIO(textwrap.dedent(
-            """\
+                )
+            )
+        )
+        cls.ai_thanassis_rain.set_data(
+            StringIO(
+                textwrap.dedent(
+                    """\
             2009-08-23 18:53,93,
             2017-08-23 22:53,42.4,
             """
-        )))
+                )
+            )
+        )
 
     def test_search_with_year_existing_somewhere(self):
-        queryset = self.get_queryset(
-            urlencode({'ts_has_years': '2005,2012,2016'}))
+        queryset = self.get_queryset(urlencode({"ts_has_years": "2005,2012,2016"}))
         self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, 'Agios Athanasios')
+        self.assertEqual(queryset[0].name, "Agios Athanasios")
 
     def test_search_with_years_existing_everywhere(self):
-        queryset = self.get_queryset(
-            urlencode({'ts_has_years': '2005,2012'})).order_by('name')
+        queryset = self.get_queryset(urlencode({"ts_has_years": "2005,2012"})).order_by(
+            "name"
+        )
         self.assertEqual(queryset.count(), 2)
-        self.assertEqual(queryset[0].name, 'Agios Athanasios')
-        self.assertEqual(queryset[1].name, 'Komboti')
+        self.assertEqual(queryset[0].name, "Agios Athanasios")
+        self.assertEqual(queryset[1].name, "Komboti")
 
     def test_search_with_year_existing_nowhere(self):
-        queryset = self.get_queryset(
-            urlencode({'ts_has_years': '2005,2012,2018'}))
+        queryset = self.get_queryset(urlencode({"ts_has_years": "2005,2012,2018"}))
         self.assertEqual(queryset.count(), 0)
 
     def test_search_with_garbage(self):
         with self.assertRaises(Http404):
-            self.get_queryset(urlencode({'ts_has_years': 'hello,world'}))
+            self.get_queryset(urlencode({"ts_has_years": "hello,world"}))
 
 
 class RandomMediaRoot(override_settings):
@@ -663,7 +772,6 @@ class RandomMediaRoot(override_settings):
 
 
 class GentityFileTestCase(TestCase):
-
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
 
@@ -673,41 +781,48 @@ class GentityFileTestCase(TestCase):
     @RandomMediaRoot()
     def test_gentity_file(self):
         # Create test data
-        mommy.make(User, username='admin', password=make_password('topsecret'),
-                   is_active=True, is_superuser=True, is_staff=True)
-        mommy.make(Station, name='Komboti')
-        mommy.make(FileType, mime_type='image/gif')
+        mommy.make(
+            User,
+            username="admin",
+            password=make_password("topsecret"),
+            is_active=True,
+            is_superuser=True,
+            is_staff=True,
+        )
+        mommy.make(Station, name="Komboti")
+        mommy.make(FileType, mime_type="image/gif")
 
         # Upload a gentity file
-        gentity_id = Station.objects.get(name='Komboti').id
-        r = self.client.login(username='admin', password='topsecret')
+        gentity_id = Station.objects.get(name="Komboti").id
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        self.assertEqual(GentityFile.objects.filter(gentity__id=gentity_id
-                                                    ).count(), 0)
-        filetype_id = FileType.objects.get(mime_type='image/gif').id
-        small_gif = b'GIF89a\x01\x00\x01\x00\x00\xff\x00,\x00\x00\x00\x00' \
-            b'\x01\x00\x01\x00\x00\x02\x00;'
-        with open(os.path.join(self.tempdir, 'aaa.jpg'), 'w+b') as f:
+        self.assertEqual(GentityFile.objects.filter(gentity__id=gentity_id).count(), 0)
+        filetype_id = FileType.objects.get(mime_type="image/gif").id
+        small_gif = b"GIF89a\x01\x00\x01\x00\x00\xff\x00,\x00\x00\x00\x00" b"\x01\x00\x01\x00\x00\x02\x00;"
+        with open(os.path.join(self.tempdir, "aaa.jpg"), "w+b") as f:
             f.write(small_gif)
             f.seek(0)
-            response = self.client.post(reverse('gentityfile_add'),
-                                        {'gentity': gentity_id,
-                                         'date': '',
-                                         'file_type': filetype_id,
-                                         'descr': 'A description',
-                                         'remarks': '',
-                                         'descr_alt': 'An alt description',
-                                         'remarks_alt': '',
-                                         'content': f,
-                                         })
+            response = self.client.post(
+                reverse("gentityfile_add"),
+                {
+                    "gentity": gentity_id,
+                    "date": "",
+                    "file_type": filetype_id,
+                    "descr": "A description",
+                    "remarks": "",
+                    "descr_alt": "An alt description",
+                    "remarks_alt": "",
+                    "content": f,
+                },
+            )
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(GentityFile.objects.filter(gentity__id=gentity_id
-                                                    ).count(), 1)
+        self.assertEqual(GentityFile.objects.filter(gentity__id=gentity_id).count(), 1)
 
         # Now try to download that gentity file
         gentity_file_id = GentityFile.objects.all()[0].id
-        response = self.client.get(reverse('gentityfile_dl',
-                                           kwargs={'gf_id': gentity_file_id}))
+        response = self.client.get(
+            reverse("gentityfile_dl", kwargs={"gf_id": gentity_file_id})
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, small_gif)
 
@@ -716,46 +831,58 @@ class TsTestCase(TestCase):
     """Test timeseries data upload/download code."""
 
     def setUp(self):
-        mommy.make(User, username='admin', password=make_password('topsecret'),
-                   is_active=True, is_superuser=True, is_staff=True)
-        self.stype = StationType.objects.create(descr='stype')
+        mommy.make(
+            User,
+            username="admin",
+            password=make_password("topsecret"),
+            is_active=True,
+            is_superuser=True,
+            is_staff=True,
+        )
+        self.stype = StationType.objects.create(descr="stype")
         self.stype.save()
-        self.organization = Organization.objects.create(name='org')
+        self.organization = Organization.objects.create(name="org")
         self.organization.save()
-        self.var = Variable.objects.create(descr='var')
+        self.var = Variable.objects.create(descr="var")
         self.var.save()
-        self.unit = UnitOfMeasurement.objects.create(symbol='+')
+        self.unit = UnitOfMeasurement.objects.create(symbol="+")
         self.unit.variables.add(self.var)
         self.unit.save()
-        self.tz = TimeZone.objects.create(code='EET', utc_offset=120)
+        self.tz = TimeZone.objects.create(code="EET", utc_offset=120)
         self.tz.save()
         self.station = Station.objects.create(
-            name='station',
+            name="station",
             owner=self.organization,
             approximate=False,
             is_automatic=True,
-            point=fromstr('POINT(24.67890 38.12345)'),
+            point=fromstr("POINT(24.67890 38.12345)"),
             srid=4326,
-            altitude=219.22)
+            altitude=219.22,
+        )
         self.station.save()
-        self.ts = Timeseries(name="tstest", gentity=self.station,
-                             time_zone=self.tz,
-                             unit_of_measurement=self.unit,
-                             variable=self.var, precision=1)
+        self.ts = Timeseries(
+            name="tstest",
+            gentity=self.station,
+            time_zone=self.tz,
+            unit_of_measurement=self.unit,
+            variable=self.var,
+            precision=1,
+        )
         self.ts.save()
-        self.user = User.objects.create_user('test', 'test@test.com',
-                                             'test')
+        self.user = User.objects.create_user("test", "test@test.com", "test")
         self.user.save()
 
     @RandomEnhydrisTimeseriesDataDir()
     def test_timeseries_data(self):
         # Upload
         with open("enhydris/tests/tsdata.hts", "rb") as f:
-            file_dict = {'data': SimpleUploadedFile(f.name, f.read())}
-        post_dict = {'gentity': self.station.pk, 'variable': self.var.pk,
-                     'unit_of_measurement': self.unit.pk,
-                     'time_zone': self.tz.pk
-                     }
+            file_dict = {"data": SimpleUploadedFile(f.name, f.read())}
+        post_dict = {
+            "gentity": self.station.pk,
+            "variable": self.var.pk,
+            "unit_of_measurement": self.unit.pk,
+            "time_zone": self.tz.pk,
+        }
         form = TimeseriesDataForm(post_dict, file_dict, instance=self.ts)
         self.assertTrue(form.is_valid())
         ts = form.save()
@@ -764,11 +891,14 @@ class TsTestCase(TestCase):
 
         # Append
         with open("enhydris/tests/tsdata2.hts", "rb") as f:
-            file_dict = {'data': SimpleUploadedFile(f.name, f.read())}
-        post_dict = {'gentity': self.station.pk, 'variable': self.var.pk,
-                     'unit_of_measurement': self.unit.pk,
-                     'time_zone': self.tz.pk, 'data_policy': 'A',
-                     }
+            file_dict = {"data": SimpleUploadedFile(f.name, f.read())}
+        post_dict = {
+            "gentity": self.station.pk,
+            "variable": self.var.pk,
+            "unit_of_measurement": self.unit.pk,
+            "time_zone": self.tz.pk,
+            "data_policy": "A",
+        }
         form = TimeseriesDataForm(post_dict, file_dict, instance=self.ts)
         self.assertTrue(form.is_valid())
         ts = form.save()
@@ -778,35 +908,31 @@ class TsTestCase(TestCase):
         # Download
 
         def nrecords():
-            lines = response.content.decode('utf-8').splitlines()
+            lines = response.content.decode("utf-8").splitlines()
             linecount = len(lines)
-            headerlinecount = sum([1 for x in takewhile(lambda x: x != '',
-                                                        lines)]) + 1
+            headerlinecount = sum([1 for x in takewhile(lambda x: x != "", lines)]) + 1
             return linecount - headerlinecount
 
         if not settings.ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
-            self.client.login(username='test', password='test')
+            self.client.login(username="test", password="test")
 
         url = "/timeseries/d/{}/download/".format(self.ts.pk)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content.decode('utf-8').splitlines()[0]
-                         .strip(), 'Version=2')
+        self.assertEqual(
+            response.content.decode("utf-8").splitlines()[0].strip(), "Version=2"
+        )
         self.assertEqual(nrecords(), 12872)
 
         url = "/timeseries/d/{}/download/?version=3".format(self.ts.pk)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        adataframe = pd2hts.read_file(StringIO(response.content.decode('utf-8')
-                                               ))
-        self.assertAlmostEqual(adataframe.location['abscissa'], 24.67890,
-                               places=6)
-        self.assertAlmostEqual(adataframe.location['ordinate'], 38.12345,
-                               places=6)
-        self.assertEqual(adataframe.location['srid'], 4326)
-        self.assertAlmostEqual(adataframe.location['altitude'], 219.22,
-                               places=2)
-        self.assertTrue(adataframe.location['asrid'] is None)
+        adataframe = pd2hts.read_file(StringIO(response.content.decode("utf-8")))
+        self.assertAlmostEqual(adataframe.location["abscissa"], 24.67890, places=6)
+        self.assertAlmostEqual(adataframe.location["ordinate"], 38.12345, places=6)
+        self.assertEqual(adataframe.location["srid"], 4326)
+        self.assertAlmostEqual(adataframe.location["altitude"], 219.22, places=2)
+        self.assertTrue(adataframe.location["asrid"] is None)
         self.assertEqual(nrecords(), 12872)
 
         url = "/timeseries/d/{}/download/1960-11-04/".format(self.ts.pk)
@@ -815,7 +941,8 @@ class TsTestCase(TestCase):
         self.assertEqual(nrecords(), 12870)
 
         url = "/timeseries/d/{}/download/1960-11-04/1960-11-08T08:00/".format(
-            self.ts.pk)
+            self.ts.pk
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(nrecords(), 4)
@@ -825,26 +952,26 @@ class TsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(nrecords(), 6)
 
-        url = "/timeseries/d/{}/download//1960-11-08T08:00:00/".format(
-            self.ts.pk)
+        url = "/timeseries/d/{}/download//1960-11-08T08:00:00/".format(self.ts.pk)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(nrecords(), 6)
 
         url = "/timeseries/d/{}/download/1950-02-02/1960-11-08T08:00/".format(
-            self.ts.pk)
+            self.ts.pk
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(nrecords(), 6)
 
         url = "/timeseries/d/{}/download/1950-02-02/1960-01-01T08:00/".format(
-            self.ts.pk)
+            self.ts.pk
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(nrecords(), 0)
 
-        url = "/timeseries/d/{}/download/1998-02-02//".format(
-            self.ts.pk)
+        url = "/timeseries/d/{}/download/1998-02-02//".format(self.ts.pk)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(nrecords(), 0)
@@ -856,11 +983,11 @@ class TsTestCase(TestCase):
         url = "/timeseries/data/?object_id={}".format(self.ts.id)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        aobject = json.loads(response.content.decode('utf-8'))
+        aobject = json.loads(response.content.decode("utf-8"))
         self.assertTrue(isinstance(aobject, dict))
         self.assertEqual(len(aobject), 2)
-        self.assertEqual(aobject['stats'], {})
-        self.assertEqual(aobject['data'], [])
+        self.assertEqual(aobject["stats"], {})
+        self.assertEqual(aobject["data"], [])
 
     @RandomEnhydrisTimeseriesDataDir()
     def test_get_nonexisting_timeseries_data(self):
@@ -876,54 +1003,63 @@ class TsTestCase(TestCase):
         data was interpreted as naive. This test checks there's no such
         bug.
         """
-        data = textwrap.dedent("""\
+        data = textwrap.dedent(
+            """\
                                2005-08-23 18:53,93,
                                2005-08-23 19:53,108.7,
                                2005-08-23 20:53,28.3,
                                2005-08-23 21:53,1.7,
                                2005-08-23 22:53,42.4,
-            """)
+            """
+        )
         self.ts.set_data(StringIO(data))
-        url = '/timeseries/d/{}/download/2005-08-23T19:54/'.format(self.ts.pk)
+        url = "/timeseries/d/{}/download/2005-08-23T19:54/".format(self.ts.pk)
         if not settings.ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
-            self.client.login(username='test', password='test')
+            self.client.login(username="test", password="test")
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        result = response.content.decode('utf-8')
+        result = response.content.decode("utf-8")
 
         # Remove header, leave only data
-        emptylinepos = result.find('\r\n\r\n')
+        emptylinepos = result.find("\r\n\r\n")
         self.assertTrue(emptylinepos > 0)
-        result = result[emptylinepos + 4:]
+        result = result[emptylinepos + 4 :]
 
-        self.assertEqual(result, textwrap.dedent("""\
+        self.assertEqual(
+            result,
+            textwrap.dedent(
+                """\
                                                  2005-08-23 20:53,28.3,\r
                                                  2005-08-23 21:53,1.7,\r
                                                  2005-08-23 22:53,42.4,\r
-                                                 """))
+                                                 """
+            ),
+        )
 
     def test_timeseries_cannot_be_deleted_with_get(self):
         self.assertEqual(Timeseries.objects.all().count(), 1)
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.get('/timeseries/delete/{}/'.format(self.ts.id))
+        r = self.client.get("/timeseries/delete/{}/".format(self.ts.id))
         self.assertEqual(r.status_code, 200)
         self.assertEqual(Timeseries.objects.all().count(), 1)
 
     def test_timeseries_can_be_deleted_with_post(self):
         self.assertEqual(Timeseries.objects.all().count(), 1)
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        r = self.client.post('/timeseries/delete/{}/'.format(self.ts.id))
+        r = self.client.post("/timeseries/delete/{}/".format(self.ts.id))
         self.assertEqual(r.status_code, 200)
         self.assertEqual(Timeseries.objects.all().count(), 0)
 
     def test_timeseries_with_wrong_encoding_causes_graceful_error(self):
-        file_dict = {'data': SimpleUploadedFile('filename', b'\xC0\xC0\xC0')}
-        post_dict = {'gentity': self.station.pk, 'variable': self.var.pk,
-                     'unit_of_measurement': self.unit.pk,
-                     'time_zone': self.tz.pk
-                     }
+        file_dict = {"data": SimpleUploadedFile("filename", b"\xC0\xC0\xC0")}
+        post_dict = {
+            "gentity": self.station.pk,
+            "variable": self.var.pk,
+            "unit_of_measurement": self.unit.pk,
+            "time_zone": self.tz.pk,
+        }
         form = TimeseriesDataForm(post_dict, file_dict, instance=self.ts)
         self.assertFalse(form.is_valid())
 
@@ -937,78 +1073,111 @@ class OpenVTestCase(TestCase):
 
     def setUp(self):
         # Create the editors group
-        permitted = ["eventtype", "filetype", "garea", "gentityaltcode",
-                     "gentityaltcodetype", "gentityevent", "gentityfile",
-                     "gline", "instrument", "instrumenttype", "overseer",
-                     "politicaldivision", "station", "stationtype",
-                     "timeseries", "timestep", "timezone", "unitofmeasurement",
-                     "userprofile", "variable", "waterbasin", "waterdivision",
-                     "person", "organization", "gentitygenericdatatype"]
-        editors = Group(name='editors')
+        permitted = [
+            "eventtype",
+            "filetype",
+            "garea",
+            "gentityaltcode",
+            "gentityaltcodetype",
+            "gentityevent",
+            "gentityfile",
+            "gline",
+            "instrument",
+            "instrumenttype",
+            "overseer",
+            "politicaldivision",
+            "station",
+            "stationtype",
+            "timeseries",
+            "timestep",
+            "timezone",
+            "unitofmeasurement",
+            "userprofile",
+            "variable",
+            "waterbasin",
+            "waterdivision",
+            "person",
+            "organization",
+            "gentitygenericdatatype",
+        ]
+        editors = Group(name="editors")
         editors.save()
-        for x in ('add', 'change', 'delete'):
+        for x in ("add", "change", "delete"):
             for y in permitted:
                 editors.permissions.add(
-                    Permission.objects.get(codename=x + '_' + y,
-                                           content_type__app_label='enhydris'))
+                    Permission.objects.get(
+                        codename=x + "_" + y, content_type__app_label="enhydris"
+                    )
+                )
 
         # create user and add him to editors group. this'll be the
         # creator/owner to check permissions
-        self.user = User.objects.create_user('opentest', 'opentest@test.com',
-                                             'opentest')
+        self.user = User.objects.create_user(
+            "opentest", "opentest@test.com", "opentest"
+        )
         # another user who won't have permissions over the tested objects to
         # verify that permission handling works as expected.
-        self.user2 = User.objects.create_user('fail', 'fail@faildom.com',
-                                              'fail')
-        self.editors = Group.objects.get(name='editors')
+        self.user2 = User.objects.create_user("fail", "fail@faildom.com", "fail")
+        self.editors = Group.objects.get(name="editors")
         self.editors.user_set.add(self.user)
         self.editors.user_set.add(self.user2)
 
         # create a station, instrument and timeseries to check permissions
-        self.stype = StationType.objects.create(descr='stype')
-        self.itype = InstrumentType.objects.create(descr='itype')
-        self.organization = Organization.objects.create(name='org')
-        self.var = Variable.objects.create(descr='var')
-        self.unit = UnitOfMeasurement.objects.create(symbol='+')
+        self.stype = StationType.objects.create(descr="stype")
+        self.itype = InstrumentType.objects.create(descr="itype")
+        self.organization = Organization.objects.create(name="org")
+        self.var = Variable.objects.create(descr="var")
+        self.unit = UnitOfMeasurement.objects.create(symbol="+")
         self.unit.variables.add(self.var)
-        self.tz = TimeZone.objects.create(code='UTC', utc_offset='0')
-        self.station = Station.objects.create(name='station',
-                                              owner=self.organization,
-                                              approximate=False,
-                                              is_automatic=True)
-        self.ts = Timeseries(name="tstest", gentity=self.station,
-                             time_zone=self.tz, unit_of_measurement=self.unit,
-                             variable=self.var)
+        self.tz = TimeZone.objects.create(code="UTC", utc_offset="0")
+        self.station = Station.objects.create(
+            name="station",
+            owner=self.organization,
+            approximate=False,
+            is_automatic=True,
+        )
+        self.ts = Timeseries(
+            name="tstest",
+            gentity=self.station,
+            time_zone=self.tz,
+            unit_of_measurement=self.unit,
+            variable=self.var,
+        )
         self.ts.save()
 
     def testStatusCode(self):
         """Test that the response status code is correct"""
-        self.pages = ['/stations/add/',
-                      '/timeseries/add/',
-                      '/instrument/add/',
-                      ]
+        self.pages = ["/stations/add/", "/timeseries/add/", "/instrument/add/"]
 
         # check that anonymous users cannot see the forms
         for page_url in self.pages:
             page = self.client.get(page_url)
             self.assertEqual(
-                page.status_code, 302,
-                "Status code for page '%s' was %s instead of %s" %
-                (page_url, page.status_code, 302))
+                page.status_code,
+                302,
+                "Status code for page '%s' was %s instead of %s"
+                % (page_url, page.status_code, 302),
+            )
             self.assertRedirects(
-                page, '/accounts/login/?next=%s' % page_url, status_code=302,
-                target_status_code=200)
+                page,
+                "/accounts/login/?next=%s" % page_url,
+                status_code=302,
+                target_status_code=200,
+            )
 
-        self.assertEqual(self.client.login(username='opentest',
-                                           password='opentest'), True)
+        self.assertEqual(
+            self.client.login(username="opentest", password="opentest"), True
+        )
 
         # check that logged in users can see the forms
         for page_url in self.pages:
             page = self.client.get(page_url)
             self.assertEqual(
-                page.status_code, 200,
-                "Status code for page '%s' was %s instead of %s" %
-                (page_url, page.status_code, 200))
+                page.status_code,
+                200,
+                "Status code for page '%s' was %s instead of %s"
+                % (page_url, page.status_code, 200),
+            )
 
         self.client.logout()
 
@@ -1017,22 +1186,23 @@ class OpenVTestCase(TestCase):
         Check that edit forms honour the permissions.
         """
 
-        self.assertEqual(self.client.login(username='opentest',
-                                           password='opentest'), True)
+        self.assertEqual(
+            self.client.login(username="opentest", password="opentest"), True
+        )
 
         post_data = {
-            'name': 'station_test',
-            'stype': self.stype.pk,
-            'owner': self.organization.pk,
-            'creator': self.user.pk,
-            'copyright_holder': 'Copyright Holder',
-            'copyright_years': '1990-2011',
-            'Overseer-TOTAL_FORMS': '1',
-            'Instrument-TOTAL_FORMS': '1',
-            'Timeseries-TOTAL_FORMS': '1',
-            'Timeseries-INITIAL_FORMS': '0',
-            'Overseer-INITIAL_FORMS': '0',
-            'Instrument-INITIAL_FORMS': '0'
+            "name": "station_test",
+            "stype": self.stype.pk,
+            "owner": self.organization.pk,
+            "creator": self.user.pk,
+            "copyright_holder": "Copyright Holder",
+            "copyright_years": "1990-2011",
+            "Overseer-TOTAL_FORMS": "1",
+            "Instrument-TOTAL_FORMS": "1",
+            "Timeseries-TOTAL_FORMS": "1",
+            "Timeseries-INITIAL_FORMS": "0",
+            "Overseer-INITIAL_FORMS": "0",
+            "Instrument-INITIAL_FORMS": "0",
         }
 
         # create new station as a logged in user. this should work
@@ -1040,7 +1210,7 @@ class OpenVTestCase(TestCase):
         resp = self.client.post(url, post_data)
         self.assertEqual(resp.status_code, 302)
 
-        s = Station.objects.get(name='station_test')
+        s = Station.objects.get(name="station_test")
 
         # edit my station. this should work
         url = "/stations/edit/%s/" % str(s.pk)
@@ -1052,8 +1222,7 @@ class OpenVTestCase(TestCase):
         url = "/stations/delete/%s/" % str(s.pk)
         resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(Station.objects.filter(name='station_test').count(),
-                         0)
+        self.assertEqual(Station.objects.filter(name="station_test").count(), 0)
 
         # try to edit a random station. this should fail
         url = "/stations/edit/%s/" % str(self.station.pk)
@@ -1070,13 +1239,12 @@ class OpenVTestCase(TestCase):
         resp = self.client.post(url, post_data)
         self.assertEqual(resp.status_code, 302)
 
-        s = Station.objects.get(name='station_test')
+        s = Station.objects.get(name="station_test")
 
         self.client.logout()
 
         # login as another user to check 403 perms
-        self.assertEqual(self.client.login(username='fail', password='fail'),
-                         True)
+        self.assertEqual(self.client.login(username="fail", password="fail"), True)
 
         # edit station. this shouldn't work
         url = "/stations/edit/%s/" % str(s.pk)
@@ -1110,22 +1278,23 @@ class OpenVTestCase(TestCase):
         """
         Check that edit forms honour the permissions.
         """
-        self.assertEqual(self.client.login(username='opentest',
-                                           password='opentest'), True)
+        self.assertEqual(
+            self.client.login(username="opentest", password="opentest"), True
+        )
 
         post_data = {
-            'name': 'station_test',
-            'stype': self.stype.pk,
-            'owner': self.organization.pk,
-            'creator': self.user.pk,
-            'copyright_holder': 'Copyright Holder',
-            'copyright_years': '1990-2011',
-            'Overseer-TOTAL_FORMS': '1',
-            'Instrument-TOTAL_FORMS': '1',
-            'Timeseries-INITIAL_FORMS': '0',
-            'Timeseries-TOTAL_FORMS': '1',
-            'Overseer-INITIAL_FORMS': '0',
-            'Instrument-INITIAL_FORMS': '0',
+            "name": "station_test",
+            "stype": self.stype.pk,
+            "owner": self.organization.pk,
+            "creator": self.user.pk,
+            "copyright_holder": "Copyright Holder",
+            "copyright_years": "1990-2011",
+            "Overseer-TOTAL_FORMS": "1",
+            "Instrument-TOTAL_FORMS": "1",
+            "Timeseries-INITIAL_FORMS": "0",
+            "Timeseries-TOTAL_FORMS": "1",
+            "Overseer-INITIAL_FORMS": "0",
+            "Instrument-INITIAL_FORMS": "0",
         }
 
         # create new station as a logged in user. this should work
@@ -1133,14 +1302,14 @@ class OpenVTestCase(TestCase):
         resp = self.client.post(url, post_data)
         self.assertEqual(resp.status_code, 302)
 
-        s = Station.objects.get(name='station_test')
+        s = Station.objects.get(name="station_test")
 
         post_data = {
-            'name': 'timeseries_test',
-            'gentity': s.pk,
-            'time_zone': self.tz.pk,
-            'variable': self.var.pk,
-            'unit_of_measurement': self.unit.pk
+            "name": "timeseries_test",
+            "gentity": s.pk,
+            "time_zone": self.tz.pk,
+            "variable": self.var.pk,
+            "unit_of_measurement": self.unit.pk,
         }
 
         # create new timeseries
@@ -1160,8 +1329,7 @@ class OpenVTestCase(TestCase):
         url = "/timeseries/delete/%s/" % str(t.pk)
         resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(Station.objects.filter(
-            name='timeseries_test').count(), 0)
+        self.assertEqual(Station.objects.filter(name="timeseries_test").count(), 0)
 
         # recreate deleted timeseries for further tests
         url = "/timeseries/add/"
@@ -1172,8 +1340,7 @@ class OpenVTestCase(TestCase):
         self.client.logout()
 
         # login as another user to check 403 perms
-        self.assertEqual(self.client.login(username='fail', password='fail'),
-                         True)
+        self.assertEqual(self.client.login(username="fail", password="fail"), True)
 
         # edit my timeseries. this shouldn't work
         url = "/timeseries/edit/%s/" % str(t.pk)
@@ -1199,8 +1366,7 @@ class OpenVTestCase(TestCase):
         url = "/timeseries/delete/%s/" % str(t.pk)
         resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(Station.objects.filter(
-            name='timeseries_test').count(), 0)
+        self.assertEqual(Station.objects.filter(name="timeseries_test").count(), 0)
 
         s.delete()
 
@@ -1209,22 +1375,23 @@ class OpenVTestCase(TestCase):
         Check that edit forms honour the permissions.
         """
 
-        self.assertEqual(self.client.login(username='opentest',
-                                           password='opentest'), True)
+        self.assertEqual(
+            self.client.login(username="opentest", password="opentest"), True
+        )
 
         post_data = {
-            'name': 'station_test',
-            'stype': self.stype.pk,
-            'owner': self.organization.pk,
-            'creator': self.user.pk,
-            'copyright_holder': 'Copyright Holder',
-            'copyright_years': '1990-2011',
-            'Overseer-TOTAL_FORMS': '1',
-            'Instrument-TOTAL_FORMS': '1',
-            'Timeseries-INITIAL_FORMS': '0',
-            'Timeseries-TOTAL_FORMS': '1',
-            'Overseer-INITIAL_FORMS': '0',
-            'Instrument-INITIAL_FORMS': '0',
+            "name": "station_test",
+            "stype": self.stype.pk,
+            "owner": self.organization.pk,
+            "creator": self.user.pk,
+            "copyright_holder": "Copyright Holder",
+            "copyright_years": "1990-2011",
+            "Overseer-TOTAL_FORMS": "1",
+            "Instrument-TOTAL_FORMS": "1",
+            "Timeseries-INITIAL_FORMS": "0",
+            "Timeseries-TOTAL_FORMS": "1",
+            "Overseer-INITIAL_FORMS": "0",
+            "Instrument-INITIAL_FORMS": "0",
         }
 
         # create new station as a logged in user. this should work
@@ -1232,13 +1399,9 @@ class OpenVTestCase(TestCase):
         resp = self.client.post(url, post_data)
         self.assertEqual(resp.status_code, 302)
 
-        s = Station.objects.get(name='station_test')
+        s = Station.objects.get(name="station_test")
 
-        post_data = {
-            'name': 'instrument_test',
-            'station': s.pk,
-            'type': self.itype.pk
-        }
+        post_data = {"name": "instrument_test", "station": s.pk, "type": self.itype.pk}
 
         # create new instrument
         url = "/instrument/add/"
@@ -1257,8 +1420,7 @@ class OpenVTestCase(TestCase):
         url = "/instrument/delete/%s/" % str(i.pk)
         resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(Station.objects.filter(
-            name='instrument_test').count(), 0)
+        self.assertEqual(Station.objects.filter(name="instrument_test").count(), 0)
 
         # recreate deleted instrument for further tests
         url = "/instrument/add/"
@@ -1270,8 +1432,7 @@ class OpenVTestCase(TestCase):
         self.client.logout()
 
         # login as another user to check 403 perms
-        self.assertEqual(self.client.login(username='fail', password='fail'),
-                         True)
+        self.assertEqual(self.client.login(username="fail", password="fail"), True)
 
         # edit my instrument. this shouldn't work
         url = "/instrument/edit/%s/" % str(i.pk)
@@ -1297,15 +1458,15 @@ class OpenVTestCase(TestCase):
         url = "/instrument/delete/%s/" % str(i.pk)
         resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(Station.objects.filter(
-            name='instrument_test').count(), 0)
+        self.assertEqual(Station.objects.filter(name="instrument_test").count(), 0)
 
     def testGenericModelCreation(self):
         """
         Test the generic model forms
         """
-        self.assertEqual(self.client.login(username='opentest',
-                                           password='opentest'), True)
+        self.assertEqual(
+            self.client.login(username="opentest", password="opentest"), True
+        )
 
         for model in ALLOWED_TO_EDIT:
             url = "/add/%s/?_popup=1" % model
@@ -1323,254 +1484,277 @@ class RegisterTestCase(TestCase):
 
     @override_settings(REGISTRATION_OPEN=False)
     def test_register_link_absent(self):
-        response = self.client.get('/')
-        self.assertNotContains(response, 'Register')
+        response = self.client.get("/")
+        self.assertNotContains(response, "Register")
 
     @override_settings(REGISTRATION_OPEN=True)
     def test_register_link_present(self):
-        response = self.client.get('/')
-        self.assertContains(response, 'Register')
+        response = self.client.get("/")
+        self.assertContains(response, "Register")
 
 
 class StationTestCase(TestCase):
-
     def setUp(self):
-        mommy.make(User, username='admin', password=make_password('topsecret'),
-                   is_active=True, is_superuser=True, is_staff=True)
+        mommy.make(
+            User,
+            username="admin",
+            password=make_password("topsecret"),
+            is_active=True,
+            is_superuser=True,
+            is_staff=True,
+        )
         mommy.make(Organization, name="We're rich and we fancy it SA")
         mommy.make(StationType, descr="Important")
 
-    @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True,
-                       STATIC_ROOT='/dummy')
+    @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True, STATIC_ROOT="/dummy")
     def test_add_station(self):
         """
         Test that the add station form appears properly.
         """
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
-        response = self.client.get('/stations/add/')
+        response = self.client.get("/stations/add/")
         self.assertEqual(response.status_code, 200)
 
         # Check that the "add another" icon from admin appears properly
-        soup = BeautifulSoup(response.content, 'html.parser')
+        soup = BeautifulSoup(response.content, "html.parser")
         icon_urls = set()
         for element in soup.find_all("a", class_="add-another"):
-            icon_urls.add(element.img['src'])
+            icon_urls.add(element.img["src"])
         self.assertEqual(len(icon_urls), 1)
         icon_url = icon_urls.pop()
         self.assertTrue(icon_url.startswith(settings.STATIC_URL))
-        path = icon_url[len(settings.STATIC_URL):]
+        path = icon_url[len(settings.STATIC_URL) :]
         self.assertTrue(os.path.exists(staticfiles_finders.find(path)))
 
     # We cannot catch invalid SRIDs with spatialite, because spatialite
     # does not return any error. We therefore skip this test. See
     # http://stackoverflow.com/questions/37005581/ for details.
-    @skipIf(settings.DATABASES['default']['ENGINE'].endswith('.spatialite'),
-            'This functionality is not available on spatialite; '
-            'fix it if you can.')
+    @skipIf(
+        settings.DATABASES["default"]["ENGINE"].endswith(".spatialite"),
+        "This functionality is not available on spatialite; " "fix it if you can.",
+    )
     @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
     def test_station_invalid_SRID_submission(self):
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
         post_data = {
-            'name': 'station_test',
-            'stype': StationType.objects.get(descr="Important").id,
-            'owner': Organization.objects.get(
-                    name="We're rich and we fancy it SA").id,
-            'copyright_holder': 'Copyright Holder',
-            'copyright_years': '1990-2011',
-            'ordinate': '17',
-            'abscissa': '25',
-            'srid': '210',
+            "name": "station_test",
+            "stype": StationType.objects.get(descr="Important").id,
+            "owner": Organization.objects.get(name="We're rich and we fancy it SA").id,
+            "copyright_holder": "Copyright Holder",
+            "copyright_years": "1990-2011",
+            "ordinate": "17",
+            "abscissa": "25",
+            "srid": "210",
         }
-        response = self.client.post('/stations/add/', post_data)
-        self.assertFormError(response, 'form', 'srid', 'Invalid SRID')
+        response = self.client.post("/stations/add/", post_data)
+        self.assertFormError(response, "form", "srid", "Invalid SRID")
 
 
 class ProfileTestCase(TestCase):
-
     def test_profile(self):
         # Create a user
         self.auser = User.objects.create_user(
-            username='auser', email='irrelevant@example.com',
-            password='topsecret')
+            username="auser", email="irrelevant@example.com", password="topsecret"
+        )
         self.auser.save()
         profile = UserProfile.objects.get(user=self.auser)
-        profile.fname = 'A'
-        profile.lname = 'User'
-        profile.address = 'Nowhere'
+        profile.fname = "A"
+        profile.lname = "User"
+        profile.address = "Nowhere"
         profile.email_is_public = True
         profile.save()
 
         # Create a second user
         self.buser = User.objects.create_user(
-            username='buser', email='irrelevant_indeed@example.com',
-            password='topsecret')
+            username="buser",
+            email="irrelevant_indeed@example.com",
+            password="topsecret",
+        )
         self.buser.save()
 
         # View the first user's profile
-        response = self.client.get('/profile/auser/')
-        self.assertContains(response, 'irrelevant@example.com')
+        response = self.client.get("/profile/auser/")
+        self.assertContains(response, "irrelevant@example.com")
 
         # Prepare the post data that we will be attempting to post -
         # essentially this sets email_is_public to False.
-        post_data = {'user': self.auser.id, 'fname': 'A', 'lname': 'User',
-                     'address': 'Nowhere', 'organization': 'UN',
-                     'email_is_public': False}
+        post_data = {
+            "user": self.auser.id,
+            "fname": "A",
+            "lname": "User",
+            "address": "Nowhere",
+            "organization": "UN",
+            "email_is_public": False,
+        }
 
         # Try to modify first user's profile anonymously - should deny
-        response = self.client.post('/profile/edit/', post_data)
+        response = self.client.post("/profile/edit/", post_data)
         self.assertEqual(response.status_code, 200)
 
         # Try to modify first user's profile as second user - should deny
-        r = self.client.login(username='buser', password='topsecret')
+        r = self.client.login(username="buser", password="topsecret")
         self.assertTrue(r)
-        response = self.client.post('/profile/edit/', post_data)
+        response = self.client.post("/profile/edit/", post_data)
         self.assertEqual(response.status_code, 200)
         self.client.logout()
 
         # Try to modify first user's profile as first user - should accept.
         # Also check that email_is_public makes a difference.
-        r = self.client.login(username='auser', password='topsecret')
+        r = self.client.login(username="auser", password="topsecret")
         self.assertTrue(r)
-        response = self.client.get('/profile/auser/')
-        self.assertContains(response, 'irrelevant@example.com')
-        response = self.client.post('/profile/edit/', post_data)
+        response = self.client.get("/profile/auser/")
+        self.assertContains(response, "irrelevant@example.com")
+        response = self.client.post("/profile/edit/", post_data)
         self.assertEqual(response.status_code, 302)
-        response = self.client.get('/profile/auser/')
-        self.assertNotContains(response, 'irrelevant@example.com')
+        response = self.client.get("/profile/auser/")
+        self.assertNotContains(response, "irrelevant@example.com")
         self.client.logout()
 
 
-@override_settings(
-    EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+@override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
 class ResetPasswordTestCase(TestCase):
-
     def test_reset_password(self):
         # Create a user
         self.auser = User.objects.create_user(
-            username='auser', email='irrelevant@example.com',
-            password='topsecret1')
+            username="auser", email="irrelevant@example.com", password="topsecret1"
+        )
         self.auser.save()
 
         # Ooops... I thought my password was topsecret2, but apparently I
         # forgot it...
-        r = self.client.login(username='auser', password='topsecret2')
+        r = self.client.login(username="auser", password="topsecret2")
         self.assertFalse(r)
 
         # No problem, let me submit the password reset form
-        response = self.client.get('/accounts/password/reset/')
+        response = self.client.get("/accounts/password/reset/")
         self.assertEqual(response.status_code, 200)
-        response = self.client.post('/accounts/password/reset/',
-                                    {'email': 'irrelevant@example.com'})
+        response = self.client.post(
+            "/accounts/password/reset/", {"email": "irrelevant@example.com"}
+        )
         self.assertEqual(response.status_code, 302)
 
         # Did I receive an email?
         self.assertEqual(len(django.core.mail.outbox), 1)
 
         # Get the link from the email
-        m = re.search(r'http://[^/]+(\S+)', django.core.mail.outbox[0].body)
+        m = re.search(r"http://[^/]+(\S+)", django.core.mail.outbox[0].body)
         reset_link = m.group(1)
 
         # Visit the link and submit the form
         response = self.client.get(reset_link)
         self.assertEqual(response.status_code, 200)
-        response = self.client.post(reset_link,
-                                    {'new_password1': 'topsecret2',
-                                     'new_password2': 'topsecret2'})
+        response = self.client.post(
+            reset_link, {"new_password1": "topsecret2", "new_password2": "topsecret2"}
+        )
         self.assertEqual(response.status_code, 302)
 
         # Cool, now let me log in
-        r = self.client.login(username='auser', password='topsecret2')
+        r = self.client.login(username="auser", password="topsecret2")
         self.assertTrue(r)
 
 
 class GentityEventTestCase(TestCase):
-
     def setUp(self):
-        mommy.make(User, username='admin', password=make_password('topsecret'),
-                   is_active=True, is_superuser=True, is_staff=True)
+        mommy.make(
+            User,
+            username="admin",
+            password=make_password("topsecret"),
+            is_active=True,
+            is_superuser=True,
+            is_staff=True,
+        )
         mommy.make(Station, name="Komboti")
         mommy.make(EventType, descr="WAR: World Is A Ghetto")
 
     def test_add_gentity_event(self):
         # Gentity and Station models share the same id
-        gentity_id = Station.objects.get(name='Komboti').id
+        gentity_id = Station.objects.get(name="Komboti").id
 
         # Before uploading, there should be 0 events in the database
-        self.assertEqual(GentityEvent.objects.filter(gentity__id=gentity_id
-                                                     ).count(), 0)
+        self.assertEqual(GentityEvent.objects.filter(gentity__id=gentity_id).count(), 0)
 
         # Login user as admin
-        r = self.client.login(username='admin', password='topsecret')
+        r = self.client.login(username="admin", password="topsecret")
         self.assertTrue(r)
 
         # Post data at 'gentityevent_add' form
         response = self.client.post(
-            reverse('gentityevent_add'),
-            {'date': '10/06/2015',
-             'gentity': gentity_id,
-             'type': EventType.objects.get(descr="WAR: World Is A Ghetto").id,
-             'user': User.objects.get(username='admin').id}
+            reverse("gentityevent_add"),
+            {
+                "date": "10/06/2015",
+                "gentity": gentity_id,
+                "type": EventType.objects.get(descr="WAR: World Is A Ghetto").id,
+                "user": User.objects.get(username="admin").id,
+            },
         )
 
         # Check that form redirect to correct Station.id
-        self.assertRedirects(response, reverse('station_detail',
-                                               kwargs={'pk': gentity_id}))
+        self.assertRedirects(
+            response, reverse("station_detail", kwargs={"pk": gentity_id})
+        )
 
         # Check that the database contains one event in the datebase
-        self.assertEqual(GentityEvent.objects.filter(gentity__id=gentity_id
-                                                     ).count(), 1)
+        self.assertEqual(GentityEvent.objects.filter(gentity__id=gentity_id).count(), 1)
 
 
-@skipUnless(getattr(settings, 'SELENIUM_WEBDRIVERS', False),
-            'Selenium is unconfigured')
+@skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
 class CoordinatesTestCase(SeleniumTestCase):
 
     # Elements in "Edit Station" view
     label_ordinate = PageElement(By.XPATH, '//label[@for="id_ordinate"]')
-    field_ordinate = PageElement(By.ID, 'id_ordinate')
+    field_ordinate = PageElement(By.ID, "id_ordinate")
     label_abscissa = PageElement(By.XPATH, '//label[@for="id_abscissa"]')
-    field_abscissa = PageElement(By.ID, 'id_abscissa')
-    field_srid = PageElement(By.ID, 'id_srid')
-    field_altitude = PageElement(By.ID, 'id_altitude')
-    field_asrid = PageElement(By.ID, 'id_asrid')
-    field_approximate = PageElement(By.ID, 'id_approximate')
-    button_coordinates = PageElement(By.ID, 'btnCoordinates')
-    field_stype = PageElement(By.ID, 'id_stype')
+    field_abscissa = PageElement(By.ID, "id_abscissa")
+    field_srid = PageElement(By.ID, "id_srid")
+    field_altitude = PageElement(By.ID, "id_altitude")
+    field_asrid = PageElement(By.ID, "id_asrid")
+    field_approximate = PageElement(By.ID, "id_approximate")
+    button_coordinates = PageElement(By.ID, "btnCoordinates")
+    field_stype = PageElement(By.ID, "id_stype")
     stype_option_important = PageElement(
-        By.XPATH, '//select[@id="id_stype"]/option[text()="Important"]')
-    field_owner = PageElement(By.ID, 'id_owner')
+        By.XPATH, '//select[@id="id_stype"]/option[text()="Important"]'
+    )
+    field_owner = PageElement(By.ID, "id_owner")
     owner_option_big_tomatoes = PageElement(
-        By.XPATH, '//select[@id="id_owner"]/option[text()="Big tomatoes"]')
-    field_copyright_holder = PageElement(By.ID, 'id_copyright_holder')
-    field_copyright_years = PageElement(By.ID, 'id_copyright_years')
+        By.XPATH, '//select[@id="id_owner"]/option[text()="Big tomatoes"]'
+    )
+    field_copyright_holder = PageElement(By.ID, "id_copyright_holder")
+    field_copyright_years = PageElement(By.ID, "id_copyright_years")
     button_submit = PageElement(By.XPATH, '//button[@type="submit"]')
 
     # Elements in "View Station" view
     button_edit = PageElement(
-        By.XPATH, '//a[starts-with(@class, "btn") and '
-                  'starts-with(@href, "/stations/edit/")]')
+        By.XPATH,
+        '//a[starts-with(@class, "btn") and ' 'starts-with(@href, "/stations/edit/")]',
+    )
 
     def setUp(self):
-        mommy.make(User, username='admin', password=make_password('topsecret'),
-                   is_active=True, is_superuser=True, is_staff=True)
+        mommy.make(
+            User,
+            username="admin",
+            password=make_password("topsecret"),
+            is_active=True,
+            is_superuser=True,
+            is_staff=True,
+        )
         mommy.make(StationType, descr="Important")
         mommy.make(Organization, name="Big tomatoes")
 
     @override_settings(DEBUG=True)
     def test_coordinates(self):
         # Login
-        self.selenium.get(self.live_server_url + '/accounts/login/')
-        PageElement(By.ID, 'id_username').wait_until_is_displayed()
-        PageElement(By.ID, 'id_username').send_keys('admin')
-        PageElement(By.ID, 'id_password').send_keys('topsecret')
+        self.selenium.get(self.live_server_url + "/accounts/login/")
+        PageElement(By.ID, "id_username").wait_until_is_displayed()
+        PageElement(By.ID, "id_username").send_keys("admin")
+        PageElement(By.ID, "id_password").send_keys("topsecret")
         submit_button = PageElement(By.XPATH, '//button[@type="submit"]')
         submit_button.click()
 
         # Go to the add new station page and check that the simple view is
         # active
-        self.selenium.get(self.live_server_url + '/stations/add/')
+        self.selenium.get(self.live_server_url + "/stations/add/")
         self.label_ordinate.wait_until_contains("Latitude")
         self.assertEqual(self.label_ordinate.text, "Latitude")
         self.assertEqual(self.label_abscissa.text, "Longitude")
@@ -1586,7 +1770,7 @@ class CoordinatesTestCase(SeleniumTestCase):
         self.assertTrue(self.field_srid.is_displayed())
         self.assertTrue(self.field_asrid.is_displayed())
         self.assertTrue(self.field_approximate.is_displayed())
-        self.assertEqual(self.field_srid.get_attribute('value'), '4326')
+        self.assertEqual(self.field_srid.get_attribute("value"), "4326")
 
         # Go back to the simple view and check it's ok
         self.button_coordinates.click()
@@ -1598,16 +1782,17 @@ class CoordinatesTestCase(SeleniumTestCase):
         self.assertFalse(self.field_approximate.is_displayed())
 
         # Enter a latitude and longitude and other data and submit
-        self.field_ordinate.send_keys('37.97522')
-        self.field_abscissa.send_keys('23.73700')
+        self.field_ordinate.send_keys("37.97522")
+        self.field_abscissa.send_keys("23.73700")
         self.stype_option_important.click()
         self.owner_option_big_tomatoes.click()
-        self.field_copyright_holder.send_keys('Alice')
-        self.field_copyright_years.send_keys('2015')
+        self.field_copyright_holder.send_keys("Alice")
+        self.field_copyright_years.send_keys("2015")
         self.selenium.execute_script(
-            '''document.evaluate('//button[@type="submit"]', document, null,
+            """document.evaluate('//button[@type="submit"]', document, null,
             XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-            .singleNodeValue.scrollIntoView()''')
+            .singleNodeValue.scrollIntoView()"""
+        )
         self.button_submit.click()
 
         # Wait for the response, then go to edit the station and check that
@@ -1620,10 +1805,8 @@ class CoordinatesTestCase(SeleniumTestCase):
         self.assertFalse(self.field_srid.is_displayed())
         self.assertFalse(self.field_asrid.is_displayed())
         self.assertFalse(self.field_approximate.is_displayed())
-        self.assertEqual(self.field_ordinate.get_attribute('value'),
-                         '37.97522')
-        self.assertEqual(self.field_abscissa.get_attribute('value'),
-                         '23.737')
+        self.assertEqual(self.field_ordinate.get_attribute("value"), "37.97522")
+        self.assertEqual(self.field_abscissa.get_attribute("value"), "23.737")
 
         # Switch to the advanced view
         self.button_coordinates.click()
@@ -1633,19 +1816,20 @@ class CoordinatesTestCase(SeleniumTestCase):
         self.assertTrue(self.field_srid.is_displayed())
         self.assertTrue(self.field_asrid.is_displayed())
         self.assertTrue(self.field_approximate.is_displayed())
-        self.assertEqual(self.field_srid.get_attribute('value'), '4326')
+        self.assertEqual(self.field_srid.get_attribute("value"), "4326")
 
         # Enter some advanced data and submit
         self.field_ordinate.clear()
-        self.field_ordinate.send_keys('4202810.33')
+        self.field_ordinate.send_keys("4202810.33")
         self.field_abscissa.clear()
-        self.field_abscissa.send_keys('476751.84')
+        self.field_abscissa.send_keys("476751.84")
         self.field_srid.clear()
-        self.field_srid.send_keys('2100')
+        self.field_srid.send_keys("2100")
         self.selenium.execute_script(
-            '''document.evaluate('//button[@type="submit"]', document, null,
+            """document.evaluate('//button[@type="submit"]', document, null,
             XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-            .singleNodeValue.scrollIntoView()''')
+            .singleNodeValue.scrollIntoView()"""
+        )
         self.button_submit.click()
 
         # Go to the edit page again, and check that the advanced view shows
@@ -1658,33 +1842,41 @@ class CoordinatesTestCase(SeleniumTestCase):
         self.assertTrue(self.field_srid.is_displayed())
         self.assertTrue(self.field_asrid.is_displayed())
         self.assertTrue(self.field_approximate.is_displayed())
-        self.assertEqual(self.field_srid.get_attribute('value'), '2100')
-        self.assertEqual(self.field_ordinate.get_attribute('value'),
-                         '4202810.33')
-        self.assertEqual(self.field_abscissa.get_attribute('value'),
-                         '476751.84')
+        self.assertEqual(self.field_srid.get_attribute("value"), "2100")
+        self.assertEqual(self.field_ordinate.get_attribute("value"), "4202810.33")
+        self.assertEqual(self.field_abscissa.get_attribute("value"), "476751.84")
 
         # It should be impossible to change to the simple view
         self.assertFalse(self.button_coordinates.is_displayed())
 
 
-@skipUnless(getattr(settings, 'SELENIUM_WEBDRIVERS', False),
-            'Selenium is unconfigured')
+@skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
 class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
 
-    button_limit_to_map = PageElement(By.ID, 'limit-to-map')
+    button_limit_to_map = PageElement(By.ID, "limit-to-map")
     td_komboti = PageElement(By.XPATH, '//td[text()="Komboti"]')
-    td_agios_athanasios = PageElement(By.XPATH,
-                                      '//td[text()="Agios Athanasios"]')
+    td_agios_athanasios = PageElement(By.XPATH, '//td[text()="Agios Athanasios"]')
     td_tharbad = PageElement(By.XPATH, '//td[text()="Tharbad"]')
 
     def setUp(self):
-        mommy.make(Station, name="Komboti",
-                   point=Point(x=21.06071, y=39.09518, srid=4326), srid=4326)
-        mommy.make(Station, name="Agios Athanasios",
-                   point=Point(x=21.60121, y=39.22440, srid=4326), srid=4326)
-        mommy.make(Station, name="Tharbad",
-                   point=Point(x=-176.48368, y=0.19377, srid=4326), srid=4326)
+        mommy.make(
+            Station,
+            name="Komboti",
+            point=Point(x=21.06071, y=39.09518, srid=4326),
+            srid=4326,
+        )
+        mommy.make(
+            Station,
+            name="Agios Athanasios",
+            point=Point(x=21.60121, y=39.22440, srid=4326),
+            srid=4326,
+        )
+        mommy.make(
+            Station,
+            name="Tharbad",
+            point=Point(x=-176.48368, y=0.19377, srid=4326),
+            srid=4326,
+        )
 
     def test_list_stations_visible_on_map(self):
         # Visit site and wait until three stations are shown
@@ -1695,9 +1887,11 @@ class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
 
         # Zoom station to an area that covers only two of these stations.
         # The co-ordinates below are 21, 39, 22, 40 in srid=3857.
-        self.selenium.execute_script("""
+        self.selenium.execute_script(
+            """
             enhydris.map.zoomToExtent([2337700, 4721700, 2449000, 4865900]);
-            """)
+            """
+        )
 
         # Click on "List stations visible on map"
         self.button_limit_to_map.click()
