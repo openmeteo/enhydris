@@ -51,7 +51,6 @@ from enhydris.models import (
     Timeseries,
     UserProfile,
 )
-from enhydris.decorators import gentityfile_permission, timeseries_permission
 from enhydris.forms import (
     GentityAltCodeForm,
     GentityEventForm,
@@ -910,7 +909,25 @@ def map_view(request, *args, **kwargs):
     return render(request, "map_page.html")
 
 
-@gentityfile_permission
+def download_permission_required(func):
+    """Decorator to check for download permission.
+
+    Use like this:
+
+        @download_permission_required
+        def do_something():
+            ...
+
+    If setting ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS is set, it does nothing.
+    Otherwise it is the same as Django's login_required decorator.
+    """
+    if settings.ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
+        return func
+    else:
+        return login_required(func)
+
+
+@download_permission_required
 def download_gentityfile(request, gf_id):
     """
     This function handles requests for gentityfile downloads and serves the
@@ -935,7 +952,7 @@ def download_gentityfile(request, gf_id):
     return response
 
 
-@gentityfile_permission
+@download_permission_required
 def download_gentitygenericdata(request, gg_id):
     """
     This function handles requests for gentitygenericdata downloads and serves
@@ -983,7 +1000,7 @@ def get_date_from_string(adate, tz):
     return result
 
 
-@timeseries_permission
+@download_permission_required
 def download_timeseries(request, object_id, start_date=None, end_date=None):
     timeseries = get_object_or_404(Timeseries, pk=int(object_id))
     tz = timeseries.time_zone.as_tzinfo
@@ -1011,7 +1028,7 @@ def download_timeseries(request, object_id, start_date=None, end_date=None):
     return response
 
 
-@timeseries_permission
+@download_permission_required
 def timeseries_bottom(request, object_id):
     try:
         atimeseries = Timeseries.objects.get(pk=int(object_id))
