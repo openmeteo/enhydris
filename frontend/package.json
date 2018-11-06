@@ -1,0 +1,36 @@
+{
+  "name": "enhydris",
+  "version": "1.0.0",
+  "description": "Enhydris Client App",
+  "author": "Stavros Anastasiadis <anastasiadis.st00@gmail.com>",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate",
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
+    "lintfix": "eslint --fix --ext .js,.vue --ignore-path .gitignore .",
+    "precommit": "npm run lint && npm run lintfix"
+  },
+  "dependencies": {
+    "@nuxtjs/dotenv": "^1.3.0",
+    "@nuxtjs/font-awesome": "^1.0.3",
+    "axios": "^0.18.0",
+    "nuxt": "^2.0.0",
+    "nuxt-buefy": "^0.3.2",
+    "nuxt-leaflet": "^0.0.10",
+    "vue-moment": "^4.0.0",
+    "vue2-leaflet": "^1.2.3"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.12.1",
+    "eslint-config-prettier": "^3.6.0",
+    "eslint-friendly-formatter": "^4.0.1",
+    "eslint-loader": "^2.1.1",
+    "eslint-plugin-prettier": "^3.0.1",
+    "eslint-plugin-vue": "^5.1.0",
+    "prettier": "^1.16.0"
+  }
+}
