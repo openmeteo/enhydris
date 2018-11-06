@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:10.1-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+  web:
+    build: .
+    command: python /code/manage.py migrate --noinput
+    command: python /code/manage.py runserver 0.0.0.0:8000 --settings=enhydris.settings.docker
+    volumes:
+      - .:/code
+    ports:
+      - 8000:8000
+    environment:
+      - SECRET_KEY=changemeinprod
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
