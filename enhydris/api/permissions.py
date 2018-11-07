@@ -14,16 +14,8 @@ class CanEditOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
-        if isinstance(obj, models.Timeseries):
-            id = obj.gentity.id
-        elif isinstance(obj, models.Gentity):
-            id = obj.id
-        else:
-            return False
-        station = get_object_or_404(models.Station, id=id)
-        return hasattr(request.user, "has_row_perm") and request.user.has_row_perm(
-            station, "edit"
-        )
+        type_name = type(obj).__name__.lower()
+        return request.user.has_perm("enhydris.change_" + type_name, obj)
 
 
 class CanCreateStation(permissions.BasePermission):

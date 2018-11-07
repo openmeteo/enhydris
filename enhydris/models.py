@@ -2,7 +2,6 @@ from datetime import timedelta, timezone
 
 from django.conf import settings
 from django.contrib.auth.models import User, Group
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
 from django.core.files.storage import FileSystemStorage
 from django.db.models import signals
@@ -14,9 +13,8 @@ from django.utils._os import abspathu
 import iso8601
 import pandas as pd
 import pd2hts
+import rules
 from simpletail import ropen
-
-from enhydris.permissions.models import Permission
 
 
 #
@@ -342,25 +340,6 @@ class StationType(Lookup):
     pass
 
 
-def handle_maintainer_permissions(sender, instance, **kwargs):
-    # TODO: Part of the broken permissions system that needs overhaul
-
-    if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
-        old_perms = Permission.objects.filter(
-            object_id=instance.pk,
-            content_type=ContentType.objects.get_for_model(Station),
-        )
-
-        new_users = instance.maintainers.all()
-        # remove all old perms for maintainers. keep for creator
-        for p in old_perms:
-            if not p.user == instance.creator:
-                p.delete()
-
-        # add new perms
-        [u.add_row_perm(instance, "edit") for u in new_users]
-
-
 class Station(Gpoint):
     owner = models.ForeignKey(Lentity, related_name="owned_stations")
     stype = models.ManyToManyField(StationType, verbose_name="type")
@@ -382,9 +361,6 @@ class Station(Gpoint):
     )
 
     f_dependencies = ["Gpoint"]
-
-
-signals.post_save.connect(handle_maintainer_permissions, Station)
 
 
 class Overseer(models.Model):
@@ -841,3 +817,55 @@ signals.post_save.connect(user_post_save, User)
 
 if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
     signals.post_save.connect(make_user_editor, User)
+
+
+@rules.predicate
+def is_station_creator(user, station):
+    return station.creator == user
+
+
+@rules.predicate
+def is_station_maintainer(user, station):
+    return user in station.maintainers.all()
+
+
+@rules.predicate
+def is_timeseries_station_creator(user, timeseries):
+    return timeseries.gentity.gpoint.station.creator == user
+
+
+@rules.predicate
+def is_timeseries_station_maintainer(user, timeseries):
+    return user in timeseries.gentity.gpoint.station.maintainers.all()
+
+
+@rules.predicate
+def is_instrument_station_creator(user, instrument):
+    return instrument.station.creator == user
+
+
+@rules.predicate
+def is_instrument_station_maintainer(user, instrument):
+    return user in instrument.station.maintainers.all()
+
+
+rules.add_perm("enhydris.change_station", is_station_creator | is_station_maintainer)
+rules.add_perm("enhydris.delete_station", is_station_creator)
+
+rules.add_perm(
+    "enhydris.change_timeseries",
+    is_timeseries_station_creator | is_timeseries_station_maintainer
+)
+rules.add_perm(
+    "enhydris.delete_timeseries",
+    is_timeseries_station_creator | is_timeseries_station_maintainer
+)
+
+rules.add_perm(
+    "enhydris.change_instrument",
+    is_instrument_station_creator | is_instrument_station_maintainer
+)
+rules.add_perm(
+    "enhydris.delete_instrument",
+    is_instrument_station_creator | is_instrument_station_maintainer
+)

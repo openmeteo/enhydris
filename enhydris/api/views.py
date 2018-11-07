@@ -93,8 +93,8 @@ class TimeseriesList(generics.ListCreateAPIView):
     permission_classes = (CanEditOrReadOnly,)
 
     def post(self, request, *args, **kwargs):
-        """
-        Redefine post, checking permissions.
+        """Redefine post, checking permissions.
+
         Django-rest-framework does not do object-level permission when
         creating a new object, so we have to completely customize the post
         method. Maybe there's a better way, such as using a mixin for the
@@ -112,9 +112,7 @@ class TimeseriesList(generics.ListCreateAPIView):
         except ValueError:
             raise Http404
         station = get_object_or_404(models.Station, id=gentity_id)
-        if not hasattr(request.user, "has_row_perm") or not request.user.has_row_perm(
-            station, "edit"
-        ):
+        if not request.user.has_perm("enhydris.change_station", station):
             return Response("Forbidden", status=status.HTTP_403_FORBIDDEN)
 
         return super(TimeseriesList, self).post(request, *args, **kwargs)

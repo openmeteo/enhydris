@@ -32,7 +32,6 @@ INSTALLED_APPS = [
     "bootstrap3",
     "enhydris",
     "enhydris.api",
-    "enhydris.permissions",
     # enhydris overrides some templates from django.contrib.admin; for
     # this reason, it must be listed in INSTALLED_APPS before
     # django.contrib.admin.
@@ -40,6 +39,7 @@ INSTALLED_APPS = [
     # enhydris overrides some templates from registration; for this
     # reason, it must be listed in INSTALLED_APPS before registration.
     "registration",
+    "rules",
 ]
 
 MIDDLEWARE_CLASSES = (
@@ -81,6 +81,11 @@ LOGIN_REDIRECT_URL = "/"
 ATOMIC_REQUESTS = True
 TEST_RUNNER = "django.test.runner.DiscoverRunner"
 USE_TZ = True
+
+AUTHENTICATION_BACKENDS = (
+    "rules.permissions.ObjectPermissionBackend",
+    "django.contrib.auth.backends.ModelBackend",
+)
 
 # Options for django-registration
 ACCOUNT_ACTIVATION_DAYS = 7

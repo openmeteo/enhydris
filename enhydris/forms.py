@@ -62,12 +62,14 @@ class OverseerForm(ModelForm):
         gentity_id = kwargs.pop("gentity_id", None)
         super(OverseerForm, self).__init__(*args, **kwargs)
 
-        if user and not user.is_superuser:
-            perms = user.get_rows_with_permission(Station(), "edit")
-            ids = [p.object_id for p in perms]
-            self.fields["station"].queryset = Station.objects.filter(id__in=ids)
         if gentity_id:
             self.fields["station"].queryset = Station.objects.filter(id=gentity_id)
+        else:
+            # This isn't entirely right; we'd need to actually return only those
+            # stations which the user has permission to edit. However this is
+            # non-trivial and we won't bother as this code is about to be thrown
+            # away as Enhydris is being converted to an SPA.
+            self.fields["station"].queryset = Station.objects.all()
 
 
 class GentityFileForm(ModelForm):
@@ -91,12 +93,14 @@ class GentityFileForm(ModelForm):
         gentity_id = kwargs.pop("gentity_id", None)
         super(GentityFileForm, self).__init__(*args, **kwargs)
 
-        if user and not user.is_superuser:
-            perms = user.get_rows_with_permission(Station(), "edit")
-            ids = [p.object_id for p in perms]
-            self.fields["gentity"].queryset = Station.objects.filter(id__in=ids)
         if gentity_id:
             self.fields["gentity"].queryset = Station.objects.filter(id=gentity_id)
+        else:
+            # This isn't entirely right; we'd need to actually return only those
+            # stations which the user has permission to edit. However this is
+            # non-trivial and we won't bother as this code is about to be thrown
+            # away as Enhydris is being converted to an SPA.
+            self.fields["gentity"].queryset = Station.objects.all()
 
 
 class GentityGenericDataForm(ModelForm):
@@ -122,12 +126,14 @@ class GentityGenericDataForm(ModelForm):
         gentity_id = kwargs.pop("gentity_id", None)
         super(GentityGenericDataForm, self).__init__(*args, **kwargs)
 
-        if user and not user.is_superuser:
-            perms = user.get_rows_with_permission(Station(), "edit")
-            ids = [p.object_id for p in perms]
-            self.fields["gentity"].queryset = Station.objects.filter(id__in=ids)
         if gentity_id:
             self.fields["gentity"].queryset = Station.objects.filter(id=gentity_id)
+        else:
+            # This isn't entirely right; we'd need to actually return only those
+            # stations which the user has permission to edit. However this is
+            # non-trivial and we won't bother as this code is about to be thrown
+            # away as Enhydris is being converted to an SPA.
+            self.fields["gentity"].queryset = Station.objects.all()
 
 
 class GentityAltCodeForm(ModelForm):
@@ -152,12 +158,14 @@ class GentityAltCodeForm(ModelForm):
         gentity_id = kwargs.pop("gentity_id", None)
         super(GentityAltCodeForm, self).__init__(*args, **kwargs)
 
-        if user and not user.is_superuser:
-            perms = user.get_rows_with_permission(Station(), "edit")
-            ids = [p.object_id for p in perms]
-            self.fields["gentity"].queryset = Station.objects.filter(id__in=ids)
         if gentity_id:
             self.fields["gentity"].queryset = Station.objects.filter(id=gentity_id)
+        else:
+            # This isn't entirely right; we'd need to actually return only those
+            # stations which the user has permission to edit. However this is
+            # non-trivial and we won't bother as this code is about to be thrown
+            # away as Enhydris is being converted to an SPA.
+            self.fields["gentity"].queryset = Station.objects.all()
 
 
 class GentityEventForm(ModelForm):
@@ -181,12 +189,14 @@ class GentityEventForm(ModelForm):
         gentity_id = kwargs.pop("gentity_id", None)
         super(GentityEventForm, self).__init__(*args, **kwargs)
 
-        if user and not user.is_superuser:
-            perms = user.get_rows_with_permission(Station(), "edit")
-            ids = [p.object_id for p in perms]
-            self.fields["gentity"].queryset = Station.objects.filter(id__in=ids)
         if gentity_id:
             self.fields["gentity"].queryset = Station.objects.filter(id=gentity_id)
+        else:
+            # This isn't entirely right; we'd need to actually return only those
+            # stations which the user has permission to edit. However this is
+            # non-trivial and we won't bother as this code is about to be thrown
+            # away as Enhydris is being converted to an SPA.
+            self.fields["gentity"].queryset = Station.objects.all()
 
 
 class GentityForm(ModelForm):
@@ -339,12 +349,14 @@ class InstrumentForm(ModelForm):
         gentity_id = kwargs.pop("gentity_id", None)
         super(InstrumentForm, self).__init__(*args, **kwargs)
 
-        if user and not user.is_superuser:
-            perms = user.get_rows_with_permission(Station(), "edit")
-            ids = [p.object_id for p in perms]
-            self.fields["station"].queryset = Station.objects.filter(id__in=ids)
         if gentity_id:
             self.fields["station"].queryset = Station.objects.filter(id=gentity_id)
+        else:
+            # This isn't entirely right; we'd need to actually return only those
+            # stations which the user has permission to edit. However this is
+            # non-trivial and we won't bother as this code is about to be thrown
+            # away as Enhydris is being converted to an SPA.
+            self.fields["station"].queryset = Station.objects.all()
 
 
 def _int_xor(i1, i2):
@@ -407,23 +419,25 @@ class TimeseriesForm(ModelForm):
         instrument_id = kwargs.pop("instrument_id", None)
         super(TimeseriesForm, self).__init__(*args, **kwargs)
 
-        if user and not user.is_superuser:
-            perms = user.get_rows_with_permission(Station(), "edit")
-            ids = [p.object_id for p in perms]
-            self.fields["gentity"].queryset = Station.objects.filter(id__in=ids)
-            perms = user.get_rows_with_permission(Instrument(), "edit")
-            ids = [p.object_id for p in perms]
-            self.fields["instrument"].queryset = Instrument.objects.filter(id__in=ids)
         if gentity_id:
             self.fields["gentity"].queryset = Station.objects.filter(id=gentity_id)
             self.fields["instrument"].queryset = Instrument.objects.filter(
                 station__id=gentity_id
             )
+        else:
+            # This isn't entirely right; we'd need to actually return only those
+            # stations which the user has permission to edit. However this is
+            # non-trivial and we won't bother as this code is about to be thrown
+            # away as Enhydris is being converted to an SPA.
+            self.fields["gentity"].queryset = Station.objects.all()
         if instrument_id:
             self.fields["instrument"].queryset = Instrument.objects.filter(
                 id=instrument_id
             )
             self.fields["instrument"].empty_label = None
+        else:
+            # Likewise
+            self.fields["instrument"].queryset = Instrument.objects.all()
 
     def clean_data(self):
         """Check if file contains valid timeseries data."""

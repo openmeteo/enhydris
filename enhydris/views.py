@@ -587,10 +587,7 @@ def _station_edit_or_create(request, station_id=None):
     if station_id:
         # User is editing a station
         station = get_object_or_404(Station, id=station_id)
-        if not (
-            user.has_row_perm(station, "edit")
-            and user.has_perm("enhydris.change_station")
-        ):
+        if not user.has_perm("enhydris.change_station", station):
             return HttpResponseForbidden("Forbidden", content_type="text/plain")
     else:
         # User is creating a new station
@@ -615,9 +612,6 @@ def _station_edit_or_create(request, station_id=None):
                         # Make creating user the station creator
                         if not station_id:
                             station.creator = request.user
-                            # Give perms to the creator
-                            user.add_row_perm(station, "edit")
-                            user.add_row_perm(station, "delete")
                     station.save()
                     # Save maintainers, many2many, then save again to
                     # set correctly row permissions
@@ -682,9 +676,7 @@ def station_delete(request, station_id):
     station = get_object_or_404(Station, id=station_id)
 
     # Check permissions
-    if not request.user.has_row_perm(station, "delete") or not request.user.has_perm(
-        "enhydris.delete_station"
-    ):
+    if not request.user.has_perm("enhydris.delete_station", station):
         return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     # Proceed with the deletion if it's a POST request
@@ -730,7 +722,7 @@ def _timeseries_edit_or_create(request, tseries_id=None):
     if station_id and not tseries:
         station = get_object_or_404(Station, id=station_id)
     if station:
-        if not request.user.has_row_perm(station, "edit"):
+        if not request.user.has_perm("enhydris.change_station", station):
             return HttpResponseForbidden("Forbidden", content_type="text/plain")
     if station and not tseries:
         tseries = Timeseries(gentity=station, instrument=instrument)
@@ -801,7 +793,6 @@ def timeseries_edit(request, timeseries_id):
     return _timeseries_edit_or_create(request, tseries_id=timeseries_id)
 
 
-@login_required
 def timeseries_delete(request, timeseries_id):
     """
     Delete existing timeseries. Permissions are checked against the relative
@@ -811,12 +802,7 @@ def timeseries_delete(request, timeseries_id):
     related_station = tseries.related_station
 
     # Check permissions
-    if (
-        not tseries
-        or not related_station
-        or not request.user.has_row_perm(related_station, "edit")
-        or not request.user.has_perm("enhydris.delete_timeseries")
-    ):
+    if not tseries or not request.user.has_perm("enhydris.delete_timeseries", tseries):
         return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     # Proceed with the deletion if it's a POST request
@@ -854,13 +840,13 @@ def _gentityfile_edit_or_create(request, gfile_id=None):
     if gfile_id:
         station = gfile.related_station
         station_id = station.id
-        if not request.user.has_row_perm(station, "edit"):
+        if not request.user.is_superuser:
             return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     if station_id and not gfile_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
-        if not request.user.has_row_perm(station, "edit"):
+        if not request.user.is_superuser:
             return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     user = request.user
@@ -918,12 +904,7 @@ def gentityfile_delete(request, gentityfile_id):
     related_station = gfile.related_station
 
     # Check permissions
-    if (
-        not gfile
-        or not related_station
-        or not request.user.has_row_perm(related_station, "edit")
-        or not request.user.has_perm("enhydris.delete_gentityfile")
-    ):
+    if not gfile or not related_station or not request.user.is_superuser:
         return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     # Proceed with the deletion if it's a POST request
@@ -961,13 +942,13 @@ def _gentitygenericdata_edit_or_create(request, ggenericdata_id=None):
     if ggenericdata_id:
         station = ggenericdata.related_station
         station_id = station.id
-        if not request.user.has_row_perm(station, "edit"):
+        if not request.user.is_superuser:
             return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     if station_id and not ggenericdata_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
-        if not request.user.has_row_perm(station, "edit"):
+        if not request.user.is_superuser:
             return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     user = request.user
@@ -1029,12 +1010,7 @@ def gentitygenericdata_delete(request, ggenericdata_id):
     related_station = ggenericdata.related_station
 
     # Check permissions
-    if (
-        not ggenericdata
-        or not related_station
-        or not request.user.has_row_perm(related_station, "edit")
-        or not request.user.has_perm("enhydris.delete_gentityfile")
-    ):
+    if not ggenericdata or not related_station or not request.user.is_superuser:
         return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     # Proceed with the deletion if it's a POST request
@@ -1072,13 +1048,13 @@ def _gentityevent_edit_or_create(request, gevent_id=None):
     if gevent_id:
         station = gevent.related_station
         station_id = station.id
-        if not request.user.has_row_perm(station, "edit"):
+        if not request.user.is_superuser:
             return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     if station_id and not gevent_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
-        if not request.user.has_row_perm(station, "edit"):
+        if not request.user.is_superuser:
             return HttpResponseForbidden("Forbidden", content_type="text/plain")
         gevent = GentityEvent(gentity=station)
 
@@ -1138,12 +1114,7 @@ def gentityevent_delete(request, gentityevent_id):
     related_station = gevent.related_station
 
     # Check permissions
-    if (
-        not gevent
-        or not related_station
-        or not request.user.has_row_perm(related_station, "edit")
-        or not request.user.has_perm("enhydris.delete_gentityevent")
-    ):
+    if not gevent or not related_station or not request.user.is_superuser:
         return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     # Proceed with the deletion if it's a POST request
@@ -1176,13 +1147,13 @@ def _gentityaltcode_edit_or_create(request, galtcode_id=None):
     if galtcode_id:
         station = galtcode.related_station
         station_id = station.id
-        if not request.user.has_row_perm(station, "edit"):
+        if not request.user.is_superuser:
             return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     if station_id and not galtcode_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
-        if not request.user.has_row_perm(station, "edit"):
+        if not request.user.is_superuser:
             return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     user = request.user
@@ -1244,12 +1215,7 @@ def gentityaltcode_delete(request, gentityaltcode_id):
     related_station = galtcode.related_station
 
     # Check permissions
-    if (
-        not galtcode
-        or not related_station
-        or not request.user.has_row_perm(related_station, "edit")
-        or not request.user.has_perm("enhydris.delete_gentityaltcode")
-    ):
+    if not galtcode or not related_station or not request.user.is_superuser:
         return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     # Proceed with the deletion if it's a POST request
@@ -1287,13 +1253,13 @@ def _overseer_edit_or_create(request, overseer_id=None, station_id=None):
     if overseer_id:
         station = overseer.station
         station_id = station.id
-        if not request.user.has_row_perm(station, "edit"):
+        if not request.user.is_superuser:
             return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     if station_id and not overseer_id:
         # Adding new
         station = get_object_or_404(Station, id=station_id)
-        if not request.user.has_row_perm(station, "edit"):
+        if not request.user.is_superuser:
             return HttpResponseForbidden("Forbidden", content_type="text/plain")
         overseer = Overseer(station=station)
 
@@ -1354,12 +1320,7 @@ def overseer_delete(request, overseer_id):
     related_station = overseer.station
 
     # Check permissions
-    if (
-        not overseer
-        or not related_station
-        or not request.user.has_row_perm(related_station, "edit")
-        or not request.user.has_perm("enhydris.delete_overseer")
-    ):
+    if not overseer or not related_station or not request.user.is_superuser:
         return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     # Proceed with the deletion if it's a POST request
@@ -1395,12 +1356,12 @@ def _instrument_edit_or_create(request, instrument_id=None):
     if instrument_id:
         station = instrument.station
         station_id = station.id
-        if not request.user.has_row_perm(station, "edit"):
+        if not request.user.has_perm("enhydris.change_instrument", instrument):
             return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     if station_id and not instrument_id:
         station = get_object_or_404(Station, id=station_id)
-        if not request.user.has_row_perm(station, "edit"):
+        if not request.user.has_perm("enhydris.change_station", station):
             return HttpResponseForbidden("Forbidden", content_type="text/plain")
         instrument = Instrument(station=station)
 
@@ -1447,22 +1408,14 @@ def instrument_edit(request, instrument_id):
     return _instrument_edit_or_create(request, instrument_id=instrument_id)
 
 
-@login_required
 def instrument_delete(request, instrument_id):
     """
     Delete existing instrument. Permissions are checked against the relative
     station that the instrument is part of.
     """
     instrument = get_object_or_404(Instrument, id=instrument_id)
-    related_station = instrument.station
 
-    # Check permissions
-    if (
-        not instrument
-        or not related_station
-        or not request.user.has_row_perm(related_station, "edit")
-        or not request.user.has_perm("enhydris.delete_instrument")
-    ):
+    if not request.user.has_perm("enhydris.delete_instrument", instrument):
         return HttpResponseForbidden("Forbidden", content_type="text/plain")
 
     # Proceed with the deletion if it's a POST request

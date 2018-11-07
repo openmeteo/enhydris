@@ -10,3 +10,4 @@ simpletail>=0.1.2
 iso8601
 pd2hts>=0.2
 pytz
+rules>=2.0

@@ -54,6 +54,7 @@ def create_test_data():
         is_automatic=False,
         copyright_holder="Joe User",
         copyright_years=2014,
+        creator=user1,
     )
     station1.stype = [stype1]
     station1.save()
@@ -89,14 +90,6 @@ def create_test_data():
         variable=variable1,
         unit_of_measurement=uom1,
         gentity=station1,
-    )
-
-    # permissions1
-    enhydris.permissions.models.Permission.objects.create(
-        name="edit",
-        object_id=station1.id,
-        user=user1,
-        content_type=ContentType.objects.get_for_model(models.Station),
     )
 
     return [pd1, water_basin1, water_division1, station1, station2]

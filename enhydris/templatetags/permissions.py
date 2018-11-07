@@ -14,8 +14,4 @@ def can_delete(user, object):
 
 
 def _check_perm(user, object, perm):
-    if not user.is_authenticated():
-        return False
-    if user.has_row_perm(object, perm):
-        return True
-    return False
+    return user.is_superuser

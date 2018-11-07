@@ -4,13 +4,14 @@ import shutil
 import tempfile
 import textwrap
 
+from django.contrib.auth.models import User
 from django.contrib.gis.geos import Point
 from django.test import TestCase
 from django.test.utils import override_settings
 
 from model_mommy import mommy
 
-from enhydris.models import Station, Timeseries, timezone
+from enhydris.models import Instrument, Station, Timeseries, timezone
 
 
 class RandomEnhydrisTimeseriesDataDir(override_settings):
@@ -144,3 +145,92 @@ class StationTestCase(TestCase):
         s = Station.objects.get(name="Komboti")
         self.assertAlmostEqual(s.original_abscissa(), 21.06071)
         self.assertAlmostEqual(s.original_ordinate(), 39.09518)
+
+
+class RulesTestCase(TestCase):
+    def setUp(self):
+        self.alice = mommy.make(User, username="alice")
+        self.bob = mommy.make(User, username="bob")
+        self.charlie = mommy.make(User, username="charlie")
+
+        self.station = mommy.make(Station, creator=self.alice, maintainers=[self.bob])
+        self.instrument = mommy.make(Instrument, station=self.station)
+        self.timeseries = mommy.make(Timeseries, gentity=self.station)
+
+    def test_creator_can_edit_station(self):
+        self.assertTrue(self.alice.has_perm("enhydris.change_station", self.station))
+
+    def test_maintainer_can_edit_station(self):
+        self.assertTrue(self.bob.has_perm("enhydris.change_station", self.station))
+
+    def test_irrelevant_user_cannot_edit_station(self):
+        self.assertFalse(self.charlie.has_perm("enhydris.change_station", self.station))
+
+    def test_creator_can_delete_station(self):
+        self.assertTrue(self.alice.has_perm("enhydris.delete_station", self.station))
+
+    def test_maintainer_cannot_delete_station(self):
+        self.assertFalse(self.bob.has_perm("enhydris.delete_station", self.station))
+
+    def test_irrelevant_user_cannot_delete_station(self):
+        self.assertFalse(self.charlie.has_perm("enhydris.change_station", self.station))
+
+    def test_creator_can_edit_timeseries(self):
+        self.assertTrue(
+            self.alice.has_perm("enhydris.change_timeseries", self.timeseries)
+        )
+
+    def test_maintainer_can_edit_timeseries(self):
+        self.assertTrue(
+            self.bob.has_perm("enhydris.change_timeseries", self.timeseries)
+        )
+
+    def test_irrelevant_user_cannot_edit_timeseries(self):
+        self.assertFalse(
+            self.charlie.has_perm("enhydris.change_timeseries", self.timeseries)
+        )
+
+    def test_creator_can_delete_timeseries(self):
+        self.assertTrue(
+            self.alice.has_perm("enhydris.delete_timeseries", self.timeseries)
+        )
+
+    def test_maintainer_can_delete_timeseries(self):
+        self.assertTrue(
+            self.bob.has_perm("enhydris.delete_timeseries", self.timeseries)
+        )
+
+    def test_irrelevant_user_cannot_delete_timeseries(self):
+        self.assertFalse(
+            self.charlie.has_perm("enhydris.change_timeseries", self.timeseries)
+        )
+
+    def test_creator_can_edit_instrument(self):
+        self.assertTrue(
+            self.alice.has_perm("enhydris.change_instrument", self.instrument)
+        )
+
+    def test_maintainer_can_edit_instrument(self):
+        self.assertTrue(
+            self.bob.has_perm("enhydris.change_instrument", self.instrument)
+        )
+
+    def test_irrelevant_user_cannot_edit_instrument(self):
+        self.assertFalse(
+            self.charlie.has_perm("enhydris.change_instrument", self.instrument)
+        )
+
+    def test_creator_can_delete_instrument(self):
+        self.assertTrue(
+            self.alice.has_perm("enhydris.delete_instrument", self.instrument)
+        )
+
+    def test_maintainer_can_delete_instrument(self):
+        self.assertTrue(
+            self.bob.has_perm("enhydris.delete_instrument", self.instrument)
+        )
+
+    def test_irrelevant_user_cannot_delete_instrument(self):
+        self.assertFalse(
+            self.charlie.has_perm("enhydris.change_instrument", self.instrument)
+        )

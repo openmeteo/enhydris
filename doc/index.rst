@@ -25,7 +25,6 @@ Developer documentation:
    dev/contributing
    dev/database
    dev/webservice-api
-   dev/permissions
 
 Indices and tables
 ==================
