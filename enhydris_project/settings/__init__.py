@@ -68,8 +68,6 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "enhydris.context_processors.registration",
-                "enhydris.context_processors.map",
             ]
         },
     }
