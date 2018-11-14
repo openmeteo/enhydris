@@ -22,7 +22,12 @@ import pd2hts
 
 from .csv import prepare_csv
 from .models import (
-    GentityFile, GentityGenericData, Instrument, Station, Timeseries, UserProfile,
+    GentityFile,
+    GentityGenericData,
+    Instrument,
+    Station,
+    Timeseries,
+    UserProfile,
 )
 
 
@@ -353,39 +358,6 @@ class BoundingBoxView(StationListBaseView):
         return HttpResponse(
             ",".join([str(e) for e in extent]), content_type="text/plain"
         )
-
-
-class TimeseriesDetailView(DetailView):
-
-    model = Timeseries
-    template_name = "timeseries_detail.html"
-
-    def get_context_data(self, **kwargs):
-        context = super(TimeseriesDetailView, self).get_context_data(**kwargs)
-        context["related_station"] = self.object.related_station
-        context["enabled_user_content"] = settings.ENHYDRIS_USERS_CAN_ADD_CONTENT
-        context["display_copyright"] = settings.ENHYDRIS_DISPLAY_COPYRIGHT_INFO
-        context[
-            "anonymous_can_download_data"
-        ] = settings.ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS
-        return context
-
-
-class InstrumentDetailView(DetailView):
-
-    model = Instrument
-    template_name = "instrument_detail.html"
-
-    def get_context_data(self, **kwargs):
-        context = super(InstrumentDetailView, self).get_context_data(**kwargs)
-        context["related_station"] = self.object.station
-        context["enabled_user_content"] = settings.ENHYDRIS_USERS_CAN_ADD_CONTENT
-        context["timeseries"] = Timeseries.objects.filter(instrument__id=self.object.id)
-        return context
-
-
-def map_view(request, *args, **kwargs):
-    return render(request, "map_page.html")
 
 
 def download_permission_required(func):

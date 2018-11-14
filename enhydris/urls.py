@@ -8,16 +8,6 @@ urlpatterns = [
     url(r"^$", views.StationListView.as_view(), name="station_list"),
     url(r"^stations/l/$", RedirectView.as_view(url="../..", permanent=True)),
     url(
-        r"^instruments/d/(?P<pk>\d+)/$",
-        views.InstrumentDetailView.as_view(),
-        name="instrument_detail",
-    ),
-    url(
-        r"^timeseries/d/(?P<pk>\d+)/$",
-        views.TimeseriesDetailView.as_view(),
-        name="timeseries_detail",
-    ),
-    url(
         r"^timeseries/d/(?P<object_id>\d+)/download/"
         r"((?P<start_date>[^/]*)/((?P<end_date>[^/]*)/)?)?$",
         views.download_timeseries,
