@@ -35,7 +35,7 @@ before_script:
  - cp enhydris_project/settings/travis.py enhydris_project/settings/local.py
 
 script:
- - coverage run --include="./*" --omit="*/tests/*","*/tests.py" manage.py test -v2
+ - coverage run --include="./*" --omit="*/tests/*","*/tests.py","*/migrations/*" manage.py test -v2
 
 env:
   - SELENIUM_BROWSER=PhantomJS
