@@ -167,7 +167,7 @@
                           <tr>
                             <th>{% trans 'Related Station' %}</th>
                             {% if timeseries.related_station %}
-                              <td><a href="{% url "station_detail" timeseries.related_station.id %}">{{ timeseries.related_station }}</a></td>
+                              <td>{{ timeseries.related_station }}</td>
                             {% else %}
                               <td>{% trans 'None' %}</td>
                             {% endif %}

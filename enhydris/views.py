@@ -64,34 +64,6 @@ def login(request, *args, **kwargs):
         return auth_login(request, *args, **kwargs)
 
 
-class StationDetailView(DetailView):
-
-    model = Station
-    template_name = "station_detail.html"
-
-    def get_context_data(self, **kwargs):
-        context = super(StationDetailView, self).get_context_data(**kwargs)
-        anonymous_can_download_data = (
-            settings.ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS
-        )
-        display_copyright = settings.ENHYDRIS_DISPLAY_COPYRIGHT_INFO
-        context.update(
-            {
-                "owner": self.object.owner,
-                "enabled_user_content": settings.ENHYDRIS_USERS_CAN_ADD_CONTENT,
-                "anonymous_can_download_data": anonymous_can_download_data,
-                "display_copyright": display_copyright,
-                "wgs84_name": settings.ENHYDRIS_WGS84_NAME,
-            }
-        )
-        return context
-
-
-class StationBriefView(DetailView):
-    model = Station
-    template_name = "station_brief.html"
-
-
 class StationListBaseView(ListView):
     template_name = ""
     model = Station
