@@ -590,22 +590,6 @@ class TsTestCase(TestCase):
         self.user.save()
 
     @RandomEnhydrisTimeseriesDataDir()
-    def test_get_empty_timeseries_data_for_chart(self):
-        url = "/api/timeseries_data/?object_id={}".format(self.ts.id)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        aobject = json.loads(response.content.decode("utf-8"))
-        self.assertTrue(isinstance(aobject, dict))
-        self.assertEqual(len(aobject), 2)
-        self.assertEqual(aobject["stats"], {})
-        self.assertEqual(aobject["data"], [])
-
-    @RandomEnhydrisTimeseriesDataDir()
-    def test_get_nonexisting_timeseries_data(self):
-        response = self.client.get("/api/timeseries_data/?object_id= 99999999999")
-        self.assertEqual(response.status_code, 404)
-
-    @RandomEnhydrisTimeseriesDataDir()
     def test_timeseries_with_timezone_data(self):
         """Test that there's no aware/naive date confusion
 
