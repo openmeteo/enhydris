@@ -1,9 +1,11 @@
+from collections import OrderedDict
 from datetime import timedelta, timezone
 
 from django.conf import settings
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from django.core.files.storage import FileSystemStorage
+from django.db import IntegrityError
 from django.db.models import signals
 from django.db.models.signals import post_save
 from django.utils.timezone import now
@@ -182,11 +184,6 @@ class Garea(Gentity):
     f_dependencies = ["Gentity"]
     mpoly = models.MultiPolygonField(null=True, blank=True)
 
-    def __str__(self):
-        if self.area:
-            return str(self.id) + " (" + str(self.area) + ")"
-        return str(self.id)
-
 
 #
 # Gentity-related models
@@ -200,13 +197,7 @@ class PoliticalDivision(Garea):
     f_dependencies = ["Garea"]
 
     def __str__(self):
-        result = (
-            self.short_name
-            or self.name
-            or self.short_name_alt
-            or self.name_alt
-            or str(self.id)
-        )
+        result = super().__str__()
         if self.parent:
             result = result + ", " + self.parent.__str__()
         return result
@@ -215,16 +206,10 @@ class PoliticalDivision(Garea):
 class WaterDivision(Garea):
     f_dependencies = ["Garea"]
 
-    def __str__(self):
-        return self.name or str(self.id)
-
 
 class WaterBasin(Garea):
     parent = models.ForeignKey("self", null=True, blank=True)
     f_dependencies = ["Garea"]
-
-    def __str__(self):
-        return self.name or str(self.id)
 
 
 class GentityAltCodeType(Lookup):
@@ -377,7 +362,7 @@ class Overseer(models.Model):
 
 class InstrumentType(Lookup):
     class Meta:
-        db_table = 'enhydris_instrumenttype'
+        db_table = "enhydris_instrumenttype"
 
 
 class Instrument(models.Model):
@@ -439,65 +424,47 @@ class TimeZone(models.Model):
         ordering = ("utc_offset",)
 
 
-def _int_xor(i1, i2):
-    """Return True if one and only one of i1 and i2 is zero."""
-    return (i1 or i2) and not (i1 and i2)
-
-
 class TimeStep(Lookup):
     length_minutes = models.PositiveIntegerField()
     length_months = models.PositiveSmallIntegerField()
 
     def __str__(self):
+        """Return timestep descriptions in a human readable format.
         """
-        Return timestep descriptions in a more human readable format
-        """
-        days = self.length_minutes / 1440
-        hours = self.length_minutes / 60 - 24 * days
-        minutes = self.length_minutes - 60 * hours - 1440 * days
-        years = self.length_months / 12
-        months = self.length_months - years * 12
-        if self.descr != "":
-            desc = self.descr + " - "
+        components = OrderedDict(
+            [
+                ("year", self.length_months // 12),
+                ("month", self.length_months % 12),
+                ("day", self.length_minutes // 1440),
+                ("hour", (self.length_minutes % 1440) // 60),
+                ("minute", self.length_minutes % 60),
+            ]
+        )
+        result = ""
+        if self.descr:
+            result = self.descr + " - "
+        items = [
+            "{} {}(s)".format(value, key) for key, value in components.items() if value
+        ]
+        result += ", ".join(items)
+        if result:
+            return result
         else:
-            desc = ""
-        link = ""
-        if years:
-            desc += "%d year(s)" % years
-            link = ","
-        if months:
-            desc += link + "%d month(s)" % months
-            link = ","
-        if days:
-            desc += link + "%d day(s)" % days
-            link = ","
-        if hours:
-            desc += link + "%d hour(s)" % hours
-            link = ","
-        if minutes:
-            desc += link + "%d minute(s)" % minutes
-            link = ","
-        if desc:
-            return desc
-        return "(0,0)"
+            return "0 minutes, 0 months"
 
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
-        if not _int_xor(self.length_minutes, self.length_months):
-            raise Exception(
+        if not bool(self.length_minutes) ^ bool(self.length_months):
+            raise IntegrityError(
                 _(
-                    "%s is not a valid time step; exactly one of minutes and "
+                    "{} is not a valid time step; exactly one of minutes and "
                     "months must be zero"
-                )
-                % self.__str__()
+                ).format(self.__str__())
             )
         super(TimeStep, self).save(force_insert, force_update, *args, **kwargs)
 
 
 class IntervalType(Lookup):
     value = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.descr
 
 
 class TimeseriesStorage(FileSystemStorage):
@@ -596,7 +563,7 @@ class Timeseries(models.Model):
             return None
         return self.end_date_utc.astimezone(tz=self.time_zone.as_tzinfo)
 
-    def set_start_and_end_date(self):
+    def _set_start_and_end_date(self):
         if (not self.datafile) or (self.datafile.size < 10):
             self.start_date_utc = None
             self.end_date_utc = None
@@ -610,8 +577,7 @@ class Timeseries(models.Model):
                 f.readline().split(",")[0], default_timezone=self.time_zone.as_tzinfo
             )
 
-    def set_extra_timeseries_properties(self, adataframe):
-        sign = -1 if self.time_zone.utc_offset < 0 else 1
+    def _set_extra_timeseries_properties(self, adataframe):
         try:
             location = {
                 "abscissa": self.gentity.gpoint.point[0],
@@ -647,6 +613,7 @@ class Timeseries(models.Model):
         )
         adataframe.unit = self.unit_of_measurement.symbol
         adataframe.title = self.name
+        sign = -1 if self.time_zone.utc_offset < 0 else 1
         adataframe.timezone = "{} (UTC{:+03d}{:02d})".format(
             self.time_zone.code,
             abs(self.time_zone.utc_offset) // 60 * sign,
@@ -661,12 +628,10 @@ class Timeseries(models.Model):
         if self.datafile:
             with open(self.datafile.path, "r", newline="\n") as f:
                 result = pd2hts.read(f, start_date=start_date, end_date=end_date)
-                self.set_extra_timeseries_properties(result)
         else:
             result = pd.DataFrame()
+        self._set_extra_timeseries_properties(result)
         return result
-
-    get_all_data = get_data
 
     def set_data(self, data):
         adataframe = pd2hts.read(data)
@@ -689,7 +654,7 @@ class Timeseries(models.Model):
             )
         new_data_start_date = adataframe.index[0]
         if old_data_end_date >= new_data_start_date:
-            raise ValueError(
+            raise IntegrityError(
                 (
                     "Cannot append time series: "
                     "its first record ({}) has a date earlier than the last "
@@ -724,55 +689,61 @@ class Timeseries(models.Model):
     def __str__(self):
         return self.name
 
-    def save(self, force_insert=False, force_update=False, *args, **kwargs):
+    def _check_that_offset_and_rounding_are_null_when_time_step_is_null(self):
+        if self.time_step:
+            return
+        one_of_them_is_not_none = (
+            self.timestamp_rounding_minutes is not None
+            or self.timestamp_rounding_months is not None
+            or self.timestamp_offset_minutes is not None
+            or self.timestamp_offset_months is not None
+        )
+        if one_of_them_is_not_none:
+            raise IntegrityError(
+                _(
+                    "Invalid time step: if time_step is null, "
+                    "rounding and offset must also be null"
+                )
+            )
+
+    def _check_integrity_of_offset_and_rounding_when_time_step_is_not_null(self):
         if not self.time_step:
-            if (
-                self.timestamp_rounding_minutes
-                or self.timestamp_rounding_months
-                or self.timestamp_offset_minutes
-                or self.timestamp_offset_months
-            ):
-                raise Exception(
-                    _(
-                        "Invalid time step: if time_step is null, "
-                        "rounding and offset must also be null"
-                    )
+            return
+        an_offset_is_none = (
+            self.timestamp_offset_minutes is None
+            or self.timestamp_offset_months is None
+        )
+        if an_offset_is_none:
+            raise IntegrityError(
+                _(
+                    "Invalid time step: if time_step is not "
+                    "null, offset must be provided"
                 )
-        else:
-            if (
-                self.timestamp_offset_minutes is None
-                or self.timestamp_offset_months is None
-            ):
-                raise Exception(
-                    _(
-                        "Invalid time step: if time_step is not "
-                        "null, offset must be provided"
-                    )
-                )
-            if (
+            )
+        roundings_are_inconsistent = (
+            (
                 self.timestamp_rounding_minutes is None
                 and self.timestamp_rounding_months is not None
             ) or (
                 self.timestamp_rounding_minutes is not None
                 and self.timestamp_rounding_months is None
-            ):
-                raise Exception(
-                    _("Invalid time step: roundings must be " "both null or not null")
-                )
-        self.set_start_and_end_date()
+            )
+        )
+        if roundings_are_inconsistent:
+            raise IntegrityError(
+                _("Invalid time step: roundings must be both null or not null")
+            )
+
+    def save(self, force_insert=False, force_update=False, *args, **kwargs):
+        self._check_that_offset_and_rounding_are_null_when_time_step_is_null()
+        self._check_integrity_of_offset_and_rounding_when_time_step_is_not_null()
+        self._set_start_and_end_date()
         super(Timeseries, self).save(force_insert, force_update, *args, **kwargs)
 
 
 # Profile creation upon user registration
 def user_post_save(sender, instance, **kwargs):
     profile, new = UserProfile.objects.get_or_create(user=instance)
-
-
-def make_user_editor(sender, instance, **kwargs):
-    user = instance
-    if not user.is_superuser:
-        group, created = Group.objects.get_or_create(name="editors")
-        user.groups.add(group)
 
 
 class UserProfile(models.Model):
@@ -815,9 +786,6 @@ class UserProfile(models.Model):
 
 signals.post_save.connect(user_post_save, User)
 
-if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
-    signals.post_save.connect(make_user_editor, User)
-
 
 @rules.predicate
 def is_station_creator(user, station):
@@ -854,18 +822,18 @@ rules.add_perm("enhydris.delete_station", is_station_creator)
 
 rules.add_perm(
     "enhydris.change_timeseries",
-    is_timeseries_station_creator | is_timeseries_station_maintainer
+    is_timeseries_station_creator | is_timeseries_station_maintainer,
 )
 rules.add_perm(
     "enhydris.delete_timeseries",
-    is_timeseries_station_creator | is_timeseries_station_maintainer
+    is_timeseries_station_creator | is_timeseries_station_maintainer,
 )
 
 rules.add_perm(
     "enhydris.change_instrument",
-    is_instrument_station_creator | is_instrument_station_maintainer
+    is_instrument_station_creator | is_instrument_station_maintainer,
 )
 rules.add_perm(
     "enhydris.delete_instrument",
-    is_instrument_station_creator | is_instrument_station_maintainer
+    is_instrument_station_creator | is_instrument_station_maintainer,
 )

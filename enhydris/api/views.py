@@ -1,5 +1,6 @@
 from io import StringIO
 
+from django.db import IntegrityError
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 
@@ -71,7 +72,7 @@ class Tsdata(APIView):
                 StringIO(request.data["timeseries_records"])
             )
             return HttpResponse(str(nrecords), content_type="text/plain")
-        except (ValueError, iso8601.ParseError) as e:
+        except (IntegrityError, iso8601.ParseError) as e:
             return HttpResponse(
                 status=status.HTTP_400_BAD_REQUEST,
                 content=str(e),

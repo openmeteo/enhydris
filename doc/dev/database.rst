@@ -688,8 +688,6 @@ Time series and related models
       Return the data of the file in a pandas DataFrame. If *start_date* or
       *end_date* are specified, only this part of the data is returned.
 
-      An old, deprecated synonym for this method is ``get_all_data()``.
-
    .. method:: enhydris.models.Timeseries.set_data(data)
 
       Replace all of the time series with *data*, which must be a

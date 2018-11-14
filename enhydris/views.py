@@ -463,7 +463,6 @@ def download_timeseries(request, object_id, start_date=None, end_date=None):
         end_date = end_date.replace(tzinfo=None)
 
     adataframe = timeseries.get_data(start_date=start_date, end_date=end_date)
-    timeseries.set_extra_timeseries_properties(adataframe)
     response = HttpResponse(content_type="text/vnd.openmeteo.timeseries; charset=utf-8")
     response["Content-Disposition"] = "attachment; filename=%s.hts" % (object_id,)
     try:
