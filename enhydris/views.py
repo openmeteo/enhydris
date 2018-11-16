@@ -27,37 +27,7 @@ from .models import (
     Instrument,
     Station,
     Timeseries,
-    UserProfile,
 )
-
-
-class ProfileDetailView(DetailView):
-    model = UserProfile
-    template_name = "profile_detail.html"
-    slug_field = "user__username"
-
-    def get_object(self, queryset=None):
-        if self.kwargs.get("slug", None):
-            return super(ProfileDetailView, self).get_object(queryset)
-        if not self.request.user.is_authenticated():
-            return None
-        if queryset is None:
-            queryset = self.get_queryset()
-        return queryset.get(user=self.request.user)
-
-
-class ProfileEditView(UpdateView):
-    model = UserProfile
-    template_name = "profile_edit.html"
-    success_url = lazy(reverse, str)("current_user_profile")
-    fields = ("user", "fname", "lname", "address", "organization", "email_is_public")
-
-    def get_object(self, queryset=None):
-        if not self.request.user.is_authenticated():
-            return None
-        if queryset is None:
-            queryset = self.get_queryset()
-        return queryset.get(user=self.request.user)
 
 
 def login(request, *args, **kwargs):

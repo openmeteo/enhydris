@@ -741,52 +741,6 @@ class Timeseries(models.Model):
         super(Timeseries, self).save(force_insert, force_update, *args, **kwargs)
 
 
-# Profile creation upon user registration
-def user_post_save(sender, instance, **kwargs):
-    profile, new = UserProfile.objects.get_or_create(user=instance)
-
-
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, verbose_name=_("Username"))
-    fname = models.CharField(_("First Name"), null=True, blank=True, max_length=30)
-    lname = models.CharField(_("Last Name"), null=True, blank=True, max_length=30)
-    address = models.CharField(_("Location"), null=True, blank=True, max_length=100)
-    organization = models.CharField(
-        _("Organization"), null=True, blank=True, max_length=100
-    )
-    email_is_public = models.BooleanField(default=False)
-
-    def __str__(self):
-        name = self.user.get_full_name()
-        if name:
-            return str("%s" % self.user.get_full_name())
-        else:
-            return str("%s" % self.user.username)
-
-    class Meta:
-        verbose_name = _("Profile")
-        verbose_name_plural = _("Profiles")
-
-    def first_name(self):
-        return "%s" % self.fname
-
-    def last_name(self):
-        return "%s" % self.lname
-
-    def full_name(self):
-        if (self.fname is None and self.lname is None) or (
-            self.fname == self.lname == ""
-        ):
-            return "No name specified"
-        return "%s %s" % (self.fname, self.lname)
-
-    def email(self):
-        return "%s" % self.user.email
-
-
-signals.post_save.connect(user_post_save, User)
-
-
 @rules.predicate
 def is_station_creator(user, station):
     return station.creator == user

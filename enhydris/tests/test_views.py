@@ -33,7 +33,6 @@ from enhydris.models import (
     Timeseries,
     TimeZone,
     UnitOfMeasurement,
-    UserProfile,
     Variable,
 )
 from enhydris.tests.test_models import RandomEnhydrisTimeseriesDataDir
@@ -647,67 +646,6 @@ class RegisterTestCase(TestCase):
     def test_register_link_present(self):
         response = self.client.get("/")
         self.assertContains(response, "Register")
-
-
-class ProfileTestCase(TestCase):
-    def test_profile(self):
-        # Create a user
-        self.auser = User.objects.create_user(
-            username="auser", email="irrelevant@example.com", password="topsecret"
-        )
-        self.auser.save()
-        profile = UserProfile.objects.get(user=self.auser)
-        profile.fname = "A"
-        profile.lname = "User"
-        profile.address = "Nowhere"
-        profile.email_is_public = True
-        profile.save()
-
-        # Create a second user
-        self.buser = User.objects.create_user(
-            username="buser",
-            email="irrelevant_indeed@example.com",
-            password="topsecret",
-        )
-        self.buser.save()
-
-        # View the first user's profile
-        response = self.client.get("/profile/auser/")
-        self.assertContains(response, "irrelevant@example.com")
-
-        # Prepare the post data that we will be attempting to post -
-        # essentially this sets email_is_public to False.
-        post_data = {
-            "user": self.auser.id,
-            "fname": "A",
-            "lname": "User",
-            "address": "Nowhere",
-            "organization": "UN",
-            "email_is_public": False,
-        }
-
-        # Try to modify first user's profile anonymously - should deny
-        response = self.client.post("/profile/edit/", post_data)
-        self.assertEqual(response.status_code, 200)
-
-        # Try to modify first user's profile as second user - should deny
-        r = self.client.login(username="buser", password="topsecret")
-        self.assertTrue(r)
-        response = self.client.post("/profile/edit/", post_data)
-        self.assertEqual(response.status_code, 200)
-        self.client.logout()
-
-        # Try to modify first user's profile as first user - should accept.
-        # Also check that email_is_public makes a difference.
-        r = self.client.login(username="auser", password="topsecret")
-        self.assertTrue(r)
-        response = self.client.get("/profile/auser/")
-        self.assertContains(response, "irrelevant@example.com")
-        response = self.client.post("/profile/edit/", post_data)
-        self.assertEqual(response.status_code, 302)
-        response = self.client.get("/profile/auser/")
-        self.assertNotContains(response, "irrelevant@example.com")
-        self.client.logout()
 
 
 @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")

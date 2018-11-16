@@ -120,8 +120,3 @@ class TimeStepAdmin(admin.ModelAdmin):
 @admin.register(models.TimeZone)
 class TimeZoneAdmin(admin.ModelAdmin):
     list_display = [f.name for f in models.TimeZone._meta.fields]
-
-
-@admin.register(models.UserProfile)
-class UserProfileAdmin(admin.ModelAdmin):
-    pass
