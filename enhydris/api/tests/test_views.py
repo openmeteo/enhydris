@@ -1,501 +1,314 @@
-import json
-import shutil
-import tempfile
 from datetime import datetime
+from unittest.mock import patch
 
 from django.contrib.auth.models import Permission, User
 from django.test import TestCase
-from django.test.client import BOUNDARY, MULTIPART_CONTENT, encode_multipart
 from django.test.utils import override_settings
 from rest_framework.test import APITestCase
 
 import iso8601
-import pytz
+import pandas as pd
 from model_mommy import mommy
 
 from enhydris import models
 
 
-def create_test_data():
-    "Besides creating test data, return the list of created gentities."
-    user1 = User.objects.create_user("user1", "user1@nowhere.org", "password1")
-    user1.is_active = True
-    user1.is_superuser = False
-    user1.is_staff = False
-    user1.save()
+class Tsdata404TestCase(APITestCase):
+    def test_get_nonexistent_timeseries(self):
+        response = self.client.get("/api/tsdata/1234/")
+        self.assertEqual(response.status_code, 404)
 
-    user2 = User.objects.create_user("user2", "user2@nowhere.org", "password2")
-    user2.is_active = True
-    user2.is_superuser = False
-    user2.is_staff = False
-    user2.save()
+    def test_post_nonexistent_timeseries(self):
+        response = self.client.post("/api/tsdata/1234/")
+        self.assertEqual(response.status_code, 404)
 
-    organization1 = models.Organization.objects.create(name="Test Organization")
-    timezone1 = models.TimeZone.objects.create(code="Test Time Zone", utc_offset=2)
-    variable1 = models.Variable.objects.create(descr="Test Variable")
-    uom1 = models.UnitOfMeasurement.objects.create(
-        descr="Test Unit Of Measurement", symbol="+"
+
+class TsdataGetTestCase(APITestCase):
+    @patch(
+        "enhydris.models.Timeseries.get_data",
+        return_value=pd.DataFrame(
+            index=[datetime(2017, 11, 23, 17, 23), datetime(2018, 11, 25, 1, 0)],
+            data={"value": [1.0, 2.0], "flags": ["", ""]},
+            columns=["value", "flags"],
+        ),
     )
-    uom1.variables = [variable1]
-    uom1.save()
+    def setUp(self, m):
+        timeseries = mommy.make(models.Timeseries)
+        self.response = self.client.get("/api/tsdata/{}/".format(timeseries.id))
 
-    pd1 = models.PoliticalDivision.objects.create(name="Test Political Division")
-    water_basin1 = models.WaterBasin.objects.create(name="Test Water Basin")
-    water_division1 = models.WaterDivision.objects.create(name="Test Water Division")
-    stype1 = models.StationType.objects.create(descr="Test Station Type")
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 200)
 
-    station1 = models.Station.objects.create(
-        name="Test Station",
-        water_division=water_division1,
-        water_basin=water_basin1,
-        political_division=pd1,
-        owner=organization1,
-        is_automatic=False,
-        copyright_holder="Joe User",
-        copyright_years=2014,
-        creator=user1,
-    )
-    station1.stype = [stype1]
-    station1.save()
+    def test_content_type(self):
+        self.assertEqual(self.response["Content-Type"], "text/plain")
 
-    station2 = models.Station.objects.create(
-        name="Test Station 2",
-        water_division=water_division1,
-        water_basin=water_basin1,
-        political_division=pd1,
-        owner=organization1,
-        is_automatic=False,
-        copyright_holder="Joe User",
-        copyright_years=2014,
-    )
-    station2.stype = [stype1]
-    station2.last_modified = iso8601.parse_date(
-        "2010-05-10 14:26:22", default_timezone=pytz.utc
-    )
-    station2.save()
-
-    # timeseries1
-    models.Timeseries.objects.create(
-        name="Test Timeseries",
-        time_zone=timezone1,
-        variable=variable1,
-        unit_of_measurement=uom1,
-        gentity=station1,
-    )
-    # timeseries2
-    models.Timeseries.objects.create(
-        name="Test Timeseries 2",
-        time_zone=timezone1,
-        variable=variable1,
-        unit_of_measurement=uom1,
-        gentity=station1,
-    )
-
-    return [pd1, water_basin1, water_division1, station1, station2]
+    def test_response_content(self):
+        self.assertEqual(
+            self.response.content.decode(),
+            "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
+        )
 
 
-class RandomEnhydrisTimeseriesDataDir(override_settings):
-    """
-    Override ENHYDRIS_TIMESERIES_DATA_DIR to a temporary directory.
+class TsdataPostTestCase(APITestCase):
+    @patch("enhydris.models.Timeseries.append_data")
+    def setUp(self, m):
+        self.mock_append_data = m
+        user = mommy.make(User, username="admin", is_superuser=True)
+        station = mommy.make(models.Station)
+        timeseries = mommy.make(models.Timeseries, gentity=station)
+        self.client.force_authenticate(user=user)
+        self.response = self.client.post(
+            "/api/tsdata/{}/".format(timeseries.id),
+            data={
+                "timeseries_records": (
+                    "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
+                )
+            },
+        )
 
-    Specifying "@RandomEnhydrisTimeseriesDataDir()" as a decorator is the same
-    as "@override_settings(ENHYDRIS_TIMESERIES_DATA_DIR=tempfile.mkdtemp())",
-    except that in the end it removes the temporary directory.
-    """
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 204)
 
-    def __init__(self):
-        self.tmpdir = tempfile.mkdtemp()
-        super().__init__(ENHYDRIS_TIMESERIES_DATA_DIR=self.tmpdir)
+    def test_called_append_data(self):
+        self.assertEqual(self.mock_append_data.call_count, 1)
 
-    def disable(self):
-        super().disable()
-        shutil.rmtree(self.tmpdir)
+    def test_called_append_data_with_correct_data(self):
+        self.assertEqual(
+            self.mock_append_data.call_args[0][0].getvalue(),
+            "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
+        )
 
 
-class ReadTestCase(APITestCase):
+class TsdataPostAuthorizationTestCase(APITestCase):
     def setUp(self):
-        self.reference_gentities = create_test_data()
+        self.user1 = mommy.make(User, is_active=True, is_superuser=False)
+        self.user2 = mommy.make(User, is_active=True, is_superuser=False)
+        station = mommy.make(models.Station, creator=self.user1)
+        self.timeseries = mommy.make(models.Timeseries, gentity=station)
 
-    def testStationList(self):
+    def _post_tsdata(self):
+        return self.client.post(
+            "/api/tsdata/{}/".format(self.timeseries.id),
+            data={
+                "timeseries_records": (
+                    "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
+                )
+            },
+        )
 
-        response = self.client.get("/api/Station/")
-        response.data.sort(key=lambda x: x["id"])
-        self.assertEqual(len(response.data), 2)
-        for res_datum, ref_datum in zip(response.data, self.reference_gentities[-2:]):
-            self.assertEqual(res_datum["id"], ref_datum.id)
-            self.assertEqual(res_datum["name"], ref_datum.name)
-            self.assertEqual(res_datum["name_alt"], ref_datum.name_alt)
-            self.assertEqual(res_datum["short_name"], ref_datum.short_name)
-            self.assertEqual(res_datum["short_name_alt"], ref_datum.short_name_alt)
-            self.assertEqual(res_datum["remarks"], ref_datum.remarks)
-            self.assertEqual(res_datum["remarks_alt"], ref_datum.remarks_alt)
-            wb_id = ref_datum.water_basin.id if ref_datum.water_basin else None
-            self.assertEqual(res_datum["water_basin"], wb_id)
-            wd_id = ref_datum.water_division.id if ref_datum.water_division else None
-            self.assertEqual(res_datum["water_division"], wd_id)
-            pd_id = (
-                ref_datum.political_division.id
-                if ref_datum.political_division
-                else None
-            )
-            self.assertEqual(res_datum["political_division"], pd_id)
-            res_last_modified = iso8601.parse_date(
-                res_datum["last_modified"], default_timezone=pytz.utc
-            )
-            self.assertEqual(res_last_modified, ref_datum.last_modified)
+    @patch("enhydris.models.Timeseries.append_data")
+    def test_unauthenticated_user_is_denied_permission_to_post_tsdata(self, m):
+        self.assertEqual(self._post_tsdata().status_code, 403)
 
-        @RandomEnhydrisTimeseriesDataDir()
-        def test_get_nonexisting_timeseries_data_using_url_query(self):
-            response = self.client.get("/api/tsdata/?pk=9999999999999")
-            self.assertEqual(response.status_code, 404)
+    @patch("enhydris.models.Timeseries.append_data")
+    def test_unauthorized_user_is_denied_permission_to_post_tsdata(self, m):
+        self.client.force_authenticate(user=self.user2)
+        self.assertEqual(self._post_tsdata().status_code, 403)
 
-        @RandomEnhydrisTimeseriesDataDir()
-        def test_get_nonexisting_timeseries_data_using_url_parameter(self):
-            response = self.client.get("/api/tsdata/9999999", follow=True)
-            self.assertEqual(response.status_code, 404)
+    @patch("enhydris.models.Timeseries.append_data")
+    def test_authorized_user_can_posttsdata(self, m):
+        self.client.force_authenticate(user=self.user1)
+        self.assertEqual(self._post_tsdata().status_code, 204)
 
 
-class WriteTestCase(TestCase):
+class TsdataPostGarbageTestCase(APITestCase):
+    @patch("enhydris.models.Timeseries.append_data", side_effect=iso8601.ParseError)
+    def setUp(self, m):
+        self.mock_append_data = m
+        user = mommy.make(User, username="admin", is_superuser=True)
+        station = mommy.make(models.Station)
+        timeseries = mommy.make(models.Timeseries, gentity=station)
+        self.client.force_authenticate(user=user)
+        self.response = self.client.post(
+            "/api/tsdata/{}/".format(timeseries.id),
+            data={
+                "timeseries_records": (
+                    # The actual content doesn't matter, since the mock will raise
+                    # an error.
+                    "2017-11-23 17:23,1.000000,\r\n"
+                    "2018-aa-25 01:00,2.000000,\r\n",
+                )
+            },
+        )
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 400)
+
+
+class TimeseriesPostTestCase(APITestCase):
     def setUp(self):
-        create_test_data()
-        self.timeseries1 = models.Timeseries.objects.get(name="Test Timeseries")
+        self.user1 = mommy.make(User, is_active=True, is_superuser=False)
+        self.user2 = mommy.make(User, is_active=True, is_superuser=False)
+        self.variable = mommy.make(models.Variable)
+        self.time_zone = mommy.make(models.TimeZone)
+        self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
+        self.station = mommy.make(models.Station, creator=self.user1)
 
-    def testTimeSeries(self):
-        # Get an existing time series
-        response = self.client.get("/api/Timeseries/{}/".format(self.timeseries1.id))
-        t = json.loads(response.content.decode("utf-8"))
-
-        # Change some of its attributes
-        t["id"] = None
-        t["name"] = "Test Timeseries 1221"
-        t["remarks"] = "Yet another timeseries test"
-
-        # Attempt to upload unauthenticated - should deny
-        d = json.dumps(t)
-        response = self.client.post(
-            "/api/Timeseries/", data=d, content_type="application/json"
+    def _create_timeseries(self):
+        return self.client.post(
+            "/api/Timeseries/",
+            data={
+                "name": "Great time series",
+                "gentity": self.station.id,
+                "variable": self.variable.id,
+                "time_zone": self.time_zone.id,
+                "unit_of_measurement": self.unit_of_measurement.id,
+            },
         )
+
+    def test_unauthenticated_user_is_denied_permission_to_create_timeseries(self):
+        self.assertEqual(self._create_timeseries().status_code, 403)
+
+    def test_unauthorized_user_is_denied_permission_to_create_timeseries(self):
+        self.client.force_authenticate(user=self.user2)
+        self.assertEqual(self._create_timeseries().status_code, 403)
+
+    def test_authorized_user_can_create_timeseries(self):
+        self.client.force_authenticate(user=self.user1)
+        self.assertEqual(self._create_timeseries().status_code, 201)
+
+
+class TimeseriesDeleteTestCase(APITestCase):
+    def setUp(self):
+        self.user1 = mommy.make(User, is_active=True, is_superuser=False)
+        self.user2 = mommy.make(User, is_active=True, is_superuser=False)
+        station = mommy.make(models.Station, creator=self.user1)
+        self.timeseries = mommy.make(models.Timeseries, gentity=station)
+
+    def test_unauthenticated_user_is_denied_permission_to_delete_timeseries(self):
+        response = self.client.delete("/api/Timeseries/{}/".format(self.timeseries.id))
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(
-            models.Timeseries.objects.filter(name="Test Timeseries 1221").count(), 0
-        )
 
-        # Now try again, this time logged on as user 2; again should deny
-        self.assertTrue(self.client.login(username="user2", password="password2"))
-        response = self.client.post(
-            "/api/Timeseries/", data=d, content_type="application/json"
-        )
+    def test_unauthorized_user_is_denied_permission_to_delete_timeseries(self):
+        self.client.force_authenticate(user=self.user2)
+        response = self.client.delete("/api/Timeseries/{}/".format(self.timeseries.id))
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(
-            models.Timeseries.objects.filter(name="Test Timeseries 1221").count(), 0
-        )
-        self.client.logout()
 
-        # Now try again, this time logged on as user 1; should accept
-        self.assertTrue(self.client.login(username="user1", password="password1"))
-        response = self.client.post(
-            "/api/Timeseries/", data=d, content_type="application/json"
-        )
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(
-            models.Timeseries.objects.filter(name="Test Timeseries 1221").count(), 1
-        )
-        self.client.logout()
-
-    def testTimeseriesDelete(self):
-        # Check the number of timeseries available
-        ntimeseries = models.Timeseries.objects.count()
-
-        # 1 is not enough; we need to know we aren't
-        # deleting more than necessary.
-        assert ntimeseries > 1
-
-        # Attempt to delete unauthenticated - should fail
-        response = self.client.delete("/api/Timeseries/{}/".format(self.timeseries1.id))
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(
-            models.Timeseries.objects.filter(pk=self.timeseries1.id).count(), 1
-        )
-        self.assertEqual(models.Timeseries.objects.count(), ntimeseries)
-
-        # Try again as user2 - should fail
-        self.assertTrue(self.client.login(username="user2", password="password2"))
-        response = self.client.delete("/api/Timeseries/{}/".format(self.timeseries1.id))
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(
-            models.Timeseries.objects.filter(pk=self.timeseries1.id).count(), 1
-        )
-        self.assertEqual(models.Timeseries.objects.count(), ntimeseries)
-        self.client.logout()
-
-        # Try again as user1 - should succeed
-        self.assertTrue(self.client.login(username="user1", password="password1"))
-        response = self.client.delete("/api/Timeseries/{}/".format(self.timeseries1.id))
+    def test_authorized_user_can_delete_timeseries(self):
+        self.client.force_authenticate(user=self.user1)
+        response = self.client.delete("/api/Timeseries/{}/".format(self.timeseries.id))
         self.assertEqual(response.status_code, 204)
-        self.assertEqual(
-            models.Timeseries.objects.filter(pk=self.timeseries1.id).count(), 0
-        )
-        self.assertEqual(models.Timeseries.objects.count(), ntimeseries - 1)
-        self.client.logout()
-
-    @RandomEnhydrisTimeseriesDataDir()
-    def testUploadTsDataUnauthenticated(self):
-        # Attempt to upload some timeseries data, unauthenticated
-        response = self.client.put(
-            "/api/tsdata/{}/".format(self.timeseries1.id),
-            encode_multipart(
-                BOUNDARY, {"timeseries_records": "2012-11-06 18:17,20,\n"}
-            ),
-            content_type=MULTIPART_CONTENT,
-        )
-        t = self.timeseries1.get_data()
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(len(t), 0)
-
-    @RandomEnhydrisTimeseriesDataDir()
-    def testUploadTsDataAsWrongUser(self):
-        # Attempt to upload some timeseries data as user 2; should deny
-        self.assertTrue(self.client.login(username="user2", password="password2"))
-        response = self.client.put(
-            "/api/tsdata/{}/".format(self.timeseries1.id),
-            encode_multipart(
-                BOUNDARY, {"timeseries_records": "2012-11-06 18:17,20,\n"}
-            ),
-            content_type=MULTIPART_CONTENT,
-        )
-        adataframe = self.timeseries1.get_data()
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(len(adataframe), 0)
-        self.client.logout()
-
-    @RandomEnhydrisTimeseriesDataDir()
-    def testUploadTsDataGarbage(self):
-        self.assertTrue(self.client.login(username="user1", password="password1"))
-        response = self.client.put(
-            "/api/tsdata/{}/".format(self.timeseries1.id),
-            encode_multipart(
-                BOUNDARY, {"timeseries_records": "2012-aa-06 18:17,20,\n"}
-            ),
-            content_type=MULTIPART_CONTENT,
-        )
-        adataframe = self.timeseries1.get_data()
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(len(adataframe), 0)
-        self.client.logout()
-
-    @RandomEnhydrisTimeseriesDataDir()
-    def testUploadTsData(self):
-        self.assertTrue(self.client.login(username="user1", password="password1"))
-        response = self.client.put(
-            "/api/tsdata/{}/".format(self.timeseries1.id),
-            encode_multipart(
-                BOUNDARY, {"timeseries_records": "2012-11-06 18:17,20,\n"}
-            ),
-            content_type=MULTIPART_CONTENT,
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content.decode("utf-8"), "1")
-        adataframe = models.Timeseries.objects.get(pk=self.timeseries1.id).get_data()
-        self.assertEqual(len(adataframe), 1)
-        self.assertEqual(adataframe.index[0], datetime(2012, 11, 6, 18, 17, 0))
-        self.assertEqual(adataframe.iloc[0].value, 20)
-        self.client.logout()
-
-        # Append two more records
-        self.assertTrue(self.client.login(username="user1", password="password1"))
-        response = self.client.put(
-            "/api/tsdata/{}/".format(self.timeseries1.id),
-            encode_multipart(
-                BOUNDARY,
-                {"timeseries_records": "2012-11-06 18:18,21,\n2012-11-07 18:18,23,\n"},
-            ),
-            content_type=MULTIPART_CONTENT,
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content.decode("utf-8"), "2")
-        adataframe = models.Timeseries.objects.get(pk=self.timeseries1.id).get_data()
-        self.assertEqual(len(adataframe), 3)
-        self.assertEqual(adataframe.index[0], datetime(2012, 11, 6, 18, 17, 0))
-        self.assertEqual(adataframe.iloc[0].value, 20)
-        self.assertEqual(adataframe.index[1], datetime(2012, 11, 6, 18, 18, 0))
-        self.assertEqual(adataframe.iloc[1].value, 21)
-        self.assertEqual(adataframe.index[2], datetime(2012, 11, 7, 18, 18, 0))
-        self.assertEqual(adataframe.iloc[2].value, 23)
-        self.client.logout()
-
-        # Try to append an earlier record; should fail
-        self.assertTrue(self.client.login(username="user1", password="password1"))
-        response = self.client.put(
-            "/api/tsdata/{}/".format(self.timeseries1.id),
-            encode_multipart(
-                BOUNDARY, {"timeseries_records": "2012-11-05 18:18,21,\n"}
-            ),
-            content_type=MULTIPART_CONTENT,
-        )
-        self.client.logout()
-        self.assertEqual(response.status_code, 400)
-        t = models.Timeseries.objects.get(pk=self.timeseries1.id).get_data()
-        self.assertEqual(len(t), 3)
-        self.client.logout()
 
 
-class WriteStationTestCase(TestCase):
+class StationCreateTestCase(APITestCase):
     def setUp(self):
-        create_test_data()
-        self.station1 = models.Station.objects.get(name="Test Station")
+        self.user = mommy.make(User, is_active=True, is_superuser=False)
+        self.variable = mommy.make(models.Variable)
+        self.time_zone = mommy.make(models.TimeZone)
+        self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
+        self.bilbo = mommy.make(models.Person, last_name="Baggins", first_name="Bilbo")
+        self.meteorological = mommy.make(models.StationType, descr="Meteorological")
 
-    def test_edit_station(self):
-        # Get an existing station
-        response = self.client.get("/api/Station/{}/".format(self.station1.id))
-        station = json.loads(response.content.decode("utf-8"))
-
-        # Change some of its attributes
-        station_id = station["id"]
-        del station["id"]
-        station["name"] = "Test Station 1222"
-        station["remarks"] = "Yet another station test"
-
-        # Attempt to upload unauthenticated - should deny
-        d = json.dumps(station)
-        response = self.client.put(
-            "/api/Station/{}/".format(station_id),
-            data=d,
-            content_type="application/json",
-        )
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(
-            models.Station.objects.filter(name="Test Station 1222").count(), 0
-        )
-
-        # Try again, this time logged on as user 2; again should deny
-        self.assertTrue(self.client.login(username="user2", password="password2"))
-        response = self.client.put(
-            "/api/Station/{}/".format(station_id),
-            data=d,
-            content_type="application/json",
-        )
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(
-            models.Station.objects.filter(name="Test Station 1222").count(), 0
-        )
-        self.client.logout()
-
-        # Try again, as user 1; should accept
-        self.assertTrue(self.client.login(username="user1", password="password1"))
-        response = self.client.put(
-            "/api/Station/{}/".format(station_id),
-            data=d,
-            content_type="application/json",
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            models.Station.objects.filter(name="Test Station 1222").count(), 1
-        )
-        self.client.logout()
-
-    def test_station_delete(self):
-        # Check the number of stations available
-        nstations = models.Station.objects.count()
-
-        # 1 is not enough; we need to know we aren't
-        # deleting more than necessary.
-        assert nstations > 1
-
-        # Attempt to delete unauthenticated - should fail
-        response = self.client.delete("/api/Station/{}/".format(self.station1.id))
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(models.Station.objects.filter(pk=self.station1.id).count(), 1)
-        self.assertEqual(models.Station.objects.count(), nstations)
-
-        # Try again as user2 - should fail
-        self.assertTrue(self.client.login(username="user2", password="password2"))
-        response = self.client.delete("/api/Station/{}/".format(self.station1.id))
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(models.Station.objects.filter(pk=self.station1.id).count(), 1)
-        self.assertEqual(models.Station.objects.count(), nstations)
-        self.client.logout()
-
-        # Try again as user1 - should succeed
-        self.assertTrue(self.client.login(username="user1", password="password1"))
-        response = self.client.delete("/api/Station/{}/".format(self.station1.id))
-        self.assertEqual(response.status_code, 204)
-        self.assertEqual(models.Station.objects.filter(pk=self.station1.id).count(), 0)
-        self.assertEqual(models.Station.objects.count(), nstations - 1)
-        self.client.logout()
-
-
-class CreateStationTestCase(TestCase):
-    def setUp(self):
-        create_test_data()
-
-        # Get an existing station
-        obj = models.Station.objects.get(name="Test Station")
-        response = self.client.get("/api/Station/{}/".format(obj.id))
-        self.station = json.loads(response.content.decode("utf-8"))
-
-        # Change some of its attributes
-        del self.station["id"]
-        self.station["name"] = "Test Station 1507"
-        self.station["remarks"] = "Yet another station test"
-
-    def test_create_unauthenticated(self):
-        response = self.client.post(
+    def _create_station(self):
+        return self.client.post(
             "/api/Station/",
-            data=json.dumps(self.station),
-            content_type="application/json",
+            data={
+                "name": "Hobbiton",
+                "copyright_years": "2018",
+                "copyright_holder": "Bilbo Baggins",
+                "owner": self.bilbo.id,
+                "stype": [self.meteorological.id],
+            },
         )
+
+    def test_unauthenticated_user_is_denied_permission_to_create_station(self):
+        response = self._create_station()
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(
-            models.Station.objects.filter(name="Test Station 1507").count(), 0
-        )
+
+    @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=False)
+    def test_unauthorized_user_is_denied_permission_to_create_station(self):
+        self.client.force_authenticate(user=self.user)
+        response = self._create_station()
+        self.assertEqual(response.status_code, 403)
+
+    @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=False)
+    def test_authorized_user_can_create_station(self):
+        permission = Permission.objects.get(codename="add_station")
+        self.user.user_permissions.add(permission)
+        self.user.save()
+        self.client.force_authenticate(user=self.user)
+        response = self._create_station()
+        self.assertEqual(response.status_code, 201)
 
     @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
-    def test_create_station_on_database_allowing_any_user(self):
-        self.assertTrue(self.client.login(username="user2", password="password2"))
-        response = self.client.post(
-            "/api/Station/",
-            data=json.dumps(self.station),
-            content_type="application/json",
-        )
+    def test_any_user_can_create_station_when_system_is_open(self):
+        self.client.force_authenticate(user=self.user)
+        response = self._create_station()
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(
-            models.Station.objects.filter(name="Test Station 1507").count(), 1
-        )
-        self.client.logout()
 
-    @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=False)
-    def test_create_station_by_disallowed_user(self):
-        self.assertTrue(self.client.login(username="user2", password="password2"))
-        response = self.client.post(
-            "/api/Station/",
-            data=json.dumps(self.station),
-            content_type="application/json",
+
+class StationUpdateAndDeleteTestCase(APITestCase):
+    def setUp(self):
+        self.user1 = mommy.make(User, is_active=True, is_superuser=False)
+        self.user2 = mommy.make(User, is_active=True, is_superuser=False)
+        self.variable = mommy.make(models.Variable)
+        self.time_zone = mommy.make(models.TimeZone)
+        self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
+        self.station = mommy.make(models.Station, creator=self.user1)
+        self.bilbo = mommy.make(models.Person, last_name="Baggins", first_name="Bilbo")
+        self.meteorological = mommy.make(models.StationType, descr="Meteorological")
+
+    def _put_station(self):
+        return self.client.put(
+            "/api/Station/{}/".format(self.station.id),
+            data={
+                "name": "Hobbiton",
+                "copyright_years": "2018",
+                "copyright_holder": "Bilbo Baggins",
+                "owner": self.bilbo.id,
+                "stype": [self.meteorological.id],
+            },
         )
+
+    def _patch_station(self):
+        return self.client.patch(
+            "/api/Station/{}/".format(self.station.id), data={"name": "Hobbiton"}
+        )
+
+    def _delete_station(self):
+        return self.client.delete("/api/Station/{}/".format(self.station.id))
+
+    def test_unauthenticated_user_is_denied_permission_to_put_station(self):
+        response = self._put_station()
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(
-            models.Station.objects.filter(name="Test Station 1507").count(), 0
-        )
-        self.client.logout()
 
-    @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=False)
-    def test_create_station_by_allowed_user(self):
-        # Give the appropriate permissions to the user
-        user = User.objects.get(username="user2")
-        permission = Permission.objects.get(codename="add_station")
-        user.user_permissions.add(permission)
-        user.save()
+    def test_unauthorized_user_is_denied_permission_to_put_station(self):
+        self.client.force_authenticate(user=self.user2)
+        response = self._put_station()
+        self.assertEqual(response.status_code, 403)
 
-        self.assertTrue(self.client.login(username="user2", password="password2"))
-        response = self.client.post(
-            "/api/Station/",
-            data=json.dumps(self.station),
-            content_type="application/json",
-        )
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(
-            models.Station.objects.filter(name="Test Station 1507").count(), 1
-        )
-        self.client.logout()
+    def test_authorized_user_can_put_station(self):
+        self.client.force_authenticate(user=self.user1)
+        response = self._put_station()
+        self.assertEqual(response.status_code, 200, response.content)
+
+    def test_unauthenticated_user_is_denied_permission_to_patch_station(self):
+        response = self._patch_station()
+        self.assertEqual(response.status_code, 403)
+
+    def test_unauthorized_user_is_denied_permission_to_patch_station(self):
+        self.client.force_authenticate(user=self.user2)
+        response = self._patch_station()
+        self.assertEqual(response.status_code, 403)
+
+    def test_authorized_user_can_patch_station(self):
+        self.client.force_authenticate(user=self.user1)
+        response = self._patch_station()
+        self.assertEqual(response.status_code, 200, response.content)
+
+    def test_unauthenticated_user_is_denied_permission_to_delete_station(self):
+        response = self._delete_station()
+        self.assertEqual(response.status_code, 403)
+
+    def test_unauthorized_user_is_denied_permission_to_delete_station(self):
+        self.client.force_authenticate(user=self.user2)
+        response = self._delete_station()
+        self.assertEqual(response.status_code, 403)
+
+    def test_authorized_user_can_delete_station(self):
+        self.client.force_authenticate(user=self.user1)
+        response = self._delete_station()
+        self.assertEqual(response.status_code, 204, response.content)
 
 
 class WaterDivisionTestCase(TestCase):

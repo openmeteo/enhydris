@@ -10,7 +10,6 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 
 import iso8601
 import pd2hts
-import pytz
 
 from enhydris import models
 
@@ -36,27 +35,20 @@ class Tsdata(APIView):
         except models.Timeseries.DoesNotExist:
             raise Http404
 
-    def put(self, request, pk, format=None):
+    def post(self, request, pk, format=None):
         try:
             atimeseries = models.Timeseries.objects.get(pk=int(pk))
             self.check_object_permissions(request, atimeseries)
-            nrecords = atimeseries.append_data(
-                StringIO(request.data["timeseries_records"])
-            )
-            return HttpResponse(str(nrecords), content_type="text/plain")
+            atimeseries.append_data(StringIO(request.data["timeseries_records"]))
+            return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+        except models.Timeseries.DoesNotExist:
+            raise Http404
         except (IntegrityError, iso8601.ParseError) as e:
             return HttpResponse(
                 status=status.HTTP_400_BAD_REQUEST,
                 content=str(e),
                 content_type="text/plain",
             )
-
-    def post(self, request, pk, format=None):
-        """
-        We temporarily keep post the same as put so that older
-        versions of loggertodb continue to work
-        """
-        return self.put(request, pk, format=None)
 
 
 class TimeseriesList(generics.ListCreateAPIView):
