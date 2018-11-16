@@ -6,35 +6,16 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import generics, status
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
+from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
 
 import iso8601
 import pd2hts
 import pytz
 
+from . import serializers
+from .permissions import CanEditOrReadOnly, CanCreateStation
 from enhydris import models
-from enhydris.api.permissions import CanEditOrReadOnly, CanCreateStation
-from enhydris.api.serializers import StationSerializer, TimeseriesSerializer
-
-
-modelnames = (
-    "Lentity Person Organization Gentity Gpoint Gline Garea "
-    "PoliticalDivision WaterDivision WaterBasin "
-    "GentityAltCodeType GentityAltCode FileType GentityFile EventType "
-    "GentityEvent StationType Station Overseer InstrumentType "
-    "Instrument Variable UnitOfMeasurement TimeZone TimeStep IntervalType "
-    "Timeseries"
-).split()
-
-
-@api_view(("GET",))
-def api_root(request, format=None):
-    d = {}
-    for m in modelnames:
-        d[m] = reverse(m + "-list", request=request, format=format)
-    return Response(d)
 
 
 class ListAPIView(generics.ListAPIView):
@@ -89,7 +70,7 @@ class Tsdata(APIView):
 
 class TimeseriesList(generics.ListCreateAPIView):
     queryset = models.Timeseries.objects.all()
-    serializer_class = TimeseriesSerializer
+    serializer_class = serializers.TimeseriesSerializer
     permission_classes = (CanEditOrReadOnly,)
 
     def post(self, request, *args, **kwargs):
@@ -120,17 +101,117 @@ class TimeseriesList(generics.ListCreateAPIView):
 
 class TimeseriesDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Timeseries.objects.all()
-    serializer_class = TimeseriesSerializer
+    serializer_class = serializers.TimeseriesSerializer
     permission_classes = (CanEditOrReadOnly,)
 
 
 class StationList(generics.ListCreateAPIView):
     queryset = models.Station.objects.all()
-    serializer_class = StationSerializer
+    serializer_class = serializers.StationSerializer
     permission_classes = (CanCreateStation,)
 
 
 class StationDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Station.objects.all()
-    serializer_class = StationSerializer
+    serializer_class = serializers.StationSerializer
     permission_classes = (CanEditOrReadOnly,)
+
+
+class WaterDivisionViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.WaterDivisionSerializer
+    queryset = models.WaterDivision.objects.all()
+
+
+class GentityAltCodeTypeViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.GentityAltCodeTypeSerializer
+    queryset = models.GentityAltCodeType.objects.all()
+
+
+class OrganizationViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.OrganizationSerializer
+    queryset = models.Organization.objects.all()
+
+
+class PersonViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.PersonSerializer
+    queryset = models.Person.objects.all()
+
+
+class StationTypeViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.StationTypeSerializer
+    queryset = models.StationType.objects.all()
+
+
+class TimeZoneViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.TimeZoneSerializer
+    queryset = models.TimeZone.objects.all()
+
+
+class PoliticalDivisionViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.PoliticalDivisionSerializer
+    queryset = models.PoliticalDivision.objects.all()
+
+
+class IntervalTypeViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.IntervalTypeSerializer
+    queryset = models.IntervalType.objects.all()
+
+
+class FileTypeViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.FileTypeSerializer
+    queryset = models.FileType.objects.all()
+
+
+class EventTypeViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.EventTypeSerializer
+    queryset = models.EventType.objects.all()
+
+
+class InstrumentTypeViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.InstrumentTypeSerializer
+    queryset = models.InstrumentType.objects.all()
+
+
+class WaterBasinViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.WaterBasinSerializer
+    queryset = models.WaterBasin.objects.all()
+
+
+class TimeStepViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.TimeStepSerializer
+    queryset = models.TimeStep.objects.all()
+
+
+class VariableViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.VariableSerializer
+    queryset = models.Variable.objects.all()
+
+
+class UnitOfMeasurementViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.UnitOfMeasurementSerializer
+    queryset = models.UnitOfMeasurement.objects.all()
+
+
+class GentityAltCodeViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.GentityAltCodeSerializer
+    queryset = models.GentityAltCode.objects.all()
+
+
+class GentityFileViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.GentityFileSerializer
+    queryset = models.GentityFile.objects.all()
+
+
+class GentityEventViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.GentityEventSerializer
+    queryset = models.GentityEvent.objects.all()
+
+
+class OverseerViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.OverseerSerializer
+    queryset = models.Overseer.objects.all()
+
+
+class InstrumentViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.InstrumentSerializer
+    queryset = models.Instrument.objects.all()
