@@ -18,15 +18,6 @@ from . import serializers
 from .permissions import CanCreateStation, CanEditOrReadOnly
 
 
-class ListAPIView(generics.ListAPIView):
-    def get_queryset(self):
-        modified_after = "1900-01-01"
-        if "modified_after" in self.kwargs:
-            modified_after = self.kwargs["modified_after"]
-        modified_after = iso8601.parse_date(modified_after, default_timezone=pytz.utc)
-        return self.queryset.exclude(last_modified__lte=modified_after)
-
-
 class Tsdata(APIView):
     """
     Take a timeseries id and return the actual timeseries data to the client,

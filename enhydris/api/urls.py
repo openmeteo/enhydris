@@ -41,12 +41,3 @@ router.register("GentityEvent", views.GentityEventViewSet)
 router.register("Overseer", views.OverseerViewSet)
 router.register("Instrument", views.InstrumentViewSet)
 urlpatterns += router.urls
-
-
-# _urls.append(
-#     url(
-#         r"^{0}/modified_after/(?P<modified_after>.*)/$".format(_x),
-#         list_view,
-#         name=_x + "-list",
-#     )
-# )
