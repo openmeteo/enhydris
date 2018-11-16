@@ -25,7 +25,7 @@ from django_selenium_clean import PageElement, SeleniumTestCase
 from model_mommy import mommy
 from selenium.webdriver.common.by import By
 
-from enhydris.api.tests import RandomEnhydrisTimeseriesDataDir
+from enhydris.api.tests.test_views import RandomEnhydrisTimeseriesDataDir
 from enhydris.models import (
     Organization,
     Station,
