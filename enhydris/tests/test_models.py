@@ -1,15 +1,11 @@
 from datetime import date, datetime, timedelta, timezone
 from io import StringIO
-import shutil
-import tempfile
-import textwrap
-from unittest.mock import Mock, MagicMock, mock_open, patch
+from unittest.mock import MagicMock, Mock, mock_open, patch
 
 from django.contrib.auth.models import User
 from django.contrib.gis.geos import Point
 from django.db import IntegrityError
 from django.test import TestCase
-from django.test.utils import override_settings
 
 from model_mommy import mommy
 

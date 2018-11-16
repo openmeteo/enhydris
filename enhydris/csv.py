@@ -8,8 +8,7 @@ import csv
 import os
 import tempfile
 import textwrap
-from zipfile import ZipFile, ZIP_DEFLATED
-
+from zipfile import ZIP_DEFLATED, ZipFile
 
 _station_list_csv_headers = [
     "id",

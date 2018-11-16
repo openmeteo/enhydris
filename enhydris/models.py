@@ -6,18 +6,16 @@ from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from django.core.files.storage import FileSystemStorage
 from django.db import IntegrityError
-from django.db.models import signals
 from django.db.models.signals import post_save
+from django.utils._os import abspathu
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-from django.utils._os import abspathu
 
 import iso8601
 import pandas as pd
 import pd2hts
 import rules
 from simpletail import ropen
-
 
 #
 # Lookups

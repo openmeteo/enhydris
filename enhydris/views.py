@@ -12,22 +12,15 @@ from django.contrib.gis.geos import Polygon
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
-from django.views.generic import DetailView, ListView, UpdateView
-from django.utils.functional import lazy
+from django.shortcuts import get_object_or_404
+from django.views.generic import ListView
 
 import iso8601
 import pandas as pd
 import pd2hts
 
 from .csv import prepare_csv
-from .models import (
-    GentityFile,
-    GentityGenericData,
-    Instrument,
-    Station,
-    Timeseries,
-)
+from .models import GentityFile, GentityGenericData, Station, Timeseries
 
 
 def login(request, *args, **kwargs):

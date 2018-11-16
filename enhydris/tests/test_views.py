@@ -1,20 +1,19 @@
-from io import StringIO
-import json
 import re
 import shutil
 import tempfile
 import textwrap
 import time
+from io import StringIO
 from unittest import skip, skipIf, skipUnless
 from urllib.parse import urlencode
 from zipfile import ZipFile
 
 import django
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
-from django.contrib.gis.geos import fromstr, Point
+from django.contrib.gis.geos import Point, fromstr
+from django.core.urlresolvers import reverse
 from django.db import connections
 from django.db.utils import DEFAULT_DB_ALIAS
 from django.http import Http404, HttpRequest, QueryDict
@@ -26,6 +25,7 @@ from django_selenium_clean import PageElement, SeleniumTestCase
 from model_mommy import mommy
 from selenium.webdriver.common.by import By
 
+from enhydris.api.tests import RandomEnhydrisTimeseriesDataDir
 from enhydris.models import (
     Organization,
     Station,
@@ -35,7 +35,6 @@ from enhydris.models import (
     UnitOfMeasurement,
     Variable,
 )
-from enhydris.api.tests import RandomEnhydrisTimeseriesDataDir
 from enhydris.views import StationListBaseView
 
 
@@ -617,7 +616,8 @@ class TsTestCase(TestCase):
         # Remove header, leave only data
         emptylinepos = result.find("\r\n\r\n")
         self.assertTrue(emptylinepos > 0)
-        result = result[emptylinepos + 4 :]
+        b = emptylinepos + 4
+        result = result[b:]
 
         self.assertEqual(
             result,

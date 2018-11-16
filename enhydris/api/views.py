@@ -3,19 +3,19 @@ from io import StringIO
 from django.db import IntegrityError
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
-
 from rest_framework import generics, status
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
-from rest_framework.response import Response
 
 import iso8601
 import pd2hts
 import pytz
 
-from . import serializers
-from .permissions import CanEditOrReadOnly, CanCreateStation
 from enhydris import models
+
+from . import serializers
+from .permissions import CanCreateStation, CanEditOrReadOnly
 
 
 class ListAPIView(generics.ListAPIView):

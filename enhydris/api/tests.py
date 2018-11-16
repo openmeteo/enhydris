@@ -1,17 +1,17 @@
-from datetime import datetime
 import json
 import shutil
 import tempfile
+from datetime import datetime
 
-from django.contrib.auth.models import User, Permission
+from django.contrib.auth.models import Permission, User
 from django.test import TestCase
-from django.test.client import MULTIPART_CONTENT, BOUNDARY, encode_multipart
+from django.test.client import BOUNDARY, MULTIPART_CONTENT, encode_multipart
 from django.test.utils import override_settings
+from rest_framework.test import APITestCase
 
 import iso8601
-from model_mommy import mommy
 import pytz
-from rest_framework.test import APITestCase
+from model_mommy import mommy
 
 from enhydris import models
 
