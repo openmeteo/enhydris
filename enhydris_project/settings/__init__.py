@@ -73,7 +73,6 @@ TEMPLATES = [
     }
 ]
 
-AUTH_PROFILE_MODULE = "enhydris.UserProfile"
 LOGIN_REDIRECT_URL = "/"
 
 ATOMIC_REQUESTS = True

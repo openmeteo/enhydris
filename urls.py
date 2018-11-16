@@ -11,19 +11,11 @@ from registration.backends.default.views import RegistrationView
 from enhydris.api import urls as enhydris_api_urls
 from enhydris import urls as enhydris_urls
 from enhydris.forms import RegistrationForm
-from enhydris.views import ProfileDetailView, ProfileEditView
 
 admin.autodiscover()
 
 urlpatterns = [
     url(r"^accounts/", include(registration_urls)),
-    url(r"^profile/$", ProfileDetailView.as_view(), name="current_user_profile"),
-    url(r"^profile/edit/$", ProfileEditView.as_view(), name="profile_edit"),
-    url(
-        r"^profile/(?P<slug>[^/]+)/$",
-        ProfileDetailView.as_view(),
-        name="profile_detail",
-    ),
     url(r"^admin/", include(admin.site.urls)),
     url(r"^ajax/", include(ajax_select_urls)),
     url(r"^api/", include(enhydris_api_urls)),

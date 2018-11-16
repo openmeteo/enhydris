@@ -1,8 +1,9 @@
 from datetime import datetime
 import json
+import shutil
+import tempfile
 
 from django.contrib.auth.models import User, Permission
-from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.test.client import MULTIPART_CONTENT, BOUNDARY, encode_multipart
 from django.test.utils import override_settings
@@ -12,9 +13,7 @@ from model_mommy import mommy
 import pytz
 from rest_framework.test import APITestCase
 
-import enhydris
 from enhydris import models
-from enhydris.tests.test_views import RandomEnhydrisTimeseriesDataDir
 
 
 def create_test_data():
@@ -93,6 +92,24 @@ def create_test_data():
     )
 
     return [pd1, water_basin1, water_division1, station1, station2]
+
+
+class RandomEnhydrisTimeseriesDataDir(override_settings):
+    """
+    Override ENHYDRIS_TIMESERIES_DATA_DIR to a temporary directory.
+
+    Specifying "@RandomEnhydrisTimeseriesDataDir()" as a decorator is the same
+    as "@override_settings(ENHYDRIS_TIMESERIES_DATA_DIR=tempfile.mkdtemp())",
+    except that in the end it removes the temporary directory.
+    """
+
+    def __init__(self):
+        self.tmpdir = tempfile.mkdtemp()
+        super().__init__(ENHYDRIS_TIMESERIES_DATA_DIR=self.tmpdir)
+
+    def disable(self):
+        super().disable()
+        shutil.rmtree(self.tmpdir)
 
 
 class ReadTestCase(APITestCase):

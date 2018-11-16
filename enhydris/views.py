@@ -400,13 +400,6 @@ def download_gentitygenericdata(request, gg_id):
     return response
 
 
-TS_ERROR = (
-    "There seems to be some problem with our internal infrastuctrure. "
-    "The admins have been notified of this and will try to resolve "
-    "the matter as soon as possible.  Please try again later."
-)
-
-
 def get_date_from_string(adate, tz):
     if not adate:
         return None

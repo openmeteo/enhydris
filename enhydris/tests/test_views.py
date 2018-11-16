@@ -35,7 +35,7 @@ from enhydris.models import (
     UnitOfMeasurement,
     Variable,
 )
-from enhydris.tests.test_models import RandomEnhydrisTimeseriesDataDir
+from enhydris.api.tests import RandomEnhydrisTimeseriesDataDir
 from enhydris.views import StationListBaseView
 
 

@@ -721,13 +721,11 @@ class Timeseries(models.Model):
                 )
             )
         roundings_are_inconsistent = (
-            (
-                self.timestamp_rounding_minutes is None
-                and self.timestamp_rounding_months is not None
-            ) or (
-                self.timestamp_rounding_minutes is not None
-                and self.timestamp_rounding_months is None
-            )
+            self.timestamp_rounding_minutes is None
+            and self.timestamp_rounding_months is not None
+        ) or (
+            self.timestamp_rounding_minutes is not None
+            and self.timestamp_rounding_months is None
         )
         if roundings_are_inconsistent:
             raise IntegrityError(
