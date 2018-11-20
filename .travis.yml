@@ -31,7 +31,7 @@ script:
  - if python -c "import sys; exit(not (sys.version >= '3.6'))"; then pip install black; black --check .; fi
  - flake8 --max-line-length=88 .
  - isort --recursive --check-only --diff .
- - coverage run --include="./*" --omit="*/tests/*","*/tests.py","*/migrations/*" manage.py test -v2
+ - coverage run --include="./*" --omit="*/tests/*","*/tests.py","*/migrations/*","./enhydris_project/*" manage.py test -v2
 
 env:
   - SELENIUM_BROWSER=PhantomJS
