@@ -10,14 +10,7 @@ class SmokeTestCase(TestCase):
     # TODO: Make this run automatic for all
 
     pages = {
-        200: [
-            "/",
-            "/accounts/login/",
-            "/accounts/logout/",
-            "/accounts/register/",
-            "/accounts/password/reset/",
-            "/accounts/password/reset/done/",
-        ],
+        200: ["/"],
         301: ["/stations/l/"],
         302: ["/admin/"],  # This redirects to a login page
         404: [
@@ -28,7 +21,6 @@ class SmokeTestCase(TestCase):
             "/timeseries/d/nonexistent/",
             "/instruments/d/",
             "/instruments/d/nonexistent/",
-            "/account/foob4r/",
         ],
     }
 

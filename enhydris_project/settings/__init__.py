@@ -27,6 +27,8 @@ INSTALLED_APPS = [
     "django.contrib.gis",
     "django.contrib.flatpages",
     "rest_framework",
+    "rest_framework.authtoken",
+    "rest_auth",
     "ajax_select",
     "captcha",
     "bootstrap3",
@@ -36,9 +38,6 @@ INSTALLED_APPS = [
     # this reason, it must be listed in INSTALLED_APPS before
     # django.contrib.admin.
     "django.contrib.admin",
-    # enhydris overrides some templates from registration; for this
-    # reason, it must be listed in INSTALLED_APPS before registration.
-    "registration",
     "rules",
 ]
 
@@ -84,12 +83,14 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
 )
 
-# Options for django-registration
-ACCOUNT_ACTIVATION_DAYS = 7
-REGISTRATION_OPEN = True
-
 # Options for django-ajax-selects
 AJAX_LOOKUP_CHANNELS = {"maintainers": dict(model="auth.User", search_field="username")}
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+    )
+}
 
 # Default Enhydris settings
 ENHYDRIS_FILTER_DEFAULT_COUNTRY = None

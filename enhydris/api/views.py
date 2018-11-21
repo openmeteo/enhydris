@@ -76,6 +76,8 @@ class TimeseriesList(generics.ListCreateAPIView):
         except ValueError:
             raise Http404
         station = get_object_or_404(models.Station, id=gentity_id)
+        if not request.user.is_authenticated():
+            return Response("Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
         if not request.user.has_perm("enhydris.change_station", station):
             return Response("Forbidden", status=status.HTTP_403_FORBIDDEN)
 

@@ -98,7 +98,7 @@ class TsdataPostAuthorizationTestCase(APITestCase):
 
     @patch("enhydris.models.Timeseries.append_data")
     def test_unauthenticated_user_is_denied_permission_to_post_tsdata(self, m):
-        self.assertEqual(self._post_tsdata().status_code, 403)
+        self.assertEqual(self._post_tsdata().status_code, 401)
 
     @patch("enhydris.models.Timeseries.append_data")
     def test_unauthorized_user_is_denied_permission_to_post_tsdata(self, m):
@@ -157,7 +157,7 @@ class TimeseriesPostTestCase(APITestCase):
         )
 
     def test_unauthenticated_user_is_denied_permission_to_create_timeseries(self):
-        self.assertEqual(self._create_timeseries().status_code, 403)
+        self.assertEqual(self._create_timeseries().status_code, 401)
 
     def test_unauthorized_user_is_denied_permission_to_create_timeseries(self):
         self.client.force_authenticate(user=self.user2)
@@ -177,7 +177,7 @@ class TimeseriesDeleteTestCase(APITestCase):
 
     def test_unauthenticated_user_is_denied_permission_to_delete_timeseries(self):
         response = self.client.delete("/api/Timeseries/{}/".format(self.timeseries.id))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 401)
 
     def test_unauthorized_user_is_denied_permission_to_delete_timeseries(self):
         self.client.force_authenticate(user=self.user2)
@@ -213,7 +213,7 @@ class StationCreateTestCase(APITestCase):
 
     def test_unauthenticated_user_is_denied_permission_to_create_station(self):
         response = self._create_station()
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 401)
 
     @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=False)
     def test_unauthorized_user_is_denied_permission_to_create_station(self):
@@ -270,7 +270,7 @@ class StationUpdateAndDeleteTestCase(APITestCase):
 
     def test_unauthenticated_user_is_denied_permission_to_put_station(self):
         response = self._put_station()
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 401)
 
     def test_unauthorized_user_is_denied_permission_to_put_station(self):
         self.client.force_authenticate(user=self.user2)
@@ -284,7 +284,7 @@ class StationUpdateAndDeleteTestCase(APITestCase):
 
     def test_unauthenticated_user_is_denied_permission_to_patch_station(self):
         response = self._patch_station()
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 401)
 
     def test_unauthorized_user_is_denied_permission_to_patch_station(self):
         self.client.force_authenticate(user=self.user2)
@@ -298,7 +298,7 @@ class StationUpdateAndDeleteTestCase(APITestCase):
 
     def test_unauthenticated_user_is_denied_permission_to_delete_station(self):
         response = self._delete_station()
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 401)
 
     def test_unauthorized_user_is_denied_permission_to_delete_station(self):
         self.client.force_authenticate(user=self.user2)

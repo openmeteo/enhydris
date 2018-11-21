@@ -54,44 +54,6 @@
               </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-              {% if user.is_authenticated %}
-                <li>
-                  <p class="navbar-text">
-                    &nbsp;&nbsp;&nbsp;{% trans "Logged in as" %} <span class="text-success">{{ user }}</span></p>
-                </li>
-                {% if perms.enhydris.add_station %}
-                  <li>
-                      <a href="{% url "station_add" %}">
-                        <i class="glyphicon glyphicon-plus"></i> {% trans "New&nbsp;station" %}
-                      </a>
-                  </li>
-                {% endif %}
-                {% with user.username as user_username %}
-                  <li>
-                      <a href='{% url "current_user_profile" %}'>
-                        <i class="glyphicon glyphicon-cog"></i> {% trans "Settings" %}
-                      </a>
-                  </li>
-                  <li>
-                      <a href='{% url "auth_logout" %}?next={{ request.path }}'>
-                        <i class="glyphicon glyphicon-log-out"></i> {% trans "Logout" %}
-                      </a>
-                  </li>
-                {% endwith %}
-              {% else %}
-                <li>
-                    <a href='{% url "auth_login" %}?next={{request.path}}'>
-                      <i class="glyphicon glyphicon-off"></i> {% trans "Login" %}
-                    </a>
-                </li>
-                {% if REGISTRATION_OPEN %}
-                  <li>
-                      <a href='{% url "registration_register" %}'>
-                        <i class="glyphicon glyphicon-user"></i> {% trans "Register" %}
-                      </a>
-                  </li>
-                {% endif %}
-              {% endif %}
             </ul>
           </div> <!-- navbar-collapse -->
       </div> <!--container - fluid -->

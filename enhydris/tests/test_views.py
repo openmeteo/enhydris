@@ -1,4 +1,3 @@
-import re
 import shutil
 import tempfile
 import textwrap
@@ -8,7 +7,6 @@ from unittest import skip, skipIf, skipUnless
 from urllib.parse import urlencode
 from zipfile import ZipFile
 
-import django
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
@@ -663,48 +661,6 @@ class RegisterTestCase(TestCase):
     def test_register_link_present(self):
         response = self.client.get("/")
         self.assertContains(response, "Register")
-
-
-@override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
-class ResetPasswordTestCase(TestCase):
-    def test_reset_password(self):
-        # Create a user
-        self.auser = User.objects.create_user(
-            username="auser", email="irrelevant@example.com", password="topsecret1"
-        )
-        self.auser.save()
-
-        # Ooops... I thought my password was topsecret2, but apparently I
-        # forgot it...
-        r = self.client.login(username="auser", password="topsecret2")
-        self.assertFalse(r)
-
-        # No problem, let me submit the password reset form
-        response = self.client.get("/accounts/password/reset/")
-        self.assertEqual(response.status_code, 200)
-        response = self.client.post(
-            "/accounts/password/reset/", {"email": "irrelevant@example.com"}
-        )
-        self.assertEqual(response.status_code, 302)
-
-        # Did I receive an email?
-        self.assertEqual(len(django.core.mail.outbox), 1)
-
-        # Get the link from the email
-        m = re.search(r"http://[^/]+(\S+)", django.core.mail.outbox[0].body)
-        reset_link = m.group(1)
-
-        # Visit the link and submit the form
-        response = self.client.get(reset_link)
-        self.assertEqual(response.status_code, 200)
-        response = self.client.post(
-            reset_link, {"new_password1": "topsecret2", "new_password2": "topsecret2"}
-        )
-        self.assertEqual(response.status_code, 302)
-
-        # Cool, now let me log in
-        r = self.client.login(username="auser", password="topsecret2")
-        self.assertTrue(r)
 
 
 @skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")

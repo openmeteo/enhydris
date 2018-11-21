@@ -4,14 +4,11 @@ from tempfile import mkstemp
 from wsgiref.util import FileWrapper
 
 from django.conf import settings
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import login as auth_login
 from django.contrib.gis.db.models import Extent
 from django.contrib.gis.geos import Polygon
-from django.core.urlresolvers import reverse
 from django.db.models import Count, Q
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 
@@ -21,15 +18,6 @@ import pd2hts
 
 from .csv import prepare_csv
 from .models import GentityFile, GentityGenericData, Station, Timeseries
-
-
-def login(request, *args, **kwargs):
-    if request.user.is_authenticated():
-        redir_url = request.GET.get("next", reverse("station_list"))
-        messages.info(request, "You are already logged on; " "logout to log in again.")
-        return HttpResponseRedirect(redir_url)
-    else:
-        return auth_login(request, *args, **kwargs)
 
 
 class StationListBaseView(ListView):

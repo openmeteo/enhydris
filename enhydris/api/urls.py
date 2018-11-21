@@ -1,10 +1,11 @@
-from django.conf.urls import url
+from django.conf.urls import include, url
 from rest_framework.routers import DefaultRouter
 from rest_framework.urlpatterns import format_suffix_patterns
 
 from . import views
 
 urlpatterns = [
+    url(r"^auth/", include("rest_auth.urls")),
     url(r"^tsdata/(?P<pk>\d+)/$", views.Tsdata.as_view(), name="tsdata"),
     url(r"^Station/$", views.StationList.as_view(), name="Station-list"),
     url(
