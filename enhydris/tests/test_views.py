@@ -12,13 +12,10 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.contrib.gis.geos import Point, fromstr
 from django.core.urlresolvers import reverse
-from django.db import connections
-from django.db.utils import DEFAULT_DB_ALIAS
 from django.http import Http404, HttpRequest, QueryDict
 from django.test import TestCase
 from django.test.utils import override_settings
 
-from bs4 import BeautifulSoup
 from django_selenium_clean import PageElement, SeleniumTestCase
 from model_mommy import mommy
 from selenium.webdriver.common.by import By
@@ -33,32 +30,6 @@ from enhydris.models import (
     Variable,
 )
 from enhydris.views import StationListBaseView
-
-
-def check_if_connected_to_old_sqlite():
-    """Return True if connected to sqlite<3.8.3
-
-    Used to skip a test, notably on Travis, which currently runs an old sqlite
-    version.
-
-    The correct way would have been to remove the functionality, not just skip
-    the test, because the functionality is still there and will cause an
-    internal server error, but this would be too much work given that we use
-    SQLite only for development.
-    """
-    try:
-        from django.contrib.gis.db.backends.spatialite import base
-        import sqlite3
-    except ImportError:
-        return False
-    if not isinstance(connections[DEFAULT_DB_ALIAS], base.DatabaseWrapper):
-        return False
-    major, minor, micro = [int(x) for x in sqlite3.sqlite_version.split(".")[:3]]
-    return (
-        (major < 3)
-        or (major == 3 and minor < 8)
-        or (major == 3 and minor == 8 and micro < 3)
-    )
 
 
 class StationsTestCase(TestCase):
@@ -108,12 +79,6 @@ class StationsTestCase(TestCase):
             srid=None,
         )
 
-    def test_station_list(self):
-        response = self.client.get("/")
-        self.assertContains(
-            response, '<a href="?sort=-name&amp;sort=name">Name&nbsp;↓</a>', html=True
-        )
-
     def test_station_list_csv(self):
         response = self.client.get("/?format=csv")
         with tempfile.TemporaryFile() as t:
@@ -145,31 +110,6 @@ class StationsTestCase(TestCase):
             with ZipFile(t) as f:
                 stations_csv = f.open("stations.csv").read().decode()
                 self.assertTrue("NoSRID Point, NoSRID Station" in stations_csv)
-
-    @override_settings(ENHYDRIS_STATIONS_PER_PAGE=3)
-    def test_two_pages(self):
-        response = self.client.get("/")
-        self.assertContains(response, "<a href='?page=2'>2</a>", html=True)
-        self.assertNotContains(response, "<a href='?page=3'>3</a>", html=True)
-
-    @override_settings(ENHYDRIS_STATIONS_PER_PAGE=2)
-    def test_next_page_url(self):
-        response = self.client.get("/")
-        soup = BeautifulSoup(response.content, "html.parser")
-        next_page_url = soup.find("a", id="next-page").get("href")
-        self.assertEqual(next_page_url, "?page=2")
-
-    @override_settings(ENHYDRIS_STATIONS_PER_PAGE=2)
-    def test_previous_page_url(self):
-        response = self.client.get("/?page=2")
-        soup = BeautifulSoup(response.content, "html.parser")
-        next_page_url = soup.find("a", id="previous-page").get("href")
-        self.assertEqual(next_page_url, "?page=1")
-
-    @override_settings(ENHYDRIS_STATIONS_PER_PAGE=100)
-    def test_one_page(self):
-        response = self.client.get("/")
-        self.assertNotContains(response, "<a href='?page=2'>2</a>", html=True)
 
 
 class SortTestCase(TestCase):
@@ -311,140 +251,6 @@ class SearchTestCaseBase(TestCase):
         view.request.method = "GET"
         view.request.GET = QueryDict(query_string)
         return view.get_queryset()
-
-
-class SearchTestCase(SearchTestCaseBase):
-    def test_search_in_timeseries_remarks(self):
-        # Search for something that exists
-        queryset = self.get_queryset(
-            urlencode({"q": "extremely important time series"})
-        )
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, "Tharbad")
-
-        # Search for something that doesn't exist
-        queryset = self.get_queryset(urlencode({"q": "this should not exist anywhere"}))
-        self.assertEqual(queryset.count(), 0)
-
-    def test_search_by_owner(self):
-        queryset = self.get_queryset(urlencode({"q": "owner:RiCh"}))
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(
-            queryset[0].owner.organization.name, "We're rich and we fancy it SA"
-        )
-        queryset = self.get_queryset(urlencode({"owner": "poor"}))
-        self.assertEqual(queryset.count(), 2)
-        self.assertEqual(
-            queryset[0].owner.organization.name, "We're poor and dislike it Ltd"
-        )
-        queryset = self.get_queryset(urlencode({"owner": "nonexistent"}))
-        self.assertEqual(queryset.count(), 0)
-
-    def test_search_by_type(self):
-        # The following will find both "Important" and "Unimportant" stations,
-        # because the string "important" is included in "Unimportant".
-        queryset = self.get_queryset(urlencode({"q": "type:Important"}))
-        queryset = queryset.distinct()
-        self.assertEqual(queryset.count(), 3)
-
-        queryset = self.get_queryset(urlencode({"type": "Unimportant"}))
-        queryset = queryset.order_by("name")
-        self.assertEqual(queryset.count(), 2)
-        self.assertEqual(queryset[0].name, "Agios Athanasios")
-        self.assertEqual(queryset[1].name, "Tharbad")
-
-        queryset = self.get_queryset(urlencode({"type": "Nonexistent"}))
-        self.assertEqual(queryset.count(), 0)
-
-    def test_search_by_water_division(self):
-        queryset = self.get_queryset(urlencode({"q": "water_division:north"}))
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, "Komboti")
-
-        queryset = self.get_queryset(urlencode({"q": "water_division:south"}))
-        queryset = queryset.order_by("name")
-        self.assertEqual(queryset.count(), 2)
-        self.assertEqual(queryset[0].name, "Agios Athanasios")
-        self.assertEqual(queryset[1].name, "Tharbad")
-
-        queryset = self.get_queryset(urlencode({"q": "water_division:east"}))
-        self.assertEqual(queryset.count(), 0)
-
-    def test_search_by_water_basin(self):
-        queryset = self.get_queryset(urlencode({"q": "water_basin:arachthos"}))
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, "Komboti")
-
-        queryset = self.get_queryset(urlencode({"water_basin": "greyflood"}))
-        queryset = queryset.order_by("name")
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, "Tharbad")
-
-        queryset = self.get_queryset(urlencode({"water_basin": "nonexistent"}))
-        self.assertEqual(queryset.count(), 0)
-
-    def test_search_by_variable(self):
-        queryset = self.get_queryset(urlencode({"q": "variable:rain"}))
-        queryset = queryset.order_by("name")
-        self.assertEqual(queryset.count(), 2)
-        self.assertEqual(queryset[0].name, "Agios Athanasios")
-        self.assertEqual(queryset[1].name, "Komboti")
-
-        queryset = self.get_queryset(urlencode({"q": "variable:temperature"}))
-        queryset = queryset.order_by("name")
-        self.assertEqual(queryset.count(), 3)
-        self.assertEqual(queryset[0].name, "Agios Athanasios")
-        self.assertEqual(queryset[1].name, "Komboti")
-        self.assertEqual(queryset[2].name, "Tharbad")
-
-        queryset = self.get_queryset(urlencode({"q": "variable:nonexistent"}))
-        self.assertEqual(queryset.count(), 0)
-
-    def test_search_by_gentityId(self):
-        station_id = Station.objects.get(name="Komboti").id
-        queryset = self.get_queryset(urlencode({"gentityId": str(station_id)}))
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, "Komboti")
-
-        queryset = self.get_queryset(urlencode({"gentityId": "98765"}))
-        self.assertEqual(queryset.count(), 0)
-
-    def test_search_by_ts_only(self):
-        queryset = self.get_queryset("")
-        self.assertEqual(queryset.count(), 4)
-        queryset = self.get_queryset(urlencode({"q": "ts_only:"}))
-        self.assertEqual(queryset.count(), 3)
-
-    @skipIf(check_if_connected_to_old_sqlite(), "Use sqlite>=3.8.3")
-    def test_search_by_political_division(self):
-        queryset = self.get_queryset(urlencode({"political_division": "Cardolan"}))
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, "Tharbad")
-
-        queryset = self.get_queryset(urlencode({"political_division": "Arthedain"}))
-        self.assertEqual(queryset.count(), 0)
-
-        queryset = self.get_queryset(urlencode({"political_division": "Karditsa"}))
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, "Agios Athanasios")
-
-        queryset = self.get_queryset(urlencode({"political_division": "Arta"}))
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, "Komboti")
-
-        queryset = self.get_queryset(urlencode({"political_division": "Epirus"}))
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, "Komboti")
-
-        queryset = self.get_queryset(urlencode({"political_division": "Greece"}))
-        queryset = queryset.order_by("name")
-        self.assertEqual(queryset.count(), 2)
-        self.assertEqual(queryset[0].name, "Agios Athanasios")
-        self.assertEqual(queryset[1].name, "Komboti")
-
-        queryset = self.get_queryset(urlencode({"political_division": "Middle Earth"}))
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, "Tharbad")
 
 
 class RandomEnhydrisTimeseriesDataDir(override_settings):

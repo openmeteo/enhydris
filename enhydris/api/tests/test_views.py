@@ -1,8 +1,10 @@
 from datetime import datetime
+from unittest import skipIf
 from unittest.mock import patch
 
 from django.contrib.auth.models import Permission, User
-from django.test import TestCase
+from django.db import connections
+from django.db.utils import DEFAULT_DB_ALIAS
 from django.test.utils import override_settings
 from rest_framework.test import APITestCase
 
@@ -190,6 +192,21 @@ class TimeseriesDeleteTestCase(APITestCase):
         self.assertEqual(response.status_code, 204)
 
 
+class StationListTestCase(APITestCase):
+    def setUp(self):
+        self.station = mommy.make(models.Station, name="Hobbiton")
+        self.response = self.client.get("/api/Station/")
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 200)
+
+    def test_number_of_returned_items(self):
+        self.assertEqual(len(self.response.json()["results"]), 1)
+
+    def test_name(self):
+        self.assertEqual(self.response.json()["results"][0]["name"], "Hobbiton")
+
+
 class StationCreateTestCase(APITestCase):
     def setUp(self):
         self.user = mommy.make(User, is_active=True, is_superuser=False)
@@ -311,7 +328,219 @@ class StationUpdateAndDeleteTestCase(APITestCase):
         self.assertEqual(response.status_code, 204, response.content)
 
 
-class WaterDivisionTestCase(TestCase):
+class StationSearchByOwnerTestCase(APITestCase):
+    def setUp(self):
+        owner1 = mommy.make(models.Organization, name="The Assassination Bureau, Ltd")
+        owner2 = mommy.make(models.Organization, name="United Federation of Planets")
+        mommy.make(models.Station, owner=owner1, name="Hobbiton")
+        mommy.make(models.Station, owner=owner2, name="Rivendell")
+        self.response = self.client.get("/api/Station/?", {"q": "owner:assassination"})
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 200)
+
+    def test_number_of_results(self):
+        self.assertEqual(len(self.response.json()["results"]), 1)
+
+    def test_results(self):
+        self.assertEqual(self.response.json()["results"][0]["name"], "Hobbiton")
+
+
+class StationSearchByTypeTestCase(APITestCase):
+    def setUp(self):
+        mommy.make(models.Station, stype__descr=["Hydrometric"], name="Hobbiton")
+        mommy.make(models.Station, stype__descr=["Elfometric"], name="Rivendell")
+        self.response = self.client.get("/api/Station/?", {"q": "type:elf"})
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 200)
+
+    def test_number_of_results(self):
+        self.assertEqual(len(self.response.json()["results"]), 1)
+
+    def test_results(self):
+        self.assertEqual(self.response.json()["results"][0]["name"], "Rivendell")
+
+
+class StationSearchByWaterDivisionTestCase(APITestCase):
+    def setUp(self):
+        mommy.make(models.Station, water_division__name="Mordor", name="Gorgoroth")
+        mommy.make(models.Station, water_division__name="Gondor", name="Pelargir")
+        self.response = self.client.get("/api/Station/?", {"q": "water_division:ordor"})
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 200)
+
+    def test_number_of_results(self):
+        self.assertEqual(len(self.response.json()["results"]), 1)
+
+    def test_results(self):
+        self.assertEqual(self.response.json()["results"][0]["name"], "Gorgoroth")
+
+
+class StationSearchByWaterBasinTestCase(APITestCase):
+    def setUp(self):
+        mommy.make(models.Station, water_basin__name="Baranduin", name="Hobbiton")
+        mommy.make(models.Station, water_basin__name="Lhûn", name="Mithlond")
+        self.response = self.client.get("/api/Station/?", {"q": "water_basin:andu"})
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 200)
+
+    def test_number_of_results(self):
+        self.assertEqual(len(self.response.json()["results"]), 1)
+
+    def test_results(self):
+        self.assertEqual(self.response.json()["results"][0]["name"], "Hobbiton")
+
+
+class StationSearchByVariableTestCase(APITestCase):
+    def setUp(self):
+        station1 = mommy.make(models.Station, name="Hobbiton")
+        station2 = mommy.make(models.Station, name="Mithlond")
+        mommy.make(models.Timeseries, gentity=station1, variable__descr="Rain")
+        mommy.make(models.Timeseries, gentity=station2, variable__descr="Temperature")
+        self.response = self.client.get("/api/Station/?", {"q": "variable:rain"})
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 200)
+
+    def test_number_of_results(self):
+        self.assertEqual(len(self.response.json()["results"]), 1)
+
+    def test_results(self):
+        self.assertEqual(self.response.json()["results"][0]["name"], "Hobbiton")
+
+
+class StationSearchByTsOnlyTestCase(APITestCase):
+    def setUp(self):
+        station1 = mommy.make(models.Station, name="Hobbiton")
+        mommy.make(models.Timeseries, gentity=station1)
+        mommy.make(models.Station, name="Mithlond")
+        self.response = self.client.get("/api/Station/?", {"q": "ts_only:"})
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 200)
+
+    def test_number_of_results(self):
+        self.assertEqual(len(self.response.json()["results"]), 1)
+
+    def test_results(self):
+        self.assertEqual(self.response.json()["results"][0]["name"], "Hobbiton")
+
+
+def check_if_connected_to_old_sqlite():
+    """Return True if connected to sqlite<3.8.3
+
+    Used to skip a test, notably on Travis, which currently runs an old sqlite
+    version.
+
+    The correct way would have been to remove the functionality, not just skip
+    the test, because the functionality is still there and will cause an
+    internal server error, but this would be too much work given that we use
+    SQLite only for development.
+    """
+    try:
+        from django.contrib.gis.db.backends.spatialite import base
+        import sqlite3
+    except ImportError:
+        return False
+    if not isinstance(connections[DEFAULT_DB_ALIAS], base.DatabaseWrapper):
+        return False
+    major, minor, micro = [int(x) for x in sqlite3.sqlite_version.split(".")[:3]]
+    return (
+        (major < 3)
+        or (major == 3 and minor < 8)
+        or (major == 3 and minor == 8 and micro < 3)
+    )
+
+
+class PoliticalDivisionTestCaseBase(APITestCase):
+    def setUp(self):
+        mommy.make(
+            models.Station,
+            name="Komboti",
+            political_division__name="Arta",
+            political_division__parent__name="Epirus",
+            political_division__parent__parent__name="Greece",
+        )
+        mommy.make(
+            models.Station,
+            name="Tharbad",
+            political_division__name="Cardolan",
+            political_division__parent__name="Eriador",
+            political_division__parent__parent__name="Middle Earth",
+        )
+
+
+@skipIf(check_if_connected_to_old_sqlite(), "Use sqlite>=3.8.3")
+class StationSearchBy2ndLevelPoliticalDivisionTestCase(PoliticalDivisionTestCaseBase):
+    def setUp(self):
+        super().setUp()
+        self.response = self.client.get(
+            "/api/Station/?",
+            {"q": "political_division:Epirus"},
+        )
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 200)
+
+    def test_number_of_results(self):
+        self.assertEqual(len(self.response.json()["results"]), 1)
+
+    def test_results(self):
+        self.assertEqual(self.response.json()["results"][0]["name"], "Komboti")
+
+
+@skipIf(check_if_connected_to_old_sqlite(), "Use sqlite>=3.8.3")
+class StationSearchBy3rdLevelPoliticalDivisionTestCase(PoliticalDivisionTestCaseBase):
+    def setUp(self):
+        super().setUp()
+        self.response = self.client.get(
+            "/api/Station/?",
+            {"q": "political_division:earth"},
+        )
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 200)
+
+    def test_number_of_results(self):
+        self.assertEqual(len(self.response.json()["results"]), 1)
+
+    def test_results(self):
+        self.assertEqual(self.response.json()["results"][0]["name"], "Tharbad")
+
+
+class StationSearchInTimeseriesRemarksTestCase(APITestCase):
+    def setUp(self):
+        station1 = mommy.make(models.Station, name="Hobbiton")
+        mommy.make(
+            models.Timeseries,
+            gentity=station1,
+            remarks="This is an extremely important time series",
+        )
+        station2 = mommy.make(models.Station, name="Mithlond")
+        mommy.make(
+            models.Timeseries,
+            gentity=station2,
+            remarks="This time series is really important",
+        )
+        self.response = self.client.get(
+            "/api/Station/?",
+            {"q": "really important time series"}
+        )
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 200)
+
+    def test_number_of_results(self):
+        self.assertEqual(len(self.response.json()["results"]), 1)
+
+    def test_results(self):
+        self.assertEqual(self.response.json()["results"][0]["name"], "Mithlond")
+
+
+class WaterDivisionTestCase(APITestCase):
     def setUp(self):
         self.water_division = mommy.make(models.WaterDivision)
 
@@ -320,7 +549,7 @@ class WaterDivisionTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class GentityAltCodeTypeTestCase(TestCase):
+class GentityAltCodeTypeTestCase(APITestCase):
     def setUp(self):
         self.gentity_alt_code_type = mommy.make(models.GentityAltCodeType)
 
@@ -331,7 +560,7 @@ class GentityAltCodeTypeTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class OrganizationTestCase(TestCase):
+class OrganizationTestCase(APITestCase):
     def setUp(self):
         self.organization = mommy.make(models.Organization)
 
@@ -340,7 +569,7 @@ class OrganizationTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class PersonTestCase(TestCase):
+class PersonTestCase(APITestCase):
     def setUp(self):
         self.person = mommy.make(models.Person)
 
@@ -349,7 +578,7 @@ class PersonTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class StationTypeTestCase(TestCase):
+class StationTypeTestCase(APITestCase):
     def setUp(self):
         self.station_type = mommy.make(models.StationType)
 
@@ -358,7 +587,7 @@ class StationTypeTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class TimeZoneTestCase(TestCase):
+class TimeZoneTestCase(APITestCase):
     def setUp(self):
         self.time_zone = mommy.make(models.TimeZone)
 
@@ -367,7 +596,7 @@ class TimeZoneTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class PoliticalDivisionTestCase(TestCase):
+class PoliticalDivisionTestCase(APITestCase):
     def setUp(self):
         self.political_division = mommy.make(models.PoliticalDivision)
 
@@ -378,7 +607,7 @@ class PoliticalDivisionTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class IntervalTypeTestCase(TestCase):
+class IntervalTypeTestCase(APITestCase):
     def setUp(self):
         self.interval_type = mommy.make(models.IntervalType)
 
@@ -387,7 +616,7 @@ class IntervalTypeTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class FileTypeTestCase(TestCase):
+class FileTypeTestCase(APITestCase):
     def setUp(self):
         self.file_type = mommy.make(models.FileType)
 
@@ -396,7 +625,7 @@ class FileTypeTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class EventTypeTestCase(TestCase):
+class EventTypeTestCase(APITestCase):
     def setUp(self):
         self.event_type = mommy.make(models.EventType)
 
@@ -405,7 +634,7 @@ class EventTypeTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class InstrumentTypeTestCase(TestCase):
+class InstrumentTypeTestCase(APITestCase):
     def setUp(self):
         self.instrument_type = mommy.make(models.InstrumentType)
 
@@ -414,7 +643,7 @@ class InstrumentTypeTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class WaterBasinTestCase(TestCase):
+class WaterBasinTestCase(APITestCase):
     def setUp(self):
         self.water_basin = mommy.make(models.WaterBasin)
 
@@ -423,7 +652,7 @@ class WaterBasinTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class TimeStepTestCase(TestCase):
+class TimeStepTestCase(APITestCase):
     def setUp(self):
         self.time_step = mommy.make(models.TimeStep, length_minutes=10, length_months=0)
 
@@ -432,7 +661,7 @@ class TimeStepTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class VariableTestCase(TestCase):
+class VariableTestCase(APITestCase):
     def setUp(self):
         self.variable = mommy.make(models.Variable)
 
@@ -441,7 +670,7 @@ class VariableTestCase(TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class UnitOfMeasurementTestCase(TestCase):
+class UnitOfMeasurementTestCase(APITestCase):
     def setUp(self):
         self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
 

@@ -1,9 +1,13 @@
 from io import StringIO
 
+from django.conf import settings
+from django.contrib.gis.geos import Polygon
 from django.db import IntegrityError
+from django.db.models import Count, Q
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
@@ -90,10 +94,181 @@ class TimeseriesDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (CanEditOrReadOnly,)
 
 
+class StationListPagination(PageNumberPagination):
+    page_size = 100
+    page_size_query_param = "page_size"
+    max_page_size = 1000
+
+
 class StationList(generics.ListCreateAPIView):
     queryset = models.Station.objects.all()
     serializer_class = serializers.StationSerializer
     permission_classes = (CanCreateStation,)
+    pagination_class = StationListPagination
+
+    def get_queryset(self, distinct=True, **kwargs):
+        result = super().get_queryset(**kwargs)
+
+        # Apply SITE_STATION_FILTER
+        if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
+            result = result.filter(**settings.ENHYDRIS_SITE_STATION_FILTER)
+
+        # Perform the search specified by the q parameter
+        query_string = self.request.GET.get("q", "")
+        for search_term in query_string.split():
+            result = self._refine_queryset(result, search_term)
+
+        # By default, only return distinct rows. We provide a way to
+        # override this by calling with distinct=False, because distinct()
+        # is incompatible with some things (namely extent()).
+        if distinct:
+            result = result.distinct()
+
+        return result
+
+    def _refine_queryset(self, queryset, search_term):
+        """Return the queryset refined according to search_term.
+
+        search_term can either be a word or a "name:value" string, such as
+        political_division:greece.
+        """
+        if ":" not in search_term:
+            return self._general_filter(queryset, search_term)
+        else:
+            name, dummy, value = search_term.partition(":")
+            return self._specific_filter(queryset, name, value)
+
+    def _general_filter(self, queryset, search_term):
+        """Return the queryset refined according to search_term.
+
+        search_term is a simple word searched in various places.
+        """
+        return queryset.filter(
+            Q(name__icontains=search_term)
+            | Q(name_alt__icontains=search_term)
+            | Q(short_name__icontains=search_term)
+            | Q(short_name_alt__icontains=search_term)
+            | Q(remarks__icontains=search_term)
+            | Q(remarks_alt__icontains=search_term)
+            | Q(water_basin__name__icontains=search_term)
+            | Q(water_basin__name_alt__icontains=search_term)
+            | Q(water_division__name__icontains=search_term)
+            | Q(water_division__name_alt__icontains=search_term)
+            | Q(political_division__name__icontains=search_term)
+            | Q(political_division__name_alt__icontains=search_term)
+            | Q(owner__organization__name__icontains=search_term)
+            | Q(owner__person__first_name__icontains=search_term)
+            | Q(owner__person__last_name__icontains=search_term)
+            | Q(timeseries__remarks__icontains=search_term)
+            | Q(timeseries__remarks_alt__icontains=search_term)
+        )
+
+    def _specific_filter(self, queryset, name, value):
+        """Return the queryset refined according to the specified name and value.
+
+        E.g. name can be "political_division" and value can be "greece". Value can also
+        be an integer, in which case it refers to the id.
+        """
+        method_name = "_filter_by_" + name
+        if not hasattr(self, method_name):
+            return queryset
+        else:
+            method = getattr(self, method_name)
+            return method(queryset, value)
+
+    def _filter_by_owner(self, queryset, value):
+        return queryset.filter(
+            Q(owner__organization__name__icontains=value)
+            | Q(owner__organization__name_alt__icontains=value)
+            | Q(owner__person__first_name__icontains=value)
+            | Q(owner__person__first_name_alt__icontains=value)
+            | Q(owner__person__last_name_alt__icontains=value)
+            | Q(owner__person__last_name__icontains=value)
+        )
+
+    def _filter_by_type(self, queryset, value):
+        return queryset.filter(
+            Q(stype__descr__icontains=value) | Q(stype__descr_alt__icontains=value)
+        )
+
+    def _filter_by_water_division(self, queryset, value):
+        return queryset.filter(
+            Q(water_division__name__icontains=value)
+            | Q(water_division__name_alt__icontains=value)
+        )
+
+    def _filter_by_water_basin(self, queryset, value):
+        return queryset.filter(
+            Q(water_basin__name__icontains=value)
+            | Q(water_basin__name_alt__icontains=value)
+        )
+
+    def _filter_by_variable(self, queryset, value):
+        return queryset.filter(
+            Q(timeseries__variable__descr__icontains=value)
+            | Q(timeseries__variable__descr_alt__icontains=value)
+        )
+
+    def _filter_by_bbox(self, queryset, value):
+        try:
+            minx, miny, maxx, maxy = [float(i) for i in value.split(",")]
+        except ValueError:
+            raise Http404
+        geom = Polygon(
+            ((minx, miny), (minx, maxy), (maxx, maxy), (maxx, miny), (minx, miny)),
+            srid=4326,
+        )
+        return queryset.filter(point__contained=geom)
+
+    def _filter_by_ts_only(self, queryset, value):
+        return queryset.annotate(tsnum=Count("timeseries")).exclude(tsnum=0)
+
+    def _filter_by_ts_has_years(self, queryset, value):
+        try:
+            years = [int(y) for y in value.split(",")]
+        except ValueError:
+            raise Http404
+        return queryset.extra(
+            where=[
+                " AND ".join(
+                    [
+                        "enhydris_station.gpoint_ptr_id IN "
+                        "(SELECT t.gentity_id FROM enhydris_timeseries t "
+                        "WHERE " + str(year) + " BETWEEN "
+                        "EXTRACT(YEAR FROM t.start_date_utc) AND "
+                        "EXTRACT(YEAR FROM t.end_date_utc))"
+                        for year in years
+                    ]
+                )
+            ]
+        )
+
+    def _filter_by_political_division(self, queryset, value):
+        return queryset.extra(
+            where=[
+                """
+                enhydris_station.gpoint_ptr_id IN (
+                SELECT id FROM enhydris_gentity WHERE political_division_id IN (
+                    WITH RECURSIVE mytable(garea_ptr_id) AS (
+                        SELECT garea_ptr_id FROM enhydris_politicaldivision
+                        WHERE garea_ptr_id IN (
+                            SELECT id FROM enhydris_gentity
+                            WHERE LOWER(name) LIKE LOWER('%%{}%%')
+                            OR LOWER(name_alt) LIKE LOWER('%%{}%%'))
+                    UNION ALL
+                        SELECT pd.garea_ptr_id
+                        FROM enhydris_politicaldivision pd, mytable
+                        WHERE pd.parent_id=mytable.garea_ptr_id
+                    )
+                    SELECT g.id FROM enhydris_gentity g, mytable
+                    WHERE g.id=mytable.garea_ptr_id))
+                """.format(
+                    value, value
+                )
+            ]
+        )
+
+    _filter_by_country = _filter_by_political_division  # synonym
 
 
 class StationDetail(generics.RetrieveUpdateDestroyAPIView):
