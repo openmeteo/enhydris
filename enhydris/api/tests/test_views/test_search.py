@@ -1,3 +1,4 @@
+from django.contrib.gis.geos import Point
 from rest_framework.test import APITestCase
 
 from model_mommy import mommy
@@ -132,3 +133,23 @@ class StationSearchInTimeseriesRemarksTestCase(APITestCase):
 
     def test_results(self):
         self.assertEqual(self.response.json()["results"][0]["name"], "Mithlond")
+
+
+class StationSearchByBboxTestCase(APITestCase):
+    def setUp(self):
+        mommy.make(
+            models.Station, point=Point(x=21.0607, y=39.0952, srid=4326), name="Komboti"
+        )
+        mommy.make(
+            models.Station, point=Point(x=20.7085, y=38.8336, srid=4326), name="Lefkada"
+        )
+        self.response = self.client.get("/api/Station/", {"q": "bbox:21,39,22,40"})
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 200)
+
+    def test_number_of_results(self):
+        self.assertEqual(len(self.response.json()["results"]), 1)
+
+    def test_results(self):
+        self.assertEqual(self.response.json()["results"][0]["name"], "Komboti")
