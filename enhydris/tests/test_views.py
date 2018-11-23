@@ -3,8 +3,7 @@ import tempfile
 import textwrap
 import time
 from io import StringIO
-from unittest import skip, skipIf, skipUnless
-from urllib.parse import urlencode
+from unittest import skip, skipUnless
 from zipfile import ZipFile
 
 from django.conf import settings
@@ -12,7 +11,6 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.contrib.gis.geos import Point, fromstr
 from django.core.urlresolvers import reverse
-from django.http import Http404, HttpRequest, QueryDict
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -29,7 +27,6 @@ from enhydris.models import (
     UnitOfMeasurement,
     Variable,
 )
-from enhydris.views import StationListBaseView
 
 
 class StationsTestCase(TestCase):
@@ -155,104 +152,6 @@ class SortTestCase(TestCase):
         self.assertLess(i("Komboti"), i("Tharbad"))
 
 
-class SearchTestCaseBase(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        # Station owners
-        rich = mommy.make(Organization, name="We're rich and we fancy it SA")
-        poor = mommy.make(Organization, name="We're poor and dislike it Ltd")
-
-        # Create three stations
-        station_komboti = mommy.make(
-            Station,
-            name="Komboti",
-            owner=poor,
-            political_division__name="Arta",
-            political_division__parent__name="Epirus",
-            political_division__parent__parent__name="Greece",
-            stype__descr="Important",
-            water_basin__name="Arachthos",
-            water_division__name="North Syldavia Basins",
-        )
-        greece = station_komboti.political_division.parent.parent
-        station_ai_thanassis = mommy.make(
-            Station,
-            name="Agios Athanasios",
-            owner=poor,
-            political_division__name="Karditsa",
-            political_division__parent__name="Thessaly",
-            political_division__parent__parent=greece,
-            stype__descr=["Important", "Unimportant"],
-            water_division__name="South Syldavia Basins",
-        )
-        station_tharbad = mommy.make(
-            Station,
-            name="Tharbad",
-            owner=rich,
-            political_division__name="Cardolan",
-            political_division__parent__name="Eriador",
-            political_division__parent__parent__name="Middle Earth",
-            stype__descr=["Unimportant"],
-            water_basin__name="Greyflood",
-            water_division__name="South Syldavia Basins",
-        )
-
-        # A time zone
-        timezone = mommy.make(TimeZone, code="UTC", utc_offset=0)
-
-        # Five time series
-        cls.komboti_temperature = mommy.make(
-            Timeseries,
-            name="Air temperature",
-            variable__descr="Temperature",
-            gentity=station_komboti,
-            time_zone=timezone,
-        )
-        cls.komboti_rain = mommy.make(
-            Timeseries,
-            name="Rain",
-            gentity=station_komboti,
-            variable__descr="Rain",
-            time_zone=timezone,
-        )
-        cls.ai_thanassis_temperature = mommy.make(
-            Timeseries,
-            name="Air temperature",
-            gentity=station_ai_thanassis,
-            variable=cls.komboti_temperature.variable,
-            time_zone=timezone,
-        )
-        cls.ai_thanassis_rain = mommy.make(
-            Timeseries,
-            name="Rain",
-            gentity=station_ai_thanassis,
-            variable=cls.komboti_rain.variable,
-            time_zone=timezone,
-        )
-        cls.tharbad_temperature = mommy.make(
-            Timeseries,
-            name="Temperature",
-            gentity=station_tharbad,
-            variable=cls.komboti_temperature.variable,
-            remarks="This is an extremely important time series, "
-            "just because it is hugely significant and markedly "
-            "outstanding.",
-            time_zone=timezone,
-        )
-
-        # And a station with no time series
-        mommy.make(Station, name="Lefkada")
-
-    def get_queryset(self, query_string):
-        view = StationListBaseView()
-        view.request = HttpRequest()
-        view.request.method = "GET"
-        view.request.GET = QueryDict(query_string)
-        return view.get_queryset()
-
-
 class RandomEnhydrisTimeseriesDataDir(override_settings):
     """
     Override ENHYDRIS_TIMESERIES_DATA_DIR to a temporary directory.
@@ -269,80 +168,6 @@ class RandomEnhydrisTimeseriesDataDir(override_settings):
     def disable(self):
         super().disable()
         shutil.rmtree(self.tmpdir)
-
-
-@skipIf(
-    settings.DATABASES["default"]["ENGINE"].endswith(".spatialite"),
-    "This functionality is not available on spatialite",
-)
-@RandomEnhydrisTimeseriesDataDir()
-class SearchTsHasYearsTestCase(SearchTestCaseBase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        # Add some timeseries data
-        cls.komboti_temperature.set_data(
-            StringIO(
-                textwrap.dedent(
-                    """\
-            2005-08-23 18:53,93,
-            2010-08-23 22:53,42.4,
-            """
-                )
-            )
-        )
-        cls.komboti_rain.set_data(
-            StringIO(
-                textwrap.dedent(
-                    """\
-            2011-08-23 18:53,93,
-            2015-08-23 22:53,42.4,
-            """
-                )
-            )
-        )
-        cls.ai_thanassis_temperature.set_data(
-            StringIO(
-                textwrap.dedent(
-                    """\
-            2005-08-23 18:53,93,
-            2010-08-23 22:53,42.4,
-            """
-                )
-            )
-        )
-        cls.ai_thanassis_rain.set_data(
-            StringIO(
-                textwrap.dedent(
-                    """\
-            2009-08-23 18:53,93,
-            2017-08-23 22:53,42.4,
-            """
-                )
-            )
-        )
-
-    def test_search_with_year_existing_somewhere(self):
-        queryset = self.get_queryset(urlencode({"ts_has_years": "2005,2012,2016"}))
-        self.assertEqual(queryset.count(), 1)
-        self.assertEqual(queryset[0].name, "Agios Athanasios")
-
-    def test_search_with_years_existing_everywhere(self):
-        queryset = self.get_queryset(urlencode({"ts_has_years": "2005,2012"})).order_by(
-            "name"
-        )
-        self.assertEqual(queryset.count(), 2)
-        self.assertEqual(queryset[0].name, "Agios Athanasios")
-        self.assertEqual(queryset[1].name, "Komboti")
-
-    def test_search_with_year_existing_nowhere(self):
-        queryset = self.get_queryset(urlencode({"ts_has_years": "2005,2012,2018"}))
-        self.assertEqual(queryset.count(), 0)
-
-    def test_search_with_garbage(self):
-        with self.assertRaises(Http404):
-            self.get_queryset(urlencode({"ts_has_years": "hello,world"}))
 
 
 class RandomMediaRoot(override_settings):
