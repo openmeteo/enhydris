@@ -6,8 +6,6 @@ from wsgiref.util import FileWrapper
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.db.models import Extent
-from django.contrib.gis.geos import Polygon
-from django.db.models import Count, Q
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
@@ -23,15 +21,6 @@ from .models import GentityFile, GentityGenericData, Station, Timeseries
 class StationListBaseView(ListView):
     template_name = ""
     model = Station
-
-    def get_paginate_by(self, queryset):
-        return getattr(settings, "ENHYDRIS_STATIONS_PER_PAGE", 100)
-
-    def get_context_data(self, **kwargs):
-        context = super(StationListBaseView, self).get_context_data(**kwargs)
-        context["query"] = self.request.GET.get("q", "")
-        context["enabled_user_content"] = settings.ENHYDRIS_USERS_CAN_ADD_CONTENT
-        return context
 
 
 class StationListView(StationListBaseView):
