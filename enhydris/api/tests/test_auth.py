@@ -11,14 +11,27 @@ the token for a user, creating it if it does not already exist.
 import re
 
 import django
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.test.utils import override_settings
 from rest_framework.test import APITestCase
+
+from allauth.account.models import EmailAddress
+from rest_captcha import utils as captcha_utils
+from rest_captcha import views as captcha_views
 
 
 class AuthTestCase(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username="alice", password="topsecret")
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username="alice",
+            email="alice@alice.com",
+            password="topsecret",
+            is_active=True,
+        )
+        EmailAddress.objects.create(
+            user=self.user, email=self.user.email, primary=True, verified=True
+        )
 
     def test_unauthenticated(self):
         response = self.client.get("/api/auth/user/")
@@ -51,6 +64,7 @@ class AuthTestCase(APITestCase):
 class ResetPasswordTestCase(APITestCase):
     def test_reset_password(self):
         # Create a user
+        User = get_user_model()
         self.user = User.objects.create_user(
             username="alice", email="alice@example.com", password="topsecret1"
         )
@@ -84,3 +98,90 @@ class ResetPasswordTestCase(APITestCase):
         # Cool, now let me log in
         r = self.client.login(username="alice", password="topsecret2")
         self.assertTrue(r)
+
+
+@override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+class RegisterTestCase(APITestCase):
+    @override_settings(ENHYDRIS_REGISTRATION_OPEN=True)
+    def test_register(self):
+        # Get a captcha
+        response = self.client.post("/api/captcha/")
+        self.assertEqual(response.status_code, 200)
+        captcha_key = response.data["captcha_key"]
+        captcha_cache_key = captcha_utils.get_cache_key(captcha_key)
+        captcha_solution = captcha_views.cache.get(captcha_cache_key)
+
+        # Submit registration form
+        response = self.client.post(
+            "/api/auth/registration/",
+            data={
+                "username": "alice",
+                "email": "alice@alice.com",
+                "password1": "topsecret",
+                "password2": "topsecret",
+                "captcha_key": captcha_key,
+                "captcha_value": captcha_solution,
+            },
+        )
+        self.assertEqual(response.status_code, 201)
+
+        # We shouldn't be able to login yet
+        response = self.client.post(
+            "/api/auth/login/", data={"username": "alice", "password": "topsecret"}
+        )
+        self.assertEqual(response.status_code, 400)
+
+        # Did I receive an email?
+        self.assertEqual(len(django.core.mail.outbox), 1)
+
+        # Get the key from the link in the email
+        m = re.search(r"http://.*/([^/]+)/", django.core.mail.outbox[0].body)
+        registration_key = m.group(1)
+
+        # Submit it
+        response = self.client.post(
+            "/api/auth/registration/verify-email/", data={"key": registration_key}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # We should now be able to login
+        response = self.client.post(
+            "/api/auth/login/", data={"username": "alice", "password": "topsecret"}
+        )
+        self.assertEqual(response.status_code, 200)
+
+    @override_settings(ENHYDRIS_REGISTRATION_OPEN=True)
+    def test_wrong_captcha(self):
+        # Get a captcha
+        response = self.client.post("/api/captcha/")
+        self.assertEqual(response.status_code, 200)
+        captcha_key = response.data["captcha_key"]
+
+        # Submit registration form
+        response = self.client.post(
+            "/api/auth/registration/",
+            data={
+                "username": "alice",
+                "email": "alice@alice.com",
+                "password1": "topsecret",
+                "password2": "topsecret",
+                "captcha_key": captcha_key,
+                "captcha_value": "wrong",
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(len(django.core.mail.outbox), 0)
+
+    @override_settings(ENHYDRIS_REGISTRATION_OPEN=False)
+    def test_registration_returns_404(self):
+        # Submit registration form
+        response = self.client.post(
+            "/api/auth/registration/",
+            data={
+                "username": "alice",
+                "email": "alice@alice.com",
+                "password1": "topsecret",
+                "password2": "topsecret",
+            },
+        )
+        self.assertEqual(response.status_code, 404)

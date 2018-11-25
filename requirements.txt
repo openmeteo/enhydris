@@ -9,4 +9,5 @@ iso8601
 pd2hts>=0.2
 pytz
 rules>=2.0
-django-rest-auth>=0.9,<1
+django-rest-auth[with_social]>=0.9,<1
+django-rest-captcha>=0.1.0,<1

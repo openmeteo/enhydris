@@ -109,6 +109,7 @@ class StationsTestCase(TestCase):
                 self.assertTrue("NoSRID Point, NoSRID Station" in stations_csv)
 
 
+@skip
 class SortTestCase(TestCase):
     def setUp(self):
         mommy.make(
@@ -275,23 +276,6 @@ class TsTestCase(TestCase):
                                                  """
             ),
         )
-
-
-class RegisterTestCase(TestCase):
-    """
-    Test that "Register" link appears depending on REGISTRATION_OPEN setting.
-    """
-
-    @override_settings(REGISTRATION_OPEN=False)
-    def test_register_link_absent(self):
-        response = self.client.get("/")
-        self.assertNotContains(response, "Register")
-
-    @skip("Would fail because this functionality does not exist yet")
-    @override_settings(REGISTRATION_OPEN=True)
-    def test_register_link_present(self):
-        response = self.client.get("/")
-        self.assertContains(response, "Register")
 
 
 @skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")

@@ -29,8 +29,12 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "rest_auth",
+    # Registration
+    "allauth",
+    "allauth.account",
+    "rest_auth.registration",
+    "rest_captcha",
     "ajax_select",
-    "captcha",
     "bootstrap3",
     "enhydris",
     "enhydris.api",
@@ -91,14 +95,23 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
     )
 }
+ACCOUNT_AUTHENTICATION_METHOD = "username"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+REST_AUTH_REGISTER_SERIALIZERS = {
+    "REGISTER_SERIALIZER": "enhydris.api.serializers.RegisterWithCaptchaSerializer"
+}
 
 # Default Enhydris settings
 ENHYDRIS_FILTER_DEFAULT_COUNTRY = None
 ENHYDRIS_FILTER_POLITICAL_SUBDIVISION1_NAME = None
 ENHYDRIS_FILTER_POLITICAL_SUBDIVISION2_NAME = None
+
+ENHYDRIS_REGISTRATION_OPEN = True
 ENHYDRIS_USERS_CAN_ADD_CONTENT = False
 ENHYDRIS_SITE_CONTENT_IS_FREE = False
 ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS = False
+
 ENHYDRIS_MIN_VIEWPORT_IN_DEGS = 0.04
 ENHYDRIS_MAP_DEFAULT_VIEWPORT = (19.3, 34.75, 29.65, 41.8)
 ENHYDRIS_TIMESERIES_DATA_DIR = "timeseries_data"
@@ -117,6 +130,7 @@ ENHYDRIS_MAP_BASE_LAYERS = [
 ]
 ENHYDRIS_MAP_BOUNDS = ((19.3, 34.75), (29.65, 41.8))
 ENHYDRIS_MAP_MARKERS = {"0": "images/drop_marker.png"}
+
 if os.environ.get("SELENIUM_BROWSER", False):
     from selenium import webdriver
 

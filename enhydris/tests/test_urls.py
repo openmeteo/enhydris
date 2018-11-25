@@ -10,7 +10,6 @@ class SmokeTestCase(TestCase):
     # TODO: Make this run automatic for all
 
     pages = {
-        200: ["/"],
         301: ["/stations/l/"],
         302: ["/admin/"],  # This redirects to a login page
         404: [
