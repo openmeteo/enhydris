@@ -34,7 +34,6 @@ INSTALLED_APPS = [
     "allauth.account",
     "rest_auth.registration",
     "rest_captcha",
-    "ajax_select",
     "bootstrap3",
     "enhydris",
     "enhydris.api",
@@ -86,9 +85,6 @@ AUTHENTICATION_BACKENDS = (
     "rules.permissions.ObjectPermissionBackend",
     "django.contrib.auth.backends.ModelBackend",
 )
-
-# Options for django-ajax-selects
-AJAX_LOOKUP_CHANNELS = {"maintainers": dict(model="auth.User", search_field="username")}
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
