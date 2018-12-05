@@ -1,5 +1,7 @@
+import mimetypes
 import os
 from io import StringIO
+from wsgiref.util import FileWrapper
 
 from django.conf import settings
 from django.contrib.gis.db.models import Extent
@@ -430,6 +432,26 @@ class GentityAltCodeViewSet(ReadOnlyModelViewSet):
 class GentityFileViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.GentityFileSerializer
     queryset = models.GentityFile.objects.all()
+
+    @action(detail=True, methods=["get"])
+    def content(self, request, pk=None):
+        gfile = self.get_object()
+        try:
+            gfile_content_file = gfile.content.file
+            filename = gfile_content_file.name
+            wrapper = FileWrapper(open(filename, "rb"))
+        except (ValueError, IOError):
+            raise Http404
+        download_name = gfile.content.name.split("/")[-1]
+        content_type = mimetypes.guess_type(filename)[0]
+        response = HttpResponse(content_type=content_type)
+        response["Content-Length"] = os.path.getsize(filename)
+        response["Content-Disposition"] = "attachment; filename=" + download_name
+
+        for chunk in wrapper:
+            response.write(chunk)
+
+        return response
 
 
 class GentityEventViewSet(ReadOnlyModelViewSet):

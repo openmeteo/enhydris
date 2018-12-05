@@ -20,12 +20,6 @@ urlpatterns = [
         "timeseries_bottom",
     ),
     url(
-        r"^gentityfile/(?P<gf_id>\d+)/download/$",
-        views.download_gentityfile,
-        {},
-        "gentityfile_dl",
-    ),
-    url(
         r"^gentitygenericdata/(?P<gg_id>\d+)/download/$",
         views.download_gentitygenericdata,
         {},

@@ -1,4 +1,3 @@
-import mimetypes
 import os
 from tempfile import mkstemp
 from wsgiref.util import FileWrapper
@@ -12,7 +11,7 @@ import iso8601
 import pandas as pd
 import pd2hts
 
-from .models import GentityFile, GentityGenericData, Timeseries
+from .models import GentityGenericData, Timeseries
 
 
 def download_permission_required(func):
@@ -31,31 +30,6 @@ def download_permission_required(func):
         return func
     else:
         return login_required(func)
-
-
-@download_permission_required
-def download_gentityfile(request, gf_id):
-    """
-    This function handles requests for gentityfile downloads and serves the
-    content to the user.
-    """
-
-    gfile = get_object_or_404(GentityFile, pk=int(gf_id))
-    try:
-        filename = gfile.content.file.name
-        wrapper = FileWrapper(open(filename, "rb"))
-    except IOError:
-        raise Http404
-    download_name = gfile.content.name.split("/")[-1]
-    content_type = mimetypes.guess_type(filename)[0]
-    response = HttpResponse(content_type=content_type)
-    response["Content-Length"] = os.path.getsize(filename)
-    response["Content-Disposition"] = "attachment; filename=%s" % download_name
-
-    for chunk in wrapper:
-        response.write(chunk)
-
-    return response
 
 
 @download_permission_required
