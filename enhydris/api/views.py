@@ -10,7 +10,7 @@ from rest_framework import generics, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 import iso8601
 import pd2hts
@@ -100,14 +100,16 @@ class StationListPagination(PageNumberPagination):
     max_page_size = 1000
 
 
-class StationList(generics.ListCreateAPIView):
-    queryset = models.Station.objects.all()
+class StationViewSet(ModelViewSet):
     serializer_class = serializers.StationSerializer
-    permission_classes = (CanCreateStation,)
     pagination_class = StationListPagination
 
+    def get_permissions(self):
+        pc = [CanCreateStation] if self.action == "create" else [CanEditOrReadOnly]
+        return [x() for x in pc]
+
     def get_queryset(self, distinct=True, **kwargs):
-        result = super().get_queryset(**kwargs)
+        result = models.Station.objects.all()
 
         # Apply SITE_STATION_FILTER
         if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
@@ -269,12 +271,6 @@ class StationList(generics.ListCreateAPIView):
         )
 
     _filter_by_country = _filter_by_political_division  # synonym
-
-
-class StationDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = models.Station.objects.all()
-    serializer_class = serializers.StationSerializer
-    permission_classes = (CanEditOrReadOnly,)
 
 
 class WaterDivisionViewSet(ReadOnlyModelViewSet):
