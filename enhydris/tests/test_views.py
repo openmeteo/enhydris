@@ -4,7 +4,6 @@ import textwrap
 import time
 from io import StringIO
 from unittest import skip, skipUnless
-from zipfile import ZipFile
 
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
@@ -27,86 +26,6 @@ from enhydris.models import (
     UnitOfMeasurement,
     Variable,
 )
-
-
-class StationsTestCase(TestCase):
-    def setUp(self):
-        mommy.make(
-            User,
-            username="admin",
-            password=make_password("topsecret"),
-            is_active=True,
-            is_superuser=True,
-            is_staff=True,
-        )
-        mommy.make(
-            Station,
-            name="Komboti",
-            point=Point(x=21.06071, y=39.09518, srid=4326),
-            srid=4326,
-        )
-        mommy.make(
-            Station,
-            name="Agios Athanasios",
-            point=Point(x=21.60121, y=39.22440, srid=4326),
-            srid=4326,
-        )
-        mommy.make(
-            Station,
-            name="Tharbad",
-            point=Point(x=-176.48368, y=0.19377, srid=4326),
-            srid=4326,
-        )
-        mommy.make(
-            Station,
-            name="SRID Point, NoSRID Station",
-            point=Point(x=-176.48368, y=0.19377, srid=4326),
-            srid=None,
-        )
-        mommy.make(
-            Station,
-            name="NoSRID Point, SRID Station",
-            point=Point(x=-176.48368, y=0.19377, srid=None),
-            srid=4326,
-        )
-        mommy.make(
-            Station,
-            name="NoSRID Point, NoSRID Station",
-            point=Point(x=-176.48368, y=0.19377, srid=None),
-            srid=None,
-        )
-
-    def test_station_list_csv(self):
-        response = self.client.get("/?format=csv")
-        with tempfile.TemporaryFile() as t:
-            t.write(response.content)
-            with ZipFile(t) as f:
-                stations_csv = f.open("stations.csv").read().decode()
-                self.assertTrue(",Agios Athanasios," in stations_csv)
-
-    def test_station_list_csv_station_no_srid(self):
-        response = self.client.get("/?format=csv")
-        with tempfile.TemporaryFile() as t:
-            t.write(response.content)
-            with ZipFile(t) as f:
-                stations_csv = f.open("stations.csv").read().decode()
-                self.assertTrue("SRID Point, NoSRID Station" in stations_csv)
-
-    def test_station_list_csv_point_no_srid(self):
-        response = self.client.get("/?format=csv")
-        with tempfile.TemporaryFile() as t:
-            t.write(response.content)
-            with ZipFile(t) as f:
-                stations_csv = f.open("stations.csv").read().decode()
-                self.assertTrue("NoSRID Point, SRID Station" in stations_csv)
-
-    def test_station_list_csv_station_and_point_with_no_srid(self):
-        response = self.client.get("/?format=csv")
-        with tempfile.TemporaryFile() as t:
-            t.write(response.content)
-            with ZipFile(t) as f:
-                stations_csv = f.open("stations.csv").read().decode()
-                self.assertTrue("NoSRID Point, NoSRID Station" in stations_csv)
 
 
 @skip

@@ -5,7 +5,6 @@ from django.views.generic.base import RedirectView
 from enhydris import views
 
 urlpatterns = [
-    url(r"^$", views.StationListView.as_view(), name="station_list"),
     url(r"^stations/l/$", RedirectView.as_view(url="../..", permanent=True)),
     url(
         r"^timeseries/d/(?P<object_id>\d+)/download/"
@@ -32,11 +31,6 @@ urlpatterns = [
         {},
         "gentitygenericdata_dl",
     ),
-    url(
-        r"^(?P<layer>[^/]+)/kml/$",
-        views.StationListView.as_view(template_name="placemarks.kml"),
-    ),
-    url(r"^bounding_box/$", views.BoundingBoxView.as_view(), {}, "bounding_box"),
     #   http://stackoverflow.com/questions/19985103/
     url(r"^password/change/$", auth_views.password_change, name="password_change"),
     url(

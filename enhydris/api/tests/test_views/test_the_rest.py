@@ -1,7 +1,10 @@
+import tempfile
 from datetime import datetime
 from unittest.mock import patch
+from zipfile import ZipFile
 
 from django.contrib.auth.models import Permission, User
+from django.contrib.gis.geos import Point
 from django.test.utils import override_settings
 from rest_framework.test import APITestCase
 
@@ -323,6 +326,78 @@ class StationUpdateAndDeleteTestCase(APITestCase):
         self.client.force_authenticate(user=self.user1)
         response = self._delete_station()
         self.assertEqual(response.status_code, 204, response.content)
+
+
+class StationCsvTestCase(APITestCase):
+    def setUp(self):
+        mommy.make(
+            models.Station,
+            name="Komboti",
+            point=Point(x=21.06071, y=39.09518, srid=4326),
+            srid=4326,
+        )
+        mommy.make(
+            models.Station,
+            name="Agios Athanasios",
+            point=Point(x=21.60121, y=39.22440, srid=4326),
+            srid=4326,
+        )
+        mommy.make(
+            models.Station,
+            name="Tharbad",
+            point=Point(x=-176.48368, y=0.19377, srid=4326),
+            srid=4326,
+        )
+        mommy.make(
+            models.Station,
+            name="SRID Point, NoSRID Station",
+            point=Point(x=-176.48368, y=0.19377, srid=4326),
+            srid=None,
+        )
+        mommy.make(
+            models.Station,
+            name="NoSRID Point, SRID Station",
+            point=Point(x=-176.48368, y=0.19377, srid=None),
+            srid=4326,
+        )
+        mommy.make(
+            models.Station,
+            name="NoSRID Point, NoSRID Station",
+            point=Point(x=-176.48368, y=0.19377, srid=None),
+            srid=None,
+        )
+
+    def test_station_csv(self):
+        response = self.client.get("/api/Station/csv/")
+        with tempfile.TemporaryFile() as t:
+            t.write(response.content)
+            with ZipFile(t) as f:
+                stations_csv = f.open("stations.csv").read().decode()
+                self.assertIn(",Agios Athanasios,", stations_csv)
+
+    def test_station_with_no_srid_is_included(self):
+        response = self.client.get("/api/Station/csv/")
+        with tempfile.TemporaryFile() as t:
+            t.write(response.content)
+            with ZipFile(t) as f:
+                stations_csv = f.open("stations.csv").read().decode()
+                self.assertIn("SRID Point, NoSRID Station", stations_csv)
+
+    def test_station_with_point_with_no_srid_is_included(self):
+        response = self.client.get("/api/Station/csv/")
+        with tempfile.TemporaryFile() as t:
+            t.write(response.content)
+            with ZipFile(t) as f:
+                stations_csv = f.open("stations.csv").read().decode()
+                self.assertIn("NoSRID Point, SRID Station", stations_csv)
+
+    def test_station_with_no_srid_and_point_with_no_srid_is_included(self):
+        response = self.client.get("/api/Station/csv/")
+        with tempfile.TemporaryFile() as t:
+            t.write(response.content)
+            with ZipFile(t) as f:
+                stations_csv = f.open("stations.csv").read().decode()
+                self.assertIn("NoSRID Point, NoSRID Station", stations_csv)
 
 
 class WaterDivisionTestCase(APITestCase):

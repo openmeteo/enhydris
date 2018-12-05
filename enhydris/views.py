@@ -5,103 +5,14 @@ from wsgiref.util import FileWrapper
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.contrib.gis.db.models import Extent
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
-from django.views.generic import ListView
 
 import iso8601
 import pandas as pd
 import pd2hts
 
-from .csv import prepare_csv
-from .models import GentityFile, GentityGenericData, Station, Timeseries
-
-
-class StationListBaseView(ListView):
-    template_name = ""
-    model = Station
-
-
-class StationListView(StationListBaseView):
-    template_name = "station_list.html"
-
-    def get_sort_order(self):
-        """Get sort_order as a list: from the request parameters, otherwise
-        from request.session, otherwise it's the default, ['name']. Removes
-        duplicate column occurences from the list.
-        """
-        sort_order = self.request.GET.getlist("sort")
-
-        # Ensure sort order term to match with Station model field names
-        field_names = [x.name for x in Station._meta.get_fields()]
-        sort_order = [x for x in sort_order if x in field_names]
-
-        if not sort_order:
-            sort_order = self.request.session.get("sort", ["name"])
-
-        sort_order = sort_order[:]
-        for i in range(len(sort_order) - 1, -1, -1):
-            s = sort_order[i]
-            if s[0] == "-":
-                s = s[1:]
-            if (s in sort_order[:i]) or ("-" + s in sort_order[:i]):
-                del sort_order[i]
-        self.sort_order = sort_order
-
-    def get(self, request, *args, **kwargs):
-        # The CSV is an undocumented feature we quickly and dirtily created
-        # for some people who needed it.
-        if request.GET.get("format", "").lower() == "csv":
-            zipfilename = prepare_csv(self.get_queryset())
-            response = HttpResponse(
-                open(zipfilename, "rb").read(), content_type="application/zip"
-            )
-            response["Content-Disposition"] = "attachment; filename=data.zip"
-            response["Content-Length"] = str(os.path.getsize(zipfilename))
-            return response
-        else:
-            return super(StationListView, self).get(request, *args, **kwargs)
-
-    def get_queryset(self, **kwargs):
-        result = super(StationListView, self).get_queryset(**kwargs)
-
-        # Sort results
-        self.get_sort_order()
-        self.request.session["sort"] = self.sort_order
-        result = result.order_by(*self.sort_order)
-
-        return result
-
-    def get_context_data(self, **kwargs):
-        context = super(StationListView, self).get_context_data(**kwargs)
-        context["sort"] = self.sort_order
-        return context
-
-
-class BoundingBoxView(StationListBaseView):
-    def get(self, request, *args, **kwargs):
-        # Determine queryset's extent
-        queryset = self.get_queryset(distinct=False)
-        try:
-            extent = list(queryset.aggregate(Extent("point")))["point__extent"]
-        except TypeError:
-            # Type error is raised if queryset is empty, or if all the
-            # stations it contains are with unspecified co-ordinates.
-            extent = settings.ENHYDRIS_MAP_DEFAULT_VIEWPORT
-
-        # Increase extent if it's too small
-        min_viewport = settings.ENHYDRIS_MIN_VIEWPORT_IN_DEGS
-        if abs(extent[2] - extent[0]) < min_viewport:
-            extent[2] += 0.5 * min_viewport
-            extent[0] -= 0.5 * min_viewport
-        if abs(extent[3] - extent[1]) < min_viewport:
-            extent[3] += 0.5 * min_viewport
-            extent[1] -= 0.5 * min_viewport
-
-        return HttpResponse(
-            ",".join([str(e) for e in extent]), content_type="text/plain"
-        )
+from .models import GentityFile, GentityGenericData, Timeseries
 
 
 def download_permission_required(func):

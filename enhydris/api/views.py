@@ -1,12 +1,15 @@
+import os
 from io import StringIO
 
 from django.conf import settings
+from django.contrib.gis.db.models import Extent
 from django.contrib.gis.geos import Polygon
 from django.db import IntegrityError
 from django.db.models import Count, Q
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -18,6 +21,7 @@ import pd2hts
 from enhydris import models
 
 from . import serializers
+from .csv import prepare_csv
 from .permissions import CanCreateStation, CanEditOrReadOnly
 
 
@@ -108,7 +112,7 @@ class StationViewSet(ModelViewSet):
         pc = [CanCreateStation] if self.action == "create" else [CanEditOrReadOnly]
         return [x() for x in pc]
 
-    def get_queryset(self, distinct=True, **kwargs):
+    def _get_unsorted_queryset(self, distinct=True, **kwargs):
         result = models.Station.objects.all()
 
         # Apply SITE_STATION_FILTER
@@ -125,6 +129,40 @@ class StationViewSet(ModelViewSet):
         # is incompatible with some things (namely extent()).
         if distinct:
             result = result.distinct()
+
+        return result
+
+    def get_queryset(self, **kwargs):
+        result = self._get_unsorted_queryset(**kwargs)
+        sort_order = self._get_sort_order()
+        self.request.session["sort"] = sort_order
+        result = result.order_by(*sort_order)
+        return result
+
+    def _get_sort_order(self):
+        """Return sort_order as a list.
+
+        Gets sort order from the request parameters, otherwise from request.session,
+        otherwise it's the default, ['name']. Removes duplicate field occurences from
+        the list.
+        """
+        # Get sort order from query parameters
+        sort_order = self.request.GET.getlist("sort")
+
+        # If empty, get sort order from session
+        if not sort_order:
+            sort_order = self.request.session.get("sort", ["name"])
+
+        # Create a copy of sort_order with duplicates and nonexistent fields removed
+        result = []
+        fields = [x.name for x in models.Station._meta.get_fields()]
+        fields_seen = set()
+        for item in sort_order:
+            field = item[1:] if item[0] == "-" else item
+            if field in fields_seen or field not in fields:
+                continue
+            result.append(item)
+            fields_seen.add(field)
 
         return result
 
@@ -271,6 +309,42 @@ class StationViewSet(ModelViewSet):
         )
 
     _filter_by_country = _filter_by_political_division  # synonym
+
+    def _get_bounding_box(self):
+        queryset = self._get_unsorted_queryset(distinct=False)
+        extent = queryset.aggregate(Extent("point"))["point__extent"]
+        if extent is None:
+            extent = settings.ENHYDRIS_MAP_DEFAULT_VIEWPORT[:]
+        else:
+            extent = list(extent)
+
+        # Increase extent if it's too small
+        min_viewport = settings.ENHYDRIS_MIN_VIEWPORT_IN_DEGS
+        dx = abs(extent[2] - extent[0])
+        if dx < min_viewport:
+            extent[2] += 0.5 * (min_viewport - dx)
+            extent[0] -= 0.5 * (min_viewport - dx)
+        dy = abs(extent[3] - extent[1])
+        if dy < min_viewport:
+            extent[3] += 0.5 * (min_viewport - dy)
+            extent[1] -= 0.5 * (min_viewport - dy)
+
+        return extent
+
+    def list(self, request):
+        response = super().list(request)
+        response.data["bounding_box"] = self._get_bounding_box()
+        return response
+
+    @action(detail=False, methods=["get"])
+    def csv(self, request):
+        zipfilename = prepare_csv(self.get_queryset())
+        response = HttpResponse(
+            open(zipfilename, "rb").read(), content_type="application/zip"
+        )
+        response["Content-Disposition"] = "attachment; filename=data.zip"
+        response["Content-Length"] = str(os.path.getsize(zipfilename))
+        return response
 
 
 class WaterDivisionViewSet(ReadOnlyModelViewSet):
