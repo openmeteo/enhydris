@@ -19,12 +19,6 @@ urlpatterns = [
         {},
         "timeseries_bottom",
     ),
-    url(
-        r"^gentitygenericdata/(?P<gg_id>\d+)/download/$",
-        views.download_gentitygenericdata,
-        {},
-        "gentitygenericdata_dl",
-    ),
     #   http://stackoverflow.com/questions/19985103/
     url(r"^password/change/$", auth_views.password_change, name="password_change"),
     url(

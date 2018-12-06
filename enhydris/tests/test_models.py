@@ -161,8 +161,8 @@ class GentityAltCodeTypeTestCase(TestCase):
     """Test lookups.
 
     We test GentityAltCodeType as an example of Lookup. We don't test
-    GentityGenericDataType, EventType, StationType, InstrumentType, Variable and
-    IntervalType, because they are trivial Lookup descendants.
+    EventType, StationType, InstrumentType, Variable and IntervalType, because they are
+    trivial Lookup descendants.
     """
 
     def test_create(self):
@@ -217,44 +217,6 @@ class GentityAltCodeTestCase(TestCase):
         station = mommy.make(models.Station)
         gac = mommy.make(models.GentityAltCode, gentity=station)
         self.assertEqual(gac.related_station, station)
-
-
-class GentityGenericDataTestCase(TestCase):
-    def test_create(self):
-        station = mommy.make(models.Station)
-        ggdt = mommy.make(models.GentityGenericDataType)
-        ggd = models.GentityGenericData(
-            gentity=station, data_type=ggdt, descr="North view"
-        )
-        ggd.save()
-        self.assertEqual(models.GentityGenericData.objects.first().descr, "North view")
-
-    def test_update(self):
-        mommy.make(models.GentityGenericData)
-        ggd = models.GentityGenericData.objects.first()
-        ggd.descr = "North view"
-        ggd.save()
-        self.assertEqual(models.GentityGenericData.objects.first().descr, "North view")
-
-    def test_delete(self):
-        mommy.make(models.GentityGenericData)
-        ggd = models.GentityGenericData.objects.first()
-        ggd.delete()
-        self.assertEqual(models.GentityGenericData.objects.count(), 0)
-
-    def test_str(self):
-        ggd = mommy.make(models.GentityGenericData, descr="North view")
-        self.assertEqual(str(ggd), "North view")
-
-    def test_related_station(self):
-        station = mommy.make(models.Station)
-        ggd = mommy.make(models.GentityGenericData, gentity=station)
-        self.assertEqual(ggd.related_station, station)
-
-    def test_related_station_is_empty_when_gentity_is_not_station(self):
-        water_basin = mommy.make(models.WaterBasin)
-        ggd = mommy.make(models.GentityGenericData, gentity=water_basin)
-        self.assertIsNone(ggd.related_station)
 
 
 class FileTypeTestCase(TestCase):

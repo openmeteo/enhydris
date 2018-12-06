@@ -11,7 +11,7 @@ import iso8601
 import pandas as pd
 import pd2hts
 
-from .models import GentityGenericData, Timeseries
+from .models import Timeseries
 
 
 def download_permission_required(func):
@@ -30,33 +30,6 @@ def download_permission_required(func):
         return func
     else:
         return login_required(func)
-
-
-@download_permission_required
-def download_gentitygenericdata(request, gg_id):
-    """
-    This function handles requests for gentitygenericdata downloads and serves
-    the content to the user.
-    """
-    ggenericdata = get_object_or_404(GentityGenericData, pk=int(gg_id))
-    s = ggenericdata.content
-    if s.find("\r") < 0:
-        s = s.replace("\n", "\r\n")
-    (afile_handle, afilename) = mkstemp()
-    os.write(afile_handle, s)
-    afile = open(afilename, "r")
-    wrapper = FileWrapper(afile)
-    download_name = "GenericData-id_%s.%s" % (
-        gg_id,
-        ggenericdata.data_type.file_extension,
-    )
-    content_type = "text/plain"
-    response = HttpResponse(content_type=content_type)
-    response["Content-Length"] = os.fstat(afile_handle).st_size
-    response["Content-Disposition"] = "attachment; filename=%s" % download_name
-    for chunk in wrapper:
-        response.write(chunk)
-    return response
 
 
 def get_date_from_string(adate, tz):

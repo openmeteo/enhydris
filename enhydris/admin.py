@@ -60,11 +60,6 @@ class FileTypeAdmin(admin.ModelAdmin):
     list_display = ("id", "mime_type", "descr")
 
 
-@admin.register(models.GentityGenericDataType)
-class GentityGenericDataTypeAdmin(admin.ModelAdmin):
-    list_display = ("id", "descr", "file_extension")
-
-
 @admin.register(models.EventType)
 class EventTypeAdmin(admin.ModelAdmin):
     list_display = ("id", "descr")
