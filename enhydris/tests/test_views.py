@@ -1,14 +1,10 @@
-import shutil
-import tempfile
-import textwrap
 import time
-from io import StringIO
 from unittest import skip, skipUnless
 
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
-from django.contrib.gis.geos import Point, fromstr
+from django.contrib.gis.geos import Point
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -17,15 +13,7 @@ from django_selenium_clean import PageElement, SeleniumTestCase
 from model_mommy import mommy
 from selenium.webdriver.common.by import By
 
-from enhydris.models import (
-    Organization,
-    Station,
-    StationType,
-    Timeseries,
-    TimeZone,
-    UnitOfMeasurement,
-    Variable,
-)
+from enhydris.models import Organization, Station, StationType
 
 
 @skip
@@ -70,131 +58,6 @@ class SortTestCase(TestCase):
         # Checking  test stations 'Komboti', 'Tharbad' alphabetical order index
         i = response.content.decode("utf-8").index
         self.assertLess(i("Komboti"), i("Tharbad"))
-
-
-class RandomEnhydrisTimeseriesDataDir(override_settings):
-    """
-    Override ENHYDRIS_TIMESERIES_DATA_DIR to a temporary directory.
-
-    Specifying "@RandomEnhydrisTimeseriesDataDir()" as a decorator is the same
-    as "@override_settings(ENHYDRIS_TIMESERIES_DATA_DIR=tempfile.mkdtemp())",
-    except that in the end it removes the temporary directory.
-    """
-
-    def __init__(self):
-        self.tmpdir = tempfile.mkdtemp()
-        super().__init__(ENHYDRIS_TIMESERIES_DATA_DIR=self.tmpdir)
-
-    def disable(self):
-        super().disable()
-        shutil.rmtree(self.tmpdir)
-
-
-class RandomMediaRoot(override_settings):
-    """
-    Override MEDIA_ROOT to a temporary directory.
-
-    Specifying "@RandomMediaRoot()" as a decorator is the same as
-    "@override_settings(MEDIA_ROOT=tempfile.mkdtemp())", except that in the
-    end it removes the temporary directory.
-    """
-
-    def __init__(self):
-        self.tmpdir = tempfile.mkdtemp()
-        super(RandomMediaRoot, self).__init__(MEDIA_ROOT=self.tmpdir)
-
-    def disable(self):
-        super(RandomMediaRoot, self).disable()
-        shutil.rmtree(self.tmpdir)
-
-
-class TsTestCase(TestCase):
-    """Test timeseries data upload/download code."""
-
-    def setUp(self):
-        mommy.make(
-            User,
-            username="admin",
-            password=make_password("topsecret"),
-            is_active=True,
-            is_superuser=True,
-            is_staff=True,
-        )
-        self.stype = StationType.objects.create(descr="stype")
-        self.stype.save()
-        self.organization = Organization.objects.create(name="org")
-        self.organization.save()
-        self.var = Variable.objects.create(descr="var")
-        self.var.save()
-        self.unit = UnitOfMeasurement.objects.create(symbol="+")
-        self.unit.variables.add(self.var)
-        self.unit.save()
-        self.tz = TimeZone.objects.create(code="EET", utc_offset=120)
-        self.tz.save()
-        self.station = Station.objects.create(
-            name="station",
-            owner=self.organization,
-            approximate=False,
-            is_automatic=True,
-            point=fromstr("POINT(24.67890 38.12345)"),
-            srid=4326,
-            altitude=219.22,
-        )
-        self.station.save()
-        self.ts = Timeseries(
-            name="tstest",
-            gentity=self.station,
-            time_zone=self.tz,
-            unit_of_measurement=self.unit,
-            variable=self.var,
-            precision=1,
-        )
-        self.ts.save()
-        self.user = User.objects.create_user("test", "test@test.com", "test")
-        self.user.save()
-
-    @RandomEnhydrisTimeseriesDataDir()
-    def test_timeseries_with_timezone_data(self):
-        """Test that there's no aware/naive date confusion
-
-        There was this bug where you'd ask to download from start date,
-        and the start date was interpreted as aware whereas the time series
-        data was interpreted as naive. This test checks there's no such
-        bug.
-        """
-        data = textwrap.dedent(
-            """\
-                               2005-08-23 18:53,93,
-                               2005-08-23 19:53,108.7,
-                               2005-08-23 20:53,28.3,
-                               2005-08-23 21:53,1.7,
-                               2005-08-23 22:53,42.4,
-            """
-        )
-        self.ts.set_data(StringIO(data))
-        url = "/timeseries/d/{}/download/2005-08-23T19:54/".format(self.ts.pk)
-        if not settings.ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS:
-            self.client.login(username="test", password="test")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        result = response.content.decode("utf-8")
-
-        # Remove header, leave only data
-        emptylinepos = result.find("\r\n\r\n")
-        self.assertTrue(emptylinepos > 0)
-        b = emptylinepos + 4
-        result = result[b:]
-
-        self.assertEqual(
-            result,
-            textwrap.dedent(
-                """\
-                                                 2005-08-23 20:53,28.3,\r
-                                                 2005-08-23 21:53,1.7,\r
-                                                 2005-08-23 22:53,42.4,\r
-                                                 """
-            ),
-        )
 
 
 @skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")

@@ -44,7 +44,9 @@ class TsdataGetTestCase(APITestCase):
     )
     def setUp(self, m):
         station = mommy.make(models.Station)
-        timeseries = mommy.make(models.Timeseries, gentity=station)
+        timeseries = mommy.make(
+            models.Timeseries, gentity=station, time_zone__utc_offset=120
+        )
         self.response = self.client.get(
             "/api/stations/{}/timeseries/{}/data/".format(station.id, timeseries.id)
         )
@@ -148,6 +150,42 @@ class TsdataPostGarbageTestCase(APITestCase):
 
     def test_status_code(self):
         self.assertEqual(self.response.status_code, 400)
+
+
+@override_settings(ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS=True)
+class TsdataStartAndEndDateTestCase(APITestCase):
+    """Test that there's no aware/naive date confusion.
+
+    There was this bug where you'd ask to download from start date, and the start date
+    was interpreted as aware whereas the time series data was interpreted as naive. This
+    test checks there's no such bug.
+    """
+
+    def setUp(self):
+        self.tz = mommy.make(models.TimeZone, code="EET", utc_offset=120)
+        self.timeseries = mommy.make(models.Timeseries, time_zone=self.tz)
+
+    @patch("enhydris.models.Timeseries.get_data")
+    def test_called_get_data_with_proper_start_date(self, m):
+        self.response = self.client.get(
+            "/api/stations/{}/timeseries/{}/data/?start_date=2005-08-23T19:54".format(
+                self.timeseries.gentity.id, self.timeseries.id
+            )
+        )
+        m.assert_called_once_with(
+            start_date=datetime(2005, 8, 23, 19, 54), end_date=None
+        )
+
+    @patch("enhydris.models.Timeseries.get_data")
+    def test_called_get_data_with_proper_end_date(self, m):
+        self.response = self.client.get(
+            "/api/stations/{}/timeseries/{}/data/?end_date=2005-08-23T19:54".format(
+                self.timeseries.gentity.id, self.timeseries.id
+            )
+        )
+        m.assert_called_once_with(
+            start_date=None, end_date=datetime(2005, 8, 23, 19, 54)
+        )
 
 
 class TimeseriesPostTestCase(APITestCase):

@@ -17,6 +17,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 import iso8601
+import pandas as pd
 import pd2hts
 
 from enhydris import models
@@ -459,26 +460,45 @@ class TimeseriesViewSet(ModelViewSet):
             return self._post_data(request, pk)
 
     def _get_data(self, request, pk, format=None):
-        try:
-            timeseries = models.Timeseries.objects.get(pk=int(pk))
-            self.check_object_permissions(request, timeseries)
-            response = HttpResponse(content_type="text/plain")
-            pd2hts.write(timeseries.get_data(), response)
-            return response
-        except models.Timeseries.DoesNotExist:
-            raise Http404
+        timeseries = get_object_or_404(models.Timeseries, pk=int(pk))
+        self.check_object_permissions(request, timeseries)
+
+        tz = timeseries.time_zone.as_tzinfo
+        start_date = request.GET.get("start_date")
+        end_date = request.GET.get("end_date")
+        start_date = self._get_date_from_string(start_date, tz)
+        end_date = self._get_date_from_string(end_date, tz)
+
+        # The time series data are naive, so we also make start_date and end_date naive.
+        if start_date:
+            start_date = start_date.replace(tzinfo=None)
+        if end_date:
+            end_date = end_date.replace(tzinfo=None)
+
+        adataframe = timeseries.get_data(start_date=start_date, end_date=end_date)
+        response = HttpResponse(content_type="text/plain")
+        pd2hts.write(adataframe, response)
+        return response
 
     def _post_data(self, request, pk, format=None):
         try:
-            atimeseries = models.Timeseries.objects.get(pk=int(pk))
+            atimeseries = get_object_or_404(models.Timeseries, pk=int(pk))
             self.check_object_permissions(request, atimeseries)
             atimeseries.append_data(StringIO(request.data["timeseries_records"]))
             return HttpResponse(status=status.HTTP_204_NO_CONTENT)
-        except models.Timeseries.DoesNotExist:
-            raise Http404
         except (IntegrityError, iso8601.ParseError) as e:
             return HttpResponse(
                 status=status.HTTP_400_BAD_REQUEST,
                 content=str(e),
                 content_type="text/plain",
             )
+
+    def _get_date_from_string(self, adate, tz):
+        if not adate:
+            return None
+        result = iso8601.parse_date(adate, default_timezone=tz)
+        if result.isoformat() < pd.Timestamp.min.isoformat():
+            result = pd.Timestamp.min
+        if result.isoformat() > pd.Timestamp.max.isoformat():
+            result = pd.Timestamp.max
+        return result

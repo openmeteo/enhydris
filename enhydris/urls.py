@@ -7,13 +7,6 @@ from enhydris import views
 urlpatterns = [
     url(r"^stations/l/$", RedirectView.as_view(url="../..", permanent=True)),
     url(
-        r"^timeseries/d/(?P<object_id>\d+)/download/"
-        r"((?P<start_date>[^/]*)/((?P<end_date>[^/]*)/)?)?$",
-        views.download_timeseries,
-        {},
-        "timeseries_text",
-    ),
-    url(
         r"^timeseries/d/(?P<object_id>\d+)/bottom/$",
         views.timeseries_bottom,
         {},
