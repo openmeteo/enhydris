@@ -149,7 +149,7 @@ class TimeseriesPostTestCase(APITestCase):
 
     def _create_timeseries(self):
         return self.client.post(
-            "/api/timeseries/",
+            "/api/stations/{}/timeseries/".format(self.station.id),
             data={
                 "name": "Great time series",
                 "gentity": self.station.id,
@@ -171,25 +171,72 @@ class TimeseriesPostTestCase(APITestCase):
         self.assertEqual(self._create_timeseries().status_code, 201)
 
 
+class TimeseriesPostWithWrongStationTestCase(APITestCase):
+    def setUp(self):
+        self.user = mommy.make(User, is_active=True, is_superuser=False)
+        self.variable = mommy.make(models.Variable)
+        self.time_zone = mommy.make(models.TimeZone)
+        self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
+        self.station1 = mommy.make(models.Station, creator=self.user)
+        self.station2 = mommy.make(models.Station, creator=self.user)
+
+    def _create_timeseries(self, station_for_url, station_for_data):
+        self.client.force_authenticate(user=self.user)
+        return self.client.post(
+            "/api/stations/{}/timeseries/".format(station_for_url.id),
+            data={
+                "name": "Great time series",
+                "gentity": station_for_data.id,
+                "variable": self.variable.id,
+                "time_zone": self.time_zone.id,
+                "unit_of_measurement": self.unit_of_measurement.id,
+            },
+        )
+
+    def test_create_timeseries_with_wrong_station(self):
+        response = self._create_timeseries(
+            station_for_url=self.station1, station_for_data=self.station2
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_timeseries_with_correct_station(self):
+        response = self._create_timeseries(
+            station_for_url=self.station1, station_for_data=self.station1
+        )
+        self.assertEqual(response.status_code, 201)
+
+
 class TimeseriesDeleteTestCase(APITestCase):
     def setUp(self):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
         self.user2 = mommy.make(User, is_active=True, is_superuser=False)
-        station = mommy.make(models.Station, creator=self.user1)
-        self.timeseries = mommy.make(models.Timeseries, gentity=station)
+        self.station = mommy.make(models.Station, creator=self.user1)
+        self.timeseries = mommy.make(models.Timeseries, gentity=self.station)
 
     def test_unauthenticated_user_is_denied_permission_to_delete_timeseries(self):
-        response = self.client.delete("/api/timeseries/{}/".format(self.timeseries.id))
+        response = self.client.delete(
+            "/api/stations/{}/timeseries/{}/".format(
+                self.station.id, self.timeseries.id
+            )
+        )
         self.assertEqual(response.status_code, 401)
 
     def test_unauthorized_user_is_denied_permission_to_delete_timeseries(self):
         self.client.force_authenticate(user=self.user2)
-        response = self.client.delete("/api/timeseries/{}/".format(self.timeseries.id))
+        response = self.client.delete(
+            "/api/stations/{}/timeseries/{}/".format(
+                self.station.id, self.timeseries.id
+            )
+        )
         self.assertEqual(response.status_code, 403)
 
     def test_authorized_user_can_delete_timeseries(self):
         self.client.force_authenticate(user=self.user1)
-        response = self.client.delete("/api/timeseries/{}/".format(self.timeseries.id))
+        response = self.client.delete(
+            "/api/stations/{}/timeseries/{}/".format(
+                self.station.id, self.timeseries.id
+            )
+        )
         self.assertEqual(response.status_code, 204)
 
 

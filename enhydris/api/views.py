@@ -61,39 +61,6 @@ class Tsdata(APIView):
             )
 
 
-class TimeseriesViewSet(ModelViewSet):
-    queryset = models.Timeseries.objects.all()
-    serializer_class = serializers.TimeseriesSerializer
-    permission_classes = (CanEditOrReadOnly,)
-
-    def create(self, request):
-        """Redefine create, checking permissions.
-
-        Django-rest-framework does not do object-level permission when
-        creating a new object, so we have to completely customize the create
-        method. Maybe there's a better way, such as using a mixin for the
-        functionality below (especially when the API is extended to include
-        other types as well).
-        """
-        # Get the data
-        serializer = self.get_serializer(data=request.data)
-        if not serializer.is_valid():
-            Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        # Check permissions
-        try:
-            gentity_id = int(serializer.get_initial()["gentity"])
-        except ValueError:
-            raise Http404
-        station = get_object_or_404(models.Station, id=gentity_id)
-        if not request.user.is_authenticated():
-            return Response("Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
-        if not request.user.has_perm("enhydris.change_station", station):
-            return Response("Forbidden", status=status.HTTP_403_FORBIDDEN)
-
-        return super().create(request)
-
-
 class GeneralListPagination(PageNumberPagination):
     page_size = 100
     page_size_query_param = "page_size"
@@ -478,3 +445,43 @@ class GentityFileViewSet(ReadOnlyModelViewSet):
             response.write(chunk)
 
         return response
+
+
+class TimeseriesViewSet(ModelViewSet):
+    queryset = models.Timeseries.objects.all()
+    serializer_class = serializers.TimeseriesSerializer
+    permission_classes = (CanEditOrReadOnly,)
+
+    def get_queryset(self):
+        return models.Timeseries.objects.filter(gentity_id=self.kwargs["station_id"])
+
+    def create(self, request, *args, **kwargs):
+        """Redefine create, checking permissions and gentity_id.
+
+        Django-rest-framework does not do object-level permission when
+        creating a new object, so we have to completely customize the create
+        method. In addition, we check that the gentity_id specified in the data
+        is the same as the station_id in the URL.
+        """
+        # Get the data
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check permissions
+        try:
+            gentity_id = int(serializer.get_initial()["gentity"])
+        except ValueError:
+            raise Http404
+        station = get_object_or_404(models.Station, id=gentity_id)
+        if not request.user.is_authenticated():
+            return Response("Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
+        if not request.user.has_perm("enhydris.change_station", station):
+            return Response("Forbidden", status=status.HTTP_403_FORBIDDEN)
+
+        # Check the correctness of gentity_id
+        if str(gentity_id) != self.kwargs["station_id"]:
+            return Response("Wrong gentity_id", status=status.HTTP_400_BAD_REQUEST)
+
+        # All checks passed, call inherited method to do the actual work.
+        return super().create(request, *args, **kwargs)

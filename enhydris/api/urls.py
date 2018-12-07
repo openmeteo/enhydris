@@ -85,8 +85,9 @@ router.register(
 router.register(
     r"stations/(?P<station_id>\d+)/instruments", views.InstrumentViewSet, "instrument"
 )
-
-router.register("timeseries", views.TimeseriesViewSet)
+router.register(
+    r"stations/(?P<station_id>\d+)/timeseries", views.TimeseriesViewSet, "timeseries"
+)
 
 router.register("waterdivisions", views.WaterDivisionViewSet)
 router.register("gentityaltcodetypes", views.GentityAltCodeTypeViewSet)
