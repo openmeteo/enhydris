@@ -65,12 +65,6 @@ urlpatterns += [
     url(r"^auth/", include("rest_auth.urls")),
     url(r"^captcha/", include("rest_captcha.urls")),
     url(r"^tsdata/(?P<pk>\d+)/$", views.Tsdata.as_view(), name="tsdata"),
-    url(r"^timeseries/$", views.TimeseriesList.as_view(), name="timeseries-list"),
-    url(
-        r"^timeseries/(?P<pk>\d+)/$",
-        views.TimeseriesDetail.as_view(),
-        name="timeseries-detail",
-    ),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
@@ -91,6 +85,8 @@ router.register(
 router.register(
     r"stations/(?P<station_id>\d+)/instruments", views.InstrumentViewSet, "instrument"
 )
+
+router.register("timeseries", views.TimeseriesViewSet)
 
 router.register("waterdivisions", views.WaterDivisionViewSet)
 router.register("gentityaltcodetypes", views.GentityAltCodeTypeViewSet)

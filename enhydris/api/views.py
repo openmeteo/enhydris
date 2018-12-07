@@ -10,7 +10,7 @@ from django.db import IntegrityError
 from django.db.models import Count, Q
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, status
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -61,16 +61,16 @@ class Tsdata(APIView):
             )
 
 
-class TimeseriesList(generics.ListCreateAPIView):
+class TimeseriesViewSet(ModelViewSet):
     queryset = models.Timeseries.objects.all()
     serializer_class = serializers.TimeseriesSerializer
     permission_classes = (CanEditOrReadOnly,)
 
-    def post(self, request, *args, **kwargs):
-        """Redefine post, checking permissions.
+    def create(self, request):
+        """Redefine create, checking permissions.
 
         Django-rest-framework does not do object-level permission when
-        creating a new object, so we have to completely customize the post
+        creating a new object, so we have to completely customize the create
         method. Maybe there's a better way, such as using a mixin for the
         functionality below (especially when the API is extended to include
         other types as well).
@@ -91,13 +91,7 @@ class TimeseriesList(generics.ListCreateAPIView):
         if not request.user.has_perm("enhydris.change_station", station):
             return Response("Forbidden", status=status.HTTP_403_FORBIDDEN)
 
-        return super(TimeseriesList, self).post(request, *args, **kwargs)
-
-
-class TimeseriesDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = models.Timeseries.objects.all()
-    serializer_class = serializers.TimeseriesSerializer
-    permission_classes = (CanEditOrReadOnly,)
+        return super().create(request)
 
 
 class GeneralListPagination(PageNumberPagination):
