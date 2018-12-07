@@ -540,21 +540,91 @@ class UnitOfMeasurementTestCase(APITestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class GentityAltCodeTestCase(APITestCase):
+class StationAltCodeTestCase(APITestCase):
     def setUp(self):
-        self.gentity_alt_code = mommy.make(models.GentityAltCode)
+        self.station = mommy.make(models.Station)
+        self.alt_code = mommy.make(
+            models.GentityAltCode, gentity=self.station, value="666"
+        )
+        self.station2 = mommy.make(models.Station)
+        self.alt_code2 = mommy.make(models.GentityAltCode, gentity=self.station2)
 
-    def test_get_gentity_alt_code(self):
-        r = self.client.get("/api/gentityaltcodes/{}/".format(self.gentity_alt_code.id))
+    def test_list_status_code(self):
+        r = self.client.get("/api/stations/{}/altcodes/".format(self.station.id))
+        self.assertEqual(r.status_code, 200)
+
+    def test_list_length(self):
+        r = self.client.get("/api/stations/{}/altcodes/".format(self.station.id))
+        self.assertEqual(len(r.json()["results"]), 1)
+
+    def test_list_content(self):
+        r = self.client.get("/api/stations/{}/altcodes/".format(self.station.id))
+        self.assertEqual(r.json()["results"][0]["value"], "666")
+
+    def test_detail_status_code(self):
+        r = self.client.get(
+            "/api/stations/{}/altcodes/{}/".format(self.station.id, self.alt_code.id)
+        )
+        self.assertEqual(r.status_code, 200)
+
+    def test_detail_content(self):
+        r = self.client.get(
+            "/api/stations/{}/altcodes/{}/".format(self.station.id, self.alt_code.id)
+        )
+        self.assertEqual(r.json()["value"], "666")
+
+    def test_detail_returns_nothing_if_wrong_station(self):
+        r = self.client.get(
+            "/api/stations/{}/altcodes/{}/".format(self.station2.id, self.alt_code.id)
+        )
+        self.assertEqual(r.status_code, 404)
+
+
+class GentityEventTestCase(APITestCase):
+    # We have extensively tested GentityAltCode, which is practically the same code,
+    # so we test this briefly.
+    def setUp(self):
+        self.station = mommy.make(models.Station)
+        self.gentity_file = mommy.make(models.GentityEvent, gentity=self.station)
+
+    def test_list_status_code(self):
+        r = self.client.get("/api/stations/{}/events/".format(self.station.id))
+        self.assertEqual(r.status_code, 200)
+
+
+class OverseerTestCase(APITestCase):
+    # We have extensively tested GentityAltCode, which is practically the same code,
+    # so we test this briefly.
+    def setUp(self):
+        self.station = mommy.make(models.Station)
+        self.gentity_file = mommy.make(models.Overseer, station=self.station)
+
+    def test_list_status_code(self):
+        r = self.client.get("/api/stations/{}/overseers/".format(self.station.id))
+        self.assertEqual(r.status_code, 200)
+
+
+class InstrumentTestCase(APITestCase):
+    # We have extensively tested GentityAltCode, which is practically the same code,
+    # so we test this briefly.
+    def setUp(self):
+        self.station = mommy.make(models.Station)
+        self.gentity_file = mommy.make(models.Instrument, station=self.station)
+
+    def test_list_status_code(self):
+        r = self.client.get("/api/stations/{}/instruments/".format(self.station.id))
         self.assertEqual(r.status_code, 200)
 
 
 class GentityFileTestCase(APITestCase):
+    # We have extensively tested GentityAltCode, which is practically the same code,
+    # so we test this briefly.
     def setUp(self):
-        self.gentity_file = mommy.make(models.GentityFile)
+        self.station = mommy.make(models.Station)
+        self.gentity_file = mommy.make(models.GentityFile, gentity=self.station)
 
-    def test_get_gentity_file(self):
-        r = self.client.get("/api/gentityfiles/{}/".format(self.gentity_file.id))
+    def test_list_status_code(self):
+        r = self.client.get("/api/stations/{}/files/".format(self.station.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -570,10 +640,13 @@ class GentityFileContentTestCase(APITestCase):
         patch1 = patch("enhydris.api.views.open", mock_open(read_data="ABCDEF"))
         patch2 = patch("os.path.getsize", return_value=6)
 
-        self.gentity_file = mommy.make(models.GentityFile)
+        self.station = mommy.make(models.Station)
+        self.gentity_file = mommy.make(models.GentityFile, gentity=self.station)
         with patch1, patch2:
             self.response = self.client.get(
-                "/api/gentityfiles/{}/content/".format(self.gentity_file.id)
+                "/api/stations/{}/files/{}/content/".format(
+                    self.station.id, self.gentity_file.id
+                )
             )
 
     def tearDown(self):
@@ -593,10 +666,13 @@ class GentityFileContentWithoutFileTestCase(APITestCase):
     def setUp(self):
         # Mommy creates a GentityFile without an associated file, so the
         # result should be 404
-        self.gentity_file = mommy.make(models.GentityFile)
+        self.station = mommy.make(models.Station)
+        self.gentity_file = mommy.make(models.GentityFile, gentity=self.station)
 
         self.response = self.client.get(
-            "/api/gentityfiles/{}/content/".format(self.gentity_file.id)
+            "/api/stations/{}/files/{}/content/".format(
+                self.station.id, self.gentity_file.id
+            )
         )
 
     def test_status_code(self):

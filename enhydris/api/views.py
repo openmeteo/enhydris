@@ -100,7 +100,7 @@ class TimeseriesDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (CanEditOrReadOnly,)
 
 
-class StationListPagination(PageNumberPagination):
+class GeneralListPagination(PageNumberPagination):
     page_size = 100
     page_size_query_param = "page_size"
     max_page_size = 1000
@@ -108,7 +108,7 @@ class StationListPagination(PageNumberPagination):
 
 class StationViewSet(ModelViewSet):
     serializer_class = serializers.StationSerializer
-    pagination_class = StationListPagination
+    pagination_class = GeneralListPagination
 
     def get_permissions(self):
         pc = [CanCreateStation] if self.action == "create" else [CanEditOrReadOnly]
@@ -426,15 +426,47 @@ class UnitOfMeasurementViewSet(ReadOnlyModelViewSet):
 
 class GentityAltCodeViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.GentityAltCodeSerializer
-    queryset = models.GentityAltCode.objects.all()
+    pagination_class = GeneralListPagination
+
+    def get_queryset(self):
+        return models.GentityAltCode.objects.filter(
+            gentity_id=self.kwargs["station_id"]
+        )
+
+
+class GentityEventViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.GentityEventSerializer
+    pagination_class = GeneralListPagination
+
+    def get_queryset(self):
+        return models.GentityEvent.objects.filter(gentity_id=self.kwargs["station_id"])
+
+
+class OverseerViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.OverseerSerializer
+    pagination_class = GeneralListPagination
+
+    def get_queryset(self):
+        return models.Overseer.objects.filter(station_id=self.kwargs["station_id"])
+
+
+class InstrumentViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.InstrumentSerializer
+    pagination_class = GeneralListPagination
+
+    def get_queryset(self):
+        return models.Instrument.objects.filter(station_id=self.kwargs["station_id"])
 
 
 class GentityFileViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.GentityFileSerializer
-    queryset = models.GentityFile.objects.all()
+    pagination_class = GeneralListPagination
+
+    def get_queryset(self):
+        return models.GentityFile.objects.filter(gentity_id=self.kwargs["station_id"])
 
     @action(detail=True, methods=["get"])
-    def content(self, request, pk=None):
+    def content(self, request, pk=None, *, station_id):
         gfile = self.get_object()
         try:
             gfile_content_file = gfile.content.file
@@ -452,18 +484,3 @@ class GentityFileViewSet(ReadOnlyModelViewSet):
             response.write(chunk)
 
         return response
-
-
-class GentityEventViewSet(ReadOnlyModelViewSet):
-    serializer_class = serializers.GentityEventSerializer
-    queryset = models.GentityEvent.objects.all()
-
-
-class OverseerViewSet(ReadOnlyModelViewSet):
-    serializer_class = serializers.OverseerSerializer
-    queryset = models.Overseer.objects.all()
-
-
-class InstrumentViewSet(ReadOnlyModelViewSet):
-    serializer_class = serializers.InstrumentSerializer
-    queryset = models.Instrument.objects.all()

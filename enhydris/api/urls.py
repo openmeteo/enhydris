@@ -76,7 +76,22 @@ urlpatterns += [
 urlpatterns = format_suffix_patterns(urlpatterns)
 
 router = DefaultRouter()
+
 router.register("stations", views.StationViewSet, "station")
+router.register(
+    r"stations/(?P<station_id>\d+)/altcodes", views.GentityAltCodeViewSet, "altcode"
+)
+router.register(r"stations/(?P<station_id>\d+)/files", views.GentityFileViewSet, "file")
+router.register(
+    r"stations/(?P<station_id>\d+)/events", views.GentityEventViewSet, "event"
+)
+router.register(
+    r"stations/(?P<station_id>\d+)/overseers", views.OverseerViewSet, "overseer"
+)
+router.register(
+    r"stations/(?P<station_id>\d+)/instruments", views.InstrumentViewSet, "instrument"
+)
+
 router.register("waterdivisions", views.WaterDivisionViewSet)
 router.register("gentityaltcodetypes", views.GentityAltCodeTypeViewSet)
 router.register("organizations", views.OrganizationViewSet)
@@ -92,9 +107,4 @@ router.register("basins", views.WaterBasinViewSet)
 router.register("timesteps", views.TimeStepViewSet)
 router.register("variables", views.VariableViewSet)
 router.register("units", views.UnitOfMeasurementViewSet)
-router.register("gentityaltcodes", views.GentityAltCodeViewSet)
-router.register("gentityfiles", views.GentityFileViewSet)
-router.register("gentityevents", views.GentityEventViewSet)
-router.register("overseers", views.OverseerViewSet)
-router.register("instruments", views.InstrumentViewSet)
 urlpatterns += router.urls
