@@ -64,7 +64,6 @@ urlpatterns += [
 urlpatterns += [
     url(r"^auth/", include("rest_auth.urls")),
     url(r"^captcha/", include("rest_captcha.urls")),
-    url(r"^tsdata/(?P<pk>\d+)/$", views.Tsdata.as_view(), name="tsdata"),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

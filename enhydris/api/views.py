@@ -14,7 +14,6 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 import iso8601
@@ -25,40 +24,6 @@ from enhydris import models
 from . import serializers
 from .csv import prepare_csv
 from .permissions import CanCreateStation, CanEditOrReadOnly
-
-
-class Tsdata(APIView):
-    """
-    Take a timeseries id and return the actual timeseries data to the client,
-    or update a time series with new records.
-    """
-
-    permission_classes = (CanEditOrReadOnly,)
-
-    def get(self, request, pk, format=None):
-        try:
-            timeseries = models.Timeseries.objects.get(pk=int(pk))
-            self.check_object_permissions(request, timeseries)
-            response = HttpResponse(content_type="text/plain")
-            pd2hts.write(timeseries.get_data(), response)
-            return response
-        except models.Timeseries.DoesNotExist:
-            raise Http404
-
-    def post(self, request, pk, format=None):
-        try:
-            atimeseries = models.Timeseries.objects.get(pk=int(pk))
-            self.check_object_permissions(request, atimeseries)
-            atimeseries.append_data(StringIO(request.data["timeseries_records"]))
-            return HttpResponse(status=status.HTTP_204_NO_CONTENT)
-        except models.Timeseries.DoesNotExist:
-            raise Http404
-        except (IntegrityError, iso8601.ParseError) as e:
-            return HttpResponse(
-                status=status.HTTP_400_BAD_REQUEST,
-                content=str(e),
-                content_type="text/plain",
-            )
 
 
 class GeneralListPagination(PageNumberPagination):
@@ -485,3 +450,35 @@ class TimeseriesViewSet(ModelViewSet):
 
         # All checks passed, call inherited method to do the actual work.
         return super().create(request, *args, **kwargs)
+
+    @action(detail=True, methods=["get", "post"])
+    def data(self, request, pk=None, *, station_id):
+        if request.method == "GET":
+            return self._get_data(request, pk)
+        elif request.method == "POST":
+            return self._post_data(request, pk)
+
+    def _get_data(self, request, pk, format=None):
+        try:
+            timeseries = models.Timeseries.objects.get(pk=int(pk))
+            self.check_object_permissions(request, timeseries)
+            response = HttpResponse(content_type="text/plain")
+            pd2hts.write(timeseries.get_data(), response)
+            return response
+        except models.Timeseries.DoesNotExist:
+            raise Http404
+
+    def _post_data(self, request, pk, format=None):
+        try:
+            atimeseries = models.Timeseries.objects.get(pk=int(pk))
+            self.check_object_permissions(request, atimeseries)
+            atimeseries.append_data(StringIO(request.data["timeseries_records"]))
+            return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+        except models.Timeseries.DoesNotExist:
+            raise Http404
+        except (IntegrityError, iso8601.ParseError) as e:
+            return HttpResponse(
+                status=status.HTTP_400_BAD_REQUEST,
+                content=str(e),
+                content_type="text/plain",
+            )

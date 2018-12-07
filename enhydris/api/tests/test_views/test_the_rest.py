@@ -17,12 +17,19 @@ from enhydris import models
 
 
 class Tsdata404TestCase(APITestCase):
+    def setUp(self):
+        self.station = mommy.make(models.Station)
+
     def test_get_nonexistent_timeseries(self):
-        response = self.client.get("/api/tsdata/1234/")
+        response = self.client.get(
+            "/api/stations/{}/timeseries/1234/data/".format(self.station.id)
+        )
         self.assertEqual(response.status_code, 404)
 
     def test_post_nonexistent_timeseries(self):
-        response = self.client.post("/api/tsdata/1234/")
+        response = self.client.post(
+            "/api/stations/{}/timeseries/1234/data/".format(self.station.id)
+        )
         self.assertEqual(response.status_code, 404)
 
 
@@ -36,8 +43,11 @@ class TsdataGetTestCase(APITestCase):
         ),
     )
     def setUp(self, m):
-        timeseries = mommy.make(models.Timeseries)
-        self.response = self.client.get("/api/tsdata/{}/".format(timeseries.id))
+        station = mommy.make(models.Station)
+        timeseries = mommy.make(models.Timeseries, gentity=station)
+        self.response = self.client.get(
+            "/api/stations/{}/timeseries/{}/data/".format(station.id, timeseries.id)
+        )
 
     def test_status_code(self):
         self.assertEqual(self.response.status_code, 200)
@@ -61,7 +71,7 @@ class TsdataPostTestCase(APITestCase):
         timeseries = mommy.make(models.Timeseries, gentity=station)
         self.client.force_authenticate(user=user)
         self.response = self.client.post(
-            "/api/tsdata/{}/".format(timeseries.id),
+            "/api/stations/{}/timeseries/{}/data/".format(station.id, timeseries.id),
             data={
                 "timeseries_records": (
                     "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
@@ -86,12 +96,14 @@ class TsdataPostAuthorizationTestCase(APITestCase):
     def setUp(self):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
         self.user2 = mommy.make(User, is_active=True, is_superuser=False)
-        station = mommy.make(models.Station, creator=self.user1)
-        self.timeseries = mommy.make(models.Timeseries, gentity=station)
+        self.station = mommy.make(models.Station, creator=self.user1)
+        self.timeseries = mommy.make(models.Timeseries, gentity=self.station)
 
     def _post_tsdata(self):
         return self.client.post(
-            "/api/tsdata/{}/".format(self.timeseries.id),
+            "/api/stations/{}/timeseries/{}/data/".format(
+                self.station.id, self.timeseries.id
+            ),
             data={
                 "timeseries_records": (
                     "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
@@ -123,7 +135,7 @@ class TsdataPostGarbageTestCase(APITestCase):
         timeseries = mommy.make(models.Timeseries, gentity=station)
         self.client.force_authenticate(user=user)
         self.response = self.client.post(
-            "/api/tsdata/{}/".format(timeseries.id),
+            "/api/stations/{}/timeseries/{}/data/".format(station.id, timeseries.id),
             data={
                 "timeseries_records": (
                     # The actual content doesn't matter, since the mock will raise
