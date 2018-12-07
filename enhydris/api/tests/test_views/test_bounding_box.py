@@ -15,7 +15,7 @@ class SimpleBoundingBoxTestCase(APITestCase):
         mommy.make(
             models.Station, point=Point(x=21.60121, y=39.22440, srid=4326), srid=4326
         )
-        response = self.client.get("/api/Station/")
+        response = self.client.get("/api/stations/")
         self.bounding_box = response.json()["bounding_box"]
 
     def test_x1(self):
@@ -36,7 +36,7 @@ class DefaultBoundingBoxTestCase(APITestCase):
     def setUp(self):
         mommy.make(models.Station, point=None, srid=None)
         mommy.make(models.Station, point=None, srid=None)
-        response = self.client.get("/api/Station/")
+        response = self.client.get("/api/stations/")
         self.bounding_box = response.json()["bounding_box"]
 
     def test_x1(self):
@@ -61,7 +61,7 @@ class TooSmallBoundingBoxTestCase(APITestCase):
         mommy.make(
             models.Station, point=Point(x=21.60121, y=39.22440, srid=4326), srid=4326
         )
-        response = self.client.get("/api/Station/")
+        response = self.client.get("/api/stations/")
         self.bounding_box = response.json()["bounding_box"]
 
     def test_x1(self):

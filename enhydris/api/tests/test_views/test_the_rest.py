@@ -149,7 +149,7 @@ class TimeseriesPostTestCase(APITestCase):
 
     def _create_timeseries(self):
         return self.client.post(
-            "/api/Timeseries/",
+            "/api/timeseries/",
             data={
                 "name": "Great time series",
                 "gentity": self.station.id,
@@ -179,24 +179,24 @@ class TimeseriesDeleteTestCase(APITestCase):
         self.timeseries = mommy.make(models.Timeseries, gentity=station)
 
     def test_unauthenticated_user_is_denied_permission_to_delete_timeseries(self):
-        response = self.client.delete("/api/Timeseries/{}/".format(self.timeseries.id))
+        response = self.client.delete("/api/timeseries/{}/".format(self.timeseries.id))
         self.assertEqual(response.status_code, 401)
 
     def test_unauthorized_user_is_denied_permission_to_delete_timeseries(self):
         self.client.force_authenticate(user=self.user2)
-        response = self.client.delete("/api/Timeseries/{}/".format(self.timeseries.id))
+        response = self.client.delete("/api/timeseries/{}/".format(self.timeseries.id))
         self.assertEqual(response.status_code, 403)
 
     def test_authorized_user_can_delete_timeseries(self):
         self.client.force_authenticate(user=self.user1)
-        response = self.client.delete("/api/Timeseries/{}/".format(self.timeseries.id))
+        response = self.client.delete("/api/timeseries/{}/".format(self.timeseries.id))
         self.assertEqual(response.status_code, 204)
 
 
 class StationListTestCase(APITestCase):
     def setUp(self):
         self.station = mommy.make(models.Station, name="Hobbiton")
-        self.response = self.client.get("/api/Station/")
+        self.response = self.client.get("/api/stations/")
 
     def test_status_code(self):
         self.assertEqual(self.response.status_code, 200)
@@ -219,7 +219,7 @@ class StationCreateTestCase(APITestCase):
 
     def _create_station(self):
         return self.client.post(
-            "/api/Station/",
+            "/api/stations/",
             data={
                 "name": "Hobbiton",
                 "copyright_years": "2018",
@@ -268,7 +268,7 @@ class StationUpdateAndDeleteTestCase(APITestCase):
 
     def _put_station(self):
         return self.client.put(
-            "/api/Station/{}/".format(self.station.id),
+            "/api/stations/{}/".format(self.station.id),
             data={
                 "name": "Hobbiton",
                 "copyright_years": "2018",
@@ -280,11 +280,11 @@ class StationUpdateAndDeleteTestCase(APITestCase):
 
     def _patch_station(self):
         return self.client.patch(
-            "/api/Station/{}/".format(self.station.id), data={"name": "Hobbiton"}
+            "/api/stations/{}/".format(self.station.id), data={"name": "Hobbiton"}
         )
 
     def _delete_station(self):
-        return self.client.delete("/api/Station/{}/".format(self.station.id))
+        return self.client.delete("/api/stations/{}/".format(self.station.id))
 
     def test_unauthenticated_user_is_denied_permission_to_put_station(self):
         response = self._put_station()
@@ -369,7 +369,7 @@ class StationCsvTestCase(APITestCase):
         )
 
     def test_station_csv(self):
-        response = self.client.get("/api/Station/csv/")
+        response = self.client.get("/api/stations/csv/")
         with tempfile.TemporaryFile() as t:
             t.write(response.content)
             with ZipFile(t) as f:
@@ -377,7 +377,7 @@ class StationCsvTestCase(APITestCase):
                 self.assertIn(",Agios Athanasios,", stations_csv)
 
     def test_station_with_no_srid_is_included(self):
-        response = self.client.get("/api/Station/csv/")
+        response = self.client.get("/api/stations/csv/")
         with tempfile.TemporaryFile() as t:
             t.write(response.content)
             with ZipFile(t) as f:
@@ -385,7 +385,7 @@ class StationCsvTestCase(APITestCase):
                 self.assertIn("SRID Point, NoSRID Station", stations_csv)
 
     def test_station_with_point_with_no_srid_is_included(self):
-        response = self.client.get("/api/Station/csv/")
+        response = self.client.get("/api/stations/csv/")
         with tempfile.TemporaryFile() as t:
             t.write(response.content)
             with ZipFile(t) as f:
@@ -393,7 +393,7 @@ class StationCsvTestCase(APITestCase):
                 self.assertIn("NoSRID Point, SRID Station", stations_csv)
 
     def test_station_with_no_srid_and_point_with_no_srid_is_included(self):
-        response = self.client.get("/api/Station/csv/")
+        response = self.client.get("/api/stations/csv/")
         with tempfile.TemporaryFile() as t:
             t.write(response.content)
             with ZipFile(t) as f:
@@ -406,7 +406,7 @@ class WaterDivisionTestCase(APITestCase):
         self.water_division = mommy.make(models.WaterDivision)
 
     def test_get_water_division(self):
-        r = self.client.get("/api/WaterDivision/{}/".format(self.water_division.id))
+        r = self.client.get("/api/waterdivisions/{}/".format(self.water_division.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -416,7 +416,7 @@ class GentityAltCodeTypeTestCase(APITestCase):
 
     def test_get_gentity_alt_code_type(self):
         r = self.client.get(
-            "/api/GentityAltCodeType/{}/".format(self.gentity_alt_code_type.id)
+            "/api/gentityaltcodetypes/{}/".format(self.gentity_alt_code_type.id)
         )
         self.assertEqual(r.status_code, 200)
 
@@ -426,7 +426,7 @@ class OrganizationTestCase(APITestCase):
         self.organization = mommy.make(models.Organization)
 
     def test_get_organization(self):
-        r = self.client.get("/api/Organization/{}/".format(self.organization.id))
+        r = self.client.get("/api/organizations/{}/".format(self.organization.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -435,7 +435,7 @@ class PersonTestCase(APITestCase):
         self.person = mommy.make(models.Person)
 
     def test_get_person(self):
-        r = self.client.get("/api/Person/{}/".format(self.person.id))
+        r = self.client.get("/api/persons/{}/".format(self.person.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -444,7 +444,7 @@ class StationTypeTestCase(APITestCase):
         self.station_type = mommy.make(models.StationType)
 
     def test_get_station_type(self):
-        r = self.client.get("/api/StationType/{}/".format(self.station_type.id))
+        r = self.client.get("/api/stationtypes/{}/".format(self.station_type.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -453,7 +453,7 @@ class TimeZoneTestCase(APITestCase):
         self.time_zone = mommy.make(models.TimeZone)
 
     def test_get_time_zone(self):
-        r = self.client.get("/api/TimeZone/{}/".format(self.time_zone.id))
+        r = self.client.get("/api/timezones/{}/".format(self.time_zone.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -463,7 +463,7 @@ class PoliticalDivisionTestCase(APITestCase):
 
     def test_get_political_division(self):
         r = self.client.get(
-            "/api/PoliticalDivision/{}/".format(self.political_division.id)
+            "/api/politicaldivisions/{}/".format(self.political_division.id)
         )
         self.assertEqual(r.status_code, 200)
 
@@ -473,7 +473,7 @@ class IntervalTypeTestCase(APITestCase):
         self.interval_type = mommy.make(models.IntervalType)
 
     def test_get_interval_type(self):
-        r = self.client.get("/api/IntervalType/{}/".format(self.interval_type.id))
+        r = self.client.get("/api/intervaltypes/{}/".format(self.interval_type.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -482,7 +482,7 @@ class FileTypeTestCase(APITestCase):
         self.file_type = mommy.make(models.FileType)
 
     def test_get_file_type(self):
-        r = self.client.get("/api/FileType/{}/".format(self.file_type.id))
+        r = self.client.get("/api/filetypes/{}/".format(self.file_type.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -491,7 +491,7 @@ class EventTypeTestCase(APITestCase):
         self.event_type = mommy.make(models.EventType)
 
     def test_get_event_type(self):
-        r = self.client.get("/api/EventType/{}/".format(self.event_type.id))
+        r = self.client.get("/api/eventtypes/{}/".format(self.event_type.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -500,7 +500,7 @@ class InstrumentTypeTestCase(APITestCase):
         self.instrument_type = mommy.make(models.InstrumentType)
 
     def test_get_instrument_type(self):
-        r = self.client.get("/api/InstrumentType/{}/".format(self.instrument_type.id))
+        r = self.client.get("/api/instrumenttypes/{}/".format(self.instrument_type.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -509,7 +509,7 @@ class WaterBasinTestCase(APITestCase):
         self.water_basin = mommy.make(models.WaterBasin)
 
     def test_get_water_basin(self):
-        r = self.client.get("/api/WaterBasin/{}/".format(self.water_basin.id))
+        r = self.client.get("/api/basins/{}/".format(self.water_basin.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -518,7 +518,7 @@ class TimeStepTestCase(APITestCase):
         self.time_step = mommy.make(models.TimeStep, length_minutes=10, length_months=0)
 
     def test_get_time_step(self):
-        r = self.client.get("/api/TimeStep/{}/".format(self.time_step.id))
+        r = self.client.get("/api/timesteps/{}/".format(self.time_step.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -527,7 +527,7 @@ class VariableTestCase(APITestCase):
         self.variable = mommy.make(models.Variable)
 
     def test_get_variable(self):
-        r = self.client.get("/api/Variable/{}/".format(self.variable.id))
+        r = self.client.get("/api/variables/{}/".format(self.variable.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -536,9 +536,7 @@ class UnitOfMeasurementTestCase(APITestCase):
         self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
 
     def test_get_unit_of_measurement(self):
-        r = self.client.get(
-            "/api/UnitOfMeasurement/{}/".format(self.unit_of_measurement.id)
-        )
+        r = self.client.get("/api/units/{}/".format(self.unit_of_measurement.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -547,7 +545,7 @@ class GentityAltCodeTestCase(APITestCase):
         self.gentity_alt_code = mommy.make(models.GentityAltCode)
 
     def test_get_gentity_alt_code(self):
-        r = self.client.get("/api/GentityAltCode/{}/".format(self.gentity_alt_code.id))
+        r = self.client.get("/api/gentityaltcodes/{}/".format(self.gentity_alt_code.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -556,7 +554,7 @@ class GentityFileTestCase(APITestCase):
         self.gentity_file = mommy.make(models.GentityFile)
 
     def test_get_gentity_file(self):
-        r = self.client.get("/api/GentityFile/{}/".format(self.gentity_file.id))
+        r = self.client.get("/api/gentityfiles/{}/".format(self.gentity_file.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -575,7 +573,7 @@ class GentityFileContentTestCase(APITestCase):
         self.gentity_file = mommy.make(models.GentityFile)
         with patch1, patch2:
             self.response = self.client.get(
-                "/api/GentityFile/{}/content/".format(self.gentity_file.id)
+                "/api/gentityfiles/{}/content/".format(self.gentity_file.id)
             )
 
     def tearDown(self):
@@ -598,7 +596,7 @@ class GentityFileContentWithoutFileTestCase(APITestCase):
         self.gentity_file = mommy.make(models.GentityFile)
 
         self.response = self.client.get(
-            "/api/GentityFile/{}/content/".format(self.gentity_file.id)
+            "/api/gentityfiles/{}/content/".format(self.gentity_file.id)
         )
 
     def test_status_code(self):

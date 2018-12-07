@@ -11,7 +11,7 @@ class StationSortDefaultTestCase(APITestCase):
     def setUp(self):
         mommy.make(models.Station, name="Rivendell")
         mommy.make(models.Station, name="Hobbiton")
-        self.response = self.client.get("/api/Station/")
+        self.response = self.client.get("/api/stations/")
 
     def test_status_code(self):
         self.assertEqual(self.response.status_code, 200)
@@ -27,7 +27,7 @@ class StationSortByReverseNameTestCase(APITestCase):
     def setUp(self):
         mommy.make(models.Station, name="Rivendell")
         mommy.make(models.Station, name="Hobbiton")
-        self.response = self.client.get("/api/Station/?sort=-name")
+        self.response = self.client.get("/api/stations/?sort=-name")
 
     def test_status_code(self):
         self.assertEqual(self.response.status_code, 200)
@@ -46,6 +46,6 @@ class StationSortWithInvalidAndDuplicateFieldsTestCase(APITestCase):
     )
     def test_invalid_and_duplicate_fields_are_removed(self, m):
         self.client.get(
-            "/api/Station/?sort=-name&sort=name&sort=nonexistent&sort=remarks"
+            "/api/stations/?sort=-name&sort=name&sort=nonexistent&sort=remarks"
         )
         m.assert_called_once_with("-name", "remarks")

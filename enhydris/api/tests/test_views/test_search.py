@@ -12,7 +12,7 @@ class StationSearchByOwnerTestCase(APITestCase):
         owner2 = mommy.make(models.Organization, name="United Federation of Planets")
         mommy.make(models.Station, owner=owner1, name="Hobbiton")
         mommy.make(models.Station, owner=owner2, name="Rivendell")
-        self.response = self.client.get("/api/Station/", {"q": "owner:assassination"})
+        self.response = self.client.get("/api/stations/", {"q": "owner:assassination"})
 
     def test_status_code(self):
         self.assertEqual(self.response.status_code, 200)
@@ -28,7 +28,7 @@ class StationSearchByTypeTestCase(APITestCase):
     def setUp(self):
         mommy.make(models.Station, stype__descr=["Hydrometric"], name="Hobbiton")
         mommy.make(models.Station, stype__descr=["Elfometric"], name="Rivendell")
-        self.response = self.client.get("/api/Station/", {"q": "type:elf"})
+        self.response = self.client.get("/api/stations/", {"q": "type:elf"})
 
     def test_status_code(self):
         self.assertEqual(self.response.status_code, 200)
@@ -44,7 +44,7 @@ class StationSearchByWaterDivisionTestCase(APITestCase):
     def setUp(self):
         mommy.make(models.Station, water_division__name="Mordor", name="Gorgoroth")
         mommy.make(models.Station, water_division__name="Gondor", name="Pelargir")
-        self.response = self.client.get("/api/Station/", {"q": "water_division:ordor"})
+        self.response = self.client.get("/api/stations/", {"q": "water_division:ordor"})
 
     def test_status_code(self):
         self.assertEqual(self.response.status_code, 200)
@@ -60,7 +60,7 @@ class StationSearchByWaterBasinTestCase(APITestCase):
     def setUp(self):
         mommy.make(models.Station, water_basin__name="Baranduin", name="Hobbiton")
         mommy.make(models.Station, water_basin__name="Lhûn", name="Mithlond")
-        self.response = self.client.get("/api/Station/", {"q": "water_basin:andu"})
+        self.response = self.client.get("/api/stations/", {"q": "water_basin:andu"})
 
     def test_status_code(self):
         self.assertEqual(self.response.status_code, 200)
@@ -78,7 +78,7 @@ class StationSearchByVariableTestCase(APITestCase):
         station2 = mommy.make(models.Station, name="Mithlond")
         mommy.make(models.Timeseries, gentity=station1, variable__descr="Rain")
         mommy.make(models.Timeseries, gentity=station2, variable__descr="Temperature")
-        self.response = self.client.get("/api/Station/", {"q": "variable:rain"})
+        self.response = self.client.get("/api/stations/", {"q": "variable:rain"})
 
     def test_status_code(self):
         self.assertEqual(self.response.status_code, 200)
@@ -95,7 +95,7 @@ class StationSearchByTsOnlyTestCase(APITestCase):
         station1 = mommy.make(models.Station, name="Hobbiton")
         mommy.make(models.Timeseries, gentity=station1)
         mommy.make(models.Station, name="Mithlond")
-        self.response = self.client.get("/api/Station/", {"q": "ts_only:"})
+        self.response = self.client.get("/api/stations/", {"q": "ts_only:"})
 
     def test_status_code(self):
         self.assertEqual(self.response.status_code, 200)
@@ -122,7 +122,7 @@ class StationSearchInTimeseriesRemarksTestCase(APITestCase):
             remarks="This time series is really important",
         )
         self.response = self.client.get(
-            "/api/Station/", {"q": "really important time series"}
+            "/api/stations/", {"q": "really important time series"}
         )
 
     def test_status_code(self):
@@ -143,7 +143,7 @@ class StationSearchByBboxTestCase(APITestCase):
         mommy.make(
             models.Station, point=Point(x=20.7085, y=38.8336, srid=4326), name="Lefkada"
         )
-        self.response = self.client.get("/api/Station/", {"q": "bbox:21,39,22,40"})
+        self.response = self.client.get("/api/stations/", {"q": "bbox:21,39,22,40"})
 
     def test_status_code(self):
         self.assertEqual(self.response.status_code, 200)

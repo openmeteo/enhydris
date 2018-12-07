@@ -65,36 +65,36 @@ urlpatterns += [
     url(r"^auth/", include("rest_auth.urls")),
     url(r"^captcha/", include("rest_captcha.urls")),
     url(r"^tsdata/(?P<pk>\d+)/$", views.Tsdata.as_view(), name="tsdata"),
-    url(r"^Timeseries/$", views.TimeseriesList.as_view(), name="Timeseries-list"),
+    url(r"^timeseries/$", views.TimeseriesList.as_view(), name="timeseries-list"),
     url(
-        r"^Timeseries/(?P<pk>\d+)/$",
+        r"^timeseries/(?P<pk>\d+)/$",
         views.TimeseriesDetail.as_view(),
-        name="Timeseries-detail",
+        name="timeseries-detail",
     ),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
 
 router = DefaultRouter()
-router.register("Station", views.StationViewSet, "station")
-router.register("WaterDivision", views.WaterDivisionViewSet)
-router.register("GentityAltCodeType", views.GentityAltCodeTypeViewSet)
-router.register("Organization", views.OrganizationViewSet)
-router.register("Person", views.PersonViewSet)
-router.register("StationType", views.StationTypeViewSet)
-router.register("TimeZone", views.TimeZoneViewSet)
-router.register("PoliticalDivision", views.PoliticalDivisionViewSet)
-router.register("IntervalType", views.IntervalTypeViewSet)
-router.register("FileType", views.FileTypeViewSet)
-router.register("EventType", views.EventTypeViewSet)
-router.register("InstrumentType", views.InstrumentTypeViewSet)
-router.register("WaterBasin", views.WaterBasinViewSet)
-router.register("TimeStep", views.TimeStepViewSet)
-router.register("Variable", views.VariableViewSet)
-router.register("UnitOfMeasurement", views.UnitOfMeasurementViewSet)
-router.register("GentityAltCode", views.GentityAltCodeViewSet)
-router.register("GentityFile", views.GentityFileViewSet)
-router.register("GentityEvent", views.GentityEventViewSet)
-router.register("Overseer", views.OverseerViewSet)
-router.register("Instrument", views.InstrumentViewSet)
+router.register("stations", views.StationViewSet, "station")
+router.register("waterdivisions", views.WaterDivisionViewSet)
+router.register("gentityaltcodetypes", views.GentityAltCodeTypeViewSet)
+router.register("organizations", views.OrganizationViewSet)
+router.register("persons", views.PersonViewSet)
+router.register("stationtypes", views.StationTypeViewSet)
+router.register("timezones", views.TimeZoneViewSet)
+router.register("politicaldivisions", views.PoliticalDivisionViewSet)
+router.register("intervaltypes", views.IntervalTypeViewSet)
+router.register("filetypes", views.FileTypeViewSet)
+router.register("eventtypes", views.EventTypeViewSet)
+router.register("instrumenttypes", views.InstrumentTypeViewSet)
+router.register("basins", views.WaterBasinViewSet)
+router.register("timesteps", views.TimeStepViewSet)
+router.register("variables", views.VariableViewSet)
+router.register("units", views.UnitOfMeasurementViewSet)
+router.register("gentityaltcodes", views.GentityAltCodeViewSet)
+router.register("gentityfiles", views.GentityFileViewSet)
+router.register("gentityevents", views.GentityEventViewSet)
+router.register("overseers", views.OverseerViewSet)
+router.register("instruments", views.InstrumentViewSet)
 urlpatterns += router.urls

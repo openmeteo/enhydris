@@ -62,7 +62,7 @@ class SearchWithYearExistingInOneStationTestCase(TestCaseBase):
     def setUp(self):
         super().setUp()
         self.response = self.client.get(
-            "/api/Station/", {"q": "ts_has_years:2005,2012,2016"}
+            "/api/stations/", {"q": "ts_has_years:2005,2012,2016"}
         )
 
     def test_status_code(self):
@@ -80,7 +80,7 @@ class SearchWithYearsExistingInAllStationsTestCase(TestCaseBase):
     def setUp(self):
         super().setUp()
         self.response = self.client.get(
-            "/api/Station/", {"q": "ts_has_years:2005,2012"}
+            "/api/stations/", {"q": "ts_has_years:2005,2012"}
         )
 
     def test_status_code(self):
@@ -100,7 +100,7 @@ class SearchWithYearsExistingNowhereTestCase(TestCaseBase):
     def setUp(self):
         super().setUp()
         self.response = self.client.get(
-            "/api/Station/", {"q": "ts_has_years:2005,2012,2018"}
+            "/api/stations/", {"q": "ts_has_years:2005,2012,2018"}
         )
 
     def test_status_code(self):
@@ -115,7 +115,7 @@ class SearchWithGarbageTestCase(TestCaseBase):
     def setUp(self):
         super().setUp()
         self.response = self.client.get(
-            "/api/Station/", {"q": "ts_has_years:hello,world"}
+            "/api/stations/", {"q": "ts_has_years:hello,world"}
         )
 
     def test_status_code(self):

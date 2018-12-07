@@ -58,7 +58,7 @@ class StationSearchBy2ndLevelPoliticalDivisionTestCase(TestCaseBase):
     def setUp(self):
         super().setUp()
         self.response = self.client.get(
-            "/api/Station/", {"q": "political_division:Epirus"}
+            "/api/stations/", {"q": "political_division:Epirus"}
         )
 
     def test_status_code(self):
@@ -76,7 +76,7 @@ class StationSearchBy3rdLevelPoliticalDivisionTestCase(TestCaseBase):
     def setUp(self):
         super().setUp()
         self.response = self.client.get(
-            "/api/Station/", {"q": "political_division:earth"}
+            "/api/stations/", {"q": "political_division:earth"}
         )
 
     def test_status_code(self):
