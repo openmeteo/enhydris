@@ -483,8 +483,11 @@ class TimeseriesViewSet(ModelViewSet):
             end_date = end_date.replace(tzinfo=None)
 
         adataframe = timeseries.get_data(start_date=start_date, end_date=end_date)
-        response = HttpResponse(content_type="text/plain")
-        pd2hts.write(adataframe, response)
+        response = HttpResponse(content_type="text/plain; charset=utf-8")
+        if request.GET.get("fmt", "").lower() == "hts":
+            pd2hts.write_file(adataframe, response)
+        else:
+            pd2hts.write(adataframe, response)
         return response
 
     def _post_data(self, request, pk, format=None):

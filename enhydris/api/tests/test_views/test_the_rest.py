@@ -55,13 +55,50 @@ class TsdataGetTestCase(APITestCase):
         self.assertEqual(self.response.status_code, 200)
 
     def test_content_type(self):
-        self.assertEqual(self.response["Content-Type"], "text/plain")
+        self.assertEqual(self.response["Content-Type"], "text/plain; charset=utf-8")
 
     def test_response_content(self):
         self.assertEqual(
             self.response.content.decode(),
-            "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
+            "2017-11-23 17:23,1.000000,\r\n2018-11-25 01:00,2.000000,\r\n",
         )
+
+
+class TsdataGetHtsTestCase(APITestCase):
+    @patch(
+        "enhydris.models.Timeseries.get_data",
+        return_value=pd.DataFrame(
+            index=[datetime(2017, 11, 23, 17, 23), datetime(2018, 11, 25, 1, 0)],
+            data={"value": [1.0, 2.0], "flags": ["", ""]},
+            columns=["value", "flags"],
+        ),
+    )
+    def setUp(self, m):
+        station = mommy.make(models.Station)
+        timeseries = mommy.make(
+            models.Timeseries, gentity=station, time_zone__utc_offset=120
+        )
+        self.response = self.client.get(
+            "/api/stations/{}/timeseries/{}/data/?fmt=hts".format(
+                station.id, timeseries.id
+            )
+        )
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 200)
+
+    def test_content_type(self):
+        self.assertEqual(self.response["Content-Type"], "text/plain; charset=utf-8")
+
+    def test_response_content(self):
+        self.assertTrue(
+            self.response.content.decode().endswith(
+                "2017-11-23 17:23,1.000000,\r\n2018-11-25 01:00,2.000000,\r\n"
+            )
+        )
+
+    def test_response_content_header(self):
+        self.assertIn("Count=2", self.response.content.decode())
 
 
 class TsdataPostTestCase(APITestCase):
