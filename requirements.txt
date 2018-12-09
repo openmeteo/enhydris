@@ -1,4 +1,4 @@
-Django>=1.11.1,<2
+Django>=2.1,<2.2
 djangorestframework>=3.9,<4
 gdal>=1.6
 simpletail>=0.1.2

@@ -1,7 +1,7 @@
 from django.conf import settings
-from django.conf.urls import include, url
 from django.contrib.auth import views as auth_views
 from django.http import Http404
+from django.urls import include, path
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -31,50 +31,50 @@ def wrapped_registration_view(registration_view):
 # For why we have this URL, see
 # https://github.com/Tivix/django-rest-auth/issues/292#issuecomment-305085402
 urlpatterns = [
-    url(
-        r"^auth/registration/account-email-verification-sent",
+    path(
+        "auth/registration/account-email-verification-sent",
         null_view,
         name="account_email_verification_sent",
     )
 ]
 
 # Normally we could just put this in urlpatterns:
-#   url(r"^/auth/registration/", include("rest_auth.registration.urls"))
+#   path("/auth/registration/", include("rest_auth.registration.urls"))
 # However, we want these views to return 404 if ENHYDRIS_REGISTRATION_OPEN is False,
 # so we wrap them in a wrapper that does this. (We could just add them to
 # urlpatterns conditionally, but then ENHYDRIS_REGISTRATION_OPEN wouldn't be
 # overridable in tests.)
 urlpatterns += [
-    url(
-        r"^auth/registration/$",
+    path(
+        "auth/registration/",
         wrapped_registration_view(auth_registration_views.RegisterView.as_view()),
         name="rest_register",
     ),
-    url(
-        r"^auth/registration/verify-email/$",
+    path(
+        "auth/registration/verify-email/",
         wrapped_registration_view(auth_registration_views.VerifyEmailView.as_view()),
         name="rest_verify_email",
     ),
-    url(
-        r"^auth/registration/account-confirm-email/(?P<key>[-:\w]+)/$",
+    path(
+        "auth/registration/account-confirm-email/<str:key>/",
         null_view,
         name="account_confirm_email",
     ),
 ]
 
 urlpatterns += [
-    url(r"^auth/", include("rest_auth.urls")),
-    url(
-        r"^auth/password/reset/confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)/$",
+    path("auth/", include("rest_auth.urls")),
+    path(
+        "auth/password/reset/confirm/<str:uidb64>/<str:token>/",
         auth_views.PasswordResetConfirmView.as_view(),
         name="password_reset_confirm",
     ),
-    url(
-        r"^auth/password/reset/complete/$",
-        auth_views.password_reset_complete,
+    path(
+        "auth/password/reset/complete/",
+        auth_views.PasswordResetCompleteView.as_view(),
         name="password_reset_complete",
     ),
-    url(r"^captcha/", include("rest_captcha.urls")),
+    path("captcha/", include("rest_captcha.urls")),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
