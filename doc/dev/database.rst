@@ -6,22 +6,18 @@ The database
 Main principles
 ---------------
 
-The Enhydris database is implemented in PostgreSQL. While the
-implementation of the database is through Django's object-relational
-mapper, which is more or less RDBMS-independent, Enhydris uses
-PostgreSQL's geographic features, so it is not portable. It also uses
-some custom PostgreSQL code for storing timeseries (however this is
-likely to change in the future).
+Enhydris supports PostgreSQL (with PostGIS) on production, and also
+SQLite (spatialite) on development.
 
-In Django parlance, a *model* is a type of entity, which usually maps
-to a single database table. Therefore, in Django, we usually talk of
-models rather than of database tables, and we design models, which is
-close to a conceptual database design, leaving it to Django's
-object-relational mapper to translate to the physical. In this text,
-we also speak more of models than of tables. Since a model is a Python
-class, we describe it as a Python class rather than as a relational
-database table. If, however, you feel more comfortable with tables,
-you can generally read the text understanding that a model is a table.
+In Django parlance, a *model* is a type of entity, which usually maps to
+a single database table. Therefore, in Django, we usually talk of models
+rather than of database tables, and we design models, which is close to
+conceptual database design, leaving it to Django's object-relational
+mapper to translate to the physical. In this text, we also speak more of
+models than of tables. Since a model is a Python class, we describe it
+as a Python class rather than as a relational database table. If,
+however, you feel more comfortable with tables, you can generally read
+the text understanding that a model is a table.
 
 If you are interested in the physical structure of the database, you
 need to know the model translation rules, which are quite simple:
@@ -40,19 +36,6 @@ need to know the model translation rules, which are quite simple:
   name of the database column for the key of the child table is the
   lower cased parent model name suffixed with ``_ptr_id``.
 
-There are two drawings that accompany this text: the drawing for the
-:download:`conceptual data model <enhydris-cdm.pdf>`, and the drawing for
-the :download:`physical data model <enhydris-pdm.pdf>`.  You should avoid
-looking at the physical data model; it is cluttered and confusing,
-since it is machine-generated. It is only provided for the benefit of
-those who are not comfortable with Django's object-relational mapping.
-However, it is best to learn to read the conceptual data model; if you
-become acquainted with the Django's object-relational mapping rules
-listed above, you will be able to write SQL commands effortlessly, by
-using these rules in your head.  The drawing of the physical data
-model is also far more likely to contain errors or to be outdated than
-the drawing and documentation for the conceptual data model.
-
 The core of the Enhydris database is a list of measuring stations,
 with additional information such as instruments, photos, videos, and
 so on, and the hydrological and meteorological time series stored for
@@ -64,7 +47,7 @@ need to develop additional software for managing aqueducts, and some
 may not. Therefore, the core is kept as simple as possible. The core
 database tables use the ``enhydris_`` prefix.  Other applications use
 another prefix. The name of a table is the lowercased model name
-preceeded by the prefix.  For example, the table that corresponds to
+preceded by the prefix.  For example, the table that corresponds to
 the :class:`~enhydris.models.Gentity` model is ``enhydris_gentity``.
 
 .. _multilingual:
@@ -82,14 +65,12 @@ the :class:`~enhydris.models.Gentity` model is ``enhydris_gentity``.
    and "descr_alt" depends on the installation. For example, we use Greek
    as the local language and English as the alternative language.
 
-   We hope to get rid of this, but this will involve fixing
-   django-multilingual or using another multilingual framework.
+   We hope to get rid of this, but this will involve using a
+   multilingual framework such as django-parler.
 
-   When any field in the API is marked as being multilingual, it means
-   that it is accompanied by an additional identical field that has
-   "_alt" appended to its name. (It also means that, instead, it should
-   be defined in a :class:`Translation` class nested in the model
-   class, as would be the case if `django-multilingual`_ were used.)
+   When any field in the reference is marked as being multilingual, it
+   means that it is accompanied by an additional identical field that
+   has "_alt" appended to its name.
 
 Lookup tables
 -------------
@@ -135,12 +116,9 @@ hierarchy is implemented by using Django's `multi-table inheritance`_.
 .. class:: enhydris.models.Person
 
    .. attribute:: last_name
-
-   .. attribute:: first_name
-
-   .. attribute:: middle_names
-
-   .. attribute:: initials
+                  first_name
+                  middle_names
+                  initials
 
       The above four are all :ref:`multilingual <multilingual>`
       character fields. The :attr:`initials` contain the initials without
@@ -150,8 +128,7 @@ hierarchy is implemented by using Django's `multi-table inheritance`_.
 .. class:: enhydris.models.Organization
 
    .. attribute:: enhydris.models.Organization.name
-
-   .. attribute:: enhydris.models.Organization.acronym
+                  enhydris.models.Organization.acronym
 
       :attr:`~enhydris.models.Organization.name` and
       :attr:`~enhydris.models.Organization.acronym` are both
@@ -207,14 +184,14 @@ implemented by using Django's `multi-table inheritance`_.
       This is a GeoDjango PointField_ that stores the 2-d location of
       the point.
 
-      .. _pointfield: http://docs.djangoproject.com/en/1.2/ref/contrib/gis/model-api/
+      .. _pointfield: https://docs.djangoproject.com/en/2.1/ref/contrib/gis/model-api/#pointfield
 
    .. attribute:: enhydris.models.Gpoint.srid
 
       Specifies the reference system in which the user originally
       entered the co-ordinates of the point.  Valid *srid*'s are
       registered at http://www.epsg-registry.org/.  See also
-      http://itia.ntua.gr/antonis/technical/coordinate-systems/.
+      https://medium.com/@aptiko/introduction-to-geographical-co-ordinate-systems-4e143c5b21bc.
 
    .. attribute:: enhydris.models.Gpoint.approximate
 
@@ -226,8 +203,7 @@ implemented by using Django's `multi-table inheritance`_.
       and e.g. in which basin it is.
 
    .. attribute:: enhydris.models.Gpoint.altitude
-
-   .. attribute:: enhydris.models.Gpoint.asrid
+                  enhydris.models.Gpoint.asrid
 
       These attributes store the altitude. *asrid* specifies the
       reference system, which defines how *altitude* is to be
@@ -237,8 +213,7 @@ implemented by using Django's `multi-table inheritance`_.
 .. class:: enhydris.models.Gline(Gentity)
 
    .. attribute:: enhydris.models.Gline.gpoint1
-
-   .. attribute:: enhydris.models.Gline.gpoint2
+                  enhydris.models.Gline.gpoint2
 
       The starting and ending points of the line; foreign keys to
       :class:`~enhydris.models.Gpoint`.
@@ -261,33 +236,31 @@ about gentities.
 
 .. class:: enhydris.models.PoliticalDivision(Garea)
 
-      From an administrative point of view, the world is divided into
-      countries. Each country is then divided into further divisions,
-      which may be called states, districts, counties, provinces,
-      prefectures, and so on, which may be further subdivided. Greece,
-      for example, is divided in districts, which are subdivided in
-      prefectures. How these divisions and subdivisions are named, and
-      the way and depth of subdividing, differs from country to
-      country.
+   From an administrative point of view, the world is divided into
+   countries. Each country is then divided into further divisions, which
+   may be called states, districts, counties, provinces, prefectures,
+   and so on, which may be further subdivided. Greece, for example, is
+   divided in districts, which are subdivided in prefectures. How these
+   divisions and subdivisions are named, and the way and depth of
+   subdividing, differs from country to country.
 
-      :class:`~enhydris.models.PoliticalDivision` is a recursive
-      model that represents such political divisions. The top-level
-      political division is a country, and lower levels differ from
-      country to country.
+   :class:`~enhydris.models.PoliticalDivision` is a recursive model that
+   represents such political divisions. The top-level political division
+   is a country, and lower levels differ from country to country.
 
-      .. attribute:: enhydris.models.PoliticalDivision.parent
+   .. attribute:: enhydris.models.PoliticalDivision.parent
 
-         For top-level political divisions, that is, countries, this
-         attribute is null; otherwise, it points to the containing
-         political division.
+      For top-level political divisions, that is, countries, this
+      attribute is null; otherwise, it points to the containing
+      political division.
 
-      .. attribute:: enhydris.models.PoliticalDivision.code
+   .. attribute:: enhydris.models.PoliticalDivision.code
 
-         For top-level political divisions, that is, countries, this
-         is the two-character ISO 3166 country code. For lower level
-         political divisions, it can be a country-specific division
-         code; for example, for US states, it can be the
-         two-character state code. Up to five characters.
+      For top-level political divisions, that is, countries, this is the
+      two-character ISO 3166 country code. For lower level political
+      divisions, it can be a country-specific division code; for
+      example, for US states, it can be the two-character state code. Up
+      to five characters.
 
 .. class:: enhydris.models.WaterDivision(Garea)
 
@@ -299,17 +272,17 @@ about gentities.
 
 .. class:: enhydris.models.WaterBasin(Garea)
 
-      A water basin.
+   A water basin.
 
-      .. attribute:: enhydris.models.WaterBasin.parent
+   .. attribute:: enhydris.models.WaterBasin.parent
 
-         If this is a subbasin, this field points to the containing
-         water basin.
+      If this is a subbasin, this field points to the containing
+      water basin.
 
-      .. attribute:: enhydris.models.WaterBasin.water_division
+   .. attribute:: enhydris.models.WaterBasin.water_division
 
-         The :class:`water district <models.WaterDivision>` in which
-         the water basin is.
+      The :class:`water district <models.WaterDivision>` in which
+      the water basin is.
 
 .. class:: enhydris.models.GentityAltCodeType(Lookup)
 
@@ -318,28 +291,27 @@ about gentities.
 
 .. class:: enhydris.models.GentityAltCode
 
-      While each gentity is automatically given an id by the system,
-      some stations may also have alternative codes. For example, in
-      Greece, if a database contains a measuring station that is owned
-      by a specific organisation, the station has the id given to it
-      by the database, but in addition it may have a code assigned by
-      the organisation; some also have a code created by older
-      inter-organisational efforts to create a unique list of stations
-      in Greece; and some also have a WMO code. This model therefore
-      stores alternative codes.
+   While each gentity is automatically given an id by the system, some
+   stations may also have alternative codes. For example, in Greece, if
+   a database contains a measuring station that is owned by a specific
+   organisation, the station has the id given to it by the database, but
+   in addition it may have a code assigned by the organisation; some
+   also have a code created by older inter-organisational efforts to
+   create a unique list of stations in Greece; and some also have a WMO
+   code. This model therefore stores alternative codes.
 
-      .. attribute:: enhydris.models.GentityAltCode.gentity
+   .. attribute:: enhydris.models.GentityAltCode.gentity
 
-         A foreign key to :class:`~enhydris.models.Gentity`.
+      A foreign key to :class:`~enhydris.models.Gentity`.
 
-      .. attribute:: enhydris.models.GentityAltCode.type
+   .. attribute:: enhydris.models.GentityAltCode.type
 
-         The type of alternative code; one of those listed in
-         :class:`~enhydris.models.GentityAltCodeType`.
+      The type of alternative code; one of those listed in
+      :class:`~enhydris.models.GentityAltCodeType`.
 
-      .. attribute:: enhydris.models.GentityAltCode.value
+   .. attribute:: enhydris.models.GentityAltCode.value
 
-         A character field with the actual code.
+      A character field with the actual code.
 
 .. class:: enhydris.models.FileType(Lookup)
 
@@ -348,7 +320,6 @@ about gentities.
    .. attribute:: enhydris.models.FileType.mime_type
 
       The mime type, like ``image/jpeg``.
-
 
 .. class:: enhydris.models.GentityFile
 
@@ -378,8 +349,8 @@ about gentities.
 
       The actual content of the file; a Django FileField_. Note that,
       for generality, images are also stored in this attribute, and
-      therefore they don't use an ImageField_, which means that the
-      few facilities that ImageField offers are not available.
+      therefore they don't use an ImageField_, which means that the few
+      facilities that ImageField offers are not available.
 
 .. class:: enhydris.models.EventType(Lookup)
 
@@ -388,10 +359,9 @@ about gentities.
 .. class:: enhydris.models.GentityEvent
 
    An event is something that happens during the lifetime of a gentity
-   and needs to be recorded. For example, for measuring stations,
-   events such as malfunctions, maintenance sessions, and extreme
-   weather phenomena observations can be recorded and provide a kind
-   of log.
+   and needs to be recorded. For example, for measuring stations, events
+   such as malfunctions, maintenance sessions, and extreme weather
+   phenomena observations can be recorded and provide a kind of log.
 
    .. attribute:: enhydris.models.GentityEvent.gentity
 
@@ -437,44 +407,40 @@ Station and its related models
       A boolean field showing whether the station is automatic.
 
    .. attribute:: enhydris.models.Station.start_date
+                  enhydris.models.Station.end_date
 
-   .. attribute:: enhydris.models.Station.end_date
-
-      An optional pair of dates indicating when the station started and
-      stopped working.
+      An optional pair of dates indicating was installed and abolished.
 
    .. attribute:: enhydris.models.Station.overseers
 
-      The overseers are the persons who are or have been responsible
-      for each meteorological station in the past. In the case of
-      traditional (not automatic) stations, this means the weather
-      observers. At a given time, each station has only one observer.
-      This is a many-to-many field, through model
+      The overseers are the persons who are or have been responsible for
+      each meteorological station in the past. In the case of manual
+      (not automatic) stations, this means the weather observers. At a
+      given time, each station has only one observer.  This is a
+      many-to-many field, through model
       :class:`~enhydris.models.Overseer`.
 
 .. class:: enhydris.models.Overseer
 
-      .. attribute:: enhydris.models.Overseer.station
+   .. attribute:: enhydris.models.Overseer.station
 
-         A foreign key to :class:`~enhydris.models.Station`.
+      A foreign key to :class:`~enhydris.models.Station`.
 
-      .. attribute:: enhydris.models.Overseer.person
+   .. attribute:: enhydris.models.Overseer.person
 
-         A foreign key to :class:`~enhydris.models.Person`.
+      A foreign key to :class:`~enhydris.models.Person`.
 
-      .. attribute:: enhydris.models.Overseer.is_current
+   .. attribute:: enhydris.models.Overseer.is_current
 
-         A boolean value indicating whether this person is the current
-         observer. For current overseers, the
-         :attr:`~enhydris.models.Overseer.end_date` below must
-         be null;
-         however, a null end_date could also mean that the end_date is
-         unknown, not necessarily that the overseer is the current
-         overseer.
+      A boolean value indicating whether this person is the current
+      overseer. For current overseers, the
+      :attr:`~enhydris.models.Overseer.end_date` below must be null;
+      however, a null end_date could also mean that the end_date is
+      unknown, not necessarily that the overseer is the current
+      overseer.
 
-      .. attribute:: enhydris.models.Overseer.start_date
-
-      .. attribute:: enhydris.models.Overseer.end_date
+   .. attribute:: enhydris.models.Overseer.start_date
+                  enhydris.models.Overseer.end_date
 
 .. class:: enhydris.models.InstrumentType(Lookup)
 
@@ -513,8 +479,7 @@ Station and its related models
       The model name.
 
    .. attribute:: enhydris.models.Instrument.start_date
-
-   .. attribute:: enhydris.models.Instrument.end_date
+                  enhydris.models.Instrument.end_date
 
       The dates of start and end of operation.
 
@@ -538,8 +503,7 @@ Time series and related models
 
    .. attribute:: enhydris.models.UnitOfMeasurement.variables
 
-      A many-to-many relationship to
-      :class:`~enhydris.models.Variable`.
+      A many-to-many relationship to :class:`~enhydris.models.Variable`.
 
 .. class:: enhydris.models.TimeZone
 
@@ -553,39 +517,38 @@ Time series and related models
 
       A number, in minutes, with the offset of the time zone from UTC.
       For example, CET has a utc_offset of 60, whereas CDT is -300.
-      This model only stores time zones with a constant utc offset,
-      and not time zones with variable offsets. For example, we don't
-      store CT (North American Central Time), because this is
-      different in summer and in winter; instead, we store CST
-      (Central Standard Time) and CDT (Central Daylight Time), which
-      are the two occurrences of CT. The time stamps of a given time
-      series may not observe summer time; they must always have the
-      same utc offset throught the time series.
+      This model only stores time zones with a constant utc offset, and
+      not time zones with variable offsets. For example, we don't store
+      CT (North American Central Time), because this is different in
+      summer and in winter; instead, we store CST (Central Standard
+      Time) and CDT (Central Daylight Time), which are the two
+      occurrences of CT. The time stamps of a given time series may not
+      observe summer time; they must always have the same utc offset
+      throught the time series.
 
 .. class:: enhydris.models.TimeStep(Lookup)
 
    This model holds time steps. The
    :attr:`~enhydris.models.Lookup.descr` attribute inherited by
-   :class:`~enhydris.models.Lookup` holds a descriptive
-   name for the time step, such as "daily" or "monthly". The model has
-   two additional attributes:
+   :class:`~enhydris.models.Lookup` holds a descriptive name for the
+   time step, such as "daily" or "monthly". The model has two additional
+   attributes:
 
    .. attribute:: length_minutes
-
-   .. attribute:: length_months
+                  length_months
 
       One of these two attributes must be zero. For example, a daily
-      time step has length_minutes=1440 and length_months=0; an
-      annual time step has length_minutes=0 and length_months=12.
+      time step has length_minutes=1440 and length_months=0; an annual
+      time step has length_minutes=0 and length_months=12.
 
 .. class:: enhydris.models.Timeseries
 
-   Hold time series.
+   Holds time series.
 
    .. attribute:: enhydris.models.Timeseries.gentity
 
-      The :class:`~enhydris.models.Gentity` to which the time
-      series refers.
+      The :class:`~enhydris.models.Gentity` to which the time series
+      refers.
 
    .. attribute:: enhydris.models.Timeseries.variable
 
@@ -603,13 +566,13 @@ Time series and related models
 
       An integer specifying the precision of the values of the time
       series, in number of decimal digits. It can be negative; for
-      example, a precision of -2 indicates that the values are
-      accurate to the hundred, ex. 100, 200 etc.
+      example, a precision of -2 indicates that the values are accurate
+      to the hundred, ex. 100, 200 etc.
 
    .. attribute:: enhydris.models.Timeseries.time_zone
 
-      The :class:`~enhydris.models.TimeZone` in which the time
-      series' timestamps are.
+      The :class:`~enhydris.models.TimeZone` in which the time series'
+      timestamps are.
 
    .. attribute:: enhydris.models.Timeseries.remarks
 
@@ -618,14 +581,15 @@ Time series and related models
    .. attribute:: enhydris.models.Timeseries.instrument
 
       The instrument that measured the time series; a foreign key to
-      :class:`~enhydris.models.Instrument`. This can be null, as
-      there are time series that are not measured by instruments, as
-      are, for example, time series resulting from processing of other
-      time series.
+      :class:`~enhydris.models.Instrument`. This can be null, as there
+      are time series that are not measured by instruments, as are, for
+      example, time series resulting from processing of other time
+      series.
 
    .. attribute:: enhydris.models.Timeseries.hidden
 
-      A boolean field to control the visibility of timeseries in related pages.
+      A boolean field to control the visibility of timeseries in related
+      pages.
 
    .. attribute:: enhydris.models.Timeseries.time_step
                   enhydris.models.Timeseries.timestamp_rounding_minutes
@@ -633,34 +597,32 @@ Time series and related models
                   enhydris.models.Timeseries.timestamp_offset_minutes
                   enhydris.models.Timeseries.timestamp_offset_months
 
-      The :attr:`~enhydris.models.Timeseries.time_step` is a
-      foreign key to :class:`~enhydris.models.TimeStep`. Some
-      time series are completely irregular; in that case,
-      :attr:`~enhydris.models.Timeseries.time_step` (and all
-      other time step related attributes) is null. Otherwise, it
-      contains an appropriate time step. For an explanation of the
-      other four attributes, see the :class:`timeseries.TimeStep`
-      class.
-      :attr:`~enhydris.models.Timeseries.timestamp_offset_minutes`
-      and
-      :attr:`~enhydris.models.Timeseries.timestamp_offset_months`
-      must always be present if the time step is not null.  The
-      rounding attributes may, however, be null, if the time
-      series is not strict, that is, if it does have a time step, but
-      that time step contains irregularities. As an example, a time
-      series measured by an automatic meteorological station every ten
-      minutes will usually have a rounding of 0 minutes, which
-      means the timestamps will end in :10, :20, :30, etc; but a clock
-      error or a setup error could result in the timestamps ending in
-      :11, :21, :31 for a brief period of time. In that case, we say
-      that the time series has a nonstrict time step of 10 minutes,
-      which means it has no specific rounding.
+      The :attr:`~enhydris.models.Timeseries.time_step` is a foreign key
+      to :class:`~enhydris.models.TimeStep`. Some time series are
+      completely irregular; in that case,
+      :attr:`~enhydris.models.Timeseries.time_step` (and all other time
+      step related attributes) is null. Otherwise, it contains an
+      appropriate time step. For an explanation of the other four
+      attributes, see the :class:`timeseries.TimeStep` class.
+      :attr:`~enhydris.models.Timeseries.timestamp_offset_minutes` and
+      :attr:`~enhydris.models.Timeseries.timestamp_offset_months` must
+      always be present if the time step is not null.  The rounding
+      attributes may, however, be null, if the time series is not
+      strict, that is, if it does have a time step, but that time step
+      contains irregularities. As an example, a time series measured by
+      an automatic meteorological station every ten minutes will usually
+      have a rounding of 0 minutes, which means the timestamps will end
+      in :10, :20, :30, etc; but a clock error or a setup error could
+      result in the timestamps ending in :11, :21, :31 for a brief
+      period of time. In that case, we say that the time series has a
+      nonstrict time step of 10 minutes, which means it has no specific
+      rounding.
 
    .. attribute:: enhydris.models.Timeseries.datafile
 
       The file where the time series data are stored. The attribute is a
-      Django FileField_. The format of this file is documented in
-      pd2hts as `text format`_.
+      Django FileField_. The format of this file is documented in pd2hts
+      as `text format`_.
 
       Usually you don't need to access this file directly; instead, use
       methods :meth:`~enhydris.models.Timeseries.get_data`,
@@ -676,17 +638,18 @@ Time series and related models
       series is empty. These are redundant; the start and end date of
       the time series could be found with
       :meth:`~enhydris.models.get_first_line` and
-      :meth:`~enhydris.models.get_last_line`. However, these
-      attributes can easily be used in database queries. Normally you
-      don't need to set them; they are set automatically when the time
-      series is saved. If you write to the
+      :meth:`~enhydris.models.get_last_line`. However, these attributes
+      can easily be used in database queries. Normally you don't need to
+      set them; they are set automatically when the time series is
+      saved. If you write to the
       :attr:`~enhydris.models.Timeseries.datafile`, you must
       subsequently call :meth:`save()` to update these fields.
 
    .. method:: enhydris.models.Timeseries.get_data(start_date=None, end_date=None)
 
-      Return the data of the file in a pandas DataFrame. If *start_date* or
-      *end_date* are specified, only this part of the data is returned.
+      Return the data of the file in a pandas DataFrame. If *start_date*
+      or *end_date* are specified, only this part of the data is
+      returned.
 
    .. method:: enhydris.models.Timeseries.set_data(data)
 
@@ -696,8 +659,8 @@ Time series and related models
 
    .. method:: enhydris.models.Timeseries.append_data(data)
 
-      Same as :meth:`~enhydris.models.Timeseries.set_data`, except
-      that the data is appended to the already existing data. Raises
+      Same as :meth:`~enhydris.models.Timeseries.set_data`, except that
+      the data is appended to the already existing data. Raises
       ``ValueError`` if the new data is not more recent than the old
       data.
 
