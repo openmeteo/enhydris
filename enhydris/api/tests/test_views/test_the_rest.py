@@ -188,6 +188,29 @@ class TsdataStartAndEndDateTestCase(APITestCase):
         )
 
 
+class TimeseriesBottomTestCase(APITestCase):
+    @patch(
+        "enhydris.models.Timeseries.get_last_line", return_value="2018-12-09 13:10,20,"
+    )
+    def setUp(self, m):
+        station = mommy.make(models.Station)
+        timeseries = mommy.make(
+            models.Timeseries, gentity=station, time_zone__utc_offset=120
+        )
+        self.response = self.client.get(
+            "/api/stations/{}/timeseries/{}/bottom/".format(station.id, timeseries.id)
+        )
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 200)
+
+    def test_content_type(self):
+        self.assertEqual(self.response["Content-Type"], "text/plain")
+
+    def test_response_content(self):
+        self.assertEqual(self.response.content.decode(), "2018-12-09 13:10,20,")
+
+
 class TimeseriesPostTestCase(APITestCase):
     def setUp(self):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)

@@ -2,16 +2,8 @@ from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 from django.views.generic.base import RedirectView
 
-from enhydris import views
-
 urlpatterns = [
     url(r"^stations/l/$", RedirectView.as_view(url="../..", permanent=True)),
-    url(
-        r"^timeseries/d/(?P<object_id>\d+)/bottom/$",
-        views.timeseries_bottom,
-        {},
-        "timeseries_bottom",
-    ),
     #   http://stackoverflow.com/questions/19985103/
     url(r"^password/change/$", auth_views.password_change, name="password_change"),
     url(

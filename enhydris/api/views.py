@@ -459,6 +459,13 @@ class TimeseriesViewSet(ModelViewSet):
         elif request.method == "POST":
             return self._post_data(request, pk)
 
+    @action(detail=True, methods=["get"])
+    def bottom(self, request, pk=None, *, station_id):
+        ts = get_object_or_404(models.Timeseries, pk=pk)
+        response = HttpResponse(content_type="text/plain")
+        response.write(ts.get_last_line())
+        return response
+
     def _get_data(self, request, pk, format=None):
         timeseries = get_object_or_404(models.Timeseries, pk=int(pk))
         self.check_object_permissions(request, timeseries)
