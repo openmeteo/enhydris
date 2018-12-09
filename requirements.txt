@@ -1,8 +1,6 @@
 Django>=1.11.1,<2
 djangorestframework>=3.9,<4
-Markdown>=2.1,<3
 gdal>=1.6
-django-bootstrap3>=8,<9
 simpletail>=0.1.2
 iso8601
 pd2hts>=0.2

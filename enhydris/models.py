@@ -118,9 +118,15 @@ post_save.connect(post_save_person_or_organization, sender=Organization)
 
 class Gentity(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    water_basin = models.ForeignKey("WaterBasin", null=True, blank=True)
-    water_division = models.ForeignKey("WaterDivision", null=True, blank=True)
-    political_division = models.ForeignKey("PoliticalDivision", null=True, blank=True)
+    water_basin = models.ForeignKey(
+        "WaterBasin", null=True, blank=True, on_delete=models.CASCADE
+    )
+    water_division = models.ForeignKey(
+        "WaterDivision", null=True, blank=True, on_delete=models.CASCADE
+    )
+    political_division = models.ForeignKey(
+        "PoliticalDivision", null=True, blank=True, on_delete=models.CASCADE
+    )
     name = models.CharField(max_length=200, blank=True)
     short_name = models.CharField(max_length=50, blank=True)
     remarks = models.TextField(blank=True)
@@ -170,8 +176,12 @@ class Gpoint(Gentity):
 
 
 class Gline(Gentity):
-    gpoint1 = models.ForeignKey(Gpoint, null=True, blank=True, related_name="glines1")
-    gpoint2 = models.ForeignKey(Gpoint, null=True, blank=True, related_name="glines2")
+    gpoint1 = models.ForeignKey(
+        Gpoint, null=True, blank=True, related_name="glines1", on_delete=models.CASCADE
+    )
+    gpoint2 = models.ForeignKey(
+        Gpoint, null=True, blank=True, related_name="glines2", on_delete=models.CASCADE
+    )
     length = models.FloatField(null=True, blank=True)
     f_dependecies = ["Gentity"]
     linestring = models.LineStringField(null=True, blank=True)
@@ -189,7 +199,7 @@ class Garea(Gentity):
 
 
 class PoliticalDivision(Garea):
-    parent = models.ForeignKey("self", null=True, blank=True)
+    parent = models.ForeignKey("self", null=True, blank=True, on_delete=models.CASCADE)
     code = models.CharField(max_length=5, blank=True)
 
     f_dependencies = ["Garea"]
@@ -206,7 +216,7 @@ class WaterDivision(Garea):
 
 
 class WaterBasin(Garea):
-    parent = models.ForeignKey("self", null=True, blank=True)
+    parent = models.ForeignKey("self", null=True, blank=True, on_delete=models.CASCADE)
     f_dependencies = ["Garea"]
 
 
@@ -216,9 +226,12 @@ class GentityAltCodeType(Lookup):
 
 class GentityAltCode(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    gentity = models.ForeignKey(Gentity)
-    type = models.ForeignKey(GentityAltCodeType)
+    gentity = models.ForeignKey(Gentity, on_delete=models.CASCADE)
+    type = models.ForeignKey(GentityAltCodeType, on_delete=models.CASCADE)
     value = models.CharField(max_length=100)
+
+    class Meta:
+        ordering = ("type__descr", "value")
 
     def __str__(self):
         return self.type.descr + " " + self.value
@@ -235,21 +248,22 @@ class FileType(Lookup):
     mime_type = models.CharField(max_length=64)
 
     def __str__(self):
-        if self.mime_type:
-            return self.mime_type
-        return str(self.id)
+        return self.mime_type or str(self.id)
 
 
 class GentityFile(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    gentity = models.ForeignKey(Gentity)
+    gentity = models.ForeignKey(Gentity, on_delete=models.CASCADE)
     date = models.DateField(blank=True, null=True)
-    file_type = models.ForeignKey(FileType)
+    file_type = models.ForeignKey(FileType, on_delete=models.CASCADE)
     content = models.FileField(upload_to="gentityfile")
     descr = models.CharField(max_length=100)
     remarks = models.TextField(blank=True)
     descr_alt = models.CharField(max_length=100)
     remarks_alt = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ("descr",)
 
     def __str__(self):
         return self.descr or self.descr_alt or str(self.id)
@@ -268,9 +282,9 @@ class EventType(Lookup):
 
 class GentityEvent(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    gentity = models.ForeignKey(Gentity)
+    gentity = models.ForeignKey(Gentity, on_delete=models.CASCADE)
     date = models.DateField()
-    type = models.ForeignKey(EventType)
+    type = models.ForeignKey(EventType, on_delete=models.CASCADE)
     user = models.CharField(max_length=64)
     report = models.TextField(blank=True)
     report_alt = models.TextField(blank=True)
@@ -299,7 +313,9 @@ class StationType(Lookup):
 
 
 class Station(Gpoint):
-    owner = models.ForeignKey(Lentity, related_name="owned_stations")
+    owner = models.ForeignKey(
+        Lentity, related_name="owned_stations", on_delete=models.CASCADE
+    )
     stype = models.ManyToManyField(StationType, verbose_name="type")
     is_automatic = models.BooleanField(default=False)
     start_date = models.DateField(null=True, blank=True)
@@ -312,7 +328,11 @@ class Station(Gpoint):
     # The following two fields are only useful when USERS_CAN_ADD_CONTENT
     # is set.
     creator = models.ForeignKey(
-        User, null=True, blank=True, related_name="created_stations"
+        User,
+        null=True,
+        blank=True,
+        related_name="created_stations",
+        on_delete=models.CASCADE,
     )
     maintainers = models.ManyToManyField(
         User, blank=True, related_name="maintaining_stations"
@@ -323,11 +343,14 @@ class Station(Gpoint):
 
 class Overseer(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    station = models.ForeignKey(Station)
-    person = models.ForeignKey(Person)
+    station = models.ForeignKey(Station, on_delete=models.CASCADE)
+    person = models.ForeignKey(Person, on_delete=models.CASCADE)
     is_current = models.BooleanField(default=False)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
+
+    class Meta:
+        ordering = ("start_date", "person__last_name", "person__first_name")
 
     def __str__(self):
         return str(self.person)
@@ -340,8 +363,8 @@ class InstrumentType(Lookup):
 
 class Instrument(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    station = models.ForeignKey(Station)
-    type = models.ForeignKey(InstrumentType)
+    station = models.ForeignKey(Station, on_delete=models.CASCADE)
+    type = models.ForeignKey(InstrumentType, on_delete=models.CASCADE)
     manufacturer = models.CharField(max_length=50, blank=True)
     model = models.CharField(max_length=50, blank=True)
     start_date = models.DateField(null=True, blank=True)
@@ -454,24 +477,32 @@ class TimeseriesStorage(FileSystemStorage):
 
     def path(self, name):
         self.location = abspathu(settings.ENHYDRIS_TIMESERIES_DATA_DIR)
-        return super(TimeseriesStorage, self).path(name)
+        return super().path(name)
 
 
 class Timeseries(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    gentity = models.ForeignKey(Gentity, related_name="timeseries")
-    variable = models.ForeignKey(Variable)
-    unit_of_measurement = models.ForeignKey(UnitOfMeasurement)
+    gentity = models.ForeignKey(
+        Gentity, related_name="timeseries", on_delete=models.CASCADE
+    )
+    variable = models.ForeignKey(Variable, on_delete=models.CASCADE)
+    unit_of_measurement = models.ForeignKey(UnitOfMeasurement, on_delete=models.CASCADE)
     name = models.CharField(max_length=200, blank=True)
     name_alt = models.CharField(max_length=200, blank=True, default="")
     hidden = models.BooleanField(null=False, blank=False, default=False)
     precision = models.SmallIntegerField(null=True, blank=True)
-    time_zone = models.ForeignKey(TimeZone)
+    time_zone = models.ForeignKey(TimeZone, on_delete=models.CASCADE)
     remarks = models.TextField(blank=True)
     remarks_alt = models.TextField(blank=True, default="")
-    instrument = models.ForeignKey(Instrument, null=True, blank=True)
-    time_step = models.ForeignKey(TimeStep, null=True, blank=True)
-    interval_type = models.ForeignKey(IntervalType, null=True, blank=True)
+    instrument = models.ForeignKey(
+        Instrument, null=True, blank=True, on_delete=models.CASCADE
+    )
+    time_step = models.ForeignKey(
+        TimeStep, null=True, blank=True, on_delete=models.CASCADE
+    )
+    interval_type = models.ForeignKey(
+        IntervalType, null=True, blank=True, on_delete=models.CASCADE
+    )
     timestamp_rounding_minutes = models.PositiveIntegerField(
         null=True,
         blank=True,

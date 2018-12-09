@@ -34,7 +34,6 @@ INSTALLED_APPS = [
     "allauth.account",
     "rest_auth.registration",
     "rest_captcha",
-    "bootstrap3",
     "enhydris",
     "enhydris.api",
     # enhydris overrides some templates from django.contrib.admin; for
@@ -44,7 +43,7 @@ INSTALLED_APPS = [
     "rules",
 ]
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -53,7 +52,7 @@ MIDDLEWARE_CLASSES = (
     "django.middleware.gzip.GZipMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.contrib.flatpages.middleware.FlatpageFallbackMiddleware",
-)
+]
 
 APPEND_SLASH = True
 

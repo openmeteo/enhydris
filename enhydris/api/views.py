@@ -268,9 +268,8 @@ class StationViewSet(ModelViewSet):
     @action(detail=False, methods=["get"])
     def csv(self, request):
         zipfilename = prepare_csv(self.get_queryset())
-        response = HttpResponse(
-            open(zipfilename, "rb").read(), content_type="application/zip"
-        )
+        with open(zipfilename, "rb") as f:
+            response = HttpResponse(f.read(), content_type="application/zip")
         response["Content-Disposition"] = "attachment; filename=data.zip"
         response["Content-Length"] = str(os.path.getsize(zipfilename))
         return response
@@ -440,7 +439,7 @@ class TimeseriesViewSet(ModelViewSet):
         except ValueError:
             raise Http404
         station = get_object_or_404(models.Station, id=gentity_id)
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             return Response("Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
         if not request.user.has_perm("enhydris.change_station", station):
             return Response("Forbidden", status=status.HTTP_403_FORBIDDEN)

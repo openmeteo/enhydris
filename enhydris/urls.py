@@ -6,6 +6,6 @@ from enhydris.api import urls as enhydris_api_urls
 admin.autodiscover()
 
 urlpatterns = [
-    url(r"^admin/", include(admin.site.urls)),
+    url(r"^admin/", admin.site.urls),
     url(r"^api/", include(enhydris_api_urls)),
 ]

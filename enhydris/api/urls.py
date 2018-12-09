@@ -66,7 +66,7 @@ urlpatterns += [
     url(r"^auth/", include("rest_auth.urls")),
     url(
         r"^auth/password/reset/confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)/$",
-        auth_views.password_reset_confirm,
+        auth_views.PasswordResetConfirmView.as_view(),
         name="password_reset_confirm",
     ),
     url(

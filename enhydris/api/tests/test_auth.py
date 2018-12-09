@@ -89,9 +89,10 @@ class ResetPasswordTestCase(APITestCase):
 
         # Visit the link and submit the form
         response = self.client.get(reset_link)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
         response = self.client.post(
-            reset_link, {"new_password1": "topsecret2", "new_password2": "topsecret2"}
+            response["Location"],
+            {"new_password1": "topsecret2", "new_password2": "topsecret2"},
         )
         self.assertEqual(response.status_code, 302)
 
