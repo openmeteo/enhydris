@@ -2,9 +2,6 @@ from django.conf import settings
 from django.contrib.auth import views as auth_views
 from django.http import Http404
 from django.urls import include, path
-from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
 from rest_framework.routers import DefaultRouter
 from rest_framework.urlpatterns import format_suffix_patterns
 
@@ -13,56 +10,39 @@ from rest_auth.registration import views as auth_registration_views
 from . import views
 
 
-@api_view()
-def null_view(request):
-    return Response(status=status.HTTP_400_BAD_REQUEST)
+class RegistrationMixin:
+    """Override dispatch method so that it raises 404 if registration isn't open.
 
+    We want the views from rest_auth.registration to raise 404 if
+    ENHYDRIS_REGISTRATION_OPEN is False.   We could just add them to
+    urlpatterns conditionally, but then ENHYDRIS_REGISTRATION_OPEN wouldn't be
+    overridable in tests. So what we do is we modify their dispatch() method so that
+    it checks for ENHYDRIS_REGISTRATION_OPEN and then either raises 404 or calls the
+    inherited dispatch().
+    """
 
-def wrapped_registration_view(registration_view):
-    def func(*args, **kwargs):
+    def dispatch(self, *args, **kwargs):
         if settings.ENHYDRIS_REGISTRATION_OPEN:
-            return registration_view(*args, **kwargs)
+            return super().dispatch(*args, **kwargs)
         else:
             raise Http404
 
-    return func
+
+class RegisterView(RegistrationMixin, auth_registration_views.RegisterView):
+    pass
 
 
-# For why we have this URL, see
-# https://github.com/Tivix/django-rest-auth/issues/292#issuecomment-305085402
+class VerifyEmailView(RegistrationMixin, auth_registration_views.VerifyEmailView):
+    pass
+
+
 urlpatterns = [
-    path(
-        "auth/registration/account-email-verification-sent",
-        null_view,
-        name="account_email_verification_sent",
-    )
-]
-
-# Normally we could just put this in urlpatterns:
-#   path("/auth/registration/", include("rest_auth.registration.urls"))
-# However, we want these views to return 404 if ENHYDRIS_REGISTRATION_OPEN is False,
-# so we wrap them in a wrapper that does this. (We could just add them to
-# urlpatterns conditionally, but then ENHYDRIS_REGISTRATION_OPEN wouldn't be
-# overridable in tests.)
-urlpatterns += [
-    path(
-        "auth/registration/",
-        wrapped_registration_view(auth_registration_views.RegisterView.as_view()),
-        name="rest_register",
-    ),
+    path("auth/registration/", RegisterView.as_view(), name="rest_register"),
     path(
         "auth/registration/verify-email/",
-        wrapped_registration_view(auth_registration_views.VerifyEmailView.as_view()),
+        VerifyEmailView.as_view(),
         name="rest_verify_email",
     ),
-    path(
-        "auth/registration/account-confirm-email/<str:key>/",
-        null_view,
-        name="account_confirm_email",
-    ),
-]
-
-urlpatterns += [
     path("auth/", include("rest_auth.urls")),
     path(
         "auth/password/reset/confirm/<str:uidb64>/<str:token>/",

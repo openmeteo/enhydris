@@ -1,9 +1,3 @@
-"""Quick-and-dirty CSV functionality.
-
-If you add ?format=csv to the station list URL, you get a zip file with the stations
-the URL would show, as well as their instruments and timeseries metadata. The job is
-done by the prepare_csv() function below.
-"""
 import csv
 import os
 import tempfile
@@ -185,11 +179,8 @@ def prepare_csv(queryset):
             structure and everything is subject to change without notice.
 
             If you are a developer and need to write automation tools, do not rely
-            on the CSV files. Instead, use the documented API
-            (http://openmeteo.org/doc/api.html), or contact us (the Enhydris
-            developers, not the web site maintainers) and insist that we support
-            one of these open standards appropriate for such information
-            interchange.
+            on the CSV files. Instead, use the web API
+            (https://enhydris.readthedocs.io/en/latest/dev/webservice-api.html).
             """
         )
     )

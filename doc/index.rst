@@ -20,7 +20,7 @@ General documentation:
 Developer documentation:
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    dev/contributing
    dev/database

@@ -96,6 +96,7 @@ ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 REST_AUTH_REGISTER_SERIALIZERS = {
     "REGISTER_SERIALIZER": "enhydris.api.serializers.RegisterWithCaptchaSerializer"
 }
+OLD_PASSWORD_FIELD_ENABLED = True
 
 # Default Enhydris settings
 ENHYDRIS_FILTER_DEFAULT_COUNTRY = None

@@ -221,22 +221,23 @@ These are the settings available to Enhydris, in addition to the
    divided in 'districts', then in 'prefecture', whereas the USA is
    first divided in 'states', then in 'counties'.
 
+.. data:: ENHYDRIS_REGISTRATION_OPEN
+
+   If ``True`` (the default), users can register, otherwise they have to
+   be created by the administrator.
+
 .. data:: ENHYDRIS_USERS_CAN_ADD_CONTENT
 
-   This must be configured before syncing the database. If set to
-   ``True``, it enables all logged in users to add content to the site
-   (stations, instruments and timeseries). It enables the use of user
-   space forms which are available to all registered users and also
-   allows editing existing data. When set to ``False`` (the default),
-   only privileged users are allowed to add/edit/remove data from the
-   db.
+   If set to ``True``, it enables all logged in users to add stations to
+   the site, and edit the data of the stations they have entered.  When
+   set to ``False`` (the default), only privileged users are allowed to
+   add/edit/remove data from the db.
 
 .. data:: ENHYDRIS_SITE_CONTENT_IS_FREE
 
    If this is set to ``True``, all registered users have access to the
    timeseries and can download timeseries data. If set to ``False``
    (the default), the users may be restricted.
-
 
 .. data:: ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS
 

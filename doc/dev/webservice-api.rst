@@ -4,248 +4,932 @@
 Webservice API
 ==============
 
-Overview
-========
+Quick start
+===========
 
-Normally the web pages of Enhydris are good if you are a human; but if
-you are a computer (a script that creates stations, for example), then
-you need a different interface. For that purpose, Enydris offers an
-API through HTTP, through which applications can communicate. For
-example, http://openmeteo.org/stations/d/1334/ shows you a weather
-station in human-readable format;
-http://openmeteo.org/api/Station/1334/ provides you data on the
-same station in machine-readable format.
+Get list of stations with a simple unauthenticated request::
 
-.. admonition:: Important
+    $ curl https://openmeteo.org/api/stations/
 
-   The Webservice API might change heavily in the future. If you make
-   any use of the API, it is very important that you stay in touch
-   with us so that we take into account your backwards compatibility
-   needs. Otherwise your applications might stop working one day.
+Response::
 
-The Webservice API is a work in progress: it was originally designed
-in order to provide the ability to replicate the data from one
-instance to another over the network. It was later extended to provide
-the possibility to create timeseries through a script. New functions
-are added to it as needed.
+    {
+      "count": 109,
+      "next": "http://openmeteo.org/api/stations/?page=2",
+      "previous": null,
+      "bounding_box": [
+        7.58748007,
+        34.9857333,
+        32.9850667,
+        53.85553
+      ],
+      "results": [
+        {
+          "id": 1386,
+          "last_modified": "2013-10-10T05:04:42.478447Z",
+          "name": "ΡΕΜΑ ΠΙΚΡΟΔΑΦΝΗΣ",
+          "short_name": "ΠΙΚΡΟΔΑΦΝΗ",
+          "remarks": "ΕΛΛΗΝΙΚΟ ΚΕΝΤΡΟ ΘΑΛΑΣΣΙΩΝ ΕΡΕΥΝΩΝ",
+          "name_alt": "",
+          "short_name_alt": "",
+          "remarks_alt": "",
+          "srid": 2100,
+          "approximate": false,
+          "altitude": 2,
+          "asrid": null,
+          "point": "SRID=4326;POINT (23.7025252977241 37.91860884428689)",
+          "is_automatic": true,
+          "start_date": "2012-09-20",
+          "end_date": null,
+          "copyright_holder": "HCMR",
+          "copyright_years": "2012-",
+          "water_basin": 1384,
+          "water_division": 506,
+          "political_division": 84,
+          "owner": 11,
+          "stype": [
+            3
+          ],
+          "overseers": [],
+          "maintainers": []
+        },
+        ...
+      ],
+    }
+
+Some requests need authentication. First, you need to get a token::
+
+   curl -X POST -d "username=alice" -d "password=topsecret" \
+       https://openmeteo.org/api/auth/login/
+
+Response::
+
+   {"key": "24122a7ad9cfec48eb536f5ca12fe06116ba3593"}
+
+Subsequently, you can make authenticated requests to the API; for example, the
+following will update a time series, modifying its ``variable`` field::
+
+    curl -H "Authorization: token 24122a7ad9cfec48eb536f5ca12fe06116ba3593" \
+        -X PATCH -d "variable=1" \
+        https://openmeteo.org/api/stations/1334/timeseries/10657/
+
+The response will be 200 with the following content::
+
+    {
+      "id": 10657,
+      "last_modified": "2011-06-22T06:54:17.064484Z",
+      "name": "Wind gust (2000-2006)",
+      "name_alt": "2-ΡΑΝ_ΠΡΩΤ",
+      "hidden": false,
+      "precision": 1,
+      "remarks": "Type: Raw data",
+      "remarks_alt": "Τύπος: Πρωτογενής",
+      "timestamp_rounding_minutes": null,
+      "timestamp_rounding_months": null,
+      "timestamp_offset_minutes": 0,
+      "timestamp_offset_months": 0,
+      "datafile": "http://stage.openmeteo.org/media/0000000242",
+      "start_date_utc": "2000-05-11T10:00:00Z",
+      "end_date_utc": "2006-07-14T12:10:00Z",
+      "gentity": 1334,
+      "variable": 1,
+      "unit_of_measurement": 7,
+      "time_zone": 1,
+      "instrument": 16,
+      "time_step": 1,
+      "interval_type": null
+    }
+
+Authentication and user management
+==================================
 
 Client authentication
-=====================
+---------------------
 
-Some of the API functions are provided freely, while others require
-authentication. An example of the latter are functions which alter
-data; another example is data which are protected and need, for
-example, a subscription in order to be accessed. In such cases of
-restricted access, HTTP Basic authentication is performed.
+Use OAuth2 token authentication::
 
-.. Note:: 
+   curl -H "Authorization: token OAUTH-TOKEN" https://openmeteo.org/api/
 
-   Using HTTP Basic Authentication with apache and
-   mod_wsgi requires you to add the ``WSGIPassAuthorization On``
-   directive to the server or vhost config, otherwise the application
-   cannot read the authentication data from HTTP_AUTHORIZATION in
-   request.META.  See: `WSGI+BASIC_AUTH`_.  
+To **get a token**, POST to ``/auth/login/``::
 
-   .. _WSGI+BASIC_AUTH: http://code.google.com/p/modwsgi/wiki/ConfigurationDirectives#WSGIPassAuthorization.
+   curl -X POST -d "username=alice" -d "password=topsecret" \
+       https://openmeteo.org/api/auth/login/
 
-Generic API calls 
-=================
+This will result in something like this::
 
-API calls are accessible under the ``/api/`` url after which you just fill in
-the model name of the model you want to request. For example, to request all
-the stations you must provide the url ``http://base-address/api/Station/``; the
-format in which the data will be returned depends on the HTTP ``Accept``
-header. The same goes for the rest of the enhydris models (e.g.
-``/api/Garea/``, ``/api/Gentity/`` etc). There is also the ability to request
-only one object of a specific type by appending its ``id`` in the url like
-this: ``http://base-address/api/Station/1000/``. 
+   {"key": "24122a7ad9cfec48eb536f5ca12fe06116ba3593"}
 
-See the :ref:`data model reference <database>` for information on the
-models.
+You can **invalidate a token** by POST to ``/auth/logout/``::
 
+   curl -X POST -H "Authorization: token OAUTH-TOKEN" \
+       https://openmeteo.org/api/auth/logout/
 
-Creating new time series and stations
-=====================================
+The response is 200 with this content::
 
-To create a new time series, you POST ``/api/Timeseries/``; you must
-pass an appropriate csrf_token and a session id (you must be logged on
-as a user who has permission to do this), and pass the data in an
-appropriate format, such as JSON. Likewise, you can create new
-stations by POSTing ``/api/Station/``; you can also delete stations
-and time series, and you can edit stations.
+    {"detail":"Successfully logged out."}
 
-If you program in Python, you should use `Pthelma's enhydris_api`_
-module. Otherwise, you should read its code to see more concrete
-examples of how to use the API.
+Password management
+-------------------
 
-.. _pthelma's enhydris_api: http://pthelma.readthedocs.org/en/latest/enhydris_api.html
+To **change password**, POST to ``/auth/password/change/``::
 
+    curl -X POST -H "Authorization: token OAUTH-TOKEN" \
+       -d "old_password=topsecret1" \
+       -d "new_password1=topsecret2" -d "new_password2=topsecret2" \
+       https://openmeteo.org/api/auth/password/change/
 
-Appending data to a time series
-===============================
+If all goes well, the response is a 200 with the following content::
 
-To append data to a time series, you PUT ``api/tsdata``. See the code
-of loggertodb_ for an example of how to do this.
+    {"detail": "New password has been saved."}
 
-.. _loggertodb: ../../pthelma/loggertodb
+If there is an error, the response is a 400 with a standard `error response`_.
 
-Timeseries data and GentityFile
-===============================
+To **reset the password**, POST to ``/auth/password/reset/``::
 
-At ``http://base-address/api/tsdata/id/`` (where ``id`` is the actual
-id of the timeseries object) you can get the timeseries data in
-`text format`_.
+   curl -X POST -d "email=myself@example.com" \
+       https://openmeteo.org/api/auth/password/reset/
 
-Cached time series data
-=======================
+This will respond with 200 and the following content::
 
-At ``http://base-address/timeseries/data/?object_id=id`` (where ``id``
-is the actual id of the time series object) you can get some time
-series data from specific positions (timestamps) as well as statistics
-and chart data. Data is cached so no need to read the entire time
-series and usually information is delivered fast. 
+    {"detail":"Password reset e-mail has been sent."}
 
-Cached time series data are being used to display time series
-previews in time series detail pages. Also there are used for
-charting like in:
+The response will be 200 even if there is no record of this email
+address (but in this case the response will be ignored); this is in
+order to avoid disclosing which email addresses are registered. However,
+the response will be 400 with a standard `error response`_ if the email
+address is invalid.
 
-  http://openmeteo.org/db/chart/ntuastation/
+The user will subsequently be sent an email with a link (under
+``/api/auth/password/reset/confirm/``) that provides a page where the
+user can specify a new password. After succeeding in specifying a new
+password, he is redirected to ``/api/auth/password/reset/complete/``,
+which is a page that says "your password has been set". However these
+two aren't API endpoints (they're just the convenient defaults of
+``django-rest-auth``).
 
-The response is a JSON object. An
-example is the following::
+User profile management
+-----------------------
+
+To **get the user data**, GET ``/auth/user``::
+
+    curl -H "Authorization: token OAUTH-TOKEN" \
+       https://openmeteo.org/api/auth/user/
+    
+This will normally result in a 200 response with content like this::
+
+    {
+        "pk": 166,
+        "username": "alice",
+        "email": "alice@example.com",
+        "first_name": "Alice",
+        "last_name": "Burton"
+    }
+
+You can **modify these attributes** except for ``pk`` and ``email`` by
+PUT or PATCH to the same endpoint::
+
+    curl -X PATCH -H "Authorization: token OAUTH-TOKEN" \
+       -d "username=joe" https://openmeteo.org/api/auth/user/
+
+The response is a 200 with a similar content as the GET response (with
+the updated data), unless there is a problem, in which case there's a
+standard `error response`_.
+
+Registration
+------------
+
+Registration only works if :data:`ENHYDRIS_REGISTRATION_OPEN` is set.
+
+**Get a captcha** with POST at ``/auth/captcha/``::
+
+    curl -X POST https://openmeteo.org/api/captcha/
+
+Response::
+
+    {
+        "captcha_image": "large string encoded in base64",
+        "image_type": "image/png",
+        "image_decode": "base64",
+        "captcha_key": "9459d5ee-dec2-42c4-843f-f8e8761f8ab3"
+    }
+
+**Register a user** with POST at ``/auth/registration``::
+
+    curl -X POST \
+       -d "username=alice" -d "email=alice@example.com" \
+       -d "password1=topsecret" -d "password2=topsecret" \
+       -d "captcha_key=9459d5ee-dec2-42c4-843f-f8e8761f8ab3" \
+       -d "captcha_value=QLLL" \
+       https://openmeteo.org/api/auth/registration/
+
+If there are no errors (such as user already existing, captcha expired,
+etc.), this will return 201 (with content ``{"detail":"Verification
+e-mail sent."}``) and will send an email to the user which
+will contain a link in the following form::
+
+    https://HOST/confirm-email/SOME_VERIFICATION_KEY/
+
+This is not an API endpoint; it is handled by the front-end, which
+should **verify the user's email** with POST at
+``/auth/registration/verify-email/``::
+
+    curl -X POST -d "key=SOME_VERIFICATION_KEY" \
+        https://openmeteo.org/api/auth/registration/verify-email/
+
+After this runs successfully (and returns 200 with ``{"detail":"ok"}``,
+the user is allowed to login.
+
+Lookups
+=======
+
+You can GET the list of objects for ``stationtypes``::
+
+    curl https://openmeteo.org/api/stationtypes/
+
+Response::
+
+    [
+      {
+        "id": 1,
+        "last_modified": "2011-06-22T05:21:05.436765Z",
+        "descr": "Meteorological",
+        "descr_alt": "Μετεωρολογικός"
+      },
+      {
+        "id": 2,
+        "last_modified": "2011-06-22T05:20:29.683218Z",
+        "descr": "Stage - Hydrometric",
+        "descr_alt": "Υδρομετρικός"
+      },
+      ...
+    ]
+
+You can also GET the detail of a single object (but it doesn't give you any
+more information)::
+
+    curl https://openmeteo.org/api/stationtypes/1/
+
+Response::
+
+    {
+      "id": 1,
+      "last_modified": "2011-06-22T05:21:05.436765Z",
+      "descr": "Meteorological",
+      "descr_alt": "Μετεωρολογικός"
+    }
+
+Exactly the same applies to ``gentityaltcodetypes``, ``eventtypes``,
+``instrumenttypes``, and ``variables``.
+
+Besides these there are several other lookups for which the response is
+similar but may have additional information. These are
+``organizations``, ``persons``, ``timezones``, ``politicaldivisions``,
+``waterdivisions``, ``intervaltypes``, ``filetypes``, ``basins``,
+``timesteps`` and ``units``.
+
+Response format for ``organizations``::
+
+    {
+      "id": 5,
+      "last_modified": "2011-06-30T03:03:47.392265Z",
+      "remarks": "",
+      "remarks_alt": "",
+      "name": "National Technical University of Athens - Dept. of Water Resources and Env. Engineering",
+      "acronym": "N.T.U.A. - D.W.R.E.",
+      "name_alt": "Εθνικό Μετσόβιο Πολυτεχνείο - Τομέας Υδατικών Πόρων και Περιβάλλοντος",
+      "acronym_alt": "Ε.Μ.Π. - Τ.Υ.Π.Π."
+    }
+
+Response format for ``persons``::
+
+    {
+        "id": 17,
+        "last_modified": null,
+        "remarks": "",
+        "remarks_alt": "",
+        "last_name": "Christofides",
+        "first_name": "Antonis",
+        "middle_names": "Michael",
+        "initials": "A. C.",
+        "last_name_alt": "Χριστοφίδης",
+        "first_name_alt": "Αντώνης",
+        "middle_names_alt": "Μιχαήλ",
+        "initials_alt": "Α.Χ."
+    }
+
+Response format for ``timezones``::
+
+    {
+        "id": 9,
+        "last_modified": "2011-06-28T16:42:34.760676Z",
+        "code": "EST",
+        "utc_offset": -300
+    }
+
+Response format for ``politicaldivisions``::
+
+    {                            
+      "id": 424,   
+      "last_modified": null,
+      "name": "ΦΛΩΡΙΝΑΣ            ",
+      "short_name": "ΦΛΩΡΙΝΑΣ",
+      "remarks": "",        
+      "name_alt": "",                
+      "short_name_alt": "",    
+      "remarks_alt": "",
+      "area": null,  
+      "mpoly": null,       
+      "code": "",       
+      "water_basin": null,
+      "water_division": null,
+      "political_division": null,
+      "parent": 307       
+    }
+
+Response format for ``waterdivisions``::
+
+      {
+        "id": 511,
+        "last_modified": null,
+        "name": "ΑΝΑΤΟΛΙΚΗ ΜΑΚΕΔΟΝΙΑ ",
+        "short_name": "Α-ΜΑΚΕΔ ",
+        "remarks": "",
+        "name_alt": "",
+        "short_name_alt": "",
+        "remarks_alt": "",
+        "area": null,
+        "mpoly": null,
+        "water_basin": null,
+        "water_division": null,
+        "political_division": null
+      }
+
+Response format for ``intervaltypes``::
+
+    {
+      "id": 1,
+      "last_modified": "2011-06-22T05:13:23.044416Z",
+      "descr": "Sum",
+      "descr_alt": "Αθροιστικό",
+      "value": "SUM"
+    }
+
+Response format for ``filetypes``::
 
   {
-    "stats": {"min_tstmp": 1353316200000, 
-              "max": 6.0, 
-              "max_tstmp": 979495200000, 
-              "avg": 0.0094982613015400109, 
-              "vavg": null,
-              "count": 10065,
-              "last_tstmp": 1353316200000,
-              "last": 0.0,
-              "min": 0.0,
-              "sum": 95.600000000000207,
-              "vectors": [0, 0, 0, 0, 0, 0, 0, 0],
-              "vsum": [0.0, 0.0]}, 
-    "data": [[911218200000, "0.0", 1],
-             [913349400000, "4.8", 3551], 
-             ..., 
-             [1350248400000, "0.0", 710001], 
-             [1353316200000, "0.0", 715149]]
+    "id": 7,
+    "last_modified": "2011-06-22T05:04:03.461401Z",
+    "descr": "png Picture",
+    "descr_alt": "Φωτογραφία png",
+    "mime_type": "image/png"
   }
 
-"stats"
-  An object holding statistics for the given interval (see bellow)
+Response format for ``basins``::
 
-"last"
-  Last value observed for the given interval
+  {
+    "id": 1343,
+    "last_modified": "2011-12-15T12:39:48.264386Z",
+    "name": "Σαρανταπόταμος",
+    "short_name": "",
+    "remarks": "",
+    "name_alt": "Sarantapotamos",
+    "short_name_alt": "",
+    "remarks_alt": "",
+    "area": null,
+    "mpoly": null,
+    "water_basin": null,
+    "water_division": 507,
+    "political_division": 303,
+    "parent": null
+  }
 
-"last_tstmp"
-  The timestamp for the last value
+Response format for ``timesteps``::
 
-"max"
-  Is the maximum value observed for the given interval (see bellow)
+  {
+    "id": 4,
+    "last_modified": "2011-06-22T05:11:53.556895Z",
+    "descr": "Monthly",
+    "descr_alt": "Μηνιαίο",
+    "length_minutes": 0,
+    "length_months": 1
+  }
 
-"max_tstmp"
-  The timestamp where the maximum value is observed
+Response format for ``units``::
 
-"min"
-  The minimum value for the given interval
+  {  
+    "id": 614,
+    "last_modified": null,
+    "descr": "Square metres",
+    "descr_alt": "Τετραγωνικά μέτρα",              
+    "symbol": "m²",                       
+    "variables": [] 
+  }
 
-"min_tstmp"
-  The timestamp where minimum value is observed
+Stations
+========
 
-"avg"
-  The average value for the given interval
+Station detail
+--------------
 
-"vavg"
-  A vector average in decimal degrees for vector variables such as
-  wind direction etc.
+You can GET the detail of a single station at ``/api/stations/ID/``::
 
-"count"
-  The actual number of records used for statistics
+    curl https://openmeteo.org/api/stations/1334/
 
-"sum"
-  The sum of values for the given interval
+Response::
 
-"vsum"
-  Two components of sum (vector sum) Sx, Sy, computed by the cosines,
-  sinus.
+    {
+      "id": 1334,
+      "last_modified": "2013-10-10T05:04:42.478447Z",
+      "name": "ΡΕΜΑ ΠΙΚΡΟΔΑΦΝΗΣ",
+      "short_name": "ΠΙΚΡΟΔΑΦΝΗ",
+      "remarks": "ΕΛΛΗΝΙΚΟ ΚΕΝΤΡΟ ΘΑΛΑΣΣΙΩΝ ΕΡΕΥΝΩΝ",
+      "name_alt": "",
+      "short_name_alt": "",
+      "remarks_alt": "",
+      "srid": 2100,
+      "approximate": false,
+      "altitude": 2,
+      "asrid": null,
+      "point": "SRID=4326;POINT (23.7025252977241 37.91860884428689)",
+      "is_automatic": true,
+      "start_date": "2012-09-20",
+      "end_date": null,
+      "copyright_holder": "HCMR",
+      "copyright_years": "2012-",
+      "water_basin": 1384,
+      "water_division": 506,
+      "political_division": 84,
+      "owner": 11,
+      "stype": [
+        3
+      ],
+      "overseers": [],
+      "maintainers": []
+    },
 
-"vectors"
-  The percentage of vector variable for eight distinct directions (N,
-  NE, E, SE, S, SW, W and NW).
+List stations
+-------------
 
-"data"
-  An object holding an array of charting values. Each item of the array
-  holds [timestamp, value, index]. Timestamp is a javascript timestamp,
-  value if a floating point number or null, index is the actual index
-  of the value in the whole time series records. 
+GET the list of stations at ``/stations/``::
 
-You have to specify at least the object_id GET parameter in order to
-obtain some data. The default time interval is the whole time series.
-In the case of the whole time series a rough image of the time series
-is displayed which is not precise. Statistics also can be no precise.
+    curl https://openmeteo.org/api/stations/
 
-In example for 10-minute time step time series, chart and statistics
-can be precise for intervals of one month the most.
+The result is a `paginated list`_ of stations::
 
-Besides ``object_id`` some other parameters can be given as GET
-parameters to specify the desired interval etc:
+    {
+        "count": 109,
+        "next": "http://openmeteo.org/api/stations/?page=2",
+        "previous": null,
+        "bounding_box": [7.58748, 37.03330, 26.88787, 53.85553]
+        "results": [
+            {...},
+            {...},
+            ...
+        ]
+    }
 
-*start_pos*
-  an index number specifying the begining of an interval. Index can
-  be zero (0) for the begining of the time series or at most last
-  record number minus one.
+Except for the standard `paginated list`_ attributes ``count``,
+``next``, ``previous`` and ``results``, the returned object also
+contains ``bounding_box``: this is the rectangle that encloses all
+stations this query returns (not only of this page): longitude and
+latitude of lower left corner, longitude and latitude of top right
+corner.
 
-*end_pos*
-  an index number specifying the end of an interval.
+Search stations
+---------------
 
-*last*
-  A string defining an interval from a pre-defined set:
-    * day
-    * week
-    * month
-    * year
-    * moment (returns one value only for the last moment)
-    * hour
-    * twohour
+Limit the returned stations with the ``q`` parameter. The following will
+return all stations where **the specified words appear anywhere** in the
+name, remarks, water basin name, water division name, political division
+name, owner name, or timeseries remarks. The match is case insensitive,
+and the words are actually substrings (i.e. they can match part of a
+word)::
 
-  By default the end of the interval is the end of the time series. If
-  time-series is auto-updated it shows the last measurements.
+    curl 'https://openmeteo.org/api/stations/?q=athens+research'
 
-*date*
-  Can be used in conjuction with the *last* parameter to display in
-  interval beginning at the specified date. Date format: yyyy-mm-dd
+The search string specified by ``q`` consists of space-delimited search
+terms.  The result set is the "and" of all search terms. If a search
+term does not contain a colon (``:``), it is searched mostly everywhere,
+as explained above.  If it does contain a colon, then the form of the
+search term is :samp:`{search_type}:{words}`. The ``words`` cannot
+contain a space (this is rarely a problem; instead of searching for
+"ionian islands", searching for "ionian" is usually fine). Search terms
+where the ``search_type`` isn't recognized are ignored.
 
-*time*
-  Can be used in conjuction with *last* and *date* parameters to
-  specify the beginning time of the interval. Accepted format: HH:MM 
+You can search specifically **by owner**::
 
-*exact_datetime*
-  A boolean parameter (set to true to activate). Specifies that
-  date times should be existing in time series record or else it
-  returns null. If not activated, it returns the closest periods
-  with data to the specified interval.
+    curl 'https://openmeteo.org/api/stations/?q=owner:ntua'
 
-*start_offset*
-  An offset in minutes for the beginning of the interval. It can
-  be used i.e. to exclude the first value of a daily interval, so
-  the statistics are computed correct i.e. from 144 10-min values
-  rather than 145 values (e.g. from 00:10 to 24:00 rather than
-  00:00 to 24:00). Suggested value for a ten minute time series is
-  10
+Or **by type**::
 
-*vector*
-  A boolean parameter. Set to 'true' to activate. Then vector
-  statistics are being calculated.
+    curl 'https://openmeteo.org/api/stations/?q=type:meteorological'
 
-*jsoncallback=?*
-  If you're running into the Same Origin Policy, which doesn't 
-  (normally) allow ajax requests to cross origins you should add
-  the GET parameter above to obtain the cached time series data
-  set.
+Or **by water division**::
 
-A full example to get some daily values for a time series:
+    curl 'https://openmeteo.org/api/stations/?q=water_division:attica'
 
-  https://openmeteo.org/db/timeseries/data/?object_id=230&last=day&exact_datetime=true&date=2012-11-01&time=00:00
+Or **by water basin**::
+
+    curl 'https://openmeteo.org/api/stations/?q=water_basin:peneios'
+
+Or **by variable** (i.e. one of the timeseries of the station refers to that
+variable)::
+
+    curl 'https://openmeteo.org/api/stations/?q=variable:temperature'
+
+Or **by political division or country**::
+
+    curl 'https://openmeteo.org/api/stations/?q=political_division:greece'
+
+Political divisions are recursive; the prefecture of Larissa is in the
+regional unit of Thessaly which is in the country Greece. If a station
+is registered as being in Larissa, it will match
+``political_division:larissa`` and ``political_division:thessaly`` and
+``political_division:greece``. You can also use ``country:greece``, but
+``country`` works merely as a synonym of ``political_division`` (i.e.
+``country:larissa`` would also work), so it's better to use the more
+accurate ``political_division``.
+
+You can also search **by bounding box**. The following will find
+stations that are enclosed in the specified rectangle (the numbers are
+longitude and latitude of lower-left and top-right corner)::
+
+    curl 'https://openmeteo.org/api/stations/?q=bbox:22.5,37.0,24.3,39.1'
+
+You can include **only stations that have time series** by specifying
+the search term ``ts_only:``, without a search word::
+
+    curl 'https://openmeteo.org/api/stations/?q=ts_only:'
+
+Finally, ``ts_has_years`` can limit to stations based on **the range of
+their time series**. The following will find stations that have at least
+one time series whose time range contains 1988, at least one time series
+whose time range contains 1989, and at least one time series whose time
+range contains 2004::
+
+    curl 'https://openmeteo.org/api/stations/?q=ts_has_years:1988,1989,2004'
+
+Sort the list of stations
+-------------------------
+
+Sort the returned stations with the ``sort`` parameter, which can be
+specified many times. This will sort by copyright holder, then by name::
+
+    curl 'https://openmeteo.org/api/stations/?sort=copyright_holder&sort=name'
+
+Export stations in a CSV
+------------------------
+
+Sometimes users want to get the list of stations and process it in a
+spreadsheet. This does this::
+
+    curl https://openmeteo.org/api/stations/csv/ >data.zip
+
+The list can be sorted and filtered with the ``q`` and ``sort``
+parameters as explained above. The result is a zip file that contains a
+CSV with the stations, a CSV with all the instruments of these stations,
+and a CSV with all the time series (their metadata only) of these
+stations. These lists contain all the columns, so users can do whatever
+they want with them.
+
+Time series
+===========
+
+List, retrieve, create, update, or delete time series
+-----------------------------------------------------
+
+GET a time series detail::
+
+    curl https://openmeteo.org/api/stations/1334/timeseries/232/
+
+Response::
+
+        {
+          "id": 232,
+          "last_modified": "2011-10-26T20:23:22.458770Z",
+          "name": "Temperature (from 1998)",
+          "name_alt": "2-ΘΕΡΜ_ΠΡΩΤ",
+          "hidden": false,
+          "precision": 1,
+          "remarks": "Type: Raw data",
+          "remarks_alt": "Τύπος: Πρωτογενής",
+          "timestamp_rounding_minutes": null,
+          "timestamp_rounding_months": null,
+          "timestamp_offset_minutes": 0,
+          "timestamp_offset_months": 0,
+          "datafile": "http://stage.openmeteo.org/media/0000000232",
+          "start_date_utc": "1998-12-10T14:30:00Z",
+          "end_date_utc": "2018-07-09T09:19:00Z",
+          "gentity": 1334,
+          "variable": 3,
+          "unit_of_measurement": 14,
+          "time_zone": 1,
+          "instrument": 10,
+          "time_step": 1,
+          "interval_type": null
+        }
+
+GET the list of time series of a station::
+
+    curl https://openmeteo.org/api/stations/1334/timeseries/
+
+The response is a list of detail objects.
+
+POST to create a time series::
+
+    curl -X POST -H "Authorization: token OAUTH-TOKEN" \
+        -d "gentity=1334" -d "variable=1" -d "time_zone=1" \
+        -d "unit_of_measurement=1" \
+        https://openmeteo.org/api/stations/1334/timeseries/
+
+The response is a 201 with a similar content as the GET detail response
+(with the new data), unless there is a problem, in which case there's a
+standard `error response`_.
+
+DELETE a time series::
+
+    curl -X DELETE -H "Authorization: token OAUTH-TOKEN" \
+        https://openmeteo.org/api/stations/1334/timeseries/10657/
+
+The response is normally 204 (no content) or 404.
+
+PUT or PATCH a time series::
+
+    curl -X PATCH -H "Authorization: token OAUTH-TOKEN" \
+        -d "variable=1" \
+        https://openmeteo.org/api/stations/1334/timeseries/10657/
+
+The response is a 200 with a similar content as the GET detail response
+(with the updated data), unless there is a problem, in which case
+there's a standard `error response`_.
+
+Time series data
+----------------
+
+**GET the data** of a time series in CSV by appending ``data/`` to the
+URL::
+
+    curl https://openmeteo.org/api/stations/1334/timeseries/232/data/
+
+Example of response::
+
+    1998-12-10 16:40,6.3,
+    1998-12-10 16:50,6.1,
+    1998-12-10 17:00,6.0,
+    1998-12-10 17:10,5.6,
+    ...
+
+Instead of CSV, you can **get HTS** by specifying the parameter
+``fmt=hts``::
+
+    curl 'https://openmeteo.org/api/stations/1334/timeseries/235/data/?fmt=hts`
+
+Response::
+
+    Count=926108
+    Title=Temperature (from 1998)
+    Comment=NTUA University Campus of Zografou
+    Comment=
+    Comment=Type: Raw data
+    Timezone=EET (UTC+0200)
+    Time_step=10,0
+    Timestamp_offset=0,0
+    Variable=Mean temperature
+    Precision=1
+    Location=23.787430 37.973850 4326
+    Altitude=219.00
+
+    1998-12-10 16:40,6.3,
+    1998-12-10 16:50,6.1,
+    1998-12-10 17:00,6.0,
+    1998-12-10 17:10,5.6,
+    ...
+
+
+**Get only the last record** of the time series (in CSV) with ``bottom/``::
+
+    curl https://openmeteo.org/api/stations/1334/timeseries/235/bottom/
+
+Response::
+
+    2018-07-09 11:19,0.000000,
+
+**Append data** to the time series::
+
+    curl -X POST -H "Authorization: token OAUTH-TOKEN" \
+        -d $'timeseries_records=2018-12-19T11:50,25.0,\n2018-12-19T12:00,25.1,\n' \
+        https://openmeteo.org/api/stations/1334/timeseries/235/data/
+
+(The ``$'...'`` is a bash idiom that does nothing more than escape the
+``\n`` in the string.)
+
+The response is normally 204 (no content).
+
+Other items of stations
+=======================
+
+Media and other station files
+-----------------------------
+
+List station files::
+
+    curl https://openmeteo.org/api/stations/1334/files/
+
+Response::
+
+    {
+      "count": 8,       
+      "next": null,
+      "previous": null,
+      "results": [ 
+        {
+          "id": 39,
+          "last_modified": "2011-06-22T07:53:01.349877Z",
+          "date": "1998-01-05",
+          "content": "https://openmeteo.org/media/gentityfile/imported_hydria_gentityfile_1334-4.jpg",
+          "descr": "West view",
+          "remarks": "",
+          "descr_alt": "Δυτική άποψη",
+          "remarks_alt": "",
+          "gentity": 1334,
+          "file_type": 1
+        },
+        ...
+      ]
+    }
+
+Or you can get the detail of a single one::
+
+    curl https://openmeteo.org/api/stations/1334/files/39/
+
+Response::
+
+    {
+      "id": 39,
+      "last_modified": "2011-06-22T07:53:01.349877Z",
+      "date": "1998-01-05",
+      "content": "https://openmeteo.org/media/gentityfile/imported_hydria_gentityfile_1334-4.jpg",
+      "descr": "West view",
+      "remarks": "",
+      "descr_alt": "Δυτική άποψη",
+      "remarks_alt": "",
+      "gentity": 1334,
+      "file_type": 1
+    },
+
+Get content of such files::
+
+    curl https://openmeteo.org/api/stations/1334/files/39/content/
+
+The response is the contents of the file (usually binary data). The
+response headers contain the appropriate ``Content-Type`` (derived from
+the file's ``file_type``).
+
+Alternative codes
+-----------------
+
+List or get detail of station alternative codes (i.e. alternative ids)::
+
+    curl https://openmeteo.org/api/stations/1334/altcodes/
+    curl https://openmeteo.org/api/stations/1334/altcodes/4/
+
+Response example for the detail request::
+
+    {
+      "id": 4,
+      "last_modified": null,
+      "value": "42B",
+      "gentity": 1334,
+      "type": 5
+    }
+
+For the list request, the result is a `paginated list`_ of items.
+
+Events
+------
+
+List or get detail of station events::
+
+    curl https://openmeteo.org/api/stations/1334/events/
+    curl https://openmeteo.org/api/stations/1334/events/524/
+
+Response example for the detail request::
+
+    {
+      "id": 524,
+      "last_modified": null,
+      "date": "1998-12-10",
+      "user": "",
+      "report": "Added air temperature and humidity sensor.",
+      "report_alt": "Προστέθηκε αισθητήρας θερμοκρασίας και υγρασίας.",
+      "gentity": 1334,
+      "type": 2
+    },
+
+For the list request, the result is a `paginated list`_ of items.
+
+Overseers
+---------
+
+List or get detail of station overseers::
+
+    curl https://openmeteo.org/api/stations/1334/overseers/
+    curl https://openmeteo.org/api/stations/1334/overseers/2/
+
+Response example for the detail request::
+
+    {
+      "id": 2,
+      "last_modified": null,
+      "is_current": true,
+      "start_date": "2019-01-06",
+      "end_date": null,
+      "station": 1334,
+      "person": 17
+    }
+
+For the list request, the result is a `paginated list`_ of items.
+
+Instruments
+-----------
+
+List or get detail of station instruments::
+
+    curl https://openmeteo.org/api/stations/1334/instruments/
+    curl https://openmeteo.org/api/stations/1334/instruments/19/
+
+Response example for the detail request::
+
+    {
+      "id": 19,
+      "last_modified": "2013-07-01T13:08:12.558369Z",
+      "manufacturer": "",
+      "model": "",
+      "start_date": "2001-04-10",
+      "end_date": null,
+      "name": "2nd air temperature & humidity",
+      "remarks": "Height from ground 2.35 m.",
+      "name_alt": "2ος αισθ θερμοκρασίας & υγρασίας",
+      "remarks_alt": "Ύψος από το έδαφος 2.35 m.",
+      "station": 1334,
+      "type": 23
+    }
+
+For the list request, the result is a `paginated list`_ of items.
+
+
+.. _paginated list:
+
+Pagination
+==========
+
+Some responses contain a paginated list. This has the following format::
+
+    {
+      "count": 109,
+      "next": "http://openmeteo.org/api/stations/?page=2",
+      "previous": null,
+      "results": [
+          {...},
+          {...},
+          {...},
+          ...
+        ]
+    }
+
+The returned object contains the following attributes:
+
+**results**
+   A list of items. Up to 100 items are returned.
+
+**count**
+   The total number of items this request returns.  If they are 100 or
+   fewer, there is no other page.
+
+**next**, **previous**
+   The URLs for the next and previous page of results.
+
+
+.. _error response:
+
+Error responses
+===============
+
+When there is an error with the data of a POST, PATCH or PUT request,
+the response code is 400 and the content has an error message for each
+problematic field. For example::
+
+    curl -v -X POST -H "Authorization: token OAUTH-TOKEN" \
+    -d "gentity=1334" -d "variable=1234" -d "unit_of_measurement=1" \
+    https://openmeteo.org/api/stations/1334/timeseries/
+
+Response::
+
+    {
+      "time_zone": [
+        "This field is required."
+      ],
+      "variable": [
+        "Invalid pk \"1234\" - object does not exist."
+      ]
+    }
