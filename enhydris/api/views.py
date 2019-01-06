@@ -267,11 +267,10 @@ class StationViewSet(ModelViewSet):
 
     @action(detail=False, methods=["get"])
     def csv(self, request):
-        zipfilename = prepare_csv(self.get_queryset())
-        with open(zipfilename, "rb") as f:
-            response = HttpResponse(f.read(), content_type="application/zip")
+        data = prepare_csv(self.get_queryset())
+        response = HttpResponse(data, content_type="application/zip")
         response["Content-Disposition"] = "attachment; filename=data.zip"
-        response["Content-Length"] = str(os.path.getsize(zipfilename))
+        response["Content-Length"] = len(data)
         return response
 
 

@@ -1,7 +1,5 @@
 import csv
-import os
-import tempfile
-import textwrap
+from io import BytesIO, StringIO
 from zipfile import ZIP_DEFLATED, ZipFile
 
 _station_list_csv_headers = [
@@ -128,69 +126,29 @@ def _timeseries_csv(t):
 
 
 def prepare_csv(queryset):
-    tempdir = tempfile.mkdtemp()
-    zipfilename = os.path.join(tempdir, "data.zip")
-    zipfile = ZipFile(zipfilename, "w", ZIP_DEFLATED)
+    with BytesIO() as result:
+        with ZipFile(result, "w", ZIP_DEFLATED) as zipfile:
+            with StringIO() as stations_csv:
+                csvwriter = csv.writer(stations_csv)
+                csvwriter.writerow(_station_list_csv_headers)
+                for station in queryset:
+                    csvwriter.writerow(_station_csv(station))
+                zipfile.writestr("stations.csv", stations_csv.getvalue())
 
-    stationsfilename = os.path.join(tempdir, "stations.csv")
-    stationsfile = open(stationsfilename, "w", encoding="utf-8-sig")
-    try:
-        csvwriter = csv.writer(stationsfile)
-        csvwriter.writerow(_station_list_csv_headers)
-        for station in queryset:
-            csvwriter.writerow(_station_csv(station))
-    finally:
-        stationsfile.close()
-    zipfile.write(stationsfilename, "stations.csv")
+            with StringIO() as instruments_csv:
+                csvwriter = csv.writer(instruments_csv)
+                csvwriter.writerow(_instrument_list_csv_headers)
+                for station in queryset:
+                    for instrument in station.instrument_set.all():
+                        csvwriter.writerow(_instrument_csv(instrument))
+                zipfile.writestr("instruments.csv", instruments_csv.getvalue())
 
-    instrumentsfilename = os.path.join(tempdir, "instruments.csv")
-    instrumentsfile = open(instrumentsfilename, "w", encoding="utf-8-sig")
-    try:
-        csvwriter = csv.writer(instrumentsfile)
-        csvwriter.writerow(_instrument_list_csv_headers)
-        for station in queryset:
-            for instrument in station.instrument_set.all():
-                csvwriter.writerow(_instrument_csv(instrument))
-    finally:
-        instrumentsfile.close()
-    zipfile.write(instrumentsfilename, "instruments.csv")
+            with StringIO() as timeseries_csv:
+                csvwriter = csv.writer(timeseries_csv)
+                csvwriter.writerow(_timeseries_list_csv_headers)
+                for station in queryset:
+                    for timeseries in station.timeseries.order_by("instrument__id"):
+                        csvwriter.writerow(_timeseries_csv(timeseries))
+                zipfile.writestr("timeseries.csv", timeseries_csv.getvalue())
 
-    timeseriesfilename = os.path.join(tempdir, "timeseries.csv")
-    timeseriesfile = open(timeseriesfilename, "w", encoding="utf-8-sig")
-    try:
-        csvwriter = csv.writer(timeseriesfile)
-        csvwriter.writerow(_timeseries_list_csv_headers)
-        for station in queryset:
-            for timeseries in station.timeseries.order_by("instrument__id"):
-                csvwriter.writerow(_timeseries_csv(timeseries))
-    finally:
-        timeseriesfile.close()
-    zipfile.write(timeseriesfilename, "timeseries.csv")
-
-    readmefilename = os.path.join(tempdir, "README")
-    readmefile = open(readmefilename, "w")
-    readmefile.write(
-        textwrap.dedent(
-            """\
-            The functionality which provides you with CSV versions of the station,
-            instrument and time series list is a quick way to enable HUMANS to
-            examine these lists with tools such as spreadsheets. It is not
-            intended to be used by any automation tools: headings, columns, file
-            structure and everything is subject to change without notice.
-
-            If you are a developer and need to write automation tools, do not rely
-            on the CSV files. Instead, use the web API
-            (https://enhydris.readthedocs.io/en/latest/dev/webservice-api.html).
-            """
-        )
-    )
-    readmefile.close()
-    zipfile.write(readmefilename, "README")
-
-    zipfile.close()
-    os.remove(stationsfilename)
-    os.remove(instrumentsfilename)
-    os.remove(timeseriesfilename)
-    os.remove(readmefilename)
-
-    return zipfilename
+        return result.getvalue()
