@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     # this reason, it must be listed in INSTALLED_APPS before
     # django.contrib.admin.
     "django.contrib.admin",
-    "rules",
+    "rules.apps.AutodiscoverRulesConfig",
 ]
 
 MIDDLEWARE = [
