@@ -13,13 +13,11 @@ class LentityAdmin(admin.ModelAdmin):
 @admin.register(models.Organization)
 class OrganizationAdmin(LentityAdmin):
     list_display = [f.name for f in models.Organization._meta.fields]
-    list_display_links = [f.name for f in models.Organization._meta.fields]
 
 
 @admin.register(models.Person)
 class PersonAdmin(LentityAdmin):
     list_display = [f.name for f in models.Person._meta.fields]
-    list_display_links = [f.name for f in models.Person._meta.fields]
 
 
 @admin.register(models.Gentity)
@@ -35,7 +33,6 @@ class GareaAdmin(GentityAdmin):
 @admin.register(models.PoliticalDivision)
 class PoliticalDivisionAdmin(GareaAdmin):
     list_display = [f.name for f in models.PoliticalDivision._meta.fields]
-    list_display_links = [f.name for f in models.PoliticalDivision._meta.fields]
 
 
 @admin.register(models.WaterDivision)
@@ -47,7 +44,6 @@ class WaterDivisionAdmin(GareaAdmin):
 @admin.register(models.WaterBasin)
 class WaterBasinAdmin(GareaAdmin):
     list_display = [f.name for f in models.WaterBasin._meta.fields]
-    list_display_links = [f.name for f in models.WaterBasin._meta.fields]
 
 
 @admin.register(models.GentityAltCodeType)
