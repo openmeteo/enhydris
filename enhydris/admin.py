@@ -37,8 +37,14 @@ class PoliticalDivisionAdmin(GareaAdmin):
 
 @admin.register(models.WaterDivision)
 class WaterDivisionAdmin(GareaAdmin):
-    # TODO: Fill it when the model is ready
-    pass
+    list_display = (
+        "id",
+        "last_modified",
+        "name",
+        "short_name",
+        "name_alt",
+        "short_name_alt",
+    )
 
 
 @admin.register(models.WaterBasin)
