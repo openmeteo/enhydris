@@ -6,6 +6,69 @@ Release notes
 
 .. highlight:: bash
 
+Version 3.0
+===========
+
+As of January 2019, version 3.0 is in heavy development and it is not
+expected to become stable before April 2019. Until then, install version
+2.0 in production.
+
+Upgrading
+---------
+
+You may only upgrade from version 2.1 (version 2.1 only exists to
+facilitate transition to 3.0, and it is otherwise not used; the old
+stable Enhydris version is 2.0). The procedure is this:
+
+ 1. Make sure you are running version 2.0 (any release will do).
+
+ 2. Backup the database.
+
+ 3. Update the repository::
+
+       git fetch origin
+
+ 4. Shut down the running service.
+
+ 5. Install version 2.1 and migrate::
+
+       git checkout 2.1
+       python manage.py migrate
+
+ 6. Empty the migrations table of the database for the ``hcore`` app::
+
+       python manage.py migrate --fake hcore zero
+
+    (This step is optional because in 3.0 the ``hcore`` app goes away
+    and is replaced by ``enhydris``. You can omit it in case you need to
+    go back or execute it if you want a cleaner database.)
+
+ 7. Install version 3.0::
+
+       git checkout 3.0
+       pip install -r requirements.txt
+
+ 8. If your settings file has been in ``enhydris/settings/``, you need
+    to create a settings file in ``enhydris_project/settings/``, as this
+    location has changed.
+
+ 9. Execute migrations::
+
+       python manage.py migrate --fake-initial
+
+10. Start the service
+
+Changes from 2.0
+----------------
+
+- This is the largest change to Enhydris so far. A large part of the
+  code has been rewritten. Enhydris is now what is (misleadingly) dubbed
+  a "Single Page Application".
+- The Web API has been reworked. Applications using the Enhydris 2.0 web
+  API won't work unchanged with 3.0.
+- GentityGenericData has been abolished, as it wasn't being used in any of the
+  known installations.
+
 Version 2.0
 ===========
 

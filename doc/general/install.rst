@@ -18,7 +18,7 @@ GDAL                                                  1.9
 PIL or Pillow with freetype                           1.1.7 [3]
 ===================================================== ============
 
-[1] Enhydris runs on Python 3.4 or later.  It does not run on Python 2.
+[1] Enhydris runs on Python 3.5 or later.  It does not run on Python 2.
 setuptools and pip are needed in order to install the rest of the Python
 modules.
 
@@ -54,7 +54,7 @@ this::
 
     cd /opt
     git clone https://github.com/openmeteo/enhydris.git
-    git checkout 1.2
+    git checkout 3.0
     virtualenv --system-site-packages --python=/usr/bin/python3 \
         enhydris/venv
     ./enhydris/venv/bin/pip install -r enhydris/requirements.txt
@@ -65,19 +65,14 @@ The main reason to use it is that it will then use your systemwide
 ``python3-psycopg2``, if you use PostgreSQL), which means it won't need
 to compile these for the virtualenv.
 
-.. note::
-
-   Versions between 0.5 and 1.1 are installed in a different way. Please
-   consult the documentation for version 1.1.
-
 Configuring Enhydris
 ====================
 
 Create a Django settings file, either in
-:file:`enhydris/settings/local.py`, or wherever you like. It should begin
-with this::
+:file:`enhydris_project/settings/local.py`, or wherever you like. It
+should begin with this::
 
-    from enhydris.settings import *
+    from enhydris_project.settings import *
 
 and it then it should go on to override ``DEBUG``, ``SECRET_KEY``,
 ``DATABASES`` and ``STATIC_ROOT``. More settings you may want to
@@ -180,9 +175,10 @@ that this only listens to the localhost; if you want it to listen on
 all interfaces, use ``0.0.0.0:8000`` instead.
 
 To use Enhydris in production, you need to setup a web server such as
-apache. This is described in detail in `Deploying Django`_.
+apache. This is described in detail in `Deploying Django`_ and in
+https://djangodeployment.com/.
 
-.. _deploying django: http://docs.djangoproject.com/en/1.8/howto/deployment/
+.. _deploying django: http://docs.djangoproject.com/en/2.1/howto/deployment/
 
 
 Post-install configuration: domain name
@@ -203,7 +199,7 @@ Settings reference
 These are the settings available to Enhydris, in addition to the
 `Django settings`_.
 
-.. _django settings: http://docs.djangoproject.com/en/1.11/ref/settings/
+.. _django settings: http://docs.djangoproject.com/en/2.1/ref/settings/
 
 .. data:: ENHYDRIS_FILTER_DEFAULT_COUNTRY
 
