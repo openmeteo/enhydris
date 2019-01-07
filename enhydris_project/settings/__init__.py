@@ -15,7 +15,7 @@ if os.path.exists("/usr/lib/x86_64-linux-gnu/mod_spatialite.so"):
 SITE_ID = 1
 STATIC_URL = "/static/"
 
-ROOT_URLCONF = "urls"
+ROOT_URLCONF = "enhydris.urls"
 
 INSTALLED_APPS = [
     "django.contrib.auth",

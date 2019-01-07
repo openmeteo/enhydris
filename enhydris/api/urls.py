@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls import include, url
+from django.contrib.auth import views as auth_views
 from django.http import Http404
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -63,6 +64,16 @@ urlpatterns += [
 
 urlpatterns += [
     url(r"^auth/", include("rest_auth.urls")),
+    url(
+        r"^auth/password/reset/confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)/$",
+        auth_views.password_reset_confirm,
+        name="password_reset_confirm",
+    ),
+    url(
+        r"^auth/password/reset/complete/$",
+        auth_views.password_reset_complete,
+        name="password_reset_complete",
+    ),
     url(r"^captcha/", include("rest_captcha.urls")),
 ]
 
