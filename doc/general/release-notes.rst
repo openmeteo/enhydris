@@ -24,18 +24,22 @@ stable Enhydris version is 2.0). The procedure is this:
 
  2. Backup the database.
 
- 3. Update the repository::
+ 3. Make sure you have read and understood the list of changes from 2.0
+    below, as some of these changes may require manual intervention or
+    automatically do things you might not want.
+
+ 4. Update the repository::
 
        git fetch origin
 
- 4. Shut down the running service.
+ 5. Shut down the running service.
 
- 5. Install version 2.1 and migrate::
+ 6. Install version 2.1 and migrate::
 
        git checkout 2.1
        python manage.py migrate
 
- 6. Empty the migrations table of the database for the ``hcore`` app::
+ 7. Empty the migrations table of the database for the ``hcore`` app::
 
        python manage.py migrate --fake hcore zero
 
@@ -43,20 +47,20 @@ stable Enhydris version is 2.0). The procedure is this:
     and is replaced by ``enhydris``. You can omit it in case you need to
     go back or execute it if you want a cleaner database.)
 
- 7. Install version 3.0::
+ 8. Install version 3.0::
 
        git checkout 3.0
        pip install -r requirements.txt
 
- 8. If your settings file has been in ``enhydris/settings/``, you need
+ 9. If your settings file has been in ``enhydris/settings/``, you need
     to create a settings file in ``enhydris_project/settings/``, as this
     location has changed.
 
- 9. Execute migrations::
+ 10. Execute migrations::
 
        python manage.py migrate --fake-initial
 
-10. Start the service
+ 11. Start the service
 
 Changes from 2.0
 ----------------
@@ -67,7 +71,13 @@ Changes from 2.0
 - The Web API has been reworked. Applications using the Enhydris 2.0 web
   API won't work unchanged with 3.0.
 - GentityGenericData has been abolished, as it wasn't being used in any of the
-  known installations.
+  known installations. Upgrading requires the table to be empty; if not,
+  upgrading will stop with an error message. Make sure the table is
+  empty before upgrading.
+- Stations now must have co-ordinates, i.e. the related database field
+  ``gpoint.point`` is not null. If you have any stations with null
+  co-ordinates, they will be silently converted to latitude zero and
+  longitude zero during upgrading.
 
 Version 2.0
 ===========

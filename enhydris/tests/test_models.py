@@ -317,6 +317,7 @@ class StationTestCase(TestCase):
             copyright_holder="Bilbo Baggins",
             copyright_years="2018",
             name="Hobbiton",
+            point=Point(x=21.06071, y=39.09518, srid=4326),
         )
         station.save()
         self.assertEqual(models.Station.objects.first().name, "Hobbiton")

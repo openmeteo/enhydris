@@ -34,8 +34,6 @@ class SimpleBoundingBoxTestCase(APITestCase):
 @override_settings(ENHYDRIS_MAP_DEFAULT_VIEWPORT=(1.0, 2.0, 3.0, 4.0))
 class DefaultBoundingBoxTestCase(APITestCase):
     def setUp(self):
-        mommy.make(models.Station, point=None, srid=None)
-        mommy.make(models.Station, point=None, srid=None)
         response = self.client.get("/api/stations/")
         self.bounding_box = response.json()["bounding_box"]
 
