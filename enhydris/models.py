@@ -153,7 +153,7 @@ class Gpoint(Gentity):
     altitude = models.FloatField(null=True, blank=True)
     asrid = models.IntegerField(null=True, blank=True)
     f_dependencies = ["Gentity"]
-    point = models.PointField(null=True, blank=True)
+    point = models.PointField()
 
     def original_abscissa(self):
         if self.point and self.srid:

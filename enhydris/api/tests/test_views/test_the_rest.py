@@ -383,6 +383,7 @@ class StationCreateTestCase(APITestCase):
                 "copyright_holder": "Bilbo Baggins",
                 "owner": self.bilbo.id,
                 "stype": [self.meteorological.id],
+                "point": "SRID=4326;POINT (20.94565 39.12102)",
             },
         )
 
@@ -432,6 +433,7 @@ class StationUpdateAndDeleteTestCase(APITestCase):
                 "copyright_holder": "Bilbo Baggins",
                 "owner": self.bilbo.id,
                 "stype": [self.meteorological.id],
+                "point": "SRID=4326;POINT (20.94565 39.12102)",
             },
         )
 
