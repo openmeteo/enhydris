@@ -356,8 +356,7 @@ class Overseer(models.Model):
 
 
 class InstrumentType(Lookup):
-    class Meta:
-        db_table = "enhydris_instrumenttype"
+    pass
 
 
 class Instrument(models.Model):
