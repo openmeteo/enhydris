@@ -106,8 +106,6 @@ ENHYDRIS_FILTER_POLITICAL_SUBDIVISION2_NAME = None
 
 ENHYDRIS_REGISTRATION_OPEN = True
 ENHYDRIS_USERS_CAN_ADD_CONTENT = False
-ENHYDRIS_SITE_CONTENT_IS_FREE = False
-ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS = False
 
 ENHYDRIS_MIN_VIEWPORT_IN_DEGS = 0.04
 ENHYDRIS_MAP_DEFAULT_VIEWPORT = (19.3, 34.75, 29.65, 41.8)
@@ -116,17 +114,6 @@ ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR = 200
 ENHYDRIS_TS_GRAPH_FINE_STEP_DENOMINATOR = 50
 ENHYDRIS_SITE_STATION_FILTER = {}
 ENHYDRIS_DISPLAY_COPYRIGHT_INFO = False
-ENHYDRIS_WGS84_NAME = "WGS84"
-ENHYDRIS_MAP_BASE_LAYERS = [
-    r'OpenLayers.Layer.OSM.Mapnik("Open Street Map",'
-    r"{isBaseLayer:true,attribution:"
-    r""""Map by <a href='http://www.openstreetmap.org/'>OSM</a>"})""",
-    r'OpenLayers.Layer.OSM.CycleMap("Open Cycle Map",'
-    r"{isBaseLayer: true, attribution:"
-    r""""Map by <a href='http://www.openstreetmap.org/'>OSM</a>"})""",
-]
-ENHYDRIS_MAP_BOUNDS = ((19.3, 34.75), (29.65, 41.8))
-ENHYDRIS_MAP_MARKERS = {"0": "images/drop_marker.png"}
 
 if os.environ.get("SELENIUM_BROWSER", False):
     from selenium import webdriver
