@@ -6,8 +6,7 @@ The database
 Main principles
 ---------------
 
-Enhydris supports PostgreSQL (with PostGIS) on production, and also
-SQLite (spatialite) on development.
+Enhydris supports PostgreSQL (with PostGIS).
 
 In Django parlance, a *model* is a type of entity, which usually maps to
 a single database table. Therefore, in Django, we usually talk of models

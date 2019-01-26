@@ -1,15 +1,11 @@
 from datetime import datetime, timezone
-from unittest import skipIf
 from unittest.mock import patch
 
-from django.conf import settings
 from rest_framework.test import APITestCase
 
 from model_mommy import mommy
 
 from enhydris import models
-
-using_sqlite = settings.DATABASES["default"]["ENGINE"].endswith(".spatialite")
 
 
 def make_timeseries(*, start_date, end_date, **kwargs):
@@ -57,7 +53,6 @@ class TestCaseBase(APITestCase):
         )
 
 
-@skipIf(using_sqlite, "This functionality is not available on sqlite")
 class SearchWithYearExistingInOneStationTestCase(TestCaseBase):
     def setUp(self):
         super().setUp()
@@ -75,7 +70,6 @@ class SearchWithYearExistingInOneStationTestCase(TestCaseBase):
         self.assertEqual(self.response.json()["results"][0]["name"], "Tharbad")
 
 
-@skipIf(using_sqlite, "This functionality is not available on sqlite")
 class SearchWithYearsExistingInAllStationsTestCase(TestCaseBase):
     def setUp(self):
         super().setUp()
@@ -95,7 +89,6 @@ class SearchWithYearsExistingInAllStationsTestCase(TestCaseBase):
         self.assertEqual(result_names, {"Komboti", "Tharbad"})
 
 
-@skipIf(using_sqlite, "This functionality is not available on sqlite")
 class SearchWithYearsExistingNowhereTestCase(TestCaseBase):
     def setUp(self):
         super().setUp()
@@ -110,7 +103,6 @@ class SearchWithYearsExistingNowhereTestCase(TestCaseBase):
         self.assertEqual(len(self.response.json()["results"]), 0)
 
 
-@skipIf(using_sqlite, "This functionality is not available on sqlite")
 class SearchWithGarbageTestCase(TestCaseBase):
     def setUp(self):
         super().setUp()

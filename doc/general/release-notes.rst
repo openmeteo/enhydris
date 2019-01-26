@@ -78,6 +78,7 @@ Changes from 2.0
   ``gpoint.point`` is not null. If you have any stations with null
   co-ordinates, they will be silently converted to latitude zero and
   longitude zero during upgrading.
+- SQLite is no longer supported.
 
 Version 2.0
 ===========
