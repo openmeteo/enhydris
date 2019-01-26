@@ -1,0 +1,3 @@
+model-mommy>=1.6.0
+django-cors-headers
+sphinx

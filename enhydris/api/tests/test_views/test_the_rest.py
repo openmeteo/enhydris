@@ -189,7 +189,6 @@ class TsdataPostGarbageTestCase(APITestCase):
         self.assertEqual(self.response.status_code, 400)
 
 
-@override_settings(ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS=True)
 class TsdataStartAndEndDateTestCase(APITestCase):
     """Test that there's no aware/naive date confusion.
 

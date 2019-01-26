@@ -60,7 +60,10 @@ stable Enhydris version is 2.0). The procedure is this:
 
        python manage.py migrate --fake-initial
 
- 11. Start the service
+ 11. Configure and compile the frontend, and setup your web server, as
+     described in :ref:install.
+
+ 12. Start the service
 
 Changes from 2.0
 ----------------
