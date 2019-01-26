@@ -5,13 +5,14 @@ DEBUG = True
 SECRET_KEY = "topsecret"
 DATABASES = {
     "default": {
-        "ENGINE": "django.contrib.gis.db.backends.spatialite",
-        "NAME": "enhydris.db",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "NAME": "enhydris",
+        "USER": "enhydris",
+        "PASSWORD": "topsecret",
+        "HOST": "localhost",
+        "PORT": "5432",
     }
 }
-if os.path.exists("/usr/lib/x86_64-linux-gnu/mod_spatialite.so"):
-    # This is necessary for spatialite>=4.2
-    SPATIALITE_LIBRARY_PATH = "mod_spatialite"
 SITE_ID = 1
 STATIC_URL = "/static/"
 
