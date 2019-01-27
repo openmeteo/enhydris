@@ -49,7 +49,11 @@
       </div>
     </div>
     <no-ssr>
-      <MapMarkers :zoom="3" :center="centerMap" :markers="makeMarkers()" />
+      <MapMarkers
+        :zoom="3"
+        :center="centerMap"
+        :markers="getStationCoordinates()"
+      />
     </no-ssr>
     <br />
     <div class="box" style="min-height: 800px;">
@@ -167,7 +171,7 @@ export default {
         .filter(station => station.name.match(name_re));
 
       filtered_data.map(obj => {
-        obj.marker = maputils.convert2coords(obj.point);
+        obj.coordinates = maputils.wkt2coordinates(obj.point);
         return obj;
       });
       return filtered_data;
@@ -199,8 +203,8 @@ export default {
           throw e;
         });
     },
-    makeMarkers: function() {
-      return maputils.stationsWithMarkers(this.curStations);
+    getStationCoordinates: function() {
+      return maputils.getStationCoordinates(this.curStations);
     }
   }
 };
