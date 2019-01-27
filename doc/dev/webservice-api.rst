@@ -174,7 +174,7 @@ To **get the user data**, GET ``/auth/user``::
 
     curl -H "Authorization: token OAUTH-TOKEN" \
        https://openmeteo.org/api/auth/user/
-    
+
 This will normally result in a 200 response with content like this::
 
     {
@@ -322,22 +322,22 @@ Response format for ``timezones``::
 
 Response format for ``politicaldivisions``::
 
-    {                            
-      "id": 424,   
+    {
+      "id": 424,
       "last_modified": null,
       "name": "ΦΛΩΡΙΝΑΣ            ",
       "short_name": "ΦΛΩΡΙΝΑΣ",
-      "remarks": "",        
-      "name_alt": "",                
-      "short_name_alt": "",    
+      "remarks": "",
+      "name_alt": "",
+      "short_name_alt": "",
       "remarks_alt": "",
-      "area": null,  
-      "mpoly": null,       
-      "code": "",       
+      "area": null,
+      "mpoly": null,
+      "code": "",
       "water_basin": null,
       "water_division": null,
       "political_division": null,
-      "parent": 307       
+      "parent": 307
     }
 
 Response format for ``waterdivisions``::
@@ -410,13 +410,13 @@ Response format for ``timesteps``::
 
 Response format for ``units``::
 
-  {  
+  {
     "id": 614,
     "last_modified": null,
     "descr": "Square metres",
-    "descr_alt": "Τετραγωνικά μέτρα",              
-    "symbol": "m²",                       
-    "variables": [] 
+    "descr_alt": "Τετραγωνικά μέτρα",
+    "symbol": "m²",
+    "variables": []
   }
 
 Stations
@@ -732,10 +732,10 @@ List station files::
 Response::
 
     {
-      "count": 8,       
+      "count": 8,
       "next": null,
       "previous": null,
-      "results": [ 
+      "results": [
         {
           "id": 39,
           "last_modified": "2011-06-22T07:53:01.349877Z",
