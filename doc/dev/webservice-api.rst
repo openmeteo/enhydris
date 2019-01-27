@@ -242,30 +242,7 @@ the user is allowed to login.
 Lookups
 =======
 
-You can GET the list of objects for ``stationtypes``::
-
-    curl https://openmeteo.org/api/stationtypes/
-
-Response::
-
-    [
-      {
-        "id": 1,
-        "last_modified": "2011-06-22T05:21:05.436765Z",
-        "descr": "Meteorological",
-        "descr_alt": "Μετεωρολογικός"
-      },
-      {
-        "id": 2,
-        "last_modified": "2011-06-22T05:20:29.683218Z",
-        "descr": "Stage - Hydrometric",
-        "descr_alt": "Υδρομετρικός"
-      },
-      ...
-    ]
-
-You can also GET the detail of a single object (but it doesn't give you any
-more information)::
+GET a single object for ``stationtypes``::
 
     curl https://openmeteo.org/api/stationtypes/1/
 
@@ -276,6 +253,23 @@ Response::
       "last_modified": "2011-06-22T05:21:05.436765Z",
       "descr": "Meteorological",
       "descr_alt": "Μετεωρολογικός"
+    }
+
+GET the list of objects for ``stationtypes``::
+
+    curl https://openmeteo.org/api/stationtypes/
+
+The result is a `paginated list`_ of station types::
+
+    {
+        "count": 8,
+        "next": null,
+        "previous": null,
+        "results": [
+            {...},
+            {...},
+            ...
+        ]
     }
 
 Exactly the same applies to ``gentityaltcodetypes``, ``eventtypes``,
@@ -633,7 +627,7 @@ GET the list of time series of a station::
 
     curl https://openmeteo.org/api/stations/1334/timeseries/
 
-The response is a list of detail objects.
+The response is a `paginated list`_ of detail objects.
 
 POST to create a time series::
 
@@ -900,10 +894,12 @@ Some responses contain a paginated list. This has the following format::
 The returned object contains the following attributes:
 
 **results**
-   A list of items. Up to 100 items are returned.
+   A list of items. Up to 20 items are returned (but this is
+   configurable by specifying ``REST_FRAMEWORK["PAGE_SIZE"]`` in the
+   settings).
 
 **count**
-   The total number of items this request returns.  If they are 100 or
+   The total number of items this request returns.  If they are 20 or
    fewer, there is no other page.
 
 **next**, **previous**

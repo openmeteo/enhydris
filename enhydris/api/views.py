@@ -12,7 +12,6 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
@@ -27,15 +26,8 @@ from .csv import prepare_csv
 from .permissions import CanCreateStation, CanEditOrReadOnly
 
 
-class GeneralListPagination(PageNumberPagination):
-    page_size = 100
-    page_size_query_param = "page_size"
-    max_page_size = 1000
-
-
 class StationViewSet(ModelViewSet):
     serializer_class = serializers.StationSerializer
-    pagination_class = GeneralListPagination
 
     def get_permissions(self):
         pc = [CanCreateStation] if self.action == "create" else [CanEditOrReadOnly]
@@ -351,7 +343,6 @@ class UnitOfMeasurementViewSet(ReadOnlyModelViewSet):
 
 class GentityAltCodeViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.GentityAltCodeSerializer
-    pagination_class = GeneralListPagination
 
     def get_queryset(self):
         return models.GentityAltCode.objects.filter(
@@ -361,7 +352,6 @@ class GentityAltCodeViewSet(ReadOnlyModelViewSet):
 
 class GentityEventViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.GentityEventSerializer
-    pagination_class = GeneralListPagination
 
     def get_queryset(self):
         return models.GentityEvent.objects.filter(gentity_id=self.kwargs["station_id"])
@@ -369,7 +359,6 @@ class GentityEventViewSet(ReadOnlyModelViewSet):
 
 class OverseerViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.OverseerSerializer
-    pagination_class = GeneralListPagination
 
     def get_queryset(self):
         return models.Overseer.objects.filter(station_id=self.kwargs["station_id"])
@@ -377,7 +366,6 @@ class OverseerViewSet(ReadOnlyModelViewSet):
 
 class InstrumentViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.InstrumentSerializer
-    pagination_class = GeneralListPagination
 
     def get_queryset(self):
         return models.Instrument.objects.filter(station_id=self.kwargs["station_id"])
@@ -385,7 +373,6 @@ class InstrumentViewSet(ReadOnlyModelViewSet):
 
 class GentityFileViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.GentityFileSerializer
-    pagination_class = GeneralListPagination
 
     def get_queryset(self):
         return models.GentityFile.objects.filter(gentity_id=self.kwargs["station_id"])
