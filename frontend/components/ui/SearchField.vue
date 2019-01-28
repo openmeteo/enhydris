@@ -4,7 +4,7 @@
       <b-input
         v-model="bindVal"
         icon="search"
-        placeholder="Search"
+        :placeholder="$t('search')"
         :loading="loading"
       />
     </b-field>

@@ -12,7 +12,7 @@ export default {
   props: {
     text: {
       type: String,
-      default: "Results found"
+      default: ""
     },
     loading: {
       type: Boolean,

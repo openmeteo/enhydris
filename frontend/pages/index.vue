@@ -1,7 +1,14 @@
 <template lang="html">
   <div class="container">
     <DevBox />
-    <h1 style="opacity: 0.7;" class="title is-size-4 ">{{ title }}</h1>
+    <h1 style="opacity: 0.7;" class="title is-size-4 ">
+      {{ $t("stations_list") }}
+    </h1>
+    <div>
+      <h1>{{ $t("language") }}</h1>
+      <nuxt-link :to="switchLocalePath('el')">Ελληνικά</nuxt-link>
+      <nuxt-link :to="switchLocalePath('en')">English</nuxt-link>
+    </div>
     <hr />
     <div class="box">
       <b-loading
@@ -16,11 +23,12 @@
         style="margin:4px 2px;"
         :number="curStations.length"
         :loading="isPageLoading"
+        :text="$t('results_found')"
       />
       <SwitchField
         v-model="showFilters"
         style="margin:4px 2px;"
-        text="Show Filters"
+        :text="$t('show_filters')"
       />
       <div v-if="showFilters" class="container">
         <div class="columns">
@@ -33,7 +41,7 @@
           <div class="column">
             <b-field>
               <button class="button" type="button" @click="resetFilters()">
-                Reset
+                {{ $t("reset") }}
               </button>
             </b-field>
           </div>
@@ -47,12 +55,11 @@
     <div class="box" style="min-height: 800px;">
       <div v-if="curStations.length" class="dropdown is-active is-pulled-right">
         <b-select v-model="perPage">
-          <option value="5">5 per page</option>
-          <option value="10">10 per page</option>
-          <option value="15">15 per page</option>
-          <option value="20">20 per page</option>
-          <option value="50">50 per page</option>
-          <option value="100">100 per page</option>
+          <option value="5">{{ $t("5perpage") }}</option>
+          <option value="10">{{ $t("10perpage") }}</option>
+          <option value="20">{{ $t("20perpage") }}</option>
+          <option value="50">{{ $t("50perpage") }}</option>
+          <option value="100">{{ $t("100perpage") }}</option>
         </b-select>
       </div>
       <br /><br />
@@ -68,7 +75,7 @@
           <b-table-column
             field="name"
             width="100"
-            label="Station Name"
+            :label="$t('station_name')"
             sortable
           >
             {{ props.row.name }}
@@ -76,7 +83,7 @@
           <b-table-column
             field="water_basin"
             width="40"
-            label="Water Basin"
+            :label="$t('water_basin')"
             sortable
             numeric
           >
@@ -85,7 +92,7 @@
           <b-table-column
             field="copyright_holder"
             width="50"
-            label="Owner"
+            :label="$t('owner')"
             sortable
           >
             {{ props.row.copyright_holder }}
@@ -97,7 +104,7 @@
               <p>
                 <b-icon icon="emoticon-sad" size="is-large" />
               </p>
-              <p>Nothing here.</p>
+              <p>{{ $t("nothing_show") }}</p>
             </div>
           </section>
         </template>
@@ -130,7 +137,6 @@ export default {
   },
   data() {
     return {
-      title: "Stations List",
       qs: "",
       showFilters: false,
       isPageLoading: false,

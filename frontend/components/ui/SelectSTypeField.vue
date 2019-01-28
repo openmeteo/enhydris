@@ -3,11 +3,11 @@
     <b-field>
       <b-select
         v-model="bindVal"
-        placeholder="Type"
+        :placeholder="placeholder"
         icon="th-list"
         :loading="loading"
       >
-        <option :value="null">None</option>
+        <option :value="null">{{ $t("none") }}</option>
         <option v-for="type in sTypes" :key="type.id" :value="type.id"
           >{{ type.descr }}
         </option>
@@ -29,6 +29,7 @@ export default {
   },
   data() {
     return {
+      placeholder: this.$i18n.t("type"),
       loading: false,
       bindVal: this.value,
       sTypes: []
