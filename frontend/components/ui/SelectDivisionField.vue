@@ -3,11 +3,11 @@
     <b-field>
       <b-select
         v-model="bindVal"
-        placeholder="Division"
+        :placeholder="placeholder"
         icon="globe"
         :loading="loading"
       >
-        <option :value="null">None</option>
+        <option :value="null">{{ $t("none") }}</option>
         <option v-for="d in divisions" :key="d.id" :value="d.id"
           >{{ d.name }}
         </option>
@@ -29,6 +29,7 @@ export default {
   },
   data() {
     return {
+      placeholder: this.$i18n.t("division"),
       loading: false,
       bindVal: this.value,
       divisions: []

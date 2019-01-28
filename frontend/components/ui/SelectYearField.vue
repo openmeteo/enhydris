@@ -7,7 +7,7 @@
         icon="calendar"
         :loading="loading"
       >
-        <option :value="null">None</option>
+        <option :value="null">{{ $t("none") }}</option>
         <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
       </b-select>
     </b-field>

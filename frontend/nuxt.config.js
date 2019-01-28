@@ -1,3 +1,6 @@
+import enTranslations from "./locales/en.json";
+import elTranslations from "./locales/el";
+
 module.exports = {
   head: {
     title: "enhydris",
@@ -19,7 +22,36 @@ module.exports = {
     ]
   },
   loading: { color: "#3B8070" },
-  modules: ["@nuxtjs/dotenv", "@nuxtjs/font-awesome"],
+  modules: [
+    "@nuxtjs/dotenv",
+    "@nuxtjs/font-awesome",
+    [
+      "nuxt-i18n",
+      {
+        locales: [
+          {
+            code: "el",
+            name: "EL",
+            iso: 'el'
+          },
+          {
+            code: "en",
+            name: "EN",
+            iso: 'en-US'
+          }
+        ],
+        strategy: "prefix_except_default",
+        defaultLocale: "en",
+        vueI18n: {
+          fallbackLocale: "en",
+          messages: {
+            en: enTranslations,
+            el: elTranslations
+          }
+        }
+      }
+    ]
+  ],
   plugins: [
     "~/plugins/vue-moment",
     "~/plugins/buefy",

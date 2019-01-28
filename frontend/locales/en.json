@@ -1,0 +1,21 @@
+{
+  "language": "Language",
+  "search": "Search",
+  "reset": "Reset",
+  "station_name": "Station Name",
+  "water_basin": "Water Basin",
+  "owner": "Owner",
+  "nothing_show": "Nothing to show.",
+  "results_found": "Results found",
+  "show_filters": "Show Filters",
+  "division": "Division",
+  "none": "None",
+  "type": "Type",
+  "stations": "Stations",
+  "stations_list": "Stations List",
+  "5perpage": "5 per page",
+  "10perpage": "10 per page",
+  "20perpage": "20 per page",
+  "50perpage": "50 per page",
+  "100perpage": "100 per page"
+}

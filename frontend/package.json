@@ -19,6 +19,7 @@
     "axios": "^0.18.0",
     "nuxt": "^2.0.0",
     "nuxt-buefy": "^0.3.2",
+    "nuxt-i18n": "^5.8.0",
     "nuxt-leaflet": "^0.0.10",
     "vue-moment": "^4.0.0",
     "vue2-leaflet": "^1.2.3"
