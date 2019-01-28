@@ -3,7 +3,7 @@ import elTranslations from "./locales/el";
 
 module.exports = {
   head: {
-    title: "enhydris",
+    titleTemplate: `%s — Enhydris`,
     meta: [
       { charset: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },

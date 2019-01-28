@@ -135,6 +135,11 @@ export default {
     SelectDivisionField,
     MapMarkers
   },
+  head() {
+    return {
+      title: "Stations"
+    };
+  },
   data() {
     return {
       qs: "",
