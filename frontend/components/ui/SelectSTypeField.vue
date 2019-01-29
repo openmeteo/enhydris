@@ -52,7 +52,7 @@ export default {
       stations
         .types()
         .then(({ data }) => {
-          this.sTypes = data;
+          this.sTypes = data.results;
           this.loading = false;
         })
         .catch(e => {

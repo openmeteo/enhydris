@@ -52,7 +52,8 @@ export default {
       stations
         .divisions()
         .then(({ data }) => {
-          this.divisions = data;
+          console.log(data);
+          this.divisions = data.results;
           this.loading = false;
         })
         .catch(e => {
