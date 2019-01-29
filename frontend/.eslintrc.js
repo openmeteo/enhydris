@@ -18,5 +18,6 @@ module.exports = {
     'prettier'
   ],
   rules: {
+    'no-console': 'off'
   }
 }
