@@ -32,12 +32,12 @@ module.exports = {
           {
             code: "el",
             name: "EL",
-            iso: 'el'
+            iso: "el"
           },
           {
             code: "en",
             name: "EN",
-            iso: 'en-US'
+            iso: "en-US"
           }
         ],
         strategy: "prefix_except_default",
