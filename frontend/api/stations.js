@@ -1,7 +1,7 @@
 import session from "./session";
 
 export default {
-  list: () => session.get("/stations/"),
-  types: () => session.get("/stationtypes/"),
-  divisions: () => session.get("/politicaldivisions/")
+  list: num => session.get(`/stations/?page=${num}`),
+  types: num => session.get(`/stationtypes/?page=${num}`),
+  divisions: num => session.get(`/politicaldivisions/?page=${num}`)
 };

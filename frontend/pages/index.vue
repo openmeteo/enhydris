@@ -19,12 +19,21 @@
       </b-loading>
 
       <SearchField v-model="qs" />
-      <FoundTag
-        style="margin:4px 2px;"
-        :number="curStations.length"
-        :loading="isPageLoading"
-        :text="$t('results_found')"
-      />
+      <div class="process-bar-wrapper  is-pulled-right">
+        <FoundTag
+          class="foundtag"
+          :number="curStations.length"
+          :loading="isPageLoading"
+          :text="$t('results_found')"
+        />
+        <progress
+          v-if="curStations.length != total"
+          style="width:120px;"
+          class="progress is-primary"
+          :value="curStations.length"
+          :max="total"
+        ></progress>
+      </div>
       <SwitchField
         v-model="showFilters"
         style="margin:4px 2px;"
@@ -184,20 +193,24 @@ export default {
       this.selectedSType = null;
       this.selectedDivision = null;
     },
-    fetchStations: function() {
+    async fetchStations() {
       this.isPageLoading = true;
-      stations
-        .list()
-        .then(({ data }) => {
+      let page = 1;
+      let keepGoing = true;
+      while (keepGoing) {
+        let { data } = await stations.list(page);
+        if (page == 1) {
           this.centerMap = maputils.getBoundingBoxCenter(data.bounding_box);
-          this.data = data.results;
           this.total = data.count;
           this.isPageLoading = false;
-        })
-        .catch(e => {
-          this.isPageLoading = false;
-          throw e;
-        });
+        }
+        this.data.push.apply(this.data, data.results);
+        if (data.next) {
+          page += 1;
+        } else {
+          keepGoing = false;
+        }
+      }
     },
     makeMarkers: function() {
       return maputils.stationsWithMarkers(this.curStations);
@@ -206,4 +219,13 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.process-bar-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.foundtag {
+  margin: 4px 2px;
+}
+</style>

@@ -47,18 +47,21 @@ export default {
     this.fetchSTypes();
   },
   methods: {
-    fetchSTypes() {
-      this.loading = true;
-      stations
-        .types()
-        .then(({ data }) => {
-          this.sTypes = data;
+    async fetchSTypes() {
+      let page = 1;
+      let keepGoing = true;
+      while (keepGoing) {
+        let { data } = await stations.types(page);
+        if (page == 1) {
           this.loading = false;
-        })
-        .catch(e => {
-          this.loading = false;
-          throw e;
-        });
+        }
+        this.sTypes.push.apply(this.sTypes, data.results);
+        if (data.next) {
+          page += 1;
+        } else {
+          keepGoing = false;
+        }
+      }
     }
   }
 };

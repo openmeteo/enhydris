@@ -47,18 +47,22 @@ export default {
     this.fetchDivisions();
   },
   methods: {
-    fetchDivisions() {
+    async fetchDivisions() {
       this.loading = true;
-      stations
-        .divisions()
-        .then(({ data }) => {
-          this.divisions = data;
+      let page = 1;
+      let keepGoing = true;
+      while (keepGoing) {
+        let { data } = await stations.divisions(page);
+        if (page == 1) {
           this.loading = false;
-        })
-        .catch(e => {
-          this.loading = false;
-          throw e;
-        });
+        }
+        this.divisions.push.apply(this.divisions, data.results);
+        if (data.next) {
+          page += 1;
+        } else {
+          keepGoing = false;
+        }
+      }
     }
   }
 };
