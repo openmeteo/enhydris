@@ -5,9 +5,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 _station_list_csv_headers = [
     "id",
     "Name",
-    "Alternative name",
     "Short name",
-    "Alt short name",
     "Type",
     "Owner",
     "Start date",
@@ -23,7 +21,6 @@ _station_list_csv_headers = [
     "Political division",
     "Automatic",
     "Remarks",
-    "Alternative remarks",
     "Last modified",
 ]
 
@@ -32,9 +29,7 @@ def _station_csv(s):
     return [
         s.id,
         s.name,
-        s.name_alt,
         s.short_name,
-        s.short_name_alt,
         "+".join([t.descr for t in s.stype.all()]),
         s.owner,
         s.start_date,
@@ -50,7 +45,6 @@ def _station_csv(s):
         s.political_division.name if s.political_division else "",
         s.is_automatic,
         s.remarks,
-        s.remarks_alt,
         s.last_modified,
     ]
 
@@ -60,13 +54,11 @@ _instrument_list_csv_headers = [
     "Station",
     "Type",
     "Name",
-    "Alternative name",
     "Manufacturer",
     "Model",
     "Start date",
     "End date",
     "Remarks",
-    "Alternative remarks",
 ]
 
 
@@ -76,13 +68,11 @@ def _instrument_csv(i):
         i.station.id,
         i.type.descr if i.type else "",
         i.name,
-        i.name_alt,
         i.manufacturer,
         i.model,
         i.start_date,
         i.end_date,
         i.remarks,
-        i.remarks_alt,
     ]
 
 
@@ -93,7 +83,6 @@ _timeseries_list_csv_headers = [
     "Variable",
     "Unit",
     "Name",
-    "Alternative name",
     "Precision",
     "Time zone",
     "Time step",
@@ -102,7 +91,6 @@ _timeseries_list_csv_headers = [
     "Act. Offs. Min.",
     "Act. Offs.  Mon.",
     "Remarks",
-    "Alternative Remarks",
 ]
 
 
@@ -114,7 +102,6 @@ def _timeseries_csv(t):
         t.variable.descr if t.variable else "",
         t.unit_of_measurement.symbol,
         t.name,
-        t.name_alt,
         t.precision,
         t.time_zone.code,
         t.time_step.descr if t.time_step else "",

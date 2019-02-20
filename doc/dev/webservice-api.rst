@@ -30,9 +30,6 @@ Response::
           "name": "ΡΕΜΑ ΠΙΚΡΟΔΑΦΝΗΣ",
           "short_name": "ΠΙΚΡΟΔΑΦΝΗ",
           "remarks": "ΕΛΛΗΝΙΚΟ ΚΕΝΤΡΟ ΘΑΛΑΣΣΙΩΝ ΕΡΕΥΝΩΝ",
-          "name_alt": "",
-          "short_name_alt": "",
-          "remarks_alt": "",
           "srid": 2100,
           "approximate": false,
           "altitude": 2,
@@ -79,11 +76,9 @@ The response will be 200 with the following content::
       "id": 10657,
       "last_modified": "2011-06-22T06:54:17.064484Z",
       "name": "Wind gust (2000-2006)",
-      "name_alt": "2-ΡΑΝ_ΠΡΩΤ",
       "hidden": false,
       "precision": 1,
       "remarks": "Type: Raw data",
-      "remarks_alt": "Τύπος: Πρωτογενής",
       "timestamp_rounding_minutes": null,
       "timestamp_rounding_months": null,
       "timestamp_offset_minutes": 0,
@@ -252,7 +247,6 @@ Response::
       "id": 1,
       "last_modified": "2011-06-22T05:21:05.436765Z",
       "descr": "Meteorological",
-      "descr_alt": "Μετεωρολογικός"
     }
 
 GET the list of objects for ``stationtypes``::
@@ -287,11 +281,8 @@ Response format for ``organizations``::
       "id": 5,
       "last_modified": "2011-06-30T03:03:47.392265Z",
       "remarks": "",
-      "remarks_alt": "",
       "name": "National Technical University of Athens - Dept. of Water Resources and Env. Engineering",
       "acronym": "N.T.U.A. - D.W.R.E.",
-      "name_alt": "Εθνικό Μετσόβιο Πολυτεχνείο - Τομέας Υδατικών Πόρων και Περιβάλλοντος",
-      "acronym_alt": "Ε.Μ.Π. - Τ.Υ.Π.Π."
     }
 
 Response format for ``persons``::
@@ -300,15 +291,10 @@ Response format for ``persons``::
         "id": 17,
         "last_modified": null,
         "remarks": "",
-        "remarks_alt": "",
         "last_name": "Christofides",
         "first_name": "Antonis",
         "middle_names": "Michael",
         "initials": "A. C.",
-        "last_name_alt": "Χριστοφίδης",
-        "first_name_alt": "Αντώνης",
-        "middle_names_alt": "Μιχαήλ",
-        "initials_alt": "Α.Χ."
     }
 
 Response format for ``timezones``::
@@ -328,9 +314,6 @@ Response format for ``politicaldivisions``::
       "name": "ΦΛΩΡΙΝΑΣ            ",
       "short_name": "ΦΛΩΡΙΝΑΣ",
       "remarks": "",
-      "name_alt": "",
-      "short_name_alt": "",
-      "remarks_alt": "",
       "area": null,
       "mpoly": null,
       "code": "",
@@ -348,9 +331,6 @@ Response format for ``waterdivisions``::
         "name": "ΑΝΑΤΟΛΙΚΗ ΜΑΚΕΔΟΝΙΑ ",
         "short_name": "Α-ΜΑΚΕΔ ",
         "remarks": "",
-        "name_alt": "",
-        "short_name_alt": "",
-        "remarks_alt": "",
         "area": null,
         "mpoly": null,
         "water_basin": null,
@@ -364,7 +344,6 @@ Response format for ``intervaltypes``::
       "id": 1,
       "last_modified": "2011-06-22T05:13:23.044416Z",
       "descr": "Sum",
-      "descr_alt": "Αθροιστικό",
       "value": "SUM"
     }
 
@@ -374,7 +353,6 @@ Response format for ``filetypes``::
     "id": 7,
     "last_modified": "2011-06-22T05:04:03.461401Z",
     "descr": "png Picture",
-    "descr_alt": "Φωτογραφία png",
     "mime_type": "image/png"
   }
 
@@ -386,9 +364,6 @@ Response format for ``basins``::
     "name": "Σαρανταπόταμος",
     "short_name": "",
     "remarks": "",
-    "name_alt": "Sarantapotamos",
-    "short_name_alt": "",
-    "remarks_alt": "",
     "area": null,
     "mpoly": null,
     "water_basin": null,
@@ -403,7 +378,6 @@ Response format for ``timesteps``::
     "id": 4,
     "last_modified": "2011-06-22T05:11:53.556895Z",
     "descr": "Monthly",
-    "descr_alt": "Μηνιαίο",
     "length_minutes": 0,
     "length_months": 1
   }
@@ -414,7 +388,6 @@ Response format for ``units``::
     "id": 614,
     "last_modified": null,
     "descr": "Square metres",
-    "descr_alt": "Τετραγωνικά μέτρα",
     "symbol": "m²",
     "variables": []
   }
@@ -437,9 +410,6 @@ Response::
       "name": "ΡΕΜΑ ΠΙΚΡΟΔΑΦΝΗΣ",
       "short_name": "ΠΙΚΡΟΔΑΦΝΗ",
       "remarks": "ΕΛΛΗΝΙΚΟ ΚΕΝΤΡΟ ΘΑΛΑΣΣΙΩΝ ΕΡΕΥΝΩΝ",
-      "name_alt": "",
-      "short_name_alt": "",
-      "remarks_alt": "",
       "srid": 2100,
       "approximate": false,
       "altitude": 2,
@@ -602,11 +572,9 @@ Response::
           "id": 232,
           "last_modified": "2011-10-26T20:23:22.458770Z",
           "name": "Temperature (from 1998)",
-          "name_alt": "2-ΘΕΡΜ_ΠΡΩΤ",
           "hidden": false,
           "precision": 1,
           "remarks": "Type: Raw data",
-          "remarks_alt": "Τύπος: Πρωτογενής",
           "timestamp_rounding_minutes": null,
           "timestamp_rounding_months": null,
           "timestamp_offset_minutes": 0,
@@ -743,8 +711,6 @@ Response::
           "content": "https://openmeteo.org/media/gentityfile/imported_hydria_gentityfile_1334-4.jpg",
           "descr": "West view",
           "remarks": "",
-          "descr_alt": "Δυτική άποψη",
-          "remarks_alt": "",
           "gentity": 1334,
           "file_type": 1
         },
@@ -765,8 +731,6 @@ Response::
       "content": "https://openmeteo.org/media/gentityfile/imported_hydria_gentityfile_1334-4.jpg",
       "descr": "West view",
       "remarks": "",
-      "descr_alt": "Δυτική άποψη",
-      "remarks_alt": "",
       "gentity": 1334,
       "file_type": 1
     },
@@ -815,7 +779,6 @@ Response example for the detail request::
       "date": "1998-12-10",
       "user": "",
       "report": "Added air temperature and humidity sensor.",
-      "report_alt": "Προστέθηκε αισθητήρας θερμοκρασίας και υγρασίας.",
       "gentity": 1334,
       "type": 2
     },
@@ -863,8 +826,6 @@ Response example for the detail request::
       "end_date": null,
       "name": "2nd air temperature & humidity",
       "remarks": "Height from ground 2.35 m.",
-      "name_alt": "2ος αισθ θερμοκρασίας & υγρασίας",
-      "remarks_alt": "Ύψος από το έδαφος 2.35 m.",
       "station": 1334,
       "type": 23
     }

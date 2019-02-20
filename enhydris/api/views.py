@@ -106,22 +106,15 @@ class StationViewSet(ModelViewSet):
         """
         return queryset.filter(
             Q(name__icontains=search_term)
-            | Q(name_alt__icontains=search_term)
             | Q(short_name__icontains=search_term)
-            | Q(short_name_alt__icontains=search_term)
             | Q(remarks__icontains=search_term)
-            | Q(remarks_alt__icontains=search_term)
             | Q(water_basin__name__icontains=search_term)
-            | Q(water_basin__name_alt__icontains=search_term)
             | Q(water_division__name__icontains=search_term)
-            | Q(water_division__name_alt__icontains=search_term)
             | Q(political_division__name__icontains=search_term)
-            | Q(political_division__name_alt__icontains=search_term)
             | Q(owner__organization__name__icontains=search_term)
             | Q(owner__person__first_name__icontains=search_term)
             | Q(owner__person__last_name__icontains=search_term)
             | Q(timeseries__remarks__icontains=search_term)
-            | Q(timeseries__remarks_alt__icontains=search_term)
         )
 
     def _specific_filter(self, queryset, name, value):
@@ -140,35 +133,21 @@ class StationViewSet(ModelViewSet):
     def _filter_by_owner(self, queryset, value):
         return queryset.filter(
             Q(owner__organization__name__icontains=value)
-            | Q(owner__organization__name_alt__icontains=value)
             | Q(owner__person__first_name__icontains=value)
-            | Q(owner__person__first_name_alt__icontains=value)
-            | Q(owner__person__last_name_alt__icontains=value)
             | Q(owner__person__last_name__icontains=value)
         )
 
     def _filter_by_type(self, queryset, value):
-        return queryset.filter(
-            Q(stype__descr__icontains=value) | Q(stype__descr_alt__icontains=value)
-        )
+        return queryset.filter(stype__descr__icontains=value)
 
     def _filter_by_water_division(self, queryset, value):
-        return queryset.filter(
-            Q(water_division__name__icontains=value)
-            | Q(water_division__name_alt__icontains=value)
-        )
+        return queryset.filter(water_division__name__icontains=value)
 
     def _filter_by_water_basin(self, queryset, value):
-        return queryset.filter(
-            Q(water_basin__name__icontains=value)
-            | Q(water_basin__name_alt__icontains=value)
-        )
+        return queryset.filter(water_basin__name__icontains=value)
 
     def _filter_by_variable(self, queryset, value):
-        return queryset.filter(
-            Q(timeseries__variable__descr__icontains=value)
-            | Q(timeseries__variable__descr_alt__icontains=value)
-        )
+        return queryset.filter(timeseries__variable__descr__icontains=value)
 
     def _filter_by_bbox(self, queryset, value):
         try:
@@ -214,8 +193,7 @@ class StationViewSet(ModelViewSet):
                         SELECT garea_ptr_id FROM enhydris_politicaldivision
                         WHERE garea_ptr_id IN (
                             SELECT id FROM enhydris_gentity
-                            WHERE LOWER(name) LIKE LOWER('%%{}%%')
-                            OR LOWER(name_alt) LIKE LOWER('%%{}%%'))
+                            WHERE LOWER(name) LIKE LOWER('%%{}%%'))
                     UNION ALL
                         SELECT pd.garea_ptr_id
                         FROM enhydris_politicaldivision pd, mytable

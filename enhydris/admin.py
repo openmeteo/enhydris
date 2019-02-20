@@ -37,14 +37,7 @@ class PoliticalDivisionAdmin(GareaAdmin):
 
 @admin.register(models.WaterDivision)
 class WaterDivisionAdmin(GareaAdmin):
-    list_display = (
-        "id",
-        "last_modified",
-        "name",
-        "short_name",
-        "name_alt",
-        "short_name_alt",
-    )
+    list_display = ("id", "last_modified", "name", "short_name")
 
 
 @admin.register(models.WaterBasin)

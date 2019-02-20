@@ -24,14 +24,13 @@ from simpletail import ropen
 class Lookup(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
     descr = models.CharField(max_length=200, blank=True)
-    descr_alt = models.CharField(max_length=200, blank=True)
 
     class Meta:
         abstract = True
         ordering = ("descr",)
 
     def __str__(self):
-        return self.descr or self.descr_alt
+        return self.descr
 
 
 #
@@ -59,7 +58,6 @@ def post_save_person_or_organization(sender, **kwargs):
 class Lentity(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
     remarks = models.TextField(blank=True)
-    remarks_alt = models.TextField(blank=True)
     ordering_string = models.CharField(
         max_length=255, null=True, blank=True, editable=False
     )
@@ -77,10 +75,6 @@ class Person(Lentity):
     first_name = models.CharField(max_length=100, blank=True)
     middle_names = models.CharField(max_length=100, blank=True)
     initials = models.CharField(max_length=20, blank=True)
-    last_name_alt = models.CharField(max_length=100, blank=True)
-    first_name_alt = models.CharField(max_length=100, blank=True)
-    middle_names_alt = models.CharField(max_length=100, blank=True)
-    initials_alt = models.CharField(max_length=20, blank=True)
     f_dependencies = ["Lentity"]
 
     class Meta:
@@ -96,8 +90,6 @@ post_save.connect(post_save_person_or_organization, sender=Person)
 class Organization(Lentity):
     name = models.CharField(max_length=200, blank=True)
     acronym = models.CharField(max_length=50, blank=True)
-    name_alt = models.CharField(max_length=200, blank=True)
-    acronym_alt = models.CharField(max_length=50, blank=True)
     f_dependencies = ["Lentity"]
 
     class Meta:
@@ -129,22 +121,13 @@ class Gentity(models.Model):
     name = models.CharField(max_length=200, blank=True)
     short_name = models.CharField(max_length=50, blank=True)
     remarks = models.TextField(blank=True)
-    name_alt = models.CharField(max_length=200, blank=True)
-    short_name_alt = models.CharField(max_length=50, blank=True)
-    remarks_alt = models.TextField(blank=True)
 
     class Meta:
         verbose_name_plural = "Gentities"
         ordering = ("name",)
 
     def __str__(self):
-        return (
-            self.short_name
-            or self.short_name_alt
-            or self.name
-            or self.name_alt
-            or str(self.id)
-        )
+        return self.short_name or self.name or str(self.id)
 
 
 class Gpoint(Gentity):
@@ -258,14 +241,12 @@ class GentityFile(models.Model):
     content = models.FileField(upload_to="gentityfile")
     descr = models.CharField(max_length=100)
     remarks = models.TextField(blank=True)
-    descr_alt = models.CharField(max_length=100)
-    remarks_alt = models.TextField(blank=True)
 
     class Meta:
         ordering = ("descr",)
 
     def __str__(self):
-        return self.descr or self.descr_alt or str(self.id)
+        return self.descr or str(self.id)
 
     @property
     def related_station(self):
@@ -286,7 +267,6 @@ class GentityEvent(models.Model):
     type = models.ForeignKey(EventType, on_delete=models.CASCADE)
     user = models.CharField(max_length=64)
     report = models.TextField(blank=True)
-    report_alt = models.TextField(blank=True)
 
     class Meta:
         ordering = ["-date"]
@@ -369,8 +349,6 @@ class Instrument(models.Model):
     end_date = models.DateField(null=True, blank=True)
     name = models.CharField(max_length=100, blank=True)
     remarks = models.TextField(blank=True)
-    name_alt = models.CharField(max_length=100, blank=True)
-    remarks_alt = models.TextField(blank=True)
 
     class Meta:
         ordering = ("name",)
@@ -486,12 +464,10 @@ class Timeseries(models.Model):
     variable = models.ForeignKey(Variable, on_delete=models.CASCADE)
     unit_of_measurement = models.ForeignKey(UnitOfMeasurement, on_delete=models.CASCADE)
     name = models.CharField(max_length=200, blank=True)
-    name_alt = models.CharField(max_length=200, blank=True, default="")
     hidden = models.BooleanField(null=False, blank=False, default=False)
     precision = models.SmallIntegerField(null=True, blank=True)
     time_zone = models.ForeignKey(TimeZone, on_delete=models.CASCADE)
     remarks = models.TextField(blank=True)
-    remarks_alt = models.TextField(blank=True, default="")
     instrument = models.ForeignKey(
         Instrument, null=True, blank=True, on_delete=models.CASCADE
     )

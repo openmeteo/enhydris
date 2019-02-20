@@ -82,6 +82,22 @@ Changes from 2.0
   co-ordinates, they will be silently converted to latitude zero and
   longitude zero during upgrading.
 - SQLite is no longer supported.
+- Database contents are no longer multilingual. We were using a hacky
+  system where two languages were offered; e.g. there was
+  ``Gentity.name`` and ``Gentity.name_alt``, where the latter was the
+  name in the "alternative" language. This system, rather than a
+  "correct" one that uses, e.g., django-parler, was more trouble than it
+  was worth, therefore all fields ending in ``_alt`` have been
+  abolished. While upgrading, for each row, whichever of ``fieldname``
+  and ``fieldname_alt`` is nonempty will be used for ``fieldname``. If
+  both are nonempty and they are single-line fields, "value of
+  ``fieldname`` [value of ``fieldname_alt``]" will be used for
+  ``fieldname``, i.e. the value of ``fieldname_alt`` will be appended in
+  square brackets. If the number of characters available is insufficient
+  an error message will be given and the upgrade will fail. If both
+  fields are nonempty and they are multi-line fields such as
+  ``TextField``, they will be joined together separated by
+  ``\n\n---ALT---\n\n``.
 
 Version 2.0
 ===========

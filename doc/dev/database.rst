@@ -49,28 +49,6 @@ another prefix. The name of a table is the lowercased model name
 preceded by the prefix.  For example, the table that corresponds to
 the :class:`~enhydris.models.Gentity` model is ``enhydris_gentity``.
 
-.. _multilingual:
-
-.. admonition:: Multilinguality
-
-   Originally, the database was designed in order to be multilingual,
-   that is, so that the content could be stored in an unlimited number of
-   languages. The `django-multilingual`_ framework was used for this
-   purpose. However, django-multilingual bugs slowed development too
-   much, and it was decided to go for a more modest solution: texts
-   are simply stored in two languages: the local language and the
-   alternative language. For example, for a description, there are the
-   "descr" field and the "descr_alt" field. Which languages are "descr"
-   and "descr_alt" depends on the installation. For example, we use Greek
-   as the local language and English as the alternative language.
-
-   We hope to get rid of this, but this will involve using a
-   multilingual framework such as django-parler.
-
-   When any field in the reference is marked as being multilingual, it
-   means that it is accompanied by an additional identical field that
-   has "_alt" appended to its name.
-
 Lookup tables
 -------------
 
@@ -86,8 +64,7 @@ class`_:
 
    .. attribute:: descr
 
-   A :ref:`multilingual <multilingual>` character field with a
-   descriptive name.
+   A character field with a descriptive name.
 
 Most lookup tables are described in a relevant section of this
 document, where their description fits better; for example,
@@ -109,8 +86,7 @@ hierarchy is implemented by using Django's `multi-table inheritance`_.
 
    .. attribute:: remarks
 
-      A :ref:`multilingual <multilingual>` text field of unlimited
-      length.
+      A text field of unlimited length.
 
 .. class:: enhydris.models.Person
 
@@ -119,10 +95,10 @@ hierarchy is implemented by using Django's `multi-table inheritance`_.
                   middle_names
                   initials
 
-      The above four are all :ref:`multilingual <multilingual>`
-      character fields. The :attr:`initials` contain the initials without
-      the last name. For example, for Antonis Michael Christofides,
-      :attr:`initials` would contain the value "A. M.".
+      The above four are all character fields. The :attr:`initials`
+      contain the initials without the last name. For example, for
+      Antonis Michael Christofides, :attr:`initials` would contain the
+      value "A. M.".
 
 .. class:: enhydris.models.Organization
 
@@ -130,8 +106,8 @@ hierarchy is implemented by using Django's `multi-table inheritance`_.
                   enhydris.models.Organization.acronym
 
       :attr:`~enhydris.models.Organization.name` and
-      :attr:`~enhydris.models.Organization.acronym` are both
-      :ref:`multilingual <multilingual>` character fields.
+      :attr:`~enhydris.models.Organization.acronym` are both character
+      fields.
 
 Gentity and its direct descendants: Gpoint, Gline, Garea
 --------------------------------------------------------
@@ -148,19 +124,16 @@ implemented by using Django's `multi-table inheritance`_.
 
    .. attribute:: enhydris.models.Gentity.name
 
-      A :ref:`multilingual <multilingual>` field with the name of the
-      gentity, such as the name of a measuring station. Up to 200
-      characters.
+      A field with the name of the gentity, such as the name of a
+      measuring station. Up to 200 characters.
 
    .. attribute:: enhydris.models.Gentity.short_name
 
-      A :ref:`multilingual <multilingual>` field with a short name of
-      the gentity. Up to 50 characters.
+      A field with a short name of the gentity. Up to 50 characters.
 
    .. attribute:: enhydris.models.Gentity.remarks
 
-      A :ref:`multilingual <multilingual>` field with general remarks
-      about the gentity. Unlimited length.
+      A field with general remarks about the gentity. Unlimited length.
 
    .. attribute:: enhydris.models.Gentity.water_basin
 
@@ -327,12 +300,11 @@ about gentities.
 
    .. attribute:: descr
 
-      A :ref:`multilingual <multilingual>` short description or legend of
-      the file.
+      A short description or legend of the file.
 
    .. attribute:: remarks
 
-      :ref:`Multilingual <multilingual>` remarks of unlimited length.
+      Remarks of unlimited length.
 
    .. attribute:: date
 
@@ -459,13 +431,11 @@ Station and its related models
 
    .. attribute:: enhydris.models.Instrument.name
 
-      A :ref:`multilingual <multilingual>` field with a descriptive
-      name.
+      A field with a descriptive name.
 
    .. attribute:: enhydris.models.Instrument.remarks
 
-      A :ref:`multilingual <multilingual>` field with remarks of
-      unlimited length.
+      A field with remarks of unlimited length.
 
    .. attribute:: enhydris.models.Instrument.manufacturer
 
@@ -674,7 +644,6 @@ Time series and related models
 .. _text format: https://github.com/openmeteo/pd2hts#text-format
 .. _file format: https://github.com/openmeteo/pd2hts#file-format
 .. _multi-table inheritance: http://docs.djangoproject.com/en/dev/topics/db/models/#id6
-.. _django-multilingual: http://code.google.com/p/django-multilingual/
 .. _abstract base class: http://docs.djangoproject.com/en/dev/topics/db/models/#id5
 .. _filefield: http://docs.djangoproject.com/en/dev/ref/models/fields/#filefield
 .. _imagefield: http://docs.djangoproject.com/en/dev/ref/models/fields/#imagefield
