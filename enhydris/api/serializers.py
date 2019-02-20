@@ -1,17 +1,22 @@
-from django.utils.translation import gettext as _
+from django.contrib.auth.models import User
 from rest_framework import serializers
-
-import rest_captcha.serializers
-import rest_captcha.utils
-from rest_auth.registration.serializers import RegisterSerializer
 
 from enhydris import models
 
 
-class StationSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
+    # To see why we specify the id, check https://stackoverflow.com/questions/36473795/
+    id = serializers.IntegerField(required=False)
+
+    # We also convert these two fields to optional, so that when used as a nested
+    # serializer they don't need to be specified (usually the id suffices as we don't
+    # create a user at the same time as a station, we always use an existing user).
+    username = serializers.CharField(max_length=150, required=False)
+    password = serializers.CharField(max_length=128, required=False)
+
     class Meta:
-        model = models.Station
-        exclude = ("creator",)
+        model = User
+        fields = "__all__"
 
 
 class TimeseriesSerializer(serializers.ModelSerializer):
@@ -21,6 +26,9 @@ class TimeseriesSerializer(serializers.ModelSerializer):
 
 
 class WaterDivisionSerializer(serializers.ModelSerializer):
+    # To see why we specify the id, check https://stackoverflow.com/questions/36473795/
+    id = serializers.IntegerField(required=False)
+
     class Meta:
         model = models.WaterDivision
         fields = "__all__"
@@ -39,12 +47,18 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
 
 class PersonSerializer(serializers.ModelSerializer):
+    # To see why we specify the id, check https://stackoverflow.com/questions/36473795/
+    id = serializers.IntegerField(required=False)
+
     class Meta:
         model = models.Person
         fields = "__all__"
 
 
 class StationTypeSerializer(serializers.ModelSerializer):
+    # To see why we specify the id, check https://stackoverflow.com/questions/36473795/
+    id = serializers.IntegerField(required=False)
+
     class Meta:
         model = models.StationType
         fields = "__all__"
@@ -57,6 +71,9 @@ class TimeZoneSerializer(serializers.ModelSerializer):
 
 
 class PoliticalDivisionSerializer(serializers.ModelSerializer):
+    # To see why we specify the id, check https://stackoverflow.com/questions/36473795/
+    id = serializers.IntegerField(required=False)
+
     class Meta:
         model = models.PoliticalDivision
         fields = "__all__"
@@ -87,6 +104,9 @@ class InstrumentTypeSerializer(serializers.ModelSerializer):
 
 
 class WaterBasinSerializer(serializers.ModelSerializer):
+    # To see why we specify the id, check https://stackoverflow.com/questions/36473795/
+    id = serializers.IntegerField(required=False)
+
     class Meta:
         model = models.WaterBasin
         fields = "__all__"
@@ -140,25 +160,34 @@ class InstrumentSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-# The following class should probably be
-#     class RegisterWithCaptchaSerializer(RegisterSerializer, RestCaptchaSerializer):
-#         pass
-# However, RestCaptchaSerializer appears to be buggy (as of 0.1.0), so we reimplement
-# it here. (The bug seems to be that it removes "captcha_key" and "captcha_value"
-# from data, which subsequently causes an error during later processing by DRF.)
+class StationSerializer(serializers.ModelSerializer):
+    water_basin = WaterBasinSerializer(required=False)
+    water_division = WaterDivisionSerializer(required=False)
+    political_division = PoliticalDivisionSerializer(required=False)
+    stype = StationTypeSerializer(many=True, required=False)
+    overseers = PersonSerializer(many=True, required=False)
+    maintainers = UserSerializer(many=True, required=False)
 
+    class Meta:
+        model = models.Station
+        exclude = ("creator",)
 
-class RegisterWithCaptchaSerializer(RegisterSerializer):
-    captcha_key = serializers.CharField(max_length=64)
-    captcha_value = serializers.CharField(max_length=8, trim_whitespace=True)
+    def validate_nested_serializer(self, value):
+        try:
+            return value["id"]
+        except KeyError as e:
+            raise serializers.ValidationError(str(e))
 
-    def validate(self, data):
-        super().validate(data)
-        cache_key = rest_captcha.utils.get_cache_key(data["captcha_key"])
-        real_value = rest_captcha.serializers.cache.get(cache_key)
-        if real_value is None:
-            raise serializers.ValidationError(_("Invalid or expired captcha key"))
-        rest_captcha.serializers.cache.delete(cache_key)
-        if data["captcha_value"].upper() != real_value:
-            raise serializers.ValidationError(_("Invalid captcha value"))
-        return data
+    validate_water_basin = validate_nested_serializer
+    validate_water_division = validate_nested_serializer
+    validate_political_division = validate_nested_serializer
+
+    def validate_nested_many_serializer(self, value):
+        try:
+            return [x["id"] for x in value]
+        except KeyError as e:
+            raise serializers.ValidationError(str(e))
+
+    validate_stype = validate_nested_many_serializer
+    validate_overseers = validate_nested_many_serializer
+    validate_maintainers = validate_nested_many_serializer

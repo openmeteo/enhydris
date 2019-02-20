@@ -40,12 +40,52 @@ Response::
           "end_date": null,
           "copyright_holder": "HCMR",
           "copyright_years": "2012-",
-          "water_basin": 1384,
-          "water_division": 506,
-          "political_division": 84,
+          "water_basin": {
+            "id": 1384,         
+            "last_modified": "2013-08-29T02:13:45.278429-05:00",
+            "name": "ΥΠΟΛΟΙΠΑ ΑΤΤΙΚΗΣ",
+            "short_name": "ΥΠΟΛΟΙΠΑ",
+            "remarks": "",
+            "area": null,
+            "mpoly": null,
+            "water_basin": null,
+            "water_division": 506,                                
+            "political_division": 84,         
+            "parent": null
+          },
+          "water_division": {
+            "id": 506,      
+            "last_modified": null,                            
+            "name": "ΑΤΤΙΚΗ              ",
+            "short_name": "ΑΤΤΙΚΗ  ",
+            "remarks": "",                               
+            "area": null,
+            "mpoly": null,     
+            "water_basin": null,
+            "water_division": null,
+            "political_division": null                                    
+          },                   
           "owner": 11,
+          "political_division": {    
+            "id": 84,      
+            "last_modified": null,   
+            "name": "GREECE",        
+            "short_name": "GREECE",
+            "remarks": "",
+            "area": null,    
+            "mpoly": null,
+            "code": "GR",
+            "water_basin": null,
+            "water_division": null,
+            "political_division": null,
+            "parent": null
+          },
           "stype": [
-            3
+            {
+              "id": 3,
+              "last_modified": "2011-06-22T00:21:05.436765-05:00",
+              "descr": "Abstract [Συνοπτικός]"
+            }
           ],
           "overseers": [],
           "maintainers": []
@@ -405,7 +445,7 @@ You can GET the detail of a single station at ``/api/stations/ID/``::
 Response::
 
     {
-      "id": 1334,
+      "id": 1386,
       "last_modified": "2013-10-10T05:04:42.478447Z",
       "name": "ΡΕΜΑ ΠΙΚΡΟΔΑΦΝΗΣ",
       "short_name": "ΠΙΚΡΟΔΑΦΝΗ",
@@ -420,16 +460,56 @@ Response::
       "end_date": null,
       "copyright_holder": "HCMR",
       "copyright_years": "2012-",
-      "water_basin": 1384,
-      "water_division": 506,
-      "political_division": 84,
+      "water_basin": {
+        "id": 1384,         
+        "last_modified": "2013-08-29T02:13:45.278429-05:00",
+        "name": "ΥΠΟΛΟΙΠΑ ΑΤΤΙΚΗΣ",
+        "short_name": "ΥΠΟΛΟΙΠΑ",
+        "remarks": "",
+        "area": null,
+        "mpoly": null,
+        "water_basin": null,
+        "water_division": 506,                                
+        "political_division": 84,         
+        "parent": null
+      },
+      "water_division": {
+        "id": 506,      
+        "last_modified": null,                            
+        "name": "ΑΤΤΙΚΗ              ",
+        "short_name": "ΑΤΤΙΚΗ  ",
+        "remarks": "",                               
+        "area": null,
+        "mpoly": null,     
+        "water_basin": null,
+        "water_division": null,
+        "political_division": null                                    
+      },                   
       "owner": 11,
+      "political_division": {    
+        "id": 84,      
+        "last_modified": null,   
+        "name": "GREECE",        
+        "short_name": "GREECE",
+        "remarks": "",
+        "area": null,    
+        "mpoly": null,
+        "code": "GR",
+        "water_basin": null,
+        "water_division": null,
+        "political_division": null,
+        "parent": null
+      },
       "stype": [
-        3
+        {
+          "id": 3,
+          "last_modified": "2011-06-22T00:21:05.436765-05:00",
+          "descr": "Abstract [Συνοπτικός]"
+        }
       ],
       "overseers": [],
       "maintainers": []
-    },
+    }
 
 List stations
 -------------
@@ -555,6 +635,41 @@ CSV with the stations, a CSV with all the instruments of these stations,
 and a CSV with all the time series (their metadata only) of these
 stations. These lists contain all the columns, so users can do whatever
 they want with them.
+
+Create, update or delete stations
+---------------------------------
+
+DELETE a station::
+
+    curl -X DELETE -H "Authorization: token OAUTH-TOKEN" \
+        https://openmeteo.org/api/stations/1334/
+
+The response is normally 204 (no content) or 404.
+
+POST to create a station::
+
+    curl -X POST -H "Authorization: token OAUTH-TOKEN" \
+        -d "name=My station" -d "copyright_holder=Joe User" \
+        -d "copyright_years=2019" -d "point=POINT(20.94565 39.12102)" \
+        -d "owner=11" https://openmeteo.org/api/stations/
+
+The response is a 201 with a similar content as the GET detail response
+(with the new data), unless there is a problem, in which case there's a
+standard `error response`_.
+
+When specifying nested objects such as ``water_basin`` or ``stype``, these
+objects are not created or updated—only the id is used and a reference to the
+nested object with that id is created.
+
+PUT or PATCH a station::
+
+    curl -X PATCH -H "Authorization: token OAUTH-TOKEN" \
+        -d "name=Your station" https://openmeteo.org/api/stations/1334/
+
+The response is a 200 with a similar content as the GET detail response
+(with the updated data), unless there is a problem, in which case
+there's a standard `error response`_. Nested objects are handled in the same
+way as for POST (see above).
 
 Time series
 ===========

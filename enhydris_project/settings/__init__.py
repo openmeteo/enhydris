@@ -97,7 +97,9 @@ ACCOUNT_AUTHENTICATION_METHOD = "username"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 REST_AUTH_REGISTER_SERIALIZERS = {
-    "REGISTER_SERIALIZER": "enhydris.api.serializers.RegisterWithCaptchaSerializer"
+    "REGISTER_SERIALIZER": (
+        "enhydris.api.serializers_captcha.RegisterWithCaptchaSerializer"
+    )
 }
 OLD_PASSWORD_FIELD_ENABLED = True
 
