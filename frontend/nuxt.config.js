@@ -32,7 +32,7 @@ module.exports = {
           {
             code: "el",
             name: "EL",
-            iso: 'el'
+            iso: "el"
           },
           {
             code: "en",
