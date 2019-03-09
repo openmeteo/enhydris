@@ -115,7 +115,7 @@ export default {
       );
 
       filtered_data.map(obj => {
-        obj.marker = maputils.convert2coords(obj.point);
+        obj.coordinates = maputils.wkt2coordinates(obj.point);
         return obj;
       });
       return filtered_data;
@@ -150,7 +150,7 @@ export default {
         });
     },
     makeMarkers: function() {
-      return maputils.stationsWithMarkers(this.curStations);
+      return maputils.getStationCoordinates(this.curStations);
     }
   }
 };

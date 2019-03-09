@@ -5,14 +5,15 @@ const maputils = {
     (bbox[1] + bbox[3]) / 2,
     (bbox[0] + bbox[2]) / 2
   ],
-  stationsWithMarkers: function(data) {
-    // Filter stations that have coordinates and return the coord array
-    return data.filter(obj => obj.marker[0]).map(obj => obj.marker);
+  getStationCoordinates: function(data) {
+    // return an Array with stations coords
+    // [[lat, long], ... [lat, long]]
+    return data.filter(obj => obj.coordinates[0]).map(obj => obj.coordinates);
   },
-  convert2coords: function(point_string) {
+  wkt2coordinates: function(point_string) {
     // Review with @aptiko
     // "point": "SRID=4326;POINT (20.984238 39.147111)", --> to object
-    // related with stationsWithMarkers
+    // related with getStationCoordinates
     if (point_string) {
       let newpoint = point_string
         .split("(")[1]
