@@ -58,6 +58,10 @@ module.exports = {
     materialDesignIcons: false,
     defaultIconPack: "fa"
   },
+  toast: {
+    position: "top-center",
+    duration: 2000
+  },
   build: {
     extend(config, { isDev, isClient }) {
       if (isDev && isClient) {

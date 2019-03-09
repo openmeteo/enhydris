@@ -17,5 +17,6 @@
   "10perpage": "10 per page",
   "20perpage": "20 per page",
   "50perpage": "50 per page",
-  "100perpage": "100 per page"
+  "100perpage": "100 per page",
+  "connection_error": "The backend is unreachable or returned an unexpected response"
 }
