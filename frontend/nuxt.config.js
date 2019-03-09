@@ -24,6 +24,7 @@ module.exports = {
   loading: { color: "#3B8070" },
   modules: [
     "@nuxtjs/dotenv",
+    "nuxt-buefy",
     "@nuxtjs/font-awesome",
     [
       "nuxt-i18n",
@@ -54,9 +55,12 @@ module.exports = {
   ],
   plugins: [
     "~/plugins/vue-moment",
-    "~/plugins/buefy",
     { src: "~/plugins/vue-leaflet", ssr: false }
   ],
+  buefy: {
+    materialDesignIcons: false,
+    defaultIconPack: "fa"
+  },
   build: {
     extend(config, { isDev, isClient }) {
       if (isDev && isClient) {
