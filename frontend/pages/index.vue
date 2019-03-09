@@ -1,53 +1,19 @@
 <template lang="html">
   <div class="container">
-    <DevBox />
-    <h1 style="opacity: 0.7;" class="title is-size-4 ">
-      {{ $t("stations_list") }}
-    </h1>
     <div>
       <h1>{{ $t("language") }}</h1>
       <nuxt-link :to="switchLocalePath('el')">Ελληνικά</nuxt-link>
       <nuxt-link :to="switchLocalePath('en')">English</nuxt-link>
     </div>
     <hr />
-    <div class="box">
-      <b-loading
-        :is-full-page="isPageLoading"
-        :active.sync="isPageLoading"
-        :can-cancel="false"
-      >
-      </b-loading>
+    <b-loading
+      :is-full-page="isPageLoading"
+      :active.sync="isPageLoading"
+      :can-cancel="false"
+    >
+    </b-loading>
 
-      <SearchField v-model="qs" />
-      <FoundTag
-        style="margin:4px 2px;"
-        :number="curStations.length"
-        :loading="isPageLoading"
-        :text="$t('results_found')"
-      />
-      <SwitchField
-        v-model="showFilters"
-        style="margin:4px 2px;"
-        :text="$t('show_filters')"
-      />
-      <div v-if="showFilters" class="container">
-        <div class="columns">
-          <div class="column">
-            <SelectSTypeField v-model="selectedSType" />
-          </div>
-          <div class="column">
-            <SelectDivisionField v-model="selectedDivision" />
-          </div>
-          <div class="column">
-            <b-field>
-              <button class="button" type="button" @click="resetFilters()">
-                {{ $t("reset") }}
-              </button>
-            </b-field>
-          </div>
-        </div>
-      </div>
-    </div>
+    <SearchField v-model="qs" />
     <no-ssr>
       <MapMarkers :zoom="3" :center="centerMap" :markers="makeMarkers()" />
     </no-ssr>
@@ -113,12 +79,7 @@
   </div>
 </template>
 <script>
-import DevBox from "@/components/dev/DevBox.vue";
 import SearchField from "@/components/ui/SearchField.vue";
-import SelectSTypeField from "@/components/ui/SelectSTypeField.vue";
-import SelectDivisionField from "@/components/ui/SelectDivisionField.vue";
-import FoundTag from "@/components/ui/FoundTag";
-import SwitchField from "@/components/ui/SwitchField";
 import MapMarkers from "@/components/map/MapMarkers.vue";
 
 import stations from "@/api/stations.js";
@@ -127,12 +88,7 @@ import maputils from "@/utils/map.js";
 export default {
   name: "Stations",
   components: {
-    DevBox,
     SearchField,
-    SwitchField,
-    FoundTag,
-    SelectSTypeField,
-    SelectDivisionField,
     MapMarkers
   },
   head() {
@@ -143,10 +99,7 @@ export default {
   data() {
     return {
       qs: "",
-      showFilters: false,
       isPageLoading: false,
-      selectedSType: null,
-      selectedDivision: null,
       data: [],
       currentPage: 1,
       perPage: 20,
@@ -157,14 +110,9 @@ export default {
   computed: {
     curStations() {
       let name_re = new RegExp(this.qs, "i");
-      let stype = this.selectedSType || null;
-      let division = this.selectedDivision || null;
-      let filtered_data = this.data
-        .filter(station =>
-          division ? station.political_division == division : true
-        )
-        .filter(station => (stype ? station.stype == stype : true))
-        .filter(station => station.name.match(name_re));
+      let filtered_data = this.data.filter(station =>
+        station.name.match(name_re)
+      );
 
       filtered_data.map(obj => {
         obj.coordinates = maputils.wkt2coordinates(obj.point);
@@ -180,10 +128,6 @@ export default {
     this.fetchStations();
   },
   methods: {
-    resetFilters: function() {
-      this.selectedSType = null;
-      this.selectedDivision = null;
-    },
     fetchStations: function() {
       this.isPageLoading = true;
       stations
