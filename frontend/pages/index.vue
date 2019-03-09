@@ -104,7 +104,7 @@ export default {
       currentPage: 1,
       perPage: 20,
       total: 0,
-      centerMap: [37.41322, -1.219482]
+      centerMap: [37.98381, 23.727539]
     };
   },
   computed: {

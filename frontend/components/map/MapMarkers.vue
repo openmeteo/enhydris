@@ -20,7 +20,7 @@ export default {
     center: {
       type: Array,
       default: function() {
-        return [37.41322, -1.219482];
+        return [37.98381, 23.727539];
       }
     },
     markers: {
