@@ -53,10 +53,7 @@ module.exports = {
       }
     ]
   ],
-  plugins: [
-    "~/plugins/vue-moment",
-    { src: "~/plugins/vue-leaflet", ssr: false }
-  ],
+  plugins: [{ src: "~/plugins/vue-leaflet", ssr: false }],
   buefy: {
     materialDesignIcons: false,
     defaultIconPack: "fa"
