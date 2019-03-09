@@ -53,7 +53,7 @@
             sortable
             numeric
           >
-            {{ props.row.water_basin }}
+            {{ props.row.water_basin ? props.row.water_basin.name : "" }}
           </b-table-column>
           <b-table-column
             field="copyright_holder"
