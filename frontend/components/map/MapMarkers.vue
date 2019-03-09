@@ -3,7 +3,7 @@
     <div style="height: 50%">
       <l-map :zoom="zoom" :center="center" style="height: 300px; width: 100;">
         <l-tile-layer :url="url" :attribution="attribution" />
-        <l-marker v-for="m in markers" :key="m.id" :lat-lng="m" />
+        <l-marker v-for="(m, idx) in markers" :key="idx" :lat-lng="m" />
       </l-map>
     </div>
   </div>
