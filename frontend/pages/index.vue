@@ -140,6 +140,12 @@ export default {
         })
         .catch(e => {
           this.isPageLoading = false;
+          this.$toast.open({
+            duration: 5000,
+            message: this.$i18n.t("connection_error"),
+            position: "is-top",
+            type: "is-danger"
+          });
           throw e;
         });
     },
