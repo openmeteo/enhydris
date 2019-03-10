@@ -24,6 +24,7 @@ module.exports = {
   loading: { color: "#3B8070" },
   modules: [
     "@nuxtjs/dotenv",
+    "@nuxtjs/axios",
     "nuxt-buefy",
     "@nuxtjs/font-awesome",
     [
@@ -54,6 +55,13 @@ module.exports = {
     ]
   ],
   plugins: [{ src: "~/plugins/vue-leaflet", ssr: false }],
+  axios: {
+    baseURL: "http://stage.openmeteo.org/api/",
+    timeout: 10000,
+    headers: {
+      "Content-Type": "application/json"
+    }
+  },
   buefy: {
     materialDesignIcons: false,
     defaultIconPack: "fa"

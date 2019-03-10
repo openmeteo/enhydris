@@ -82,7 +82,6 @@
 import SearchField from "@/components/ui/SearchField.vue";
 import MapMarkers from "@/components/map/MapMarkers.vue";
 
-import stations from "@/api/stations.js";
 import maputils from "@/utils/map.js";
 
 export default {
@@ -128,26 +127,35 @@ export default {
     this.fetchStations();
   },
   methods: {
-    fetchStations: function() {
+    async fetchStations() {
       this.isPageLoading = true;
-      stations
-        .list()
-        .then(({ data }) => {
-          this.centerMap = maputils.getBoundingBoxCenter(data.bounding_box);
-          this.data = data.results;
-          this.total = data.count;
-          this.isPageLoading = false;
-        })
-        .catch(e => {
-          this.isPageLoading = false;
-          this.$toast.open({
-            duration: 5000,
-            message: this.$i18n.t("connection_error"),
-            position: "is-top",
-            type: "is-danger"
-          });
-          throw e;
+      try {
+        let page = 1;
+        let keepGoing = true;
+        while (keepGoing) {
+          let data = await this.$axios.$post(`/stations?page=${page}`);
+          if (page == 1) {
+            this.centerMap = maputils.getBoundingBoxCenter(data.bounding_box);
+            this.total = data.count;
+            this.isPageLoading = false;
+          }
+          this.data.push.apply(this.data, data.results);
+          if (data.next) {
+            page += 1;
+          } else {
+            keepGoing = false;
+          }
+        }
+      } catch (e) {
+        this.$toast.open({
+          duration: 5000,
+          message: this.$i18n.t("connection_error"),
+          position: "is-top",
+          type: "is-danger"
         });
+        this.isPageLoading = false;
+        throw e;
+      }
     },
     makeMarkers: function() {
       return maputils.getStationCoordinates(this.curStations);
