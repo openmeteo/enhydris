@@ -68,7 +68,11 @@ module.exports = {
       }
     ]
   ],
-  plugins: ["~/plugins/i18n.js", { src: "~/plugins/vue-leaflet", ssr: false }],
+  plugins: [
+    "~/plugins/i18n.js",
+    { src: "~/plugins/vue-leaflet", ssr: false },
+    { src: "~/plugins/persisted-localstore.js", ssr: false }
+  ],
   axios: {
     baseURL: "http://stage.openmeteo.org/api/",
     timeout: 10000,

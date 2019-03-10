@@ -23,7 +23,8 @@
     "nuxt-i18n": "^5.8.0",
     "nuxt-leaflet": "^0.0.10",
     "vue-moment": "^4.0.0",
-    "vue2-leaflet": "^1.2.3"
+    "vue2-leaflet": "^1.2.3",
+    "vuex-persistedstate": "^2.5.4"
   },
   "devDependencies": {
     "@babel/core": "^7.2.2",
