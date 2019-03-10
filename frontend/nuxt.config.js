@@ -1,5 +1,7 @@
-import enTranslations from "./locales/en.json";
+import enTranslations from "./locales/en";
 import elTranslations from "./locales/el";
+import deTranslations from "./locales/de";
+import frTranslations from "./locales/fr";
 
 module.exports = {
   head: {
@@ -40,6 +42,16 @@ module.exports = {
             code: "en",
             name: "EN",
             iso: "en-US"
+          },
+          {
+            code: "de",
+            name: "DE",
+            iso: "de"
+          },
+          {
+            code: "fr",
+            name: "FR",
+            iso: "fr"
           }
         ],
         strategy: "prefix_except_default",
@@ -48,13 +60,15 @@ module.exports = {
           fallbackLocale: "en",
           messages: {
             en: enTranslations,
-            el: elTranslations
+            el: elTranslations,
+            de: deTranslations,
+            fr: frTranslations
           }
         }
       }
     ]
   ],
-  plugins: [{ src: "~/plugins/vue-leaflet", ssr: false }],
+  plugins: ["~/plugins/i18n.js", { src: "~/plugins/vue-leaflet", ssr: false }],
   axios: {
     baseURL: "http://stage.openmeteo.org/api/",
     timeout: 10000,

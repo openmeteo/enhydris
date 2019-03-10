@@ -1,18 +1,12 @@
 <template lang="html">
   <div class="container">
-    <div>
-      <h1>{{ $t("language") }}</h1>
-      <nuxt-link :to="switchLocalePath('el')">Ελληνικά</nuxt-link>
-      <nuxt-link :to="switchLocalePath('en')">English</nuxt-link>
-    </div>
-    <hr />
     <b-loading
       :is-full-page="isPageLoading"
       :active.sync="isPageLoading"
       :can-cancel="false"
     >
     </b-loading>
-
+    <br /><br /><br /><br />
     <SearchField v-model="qs" />
     <no-ssr>
       <MapMarkers :zoom="3" :center="centerMap" :markers="makeMarkers()" />
