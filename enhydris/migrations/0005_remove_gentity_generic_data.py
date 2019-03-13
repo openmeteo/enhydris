@@ -18,7 +18,7 @@ def do_nothing(*args, **kwargs):
 
 class Migration(migrations.Migration):
 
-    dependencies = [("enhydris", "0004_delete_user_profile")]
+    dependencies = [("enhydris", "0003_user_name")]
 
     operations = [
         migrations.RunPython(check_that_generic_data_is_empty, do_nothing),

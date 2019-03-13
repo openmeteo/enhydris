@@ -715,3 +715,29 @@ class Timeseries(models.Model):
         self._check_integrity_of_offset_and_rounding_when_time_step_is_not_null()
         self._set_start_and_end_date()
         super(Timeseries, self).save(force_insert, force_update, *args, **kwargs)
+
+
+class UserProfile(models.Model):
+    """Unused model for backwards compatibility.
+
+    This model isn't being used. We need it so that Enhydris 3 and Enhydris 2.2 can
+    co-exist, using the same database. This is because, for some time, Enhydris 2.2
+    will be in production but Enhydris 3 will be running on the same database being
+    tested. When production is switched to use Enhydris 3 and 2.2 is pronounced dead,
+    this model should be removed.
+    """
+
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, verbose_name=_("Username")
+    )
+    fname = models.CharField(_("First Name"), null=True, blank=True, max_length=30)
+    lname = models.CharField(_("Last Name"), null=True, blank=True, max_length=30)
+    address = models.CharField(_("Location"), null=True, blank=True, max_length=100)
+    organization = models.CharField(
+        _("Organization"), null=True, blank=True, max_length=100
+    )
+    email_is_public = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = _("Profile")
+        verbose_name_plural = _("Profiles")
