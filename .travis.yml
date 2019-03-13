@@ -3,7 +3,6 @@ sudo: false
 language: python
 
 python:
- - "3.4"
  - "3.5"
  - "3.6"
 
@@ -22,7 +21,7 @@ addons:
 install:
  - CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install 'gdal<1.11'
 
- - pip install codecov
+ - pip install codecov coverage isort flake8
  - pip install psycopg2==2.7.4
  - pip install -r requirements.txt
  - pip install -r requirements-test.txt
@@ -35,6 +34,9 @@ before_script:
  - cp enhydris_project/settings/travis.py enhydris_project/settings/local.py
 
 script:
+ - if python -c "import sys; exit(not (sys.version >= '3.6'))"; then pip install black; black --check .; fi
+ - flake8 --max-line-length=88 .
+ - isort --recursive --check-only --diff .
  - coverage run --include="./*" --omit="*/tests/*","*/tests.py" manage.py test -v2
 
 env:

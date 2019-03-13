@@ -2,48 +2,44 @@ from io import StringIO
 
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
-
 from rest_framework import generics, status
-from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
+from rest_framework.views import APIView
 
 import iso8601
 import pd2hts
 import pytz
 
 from enhydris import models
-from enhydris.api.permissions import CanEditOrReadOnly, CanCreateStation
+from enhydris.api.permissions import CanCreateStation, CanEditOrReadOnly
 from enhydris.api.serializers import StationSerializer, TimeseriesSerializer
 
-
 modelnames = (
-    'Lentity Person Organization Gentity Gpoint Gline Garea '
-    'PoliticalDivision WaterDivision WaterBasin '
-    'GentityAltCodeType GentityAltCode FileType GentityFile EventType '
-    'GentityEvent StationType Station Overseer InstrumentType '
-    'Instrument Variable UnitOfMeasurement TimeZone TimeStep IntervalType '
-    'Timeseries'
+    "Lentity Person Organization Gentity Gpoint Gline Garea "
+    "PoliticalDivision WaterDivision WaterBasin "
+    "GentityAltCodeType GentityAltCode FileType GentityFile EventType "
+    "GentityEvent StationType Station Overseer InstrumentType "
+    "Instrument Variable UnitOfMeasurement TimeZone TimeStep IntervalType "
+    "Timeseries"
 ).split()
 
 
-@api_view(('GET',))
+@api_view(("GET",))
 def api_root(request, format=None):
     d = {}
     for m in modelnames:
-        d[m] = reverse(m + '-list', request=request, format=format)
+        d[m] = reverse(m + "-list", request=request, format=format)
     return Response(d)
 
 
 class ListAPIView(generics.ListAPIView):
-
     def get_queryset(self):
-        modified_after = '1900-01-01'
-        if 'modified_after' in self.kwargs:
-            modified_after = self.kwargs['modified_after']
-        modified_after = iso8601.parse_date(modified_after,
-                                            default_timezone=pytz.utc)
+        modified_after = "1900-01-01"
+        if "modified_after" in self.kwargs:
+            modified_after = self.kwargs["modified_after"]
+        modified_after = iso8601.parse_date(modified_after, default_timezone=pytz.utc)
         return self.queryset.exclude(last_modified__lte=modified_after)
 
 
@@ -52,13 +48,14 @@ class Tsdata(APIView):
     Take a timeseries id and return the actual timeseries data to the client,
     or update a time series with new records.
     """
+
     permission_classes = (CanEditOrReadOnly,)
 
     def get(self, request, pk, format=None):
         try:
             timeseries = models.Timeseries.objects.get(pk=int(pk))
             self.check_object_permissions(request, timeseries)
-            response = HttpResponse(content_type='text/plain')
+            response = HttpResponse(content_type="text/plain")
             pd2hts.write(timeseries.get_data(), response)
             return response
         except models.Timeseries.DoesNotExist:
@@ -68,13 +65,16 @@ class Tsdata(APIView):
         try:
             atimeseries = models.Timeseries.objects.get(pk=int(pk))
             self.check_object_permissions(request, atimeseries)
-            nrecords = atimeseries.append_data(StringIO(request.data[
-                'timeseries_records']))
+            nrecords = atimeseries.append_data(
+                StringIO(request.data["timeseries_records"])
+            )
             return HttpResponse(str(nrecords), content_type="text/plain")
         except (ValueError, iso8601.ParseError) as e:
-            return HttpResponse(status=status.HTTP_400_BAD_REQUEST,
-                                content=str(e),
-                                content_type="text/plain")
+            return HttpResponse(
+                status=status.HTTP_400_BAD_REQUEST,
+                content=str(e),
+                content_type="text/plain",
+            )
 
     def post(self, request, pk, format=None):
         """
@@ -105,13 +105,14 @@ class TimeseriesList(generics.ListCreateAPIView):
 
         # Check permissions
         try:
-            gentity_id = int(serializer.get_initial()['gentity'])
+            gentity_id = int(serializer.get_initial()["gentity"])
         except ValueError:
             raise Http404
         station = get_object_or_404(models.Station, id=gentity_id)
-        if not hasattr(request.user, 'has_row_perm') \
-                or not request.user.has_row_perm(station, 'edit'):
-            return Response('Forbidden', status=status.HTTP_403_FORBIDDEN)
+        if not hasattr(request.user, "has_row_perm") or not request.user.has_row_perm(
+            station, "edit"
+        ):
+            return Response("Forbidden", status=status.HTTP_403_FORBIDDEN)
 
         return super(TimeseriesList, self).post(request, *args, **kwargs)
 

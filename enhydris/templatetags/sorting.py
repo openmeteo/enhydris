@@ -20,14 +20,14 @@ def sorter(column, sort_order, label):
     the tag adds a downward or upward arrow (depending on whether the sorting
     is direct or reverse).
     """
-    sign = ''
-    indicator = ''
+    sign = ""
+    indicator = ""
     if sort_order and (sort_order[0] == column):
-        indicator = '&nbsp;↓'
-        sign = '-'
-    elif sort_order and (sort_order[0] == '-' + column):
-        indicator = '&nbsp;↑'
-    target = '?sort={}{}&{}'.format(
-        sign, column, '&'.join(['sort=' + x for x in sort_order]))
-    return format_html('<a href="{}">{}{}</a>', target, label,
-                       mark_safe(indicator))
+        indicator = "&nbsp;↓"
+        sign = "-"
+    elif sort_order and (sort_order[0] == "-" + column):
+        indicator = "&nbsp;↑"
+    target = "?sort={}{}&{}".format(
+        sign, column, "&".join(["sort=" + x for x in sort_order])
+    )
+    return format_html('<a href="{}">{}{}</a>', target, label, mark_safe(indicator))

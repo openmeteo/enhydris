@@ -1,12 +1,6 @@
+from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import Q
-from django.contrib.gis.geos import Polygon
-from django.http import Http404
-from django.conf import settings
-from django.core.exceptions import FieldError
-
-from enhydris.models import *
 
 
 def timeseries_permission(function=None, redirect_field_name=REDIRECT_FIELD_NAME):
@@ -20,8 +14,7 @@ def timeseries_permission(function=None, redirect_field_name=REDIRECT_FIELD_NAME
         return function
 
     actual_decorator = user_passes_test(
-        lambda u: u.is_authenticated(),
-        redirect_field_name=redirect_field_name
+        lambda u: u.is_authenticated(), redirect_field_name=redirect_field_name
     )
 
     if function:
@@ -40,8 +33,7 @@ def gentityfile_permission(function=None, redirect_field_name=REDIRECT_FIELD_NAM
         return function
 
     actual_decorator = user_passes_test(
-        lambda u: u.is_authenticated(),
-        redirect_field_name=redirect_field_name
+        lambda u: u.is_authenticated(), redirect_field_name=redirect_field_name
     )
 
     if function:

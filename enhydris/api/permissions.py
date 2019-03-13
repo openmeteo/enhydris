@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-
 from rest_framework import permissions
 
 from enhydris import models
@@ -21,18 +20,19 @@ class CanEditOrReadOnly(permissions.BasePermission):
         else:
             return False
         station = get_object_or_404(models.Station, id=id)
-        return hasattr(request.user, 'has_row_perm') \
-            and request.user.has_row_perm(station, 'edit')
+        return hasattr(request.user, "has_row_perm") and request.user.has_row_perm(
+            station, "edit"
+        )
 
 
 class CanCreateStation(permissions.BasePermission):
-
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
-        if request.method != 'POST' or not request.user.is_authenticated():
+        if request.method != "POST" or not request.user.is_authenticated():
             return False
         if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT or request.user.has_perm(
-                'enhydris.add_station'):
+            "enhydris.add_station"
+        ):
             return True
         return False

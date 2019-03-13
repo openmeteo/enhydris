@@ -13,13 +13,13 @@ register = Library()
 
 def do_count(appmodel):
     try:
-        model = apps.get_app_config('enhydris').get_model(
-            *appmodel.split('.'))
+        model = apps.get_app_config("enhydris").get_model(*appmodel.split("."))
         count = model.objects.all().count()
-    except:
+    except Exception:
         count = 0
 
     return count
+
 
 register.simple_tag(do_count)
 
@@ -33,18 +33,19 @@ class LastModifiedStations(Node):
             station_objects = Station.objects.all()
             if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
                 station_objects = station_objects.filter(
-                    **settings.ENHYDRIS_SITE_STATION_FILTER)
-            latest_stations = station_objects.all().order_by(
-                'last_modified').reverse()[:self.number]
+                    **settings.ENHYDRIS_SITE_STATION_FILTER
+                )
+            latest_stations = (
+                station_objects.all().order_by("last_modified").reverse()[: self.number]
+            )
         except ValueError:
             latest_stations = None
 
-        context['latest_stations'] = latest_stations
-        return ''
+        context["latest_stations"] = latest_stations
+        return ""
 
 
 class DoGetLatestStations:
-
     def __init__(self):
         pass
 
@@ -52,7 +53,9 @@ class DoGetLatestStations:
         tokens = token.contents.split()
         if not tokens[1].isdigit():
             raise TemplateSyntaxError(
-                "The argument for '%s' must be an integer" % tokens[0])
+                "The argument for '%s' must be an integer" % tokens[0]
+            )
         return LastModifiedStations(tokens[1])
 
-register.tag('get_latest_stations', DoGetLatestStations())
+
+register.tag("get_latest_stations", DoGetLatestStations())

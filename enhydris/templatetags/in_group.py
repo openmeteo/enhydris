@@ -16,9 +16,10 @@ def in_group(user, group):
     No white space allowed.
     """
     import re
-    if re.search(',', group):
-        group_list = re.sub('\s+', '', group).split(',')
-    elif re.search(' ', group):
+
+    if re.search(",", group):
+        group_list = re.sub(r"\s+", "", group).split(",")
+    elif re.search(" ", group):
         group_list = group.split()
     else:
         group_list = [group]
@@ -29,4 +30,6 @@ def in_group(user, group):
         return True
     else:
         return False
+
+
 in_group.is_safe = True

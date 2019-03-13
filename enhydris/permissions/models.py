@@ -1,6 +1,6 @@
 import inspect
 
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group, User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -9,19 +9,19 @@ from django.db.models import Q
 
 class Permission(models.Model):
     name = models.CharField(max_length=16)
-    content_type = models.ForeignKey(ContentType,
-                                     related_name="row_permissions")
+    content_type = models.ForeignKey(ContentType, related_name="row_permissions")
     object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey("content_type", "object_id")
     user = models.ForeignKey(User, null=True, blank=True)
     group = models.ForeignKey(Group, null=True, blank=True)
 
     class Meta:
-        verbose_name = 'permission'
-        verbose_name_plural = 'permissions'
+        verbose_name = "permission"
+        verbose_name_plural = "permissions"
 
 
 # The remaining code extends User and Group in a very strange way.
+
 
 class MetaClass(type):
     """General metaclass which extends User/Group creators with additional
@@ -68,7 +68,8 @@ class User(MetaObject):
         instance variable may be an object or a queryset.
         """
         from enhydris.permissions.models import Permission
-        if type(instance).__name__ == 'QuerySet':
+
+        if type(instance).__name__ == "QuerySet":
             for object in instance:
                 if self.has_row_perm(object, perm, True):
                     pass
@@ -96,22 +97,29 @@ class User(MetaObject):
         instance variable may be an object or a queryset.
         """
         from .models import Permission
-        if type(instance).__name__ == 'QuerySet':
+
+        if type(instance).__name__ == "QuerySet":
             for object in instance:
                 if not self.has_row_perm(object, perm, True):
                     pass
                 content_type = ContentType.objects.get_for_model(object)
                 perms = Permission.objects.filter(
-                    user=self, content_type__pk=content_type.id,
-                    object_id=object.id, name=perm)
+                    user=self,
+                    content_type__pk=content_type.id,
+                    object_id=object.id,
+                    name=perm,
+                )
                 perms.delete()
         else:
             if not self.has_row_perm(instance, perm, True):
                 return False
             content_type = ContentType.objects.get_for_model(instance)
             objects = Permission.objects.filter(
-                user=self, content_type__pk=content_type.id,
-                object_id=instance.id, name=perm)
+                user=self,
+                content_type__pk=content_type.id,
+                object_id=instance.id,
+                name=perm,
+            )
             objects.delete()
         return True
 
@@ -120,6 +128,7 @@ class User(MetaObject):
         Check if user has permission 'perm' on object instance.
         """
         from enhydris.permissions.models import Permission
+
         if self.is_superuser:
             return True
         if not self.is_active:
@@ -127,8 +136,11 @@ class User(MetaObject):
 
         content_type = ContentType.objects.get_for_model(instance)
         objects = Permission.objects.filter(
-            user=self, content_type__pk=content_type.id,
-            object_id=instance.id, name=perm)
+            user=self,
+            content_type__pk=content_type.id,
+            object_id=instance.id,
+            name=perm,
+        )
         if objects.count() > 0:
             return True
 
@@ -157,18 +169,23 @@ class User(MetaObject):
         permission.
         """
         from enhydris.permissions.models import Permission
+
         content_type = ContentType.objects.get_for_model(instance)
         objects = Permission.objects.filter(
             Q(user=self) | Q(group__in=self.groups.all()),
-            content_type__pk=content_type.id, name=perm)
+            content_type__pk=content_type.id,
+            name=perm,
+        )
         return objects
 
 
 class Group(MetaObject):
     """Meta class to extend base Group class with permission editing methods"""
+
     def add_row_perm(self, instance, perm):
         from enhydris.permissions.models import Permission
-        if type(instance).__name__ == 'QuerySet':
+
+        if type(instance).__name__ == "QuerySet":
             for object in instance:
                 if self.has_row_perm(object, perm):
                     pass
@@ -189,31 +206,42 @@ class Group(MetaObject):
 
     def del_row_perm(self, instance, perm):
         from enhydris.permissions.models import Permission
-        if type(instance).__name__ == 'QuerySet':
+
+        if type(instance).__name__ == "QuerySet":
             for object in instance:
                 if not self.has_row_perm(object, perm, True):
                     pass
                 content_type = ContentType.objects.get_for_model(object)
                 perms = Permission.objects.filter(
-                    user=self, content_type__pk=content_type.id,
-                    object_id=object.id, name=perm)
+                    user=self,
+                    content_type__pk=content_type.id,
+                    object_id=object.id,
+                    name=perm,
+                )
                 perms.delete()
         else:
             if not self.has_row_perm(instance, perm):
                 return False
             content_type = ContentType.objects.get_for_model(instance)
             objects = Permission.objects.filter(
-                group=self, content_type__pk=content_type.id,
-                object_id=instance.id, name=perm)
+                group=self,
+                content_type__pk=content_type.id,
+                object_id=instance.id,
+                name=perm,
+            )
             objects.delete()
         return True
 
     def has_row_perm(self, instance, perm):
         from enhydris.permissions.models import Permission
+
         content_type = ContentType.objects.get_for_model(instance)
         objects = Permission.objects.filter(
-            group=self, content_type__pk=content_type.id,
-            object_id=instance.id, name=perm)
+            group=self,
+            content_type__pk=content_type.id,
+            object_id=instance.id,
+            name=perm,
+        )
         if objects.count() > 0:
             return True
         else:
@@ -221,7 +249,9 @@ class Group(MetaObject):
 
     def get_rows_with_permission(self, instance, perm):
         from enhydris.permissions.models import Permission
+
         content_type = ContentType.objects.get_for_model(instance)
         objects = Permission.objects.filter(
-            group=self, content_type__pk=content_type.id, name=perm)
+            group=self, content_type__pk=content_type.id, name=perm
+        )
         return objects
