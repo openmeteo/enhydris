@@ -163,8 +163,8 @@ class GentityForm(ModelForm):
 
 
 class GpointForm(GentityForm):
-    abscissa = forms.FloatField(required=False)
-    ordinate = forms.FloatField(required=False)
+    abscissa = forms.FloatField()
+    ordinate = forms.FloatField()
     srid = forms.IntegerField(required=False)
 
     class Meta:

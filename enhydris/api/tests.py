@@ -3,6 +3,7 @@ from datetime import datetime
 
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.gis.geos import Point
 from django.test import TestCase
 from django.test.client import BOUNDARY, MULTIPART_CONTENT, encode_multipart
 from django.test.utils import override_settings
@@ -45,7 +46,8 @@ def create_test_data():
     water_division1 = models.WaterDivision.objects.create(name="Test Water Division")
     stype1 = models.StationType.objects.create(descr="Test Station Type")
 
-    station1 = models.Station.objects.create(
+    station1 = mommy.make(
+        models.Station,
         name="Test Station",
         water_division=water_division1,
         water_basin=water_basin1,
@@ -54,11 +56,12 @@ def create_test_data():
         is_automatic=False,
         copyright_holder="Joe User",
         copyright_years=2014,
+        stype__id=stype1.id,
+        gpoint__point=Point(0.0, 0.0),
     )
-    station1.stype = [stype1]
-    station1.save()
 
-    station2 = models.Station.objects.create(
+    station2 = mommy.make(
+        models.Station,
         name="Test Station 2",
         water_division=water_division1,
         water_basin=water_basin1,
@@ -67,12 +70,12 @@ def create_test_data():
         is_automatic=False,
         copyright_holder="Joe User",
         copyright_years=2014,
+        stype__id=stype1.id,
+        gpoint__point=Point(0.0, 0.0),
+        last_modified=iso8601.parse_date(
+            "2010-05-10 14:26:22", default_timezone=pytz.utc
+        ),
     )
-    station2.stype = [stype1]
-    station2.last_modified = iso8601.parse_date(
-        "2010-05-10 14:26:22", default_timezone=pytz.utc
-    )
-    station2.save()
 
     # timeseries1
     models.Timeseries.objects.create(

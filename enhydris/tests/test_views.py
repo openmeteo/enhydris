@@ -1098,11 +1098,13 @@ class OpenVTestCase(TestCase):
         self.unit = UnitOfMeasurement.objects.create(symbol="+")
         self.unit.variables.add(self.var)
         self.tz = TimeZone.objects.create(code="UTC", utc_offset="0")
-        self.station = Station.objects.create(
+        self.station = mommy.make(
+            Station,
             name="station",
             owner=self.organization,
             approximate=False,
             is_automatic=True,
+            gpoint__point=Point(0.0, 0.0),
         )
         self.ts = Timeseries(
             name="tstest",
@@ -1163,6 +1165,8 @@ class OpenVTestCase(TestCase):
             "stype": self.stype.pk,
             "owner": self.organization.pk,
             "creator": self.user.pk,
+            "abscissa": 0.0,
+            "ordinate": 0.0,
             "copyright_holder": "Copyright Holder",
             "copyright_years": "1990-2011",
             "Overseer-TOTAL_FORMS": "1",
@@ -1255,6 +1259,8 @@ class OpenVTestCase(TestCase):
             "stype": self.stype.pk,
             "owner": self.organization.pk,
             "creator": self.user.pk,
+            "abscissa": 0.0,
+            "ordinate": 0.0,
             "copyright_holder": "Copyright Holder",
             "copyright_years": "1990-2011",
             "Overseer-TOTAL_FORMS": "1",
@@ -1352,6 +1358,8 @@ class OpenVTestCase(TestCase):
             "stype": self.stype.pk,
             "owner": self.organization.pk,
             "creator": self.user.pk,
+            "abscissa": 0.0,
+            "ordinate": 0.0,
             "copyright_holder": "Copyright Holder",
             "copyright_years": "1990-2011",
             "Overseer-TOTAL_FORMS": "1",
