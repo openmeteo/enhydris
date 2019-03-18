@@ -48,20 +48,12 @@ class GentityFileAdmin(admin.ModelAdmin):
     list_display = [f.name for f in models.GentityFile._meta.fields]
 
 
-class GentityGenericDataAdmin(admin.ModelAdmin):
-    list_display = [f.name for f in models.GentityGenericData._meta.fields]
-
-
 class GentityAltCodeTypeAdmin(admin.ModelAdmin):
     list_display = [f.name for f in models.GentityAltCodeType._meta.fields]
 
 
 class FileTypeAdmin(admin.ModelAdmin):
     list_display = ("id", "mime_type", "descr")
-
-
-class GentityGenericDataTypeAdmin(admin.ModelAdmin):
-    list_display = ("id", "descr", "file_extension")
 
 
 class EventTypeAdmin(admin.ModelAdmin):
@@ -113,9 +105,7 @@ admin.site.register(models.WaterBasin, WaterBasinAdmin)
 
 admin.site.register(models.GentityAltCodeType, GentityAltCodeTypeAdmin)
 admin.site.register(models.GentityFile, GentityFileAdmin)
-admin.site.register(models.GentityGenericData, GentityGenericDataAdmin)
 admin.site.register(models.FileType, FileTypeAdmin)
-admin.site.register(models.GentityGenericDataType, GentityGenericDataTypeAdmin)
 admin.site.register(models.EventType, EventTypeAdmin)
 admin.site.register(models.StationType, StationTypeAdmin)
 admin.site.register(models.InstrumentType, InstrumentTypeAdmin)
@@ -136,11 +126,6 @@ class GentityAltCodeInline(admin.TabularInline):
 
 class GentityFileInline(admin.TabularInline):
     model = models.GentityFile
-    extra = 1
-
-
-class GentityGenericDataInline(admin.TabularInline):
-    model = models.GentityGenericData
     extra = 1
 
 
@@ -205,7 +190,6 @@ class StationAdmin(admin.ModelAdmin):
     inlines = (
         GentityAltCodeInline,
         GentityFileInline,
-        GentityGenericDataInline,
         GentityEventInline,
         OverseerInline,
         InstrumentInline,

@@ -7,7 +7,6 @@ import mimetypes
 import os
 import tempfile
 from datetime import datetime, timedelta
-from tempfile import mkstemp
 from wsgiref.util import FileWrapper
 from zipfile import ZIP_DEFLATED, ZipFile
 
@@ -44,7 +43,6 @@ from enhydris.forms import (
     GentityAltCodeForm,
     GentityEventForm,
     GentityFileForm,
-    GentityGenericDataForm,
     InstrumentForm,
     OverseerForm,
     StationForm,
@@ -56,7 +54,6 @@ from enhydris.models import (
     GentityAltCode,
     GentityEvent,
     GentityFile,
-    GentityGenericData,
     Instrument,
     Overseer,
     Station,
@@ -934,36 +931,6 @@ def download_gentityfile(request, gf_id):
     return response
 
 
-@gentityfile_permission
-def download_gentitygenericdata(request, gg_id):
-    """
-    This function handles requests for gentitygenericdata downloads and serves
-    the content to the user.
-    """
-    ggenericdata = get_object_or_404(GentityGenericData, pk=int(gg_id))
-    try:
-        s = ggenericdata.content
-        if s.find("\r") < 0:
-            s = s.replace("\n", "\r\n")
-        (afile_handle, afilename) = mkstemp()
-        os.write(afile_handle, s)
-        afile = open(afilename, "r")
-        wrapper = FileWrapper(afile)
-    except Exception:
-        raise Http404
-    download_name = "GenericData-id_%s.%s" % (
-        gg_id,
-        ggenericdata.data_type.file_extension,
-    )
-    content_type = "text/plain"
-    response = HttpResponse(content_type=content_type)
-    response["Content-Length"] = os.fstat(afile_handle).st_size
-    response["Content-Disposition"] = "attachment; filename=%s" % download_name
-    for chunk in wrapper:
-        response.write(chunk)
-    return response
-
-
 TS_ERROR = (
     "There seems to be some problem with our internal infrastuctrure. "
     "The admins have been notified of this and will try to resolve "
@@ -1285,7 +1252,7 @@ def timeseries_delete(request, timeseries_id):
 
 
 """
-GentityFile/GenericData/Event Views
+GentityFile/Event Views
 """
 
 
@@ -1386,117 +1353,6 @@ def gentityfile_delete(request, gentityfile_id):
             request,
             "delete_confirm.html",
             {"object_description": _("file {}").format(gfile.id)},
-        )
-
-    return HttpResponseBadRequest("Bad request", content_type="text/plain")
-
-
-"""
-GentityGenericData View
-"""
-
-
-def _gentitygenericdata_edit_or_create(request, ggenericdata_id=None):
-    station_id = request.GET.get("station_id", None)
-    if ggenericdata_id:
-        # Edit
-        ggenericdata = get_object_or_404(GentityGenericData, id=ggenericdata_id)
-    else:
-        # Add
-        ggenericdata = None
-
-    if ggenericdata_id:
-        station = ggenericdata.related_station
-        station_id = station.id
-        if not request.user.has_row_perm(station, "edit"):
-            return HttpResponseForbidden("Forbidden", content_type="text/plain")
-
-    if station_id and not ggenericdata_id:
-        # Adding new
-        station = get_object_or_404(Station, id=station_id)
-        if not request.user.has_row_perm(station, "edit"):
-            return HttpResponseForbidden("Forbidden", content_type="text/plain")
-
-    user = request.user
-    # Done with checks
-    if request.method == "POST":
-        if ggenericdata:
-            form = GentityGenericDataForm(
-                request.POST, request.FILES, instance=ggenericdata, user=user
-            )
-        else:
-            form = GentityGenericDataForm(request.POST, request.FILES, user=user)
-        if form.is_valid():
-            ggenericdata = form.save()
-            # do stuff
-            ggenericdata.save()
-            if not ggenericdata_id:
-                ggenericdata_id = str(ggenericdata.id)
-            return HttpResponseRedirect(
-                reverse(
-                    "station_detail", kwargs={"object_id": str(ggenericdata.gentity.id)}
-                )
-            )
-    else:
-        if ggenericdata:
-            form = GentityGenericDataForm(
-                instance=ggenericdata, user=user, gentity_id=station_id
-            )
-        else:
-            form = GentityGenericDataForm(user=user, gentity_id=station_id)
-
-    return render(request, "gentitygenericdata_edit.html", {"form": form})
-
-
-@permission_required("enhydris.add_gentityfile")
-def gentitygenericdata_add(request):
-    """
-    Create new gentitygenericdata. GentityGenericData can only be added as part
-    of an existing station.
-    """
-    return _gentitygenericdata_edit_or_create(request)
-
-
-@login_required
-def gentitygenericdata_edit(request, ggenericdata_id):
-    """
-    Edit existing gentitygenericdata. Permissions are checked against the
-    relative station that the gentitygenericdata is part of.
-    """
-    return _gentitygenericdata_edit_or_create(request, ggenericdata_id=ggenericdata_id)
-
-
-@login_required
-def gentitygenericdata_delete(request, ggenericdata_id):
-    """
-    Delete existing gentitygenericdata. Permissions are checked against the
-    relative station that the gentitygenericdata is part of.
-    """
-    ggenericdata = get_object_or_404(GentityGenericData, id=ggenericdata_id)
-    related_station = ggenericdata.related_station
-
-    # Check permissions
-    if (
-        not ggenericdata
-        or not related_station
-        or not request.user.has_row_perm(related_station, "edit")
-        or not request.user.has_perm("enhydris.delete_gentityfile")
-    ):
-        return HttpResponseForbidden("Forbidden", content_type="text/plain")
-
-    # Proceed with the deletion if it's a POST request
-    if request.method == "POST":
-        ggenericdata.delete()
-        return render(
-            request, "success.html", {"msg": "GentityGenericData deleted successfully"}
-        )
-
-    # Ask for confirmation if it's a GET request
-    if request.method == "GET":
-        return render(
-            request,
-            "delete_confirm.html",
-            {"object_description": _("generic data {}").format(ggenericdata.id)},
         )
 
     return HttpResponseBadRequest("Bad request", content_type="text/plain")
@@ -1952,7 +1808,6 @@ ALLOWED_TO_EDIT = (
     "gentityaltcode",
     "gentityfile",
     "gentityevent",
-    "gentitygenericdatatype",
 )
 
 

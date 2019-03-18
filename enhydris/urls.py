@@ -97,30 +97,6 @@ urlpatterns = [
         "gentityfile_delete",
     ),
     url(
-        r"^gentitygenericdata/(?P<gg_id>\d+)/download/$",
-        views.download_gentitygenericdata,
-        {},
-        "gentitygenericdata_dl",
-    ),
-    url(
-        r"^gentitygenericdata/edit/(?P<ggenericdata_id>\d+)/$",
-        views.gentitygenericdata_edit,
-        {},
-        "gentitygenericdata_edit",
-    ),
-    url(
-        r"^gentitygenericdata/add/$",
-        views.gentitygenericdata_add,
-        {},
-        "gentitygenericdata_add",
-    ),
-    url(
-        r"^gentitygenericdata/delete/(?P<ggenericdata_id>\d+)/$",
-        views.gentitygenericdata_delete,
-        {},
-        "gentitygenericdata_delete",
-    ),
-    url(
         r"^gentityevent/edit/(?P<gentityevent_id>\d+)/$",
         views.gentityevent_edit,
         {},

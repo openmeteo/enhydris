@@ -63,7 +63,7 @@
                 {% if request.user|can_delete:station %}
                   <a href='{% url "station_delete" station.id%}' class="btn btn-xs btn-danger" >{% trans "Delete" %}</a>
                 {% endif %}
-              <sub>
+              </sub>
               <sub>
                 {% if request.user|can_edit:station %}
                   <button style="float:right" onclick="togl('more')"class="btn btn-primary btn-xs" id="show_results"> {% trans "Show/Hide more options" %}</button>
@@ -72,7 +72,6 @@
                     <a class="btn btn-xs btn-default " href="{% url "timeseries_add" %}?station_id={{ station.id }}"><i class="glyphicon glyphicon-plus"></i> New Timeseries</a>
                     <a class="btn btn-xs btn-default " href="{% url "instrument_add" %}?station_id={{ station.id }}"><i class="glyphicon glyphicon-plus"></i> New Instrument</a>
                     <a class="btn btn-xs btn-default " href="{% url "gentityfile_add" %}?station_id={{ station.id }}"><i class="glyphicon glyphicon-plus"></i> New File</a>
-                    <a class="btn btn-xs btn-default " href="{% url "gentitygenericdata_add" %}?station_id={{ station.id }}"><i class="glyphicon glyphicon-plus"></i> New Generic Item</a>
                     <a class="btn btn-xs btn-default " href="{% url "gentityevent_add" %}?station_id={{ station.id }}"><i class="glyphicon glyphicon-plus"></i> New Event</a>
                     <a class="btn btn-xs btn-default " href="{% url "gentityaltcode_add" %}?station_id={{ station.id }}"><i class="glyphicon glyphicon-plus"></i> New Alt Code</a>
                     <a class="btn btn-xs btn-default " href="{% url "overseer_add" %}?station_id={{ station.id }}"><i class="glyphicon glyphicon-plus"></i> New Overseer</a>
@@ -160,8 +159,8 @@
                     {% else %}
                       <td colspan='2'>{% trans "Unknown" %}</td>
                     {% endif %}
-                {% endif %}
                   </tr>
+                {% endif %}
                   <tr><!-- Overseers table -->
                     <th>{% trans 'Overseers' %}</th>
                     <td colspan='2'>
@@ -208,7 +207,6 @@
         <li class="active"><a href="#timeseries" data-toggle="tab">{% trans "Timeseries" %}</a></li>
         <li><a href="#gentity_codes" data-toggle="tab">{% trans "Codes" %}</a></li>
         <li><a href="#gentity_files" data-toggle="tab">{% trans "Files" %}</a></li>
-        <li><a href="#gentity_data" data-toggle="tab">{% trans "Generic Data" %}</a></li>
         <li><a href="#gentity_events" data-toggle="tab">{% trans "Events" %}</a></li>
         <li><a href="#instruments" data-toggle="tab">{% trans "Instruments" %}</a></li>
       </ul>
@@ -217,7 +215,6 @@
           <h4>{% trans 'Station (Gentity) Alternative Codes' %}</h4>
           <div class="table-responsive">
             {% if station.gentityaltcode_set.count %}
-              <td>
                 <table class="table table-hover table-condensed">
                   <thead>
                     <tr>
@@ -245,20 +242,15 @@
                     {% endfor %}
                   </tbody>
                 </table>
-              </td>
             {% else %}
-              <td>
                 <h4 class="tab-no-data">{% trans "No data available" %}</h4>
-              </td>
             {% endif %}
-          </table>
         </div>
       </div>
       <div class="tab-pane" id="gentity_files">
         <h4>{% trans 'Station (Gentity) Files' %}</h4>
         <div class="table-responsive">
           {% if station.gentityfile_set.count %}
-            <td>
               <table class="table table-hover table-condensed">
                 <thead>
                   <tr>
@@ -300,71 +292,15 @@
                   {% endfor %}
                 </tbody>
               </table>
-            </td>
             {% else %}
-              <td colspan="2">
                 <h4 class="tab-no-data">{% trans "No data available" %}</h4>
-              </td>
             {% endif %}
-          </table>
         </div>
       </div>
-      <div class="tab-pane" id="gentity_data">
-        <h4>{% trans 'Station (Gentity) Generic data' %}</h4>
-        <div class="table-responsive">
-          {% if station.gentitygenericdata_set.count %}
-            <td>
-              <table class="table table-hover table-condensed">
-                <thead>
-                  <tr>
-                    <th>{% trans 'ID' %}</th>
-                    <th>{% trans 'Data Type' %}</th>
-                    <th>{% trans 'Description' %}</th>
-                    <th>{% trans 'Remarks' %}</th>
-                    <th>{% trans 'Request File' %}</th>
-                      {% if request.user|can_edit:station %}
-                        <th>{% trans "Management" %}</th>
-                      {% endif %}
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for genericdata in station.gentitygenericdata_set.all %}
-                    <tr>
-                      <td>{{ genericdata.id }}</td>
-                      <td>{{ genericdata.data_type }}</td>
-                      <td class="col-sm-4">{{ genericdata.descr }}</td>
-                      <td class="col-sm-4">{{ genericdata.remarks }}</td>
-                      <td>
-                        {% if request.user.is_authenticated or anonymous_can_download_data %}
-                          <a href="{% url "gentitygenericdata_dl" genericdata.id %}"><img style="border:none" src="{% static "images/icons/download.png" %}"></a>
-                        {% else %}
-                          <i>N/A</i>
-                        {% endif %}
-                      </td>
-                      {% if request.user|can_edit:station %}
-                        <td style="text-align:center;">
-                          <a href="{% url "gentitygenericdata_edit" genericdata.id %}" title="Edit"><i class="glyphicon glyphicon-pencil"></a>&nbsp;
-                          <a href="{% url "gentitygenericdata_delete" genericdata.id %}" title="Delete"><i class="glyphicon glyphicon-remove"></a>
-                        </td>
-                      {% endif %}
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </td>
-          {% else %}
-            <td>
-              <h4 class="tab-no-data">{% trans "No data available" %}</h4>
-            </td>
-          {% endif %}
-        </table>
-      </div>
-    </div>
     <div class="tab-pane" id="gentity_events">
       <h4>{% trans 'Station (Gentity) Events' %}</h4>
       <div class="table-responsive">
         {% if station.gentityevent_set.count %}
-          <td colspan="2">
             <table class="table table-hover table-condensed">
               <thead>
                 <tr>
@@ -396,20 +332,15 @@
                 {% endfor %}
               </tbody>
             </table>
-          </td>
         {% else %}
-          <td>
             <h4 class="tab-no-data">{% trans "No data available" %}</h4>
-          </td>
         {% endif %}
-        </table>
       </div>
     </div>
     <div class="tab-pane" id="instruments">
       <h4>{% trans 'Instruments' %}</h4>
       <div class="table-responsive">
         {% if station.instrument_set.count %}
-          <td colspan="2">
             <table class="table table-hover table-condensed">
               <thead>
                 <tr>
@@ -448,20 +379,15 @@
               {% endfor %}
             </tbody>
           </table>
-        </td>
         {% else %}
-          <td>
             <h4 class="tab-no-data">{% trans "No data available" %}</h4>
-          </td>
         {% endif %}
-        </table>
       </div>
     </div>
     <div class="tab-pane active" id="timeseries">
       <h4>{% trans 'Timeseries' %}</h4>
       <div class="table-responsive">
         {% if station.timeseries.count %}
-          <td colspan="2">
             <table class="table table-hover table-condensed">
               <thead>
                 <tr>
@@ -510,13 +436,9 @@
               {% endfor %}
             </tbody>
           </table>
-        </td>
       {% else %}
-        <td colspan="2">
           <h4 class="tab-no-data">{% trans "No data available" %}<h4>
-        </td>
       {% endif %}
-    </table>
     </div>
     </div>
     </div>

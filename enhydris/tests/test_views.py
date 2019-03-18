@@ -38,7 +38,6 @@ from enhydris.models import (
     GentityAltCode,
     GentityEvent,
     GentityFile,
-    GentityGenericData,
     Instrument,
     InstrumentType,
     Organization,
@@ -275,40 +274,6 @@ class GentityEventsTestCase(TestCase):
         r = self.client.post("/gentityevent/delete/{}/".format(self.gentity_event.id))
         self.assertEqual(r.status_code, 200)
         self.assertEqual(GentityEvent.objects.all().count(), 0)
-
-
-class GentityGenericDataTestCase(TestCase):
-    def setUp(self):
-        mommy.make(
-            User,
-            username="admin",
-            password=make_password("topsecret"),
-            is_active=True,
-            is_superuser=True,
-            is_staff=True,
-        )
-        self.station = mommy.make(Station)
-        self.generic_data = mommy.make(GentityGenericData, gentity=self.station)
-
-    def test_generic_data_cannot_be_deleted_with_get(self):
-        self.assertEqual(GentityGenericData.objects.all().count(), 1)
-        r = self.client.login(username="admin", password="topsecret")
-        self.assertTrue(r)
-        r = self.client.get(
-            "/gentitygenericdata/delete/{}/".format(self.generic_data.id)
-        )
-        self.assertEqual(r.status_code, 200)
-        self.assertEqual(GentityGenericData.objects.all().count(), 1)
-
-    def test_generic_data_can_be_deleted_with_post(self):
-        self.assertEqual(GentityGenericData.objects.all().count(), 1)
-        r = self.client.login(username="admin", password="topsecret")
-        self.assertTrue(r)
-        r = self.client.post(
-            "/gentitygenericdata/delete/{}/".format(self.generic_data.id)
-        )
-        self.assertEqual(r.status_code, 200)
-        self.assertEqual(GentityGenericData.objects.all().count(), 0)
 
 
 class GentityFilesTestCase(TestCase):
@@ -1102,7 +1067,6 @@ class OpenVTestCase(TestCase):
             "waterdivision",
             "person",
             "organization",
-            "gentitygenericdatatype",
         ]
         editors = Group(name="editors")
         editors.save()

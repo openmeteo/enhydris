@@ -19,8 +19,6 @@ from enhydris.models import (
     GentityAltCodeType,
     GentityEvent,
     GentityFile,
-    GentityGenericData,
-    GentityGenericDataType,
     Gpoint,
     Instrument,
     InstrumentType,
@@ -90,37 +88,6 @@ class GentityFileForm(ModelForm):
         user = kwargs.pop("user", None)
         gentity_id = kwargs.pop("gentity_id", None)
         super(GentityFileForm, self).__init__(*args, **kwargs)
-
-        if user and not user.is_superuser:
-            perms = user.get_rows_with_permission(Station(), "edit")
-            ids = [p.object_id for p in perms]
-            self.fields["gentity"].queryset = Station.objects.filter(id__in=ids)
-        if gentity_id:
-            self.fields["gentity"].queryset = Station.objects.filter(id=gentity_id)
-
-
-class GentityGenericDataForm(ModelForm):
-
-    station_objects = Station.objects.all()
-    if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
-        station_objects = station_objects.filter(
-            **settings.ENHYDRIS_SITE_STATION_FILTER
-        )
-    gentity = forms.ModelChoiceField(station_objects, label="Station", empty_label=None)
-    data_type = forms.ModelChoiceField(
-        GentityGenericDataType.objects,
-        label="Data type",
-        widget=SelectWithPop(model_name="gentitygenericdatatype"),
-    )
-
-    class Meta:
-        model = GentityGenericData
-        exclude = []
-
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop("user", None)
-        gentity_id = kwargs.pop("gentity_id", None)
-        super(GentityGenericDataForm, self).__init__(*args, **kwargs)
 
         if user and not user.is_superuser:
             perms = user.get_rows_with_permission(Station(), "edit")
