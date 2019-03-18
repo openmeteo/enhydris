@@ -144,9 +144,7 @@ class StationBriefView(DetailView):
 _station_list_csv_headers = [
     "id",
     "Name",
-    "Alternative name",
     "Short name",
-    "Alt short name",
     "Type",
     "Owner",
     "Start date",
@@ -162,7 +160,6 @@ _station_list_csv_headers = [
     "Political division",
     "Automatic",
     "Remarks",
-    "Alternative remarks",
     "Last modified",
 ]
 
@@ -171,9 +168,7 @@ def _station_csv(s):
     return [
         s.id,
         s.name,
-        s.name_alt,
         s.short_name,
-        s.short_name_alt,
         "+".join([t.descr for t in s.stype.all()]),
         s.owner,
         s.start_date,
@@ -189,7 +184,6 @@ def _station_csv(s):
         s.political_division.name if s.political_division else "",
         s.is_automatic,
         s.remarks,
-        s.remarks_alt,
         s.last_modified,
     ]
 
@@ -199,13 +193,11 @@ _instrument_list_csv_headers = [
     "Station",
     "Type",
     "Name",
-    "Alternative name",
     "Manufacturer",
     "Model",
     "Start date",
     "End date",
     "Remarks",
-    "Alternative remarks",
 ]
 
 
@@ -215,13 +207,11 @@ def _instrument_csv(i):
         i.station.id,
         i.type.descr if i.type else "",
         i.name,
-        i.name_alt,
         i.manufacturer,
         i.model,
         i.start_date,
         i.end_date,
         i.remarks,
-        i.remarks_alt,
     ]
 
 
@@ -232,7 +222,6 @@ _timeseries_list_csv_headers = [
     "Variable",
     "Unit",
     "Name",
-    "Alternative name",
     "Precision",
     "Time zone",
     "Time step",
@@ -241,7 +230,6 @@ _timeseries_list_csv_headers = [
     "Act. Offs. Min.",
     "Act. Offs.  Mon.",
     "Remarks",
-    "Alternative Remarks",
 ]
 
 
@@ -253,7 +241,6 @@ def _timeseries_csv(t):
         t.variable.descr if t.variable else "",
         t.unit_of_measurement.symbol,
         t.name,
-        t.name_alt,
         t.precision,
         t.time_zone.code,
         t.time_step.descr if t.time_step else "",
@@ -395,22 +382,15 @@ class StationListBaseView(ListView):
         """
         return queryset.filter(
             Q(name__icontains=search_term)
-            | Q(name_alt__icontains=search_term)
             | Q(short_name__icontains=search_term)
-            | Q(short_name_alt__icontains=search_term)
             | Q(remarks__icontains=search_term)
-            | Q(remarks_alt__icontains=search_term)
             | Q(water_basin__name__icontains=search_term)
-            | Q(water_basin__name_alt__icontains=search_term)
             | Q(water_division__name__icontains=search_term)
-            | Q(water_division__name_alt__icontains=search_term)
             | Q(political_division__name__icontains=search_term)
-            | Q(political_division__name_alt__icontains=search_term)
             | Q(owner__organization__name__icontains=search_term)
             | Q(owner__person__first_name__icontains=search_term)
             | Q(owner__person__last_name__icontains=search_term)
             | Q(timeseries__remarks__icontains=search_term)
-            | Q(timeseries__remarks_alt__icontains=search_term)
         )
 
     def specific_filter(self, queryset, name, value, ignore_invalid=False):
@@ -434,35 +414,21 @@ class StationListBaseView(ListView):
     def filter_by_owner(self, queryset, value):
         return queryset.filter(
             Q(owner__organization__name__icontains=value)
-            | Q(owner__organization__name_alt__icontains=value)
             | Q(owner__person__first_name__icontains=value)
-            | Q(owner__person__first_name_alt__icontains=value)
-            | Q(owner__person__last_name_alt__icontains=value)
             | Q(owner__person__last_name__icontains=value)
         )
 
     def filter_by_type(self, queryset, value):
-        return queryset.filter(
-            Q(stype__descr__icontains=value) | Q(stype__descr_alt__icontains=value)
-        )
+        return queryset.filter(Q(stype__descr__icontains=value))
 
     def filter_by_water_division(self, queryset, value):
-        return queryset.filter(
-            Q(water_division__name__icontains=value)
-            | Q(water_division__name_alt__icontains=value)
-        )
+        return queryset.filter(Q(water_division__name__icontains=value))
 
     def filter_by_water_basin(self, queryset, value):
-        return queryset.filter(
-            Q(water_basin__name__icontains=value)
-            | Q(water_basin__name_alt__icontains=value)
-        )
+        return queryset.filter(Q(water_basin__name__icontains=value))
 
     def filter_by_variable(self, queryset, value):
-        return queryset.filter(
-            Q(timeseries__variable__descr__icontains=value)
-            | Q(timeseries__variable__descr_alt__icontains=value)
-        )
+        return queryset.filter(Q(timeseries__variable__descr__icontains=value))
 
     def filter_by_bbox(self, queryset, value):
         try:
@@ -524,8 +490,7 @@ class StationListBaseView(ListView):
                     SELECT garea_ptr_id FROM enhydris_politicaldivision
                     WHERE garea_ptr_id IN (
                         SELECT id FROM enhydris_gentity
-                        WHERE LOWER(name) LIKE LOWER('%%{}%%')
-                        OR LOWER(name_alt) LIKE LOWER('%%{}%%'))
+                        WHERE LOWER(name) LIKE LOWER('%%{}%%'))
                   UNION ALL
                     SELECT pd.garea_ptr_id
                     FROM enhydris_politicaldivision pd, mytable

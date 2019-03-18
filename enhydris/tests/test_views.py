@@ -778,8 +778,6 @@ class GentityFileTestCase(TestCase):
                     "file_type": filetype_id,
                     "descr": "A description",
                     "remarks": "",
-                    "descr_alt": "An alt description",
-                    "remarks_alt": "",
                     "content": f,
                 },
             )

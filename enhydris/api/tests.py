@@ -117,11 +117,8 @@ class ReadTestCase(APITestCase):
         for res_datum, ref_datum in zip(response.data, self.reference_gentities):
             self.assertEqual(res_datum["id"], ref_datum.id)
             self.assertEqual(res_datum["name"], ref_datum.name)
-            self.assertEqual(res_datum["name_alt"], ref_datum.name_alt)
             self.assertEqual(res_datum["short_name"], ref_datum.short_name)
-            self.assertEqual(res_datum["short_name_alt"], ref_datum.short_name_alt)
             self.assertEqual(res_datum["remarks"], ref_datum.remarks)
-            self.assertEqual(res_datum["remarks_alt"], ref_datum.remarks_alt)
             wb_id = ref_datum.water_basin.id if ref_datum.water_basin else None
             self.assertEqual(res_datum["water_basin"], wb_id)
             wd_id = ref_datum.water_division.id if ref_datum.water_division else None
@@ -150,11 +147,8 @@ class ReadTestCase(APITestCase):
         for res_datum, ref_datum in zip(response.data, self.reference_gentities):
             self.assertEqual(res_datum["id"], ref_datum.id)
             self.assertEqual(res_datum["name"], ref_datum.name)
-            self.assertEqual(res_datum["name_alt"], ref_datum.name_alt)
             self.assertEqual(res_datum["short_name"], ref_datum.short_name)
-            self.assertEqual(res_datum["short_name_alt"], ref_datum.short_name_alt)
             self.assertEqual(res_datum["remarks"], ref_datum.remarks)
-            self.assertEqual(res_datum["remarks_alt"], ref_datum.remarks_alt)
             wb_id = ref_datum.water_basin.id if ref_datum.water_basin else None
             self.assertEqual(res_datum["water_basin"], wb_id)
             wd_id = ref_datum.water_division.id if ref_datum.water_division else None
