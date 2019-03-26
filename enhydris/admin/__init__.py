@@ -4,6 +4,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from enhydris import models
 
+from .station import StationAdmin  # NOQA
+
 
 @admin.register(models.Lentity)
 class LentityAdmin(admin.ModelAdmin):
