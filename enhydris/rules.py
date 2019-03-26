@@ -129,7 +129,10 @@ rules.add_perm("enhydris.delete_timeseries", can_touch_timeseries)
 rules.add_perm("enhydris.change_instrument", can_touch_instrument)
 rules.add_perm("enhydris.delete_instrument", can_touch_instrument)
 
-rules.add_perm("enhydris.change_station_creator", is_superuser)
+rules.add_perm(
+    "enhydris.change_station_creator",
+    users_can_add_content & model_backend_can_edit_station,
+)
 rules.add_perm(
     "enhydris.change_station_maintainers",
     users_can_add_content
