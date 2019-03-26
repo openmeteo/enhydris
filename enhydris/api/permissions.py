@@ -1,4 +1,3 @@
-from django.conf import settings
 from rest_framework import permissions
 
 
@@ -16,12 +15,4 @@ class CanEditOrReadOnly(permissions.BasePermission):
 
 class CanCreateStation(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        if request.method != "POST" or not request.user.is_authenticated:
-            return False
-        if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT or request.user.has_perm(
-            "enhydris.add_station"
-        ):
-            return True
-        return False
+        return request.user.has_perm("enhydris.add_station")

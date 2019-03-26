@@ -131,6 +131,7 @@ class TsdataPostTestCase(APITestCase):
         )
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class TsdataPostAuthorizationTestCase(APITestCase):
     def setUp(self):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
@@ -247,6 +248,7 @@ class TimeseriesBottomTestCase(APITestCase):
         self.assertEqual(self.response.content.decode(), "2018-12-09 13:10,20,")
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class TimeseriesPostTestCase(APITestCase):
     def setUp(self):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
@@ -280,6 +282,7 @@ class TimeseriesPostTestCase(APITestCase):
         self.assertEqual(self._create_timeseries().status_code, 201)
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class TimeseriesPostWithWrongStationTestCase(APITestCase):
     def setUp(self):
         self.user = mommy.make(User, is_active=True, is_superuser=False)
@@ -315,6 +318,7 @@ class TimeseriesPostWithWrongStationTestCase(APITestCase):
         self.assertEqual(response.status_code, 201)
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class TimeseriesDeleteTestCase(APITestCase):
     def setUp(self):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
@@ -386,6 +390,7 @@ class StationCreateTestCase(APITestCase):
             },
         )
 
+    @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
     def test_unauthenticated_user_is_denied_permission_to_create_station(self):
         response = self._create_station()
         self.assertEqual(response.status_code, 401)
@@ -412,6 +417,7 @@ class StationCreateTestCase(APITestCase):
         self.assertEqual(response.status_code, 201)
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class StationUpdateAndDeleteTestCase(APITestCase):
     def setUp(self):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
