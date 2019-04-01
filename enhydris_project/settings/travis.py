@@ -10,3 +10,4 @@ DATABASES = {
         "PORT": 5432,
     }
 }
+ENHYDRIS_TIMESERIES_DATA_DIR = "/tmp"

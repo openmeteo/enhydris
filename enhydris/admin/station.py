@@ -1,9 +1,12 @@
+from io import TextIOWrapper
+
 from django import forms
 from django.conf import settings
 from django.contrib import admin
 from django.db.models import Q, TextField
 from django.utils.translation import ugettext_lazy as _
 
+from htimeseries import HTimeseries
 from rules.contrib.admin import ObjectPermissionsModelAdmin
 
 from enhydris import models
@@ -134,6 +137,112 @@ class GentityEventInline(InlinePermissionsMixin, admin.StackedInline):
     fields = (("user", "date"), "type", "report")
 
 
+class TimeseriesInlineAdminForm(forms.ModelForm):
+    data = forms.FileField(label=_("Data file"), required=False)
+    replace_or_append = forms.ChoiceField(
+        label=_("What to do"),
+        required=False,
+        initial="APPEND",
+        choices=(
+            ("APPEND", _("Append this file's data to the already existing")),
+            (
+                "REPLACE",
+                _("Discard any already existing data and replace them with this file"),
+            ),
+        ),
+    )
+
+    class Meta:
+        model = models.Timeseries
+        exclude = ()
+
+    def clean(self):
+        result = super().clean()
+        if self.cleaned_data.get("data") is not None:
+            self._check_submitted_data(self.cleaned_data["data"])
+        return result
+
+    def _check_submitted_data(self, datastream):
+        ahtimeseries = self._get_timeseries_without_moving_file_position(datastream)
+        if self._we_are_appending_data(ahtimeseries):
+            self._check_timeseries_for_appending(ahtimeseries)
+
+    def _get_timeseries_without_moving_file_position(self, datastream):
+        original_position = datastream.tell()
+        wrapped_datastream = TextIOWrapper(datastream, newline="\n")
+        result = HTimeseries.read(wrapped_datastream)
+        wrapped_datastream.detach()  # If we don't do this the datastream will be closed
+        datastream.seek(original_position)
+        return result
+
+    def _we_are_appending_data(self, ahtimeseries):
+        data_exists = bool(self.instance and self.instance.start_date)
+        submitted_data_exists = len(ahtimeseries.data) > 0
+        user_wants_to_append = self.cleaned_data.get("replace_or_append") == "APPEND"
+        return data_exists and submitted_data_exists and user_wants_to_append
+
+    def _check_timeseries_for_appending(self, ahtimeseries):
+        if self.instance.start_date.replace(tzinfo=None) >= ahtimeseries.data.index[0]:
+            raise forms.ValidationError(
+                _(
+                    "Can't append; the first record of the time series to append is "
+                    "earlier than the last record of the existing time series."
+                )
+            )
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self._save_timeseries_data()
+
+    def _save_timeseries_data(self):
+        data = TextIOWrapper(self.cleaned_data["data"], newline="\n")
+        if self.cleaned_data["replace_or_append"] == "APPEND":
+            self.instance.append_data(data)
+        else:
+            self.instance.set_data(data)
+
+
+class TimeseriesInline(InlinePermissionsMixin, admin.StackedInline):
+    form = TimeseriesInlineAdminForm
+    model = models.Timeseries
+    classes = ("collapse",)
+    fieldsets = [
+        (
+            _("Essential information"),
+            {
+                "fields": ("name", ("variable", "unit_of_measurement")),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            _("Other details"),
+            {
+                "fields": ("hidden", "instrument", "precision", "remarks"),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            _("Time step"),
+            {
+                "fields": (
+                    "interval_type",
+                    ("time_step", "time_zone"),
+                    ("timestamp_rounding_months", "timestamp_rounding_minutes"),
+                    ("timestamp_offset_months", "timestamp_offset_minutes"),
+                ),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            _("Data"),
+            {"fields": (("data", "replace_or_append"),), "classes": ("collapse",)},
+        ),
+    ]
+
+    class Media:
+        css = {"all": ("css/extra_admin.css",)}
+
+
 @admin.register(models.Station)
 class StationAdmin(ObjectPermissionsModelAdmin):
     form = StationAdminForm
@@ -145,6 +254,7 @@ class StationAdmin(ObjectPermissionsModelAdmin):
         InstrumentInline,
         GentityFileInline,
         GentityEventInline,
+        TimeseriesInline,
     ]
 
     def get_queryset(self, request):

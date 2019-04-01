@@ -1,0 +1,12 @@
+/* When an inline has fieldsets, we don't use a blue heading, otherwise the
+ * inline fieldset's heading is confused with the inline's heading.
+ */
+
+.inline-related h2 {
+    background: #f8f8f8;
+    color: #666;
+}
+
+.inline-related h2 .collapse-toggle {
+    color: #447e9b;
+}

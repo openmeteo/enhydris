@@ -1,11 +1,15 @@
+import datetime as dt
+from io import StringIO
+
 from django.contrib.auth.models import Permission, User
 from django.contrib.gis.geos import Point
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 
 from model_mommy import mommy
 
-from enhydris.admin.station import LatLonField, LatLonWidget
-from enhydris.models import Station
+from enhydris.admin.station import LatLonField, LatLonWidget, TimeseriesInlineAdminForm
+from enhydris.models import Station, Timeseries
 
 
 class LatLonWidgetTestCase(TestCase):
@@ -214,3 +218,117 @@ class StationPermsTestCaseWhenUsersCannotAddCont(StationPermsTestCaseBase, Commo
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "Creator")
         self.assertNotContains(response, "Maintainers")
+
+
+class TimeseriesInlineAdminFormRefusesToAppendIfNotInOrderTestCase(TestCase):
+    def setUp(self):
+        station = mommy.make(Station)
+        self.timeseries = mommy.make(
+            Timeseries, gentity=station, time_zone__utc_offset=0
+        )
+        self.timeseries.set_data(StringIO("2019-01-01 00:30,25,\n"))
+        self.data = {
+            "replace_or_append": "APPEND",
+            "gentity": station.id,
+            "unit_of_measurement": self.timeseries.unit_of_measurement.id,
+            "variable": self.timeseries.variable.id,
+            "time_zone": self.timeseries.time_zone.id,
+        }
+        self.files = {
+            "data": SimpleUploadedFile(
+                "mytimeseries.csv", b"2005-12-01 18:35,7,\n2019-04-09 13:36,0,\n"
+            )
+        }
+        self.form = TimeseriesInlineAdminForm(
+            data=self.data, files=self.files, instance=self.timeseries
+        )
+
+    def test_form_is_not_valid(self):
+        self.assertFalse(self.form.is_valid())
+
+    def test_form_errors(self):
+        self.assertIn(
+            "the first record of the time series to append is earlier than the last "
+            "record of the existing time series",
+            self.form.errors["__all__"][0],
+        )
+
+
+class TimeseriesInlineAdminFormAcceptsAppendingIfInOrderTestCase(TestCase):
+    def setUp(self):
+        station = mommy.make(Station)
+        self.timeseries = mommy.make(
+            Timeseries, gentity=station, time_zone__utc_offset=0
+        )
+        self.timeseries.set_data(StringIO("2019-01-01 00:30,25,\n"))
+        self.data = {
+            "replace_or_append": "APPEND",
+            "gentity": station.id,
+            "unit_of_measurement": self.timeseries.unit_of_measurement.id,
+            "variable": self.timeseries.variable.id,
+            "time_zone": self.timeseries.time_zone.id,
+        }
+        self.files = {
+            "data": SimpleUploadedFile("mytimeseries.csv", b"2019-04-09 13:36,0,\n")
+        }
+        self.form = TimeseriesInlineAdminForm(
+            data=self.data, files=self.files, instance=self.timeseries
+        )
+        self.form.save()
+
+    def test_form_is_valid(self):
+        self.assertTrue(self.form.is_valid())
+
+    def test_data_length(self):
+        self.assertEqual(len(self.timeseries.get_data().data), 2)
+
+    def test_first_record(self):
+        self.assertEqual(
+            self.timeseries.get_data().data.index[0], dt.datetime(2019, 1, 1, 0, 30)
+        )
+
+    def test_second_record(self):
+        self.assertEqual(
+            self.timeseries.get_data().data.index[1], dt.datetime(2019, 4, 9, 13, 36)
+        )
+
+
+class TimeseriesInlineAdminFormAcceptsReplacingTestCase(TestCase):
+    def setUp(self):
+        station = mommy.make(Station)
+        self.timeseries = mommy.make(
+            Timeseries, gentity=station, time_zone__utc_offset=0
+        )
+        self.timeseries.set_data(StringIO("2019-01-01 00:30,25,\n"))
+        self.data = {
+            "replace_or_append": "REPLACE",
+            "gentity": station.id,
+            "unit_of_measurement": self.timeseries.unit_of_measurement.id,
+            "variable": self.timeseries.variable.id,
+            "time_zone": self.timeseries.time_zone.id,
+        }
+        self.files = {
+            "data": SimpleUploadedFile(
+                "mytimeseries.csv", b"2005-12-01 18:35,7,\n2019-04-09 13:36,0,\n"
+            )
+        }
+        self.form = TimeseriesInlineAdminForm(
+            data=self.data, files=self.files, instance=self.timeseries
+        )
+        self.form.save()
+
+    def test_form_is_valid(self):
+        self.assertTrue(self.form.is_valid())
+
+    def test_data_length(self):
+        self.assertEqual(len(self.timeseries.get_data().data), 2)
+
+    def test_first_record(self):
+        self.assertEqual(
+            self.timeseries.get_data().data.index[0], dt.datetime(2005, 12, 1, 18, 35)
+        )
+
+    def test_second_record(self):
+        self.assertEqual(
+            self.timeseries.get_data().data.index[1], dt.datetime(2019, 4, 9, 13, 36)
+        )
