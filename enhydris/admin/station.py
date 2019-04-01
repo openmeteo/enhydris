@@ -1,13 +1,12 @@
 from django import forms
 from django.conf import settings
 from django.contrib import admin
-from django.db import models
-from django.db.models import Q
+from django.db.models import Q, TextField
 from django.utils.translation import ugettext_lazy as _
 
 from rules.contrib.admin import ObjectPermissionsModelAdmin
 
-from enhydris.models import Station
+from enhydris import models
 
 
 class LatLonWidget(forms.MultiWidget):
@@ -62,16 +61,91 @@ class StationAdminForm(forms.ModelForm):
     )
 
     class Meta:
-        model = Station
+        model = models.Station
         exclude = ()
 
 
-@admin.register(Station)
+class InlinePermissionsMixin:
+    """Permissions relaxing mixin.
+    The admin is using some complicated permissions stuff to determine which inlines
+    will show on the form, whether they'll have the "delete" checkbox, and so on.
+    Among other things it's doing strange things such as checking whether a nonexistent
+    object has delete permission. This is causing trouble for our django-rules system.
+
+    What we do is specify that (for ENHYDRIS_USERS_CAN_ADD_CONTENT=True), users
+    always have permission to add, change, delete and view inlines. This will
+    (hopefully) take effect only when the user has permission to edit the parent object
+    (i.e. the station).
+
+    The truth is that this hasn't been exhaustively tested (but it should).
+    """
+
+    def has_add_permission(self, request):
+        if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
+            return True
+        else:
+            return super().has_add_permission(request)
+
+    def has_change_permission(self, request, obj):
+        if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
+            return True
+        else:
+            return super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj):
+        if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
+            return True
+        else:
+            return super().has_delete_permission(request, obj)
+
+    def has_view_permission(self, request, obj):
+        if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
+            return True
+        else:
+            return super().has_view_permission(request, obj)
+
+
+class GentityAltCodeInline(InlinePermissionsMixin, admin.TabularInline):
+    model = models.GentityAltCode
+    classes = ("collapse",)
+
+
+class InstrumentInline(InlinePermissionsMixin, admin.StackedInline):
+    model = models.Instrument
+    classes = ("collapse",)
+    fields = (
+        "name",
+        "type",
+        ("manufacturer", "model"),
+        ("start_date", "end_date"),
+        "remarks",
+    )
+
+
+class GentityFileInline(InlinePermissionsMixin, admin.StackedInline):
+    model = models.GentityFile
+    classes = ("collapse",)
+    fields = (("descr", "date"), ("content", "file_type"), "remarks")
+
+
+class GentityEventInline(InlinePermissionsMixin, admin.StackedInline):
+    model = models.GentityEvent
+    classes = ("collapse",)
+    fields = (("user", "date"), "type", "report")
+
+
+@admin.register(models.Station)
 class StationAdmin(ObjectPermissionsModelAdmin):
     form = StationAdminForm
     formfield_overrides = {
-        models.TextField: {"widget": forms.Textarea(attrs={"rows": 4, "cols": 40})}
+        TextField: {"widget": forms.Textarea(attrs={"rows": 4, "cols": 40})}
     }
+    inlines = [
+        GentityAltCodeInline,
+        InstrumentInline,
+        GentityFileInline,
+        GentityEventInline,
+    ]
 
     def get_queryset(self, request):
         result = super().get_queryset(request)
@@ -95,7 +169,8 @@ class StationAdmin(ObjectPermissionsModelAdmin):
                         "stype",
                         "owner",
                         ("copyright_years", "copyright_holder"),
-                    )
+                    ),
+                    "classes": ("collapse",),
                 },
             ),
             (
@@ -107,10 +182,17 @@ class StationAdmin(ObjectPermissionsModelAdmin):
                         "water_basin",
                         ("point", "srid", "approximate"),
                         ("altitude", "asrid"),
-                    )
+                    ),
+                    "classes": ("collapse",),
                 },
             ),
-            (_("Other details"), {"fields": ("remarks", ("start_date", "end_date"))}),
+            (
+                _("Other details"),
+                {
+                    "fields": ("remarks", ("start_date", "end_date")),
+                    "classes": ("collapse",),
+                },
+            ),
         ]
         permissions_fields = []
         if request.user.has_perm("enhydris.change_station_creator", obj):
@@ -118,5 +200,10 @@ class StationAdmin(ObjectPermissionsModelAdmin):
         if request.user.has_perm("enhydris.change_station_maintainers", obj):
             permissions_fields.append("maintainers")
         if permissions_fields:
-            fieldsets.append((_("Permissions"), {"fields": permissions_fields}))
+            fieldsets.append(
+                (
+                    _("Permissions"),
+                    {"fields": permissions_fields, "classes": ("collapse",)},
+                )
+            )
         return fieldsets

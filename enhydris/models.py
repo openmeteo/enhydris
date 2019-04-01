@@ -213,6 +213,8 @@ class GentityAltCode(models.Model):
 
     class Meta:
         ordering = ("type__descr", "value")
+        verbose_name = _("Alternative code")
+        verbose_name_plural = _("Alternative codes")
 
     def __str__(self):
         return self.type.descr + " " + self.value
@@ -243,6 +245,8 @@ class GentityFile(models.Model):
 
     class Meta:
         ordering = ("descr",)
+        verbose_name = _("File")
+        verbose_name_plural = _("Files")
 
     def __str__(self):
         return self.descr or str(self.id)
@@ -269,6 +273,8 @@ class GentityEvent(models.Model):
 
     class Meta:
         ordering = ["-date"]
+        verbose_name = _("Log entry")
+        verbose_name_plural = _("Log entries")
 
     def __str__(self):
         return str(self.date) + " " + self.type.__str__()
@@ -351,6 +357,8 @@ class Instrument(models.Model):
 
     class Meta:
         ordering = ("name",)
+        verbose_name = _("Instrument")
+        verbose_name_plural = _("Instruments")
 
     def __str__(self):
         return self.name or str(self.id)
