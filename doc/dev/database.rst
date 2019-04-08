@@ -590,8 +590,8 @@ Time series and related models
    .. attribute:: enhydris.models.Timeseries.datafile
 
       The file where the time series data are stored. The attribute is a
-      Django FileField_. The format of this file is documented in pd2hts
-      as `text format`_.
+      Django FileField_. The format of this file is documented in
+      htimeseries as `text format`_.
 
       Usually you don't need to access this file directly; instead, use
       methods :meth:`~enhydris.models.Timeseries.get_data`,
@@ -641,8 +641,8 @@ Time series and related models
       if the time series contains no records.
 
 
-.. _text format: https://github.com/openmeteo/pd2hts#text-format
-.. _file format: https://github.com/openmeteo/pd2hts#file-format
+.. _text format: https://github.com/openmeteo/htimeseries#text-format
+.. _file format: https://github.com/openmeteo/htimeseries#file-format
 .. _multi-table inheritance: http://docs.djangoproject.com/en/dev/topics/db/models/#id6
 .. _abstract base class: http://docs.djangoproject.com/en/dev/topics/db/models/#id5
 .. _filefield: http://docs.djangoproject.com/en/dev/ref/models/fields/#filefield

@@ -11,6 +11,7 @@ from rest_framework.test import APITestCase
 
 import iso8601
 import pandas as pd
+from htimeseries import HTimeseries
 from model_mommy import mommy
 
 from enhydris import models
@@ -34,22 +35,21 @@ class Tsdata404TestCase(APITestCase):
 
 
 class TsdataGetTestCase(APITestCase):
-    @patch(
-        "enhydris.models.Timeseries.get_data",
-        return_value=pd.DataFrame(
+    def setUp(self):
+        ahtimeseries = HTimeseries()
+        ahtimeseries.data = pd.DataFrame(
             index=[datetime(2017, 11, 23, 17, 23), datetime(2018, 11, 25, 1, 0)],
             data={"value": [1.0, 2.0], "flags": ["", ""]},
             columns=["value", "flags"],
-        ),
-    )
-    def setUp(self, m):
+        )
         station = mommy.make(models.Station)
         timeseries = mommy.make(
             models.Timeseries, gentity=station, time_zone__utc_offset=120
         )
-        self.response = self.client.get(
-            "/api/stations/{}/timeseries/{}/data/".format(station.id, timeseries.id)
-        )
+        with patch("enhydris.models.Timeseries.get_data", return_value=ahtimeseries):
+            self.response = self.client.get(
+                "/api/stations/{}/timeseries/{}/data/".format(station.id, timeseries.id)
+            )
 
     def test_status_code(self):
         self.assertEqual(self.response.status_code, 200)
@@ -65,24 +65,23 @@ class TsdataGetTestCase(APITestCase):
 
 
 class TsdataGetHtsTestCase(APITestCase):
-    @patch(
-        "enhydris.models.Timeseries.get_data",
-        return_value=pd.DataFrame(
+    def setUp(self):
+        ahtimeseries = HTimeseries()
+        ahtimeseries.data = pd.DataFrame(
             index=[datetime(2017, 11, 23, 17, 23), datetime(2018, 11, 25, 1, 0)],
             data={"value": [1.0, 2.0], "flags": ["", ""]},
             columns=["value", "flags"],
-        ),
-    )
-    def setUp(self, m):
+        )
         station = mommy.make(models.Station)
         timeseries = mommy.make(
             models.Timeseries, gentity=station, time_zone__utc_offset=120
         )
-        self.response = self.client.get(
-            "/api/stations/{}/timeseries/{}/data/?fmt=hts".format(
-                station.id, timeseries.id
+        with patch("enhydris.models.Timeseries.get_data", return_value=ahtimeseries):
+            self.response = self.client.get(
+                "/api/stations/{}/timeseries/{}/data/?fmt=hts".format(
+                    station.id, timeseries.id
+                )
             )
-        )
 
     def test_status_code(self):
         self.assertEqual(self.response.status_code, 200)

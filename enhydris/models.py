@@ -12,8 +12,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 import iso8601
-import pandas as pd
-import pd2hts
+from htimeseries import HTimeseries
 from simpletail import ropen
 
 #
@@ -555,7 +554,7 @@ class Timeseries(models.Model):
                 f.readline().split(",")[0], default_timezone=self.time_zone.as_tzinfo
             )
 
-    def _set_extra_timeseries_properties(self, adataframe):
+    def _set_extra_timeseries_properties(self, ahtimeseries):
         try:
             location = {
                 "abscissa": self.gentity.gpoint.point[0],
@@ -568,69 +567,69 @@ class Timeseries(models.Model):
             # TypeError occurs when self.gentity.gpoint.point is None,
             # meaning the co-ordinates aren't registered.
             location = None
-        adataframe.time_step = "{},{}".format(
+        ahtimeseries.time_step = "{},{}".format(
             self.time_step.length_minutes if self.time_step else 0,
             self.time_step.length_months if self.time_step else 0,
         )
-        adataframe.timestamp_rounding = (
+        ahtimeseries.timestamp_rounding = (
             None
             if None in (self.timestamp_rounding_minutes, self.timestamp_rounding_months)
             else "{},{}".format(
                 self.timestamp_rounding_minutes, self.timestamp_rounding_months
             )
         )
-        adataframe.timestamp_offset = (
+        ahtimeseries.timestamp_offset = (
             None
             if None in (self.timestamp_offset_minutes, self.timestamp_offset_months)
             else "{},{}".format(
                 self.timestamp_offset_minutes, self.timestamp_offset_months
             )
         )
-        adataframe.interval_type = (
+        ahtimeseries.interval_type = (
             None if not self.interval_type else self.interval_type.value.lower()
         )
-        adataframe.unit = self.unit_of_measurement.symbol
-        adataframe.title = self.name
+        ahtimeseries.unit = self.unit_of_measurement.symbol
+        ahtimeseries.title = self.name
         sign = -1 if self.time_zone.utc_offset < 0 else 1
-        adataframe.timezone = "{} (UTC{:+03d}{:02d})".format(
+        ahtimeseries.timezone = "{} (UTC{:+03d}{:02d})".format(
             self.time_zone.code,
             abs(self.time_zone.utc_offset) // 60 * sign,
             abs(self.time_zone.utc_offset) % 60,
         )
-        adataframe.variable = self.variable.descr
-        adataframe.precision = self.precision
-        adataframe.location = location
-        adataframe.comment = "%s\n\n%s" % (self.gentity.name, self.remarks)
+        ahtimeseries.variable = self.variable.descr
+        ahtimeseries.precision = self.precision
+        ahtimeseries.location = location
+        ahtimeseries.comment = "%s\n\n%s" % (self.gentity.name, self.remarks)
 
     def get_data(self, start_date=None, end_date=None):
         if self.datafile:
             with open(self.datafile.path, "r", newline="\n") as f:
-                result = pd2hts.read(f, start_date=start_date, end_date=end_date)
+                result = HTimeseries.read(f, start_date=start_date, end_date=end_date)
         else:
-            result = pd.DataFrame()
+            result = HTimeseries()
         self._set_extra_timeseries_properties(result)
         return result
 
     def set_data(self, data):
-        adataframe = pd2hts.read(data)
+        ahtimeseries = HTimeseries.read(data)
         if not self.datafile:
             self.datafile.name = "{:010}".format(self.id)
         with open(self.datafile.path, "w") as f:
-            pd2hts.write(adataframe, f)
+            ahtimeseries.write(f)
         self.save()
-        return len(adataframe)
+        return len(ahtimeseries.data)
 
     def append_data(self, data):
         if not self.datafile:
             return self.set_data(data)
-        adataframe = pd2hts.read(data)
-        if not len(adataframe):
+        ahtimeseries = HTimeseries.read(data)
+        if not len(ahtimeseries.data):
             return 0
         with ropen(self.datafile.path, bufsize=80) as f:
             old_data_end_date = iso8601.parse_date(f.readline().split(",")[0]).replace(
                 tzinfo=None
             )
-        new_data_start_date = adataframe.index[0]
+        new_data_start_date = ahtimeseries.data.index[0]
         if old_data_end_date >= new_data_start_date:
             raise IntegrityError(
                 (
@@ -640,9 +639,9 @@ class Timeseries(models.Model):
                 ).format(new_data_start_date, old_data_end_date)
             )
         with open(self.datafile.path, "a") as f:
-            pd2hts.write(adataframe, f)
+            ahtimeseries.write(f)
         self.save()
-        return len(adataframe)
+        return len(ahtimeseries.data)
 
     def get_first_line(self):
         if not self.datafile or self.datafile.size < 10:

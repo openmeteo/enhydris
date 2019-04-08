@@ -17,7 +17,7 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 import iso8601
 import pandas as pd
-import pd2hts
+from htimeseries import HTimeseries
 
 from enhydris import models
 
@@ -445,12 +445,13 @@ class TimeseriesViewSet(ModelViewSet):
         if end_date:
             end_date = end_date.replace(tzinfo=None)
 
-        adataframe = timeseries.get_data(start_date=start_date, end_date=end_date)
+        ahtimeseries = timeseries.get_data(start_date=start_date, end_date=end_date)
         response = HttpResponse(content_type="text/plain; charset=utf-8")
         if request.GET.get("fmt", "").lower() == "hts":
-            pd2hts.write_file(adataframe, response)
+            fmt = HTimeseries.FILE
         else:
-            pd2hts.write(adataframe, response)
+            fmt = HTimeseries.TEXT
+        ahtimeseries.write(response, format=fmt)
         return response
 
     def _post_data(self, request, pk, format=None):
