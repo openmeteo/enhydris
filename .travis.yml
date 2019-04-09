@@ -1,3 +1,5 @@
+dist: xenial
+
 matrix:
   include:
 
@@ -8,11 +10,10 @@ matrix:
         postgresql: "9.5"
         apt:
           packages:
-            - libgdal1h
             - gdal-bin
             - libgdal-dev
             - python3-psycopg2
-            - postgresql-9.5-postgis-2.3
+            - postgresql-9.5-postgis-2.4
       install:
        - pip install codecov coverage
        - CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install 'gdal<1.11'
@@ -40,11 +41,10 @@ matrix:
         postgresql: "9.5"
         apt:
           packages:
-            - libgdal1h
             - gdal-bin
             - libgdal-dev
             - python3-psycopg2
-            - postgresql-9.5-postgis-2.3
+            - postgresql-9.5-postgis-2.4
       install:
        - CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install 'gdal<1.11'
        - pip install psycopg2==2.7.4

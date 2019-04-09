@@ -21,6 +21,7 @@ ROOT_URLCONF = "enhydris.urls"
 INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
+    "django.contrib.messages",
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.contrib.sites",
