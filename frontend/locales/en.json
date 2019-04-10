@@ -1,5 +1,6 @@
 {
   "language": "Language",
+  "language_picker": "English",
   "search": "Search",
   "reset": "Reset",
   "station_name": "Station Name",
@@ -18,5 +19,6 @@
   "20perpage": "20 per page",
   "50perpage": "50 per page",
   "100perpage": "100 per page",
-  "connection_error": "The backend is unreachable or returned an unexpected response"
+  "connection_error": "The backend is unreachable or returned an unexpected response",
+  "home": "Home"
 }
