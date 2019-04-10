@@ -3,7 +3,7 @@ djangorestframework>=3.9,<4
 gdal>=1.6
 simpletail>=0.1.2
 iso8601
-htimeseries>=0.1
+htimeseries>=0.2
 pytz
 rules>=2.0
 django-rest-auth[with_social]>=0.9,<1

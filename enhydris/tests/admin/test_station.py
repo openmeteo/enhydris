@@ -1,5 +1,6 @@
 import datetime as dt
 from io import StringIO
+from locale import LC_CTYPE, getlocale, setlocale
 
 from django.contrib.auth.models import Permission, User
 from django.contrib.gis.geos import Point
@@ -331,4 +332,47 @@ class TimeseriesInlineAdminFormAcceptsReplacingTestCase(TestCase):
     def test_second_record(self):
         self.assertEqual(
             self.timeseries.get_data().data.index[1], dt.datetime(2019, 4, 9, 13, 36)
+        )
+
+
+class TimeseriesUploadFileWithUnicodeHeadersTestCase(TestCase):
+    def setUp(self):
+        station = mommy.make(Station)
+        self.timeseries = mommy.make(
+            Timeseries, gentity=station, time_zone__utc_offset=0
+        )
+        self.data = {
+            "replace_or_append": "REPLACE",
+            "gentity": station.id,
+            "unit_of_measurement": self.timeseries.unit_of_measurement.id,
+            "variable": self.timeseries.variable.id,
+            "time_zone": self.timeseries.time_zone.id,
+        }
+        self.files = {
+            "data": SimpleUploadedFile(
+                "mytimeseries.csv",
+                "Station=Πάπιγκο\n\n2019-04-09 13:36,0,\n".encode("utf-8"),
+            )
+        }
+        try:
+            # We check that the file is read without problem even if the locale
+            # is set to C (i.e. ascii only)
+            saved_locale = getlocale(LC_CTYPE)
+            setlocale(LC_CTYPE, "C")
+            self.form = TimeseriesInlineAdminForm(
+                data=self.data, files=self.files, instance=self.timeseries
+            )
+            self.form.save()
+        finally:
+            setlocale(LC_CTYPE, saved_locale)
+
+    def test_form_is_valid(self):
+        self.assertTrue(self.form.is_valid())
+
+    def test_data_length(self):
+        self.assertEqual(len(self.timeseries.get_data().data), 1)
+
+    def test_first_record(self):
+        self.assertEqual(
+            self.timeseries.get_data().data.index[0], dt.datetime(2019, 4, 9, 13, 36)
         )
