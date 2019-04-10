@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LangPicker with locale en renders correctly 1`] = `
+<div
+  class="navbar-item has-dropdown is-hoverable"
+>
+  <a
+    class="navbar-link langpicker"
+  >
+    language_picker 
+  </a>
+   
+  <div
+    class="navbar-dropdown is-hidden-mobile"
+  >
+    <div>
+      <!---->
+       
+      <a
+        class="navbar-item"
+      >
+        <img
+          class="flagIcon"
+          src="~/static/flags/el.svg"
+        />
+         Ελληνικά
+      
+      </a>
+    </div>
+  </div>
+</div>
+`;
