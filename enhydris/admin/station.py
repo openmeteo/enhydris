@@ -256,6 +256,15 @@ class StationAdmin(ObjectPermissionsModelAdmin):
         GentityEventInline,
         TimeseriesInline,
     ]
+    search_fields = (
+        "id",
+        "name",
+        "short_name",
+        "stype__descr",
+        "water_basin__name",
+        "owner__ordering_string",
+    )
+    list_display = ("name", "water_basin", "owner")
 
     def get_queryset(self, request):
         result = super().get_queryset(request)

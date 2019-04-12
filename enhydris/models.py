@@ -126,7 +126,7 @@ class Gentity(models.Model):
         ordering = ("name",)
 
     def __str__(self):
-        return self.short_name or self.name or str(self.id)
+        return self.name or self.short_name or str(self.id)
 
 
 class Gpoint(Gentity):
