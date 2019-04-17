@@ -1,3 +1,5 @@
+require("dotenv").config(); // load .env
+
 import enTranslations from "./locales/en.json";
 import elTranslations from "./locales/el";
 
@@ -56,7 +58,7 @@ module.exports = {
   ],
   plugins: [{ src: "~/plugins/vue-leaflet", ssr: false }],
   axios: {
-    baseURL: "http://stage.openmeteo.org/api/",
+    baseURL: process.env.BASE_API_URL,
     timeout: 10000,
     headers: {
       "Content-Type": "application/json"
