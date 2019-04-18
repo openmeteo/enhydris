@@ -4,6 +4,9 @@ import enTranslations from "./locales/en.json";
 import elTranslations from "./locales/el";
 
 module.exports = {
+  env: {
+    adminLink: ""
+  },
   head: {
     titleTemplate: `%s — Enhydris`,
     meta: [

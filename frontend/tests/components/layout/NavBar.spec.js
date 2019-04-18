@@ -24,3 +24,25 @@ describe("NavBar with locale en", () => {
     expect(wrapper.element).toMatchSnapshot();
   });
 });
+
+describe("NavBar with admin link", () => {
+  let wrapper;
+  beforeEach(() => {
+    wrapper = shallowMount(NavBar, {
+      mocks: {
+        $t: msg => msg,
+        $i18n: { locale: "en" }
+      }
+    });
+  });
+
+  it("has admin link", () => {
+    wrapper.setData({ adminLink: "/admin/" });
+    expect(wrapper.find("#adminLink").element.text).toContain("login");
+  });
+
+  it("renders correctly", () => {
+    wrapper.setData({ adminLink: "/admin/" });
+    expect(wrapper.element).toMatchSnapshot();
+  });
+});
