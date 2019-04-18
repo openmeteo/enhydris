@@ -1,7 +1,7 @@
 matrix:
   include:
 
-    - name: "Python 3.6 unit tests (with coverage)"
+    - name: "Python 3.6 unit tests (with coverage and linting)"
       language: python
       python: 3.6
       addons:
@@ -19,10 +19,16 @@ matrix:
        - pip install psycopg2==2.7.4
        - pip install -r requirements.txt
        - pip install -r requirements-dev.txt
+       - pip install isort flake8 black
       before_script:
        - psql -U postgres -c "create extension postgis"
+       - psql -U postgres -c "create database openmeteo"
        - cp enhydris_project/settings/travis.py enhydris_project/settings/local.py
       script:
+       - python manage.py makemigrations --check
+       - black --check .
+       - flake8 --max-line-length=88 .
+       - isort --recursive --check-only --diff .
        - coverage run --include="./*" --omit="*/tests/*","*/tests.py","*/migrations/*","./enhydris_project/*" manage.py test -v2
       after_success:
        - codecov
@@ -50,17 +56,7 @@ matrix:
       script:
        - ./manage.py test -v2
 
-    - name: "Python linting (black, isort, flake8)"
-      language: python
-      python: 3.6
-      install:
-       - pip install isort flake8 black
-      script:
-       - black --check .
-       - flake8 --max-line-length=88 .
-       - isort --recursive --check-only --diff .
-
-    - name: "JavaScript lint, unit tests and coverage"
+    - name: "JavaScript unit tests (with coverage and linting)"
       language: node_js
       node_js: lts/*
       install:
