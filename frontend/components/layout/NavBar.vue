@@ -28,6 +28,14 @@
           </a>
         </div>
         <div class="navbar-end">
+          <a
+            v-if="adminLink"
+            id="adminLink"
+            class="navbar-item"
+            :href="adminLink"
+          >
+            {{ $t("login") }}
+          </a>
           <LangPicker />
         </div>
       </div>
@@ -45,7 +53,8 @@ export default {
   },
   data() {
     return {
-      isOpen: false
+      isOpen: false,
+      adminLink: process.env.adminLink
     };
   },
   computed: {
