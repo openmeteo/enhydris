@@ -268,7 +268,7 @@ class GentityEvent(models.Model):
     gentity = models.ForeignKey(Gentity, on_delete=models.CASCADE)
     date = models.DateField()
     type = models.ForeignKey(EventType, on_delete=models.CASCADE)
-    user = models.CharField(max_length=64)
+    user = models.CharField(blank=True, max_length=64)
     report = models.TextField(blank=True)
 
     class Meta:
