@@ -11,7 +11,9 @@
     "generate": "nuxt generate",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
     "lintfix": "eslint --fix --ext .js,.vue --ignore-path .gitignore .",
-    "precommit": "npm run lint && npm run lintfix"
+    "precommit": "npm run lint && npm run lintfix",
+    "test": "jest --verbose",
+    "testw": "jest --watch"
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.4.1",
