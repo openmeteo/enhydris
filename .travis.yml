@@ -64,7 +64,7 @@ matrix:
        - yarn install
       script:
        - yarn lint
-       - yarn run jest
+       - yarn test
       after_success:
        - yarn add codecov
        - codecov
