@@ -1,22 +1,6 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from enhydris import models
-
-
-class UserSerializer(serializers.ModelSerializer):
-    # To see why we specify the id, check https://stackoverflow.com/questions/36473795/
-    id = serializers.IntegerField(required=False)
-
-    # We also convert these two fields to optional, so that when used as a nested
-    # serializer they don't need to be specified (usually the id suffices as we don't
-    # create a user at the same time as a station, we always use an existing user).
-    username = serializers.CharField(max_length=150, required=False)
-    password = serializers.CharField(max_length=128, required=False)
-
-    class Meta:
-        model = User
-        fields = "__all__"
 
 
 class TimeseriesSerializer(serializers.ModelSerializer):
