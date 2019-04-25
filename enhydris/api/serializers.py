@@ -166,11 +166,10 @@ class StationSerializer(serializers.ModelSerializer):
     political_division = PoliticalDivisionSerializer(required=False)
     stype = StationTypeSerializer(many=True, required=False)
     overseers = PersonSerializer(many=True, required=False)
-    maintainers = UserSerializer(many=True, required=False)
 
     class Meta:
         model = models.Station
-        exclude = ("creator",)
+        exclude = ("creator", "maintainers")
 
     def validate_nested_serializer(self, value):
         try:
