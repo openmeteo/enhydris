@@ -1,4 +1,4 @@
-import { shallowMount } from "@vue/test-utils";
+import { shallowMount, RouterLinkStub } from "@vue/test-utils";
 import NavBar from "@/components/layout/NavBar";
 
 describe("NavBar with locale en", () => {
@@ -7,7 +7,11 @@ describe("NavBar with locale en", () => {
     wrapper = shallowMount(NavBar, {
       mocks: {
         $t: msg => msg,
-        $i18n: { locale: "en" }
+        $i18n: { locale: "en" },
+        localePath: msg => msg
+      },
+      stubs: {
+        NuxtLink: RouterLinkStub
       }
     });
   });
@@ -31,7 +35,11 @@ describe("NavBar with admin link", () => {
     wrapper = shallowMount(NavBar, {
       mocks: {
         $t: msg => msg,
-        $i18n: { locale: "en" }
+        $i18n: { locale: "en" },
+        localePath: msg => msg
+      },
+      stubs: {
+        NuxtLink: RouterLinkStub
       }
     });
   });

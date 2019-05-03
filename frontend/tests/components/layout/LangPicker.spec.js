@@ -8,7 +8,8 @@ describe("LangPicker with locale en", () => {
       mocks: {
         $t: msg => msg,
         $i18n: { locale: "en" },
-        switchLocalePath: msg => msg
+        switchLocalePath: msg => msg,
+        localePath: msg => msg
       },
       stubs: {
         NuxtLink: RouterLinkStub
