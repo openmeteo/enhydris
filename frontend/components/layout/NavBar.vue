@@ -54,7 +54,7 @@ export default {
   data() {
     return {
       isOpen: false,
-      adminLink: process.env.adminLink
+      adminLink: process.env.ADMIN_LINK
     };
   },
   computed: {

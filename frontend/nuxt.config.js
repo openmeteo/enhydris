@@ -5,7 +5,7 @@ import elTranslations from "./locales/el";
 
 module.exports = {
   env: {
-    adminLink: ""
+    ADMIN_LINK: ""
   },
   head: {
     titleTemplate: `%s — Enhydris`,
