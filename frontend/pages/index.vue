@@ -31,11 +31,13 @@
         :narrowed="true"
         :total="total"
         :per-page="perPage"
+        selectable
+        @select="selected"
       >
         <template slot-scope="props">
           <b-table-column
             field="name"
-            width="100"
+            width="20"
             :label="$t('station_name')"
             sortable
           >
@@ -154,9 +156,21 @@ export default {
     },
     makeMarkers: function() {
       return maputils.getStationCoordinates(this.curStations);
+    },
+    selected(row) {
+      this.$router.push(
+        this.localePath({
+          name: "stations-id",
+          params: { id: row.id }
+        })
+      );
     }
   }
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+table td {
+  cursor: pointer;
+}
+</style>
