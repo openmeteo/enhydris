@@ -19,13 +19,9 @@
 
       <div class="navbar-menu" :class="{ 'is-active': isOpen }">
         <div class="navbar-start">
-          <a
-            id="home"
-            class="navbar-item"
-            :href="currentLanguage != 'en' ? currentLanguage : ''"
-          >
-            {{ $t("home") }}
-          </a>
+          <nuxt-link id="home" class="navbar-item" :to="localePath('index')">{{
+            $t("home")
+          }}</nuxt-link>
         </div>
         <div class="navbar-end">
           <a

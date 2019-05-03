@@ -39,12 +39,9 @@ exports[`NavBar with admin link renders correctly 1`] = `
       >
         <a
           class="navbar-item"
-          href=""
           id="home"
         >
-          
           home
-        
         </a>
       </div>
        
@@ -107,12 +104,9 @@ exports[`NavBar with locale en renders correctly 1`] = `
       >
         <a
           class="navbar-item"
-          href=""
           id="home"
         >
-          
           home
-        
         </a>
       </div>
        
