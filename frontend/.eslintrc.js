@@ -19,6 +19,5 @@ module.exports = {
     'prettier',
     'jest'
   ],
-  rules: {
-  }
+  rules: {}
 }
