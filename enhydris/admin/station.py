@@ -218,9 +218,10 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
             )
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+        result = super().save(*args, **kwargs)
         if self.cleaned_data.get("data") is not None:
             self._save_timeseries_data()
+        return result
 
     def _save_timeseries_data(self):
         data = TextIOWrapper(self.cleaned_data["data"], encoding="utf-8", newline="\n")
