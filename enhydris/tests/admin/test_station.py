@@ -10,7 +10,7 @@ from django.test import TestCase, override_settings
 from model_mommy import mommy
 
 from enhydris.admin.station import LatLonField, LatLonWidget, TimeseriesInlineAdminForm
-from enhydris.models import Station, Timeseries
+from enhydris.models import Station, Timeseries, TimeStep
 
 
 class LatLonWidgetTestCase(TestCase):
@@ -335,6 +335,76 @@ class TimeseriesInlineAdminFormAcceptsReplacingTestCase(TestCase):
         self.assertEqual(
             self.timeseries.get_data().data.index[1], dt.datetime(2019, 4, 9, 13, 36)
         )
+
+
+class TimeseriesInlineAdminFormTimeStepNullTestCase(TestCase):
+    def setUp(self):
+        station = mommy.make(Station)
+        self.timeseries = mommy.make(
+            Timeseries, gentity=station, time_zone__utc_offset=0
+        )
+        self.data = {
+            "gentity": station.id,
+            "unit_of_measurement": self.timeseries.unit_of_measurement.id,
+            "variable": self.timeseries.variable.id,
+            "time_zone": self.timeseries.time_zone.id,
+        }
+
+    def test_form_is_not_valid_when_rounding_months_not_null(self):
+        self.data["timestamp_rounding_months"] = 0
+        self.form = TimeseriesInlineAdminForm(data=self.data, instance=self.timeseries)
+        self.assertFalse(self.form.is_valid())
+
+    def test_form_is_not_valid_when_rounding_minutes_not_null(self):
+        self.data["timestamp_rounding_minutes"] = 0
+        self.form = TimeseriesInlineAdminForm(data=self.data, instance=self.timeseries)
+        self.assertFalse(self.form.is_valid())
+
+    def test_form_is_not_valid_when_offset_months_not_null(self):
+        self.data["timestamp_offset_months"] = 0
+        self.form = TimeseriesInlineAdminForm(data=self.data, instance=self.timeseries)
+        self.assertFalse(self.form.is_valid())
+
+    def test_form_is_not_valid_when_offset_minutes_not_null(self):
+        self.data["timestamp_offset_minutes"] = 0
+        self.form = TimeseriesInlineAdminForm(data=self.data, instance=self.timeseries)
+        self.assertFalse(self.form.is_valid())
+
+    def test_form_is_valid_when_all_null(self):
+        self.form = TimeseriesInlineAdminForm(data=self.data, instance=self.timeseries)
+        self.assertTrue(self.form.is_valid())
+
+
+class TimeseriesInlineAdminFormTimeStepNotNullTestCase(TestCase):
+    def setUp(self):
+        station = mommy.make(Station)
+        self.timeseries = mommy.make(
+            Timeseries, gentity=station, time_zone__utc_offset=0
+        )
+        self.time_step = mommy.make(TimeStep, length_minutes=1, length_months=0)
+        self.data = {
+            "gentity": station.id,
+            "unit_of_measurement": self.timeseries.unit_of_measurement.id,
+            "variable": self.timeseries.variable.id,
+            "time_zone": self.timeseries.time_zone.id,
+            "time_step": self.time_step.id,
+            "timestamp_offset_months": 0,
+            "timestamp_offset_minutes": 0,
+        }
+
+    def test_form_is_not_valid_when_offset_months_null_and_timestep_not_null(self):
+        self.data["timestamp_offset_months"] = None
+        self.form = TimeseriesInlineAdminForm(data=self.data, instance=self.timeseries)
+        self.assertFalse(self.form.is_valid())
+
+    def test_form_is_not_valid_when_offset_minutes_null_and_timestep_not_null(self):
+        self.data["timestamp_offset_minutes"] = None
+        self.form = TimeseriesInlineAdminForm(data=self.data, instance=self.timeseries)
+        self.assertFalse(self.form.is_valid())
+
+    def test_form_is_valid_when_offset_not_null_and_timestep_not_null(self):
+        self.form = TimeseriesInlineAdminForm(data=self.data, instance=self.timeseries)
+        self.assertTrue(self.form.is_valid())
 
 
 class TimeseriesUploadFileWithUnicodeHeadersTestCase(TestCase):

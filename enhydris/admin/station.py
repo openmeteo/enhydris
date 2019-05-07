@@ -158,9 +158,36 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
 
     def clean(self):
         result = super().clean()
+        self._check_timestep()
         if self.cleaned_data.get("data") is not None:
             self._check_submitted_data(self.cleaned_data["data"])
         return result
+
+    def _check_timestep(self):
+        self._check_rounding_and_offset_are_none_when_timestep_is_none()
+        self._check_offset_is_not_none_when_timestep_is_not_none()
+
+    def _check_rounding_and_offset_are_none_when_timestep_is_none(self):
+        has_error = self.cleaned_data.get("time_step") is None and (
+            self.cleaned_data.get("timestamp_rounding_minutes") is not None
+            or self.cleaned_data.get("timestamp_rounding_months") is not None
+            or self.cleaned_data.get("timestamp_offset_minutes") is not None
+            or self.cleaned_data.get("timestamp_offset_months") is not None
+        )
+        if has_error:
+            raise forms.ValidationError(
+                _("When the time step is empty, the rounding and offset must be empty.")
+            )
+
+    def _check_offset_is_not_none_when_timestep_is_not_none(self):
+        has_error = self.cleaned_data.get("time_step") is not None and (
+            self.cleaned_data.get("timestamp_offset_minutes") is None
+            or self.cleaned_data.get("timestamp_offset_months") is None
+        )
+        if has_error:
+            raise forms.ValidationError(
+                _("When a time step is specified, the offset must have a value.")
+            )
 
     def _check_submitted_data(self, datastream):
         ahtimeseries = self._get_timeseries_without_moving_file_position(datastream)
