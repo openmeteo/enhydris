@@ -399,5 +399,6 @@ class TimeseriesInlineAdminFormProcessWithoutFileTestCase(TestCase):
     def test_form_is_valid(self):
         self.assertTrue(self.form.is_valid())
 
-    def test_form_saves_without_exception(self):
-        self.form.save()
+    def test_form_saves_and_returns_object(self):
+        timeseries = self.form.save()
+        self.assertEqual(timeseries.id, self.timeseries.id)
