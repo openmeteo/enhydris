@@ -227,7 +227,9 @@ class TimeseriesInlineAdminFormRefusesToAppendIfNotInOrderTestCase(TestCase):
         self.timeseries = mommy.make(
             Timeseries, gentity=station, time_zone__utc_offset=0
         )
-        self.timeseries.set_data(StringIO("2019-01-01 00:30,25,\n"))
+        self.timeseries.set_data(
+            StringIO("2005-11-01 18:00,3,\n2019-01-01 00:30,25,\n")
+        )
         self.data = {
             "replace_or_append": "APPEND",
             "gentity": station.id,
