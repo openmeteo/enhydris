@@ -50,7 +50,7 @@ class DefaultBoundingBoxTestCase(APITestCase):
         self.assertAlmostEqual(self.bounding_box[3], 4.0)
 
 
-@override_settings(ENHYDRIS_MIN_VIEWPORT_IN_DEGS=1.0)
+@override_settings(ENHYDRIS_MAP_MIN_VIEWPORT_SIZE=1.0)
 class TooSmallBoundingBoxTestCase(APITestCase):
     def setUp(self):
         mommy.make(

@@ -2,11 +2,17 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import View
 
+from enhydris import views
 from enhydris.api import urls as enhydris_api_urls
 
 admin.autodiscover()
 
 urlpatterns = [
+    path("", views.StationListView.as_view(), name="station_list"),
+    path(
+        "stations/kml/",
+        views.StationListView.as_view(template_name="enhydris/placemarks.kml"),
+    ),
     path("admin/", admin.site.urls),
     path("api/", include(enhydris_api_urls)),
 ]

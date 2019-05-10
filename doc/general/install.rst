@@ -164,14 +164,60 @@ These are the settings available to Enhydris, in addition to the
    set to ``False`` (the default), only privileged users are allowed to
    add/edit/remove data from the db.
 
-.. data:: ENHYDRIS_MIN_VIEWPORT_IN_DEGS
+.. data:: ENHYDRIS_MAP_BASE_LAYERS
 
-   Set a value in degrees. When a geographical query has a bounding
-   box with dimensions less than :data:`MIN_VIEWPORT_IN_DEGS`, the map
-   will have at least a dimension of ``MIN_VIEWPORT_IN_DEGS²``. Useful
-   when showing a single entity, such as a hydrometeorological
-   station. Default value is 0.04, corresponding to an area
-   approximately 4×4 km.
+   A list of JavaScript definitions of base layers to use on the map.
+   The default is::
+
+        [
+            r"""OpenLayers.Layer.OSM.Mapnik(
+                    "Open Street Map",
+                    {
+                        isBaseLayer: true,
+                        attribution: "Map by <a href='http://www.openstreetmap.org/'>OSM</a>"
+                    }
+                )
+            """,
+            r"""OpenLayers.Layer.OSM.CycleMap(
+                    "Open Cycle Map",
+                    {
+                        isBaseLayer: true,
+                        attribution: "Map by <a href='http://www.openstreetmap.org/'>OSM</a>"
+                    }
+                )
+            """,
+        ]
+
+.. data:: ENHYDRIS_MAP_MIN_VIEWPORT_SIZE
+
+   Set a value in degrees. When a geographical query has a bounding box
+   with dimensions less than :data:`ENHYDRIS_MAP_MIN_VIEWPORT_SIZE`, the
+   map initially shown will be zoomed so that its dimension will be at
+   least ``ENHYDRIS_MAP_MIN_VIEWPORT_SIZE²``. Useful when showing a
+   single entity, such as a hydrometeorological station. Default value
+   is 0.04, corresponding to an area approximately 4×4 km.
+
+.. data:: ENHYDRIS_MAP_MARKERS
+
+   The map can show different station types with different markers. For
+   example::
+
+      ENHYDRIS_MAP_MARKERS = {
+          '0': 'images/drop_marker.png',
+          '1': 'images/drop_marker_cyan.png',
+          '3': 'images/drop_marker_orange.png',
+          '11': 'images/drop_marker_green.png',
+      }
+
+   In the example above, stations whose type id is 3 will be shown with
+   :file:`drop_marker_orange.png`, and any marker whose id is not one
+   of 1, 3, or 11 will show with :file:`drop_marker.png`. The files
+   are URLs; if they are relative, they are relative to
+   :data:`STATIC_URL`.
+
+   The default is::
+
+      ENHYDRIS_MAP_MARKERS = {'0': 'images/drop_marker.png'}
 
 .. data:: ENHYDRIS_MAP_DEFAULT_VIEWPORT
 
@@ -201,3 +247,8 @@ These are the settings available to Enhydris, in addition to the
    relevant to the Deucalion project, because it has this setting::
 
       ENHYDRIS_SITE_STATION_FILTER = {'owner__id__exact': '9'}
+
+.. data:: ENHYDRIS_STATIONS_PER_PAGE
+
+   Number of stations per page for the paginatin of the station list.
+   The default is 100.

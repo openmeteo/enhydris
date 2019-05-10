@@ -1,0 +1,11 @@
+{% extends "gis/kml/base.kml" %}
+{% block placemarks %}
+{% for place in station_list %}
+<Placemark>
+  <name>{% if place.name %}{{ place.name }}{% else %}{{ place }}{% endif %}</name>
+  <id>{{ place.id }}</id>
+  <stype_id>{% for stype in place.stype.all %}{% if not forloop.first %},{% endif %}{{ stype.id }}{% endfor %}</stype_id>
+  {{ place.point.kml|safe }}
+</Placemark>
+{% endfor %}
+{% endblock %}

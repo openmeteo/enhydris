@@ -1,0 +1,21 @@
+.olControlShowLabels
+{
+    width:100%;
+}
+.olControlShowLabels div
+{
+    display: block;
+    width: 28px;
+    height: 28px;
+    position: relative;
+    left: 16px;
+    top: 370px;
+}
+.LabelButtonClassItemInactive
+{
+background-image: url('../images/icons/show-labels-inactive.png');
+}
+
+.LabelButtonClassItemActive
+{
+background-image: url('../images/icons/show-labels-active.png');

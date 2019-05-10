@@ -1,0 +1,11 @@
+/* OpenLayers Map Display */
+.map {
+    width: 100%;
+    height: 300px;
+    position:relative;
+}
+
+h4.tab-no-data {
+  white-space: normal;
+  min-height:25em;
+}
