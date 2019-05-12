@@ -55,16 +55,3 @@ matrix:
        - cp enhydris_project/settings/travis.py enhydris_project/settings/local.py
       script:
        - ./manage.py test -v2
-
-    - name: "JavaScript unit tests (with coverage and linting)"
-      language: node_js
-      node_js: lts/*
-      install:
-       - cd frontend
-       - yarn install
-      script:
-       - yarn lint
-       - yarn test
-      after_success:
-       - yarn add codecov
-       - codecov

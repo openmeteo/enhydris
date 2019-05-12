@@ -15,7 +15,6 @@ Prerequisite                                          Version
 Python with setuptools and pip                        3 [1]
 PostgreSQL + PostGIS
 GDAL                                                  1.9 [2]
-node.js + yarn                                        [3]
 ===================================================== ============
 
 [1] Enhydris runs on Python 3.5 or later.  It does not run on Python 2.
@@ -26,18 +25,6 @@ modules.
 also install gdal. However it can be tricky to install and it's
 usually easier to install a prepackaged version for your operating
 system.
-
-[3] Production doesn't need node.js and yarn, but they are needed to
-compile the Javascript.
-
-.. note::
-
-   Example: Installing prerequisites on Debian/Ubuntu
-
-   ::
-
-      apt install python3 postgresql-9.6-postgis-2.3 python3-psycopg2 \
-          python3-pip python3-gdal
 
 Install Enhydris
 ================
@@ -52,8 +39,8 @@ specified in :file:`requirements.txt`, probably in a virtualenv::
     ./enhydris/venv/bin/pip install -r enhydris/requirements.txt
     ./enhydris/venv/bin/pip install -r enhydris/requirements-dev.txt
 
-Configure the backend
-=====================
+Configure Enhydris
+==================
 
 Create a Django settings file, either in
 :file:`enhydris_project/settings/local.py`, or wherever you like. It
@@ -63,8 +50,8 @@ should begin with this::
 
 and it then it should go on to override ``DEBUG``, ``SECRET_KEY``,
 ``DATABASES`` and ``STATIC_ROOT``. More settings you may want to
-override are the `Django settings`_ and the :ref:`Enhydris backend
-settings <backend_settings>`.
+override are the `Django settings`_ and the :ref:`Enhydris 
+settings <enhydris_settings>`.
 
 On production you need to import from ``enhydris_project.settings``
 instead.
@@ -125,8 +112,8 @@ Enhydris configuration directory::
 
 The above commands will also ask you to create a Enhydris superuser.
 
-Start the backend
-=================
+Start Django
+============
 
 Inside the Enhydris configuration directory, run the following
 command::
@@ -136,40 +123,12 @@ command::
 The above command will start the Django development server and set it
 to listen to port 8000.
 
-Configure and start the frontend
-================================
-
-::
-
-    cd frontend
-
-Copy ``.env.sample`` to ``.env`` and change ``API_ROOT`` to
-``http://localhost:8000/api/`` (for other settings see the
-backend_settings_).
-
-Install the front-end dependencies::
-
-    yarn install
-
-Run a development server on port 3000::
-
-    yarn dev
-
-That's it. You can visit Enhydris at http://localhost:3000/.
-
 Production
 ==========
 
 To use Enhydris in production, you need to setup a web server such as
 apache. This is described in detail in `Deploying Django`_ and in
 https://djangodeployment.com/.
-
-For the frontend, instead of ``yarn dev``, execute ``yarn generate``;
-this will compile (transpile) the JavaScript and create several static
-files in the `dist` directory. You must put these files in the
-top-level directory of your web site, such as ``/var/www/mysite``.
-Configure your web server to send ``/api/`` and ``/admin/`` to Django,
-and serve the rest from static files.
 
 .. _deploying django: http://docs.djangoproject.com/en/2.1/howto/deployment/
 
@@ -183,10 +142,10 @@ confirmation will contain links to that domain.  Restart the
 Enhydris (by restarting apache/gunicorn/whatever) after changing the
 domain name.
 
-.. _backend_settings:
+.. _enhydris_settings:
 
-Backend settings reference
-==========================
+Settings reference
+==================
  
 These are the settings available to Enhydris, in addition to the
 `Django settings`_.
@@ -242,13 +201,3 @@ These are the settings available to Enhydris, in addition to the
    relevant to the Deucalion project, because it has this setting::
 
       ENHYDRIS_SITE_STATION_FILTER = {'owner__id__exact': '9'}
-
-.. _frontend_settings:
-
-Frontend settings reference
-===========================
-
-.. data:: API_ROOT
-
-   The URL of the backend; for example, ``https://openmeteo.org/api/``
-   or ``http://localhost:8000/api/``.

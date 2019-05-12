@@ -9,9 +9,9 @@ Release notes
 Version 3.0
 ===========
 
-As of January 2019, version 3.0 is in heavy development and it is not
-expected to become stable before April 2019. Until then, install version
-2.0 in production.
+As of May 2019, version 3.0 is in heavy development and it is not
+expected to become stable before 2020. Until then, install version 2.0
+in production.
 
 Upgrading
 ---------
@@ -60,17 +60,11 @@ stable Enhydris version is 2.0). The procedure is this:
 
        python manage.py migrate --fake-initial
 
- 11. Configure and compile the frontend, and setup your web server, as
-     described in :ref:install.
-
- 12. Start the service
+ 11. Start the service
 
 Changes from 2.0
 ----------------
 
-- This is the largest change to Enhydris so far. A large part of the
-  code has been rewritten. Enhydris is now what is (misleadingly) dubbed
-  a "Single Page Application".
 - The Web API has been reworked. Applications using the Enhydris 2.0 web
   API won't work unchanged with 3.0.
 - GentityGenericData has been abolished, as it wasn't being used in any of the
