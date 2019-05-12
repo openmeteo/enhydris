@@ -19,18 +19,23 @@ class StationListViewMixin:
     """
 
     def _get_unsorted_undistinct_queryset(self, **kwargs):
-        result = models.Station.objects.all()
+        queryset = models.Station.objects.all()
 
         # Apply SITE_STATION_FILTER
         if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
-            result = result.filter(**settings.ENHYDRIS_SITE_STATION_FILTER)
+            queryset = queryset.filter(**settings.ENHYDRIS_SITE_STATION_FILTER)
 
         # Perform the search specified by the q parameter
         query_string = self.request.GET.get("q", "")
         for search_term in query_string.split():
-            result = self._refine_queryset(result, search_term)
+            queryset = self._refine_queryset(queryset, search_term)
 
-        return result
+        # Also filter by the bbox query parameter, if there is one
+        bbox = self.request.GET.get("bbox")
+        if bbox:
+            queryset = self._filter_by_bbox(queryset, bbox)
+
+        return queryset
 
     def get_queryset(self, **kwargs):
         result = self._get_unsorted_undistinct_queryset(**kwargs).distinct()
