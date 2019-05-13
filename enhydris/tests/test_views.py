@@ -93,6 +93,34 @@ class StationListTestCase(TestCase):
         self.assertNotContains(response, "<a href='?page=2'>2</a>", html=True)
 
 
+class StationDetailTestCase(TestCase):
+    def setUp(self):
+        self.station = mommy.make(
+            Station,
+            name="Komboti",
+            point=Point(x=21.00000, y=39.00000, srid=4326),
+            srid=4326,
+        )
+
+    @override_settings(ENHYDRIS_MAP_MIN_VIEWPORT_SIZE=0.2)
+    def test_map_viewport(self):
+        response = self.client.get("/stations/{}/".format(self.station.id))
+        self.assertContains(response, "enhydris.mapViewport=[20.9, 38.9, 21.1, 39.1]")
+
+
+class StationEditRedirectTestCase(TestCase):
+    def setUp(self):
+        self.response = self.client.get("/stations/42/edit/")
+
+    def test_status_code(self):
+        self.assertEqual(self.response.status_code, 302)
+
+    def test_redirect_target(self):
+        self.assertEqual(
+            self.response["Location"], "/admin/enhydris/station/42/change/"
+        )
+
+
 @skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
 class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
 

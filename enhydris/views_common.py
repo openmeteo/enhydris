@@ -11,6 +11,18 @@ from django.http import Http404
 from . import models
 
 
+def ensure_extent_is_large_enough(extent):
+    min_viewport = settings.ENHYDRIS_MAP_MIN_VIEWPORT_SIZE
+    dx = abs(extent[2] - extent[0])
+    if dx < min_viewport:
+        extent[2] += 0.5 * (min_viewport - dx)
+        extent[0] -= 0.5 * (min_viewport - dx)
+    dy = abs(extent[3] - extent[1])
+    if dy < min_viewport:
+        extent[3] += 0.5 * (min_viewport - dy)
+        extent[1] -= 0.5 * (min_viewport - dy)
+
+
 class StationListViewMixin:
     """Functionality common to StationList views.
 
@@ -24,6 +36,14 @@ class StationListViewMixin:
         # Apply SITE_STATION_FILTER
         if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
             queryset = queryset.filter(**settings.ENHYDRIS_SITE_STATION_FILTER)
+
+        # If a gentity_id query parameter is specified, ignore all the rest
+        try:
+            gentity_id = int(self.request.GET.get("gentity_id", "0"))
+            if gentity_id:
+                return queryset.filter(id=gentity_id)
+        except ValueError:
+            raise Http404
 
         # Perform the search specified by the q parameter
         query_string = self.request.GET.get("q", "")
@@ -201,15 +221,6 @@ class StationListViewMixin:
         else:
             extent = list(extent)
 
-        # Increase extent if it's too small
-        min_viewport = settings.ENHYDRIS_MAP_MIN_VIEWPORT_SIZE
-        dx = abs(extent[2] - extent[0])
-        if dx < min_viewport:
-            extent[2] += 0.5 * (min_viewport - dx)
-            extent[0] -= 0.5 * (min_viewport - dx)
-        dy = abs(extent[3] - extent[1])
-        if dy < min_viewport:
-            extent[3] += 0.5 * (min_viewport - dy)
-            extent[1] -= 0.5 * (min_viewport - dy)
+        ensure_extent_is_large_enough(extent)
 
         return extent

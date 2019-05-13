@@ -35,7 +35,7 @@
               <tbody>
                 {% for object in object_list %}
                   <tr>
-                    <td>{{ object.id }}</td>
+                    <td><a href="{% url "station_detail" object.id %}">{{ object.id }}</a></td>
                     <td>{{ object.name }}</td>
                     <td>{{ object.water_basin|default_if_none:"" }}</td>
                     <td>{{ object.water_division|default_if_none:"" }}</td>
@@ -87,6 +87,5 @@
   </div>
 {% endblock %}
 
-
-{% block extrajs %}
+{% block afterendjs %}
 {% endblock %}

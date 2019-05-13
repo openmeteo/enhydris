@@ -146,7 +146,7 @@
 
 {% block bodyend %}{% endblock %}
 
-{% block basejs %}
+{% block startjs %}
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   {% bootstrap_javascript %}
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/openlayers/2.12/OpenLayers.min.js"></script>
@@ -173,8 +173,11 @@
     enhydris.mapMode = 1;
     {{ map_js | safe }}
   </script>
+{% endblock %}
+{% block afterstartjs %}{% endblock %}
+{% block endjs %}
   <script type="text/javascript" src="{% static "js/enhydris.js" %}"></script>
 {% endblock %}
-{% block extrajs %}{% endblock %}
+{% block afterendjs %}{% endblock %}
 </body>
 </html>
