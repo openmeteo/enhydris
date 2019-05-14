@@ -54,6 +54,12 @@
               </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
+              {% if user.is_authenticated %}
+                <li><a href="{% url "admin:index" %}">{% trans "Dashboard" %}</a></li>
+                <li><a href="{% url "admin:logout" %}?next={{request.path}}">{% blocktrans with username=user.username %}Logout {{ username }}{% endblocktrans %}</a></li>
+              {% else %}
+                <li><a href="{% url "admin:login" %}?next={{request.path}}">{% trans "Login" %}</a></li>
+              {% endif %}
             </ul>
           </div> <!-- navbar-collapse -->
       </div> <!--container - fluid -->
