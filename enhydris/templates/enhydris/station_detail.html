@@ -309,7 +309,7 @@
                   {% with instrument.id as instrument_id %}
                   {% url "instrument_detail" instrument_id as instrument_url %}
                   <tr>
-                    <td><a href="{{ instrument_url }}">{{ instrument_id }}</a></td>
+                      <td><a href="{% url "instrument_detail" station_id=station.id pk=instrument.id %}">{{ instrument_id }}</a></td>
                       <td>{{ instrument.name }}</td>
                       <td>{{ instrument.type }}</td>
                       <td>{{ instrument.manufacturer }}</td>
@@ -350,7 +350,7 @@
                 {% with t.id as t_id %}
                 {% url "timeseries_detail" t_id as timeseries_url %}
                   <tr>
-                    <td><a href="{{ timeseries_url }}">{{ t_id }}</a></td>
+                    <td><a href="{% url "timeseries_detail" station_id=station.id pk=t_id %}">{{ t_id }}</a></td>
                     <td>{{ t.name }}</td>
                     <td class="col-sm-1">{{ t.variable }}</td>
                     <td class="col-sm-4">{% if not t.time_step %}

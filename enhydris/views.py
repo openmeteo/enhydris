@@ -33,3 +33,13 @@ class StationDetail(DetailView):
 class StationEdit(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         return reverse("admin:enhydris_station_change", args=(kwargs["pk"],))
+
+
+class TimeseriesDetail(DetailView):
+    model = models.Timeseries
+    template_name = "enhydris/timeseries_detail.html"
+
+
+class InstrumentDetail(DetailView):
+    model = models.Instrument
+    template_name = "enhydris/instrument_detail.html"
