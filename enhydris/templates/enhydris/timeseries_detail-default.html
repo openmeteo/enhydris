@@ -22,9 +22,9 @@
 	$(document).ready(function() {
 
 		$("#data_holder").hide()
-                    $("#progress").append("<img style=\"display: block; margin: auto auto;\" src=\"{% static "images/icons/progress.gif" %}\">");
+                    $("#progress").append("<img style=\"display: block; margin: auto auto;\" src=\"{% static "images/progress.gif" %}\">");
 
-		 $.getJSON('FIXME% url "timeseries_data" %}', {object_id:{{timeseries.id}}}, function(chart_data){
+        $.getJSON('{% url "timeseries_data" %}', {object_id:{{timeseries.id}}}, function(chart_data){
 
 			$("#progress").hide()
 			$("#data_holder").show()
@@ -83,7 +83,7 @@
                 }
             }
             $("#placeholder").append("<img style=\"display: block; margin: auto auto;\" src=\"{% static "images/progress.gif" %}\">");
-            $.getJSON('FIXME% url "timeseries_data" %}', {object_id:{{timeseries.id}},
+            $.getJSON('{% url "timeseries_data" %}', {object_id:{{timeseries.id}},
                 start_pos:from_pos, end_pos:to_pos}, function(chart_data){
                 d = chart_data['data'];
                 var tol=(actual_xaxis_to-actual_xaxis_from)*0.01;

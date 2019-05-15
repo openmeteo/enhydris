@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import View
 
-from enhydris import views
+from enhydris import views, views_old
 from enhydris.api import urls as enhydris_api_urls
 
 admin.autodiscover()
@@ -27,6 +27,8 @@ urlpatterns = [
     ),
     path("admin/", admin.site.urls),
     path("api/", include(enhydris_api_urls)),
+    # For the following, see ticket #181
+    path("timeseries/data/", views_old.timeseries_data, name="timeseries_data"),
 ]
 
 # A view that does nothing, that will be used in some fake patterns below
