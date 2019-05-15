@@ -125,9 +125,9 @@ class StationEditRedirectTestCase(TestCase):
 class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
 
     button_limit_to_map = PageElement(By.ID, "limit-to-map")
-    td_komboti = PageElement(By.XPATH, '//td[text()="Komboti"]')
-    td_agios_athanasios = PageElement(By.XPATH, '//td[text()="Agios Athanasios"]')
-    td_tharbad = PageElement(By.XPATH, '//td[text()="Tharbad"]')
+    td_komboti = PageElement(By.XPATH, '//td//a[text()="Komboti"]')
+    td_agios_athanasios = PageElement(By.XPATH, '//td//a[text()="Agios Athanasios"]')
+    td_tharbad = PageElement(By.XPATH, '//td//a[text()="Tharbad"]')
 
     def setUp(self):
         mommy.make(

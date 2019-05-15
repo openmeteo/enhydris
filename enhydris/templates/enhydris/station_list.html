@@ -23,25 +23,17 @@
             <table class="table table-hover table-condensed">
               <thead>
                 <tr>
-                  <th>{% sorter "id" request.session.sort "id" %}</th>
                   <th>{% sorter "name" request.session.sort _("Name") %}</th>
                   <th>{% sorter "water_basin" request.session.sort _("Water basin") %}</th>
-                  <th>{% sorter "water_division" request.session.sort _("Water division") %}</th>
-                  <th>{% sorter "political_division" request.session.sort _("Political division") %}</th>
                   <th>{% sorter "owner" request.session.sort _("Owner") %}</th>
-                  <th>{% sorter "stype" request.session.sort _("Type") %}</th>
                 </tr>
               </thead>
               <tbody>
                 {% for object in object_list %}
                   <tr>
-                    <td><a href="{% url "station_detail" object.id %}">{{ object.id }}</a></td>
-                    <td>{{ object.name }}</td>
+                    <td><a href="{% url "station_detail" pk=object.id %}">{{ object.name }}</a></td>
                     <td>{{ object.water_basin|default_if_none:"" }}</td>
-                    <td>{{ object.water_division|default_if_none:"" }}</td>
-                    <td>{{ object.political_division.name|default_if_none:"" }}</td>
                     <td>{{ object.owner|default_if_none:"" }}</td>
-                    <td>{{ object.stype.all|join:", " }}</td>
                   </tr>
                 {% endfor %}
               </tbody>
