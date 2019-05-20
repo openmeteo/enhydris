@@ -112,16 +112,16 @@ class GentityFileDownloadLinkTestCase(TestCase):
     def setUp(self):
         self.station = mommy.make(Station, name="Komboti")
         self.gentityfile = mommy.make(GentityFile, gentity=self.station)
-        self.link = "<a href='/api/stations/{}/files/{}/content/>".format(
+        self.link = '<a href="/api/stations/{}/files/{}/content/">'.format(
             self.station.id, self.gentityfile.id
         )
 
-    @override_settings(ENHYDRIS_SITE_CONTENT_IS_FREE=True)
+    @override_settings(ENHYDRIS_OPEN_CONTENT=True)
     def test_contains_download_link_when_site_content_is_free(self):
         response = self.client.get("/stations/{}/".format(self.station.id))
         self.assertContains(response, self.link)
 
-    @override_settings(ENHYDRIS_SITE_CONTENT_IS_FREE=False)
+    @override_settings(ENHYDRIS_OPEN_CONTENT=False)
     def test_has_no_download_link_when_site_content_is_restricted(self):
         response = self.client.get("/stations/{}/".format(self.station.id))
         self.assertNotContains(response, self.link)

@@ -229,11 +229,12 @@
                     <th>{% trans 'Content' %}</th>
                     <th>{% trans 'Description' %}</th>
                     <th>{% trans 'Remarks' %}</th>
-                    <th>{% trans 'Request File' %}</th>
+                    <th>{% trans 'Download' %}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for file in station.gentityfile_set.all %}
+                    {% has_perm "enhydris.view_gentityfile_content" request.user file as can_view_file_data %}
                     <tr>
                       <td class="col-sm-1">{{ file.id }}</td>
                       <td class="col-sm-1">{{ file.date|date:"Y/m/d" }}</td>
@@ -242,10 +243,10 @@
                       <td class="col-sm-1">{{ file.descr }}</td>
                       <td class="col-sm-8">{{ file.remarks }}</td>
                       <td class="col-sm-1">
-                        {% if user.is_authenticated or anonymous_can_download_data %}
+                        {% if can_view_file_data %}
                           <a href="{% url "file-content" station_id=station.id pk=file.id %}"><i class="glyphicon glyphicon-cloud-download"></i></a>
                         {% else %}
-                          <i>N/A</i>
+                          {% trans "Unauthorized" %}
                         {% endif %}
                       </td>
                     </tr>
