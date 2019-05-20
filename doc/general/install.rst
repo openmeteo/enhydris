@@ -261,5 +261,5 @@ These are the settings available to Enhydris, in addition to the
 
 .. data:: ENHYDRIS_STATIONS_PER_PAGE
 
-   Number of stations per page for the paginatin of the station list.
+   Number of stations per page for the pagination of the station list.
    The default is 100.
