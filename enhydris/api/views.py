@@ -18,16 +18,18 @@ from htimeseries import HTimeseries
 from enhydris import models
 from enhydris.views_common import StationListViewMixin
 
-from . import serializers
+from . import permissions, serializers
 from .csv import prepare_csv
-from .permissions import CanCreateStation, CanEditOrReadOnly
 
 
 class StationViewSet(StationListViewMixin, ModelViewSet):
     serializer_class = serializers.StationSerializer
 
     def get_permissions(self):
-        pc = [CanCreateStation] if self.action == "create" else [CanEditOrReadOnly]
+        if self.action == "create":
+            pc = [permissions.CanCreateStation]
+        else:
+            pc = [permissions.CanEditOrReadOnly]
         return [x() for x in pc]
 
     def list(self, request):
@@ -152,12 +154,20 @@ class InstrumentViewSet(ReadOnlyModelViewSet):
 class GentityFileViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.GentityFileSerializer
 
+    def get_permissions(self):
+        if self.action == "content":
+            pc = [permissions.CanAccessGentityFileContent]
+        else:
+            pc = [permissions.CanEditOrReadOnly]
+        return [x() for x in pc]
+
     def get_queryset(self):
         return models.GentityFile.objects.filter(gentity_id=self.kwargs["station_id"])
 
     @action(detail=True, methods=["get"])
     def content(self, request, pk=None, *, station_id):
         gfile = self.get_object()
+        self.check_object_permissions(request, gfile)
         try:
             gfile_content_file = gfile.content.file
             filename = gfile_content_file.name
@@ -179,7 +189,13 @@ class GentityFileViewSet(ReadOnlyModelViewSet):
 class TimeseriesViewSet(ModelViewSet):
     queryset = models.Timeseries.objects.all()
     serializer_class = serializers.TimeseriesSerializer
-    permission_classes = (CanEditOrReadOnly,)
+
+    def get_permissions(self):
+        if self.action in ("data", "bottom"):
+            pc = [permissions.CanAccessTimeseriesData]
+        else:
+            pc = [permissions.CanEditOrReadOnly]
+        return [x() for x in pc]
 
     def get_queryset(self):
         return models.Timeseries.objects.filter(gentity_id=self.kwargs["station_id"])
@@ -225,6 +241,7 @@ class TimeseriesViewSet(ModelViewSet):
     @action(detail=True, methods=["get"])
     def bottom(self, request, pk=None, *, station_id):
         ts = get_object_or_404(models.Timeseries, pk=pk)
+        self.check_object_permissions(request, ts)
         response = HttpResponse(content_type="text/plain")
         response.write(ts.get_last_line())
         return response

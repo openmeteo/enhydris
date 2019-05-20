@@ -16,3 +16,23 @@ class CanEditOrReadOnly(permissions.BasePermission):
 class CanCreateStation(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.has_perm("enhydris.add_station")
+
+
+class CanAccessTimeseriesData(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return request.user.has_perm("enhydris.view_timeseries_data", obj)
+        else:
+            return request.user.has_perm(
+                "enhydris.change_station", obj.gentity.gpoint.station
+            )
+
+
+class CanAccessGentityFileContent(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return request.user.has_perm("enhydris.view_gentityfile_content", obj)
+        else:
+            return request.user.has_perm(
+                "enhydris.change_station", obj.gentity.gpoint.station
+            )

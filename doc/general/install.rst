@@ -164,6 +164,17 @@ These are the settings available to Enhydris, in addition to the
    set to ``False`` (the default), only privileged users are allowed to
    add/edit/remove data from the db.
 
+   See also :data:`ENHYDRIS_OPEN_CONTENT`.
+
+.. data:: ENHYDRIS_OPEN_CONTENT
+
+   If set to ``True``, users who haven't logged on can view timeseries
+   data and station file (e.g. image) content. Otherwise, only logged on
+   users can do so. Logged on users can always view everything.
+
+   When this setting is ``False``, ``ENHYDRIS_REGISTRATION_OPEN`` must
+   obviously also be set to ``False``.
+
 .. data:: ENHYDRIS_MAP_BASE_LAYERS
 
    A list of JavaScript definitions of base layers to use on the map.

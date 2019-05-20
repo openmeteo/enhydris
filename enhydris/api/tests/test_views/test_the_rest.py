@@ -34,6 +34,7 @@ class Tsdata404TestCase(APITestCase):
         self.assertEqual(response.status_code, 404)
 
 
+@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class TsdataGetTestCase(APITestCase):
     def setUp(self):
         ahtimeseries = HTimeseries()
@@ -64,6 +65,30 @@ class TsdataGetTestCase(APITestCase):
         )
 
 
+@override_settings(ENHYDRIS_OPEN_CONTENT=False)
+@patch("enhydris.models.Timeseries.get_data", return_value=HTimeseries())
+class TsdataGetPermissionsTestCase(APITestCase):
+    def setUp(self):
+        station = mommy.make(models.Station)
+        timeseries = mommy.make(
+            models.Timeseries, gentity=station, time_zone__utc_offset=120
+        )
+        self.url = "/api/stations/{}/timeseries/{}/data/".format(
+            station.id, timeseries.id
+        )
+
+    def test_anonymous_user_is_denied(self, m):
+        self.response = self.client.get(self.url)
+        self.assertEqual(self.response.status_code, 401)
+
+    def test_logged_on_user_is_ok(self, m):
+        self.user1 = mommy.make(User, is_active=True, is_superuser=False)
+        self.client.force_authenticate(user=self.user1)
+        self.response = self.client.get(self.url)
+        self.assertEqual(self.response.status_code, 200)
+
+
+@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class TsdataGetHtsTestCase(APITestCase):
     def setUp(self):
         ahtimeseries = HTimeseries()
@@ -189,6 +214,7 @@ class TsdataPostGarbageTestCase(APITestCase):
         self.assertEqual(self.response.status_code, 400)
 
 
+@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class TsdataStartAndEndDateTestCase(APITestCase):
     """Test that there's no aware/naive date confusion.
 
@@ -224,6 +250,7 @@ class TsdataStartAndEndDateTestCase(APITestCase):
         )
 
 
+@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class TimeseriesBottomTestCase(APITestCase):
     @patch(
         "enhydris.models.Timeseries.get_last_line", return_value="2018-12-09 13:10,20,"
@@ -245,6 +272,29 @@ class TimeseriesBottomTestCase(APITestCase):
 
     def test_response_content(self):
         self.assertEqual(self.response.content.decode(), "2018-12-09 13:10,20,")
+
+
+@override_settings(ENHYDRIS_OPEN_CONTENT=False)
+@patch("enhydris.models.Timeseries.get_last_line", return_value="2018-12-09 13:10,20,")
+class TimeseriesBottomPermissionsTestCase(APITestCase):
+    def setUp(self):
+        station = mommy.make(models.Station)
+        timeseries = mommy.make(
+            models.Timeseries, gentity=station, time_zone__utc_offset=120
+        )
+        self.url = "/api/stations/{}/timeseries/{}/bottom/".format(
+            station.id, timeseries.id
+        )
+
+    def test_anonymous_user_is_denied(self, m):
+        self.response = self.client.get(self.url)
+        self.assertEqual(self.response.status_code, 401)
+
+    def test_logged_on_user_is_ok(self, m):
+        self.user1 = mommy.make(User, is_active=True, is_superuser=False)
+        self.client.force_authenticate(user=self.user1)
+        self.response = self.client.get(self.url)
+        self.assertEqual(self.response.status_code, 200)
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
@@ -791,6 +841,7 @@ class GentityFileTestCase(APITestCase):
         self.assertEqual(r.status_code, 200)
 
 
+@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class GentityFileContentTestCase(APITestCase):
     def setUp(self):
         # Mocking. We mock several things in Django and Python so that:
@@ -825,6 +876,35 @@ class GentityFileContentTestCase(APITestCase):
         self.assertEqual(self.response["Content-Type"], "image/jpeg")
 
 
+@override_settings(ENHYDRIS_OPEN_CONTENT=False)
+@patch("enhydris.api.views.open", mock_open(read_data="ABCDEF"))
+@patch("os.path.getsize", return_value=6)
+class GentityFileContentPermissionsTestCase(APITestCase):
+    def setUp(self):
+        self.station = mommy.make(models.Station)
+        self.gentity_file = mommy.make(models.GentityFile, gentity=self.station)
+        self.url = "/api/stations/{}/files/{}/content/".format(
+            self.station.id, self.gentity_file.id
+        )
+        self.saved_fieldfile_file = FieldFile.file
+        self.filemock = MagicMock(**{"return_value.name": "some_image.jpg"})
+        FieldFile.file = property(self.filemock, MagicMock(), MagicMock())
+
+    def tearDown(self):
+        FieldFile.file = self.saved_fieldfile_file
+
+    def test_anonymous_user_is_denied(self, m):
+        self.response = self.client.get(self.url)
+        self.assertEqual(self.response.status_code, 401)
+
+    def test_logged_on_user_is_ok(self, m):
+        self.user1 = mommy.make(User, is_active=True, is_superuser=False)
+        self.client.force_authenticate(user=self.user1)
+        self.response = self.client.get(self.url)
+        self.assertEqual(self.response.status_code, 200)
+
+
+@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class GentityFileContentWithoutFileTestCase(APITestCase):
     def setUp(self):
         # Mommy creates a GentityFile without an associated file, so the

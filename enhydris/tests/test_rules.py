@@ -1,4 +1,4 @@
-from django.contrib.auth.models import Permission, User
+from django.contrib.auth.models import AnonymousUser, Permission, User
 from django.test import TestCase, override_settings
 
 from model_mommy import mommy
@@ -200,4 +200,72 @@ class RulesTestCaseWhenUsersCannotAddContent(RulesTestCaseBase, CommonTests):
     def test_maintainer_is_irrelevant_for_delete_timeseries(self):
         self.assertFalse(
             self.bob.has_perm("enhydris.delete_timeseries", self.timeseries)
+        )
+
+
+class ContentRulesTestCaseBase(TestCase):
+    """Test case base for time series data and file content."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.alice = User.objects.create_user(username="alice")
+        cls.bob = User.objects.create_user(username="bob")
+        cls.charlie = User.objects.create_user(username="charlie")
+        cls.david = User.objects.create_user(username="david")
+        cls.anonymous = AnonymousUser()
+
+        cls.station = mommy.make(
+            models.Station, creator=cls.alice, maintainers=[cls.bob]
+        )
+        cls.timeseries = mommy.make(models.Timeseries, gentity=cls.station)
+        cls.gentityfile = mommy.make(models.GentityFile, gentity=cls.station)
+
+        po = Permission.objects
+        cls.charlie.user_permissions.add(po.get(codename="view_station"))
+        cls.charlie.user_permissions.add(po.get(codename="change_station"))
+        cls.charlie.user_permissions.add(po.get(codename="delete_station"))
+        cls.charlie.user_permissions.add(po.get(codename="change_timeseries"))
+        cls.charlie.user_permissions.add(po.get(codename="delete_timeseries"))
+        cls.charlie.user_permissions.add(po.get(codename="change_instrument"))
+        cls.charlie.user_permissions.add(po.get(codename="delete_instrument"))
+
+
+@override_settings(ENHYDRIS_OPEN_CONTENT=True)
+class ContentRulesWhenContentIsOpenTestCase(ContentRulesTestCaseBase):
+    def test_anonymous_can_download_timeseries(self):
+        self.assertTrue(
+            self.anonymous.has_perm("enhydris.view_timeseries_data", self.timeseries)
+        )
+
+    def test_anonymous_can_download_gentity_file(self):
+        self.assertTrue(
+            self.anonymous.has_perm(
+                "enhydris.view_gentityfile_content", self.timeseries
+            )
+        )
+
+
+@override_settings(ENHYDRIS_OPEN_CONTENT=False)
+class ContentRulesWhenContentIsNotOpen(ContentRulesTestCaseBase):
+    def test_anonymous_cannot_download_timeseries(self):
+        self.assertFalse(
+            self.anonymous.has_perm("enhydris.view_timeseries_data", self.timeseries)
+        )
+
+    def test_anonymous_cannot_download_gentity_file(self):
+        self.assertFalse(
+            self.anonymous.has_perm(
+                "enhydris.view_gentityfile_content", self.timeseries
+            )
+        )
+
+    def test_logged_on_can_download_timeseries(self):
+        self.assertTrue(
+            self.david.has_perm("enhydris.view_timeseries_data", self.timeseries)
+        )
+
+    def test_logged_on_can_download_gentity_file(self):
+        self.assertTrue(
+            self.david.has_perm("enhydris.view_gentityfile_content", self.timeseries)
         )

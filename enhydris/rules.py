@@ -77,6 +77,11 @@ def users_can_add_content(user, obj):
 
 
 @rules.predicate
+def open_content(user, obj):
+    return settings.ENHYDRIS_OPEN_CONTENT
+
+
+@rules.predicate
 def model_backend_can_add_station(user, obj):
     return ModelBackend().has_perm(user, "enhydris.add_station")
 
@@ -138,3 +143,6 @@ rules.add_perm(
     users_can_add_content
     & (model_backend_can_edit_station | is_new_object | is_station_creator),
 )
+
+rules.add_perm("enhydris.view_timeseries_data", open_content | is_active)
+rules.add_perm("enhydris.view_gentityfile_content", open_content | is_active)
