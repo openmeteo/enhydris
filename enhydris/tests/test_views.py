@@ -11,7 +11,7 @@ from django_selenium_clean import PageElement, SeleniumTestCase
 from model_mommy import mommy
 from selenium.webdriver.common.by import By
 
-from enhydris.models import Station
+from enhydris.models import GentityFile, Station
 
 
 class StationListTestCase(TestCase):
@@ -106,6 +106,25 @@ class StationDetailTestCase(TestCase):
     def test_map_viewport(self):
         response = self.client.get("/stations/{}/".format(self.station.id))
         self.assertContains(response, "enhydris.mapViewport=[20.9, 38.9, 21.1, 39.1]")
+
+
+class GentityFileDownloadLinkTestCase(TestCase):
+    def setUp(self):
+        self.station = mommy.make(Station, name="Komboti")
+        self.gentityfile = mommy.make(GentityFile, gentity=self.station)
+        self.link = "<a href='/api/stations/{}/files/{}/content/>".format(
+            self.station.id, self.gentityfile.id
+        )
+
+    @override_settings(ENHYDRIS_SITE_CONTENT_IS_FREE=True)
+    def test_contains_download_link_when_site_content_is_free(self):
+        response = self.client.get("/stations/{}/".format(self.station.id))
+        self.assertContains(response, self.link)
+
+    @override_settings(ENHYDRIS_SITE_CONTENT_IS_FREE=False)
+    def test_has_no_download_link_when_site_content_is_restricted(self):
+        response = self.client.get("/stations/{}/".format(self.station.id))
+        self.assertNotContains(response, self.link)
 
 
 class StationEditRedirectTestCase(TestCase):
