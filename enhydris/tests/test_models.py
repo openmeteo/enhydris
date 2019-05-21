@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta, timezone
+import datetime as dt
 from io import StringIO
 from unittest.mock import MagicMock, Mock, mock_open, patch
 
@@ -272,7 +272,7 @@ class GentityEventTestCase(TestCase):
         gentity_event = models.GentityEvent(
             gentity=station,
             type=type,
-            date=datetime.now(),
+            date=dt.datetime.now(),
             user="Alice",
             report="Station exploded",
         )
@@ -387,7 +387,9 @@ class OverseerTestCase(TestCase):
         overseer = models.Overseer.objects.first()
         overseer.start_date = "2018-11-14"
         overseer.save()
-        self.assertEqual(models.Overseer.objects.first().start_date, date(2018, 11, 14))
+        self.assertEqual(
+            models.Overseer.objects.first().start_date, dt.date(2018, 11, 14)
+        )
 
     def test_delete(self):
         mommy.make(models.Overseer)
@@ -466,7 +468,7 @@ class TimeZoneTestCase(TestCase):
 
     def test_as_tzinfo(self):
         time_zone = mommy.make(models.TimeZone, code="EET", utc_offset=120)
-        self.assertEqual(time_zone.as_tzinfo, timezone(timedelta(hours=2), "EET"))
+        self.assertEqual(time_zone.as_tzinfo, dt.timezone(dt.timedelta(hours=2), "EET"))
 
 
 class TimeStepTestCase(TestCase):
@@ -554,23 +556,25 @@ class TimeseriesDatesTestCase(TestCase):
 
         # We can't have mommy save the following two, because it calls
         # Timeseries.save(), and .save() would overwrite them.
-        self.timeseries.start_date_utc = datetime(
-            2018, 11, 15, 16, 0, tzinfo=timezone.utc
+        self.timeseries.start_date_utc = dt.datetime(
+            2018, 11, 15, 16, 0, tzinfo=dt.timezone.utc
         )
-        self.timeseries.end_date_utc = datetime(
-            2018, 11, 17, 23, 0, tzinfo=timezone.utc
+        self.timeseries.end_date_utc = dt.datetime(
+            2018, 11, 17, 23, 0, tzinfo=dt.timezone.utc
         )
 
     def test_start_date(self):
         self.assertEqual(
             self.timeseries.start_date,
-            datetime(2018, 11, 15, 18, 0, tzinfo=self.timeseries.time_zone.as_tzinfo),
+            dt.datetime(
+                2018, 11, 15, 18, 0, tzinfo=self.timeseries.time_zone.as_tzinfo
+            ),
         )
 
     def test_end_date(self):
         self.assertEqual(
             self.timeseries.end_date,
-            datetime(2018, 11, 18, 1, 0, tzinfo=self.timeseries.time_zone.as_tzinfo),
+            dt.datetime(2018, 11, 18, 1, 0, tzinfo=self.timeseries.time_zone.as_tzinfo),
         )
 
 
@@ -600,13 +604,13 @@ class TimeseriesSaveDatesTestCase(TestCase):
     def test_start_date(self):
         self.assertEqual(
             self.timeseries.start_date_utc,
-            datetime(2017, 11, 23, 15, 23, tzinfo=timezone.utc),
+            dt.datetime(2017, 11, 23, 15, 23, tzinfo=dt.timezone.utc),
         )
 
     def test_end_date(self):
         self.assertEqual(
             self.timeseries.end_date_utc,
-            datetime(2018, 11, 24, 23, 0, tzinfo=timezone.utc),
+            dt.datetime(2018, 11, 24, 23, 0, tzinfo=dt.timezone.utc),
         )
 
 
