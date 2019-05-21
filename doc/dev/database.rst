@@ -616,15 +616,20 @@ Time series and related models
 
    .. method:: enhydris.models.Timeseries.get_data(start_date=None, end_date=None)
 
-      Return the data of the file in a pandas DataFrame. If *start_date*
-      or *end_date* are specified, only this part of the data is
-      returned.
+      Return the data of the file in a HTimeseries_ object. If
+      *start_date* or *end_date* are specified, only this part of the
+      data is returned.
 
    .. method:: enhydris.models.Timeseries.set_data(data)
 
-      Replace all of the time series with *data*, which must be a
-      filelike object containing time series data in `text format`_ or
-      `file format`_. If it is in file format, the header is ignored.
+      Replace all of the time series with *data*, which must be one of
+      the following:
+
+       * A Pandas DataFrame
+       * A HTimeseries_ object
+       * A filelike object containing time series data in `text format`_
+         or `file format`_. If it is in file format, the header is
+         ignored.
 
    .. method:: enhydris.models.Timeseries.append_data(data)
 
@@ -641,6 +646,7 @@ Time series and related models
       if the time series contains no records.
 
 
+.. _htimeseries: https://github.com/openmeteo/htimeseries
 .. _text format: https://github.com/openmeteo/htimeseries#text-format
 .. _file format: https://github.com/openmeteo/htimeseries#file-format
 .. _multi-table inheritance: http://docs.djangoproject.com/en/dev/topics/db/models/#id6
