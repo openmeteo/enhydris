@@ -767,50 +767,31 @@ class TimeseriesSetDataTestCase(TestCase):
         )
 
 
+@RandomEnhydrisTimeseriesDataDir()
 class TimeseriesAppendDataTestCase(TestCase):
     def setUp(self):
         self.timeseries = mommy.make(
             models.Timeseries, id=42, time_zone__utc_offset=0, precision=2
         )
-
-        # Mock self.timeseries.datafile
-        self.timeseries.datafile = MagicMock(size=50, path="/some/path")
-
-        # Mock open() so that it doesn't actually save to a file
-        self.mock_open = mock_open()
-        self.patch1 = patch("enhydris.models.open", self.mock_open)
-
-        # Mock ropen() so that it supposedly returns some data
-        self.patch2 = patch(
-            "enhydris.models.ropen", mock_open(read_data="2016-01-01 00:00,42,\n")
-        )
-
-        # Mock Timeseries.save(), otherwise there's chaos
-        self.patch3 = patch("enhydris.models.Timeseries.save")
+        self.timeseries.set_data(StringIO("2016-01-01 00:00,42,\n"))
 
     def test_call_with_file_object(self):
-        with self.patch1, self.patch2, self.patch3:
-            returned_length = self.timeseries.append_data(
-                StringIO("2017-11-23 17:23,1,\n" "2018-11-25 01:00,2,\n")
-            )
+        returned_length = self.timeseries.append_data(
+            StringIO("2017-11-23 17:23,1,\n" "2018-11-25 01:00,2,\n")
+        )
         self.assertEqual(returned_length, 2)
-        self.mock_open.assert_called_once_with("/some/path", "a")
         self._assert_wrote_data()
 
     def test_call_with_dataframe(self):
-        with self.patch1, self.patch2, self.patch3:
-            returned_length = self.timeseries.append_data(self._get_dataframe())
+        returned_length = self.timeseries.append_data(self._get_dataframe())
         self.assertEqual(returned_length, 2)
-        self.mock_open.assert_called_once_with("/some/path", "a")
         self._assert_wrote_data()
 
     def test_call_with_htimeseries(self):
-        with self.patch1, self.patch2, self.patch3:
-            returned_length = self.timeseries.append_data(
-                HTimeseries(self._get_dataframe())
-            )
+        returned_length = self.timeseries.append_data(
+            HTimeseries(self._get_dataframe())
+        )
         self.assertEqual(returned_length, 2)
-        self.mock_open.assert_called_once_with("/some/path", "a")
         self._assert_wrote_data()
 
     def _get_dataframe(self):
@@ -826,40 +807,56 @@ class TimeseriesAppendDataTestCase(TestCase):
         # Instead of six decimal digits we should probably have gotten two digits
         # because we specified precision=2. See Enhydris ticket #90.
         self.assertEqual(
-            self.mock_open().write.call_args_list,
-            [
-                (("2017-11-23 17:23,1.000000,\r\n",),),
-                (("2018-11-25 01:00,2.000000,\r\n",),),
-            ],
+            open(self.timeseries.datafile.path, "rb").read(),
+            (
+                b"2016-01-01 00:00,42.000000,\r\n"
+                b"2017-11-23 17:23,1.000000,\r\n"
+                b"2018-11-25 01:00,2.000000,\r\n"
+            ),
         )
 
 
+@RandomEnhydrisTimeseriesDataDir()
+class TimeseriesAppendDataToEmptyTimeseriesTestCase(TestCase):
+    def setUp(self):
+        self.timeseries = mommy.make(
+            models.Timeseries, id=42, time_zone__utc_offset=0, precision=2
+        )
+
+    def test_call_with_dataframe(self):
+        returned_length = self.timeseries.append_data(self._get_dataframe())
+        self.assertEqual(returned_length, 2)
+        self._assert_wrote_data()
+
+    def _get_dataframe(self):
+        result = pd.DataFrame(
+            data={"value": [1.0, 2.0], "flags": ["", ""]},
+            columns=["value", "flags"],
+            index=[dt.datetime(2017, 11, 23, 17, 23), dt.datetime(2018, 11, 25, 1, 0)],
+        )
+        result.index.name = "date"
+        return result
+
+    def _assert_wrote_data(self):
+        # Instead of six decimal digits we should probably have gotten two digits
+        # because we specified precision=2. See Enhydris ticket #90.
+        self.assertEqual(
+            open(self.timeseries.datafile.path, "rb").read(),
+            b"2017-11-23 17:23,1.000000,\r\n2018-11-25 01:00,2.000000,\r\n",
+        )
+
+
+@RandomEnhydrisTimeseriesDataDir()
 class TimeseriesAppendErrorTestCase(TestCase):
     def test_does_not_update_if_data_to_append_are_not_later(self):
         self.timeseries = mommy.make(
             models.Timeseries, id=42, time_zone__utc_offset=0, precision=2
         )
-
-        # Mock self.timeseries.datafile
-        self.timeseries.datafile = MagicMock(size=50, path="/some/path")
-
-        # Mock open() so that it doesn't actually save to a file
-        self.mock_open = mock_open()
-        patch1 = patch("enhydris.models.open", self.mock_open)
-
-        # Mock ropen() so that it supposedly returns some data
-        patch2 = patch(
-            "enhydris.models.ropen", mock_open(read_data="2018-01-01 00:00,42,\n")
-        )
-
-        # Mock Timeseries.save(), otherwise there's chaos
-        patch3 = patch("enhydris.models.Timeseries.save")
-
-        with patch1, patch2, patch3:
-            with self.assertRaises(IntegrityError):
-                self.timeseries.append_data(
-                    StringIO("2017-11-23 17:23,1,\n" "2018-11-25 01:00,2,\n")
-                )
+        self.timeseries.set_data(StringIO("2018-01-01 00:00,42,\n"))
+        with self.assertRaises(IntegrityError):
+            self.timeseries.append_data(
+                StringIO("2017-11-23 17:23,1,\n2018-11-25 01:00,2,\n")
+            )
 
 
 class TimeseriesGetFirstOrLastLineTestCase(TestCase):

@@ -1,3 +1,4 @@
+import os
 from collections import OrderedDict
 from datetime import timedelta, timezone
 
@@ -629,7 +630,7 @@ class Timeseries(models.Model):
         return len(ahtimeseries.data)
 
     def append_data(self, data):
-        if not self.datafile:
+        if (not self.datafile) or (os.path.getsize(self.datafile.path) == 0):
             return self.set_data(data)
         ahtimeseries = self._get_htimeseries_from_data(data)
         if not len(ahtimeseries.data):
