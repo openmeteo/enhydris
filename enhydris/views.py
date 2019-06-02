@@ -29,6 +29,11 @@ class StationDetail(DetailView):
         self.request.map_viewport = map_extent
         return super().render_to_response(*args, **kwargs)
 
+    def get_template_names(self):
+        if self.request.GET.get("mode", "") == "popup":
+            return ["enhydris/map_station_popup.html"]
+        return super().get_template_names()
+
 
 class StationEdit(RedirectView):
     def get_redirect_url(self, *args, **kwargs):

@@ -39,11 +39,11 @@ enhydris.mapModule = (function namespace() {
         removePopup();
         point = feature.geometry.getBounds().getCenterLonLat();
         map.panTo(point);
-        url = enhydris.rootUrl + 'stations/b/' +
-              getAttribute(feature, 'id') + '/';
+        url = enhydris.rootUrl + 'stations/' +
+              getAttribute(feature, 'id') + '/?mode=popup';
         $.get(url, {}, function (message) {
             var size;
-            size = new OpenLayers.Size(190, 150);
+            size = new OpenLayers.Size(300, 130);
             popup = new OpenLayers.Popup(getAttribute(feature, 'name'),
                                          point, size, message, true);
             popup.setBorder('2px solid');

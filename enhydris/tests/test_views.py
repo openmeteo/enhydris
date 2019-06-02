@@ -107,6 +107,10 @@ class StationDetailTestCase(TestCase):
         response = self.client.get("/stations/{}/".format(self.station.id))
         self.assertContains(response, "enhydris.mapViewport=[20.9, 38.9, 21.1, 39.1]")
 
+    def test_popup_mode(self):
+        response = self.client.get("/stations/{}/?mode=popup".format(self.station.id))
+        self.assertContains(response, "Details...")
+
 
 class GentityFileDownloadLinkTestCase(TestCase):
     def setUp(self):
