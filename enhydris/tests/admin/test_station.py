@@ -10,7 +10,7 @@ from django.test import TestCase, override_settings
 from model_mommy import mommy
 
 from enhydris.admin.station import LatLonField, LatLonWidget, TimeseriesInlineAdminForm
-from enhydris.models import Station, Timeseries, TimeStep
+from enhydris.models import Organization, Station, StationType, Timeseries, TimeStep
 
 
 class LatLonWidgetTestCase(TestCase):
@@ -219,6 +219,46 @@ class StationPermsTestCaseWhenUsersCannotAddCont(StationPermsTestCaseBase, Commo
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "Creator")
         self.assertNotContains(response, "Maintainers")
+
+
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+class StationCreateSetsCreatorTestCase(TestCase):
+    def setUp(self):
+        self.alice = User.objects.create_user(
+            username="alice", password="topsecret", is_staff=True, is_superuser=True
+        )
+        self.bob = User.objects.create_user(
+            username="bob", password="topsecret", is_staff=True, is_superuser=False
+        )
+        self.serial_killers_sa = Organization.objects.create(name="Serial killers SA")
+        self.meteorological = mommy.make(StationType, descr="Meteorological")
+
+    def test_when_creating_station_creator_is_set(self):
+        self.client.login(username="bob", password="topsecret")
+        response = self.client.post(
+            "/admin/enhydris/station/add/",
+            {
+                "name": "Hobbiton",
+                "copyright_years": "2018",
+                "copyright_holder": "Bilbo Baggins",
+                "owner": self.serial_killers_sa.id,
+                "stype": [self.meteorological.id],
+                "point_0": "20.94565",
+                "point_1": "39.12102",
+                "gentityaltcode_set-TOTAL_FORMS": "0",
+                "gentityaltcode_set-INITIAL_FORMS": "0",
+                "instrument_set-TOTAL_FORMS": "0",
+                "instrument_set-INITIAL_FORMS": "0",
+                "gentityfile_set-TOTAL_FORMS": "0",
+                "gentityfile_set-INITIAL_FORMS": "0",
+                "gentityevent_set-TOTAL_FORMS": "0",
+                "gentityevent_set-INITIAL_FORMS": "0",
+                "timeseries-TOTAL_FORMS": "0",
+                "timeseries-INITIAL_FORMS": "0",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Station.objects.first().creator, self.bob)
 
 
 class TimeseriesInlineAdminFormRefusesToAppendIfNotInOrderTestCase(TestCase):

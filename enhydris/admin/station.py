@@ -355,3 +355,8 @@ class StationAdmin(ObjectPermissionsModelAdmin):
                 )
             )
         return fieldsets
+
+    def save_model(self, request, obj, form, change):
+        if obj.creator is None:
+            obj.creator = request.user
+        super().save_model(request, obj, form, change)
