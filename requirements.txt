@@ -1,5 +1,4 @@
-# Don't use Django 2.2 until https://code.djangoproject.com/ticket/30459 is fixed
-Django>=2.1,<2.2
+Django>=2.2.2,<3
 djangorestframework>=3.9,<4
 gdal>=1.6
 django-bootstrap3>=11,<12
