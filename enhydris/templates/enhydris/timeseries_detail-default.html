@@ -1,6 +1,7 @@
 {% extends "enhydris/base.html" %}
 {% load i18n %}
 {% load static %}
+{% load rules %}
 
 
 {% block title %}
@@ -137,9 +138,10 @@
                   <div class="col-md-7">
                     <div style="float:left; width: 500px;">
                       {% block download_timeseries %}
-                        {% if user.is_authenticated or anonymous_can_download_data %}
+                        {% has_perm "enhydris.view_timeseries_data" request.user timeseries as can_view_timeseries_data %}
+                        {% if can_view_timeseries_data %}
                             <p>
-                            <a href='{% url "timeseries-data" station_id=timeseries.gentity.id pk=timeseries.id %}?fmt=hts'><i class="glyphicon glyphicon-cloud-download"></i> {% trans "Download time series" %}</a>
+                            <a href="{% url "timeseries-data" station_id=timeseries.gentity.id pk=timeseries.id %}?fmt=hts"><i class="glyphicon glyphicon-cloud-download"></i> {% trans "Download time series" %}</a>
                             </p>
                         {% else %}
                             <p class="text-warning">

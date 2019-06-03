@@ -11,7 +11,7 @@ from django_selenium_clean import PageElement, SeleniumTestCase
 from model_mommy import mommy
 from selenium.webdriver.common.by import By
 
-from enhydris.models import GentityFile, Station
+from enhydris.models import GentityFile, Station, Timeseries
 
 
 class StationListTestCase(TestCase):
@@ -110,6 +110,40 @@ class StationDetailTestCase(TestCase):
     def test_popup_mode(self):
         response = self.client.get("/stations/{}/?mode=popup".format(self.station.id))
         self.assertContains(response, "Details...")
+
+
+class TimeseriesDownloadLinkTestCase(TestCase):
+    def setUp(self):
+        self.station = mommy.make(Station, name="Komboti")
+        self.timeseries = mommy.make(Timeseries, gentity=self.station)
+        self.link = '<a href="/api/stations/{}/timeseries/{}/data/?fmt=hts">'.format(
+            self.station.id, self.timeseries.id
+        )
+
+    def _get_response(self):
+        self.response = self.client.get(
+            "/stations/{}/timeseries/{}/".format(self.station.id, self.timeseries.id)
+        )
+
+    @override_settings(ENHYDRIS_OPEN_CONTENT=True)
+    def test_contains_download_link_when_site_content_is_free(self):
+        self._get_response()
+        self.assertContains(self.response, self.link)
+
+    @override_settings(ENHYDRIS_OPEN_CONTENT=False)
+    def test_has_no_download_link_when_site_content_is_restricted(self):
+        self._get_response()
+        self.assertNotContains(self.response, self.link)
+
+    @override_settings(ENHYDRIS_OPEN_CONTENT=True)
+    def test_has_no_permission_denied_message_when_site_content_is_free(self):
+        self._get_response()
+        self.assertNotContains(self.response, "You don't have permission to download")
+
+    @override_settings(ENHYDRIS_OPEN_CONTENT=False)
+    def test_shows_permission_denied_message_when_site_content_is_restricted(self):
+        self._get_response()
+        self.assertContains(self.response, "You don't have permission to download")
 
 
 class GentityFileDownloadLinkTestCase(TestCase):
