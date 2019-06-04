@@ -9,9 +9,9 @@ Release notes
 Version 3.0
 ===========
 
-As of May 2019, version 3.0 is in heavy development and it is not
-expected to become stable before 2020. Until then, install version 2.0
-in production.
+As of June 2019, version 3.0 is in heavy development and it is not
+expected to become stable before late 2019. Until then, install version
+2.0 in production.
 
 Upgrading
 ---------
@@ -92,6 +92,9 @@ Changes from 2.0
   fields are nonempty and they are multi-line fields such as
   ``TextField``, they will be joined together separated by
   ``\n\n---ALT---\n\n``.
+- The fields ``approximate`` (used to denote that a station's location
+  has been assigned roughly) and ``asrid`` (altitude SRID) have been
+  abolished. The field ``srid`` has been renamed to ``original_srid``.
 
 Version 2.0
 ===========

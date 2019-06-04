@@ -10,10 +10,14 @@ from enhydris import models
 class SimpleBoundingBoxTestCase(APITestCase):
     def setUp(self):
         mommy.make(
-            models.Station, point=Point(x=21.06071, y=39.09518, srid=4326), srid=4326
+            models.Station,
+            point=Point(x=21.06071, y=39.09518, srid=4326),
+            original_srid=4326,
         )
         mommy.make(
-            models.Station, point=Point(x=21.60121, y=39.22440, srid=4326), srid=4326
+            models.Station,
+            point=Point(x=21.60121, y=39.22440, srid=4326),
+            original_srid=4326,
         )
         response = self.client.get("/api/stations/")
         self.bounding_box = response.json()["bounding_box"]
@@ -54,10 +58,14 @@ class DefaultBoundingBoxTestCase(APITestCase):
 class TooSmallBoundingBoxTestCase(APITestCase):
     def setUp(self):
         mommy.make(
-            models.Station, point=Point(x=21.06071, y=39.09518, srid=4326), srid=4326
+            models.Station,
+            point=Point(x=21.06071, y=39.09518, srid=4326),
+            original_srid=4326,
         )
         mommy.make(
-            models.Station, point=Point(x=21.60121, y=39.22440, srid=4326), srid=4326
+            models.Station,
+            point=Point(x=21.60121, y=39.22440, srid=4326),
+            original_srid=4326,
         )
         response = self.client.get("/api/stations/")
         self.bounding_box = response.json()["bounding_box"]

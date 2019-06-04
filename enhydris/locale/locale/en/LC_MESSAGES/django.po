@@ -287,10 +287,6 @@ msgstr ""
 msgid "SRID"
 msgstr ""
 
-#: templates/enhydris/station_detail.html:66
-msgid "Approximate"
-msgstr ""
-
 #: templates/enhydris/station_detail.html:70
 msgid "Altitude"
 msgstr ""

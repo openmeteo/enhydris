@@ -28,37 +28,37 @@ class StationListTestCase(TestCase):
             Station,
             name="Komboti",
             point=Point(x=21.06071, y=39.09518, srid=4326),
-            srid=4326,
+            original_srid=4326,
         )
         mommy.make(
             Station,
             name="Agios Athanasios",
             point=Point(x=21.60121, y=39.22440, srid=4326),
-            srid=4326,
+            original_srid=4326,
         )
         mommy.make(
             Station,
             name="Tharbad",
             point=Point(x=-176.48368, y=0.19377, srid=4326),
-            srid=4326,
+            original_srid=4326,
         )
         mommy.make(
             Station,
             name="SRID Point, NoSRID Station",
             point=Point(x=-176.48368, y=0.19377, srid=4326),
-            srid=None,
+            original_srid=None,
         )
         mommy.make(
             Station,
             name="NoSRID Point, SRID Station",
             point=Point(x=-176.48368, y=0.19377, srid=None),
-            srid=4326,
+            original_srid=4326,
         )
         mommy.make(
             Station,
             name="NoSRID Point, NoSRID Station",
             point=Point(x=-176.48368, y=0.19377, srid=None),
-            srid=None,
+            original_srid=None,
         )
 
     def test_station_list(self):
@@ -99,7 +99,7 @@ class StationDetailTestCase(TestCase):
             Station,
             name="Komboti",
             point=Point(x=21.00000, y=39.00000, srid=4326),
-            srid=4326,
+            original_srid=4326,
         )
 
     @override_settings(ENHYDRIS_MAP_MIN_VIEWPORT_SIZE=0.2)
@@ -191,19 +191,19 @@ class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
             Station,
             name="Komboti",
             point=Point(x=21.06071, y=39.09518, srid=4326),
-            srid=4326,
+            original_srid=4326,
         )
         mommy.make(
             Station,
             name="Agios Athanasios",
             point=Point(x=21.60121, y=39.22440, srid=4326),
-            srid=4326,
+            original_srid=4326,
         )
         mommy.make(
             Station,
             name="Tharbad",
             point=Point(x=-176.48368, y=0.19377, srid=4326),
-            srid=4326,
+            original_srid=4326,
         )
 
     def test_list_stations_visible_on_map(self):

@@ -158,29 +158,16 @@ implemented by using Django's `multi-table inheritance`_.
 
       .. _pointfield: https://docs.djangoproject.com/en/2.1/ref/contrib/gis/model-api/#pointfield
 
-   .. attribute:: enhydris.models.Gpoint.srid
+   .. attribute:: enhydris.models.Gpoint.original_srid
 
       Specifies the reference system in which the user originally
       entered the co-ordinates of the point.  Valid *srid*'s are
       registered at http://www.epsg-registry.org/.  See also
       https://medium.com/@aptiko/introduction-to-geographical-co-ordinate-systems-4e143c5b21bc.
 
-   .. attribute:: enhydris.models.Gpoint.approximate
-
-      This boolean field has the value ``True`` if the horizontal
-      co-ordinates are approximate. This normally means that the user
-      who specified the co-ordinates did not really know the location
-      of the point, but for convenience placed it somewhere visually
-      so that the GIS system can have a rough idea of where to show it
-      and e.g. in which basin it is.
-
    .. attribute:: enhydris.models.Gpoint.altitude
-                  enhydris.models.Gpoint.asrid
 
-      These attributes store the altitude. *asrid* specifies the
-      reference system, which defines how *altitude* is to be
-      understood. *asrid* can be empty, in which case, *altitude* is
-      given in metres above mean sea level.
+      The altitude in metres above mean sea level.
 
 .. class:: enhydris.models.Gline(Gentity)
 

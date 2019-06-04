@@ -157,37 +157,37 @@ class StationCsvTestCase(APITestCase):
             models.Station,
             name="Komboti",
             point=Point(x=21.06071, y=39.09518, srid=4326),
-            srid=4326,
+            original_srid=4326,
         )
         mommy.make(
             models.Station,
             name="Agios Athanasios",
             point=Point(x=21.60121, y=39.22440, srid=4326),
-            srid=4326,
+            original_srid=4326,
         )
         mommy.make(
             models.Station,
             name="Tharbad",
             point=Point(x=-176.48368, y=0.19377, srid=4326),
-            srid=4326,
+            original_srid=4326,
         )
         mommy.make(
             models.Station,
             name="SRID Point, NoSRID Station",
             point=Point(x=-176.48368, y=0.19377, srid=4326),
-            srid=None,
+            original_srid=None,
         )
         mommy.make(
             models.Station,
             name="NoSRID Point, SRID Station",
             point=Point(x=-176.48368, y=0.19377, srid=None),
-            srid=4326,
+            original_srid=4326,
         )
         mommy.make(
             models.Station,
             name="NoSRID Point, NoSRID Station",
             point=Point(x=-176.48368, y=0.19377, srid=None),
-            srid=None,
+            original_srid=None,
         )
 
     def test_station_csv(self):
@@ -198,7 +198,7 @@ class StationCsvTestCase(APITestCase):
                 stations_csv = f.open("stations.csv").read().decode()
                 self.assertIn(",Agios Athanasios,", stations_csv)
 
-    def test_station_with_no_srid_is_included(self):
+    def test_station_with_no_original_srid_is_included(self):
         response = self.client.get("/api/stations/csv/")
         with tempfile.TemporaryFile() as t:
             t.write(response.content)
@@ -206,7 +206,7 @@ class StationCsvTestCase(APITestCase):
                 stations_csv = f.open("stations.csv").read().decode()
                 self.assertIn("SRID Point, NoSRID Station", stations_csv)
 
-    def test_station_with_point_with_no_srid_is_included(self):
+    def test_station_with_point_with_no_original_srid_is_included(self):
         response = self.client.get("/api/stations/csv/")
         with tempfile.TemporaryFile() as t:
             t.write(response.content)

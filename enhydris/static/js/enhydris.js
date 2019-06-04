@@ -255,7 +255,7 @@ enhydris.coordinatesUI = (function namespace() {
 
     var switchToSimpleView = function () {
         // Hide elements for simple view
-        var elementIDArray = ['id_asrid','id_srid','id_approximate'];
+        var elementIDArray = ['id_srid'];
         for (var i = 0; i < elementIDArray.length; i++) {
             $('#' + elementIDArray[i]).hide();
             $('label[for="' + elementIDArray[i] + '"]').hide();
@@ -273,7 +273,7 @@ enhydris.coordinatesUI = (function namespace() {
 
     var switchToAdvancedView = function () {
         // Show elements for advanced view
-        var elementIDArray = ['id_asrid','id_srid','id_approximate'];
+        var elementIDArray = ['id_srid'];
         for (var i = 0; i < elementIDArray.length; i++) {
             $('#' + elementIDArray[i]).show();
             $('label[for="' + elementIDArray[i] + '"]').show();
@@ -306,18 +306,12 @@ enhydris.coordinatesUI = (function namespace() {
         if ($('#id_srid').val() === '' || $('#id_srid').val() === null) {
             $('#id_srid').attr('value', '4326');
         }
-        // Initialize Form elements
         var sridValue = $('#id_srid').val();
-        var asridValue = $('#id_asrid').val();
-        // if the srid is 4326 or null, AND asrid is null
-
-        if (sridValue === '4326' && asridValue === '') {
+        if (sridValue === '4326') {
             switchToSimpleView();
             $('#btnCoordinates').show();
-            $("label[for='id_asrid']").text(transText.formASridLabel);
         } else {
             $('#btnCoordinates').hide();
-            $('label[for="id_asrid"]').text(transText.formASridLabel);
             switchToAdvancedView();
         }
     };

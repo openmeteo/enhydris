@@ -471,10 +471,6 @@ msgstr "Τεταγμένη"
 msgid "SRID"
 msgstr "SRID"
 
-#: templates/station_detail.html:182
-msgid "Approximate"
-msgstr "Προσέγγιση"
-
 #: templates/station_detail.html:186
 msgid "Altitude"
 msgstr "Υψόμετρο"

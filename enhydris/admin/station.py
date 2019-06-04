@@ -45,21 +45,13 @@ class StationAdminForm(forms.ModelForm):
         label=_("Co-ordinates"),
         help_text=_("Longitude and latitude in decimal degrees"),
     )
-    srid = forms.IntegerField(
+    original_srid = forms.IntegerField(
         label=_("Original SRID"),
         required=False,
         help_text=_(
             "Set this to 4326 if you have no idea what we're talking about. "
             "If the latitude and longitude has been converted from another co-ordinate "
             "system, enter the SRID of the original co-ordinate system."
-        ),
-    )
-    asrid = forms.IntegerField(
-        label=_("Altitude SRID"),
-        required=False,
-        help_text=_(
-            "Leave this empty if unsure. Set it to the SRID of the reference system "
-            "used for the altitude. Empty means mean sea level."
         ),
     )
 
@@ -328,8 +320,8 @@ class StationAdmin(ObjectPermissionsModelAdmin):
                         "political_division",
                         "water_division",
                         "water_basin",
-                        ("point", "srid", "approximate"),
-                        ("altitude", "asrid"),
+                        ("point", "original_srid"),
+                        ("altitude"),
                     ),
                     "classes": ("collapse",),
                 },

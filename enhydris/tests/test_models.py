@@ -352,7 +352,7 @@ class StationOriginalCoordinatesTestCase(TestCase):
             models.Station,
             name="Komboti",
             point=Point(x=21.06071, y=39.09518, srid=4326),
-            srid=2100,
+            original_srid=2100,
         )
         self.station = models.Station.objects.get(name="Komboti")
 
@@ -369,7 +369,7 @@ class StationOriginalCoordinatesWithNullSridTestCase(TestCase):
             models.Station,
             name="Komboti",
             point=Point(x=21.06071, y=39.09518, srid=4326),
-            srid=None,
+            original_srid=None,
         )
         self.station = models.Station.objects.get(name="Komboti")
 
@@ -628,10 +628,9 @@ class TimeseriesGetDataTestCase(TestCase):
         station = mommy.make(
             models.Station,
             name="Celduin",
-            srid=4326,
+            original_srid=4326,
             point=Point(x=21.06071, y=39.09518, srid=4326),
             altitude=219,
-            asrid=None,
         )
         cls.timeseries = mommy.make(
             models.Timeseries,
@@ -663,14 +662,11 @@ class TimeseriesGetDataTestCase(TestCase):
     def test_ordinate(self):
         self.assertAlmostEqual(self.data.location["ordinate"], 39.09518)
 
-    def test_srid(self):
-        self.assertAlmostEqual(self.data.location["srid"], 4326)
+    def test_original_srid(self):
+        self.assertAlmostEqual(self.data.location["original_srid"], 4326)
 
     def test_altitude(self):
         self.assertAlmostEqual(self.data.location["altitude"], 219)
-
-    def test_asrid(self):
-        self.assertIsNone(self.data.location["asrid"])
 
     def test_time_step(self):
         self.assertEqual(self.data.time_step, "60,0")

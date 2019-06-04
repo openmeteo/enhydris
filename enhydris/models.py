@@ -132,16 +132,14 @@ class Gentity(models.Model):
 
 
 class Gpoint(Gentity):
-    srid = models.IntegerField(null=True, blank=True)
-    approximate = models.BooleanField(default=False)
+    original_srid = models.IntegerField(null=True, blank=True)
     altitude = models.FloatField(null=True, blank=True)
-    asrid = models.IntegerField(null=True, blank=True)
     f_dependencies = ["Gentity"]
     point = models.PointField()
 
     def original_abscissa(self):
-        if self.point and self.srid:
-            (x, y) = self.point.transform(self.srid, clone=True)
+        if self.point and self.original_srid:
+            (x, y) = self.point.transform(self.original_srid, clone=True)
             return round(x, 2) if abs(x) > 180 and abs(y) > 90 else x
         elif self.point:
             return self.point.x
@@ -149,8 +147,8 @@ class Gpoint(Gentity):
             return None
 
     def original_ordinate(self):
-        if self.point and self.srid:
-            (x, y) = self.point.transform(self.srid, clone=True)
+        if self.point and self.original_srid:
+            (x, y) = self.point.transform(self.original_srid, clone=True)
             return round(y, 2) if abs(x) > 180 and abs(y) > 90 else y
         elif self.point:
             return self.point.y
@@ -569,9 +567,8 @@ class Timeseries(models.Model):
             location = {
                 "abscissa": self.gentity.gpoint.point[0],
                 "ordinate": self.gentity.gpoint.point[1],
-                "srid": self.gentity.gpoint.srid,
+                "original_srid": self.gentity.gpoint.original_srid,
                 "altitude": self.gentity.gpoint.altitude,
-                "asrid": self.gentity.gpoint.asrid,
             }
         except TypeError:
             # TypeError occurs when self.gentity.gpoint.point is None,

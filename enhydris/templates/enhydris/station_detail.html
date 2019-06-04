@@ -91,15 +91,12 @@
               <tr>
                 <th class="col-md-3" >{% trans 'Co-ordinates' %}</th>
                 <td colspan='2'>{{ station.point.y | floatformat:5 }}, {{ station.point.x | floatformat:5 }}
-                  {% if station.approximate %}
-                    ({% trans 'approximate' %})
-                  {% endif %}
-                  {% if station.srid != 4326 %}
+                  {% if station.original_srid != 4326 %}
                     <small>
                       <br>
                       ({{ wgs84_name }};
                       {% trans "converted from" %}
-                      srid={{ station.srid }},
+                      srid={{ station.original_srid }},
                       x={{ station.original_abscissa }},
                       y={{ station.original_ordinate }})
                     </small>
@@ -107,9 +104,7 @@
                 </td>
                 <tr>
                   <th class="col-md-3" >{% trans 'Altitude' %}</th>
-                  <td colspan='2'>{{ station.altitude|floatformat:2 }}
-                    {% if station.asrid %}[srid={{ station.asrid }}]{% endif %}
-                  </td>
+                  <td colspan='2'>{{ station.altitude|floatformat:2 }}</td>
                 </tr>
                 <tr >
                   <th class="col-md-3">{% trans 'Owner' %}</th>
