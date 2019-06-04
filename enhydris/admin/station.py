@@ -314,7 +314,7 @@ class StationAdmin(ObjectPermissionsModelAdmin):
                 {
                     "fields": (
                         ("name", "short_name"),
-                        "stype",
+                        ("stype", "is_automatic"),
                         "owner",
                         ("copyright_years", "copyright_holder"),
                     ),
