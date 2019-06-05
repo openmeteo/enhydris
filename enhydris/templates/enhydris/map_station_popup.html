@@ -1,8 +1,0 @@
-{% load i18n %}
-<p style="color: #884400; font-size:12pt; font-weight:bold; margin: 3px;">{{ station.name }}</p>
-<p style="color: #000044; font-size: 9pt; margin: 3px;">
-    {% for stype in station.stype.all %}{{ stype.descr }}{% if not forloop.last %}, {% endif %}{% endfor %}<br />
-    {% trans 'Owner: ' %}{{ station.owner }}<br />
-    {% url "station_detail" station.id as station_url %}
-    <a href=" {{station_url}} ">{% trans 'Details...' %}</a>
-</p>

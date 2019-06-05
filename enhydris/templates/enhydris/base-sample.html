@@ -9,7 +9,8 @@
     {% block js-globals %}{% endblock %}
     {% block basecss %}
       <link href="{% static 'css/enhydris.css' %}" type="text/css" rel="stylesheet" />
-      <link media="screen" href="{% static "css/olmap.css" %}" type="text/css" rel="stylesheet" />
+      <link rel="stylesheet" media="screen" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css">
+      <link href="{% static 'css/L.Control.MousePosition.css' %}" type="text/css" rel="stylesheet" />
       {% bootstrap_css %}
       <link rel="stylesheet" media="screen" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/css/bootstrap-datepicker.min.css">
     {% endblock %}
@@ -155,9 +156,10 @@
 {% block startjs %}
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   {% bootstrap_javascript %}
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/openlayers/2.12/OpenLayers.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet-plugins/3.0.3/layer/vector/KML.js"></script>
+  <script src="{% static "js/L.Control.MousePosition.js"%}"></script>
   <script type="text/javascript" src="{% static "js/arg.js.v1.1.min.js" %}"></script>
-  <script type="text/javascript" src="//www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/js/bootstrap-datepicker.min.js" charset="UTF-8"></script>
   <script type="text/javascript">
     var enhydris = {};
@@ -176,7 +178,7 @@
     // String Variables for enhydris.mapModule module
     enhydris.staticUrl = '{% static "" %}';
     enhydris.rootUrl = '{% url "station_list" %}';
-    enhydris.mapMode = 1;
+    enhydris.mapMode = 'many-stations';
     {{ map_js | safe }}
   </script>
 {% endblock %}

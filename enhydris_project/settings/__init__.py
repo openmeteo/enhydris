@@ -118,14 +118,29 @@ ENHYDRIS_REGISTRATION_OPEN = False
 ENHYDRIS_USERS_CAN_ADD_CONTENT = False
 ENHYDRIS_OPEN_CONTENT = False
 
-ENHYDRIS_MAP_BASE_LAYERS = [
-    r'OpenLayers.Layer.OSM.Mapnik("Open Street Map",'
-    r"{isBaseLayer:true,attribution:"
-    r""""Map by <a href='http://www.openstreetmap.org/'>OSM</a>"})""",
-    r'OpenLayers.Layer.OSM.CycleMap("Open Cycle Map",'
-    r"{isBaseLayer: true, attribution:"
-    r""""Map by <a href='http://www.openstreetmap.org/'>OSM</a>"})""",
-]
+ENHYDRIS_MAP_BASE_LAYERS = {
+    "Open Street Map": r"""
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: (
+                'Map data © <a href="https://www.openstreetmap.org/">' +
+                'OpenStreetMap</a> contributors, ' +
+                '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
+            ),
+            maxZoom: 18,
+        })
+    """,
+    "Open Cycle Map": r"""
+        L.tileLayer("https://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png", {
+            attribution: (
+                'Map data © <a href="https://www.openstreetmap.org/">' +
+                'OpenStreetMap</a> contributors, ' +
+                '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
+            ),
+            maxZoom: 18,
+        })
+    """,
+}
+ENHYDRIS_MAP_DEFAULT_BASE_LAYER = "Open Street Map"
 ENHYDRIS_MAP_MARKERS = {"0": "images/drop_marker.png"}
 ENHYDRIS_MAP_MIN_VIEWPORT_SIZE = 0.04
 ENHYDRIS_MAP_DEFAULT_VIEWPORT = (19.3, 34.75, 29.65, 41.8)

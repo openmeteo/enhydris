@@ -107,10 +107,6 @@ class StationDetailTestCase(TestCase):
         response = self.client.get("/stations/{}/".format(self.station.id))
         self.assertContains(response, "enhydris.mapViewport=[20.9, 38.9, 21.1, 39.1]")
 
-    def test_popup_mode(self):
-        response = self.client.get("/stations/{}/?mode=popup".format(self.station.id))
-        self.assertContains(response, "Details...")
-
 
 class TimeseriesDownloadLinkTestCase(TestCase):
     def setUp(self):
@@ -214,10 +210,9 @@ class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
         self.td_tharbad.wait_until_is_displayed()
 
         # Zoom station to an area that covers only two of these stations.
-        # The co-ordinates below are 21, 39, 22, 40 in srid=3857.
         self.selenium.execute_script(
             """
-            enhydris.map.zoomToExtent([2337700, 4721700, 2449000, 4865900]);
+            enhydris.map.fitBounds([[39.0, 21.0], [40.0, 22.0]]);
             """
         )
 

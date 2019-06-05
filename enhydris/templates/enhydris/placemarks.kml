@@ -1,11 +1,21 @@
 {% extends "gis/kml/base.kml" %}
+{% load i18n %}
+
 {% block placemarks %}
-{% for place in station_list %}
-<Placemark>
-  <name>{% if place.name %}{{ place.name }}{% else %}{{ place }}{% endif %}</name>
-  <id>{{ place.id }}</id>
-  <stype_id>{% for stype in place.stype.all %}{% if not forloop.first %},{% endif %}{{ stype.id }}{% endfor %}</stype_id>
-  {{ place.point.kml|safe }}
-</Placemark>
-{% endfor %}
+  {% for station in station_list %}
+  <Placemark>
+    <name>{% if station.name %}{{ station.name }}{% else %}{{ station }}{% endif %}</name>
+    <id>{{ station.id }}</id>
+    <description>
+      {% for stype in station.stype.all %}{% if not forloop.first %},{% endif %}{{ stype.descr }}{% endfor %}
+      <![CDATA[<br>]]>
+      {% blocktrans with owner=station.owner %}
+        Owner: {{ owner }}
+      {% endblocktrans %}
+      <![CDATA[<br><br>]]>
+      <![CDATA[<a href='/stations/{{ station.id }}/'>{% trans "Details..." %}</a>]]>
+    </description>
+    {{ station.point.kml|safe }}
+  </Placemark>
+  {% endfor %}
 {% endblock %}

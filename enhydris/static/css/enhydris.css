@@ -1,8 +1,12 @@
-/* OpenLayers Map Display */
-.map {
+#mapid {
     width: 100%;
     height: 300px;
     position:relative;
+}
+
+.leaflet-popup-content h2 {
+    font-size: 1em;
+    font-weight: bold;
 }
 
 h4.tab-no-data {

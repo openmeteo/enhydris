@@ -177,27 +177,35 @@ These are the settings available to Enhydris, in addition to the
 
 .. data:: ENHYDRIS_MAP_BASE_LAYERS
 
-   A list of JavaScript definitions of base layers to use on the map.
+   A dictionary of JavaScript definitions of base layers to use on the map.
    The default is::
+       {
+           "Open Street Map": r'''
+               L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                   attribution: (
+                       'Map data © <a href="https://www.openstreetmap.org/">' +
+                       'OpenStreetMap</a> contributors, ' +
+                       '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
+                   ),
+                   maxZoom: 18,
+               })
+           ''',
+           "Open Cycle Map": r'''
+               L.tileLayer("https://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png", {
+                   attribution: (
+                       'Map data © <a href="https://www.openstreetmap.org/">' +
+                       'OpenStreetMap</a> contributors, ' +
+                       '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
+                   ),
+                   maxZoom: 18,
+               })
+           '''
+        }
 
-        [
-            r"""OpenLayers.Layer.OSM.Mapnik(
-                    "Open Street Map",
-                    {
-                        isBaseLayer: true,
-                        attribution: "Map by <a href='http://www.openstreetmap.org/'>OSM</a>"
-                    }
-                )
-            """,
-            r"""OpenLayers.Layer.OSM.CycleMap(
-                    "Open Cycle Map",
-                    {
-                        isBaseLayer: true,
-                        attribution: "Map by <a href='http://www.openstreetmap.org/'>OSM</a>"
-                    }
-                )
-            """,
-        ]
+.. data:: ENHYDRIS_MAP_DEFAULT_BASE_LAYER
+
+   The name of the base layer that is visible by default; it must be a key in
+   data:`ENHYDRIS_MAP_BASE_LAYERS`. The default is "Open Street Map".
 
 .. data:: ENHYDRIS_MAP_MIN_VIEWPORT_SIZE
 

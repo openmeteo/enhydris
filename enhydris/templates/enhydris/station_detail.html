@@ -10,7 +10,7 @@
 
 {% block afterstartjs %}
   <script type="text/javascript">
-    enhydris.mapMode = 2;
+    enhydris.mapMode = "single-station";
     {% if station %}enhydris.agentityId = {{station.id}};{% endif %}
   </script>
   <script type="text/javascript">
@@ -46,7 +46,7 @@
               <h5>{{ station.name }}</h5>
             </div>
             <div class="panel-body">
-              <div id="map" class="map"></div>
+              <div id="mapid" class="map"></div>
             </div>
           </div>
         </div>

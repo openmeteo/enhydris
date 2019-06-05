@@ -13,10 +13,16 @@ def registration(request):
 
 
 def map(request):
-    map_js = "enhydris.mapBaseLayers=[{0}];\n".format(
+    map_js = "enhydris.mapBaseLayers={{{0}}};\n".format(
         ",".join(
-            ["new " + layer.strip() for layer in settings.ENHYDRIS_MAP_BASE_LAYERS]
+            [
+                '"{}": {}'.format(name, layer.strip())
+                for name, layer in settings.ENHYDRIS_MAP_BASE_LAYERS.items()
+            ]
         )
+    )
+    map_js += 'enhydris.mapDefaultBaseLayer="{}";\n'.format(
+        settings.ENHYDRIS_MAP_DEFAULT_BASE_LAYER
     )
     if hasattr(request, "map_viewport"):
         map_js += "enhydris.mapViewport={};\n".format(request.map_viewport)
