@@ -4,7 +4,7 @@ gdal>=1.6
 django-bootstrap3>=11,<12
 simpletail>=0.1.2
 iso8601
-htimeseries>=0.2
+htimeseries>=1,<2
 pytz
 rules>=2.0
 django-rest-auth[with_social]>=0.9,<1

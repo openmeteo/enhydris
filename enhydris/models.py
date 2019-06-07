@@ -13,7 +13,6 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 import iso8601
-import pandas as pd
 from htimeseries import HTimeseries
 from simpletail import ropen
 
@@ -611,7 +610,7 @@ class Timeseries(models.Model):
     def get_data(self, start_date=None, end_date=None):
         if self.datafile:
             with open(self.datafile.path, "r", newline="\n") as f:
-                result = HTimeseries.read(f, start_date=start_date, end_date=end_date)
+                result = HTimeseries(f, start_date=start_date, end_date=end_date)
         else:
             result = HTimeseries()
         self._set_extra_timeseries_properties(result)
@@ -653,10 +652,8 @@ class Timeseries(models.Model):
     def _get_htimeseries_from_data(self, data):
         if isinstance(data, HTimeseries):
             return data
-        elif isinstance(data, pd.DataFrame):
-            return HTimeseries(data)
         else:
-            return HTimeseries.read(data)
+            return HTimeseries(data)
 
     def get_first_line(self):
         if not self.datafile or self.datafile.size < 10:

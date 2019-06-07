@@ -189,7 +189,7 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
     def _get_timeseries_without_moving_file_position(self, datastream):
         original_position = datastream.tell()
         wrapped_datastream = TextIOWrapper(datastream, encoding="utf-8", newline="\n")
-        result = HTimeseries.read(wrapped_datastream)
+        result = HTimeseries(wrapped_datastream)
         wrapped_datastream.detach()  # If we don't do this the datastream will be closed
         datastream.seek(original_position)
         return result
