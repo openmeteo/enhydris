@@ -95,6 +95,13 @@ Changes from 2.0
 - The fields ``approximate`` (used to denote that a station's location
   has been assigned roughly) and ``asrid`` (altitude SRID) have been
   abolished. The field ``srid`` has been renamed to ``original_srid``.
+- OpenLayers has been replaced with Leaflet. Accordingly, the form of
+  the :data:`ENHYDRIS_MAP_BASE_LAYERS` setting has been changed and the
+  setting :data:`ENHYDRIS_MAP_DEFAULT_BASE_LAYER` has been added.
+- The setting ``ENHYDRIS_SITE_CONTENT_IS_FREE`` has been abolished.
+  ``ENHYDRIS_TSDATA_AVAILABLE_FOR_ANONYMOUS_USERS`` has been renamed to
+  :data:`ENHYDRIS_OPEN_CONTENT`. Several other settings that were rarely
+  being used have been abolished or renamed.
 
 Version 2.0
 ===========
