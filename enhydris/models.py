@@ -562,16 +562,14 @@ class Timeseries(models.Model):
             )
 
     def _set_extra_timeseries_properties(self, ahtimeseries):
-        try:
+        if self.gentity.gpoint.point:
             location = {
-                "abscissa": self.gentity.gpoint.point[0],
-                "ordinate": self.gentity.gpoint.point[1],
-                "original_srid": self.gentity.gpoint.original_srid,
+                "abscissa": self.gentity.gpoint.original_abscissa(),
+                "ordinate": self.gentity.gpoint.original_ordinate(),
+                "srid": self.gentity.gpoint.original_srid,
                 "altitude": self.gentity.gpoint.altitude,
             }
-        except TypeError:
-            # TypeError occurs when self.gentity.gpoint.point is None,
-            # meaning the co-ordinates aren't registered.
+        else:
             location = None
         ahtimeseries.time_step = "{},{}".format(
             self.time_step.length_minutes if self.time_step else 0,

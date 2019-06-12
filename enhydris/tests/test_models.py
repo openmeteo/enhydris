@@ -628,7 +628,7 @@ class TimeseriesGetDataTestCase(TestCase):
         station = mommy.make(
             models.Station,
             name="Celduin",
-            original_srid=4326,
+            original_srid=2100,
             point=Point(x=21.06071, y=39.09518, srid=4326),
             altitude=219,
         )
@@ -657,13 +657,13 @@ class TimeseriesGetDataTestCase(TestCase):
         cls.data = cls.timeseries.get_data()
 
     def test_abscissa(self):
-        self.assertAlmostEqual(self.data.location["abscissa"], 21.06071)
+        self.assertAlmostEqual(self.data.location["abscissa"], 245648.96, places=2)
 
     def test_ordinate(self):
-        self.assertAlmostEqual(self.data.location["ordinate"], 39.09518)
+        self.assertAlmostEqual(self.data.location["ordinate"], 4331165.20, places=2)
 
-    def test_original_srid(self):
-        self.assertAlmostEqual(self.data.location["original_srid"], 4326)
+    def test_srid(self):
+        self.assertAlmostEqual(self.data.location["srid"], 2100)
 
     def test_altitude(self):
         self.assertAlmostEqual(self.data.location["altitude"], 219)
