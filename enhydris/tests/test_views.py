@@ -174,6 +174,28 @@ class StationEditRedirectTestCase(TestCase):
         )
 
 
+class RedirectOldUrlsTestCase(TestCase):
+    def test_old_stations_url_redirects(self):
+        r = self.client.get("/stations/d/200348/")
+        self.assertRedirects(
+            r, "/stations/200348/", status_code=301, fetch_redirect_response=False
+        )
+
+    def test_old_timeseries_url_redirects(self):
+        mommy.make(Timeseries, id=1169, gentity__id=200348)
+        r = self.client.get("/timeseries/d/1169/")
+        self.assertRedirects(
+            r,
+            "/stations/200348/timeseries/1169/",
+            status_code=301,
+            fetch_redirect_response=False,
+        )
+
+    def test_old_timeseries_url_for_nonexistent_timeseries_returns_404(self):
+        r = self.client.get("/timeseries/d/1169/")
+        self.assertEqual(r.status_code, 404)
+
+
 @skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
 class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
 

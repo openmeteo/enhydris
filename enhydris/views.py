@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.generic import DetailView, ListView, RedirectView
 
@@ -38,6 +39,17 @@ class StationEdit(RedirectView):
 class TimeseriesDetail(DetailView):
     model = models.Timeseries
     template_name = "enhydris/timeseries_detail.html"
+
+
+class OldTimeseriesDetailRedirectView(RedirectView):
+    permanent = True
+
+    def get_redirect_url(self, *args, **kwargs):
+        timeseries_id = kwargs["pk"]
+        station_id = get_object_or_404(models.Timeseries, id=timeseries_id).gentity.id
+        return reverse(
+            "timeseries_detail", kwargs={"station_id": station_id, "pk": timeseries_id}
+        )
 
 
 class InstrumentDetail(DetailView):

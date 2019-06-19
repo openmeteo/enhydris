@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import include, path
-from django.views.generic import View
+from django.views.generic import RedirectView, View
 
 from enhydris import views, views_old
 from enhydris.api import urls as enhydris_api_urls
@@ -27,6 +27,11 @@ urlpatterns = [
     ),
     path("admin/", admin.site.urls),
     path("api/", include(enhydris_api_urls)),
+    path(
+        "stations/d/<int:pk>/",
+        RedirectView.as_view(pattern_name="station_detail", permanent=True),
+    ),
+    path("timeseries/d/<int:pk>/", views.OldTimeseriesDetailRedirectView.as_view()),
     # For the following, see ticket #181
     path("timeseries/data/", views_old.timeseries_data, name="timeseries_data"),
 ]
