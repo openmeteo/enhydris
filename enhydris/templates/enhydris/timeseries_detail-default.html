@@ -11,7 +11,8 @@
 {% endblock %}
 
 
-{% block afterendjs %}
+{% block mainjs %}
+  {{ block.super }}
   <!--[if IE]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
   <script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/excanvas.min.js"></script>
   <script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/jquery.flot.min.js"></script>

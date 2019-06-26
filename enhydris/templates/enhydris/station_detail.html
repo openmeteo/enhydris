@@ -1,4 +1,4 @@
-{% extends "enhydris/base.html" %}
+{% extends "enhydris/base-with-map.html" %}
 {% load i18n %}
 {% load static %}
 {% load rules %}
@@ -8,7 +8,8 @@
 {% endblock %}
 
 
-{% block afterstartjs %}
+{% block mainjs %}
+  {{ block.super }}
   <script type="text/javascript">
     enhydris.mapMode = "single-station";
     {% if station %}enhydris.agentityId = {{station.id}};{% endif %}

@@ -1,0 +1,19 @@
+{% extends "enhydris/base.html" %}
+{% load static %}
+
+{% block body_onload %}
+  {{ block.super }};
+  enhydris.map = enhydris.mapModule.init();
+{% endblock %}
+
+{% block mainjs %}
+  {{ block.super }}
+  <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet-plugins/3.0.3/layer/vector/KML.js"></script>
+  <script src="{% static "js/L.Control.MousePosition.js"%}"></script>
+  <script type="text/javascript" src="{% static "js/arg.js.v1.1.min.js" %}"></script>
+  <script>
+    enhydris.mapMode = 'many-stations';
+    {{ map_js | safe }}
+  </script>
+{% endblock %}

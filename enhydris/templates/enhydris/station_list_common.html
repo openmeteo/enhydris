@@ -1,7 +1,7 @@
-{% extends "enhydris/base.html" %}
+{% extends "enhydris/base-with-map.html" %}
 {% load i18n %}
 {% load static %}
 
-{% block afterendjs %}
+{% block extrajs %}
   <script type="text/javascript" src="{% static "js/jquery.getUrlParam.js" %}"></script>
 {% endblock %}

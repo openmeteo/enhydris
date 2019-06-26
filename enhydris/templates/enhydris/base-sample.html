@@ -20,7 +20,7 @@
     {% block extracss %}{% endblock %}
     {% block extra_head %}{% endblock %}
 </head>
-<body onload="enhydris.map = enhydris.mapModule.init()">
+<body onload="{% block body_onload %}{% endblock %}">
   {% block header %}
     <div class="navbar navbar-default" role="navigation">
       <div class="container-fluid">
@@ -153,39 +153,16 @@
 
 {% block bodyend %}{% endblock %}
 
-{% block startjs %}
+{% block mainjs %}
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   {% bootstrap_javascript %}
-  <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet-plugins/3.0.3/layer/vector/KML.js"></script>
-  <script src="{% static "js/L.Control.MousePosition.js"%}"></script>
-  <script type="text/javascript" src="{% static "js/arg.js.v1.1.min.js" %}"></script>
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/js/bootstrap-datepicker.min.js" charset="UTF-8"></script>
   <script type="text/javascript">
     var enhydris = {};
-
-    // Translation strings for enhydris.coordinatesUI module
-    enhydris.transCoordinatesUI = {
-      btnSimpleView: '{% trans "Simple view" %}',
-      btnAdvanceView: '{% trans "Advanced view" %}',
-      formSridLabel:'{% trans "SRID" %}',
-      formASridLabel: '{% trans "Altitude SRID" %}',
-      formLongtitudeLabel:'{% trans "Longitude" %}',
-      formLatitudeLabel:'{% trans "Latitude" %}',
-      formOrdinateLabel:'{% trans "Ordinate" %}',
-      formAbscissaLabel:'{% trans "Abscissa" %}',
-    }
-    // String Variables for enhydris.mapModule module
     enhydris.staticUrl = '{% static "" %}';
     enhydris.rootUrl = '{% url "station_list" %}';
-    enhydris.mapMode = 'many-stations';
-    {{ map_js | safe }}
   </script>
-{% endblock %}
-{% block afterstartjs %}{% endblock %}
-{% block endjs %}
   <script type="text/javascript" src="{% static "js/enhydris.js" %}"></script>
 {% endblock %}
-{% block afterendjs %}{% endblock %}
+{% block extrajs %}{% endblock %}
 </body>
 </html>
