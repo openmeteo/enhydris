@@ -18,6 +18,7 @@ enhydris.mapModule = (function namespace() {
         L.control.mousePosition(
             {"position": "bottomright", "emptyString": ""}
         ).addTo(map);
+        return map;
     };
 
     var _setupBaseLayer = function () {
@@ -56,7 +57,9 @@ enhydris.mapModule = (function namespace() {
 
     return {
         init: init,
-        listStationsVisibleOnMap: listStationsVisibleOnMap
+        listStationsVisibleOnMap: listStationsVisibleOnMap,
+        setupMap: _setupMap,
+        setupBaseLayer: _setupBaseLayer,
     };
 }());
 
