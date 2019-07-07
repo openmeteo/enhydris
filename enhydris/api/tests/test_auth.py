@@ -101,9 +101,22 @@ class ResetPasswordTestCase(APITestCase):
         self.assertTrue(r)
 
 
+_settings_for_registration_open = {
+    "ENHYDRIS_REGISTRATION_OPEN": True,
+    "ACCOUNT_EMAIL_REQUIRED": True,
+    "ACCOUNT_EMAIL_VERIFICATION": "mandatory",
+}
+
+_settings_for_registration_closed = {
+    "ENHYDRIS_REGISTRATION_OPEN": False,
+    "ACCOUNT_EMAIL_REQUIRED": False,
+    "ACCOUNT_EMAIL_VERIFICATION": "optional",
+}
+
+
 @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
 class RegisterTestCase(APITestCase):
-    @override_settings(ENHYDRIS_REGISTRATION_OPEN=True)
+    @override_settings(**_settings_for_registration_open)
     def test_register(self):
         # Get a captcha
         response = self.client.post("/api/captcha/")
@@ -151,7 +164,7 @@ class RegisterTestCase(APITestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-    @override_settings(ENHYDRIS_REGISTRATION_OPEN=True)
+    @override_settings(**_settings_for_registration_open)
     def test_wrong_captcha(self):
         # Get a captcha
         response = self.client.post("/api/captcha/")
@@ -173,7 +186,7 @@ class RegisterTestCase(APITestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(len(django.core.mail.outbox), 0)
 
-    @override_settings(ENHYDRIS_REGISTRATION_OPEN=False)
+    @override_settings(**_settings_for_registration_closed)
     def test_registration_returns_404(self):
         # Submit registration form
         response = self.client.post(

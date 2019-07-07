@@ -154,8 +154,14 @@ These are the settings available to Enhydris, in addition to the
 
 .. data:: ENHYDRIS_REGISTRATION_OPEN
 
-   If ``True`` (the default), users can register, otherwise they have to
-   be created by the administrator.
+   If ``True``, users can register, otherwise they have to be created
+   by the administrator. The default is ``False``.
+
+   ``allauth``'s :data:`ACCOUNT_EMAIL_REQUIRED` must be set at the
+   same value as :data:`ENHYDRIS_REGISTRATION_OPEN`. In addition,
+   :data:`ACCOUNT_EMAIL_VERIFICATION` must be set to "mandatory" if
+   :data:`ENHYDRIS_REGISTRATION_OPEN` is ``True`` and "optional" if
+   ``False``.
 
 .. data:: ENHYDRIS_USERS_CAN_ADD_CONTENT
 
@@ -179,6 +185,7 @@ These are the settings available to Enhydris, in addition to the
 
    A dictionary of JavaScript definitions of base layers to use on the map.
    The default is::
+
        {
            "Open Street Map": r'''
                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
