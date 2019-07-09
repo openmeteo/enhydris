@@ -1,4 +1,5 @@
 from datetime import datetime
+from io import StringIO
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
@@ -11,6 +12,7 @@ from htimeseries import HTimeseries
 from model_mommy import mommy
 
 from enhydris import models
+from enhydris.tests import RandomEnhydrisTimeseriesDataDir
 
 
 class Tsdata404TestCase(APITestCase):
@@ -269,6 +271,34 @@ class TsdataInvalidStartOrEndDateTestCase(APITestCase):
             )
         )
         m.assert_called_once_with(start_date=None, end_date=None)
+
+
+@override_settings(ENHYDRIS_OPEN_CONTENT=True)
+@RandomEnhydrisTimeseriesDataDir()
+class TsdataHeadTestCase(APITestCase):
+    def setUp(self):
+        station = mommy.make(models.Station)
+        self.tz = mommy.make(models.TimeZone, code="EET", utc_offset=120)
+        self.timeseries = mommy.make(
+            models.Timeseries, time_zone=self.tz, gentity=station
+        )
+        self.timeseries.set_data(StringIO("2018-12-09 13:10,20,\n"))
+
+    def test_get(self):
+        response = self.client.get(
+            "/api/stations/{}/timeseries/{}/data/".format(
+                self.timeseries.gentity.id, self.timeseries.id
+            )
+        )
+        self.assertContains(response, "2018-12-09 13:10,")
+
+    def test_head(self):
+        response = self.client.head(
+            "/api/stations/{}/timeseries/{}/data/".format(
+                self.timeseries.gentity.id, self.timeseries.id
+            )
+        )
+        self.assertNotContains(response, "2018-12-09 13:10,")
 
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)

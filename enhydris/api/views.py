@@ -233,7 +233,7 @@ class TimeseriesViewSet(ModelViewSet):
 
     @action(detail=True, methods=["get", "post"])
     def data(self, request, pk=None, *, station_id):
-        if request.method == "GET":
+        if request.method in ("GET", "HEAD"):
             return self._get_data(request, pk)
         elif request.method == "POST":
             return self._post_data(request, pk)
@@ -262,13 +262,14 @@ class TimeseriesViewSet(ModelViewSet):
         if end_date:
             end_date = end_date.replace(tzinfo=None)
 
-        ahtimeseries = timeseries.get_data(start_date=start_date, end_date=end_date)
         response = HttpResponse(content_type="text/plain; charset=utf-8")
         if request.GET.get("fmt", "").lower() == "hts":
             fmt = HTimeseries.FILE
         else:
             fmt = HTimeseries.TEXT
-        ahtimeseries.write(response, format=fmt)
+        if request.method == "GET":
+            ahtimeseries = timeseries.get_data(start_date=start_date, end_date=end_date)
+            ahtimeseries.write(response, format=fmt)
         return response
 
     def _post_data(self, request, pk, format=None):
