@@ -247,6 +247,31 @@ class TsdataStartAndEndDateTestCase(APITestCase):
 
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
+class TsdataInvalidStartOrEndDateTestCase(APITestCase):
+    def setUp(self):
+        self.tz = mommy.make(models.TimeZone, code="EET", utc_offset=120)
+        self.timeseries = mommy.make(models.Timeseries, time_zone=self.tz)
+
+    @patch("enhydris.models.Timeseries.get_data")
+    def test_invalid_start_date(self, m):
+        self.response = self.client.get(
+            "/api/stations/{}/timeseries/{}/data/?start_date=hello".format(
+                self.timeseries.gentity.id, self.timeseries.id
+            )
+        )
+        m.assert_called_once_with(start_date=None, end_date=None)
+
+    @patch("enhydris.models.Timeseries.get_data")
+    def test_invalid_end_date(self, m):
+        self.response = self.client.get(
+            "/api/stations/{}/timeseries/{}/data/?end_date=hello".format(
+                self.timeseries.gentity.id, self.timeseries.id
+            )
+        )
+        m.assert_called_once_with(start_date=None, end_date=None)
+
+
+@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class TimeseriesBottomTestCase(APITestCase):
     @patch(
         "enhydris.models.Timeseries.get_last_line", return_value="2018-12-09 13:10,20,"

@@ -285,11 +285,20 @@ class TimeseriesViewSet(ModelViewSet):
             )
 
     def _get_date_from_string(self, adate, tz):
-        if not adate:
+        date = self._parse_date(adate, tz)
+        if not date:
             return None
-        result = iso8601.parse_date(adate, default_timezone=tz)
-        if result.isoformat() < pd.Timestamp.min.isoformat():
-            result = pd.Timestamp.min
-        if result.isoformat() > pd.Timestamp.max.isoformat():
-            result = pd.Timestamp.max
-        return result
+        return self._bring_date_within_system_limits(date)
+
+    def _parse_date(self, adate, tz):
+        try:
+            return iso8601.parse_date(adate, default_timezone=tz)
+        except iso8601.ParseError:
+            return None
+
+    def _bring_date_within_system_limits(self, date):
+        if date.isoformat() < pd.Timestamp.min.isoformat():
+            date = pd.Timestamp.min
+        if date.isoformat() > pd.Timestamp.max.isoformat():
+            date = pd.Timestamp.max
+        return date
