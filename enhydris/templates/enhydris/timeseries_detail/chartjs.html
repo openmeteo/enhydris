@@ -1,0 +1,101 @@
+{% load static %}
+
+<!--[if IE]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
+<script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/excanvas.min.js"></script>
+<script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/jquery.flot.min.js"></script>
+<script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/jquery.flot.selection.min.js"></script>
+<script language="javascript" type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/jquery.flot.time.min.js"></script>
+<script type="text/javascript">
+
+  // helper for returning the weekends in a period
+  $(document).ready(function() {
+
+  	$("#data_holder").hide()
+              $("#progress").append("<img style=\"display: block; margin: auto auto;\" src=\"{% static "images/progress.gif" %}\">");
+
+  $.getJSON('{% url "timeseries_data" %}', {object_id:{{timeseries.id}}}, function(chart_data){
+
+  		$("#progress").hide()
+  		$("#data_holder").show()
+  		if ( chart_data ) {
+  			flot_init(chart_data['data']);
+  		} else {
+  			$("#data_holder").html("<h3>No data locally available!</h3>");
+  		}
+
+  	});
+  });
+
+  function flot_init(chart_data) {
+  	var d = chart_data;
+  var d_bak = d.slice();
+  var from_x, to_x, tol;
+  from_x = d[0][0];
+  to_x = d[d.length-1][0];
+  tol = (to_x-from_x)*0.01;
+  from_x-=tol;
+  to_x+=tol;
+  	var options = {
+  		xaxis: { mode: "time", min: from_x, max: to_x},
+  		selection: { mode: "x" }
+  	};
+
+  	var plot = $.plot($("#placeholder"), [d], options);
+
+  	var overview = $.plot($("#overview"), [d], {
+  		series: {
+  			lines: { show: true, lineWidth: 1 },
+  			shadowSize: 0
+  		},
+  		xaxis: { ticks: [], mode: "time", min: from_x, max: to_x },
+  		yaxis: { ticks: [], min: 0, autoscaleMargin: 0.1 },
+  		selection: { mode: "x" }
+  	});
+
+  function get_zoomed_data(ranges, data){
+      var from_pos, to_pos;
+      var actual_xaxis_from, actual_xaxis_to;
+      from_pos = data[0][2];
+      to_pos = data[data.length-1][2];
+      for(var i=0;i<data.length;i++){
+          if(ranges.xaxis.from<=data[i][0]){
+              from_pos = data[i][2];
+              actual_xaxis_from = data[i][0];
+              break;
+          }
+      }
+      for(var i=data.length-1;i>=0;i--){
+          if(ranges.xaxis.to>=data[i][0]){
+              to_pos = data[i][2];
+              actual_xaxis_to = data[i][0];
+              break;
+          }
+      }
+      $("#placeholder").append("<img style=\"display: block; margin: auto auto;\" src=\"{% static "images/progress.gif" %}\">");
+      $.getJSON('{% url "timeseries_data" %}', {object_id:{{timeseries.id}},
+          start_pos:from_pos, end_pos:to_pos}, function(chart_data){
+          d = chart_data['data'];
+          var tol=(actual_xaxis_to-actual_xaxis_from)*0.01;
+  		    plot = $.plot($("#placeholder"), [d],
+    					  $.extend(true, {}, options, {
+    						  xaxis: { min: actual_xaxis_from-tol, max: actual_xaxis_to+tol }
+    					  }));
+    	});
+  		$("placeholder").remove(":contains('img style')");
+  }
+
+  	// now connect the two
+  	$("#placeholder").bind("plotselected", function (event, ranges) {
+      get_zoomed_data(ranges, d);
+
+  	// don't fire event on the overview to prevent eternal loop
+  		overview.setSelection(ranges, true);
+  	});
+
+  	$("#overview").bind("plotselected", function (event, ranges) {
+      d = d_bak;
+  		plot.setSelection(ranges);
+  	});
+
+  };
+</script>

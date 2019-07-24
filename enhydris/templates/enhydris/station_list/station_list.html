@@ -1,0 +1,10 @@
+{% load i18n %}
+
+<div class="col-md-12">
+  {% if object_list %}
+    {% include "enhydris/station_list/table.html" %}
+    {% include "enhydris/station_list/page_navigation.html" %}
+  {% else %}
+    <p>{% trans "No entries found." %}</p>
+  {% endif %}
+</div>

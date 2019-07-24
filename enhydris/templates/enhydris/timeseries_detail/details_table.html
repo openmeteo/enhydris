@@ -1,0 +1,100 @@
+{% load i18n %}
+<table class="table table-hover table-condensed">
+  <tr>
+    <th>{% trans 'ID' %}</th>
+    <td>{{ timeseries.id }}</td>
+  </tr>
+  <tr>
+    <th>{% trans 'Related Station' %}</th>
+      <td><a href="{% url "station_detail" timeseries.gentity.id %}">{{ timeseries.gentity.name }}</a></td>
+  </tr>
+  <tr>
+    <th>{% trans 'Name' %}</th>
+    <td>{{ timeseries.name }}</td>
+  </tr>
+  <tr>
+    <th>{% trans 'Variable' %}</th>
+    <td>{{ timeseries.variable }}</td>
+  </tr>
+  <tr>
+    <th>{% trans 'Unit Of Measurement' %}</th>
+    <td>{{ timeseries.unit_of_measurement }}</td>
+  </tr>
+  <tr>
+    <th>{% trans 'Precision' %}</th>
+    <td>{{ timeseries.precision }}</td>
+  </tr>
+  <tr>
+    <th>{% trans 'Time Zone' %}</th>
+    <td>{{ timeseries.time_zone }}</td>
+  </tr>
+  <tr>
+    <th>{% trans 'Remarks' %}</th>
+    <td>{{ timeseries.remarks }}</td>
+  </tr>
+  <tr>
+    <th>{% trans 'Instrument' %}</th>
+    {% if timeseries.instrument %}
+      <td><a href="{% url "instrument_detail" station_id=timeseries.gentity.id pk=timeseries.instrument.id %}">{{ timeseries.instrument }}</a></td>
+    {% else %}
+      <td>{% trans 'None' %}</td>
+    {% endif %}
+  </tr>
+  <tr>
+    <th>{% trans 'Start Date' %}</th>
+    <td>{{ timeseries.start_date|date:"Y/m/d H:i" }}</td>
+  </tr>
+  <tr>
+    <th>{% trans 'End Date' %}</th>
+    <td>{{ timeseries.end_date|date:"Y/m/d H:i" }}</td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><strong>{% trans 'Time stamps properties' %}</strong></th></tr>
+  <tr>
+    <th>{% trans 'Time scale' %}</th>
+    <td>{% if not timeseries.time_step %}
+          {% trans 'Variable step' %}
+        {% else %}
+          {{ timeseries.time_step }}
+        {% endif %}
+    </td>
+  </tr>
+  {% ifequal timeseries.timestamp_rounding_minutes NULL %}
+    <tr>
+      <th>{% trans 'Timestamp regularity' %}</th>
+      <td>{% trans 'Time step is not strict' %}</td>
+    </tr>
+  {% else %}
+    <tr>
+      <th>{% trans 'Timestamp regularity' %}</th>
+      <td>{% trans 'Time step is strict' %}</td>
+    </tr>
+    <tr>
+      <th>{% trans ' Timestamp rounding' %}</th>
+      <td>{{ timeseries.timestamp_rounding_minutes }}
+        {% trans 'minutes' %},
+        {{ timeseries.timestamp_rounding_months }}
+        {% trans 'months' %}
+      </td>
+    </tr>
+  {% endifequal %}
+  <tr>
+    <th>{% trans 'Time stamps reference' %}</th>
+    <td>{% if not timeseries.interval_type %}
+          {% trans 'Instantaneous values' %}
+        {% else %}
+          {% trans 'Interval, '%}{{ timeseries.interval_type }}
+        {% endif %}
+    </td>
+  </tr>
+  {% ifnotequal timeseries.timestamp_offset_months NULL %}
+    <tr>
+      <th>{% trans 'Timestamp offset' %}</th>
+      <td>{{ timeseries.timestamp_offset_minutes }}
+        {% trans 'minutes' %},
+        {{ timeseries.timestamp_offset_months }}
+        {% trans 'months' %}
+      </td>
+    </tr>
+  {% endifnotequal %}
+</table>

@@ -1,0 +1,48 @@
+{% load i18n %}
+{% load static %}
+{% load bootstrap3 %}
+
+<title>{% block title %}{% trans "Enhydris" %}{% endblock %}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+{% block basecss %}
+    <link href="{% static 'css/enhydris.css' %}" type="text/css" rel="stylesheet" />
+    <link rel="stylesheet" media="screen" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css">
+    <link href="{% static 'css/L.Control.MousePosition.css' %}" type="text/css" rel="stylesheet" />
+    {% bootstrap_css %}
+    <link rel="stylesheet" media="screen" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.0/css/bootstrap-datepicker.min.css">
+{% endblock %}
+{% block shortcut_icon %}
+    <link rel="icon" type="image/x-icon" href="{% static "images/favicon.ico" %}">
+{% endblock %}
+{% block extracss %}{% endblock %}
+{% block extra_head %}{% endblock %}
+
+<body onload="{% block body_onload %}{% endblock %}">
+  {% block header %}
+    {% include "enhydris/base/navbar.html" %}
+    {% include "enhydris/base/searchtips.html" %}
+    {% include "enhydris/base/messages.html" %}
+  {% endblock header %}
+
+  {% block content %}
+  {% endblock %}
+
+  <footer>
+    {% block footer %}
+    {% endblock %}
+  </footer>
+
+  {% block bodyend %}{% endblock %}
+
+  {% block mainjs %}
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    {% bootstrap_javascript %}
+    <script type="text/javascript">
+      var enhydris = {};
+      enhydris.staticUrl = '{% static "" %}';
+      enhydris.rootUrl = '{% url "station_list" %}';
+    </script>
+    <script type="text/javascript" src="{% static "js/enhydris.js" %}"></script>
+  {% endblock %}
+  {% block extrajs %}{% endblock %}
+</body>

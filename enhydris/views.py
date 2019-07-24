@@ -8,7 +8,7 @@ from .views_common import StationListViewMixin, ensure_extent_is_large_enough
 
 
 class StationList(StationListViewMixin, ListView):
-    template_name = "enhydris/station_list.html"
+    template_name = "enhydris/station_list/main.html"
     model = models.Station
 
     def get_paginate_by(self, queryset):
@@ -21,7 +21,7 @@ class StationList(StationListViewMixin, ListView):
 
 class StationDetail(DetailView):
     model = models.Station
-    template_name = "enhydris/station_detail.html"
+    template_name = "enhydris/station_detail/main.html"
 
     def render_to_response(self, *args, **kwargs):
         p = self.object.point
@@ -38,7 +38,7 @@ class StationEdit(RedirectView):
 
 class TimeseriesDetail(DetailView):
     model = models.Timeseries
-    template_name = "enhydris/timeseries_detail.html"
+    template_name = "enhydris/timeseries_detail/main.html"
 
 
 class OldTimeseriesDetailRedirectView(RedirectView):
@@ -54,4 +54,4 @@ class OldTimeseriesDetailRedirectView(RedirectView):
 
 class InstrumentDetail(DetailView):
     model = models.Instrument
-    template_name = "enhydris/instrument_detail.html"
+    template_name = "enhydris/instrument_detail/main.html"

@@ -1,0 +1,99 @@
+{% load i18n %}
+
+<table class="table table-hover table-condensed">
+  <tr>
+    <th class="col-md-2">{% trans 'ID' %}</th>
+    <td colspan='2'>{{ station.id }}</td>
+  </tr>
+  <tr>
+    <th class="col-md-3">{% trans 'Name' %}</th>
+    <td colspan='2'>{{ station.name }}</td>
+  </tr>
+  </tr>
+  <tr>
+    <th class="col-md-3">{% trans 'Remarks' %}</th>
+    <td colspan='2'>{{ station.remarks }}</td>
+  </tr>
+  <tr>
+    <th class="col-md-3" >{% trans 'Water Basin' %}</th>
+    <td colspan='2'>{{ station.water_basin.name }}</td>
+  </tr>
+  <tr>
+    <th class="col-md-3" >{% trans 'Water Division' %}</th>
+    <td colspan='2'>{{ station.water_division.name }}</td>
+  </tr>
+  <tr>
+    <th class="col-md-3" >{% trans 'Political Division' %}</th>
+    <td colspan='2'>{{ station.political_division.name }}</td>
+  </tr>
+  <tr>
+    <th class="col-md-3" >{% trans 'Co-ordinates' %}</th>
+    <td colspan='2'>{{ station.point.y | floatformat:5 }}, {{ station.point.x | floatformat:5 }}
+      {% if station.original_srid != 4326 %}
+        <small>
+          <br>
+          ({{ wgs84_name }};
+          {% trans "converted from" %}
+          srid={{ station.original_srid }},
+          x={{ station.original_abscissa }},
+          y={{ station.original_ordinate }})
+        </small>
+      {% endif %}
+    </td>
+  </tr>
+  <tr>
+    <th class="col-md-3" >{% trans 'Altitude' %}</th>
+    <td colspan='2'>{{ station.altitude|floatformat:2 }}</td>
+  </tr>
+  <tr >
+    <th class="col-md-3">{% trans 'Owner' %}</th>
+    <td colspan='2'>
+      {{ station.owner }}
+    </td>
+  </tr>
+  <tr>
+    <th class="col-md-3">{% trans 'Type' %}</th>
+    <td colspan='2'>{% for stype in station.stype.all %}{{ stype.descr }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+  </tr>
+  <tr>
+    <th class="col-md-3">{% trans 'Is Automatic' %}</th>
+    <td colspan='2'>{{ station.is_automatic }}</td>
+  </tr>
+  <tr>
+    <th class="col-md-3">{% trans 'Start Date' %}</th>
+    <td colspan='2'>{{ station.start_date|date:"Y/m/d" }}</td>
+  </tr>
+  <tr>
+    <th class="col-md-3">{% trans 'End Date' %}</th>
+    <td colspan='2'>{{ station.end_date|date:"Y/m/d" }}</td>
+  </tr>
+  {% if enabled_user_content %}
+    <tr>
+      <th class="col-md-3">{% trans 'Creator' %}</th>
+      {% if station.creator %}
+        <td colspan='2'><a href='{% url "profile_detail" station.creator %}' />{{ station.creator }}</td>
+      {% else %}
+        <td colspan='2'>{% trans "Unknown" %}</td>
+      {% endif %}
+    </tr>
+  {% endif %}
+  <tr><!-- Overseers table -->
+    <th>{% trans 'Overseers' %}</th>
+    <td colspan='2'>
+      {% if station.overseers.count %}
+        <div class="table-responsive">
+          <table class="table table-hover table-condensed">
+            <tbody>
+              {% for overseer in station.overseer_set.all %}
+                <tr>
+                  <td>{{ overseer.person.first_name }} {{ overseer.person.last_name }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    </td>
+  </tr>
+</table>

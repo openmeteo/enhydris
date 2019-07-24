@@ -1,0 +1,28 @@
+{% extends "enhydris/base/main.html" %}
+
+
+{% block title %}
+  {{ instrument.name }} ({{ instrument.type }})
+  — {{ instrument.station }}
+  — {{ block.super }}
+{% endblock %}
+
+
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <b> {{ instrument.station }} </b>
+          </div>
+          <div class="panel-body">
+            <div class="table-responsive">
+              {% include "enhydris/instrument_detail/details.html" %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

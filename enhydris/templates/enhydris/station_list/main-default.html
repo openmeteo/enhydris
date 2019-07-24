@@ -1,0 +1,16 @@
+{% extends "enhydris/station_list/common.html" %}
+{% load i18n %}
+
+
+{% block title %}
+  {% trans 'Stations' %} — {{ block.super }}
+{% endblock %}
+
+
+{% block content %}
+  <div class="container-fluid">
+    {% include "enhydris/station_list/map.html" %}
+    <hr>
+    {% include "enhydris/station_list/station_list.html" %}
+  </div>
+{% endblock %}

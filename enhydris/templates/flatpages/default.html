@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "enhydris/base/main.html" %}
 
 
 {% block title %}
@@ -6,7 +6,7 @@
 {% endblock %}
 
 
-{% block content_main %}
+{% block content %}
   <h1>{{ flatpage.title }}</h1>
   {{ flatpage.content }}
 {% endblock %}

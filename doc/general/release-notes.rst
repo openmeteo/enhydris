@@ -67,6 +67,9 @@ Changes from 2.0
 
 - The Web API has been reworked. Applications using the Enhydris 2.0 web
   API won't work unchanged with 3.0.
+- The templates have been refactored. Applications and installations
+  with custom templates or templates inheriting the Enhydris templates
+  may need to be modified.
 - GentityGenericData has been abolished, as it wasn't being used in any of the
   known installations. Upgrading requires the table to be empty; if not,
   upgrading will stop with an error message. Make sure the table is

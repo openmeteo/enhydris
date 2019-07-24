@@ -76,7 +76,6 @@ enhydris.coordinatesUI = (function namespace() {
     this.
     */
 
-    // enhydris.transCoordinatesUI init at 'base-sample.html'
     var transText = enhydris.transCoordinatesUI;
 
     var switchToSimpleView = function () {

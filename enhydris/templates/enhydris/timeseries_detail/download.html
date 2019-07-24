@@ -1,0 +1,15 @@
+{% load i18n %}
+{% load rules %}
+
+{% has_perm "enhydris.view_timeseries_data" request.user timeseries as can_view_timeseries_data %}
+{% if can_view_timeseries_data %}
+    <p>
+    <a href="{% url "timeseries-data" station_id=timeseries.gentity.id pk=timeseries.id %}?fmt=hts"><i class="glyphicon glyphicon-cloud-download"></i> {% trans "Download time series" %}</a>
+    </p>
+{% else %}
+    <p class="text-warning">
+    {% blocktrans %}
+        You don't have permission to download the time series.
+    {% endblocktrans %}
+    </p>
+{% endif %}

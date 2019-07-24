@@ -1,0 +1,49 @@
+{% load i18n %}
+<div id="searchtips" class="modal fade" tabindex="-1" role="dialog"
+    aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">{% trans "Search tips" %}
+        <button type="button" class="close" data-target="#searchtips"
+            data-toggle="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- List group -->
+        <ul class="list-group">
+          {% blocktrans %}
+            <li class="list-group-item">
+              Stations having "diamond" and "emerald" in
+              their name or remarks (or various other fields):
+              <code>diamond&nbsp;emerald</code>
+            </li>
+            <li class="list-group-item">
+              Meteorological stations owned by George Michael or Boy
+              George or any George:
+              <code>owner:george&nbsp;type:meteorological</code>
+            </li>
+            <li class="list-group-item">
+              Stations measuring temperature in Celduin:
+              <code>variable:temperature&nbsp;water_basin:celduin</code>
+            </li>
+            <li class="list-group-item">
+              German stations that have time series:
+              <code>country:germany&nbsp;ts_only:</code>
+            </li>
+            <li class="list-group-item">
+              Stations that have at least one time series whose time range
+              contains 1988, at least one time series whose time range
+              contains 1989, and at least one time series whose time range
+              contains 2004:
+              <code>ts_has_years:1988,1989,2004</code>
+            </li>
+          {% endblocktrans %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn" data-dismiss="modal">Close</a>
+      </div>
+    </div>
+  </div>
+</div>
