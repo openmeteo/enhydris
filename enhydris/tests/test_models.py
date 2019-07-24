@@ -380,6 +380,49 @@ class StationOriginalCoordinatesWithNullSridTestCase(TestCase):
         self.assertAlmostEqual(self.station.original_ordinate(), 39.09518)
 
 
+@patch("enhydris.models.Timeseries._set_start_and_end_date")
+class StationLastUpdateTestCase(TestCase):
+    def setUp(self):
+        self.station = mommy.make(models.Station)
+        self.time_zone = mommy.make(models.TimeZone, code="EET", utc_offset=120)
+
+    def _create_timeseries(self, ye=None, mo=None, da=None, ho=None, mi=None):
+        if ye:
+            end_date_utc = dt.datetime(ye, mo, da, ho, mi, tzinfo=dt.timezone.utc)
+        else:
+            end_date_utc = None
+        mommy.make(
+            models.Timeseries,
+            gentity=self.station,
+            time_zone=self.time_zone,
+            end_date_utc=end_date_utc,
+        )
+
+    def test_last_update_when_all_timeseries_have_end_date(self, m):
+        self._create_timeseries(2019, 7, 24, 11, 26)
+        self._create_timeseries(2019, 7, 23, 5, 10)
+        self.assertEqual(
+            self.station.last_update,
+            dt.datetime(2019, 7, 24, 13, 26, tzinfo=self.time_zone.as_tzinfo),
+        )
+
+    def test_last_update_when_one_timeseries_has_no_data(self, m):
+        self._create_timeseries(2019, 7, 24, 11, 26)
+        self._create_timeseries()
+        self.assertEqual(
+            self.station.last_update,
+            dt.datetime(2019, 7, 24, 13, 26, tzinfo=self.time_zone.as_tzinfo),
+        )
+
+    def test_last_update_when_all_timeseries_has_no_data(self, m):
+        self._create_timeseries()
+        self._create_timeseries()
+        self.assertIsNone(self.station.last_update)
+
+    def test_last_update_when_no_timeseries(self, m):
+        self.assertIsNone(self.station.last_update)
+
+
 class InstrumentTestCase(TestCase):
     def test_create(self):
         type = mommy.make(models.InstrumentType)

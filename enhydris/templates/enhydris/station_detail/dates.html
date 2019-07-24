@@ -1,18 +1,25 @@
 {% load i18n %}
 
 <div class="row">
-  <div class="col-md-12">
+  <div class="col-md-6">
     {% if station.start_date and station.end_date %}
       {% blocktrans with start_date=station.start_date|date:"SHORT_DATE_FORMAT" end_date=station.end_date|date:"SHORT_DATE_FORMAT" %}
-        Period of operation: {{start_date}} - {{end_date}}
+        <b>Period of operation:</b> {{start_date}} - {{end_date}}
       {% endblocktrans %}
     {% elif station.start_date %}
       {% blocktrans with start_date=station.start_date|date:"SHORT_DATE_FORMAT" %}
-        Start of operation: {{start_date}}
+        <b>Start of operation:</b> {{start_date}}
       {% endblocktrans %}
     {% elif station.end_date %}
       {% blocktrans with end_date=station.end_date|date:"SHORT_DATE_FORMAT" %}
-        End of operation: {{end_date}}
+        <b>End of operation:</b> {{end_date}}
+      {% endblocktrans %}
+    {% endif %}
+  </div>
+  <div class="col-md-6">
+    {% if station.last_update %}
+      {% blocktrans with last_update=station.last_update|date:"SHORT_DATETIME_FORMAT" %}
+        <b>Last update:</b> {{last_update}}
       {% endblocktrans %}
     {% endif %}
   </div>

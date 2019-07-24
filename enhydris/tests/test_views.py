@@ -131,17 +131,19 @@ class StationDetailPeriodOfOperationTestCase(TestCase):
     def test_when_start_date_and_end_date(self):
         self._set_dates(dt.datetime(2019, 7, 26), dt.datetime(2019, 7, 27))
         response = self._get_response()
-        self.assertContains(response, "Period of operation: 26/07/2019 - 27/07/2019")
+        self.assertContains(
+            response, "<b>Period of operation:</b> 26/07/2019 - 27/07/2019"
+        )
 
     def test_when_only_start_date(self):
         self._set_dates(dt.datetime(2019, 7, 26), None)
         response = self._get_response()
-        self.assertContains(response, "Start of operation: 26/07/2019")
+        self.assertContains(response, "<b>Start of operation:</b> 26/07/2019")
 
     def test_when_only_end_date(self):
         self._set_dates(None, dt.datetime(2019, 7, 27))
         response = self._get_response()
-        self.assertContains(response, "End of operation: 27/07/2019")
+        self.assertContains(response, "<b>End of operation:</b> 27/07/2019")
 
     def test_when_no_dates(self):
         self._set_dates(None, None)

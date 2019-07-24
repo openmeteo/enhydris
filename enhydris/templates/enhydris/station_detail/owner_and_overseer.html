@@ -3,13 +3,13 @@
 <div class="row">
   <div class="col-md-{% if station.overseer %}6{% else %}12{% endif %}">
     {% blocktrans with owner=station.owner %}
-      Owner: {{owner}}
+      <b>Owner:</b> {{owner}}
     {% endblocktrans %}
   </div>
   {% if station.overseer %}
     <div class="col-md-6">
       {% blocktrans with overseer=station.overseer %}
-        Overseer: {{overseer}}
+        <b>Overseer:</b> {{overseer}}
       {% endblocktrans %}
     </div>
   {% endif %}

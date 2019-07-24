@@ -87,6 +87,8 @@ ATOMIC_REQUESTS = True
 TEST_RUNNER = "django.test.runner.DiscoverRunner"
 USE_TZ = True
 
+USE_L10N = True
+
 AUTHENTICATION_BACKENDS = (
     "rules.permissions.ObjectPermissionBackend",
     "django.contrib.auth.backends.ModelBackend",

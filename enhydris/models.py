@@ -321,6 +321,16 @@ class Station(Gpoint):
 
     f_dependencies = ["Gpoint"]
 
+    @property
+    def last_update(self):
+        freshest_timeseries = (
+            self.timeseries.filter(end_date_utc__isnull=False)
+            .order_by("-end_date_utc")
+            .first()
+        )
+        if freshest_timeseries:
+            return freshest_timeseries.end_date
+
 
 class InstrumentType(Lookup):
     pass
