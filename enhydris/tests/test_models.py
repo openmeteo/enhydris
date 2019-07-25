@@ -380,36 +380,6 @@ class StationOriginalCoordinatesWithNullSridTestCase(TestCase):
         self.assertAlmostEqual(self.station.original_ordinate(), 39.09518)
 
 
-class OverseerTestCase(TestCase):
-    def test_create(self):
-        person = mommy.make(models.Person)
-        station = mommy.make(models.Station)
-        overseer = models.Overseer(person=person, station=station)
-        overseer.save()
-        self.assertEqual(models.Overseer.objects.first().station, station)
-
-    def test_update(self):
-        mommy.make(models.Overseer)
-        overseer = models.Overseer.objects.first()
-        overseer.start_date = "2018-11-14"
-        overseer.save()
-        self.assertEqual(
-            models.Overseer.objects.first().start_date, dt.date(2018, 11, 14)
-        )
-
-    def test_delete(self):
-        mommy.make(models.Overseer)
-        overseer = models.Overseer.objects.first()
-        overseer.delete()
-        self.assertEqual(models.Overseer.objects.count(), 0)
-
-    def test_str(self):
-        overseer = mommy.make(
-            models.Overseer, person__last_name="Baggins", person__initials="F."
-        )
-        self.assertEqual(str(overseer), "Baggins F.")
-
-
 class InstrumentTestCase(TestCase):
     def test_create(self):
         type = mommy.make(models.InstrumentType)

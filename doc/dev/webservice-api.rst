@@ -85,7 +85,7 @@ Response::
               "descr": "Abstract [Συνοπτικός]"
             }
           ],
-          "overseers": [],
+          "overseer": "",
           "maintainers": []
         },
         ...
@@ -503,7 +503,7 @@ Response::
           "descr": "Abstract [Συνοπτικός]"
         }
       ],
-      "overseers": [],
+      "overseer": "",
       "maintainers": []
     }
 
@@ -893,28 +893,6 @@ Response example for the detail request::
       "gentity": 1334,
       "type": 2
     },
-
-For the list request, the result is a `paginated list`_ of items.
-
-Overseers
----------
-
-List or get detail of station overseers::
-
-    curl https://openmeteo.org/api/stations/1334/overseers/
-    curl https://openmeteo.org/api/stations/1334/overseers/2/
-
-Response example for the detail request::
-
-    {
-      "id": 2,
-      "last_modified": null,
-      "is_current": true,
-      "start_date": "2019-01-06",
-      "end_date": null,
-      "station": 1334,
-      "person": 17
-    }
 
 For the list request, the result is a `paginated list`_ of items.
 

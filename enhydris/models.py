@@ -303,9 +303,7 @@ class Station(Gpoint):
     is_automatic = models.BooleanField(default=False)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
-    overseers = models.ManyToManyField(
-        Person, through="Overseer", related_name="stations_overseen"
-    )
+    overseer = models.CharField(max_length=30, blank=True)
     copyright_holder = models.TextField()
     copyright_years = models.CharField(max_length=10)
     # The following two fields are only useful when USERS_CAN_ADD_CONTENT
@@ -322,21 +320,6 @@ class Station(Gpoint):
     )
 
     f_dependencies = ["Gpoint"]
-
-
-class Overseer(models.Model):
-    last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    station = models.ForeignKey(Station, on_delete=models.CASCADE)
-    person = models.ForeignKey(Person, on_delete=models.CASCADE)
-    is_current = models.BooleanField(default=False)
-    start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
-
-    class Meta:
-        ordering = ("start_date", "person__last_name", "person__first_name")
-
-    def __str__(self):
-        return str(self.person)
 
 
 class InstrumentType(Lookup):

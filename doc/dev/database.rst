@@ -369,36 +369,12 @@ Station and its related models
 
       An optional pair of dates indicating was installed and abolished.
 
-   .. attribute:: enhydris.models.Station.overseers
+   .. attribute:: enhydris.models.Station.overseer
 
-      The overseers are the persons who are or have been responsible for
-      each meteorological station in the past. In the case of manual
-      (not automatic) stations, this means the weather observers. At a
-      given time, each station has only one observer.  This is a
-      many-to-many field, through model
-      :class:`~enhydris.models.Overseer`.
-
-.. class:: enhydris.models.Overseer
-
-   .. attribute:: enhydris.models.Overseer.station
-
-      A foreign key to :class:`~enhydris.models.Station`.
-
-   .. attribute:: enhydris.models.Overseer.person
-
-      A foreign key to :class:`~enhydris.models.Person`.
-
-   .. attribute:: enhydris.models.Overseer.is_current
-
-      A boolean value indicating whether this person is the current
-      overseer. For current overseers, the
-      :attr:`~enhydris.models.Overseer.end_date` below must be null;
-      however, a null end_date could also mean that the end_date is
-      unknown, not necessarily that the overseer is the current
-      overseer.
-
-   .. attribute:: enhydris.models.Overseer.start_date
-                  enhydris.models.Overseer.end_date
+      The overseers is the person responsible for the meteorological
+      station in the past. In the case of manual (not automatic)
+      stations, this means the weather observers.  This is a simple text
+      field.
 
 .. class:: enhydris.models.InstrumentType(Lookup)
 

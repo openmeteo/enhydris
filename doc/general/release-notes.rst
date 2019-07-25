@@ -98,6 +98,9 @@ Changes from 2.0
 - The fields ``approximate`` (used to denote that a station's location
   has been assigned roughly) and ``asrid`` (altitude SRID) have been
   abolished. The field ``srid`` has been renamed to ``original_srid``.
+- Stations can now only have a single overseer, specified as a text
+  field. Upgrading will convert as needed, and it will also delete any
+  unreferenced Person objects.
 - OpenLayers has been replaced with Leaflet. Accordingly, the form of
   the :data:`ENHYDRIS_MAP_BASE_LAYERS` setting has been changed and the
   setting :data:`ENHYDRIS_MAP_DEFAULT_BASE_LAYER` has been added.

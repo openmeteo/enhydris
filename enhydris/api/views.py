@@ -137,13 +137,6 @@ class GentityEventViewSet(ReadOnlyModelViewSet):
         return models.GentityEvent.objects.filter(gentity_id=self.kwargs["station_id"])
 
 
-class OverseerViewSet(ReadOnlyModelViewSet):
-    serializer_class = serializers.OverseerSerializer
-
-    def get_queryset(self):
-        return models.Overseer.objects.filter(station_id=self.kwargs["station_id"])
-
-
 class InstrumentViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.InstrumentSerializer
 

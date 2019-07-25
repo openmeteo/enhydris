@@ -67,7 +67,6 @@ urlstart = r"stations/(?P<station_id>\d+)/"
 router.register(urlstart + "altcodes", views.GentityAltCodeViewSet, "altcode")
 router.register(urlstart + "files", views.GentityFileViewSet, "file")
 router.register(urlstart + "events", views.GentityEventViewSet, "event")
-router.register(urlstart + "overseers", views.OverseerViewSet, "overseer")
 router.register(urlstart + "instruments", views.InstrumentViewSet, "instrument")
 router.register(urlstart + "timeseries", views.TimeseriesViewSet, "timeseries")
 

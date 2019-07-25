@@ -132,12 +132,6 @@ class GentityEventSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class OverseerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Overseer
-        fields = "__all__"
-
-
 class InstrumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Instrument
@@ -149,7 +143,6 @@ class StationSerializer(serializers.ModelSerializer):
     water_division = WaterDivisionSerializer(required=False)
     political_division = PoliticalDivisionSerializer(required=False)
     stype = StationTypeSerializer(many=True, required=False)
-    overseers = PersonSerializer(many=True, required=False)
 
     class Meta:
         model = models.Station
@@ -172,5 +165,4 @@ class StationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(str(e))
 
     validate_stype = validate_nested_many_serializer
-    validate_overseers = validate_nested_many_serializer
     validate_maintainers = validate_nested_many_serializer

@@ -16,7 +16,7 @@ class StationSerializerTestCase(APITestCase):
             water_division__name="Middle Earth",
             political_division__name="Eriador",
             stype=[mommy.make(models.StationType, descr="Smurfy")],
-            overseers=[mommy.make(models.Person, last_name="Baggins")],
+            overseer="Bilbo Baggins",
             maintainers=[mommy.make(User, username="Bilbo")],
         )
         self.serializer = StationSerializer(station)
@@ -37,7 +37,7 @@ class StationSerializerTestCase(APITestCase):
         self.assertEqual(self.serializer.data["stype"][0]["descr"], "Smurfy")
 
     def test_overseer(self):
-        self.assertEqual(self.serializer.data["overseers"][0]["last_name"], "Baggins")
+        self.assertEqual(self.serializer.data["overseer"], "Bilbo Baggins")
 
     def test_no_maintainers(self):
         # There shouldn't be information about maintainers, this is security information
@@ -103,16 +103,4 @@ class StationSerializerNestedValidationTestCase(APITestCase):
 
     def test_incorrect_nested_stype_does_not_validate(self):
         serializer = StationSerializer(data={**self.base_data, "stype": [{"di": 203}]})
-        self.assertFalse(serializer.is_valid())
-
-    def test_correct_nested_overseers_validates(self):
-        serializer = StationSerializer(
-            data={**self.base_data, "overseers": [{"id": 204}]}
-        )
-        self.assertTrue(serializer.is_valid())
-
-    def test_incorrect_nested_overseers_does_not_validate(self):
-        serializer = StationSerializer(
-            data={**self.base_data, "overseers": [{"di": 204}]}
-        )
         self.assertFalse(serializer.is_valid())

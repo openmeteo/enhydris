@@ -196,18 +196,6 @@ class GentityEventTestCase(APITestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class OverseerTestCase(APITestCase):
-    # We have extensively tested GentityAltCode, which is practically the same code,
-    # so we test this briefly.
-    def setUp(self):
-        self.station = mommy.make(models.Station)
-        self.gentity_file = mommy.make(models.Overseer, station=self.station)
-
-    def test_list_status_code(self):
-        r = self.client.get("/api/stations/{}/overseers/".format(self.station.id))
-        self.assertEqual(r.status_code, 200)
-
-
 class InstrumentTestCase(APITestCase):
     # We have extensively tested GentityAltCode, which is practically the same code,
     # so we test this briefly.

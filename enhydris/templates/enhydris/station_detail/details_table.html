@@ -77,23 +77,8 @@
       {% endif %}
     </tr>
   {% endif %}
-  <tr><!-- Overseers table -->
-    <th>{% trans 'Overseers' %}</th>
-    <td colspan='2'>
-      {% if station.overseers.count %}
-        <div class="table-responsive">
-          <table class="table table-hover table-condensed">
-            <tbody>
-              {% for overseer in station.overseer_set.all %}
-                <tr>
-                  <td>{{ overseer.person.first_name }} {{ overseer.person.last_name }}
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% endif %}
-    </td>
+  <tr>
+    <th>{% trans 'Overseer' %}</th>
+    <td colspan='2'>{{ station.overseer }}</td></td>
   </tr>
 </table>
