@@ -1,28 +1,8 @@
-{% load i18n %}
-{% load rules %}
-
-{% has_perm "enhydris.change_station" request.user station as can_edit_station %}
-
 <div class="panel panel-default">
-  <div class="panel-heading">
-    <b>{% trans "Station Details" %}</b><br>
-    <sub>
-      {% if can_edit_station %}
-        <a class="btn btn-xs btn-primary" href='{% url "station_edit" pk=station.id%}'>{% trans "Edit" %}</a>
-      {% endif %}
-    </sub>
+  <div class="panel-body">
+    {% include "enhydris/station_detail/period_of_operation.html" %}
+    {% include "enhydris/station_detail/owner_and_overseer.html" %}
+    {% include "enhydris/station_detail/copyright.html" %}
+    {% include "enhydris/station_detail/remarks.html" %}
   </div>
-
-  <div class="table-responsive">
-    {% include "enhydris/station_detail/details_table.html" %}
-  </div>
-
-  {% if display_copyright %}
-    <div class="panel-footer">
-      © <span class="text-warning">
-        {{ station.copyright_years }}
-        {{ station.copyright_holder }}
-        </span>
-    </div>
-  {% endif %}
 </div>

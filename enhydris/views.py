@@ -30,6 +30,11 @@ class StationDetail(DetailView):
         self.request.map_viewport = map_extent
         return super().render_to_response(*args, **kwargs)
 
+    def get_context_data(self, *args, **kwargs):
+        result = super().get_context_data(*args, **kwargs)
+        result["display_copyright_info"] = settings.ENHYDRIS_DISPLAY_COPYRIGHT_INFO
+        return result
+
 
 class StationEdit(RedirectView):
     def get_redirect_url(self, *args, **kwargs):

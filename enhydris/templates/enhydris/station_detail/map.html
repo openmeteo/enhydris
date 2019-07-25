@@ -1,8 +1,22 @@
+{% load i18n %}
+
 <div class="panel panel-default">
-  <div class="panel-heading">
-    <h5>{{ station.name }}</h5>
-  </div>
   <div class="panel-body">
     <div id="mapid" class="map"></div>
+  </div>
+  <div class="panel-footer">
+    ϕ, λ = {{ station.point.y | floatformat:5 }}, {{ station.point.x | floatformat:5 }}
+    {% if station.original_srid != 4326 %}
+      <small>
+        <br>
+        {% blocktrans with srid=station.original_srid x=station.original_abscissa y=station.original_ordinate %}
+          (originally srid={{ srid }}, x={{ x }}, y={{ y }})
+        {% endblocktrans %}
+      </small>
+    {% endif %}
+    <br>
+    {% if station.altitude != None %}
+      z = {{ station.altitude|floatformat:2 }}
+    {% endif %}
   </div>
 </div>

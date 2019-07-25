@@ -1,0 +1,40 @@
+{% load i18n %}
+
+<div role="tabpanel" class="tab-pane" id="instruments">
+  <h4>{% trans 'Instruments' %}</h4>
+  <div class="table-responsive">
+    {% if station.instrument_set.count %}
+        <table class="table table-hover table-condensed">
+          <thead>
+            <tr>
+              <th>{% trans "ID" %}</th>
+              <th>{% trans "Name" %}</th>
+              <th>{% trans "Type" %}</th>
+              <th>{% trans "Manufacturer" %}</th>
+              <th>{% trans "Model" %}</th>
+              <th>{% trans "Start Date" %}</th>
+              <th>{% trans "End Date" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for instrument in station.instrument_set.all %}
+              {% with instrument.id as instrument_id %}
+              {% url "instrument_detail" instrument_id as instrument_url %}
+              <tr>
+                  <td><a href="{% url "instrument_detail" station_id=station.id pk=instrument.id %}">{{ instrument_id }}</a></td>
+                  <td>{{ instrument.name }}</td>
+                  <td>{{ instrument.type }}</td>
+                  <td>{{ instrument.manufacturer }}</td>
+                  <td>{{ instrument.model }}</td>
+                  <td>{{ instrument.start_date|date:"Y/m/d" }}</td>
+                  <td>{{ instrument.end_date|date:"Y/m/d" }}</td>
+        </tr>
+            {% endwith %}
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+        <h4 class="tab-no-data">{% trans "No data available" %}</h4>
+    {% endif %}
+  </div>
+</div>

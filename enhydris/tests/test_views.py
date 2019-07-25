@@ -1,3 +1,4 @@
+import datetime as dt
 from unittest import skipUnless
 
 from django.conf import settings
@@ -106,6 +107,46 @@ class StationDetailTestCase(TestCase):
     def test_map_viewport(self):
         response = self.client.get("/stations/{}/".format(self.station.id))
         self.assertContains(response, "enhydris.mapViewport=[20.9, 38.9, 21.1, 39.1]")
+
+
+class StationDetailPeriodOfOperationTestCase(TestCase):
+    def setUp(self):
+        self.station = mommy.make(
+            Station,
+            name="Komboti",
+            point=Point(x=21.00000, y=39.00000, srid=4326),
+            original_srid=4326,
+        )
+
+    def _set_dates(self, start_date, end_date):
+        self.station.start_date = start_date
+        self.station.end_date = end_date
+        self.station.save()
+
+    def _get_response(self):
+        return self.client.get(
+            "/stations/{}/".format(self.station.id), HTTP_ACCEPT_LANGUAGE="en-gb"
+        )
+
+    def test_when_start_date_and_end_date(self):
+        self._set_dates(dt.datetime(2019, 7, 26), dt.datetime(2019, 7, 27))
+        response = self._get_response()
+        self.assertContains(response, "Period of operation: 26/07/2019 - 27/07/2019")
+
+    def test_when_only_start_date(self):
+        self._set_dates(dt.datetime(2019, 7, 26), None)
+        response = self._get_response()
+        self.assertContains(response, "Start of operation: 26/07/2019")
+
+    def test_when_only_end_date(self):
+        self._set_dates(None, dt.datetime(2019, 7, 27))
+        response = self._get_response()
+        self.assertContains(response, "End of operation: 27/07/2019")
+
+    def test_when_no_dates(self):
+        self._set_dates(None, None)
+        response = self._get_response()
+        self.assertNotContains(response, "operation")
 
 
 class TimeseriesDownloadLinkTestCase(TestCase):

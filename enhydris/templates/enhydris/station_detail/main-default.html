@@ -27,214 +27,43 @@
 {% block content %}
   <div class="container">
     <div class="row">
+      <h1>{{ station.name }}</h1>
+      <p>
+        [
+          {% for stype in station.stype.all %}{{ stype.descr }}{% if not forloop.last %}, {% endif %}{% endfor %},
+          {% if station.is_automatic %}{% trans "automatic" %}{% else %}{% trans "conventional" %}{% endif %}
+        ]
+      </p>
       <div class="col-md-4">
         {% include "enhydris/station_detail/map.html" %}
       </div>
       <div class="col-md-8">
         {% include "enhydris/station_detail/details.html" %}
+        {% has_perm "enhydris.change_station" request.user station as can_edit_station %}
+        {% if can_edit_station %}
+            <a class="btn btn-xs btn-primary" href='{% url "station_edit" pk=station.id%}'>{% trans "Edit" %}</a>
+        {% endif %}
       </div>
     </div>
   </div>
 
-  <!-- Tabs -->
   <div class="container">
     <hr>
     <div id="content">
-      <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
-        <li class="active"><a href="#timeseries" data-toggle="tab">{% trans "Timeseries" %}</a></li>
-        <li><a href="#gentity_codes" data-toggle="tab">{% trans "Codes" %}</a></li>
-        <li><a href="#gentity_files" data-toggle="tab">{% trans "Files" %}</a></li>
-        <li><a href="#gentity_events" data-toggle="tab">{% trans "Events" %}</a></li>
-        <li><a href="#instruments" data-toggle="tab">{% trans "Instruments" %}</a></li>
+      <ul id="tabs" class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#timeseries" data-toggle="tab" aria-controls="timeseries" role="tab">{% trans "Timeseries" %}</a></li>
+        <li role="presentation" ><a href="#gentity_codes" data-toggle="tab" aria-controls="gentity_codes" role="tab">{% trans "Codes" %}</a></li>
+        <li role="presentation" ><a href="#gentity_files" data-toggle="tab" aria-controls="gentity_files" role="tab">{% trans "Files" %}</a></li>
+        <li role="presentation" ><a href="#gentity_events" data-toggle="tab" aria-controls="gentity_events" role="tab">{% trans "Events" %}</a></li>
+        <li role="presentation" ><a href="#instruments" data-toggle="tab" aria-controls="instruments" role="tab">{% trans "Instruments" %}</a></li>
       </ul>
-      <div id="my-tab-content" class="tab-content">
-        <div class="tab-pane" id="gentity_codes">
-          <h4>{% trans 'Station (Gentity) Alternative Codes' %}</h4>
-          <div class="table-responsive">
-            {% if station.gentityaltcode_set.count %}
-                <table class="table table-hover table-condensed">
-                  <thead>
-                    <tr>
-                      <th>{% trans 'ID' %}</th>
-                      <th>{% trans 'Type' %}</th>
-                      <th>{% trans 'Value' %}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for code in station.gentityaltcode_set.all %}
-                      <tr>
-                        <td>{{ code.id }}</td>
-                        <td>{{ code.type }}</td>
-                        <td>{{ code.value }}</td>
-                      </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-            {% else %}
-                <h4 class="tab-no-data">{% trans "No data available" %}</h4>
-            {% endif %}
-        </div>
-      </div>
-      <div class="tab-pane" id="gentity_files">
-        <h4>{% trans 'Station (Gentity) Files' %}</h4>
-        <div class="table-responsive">
-          {% if station.gentityfile_set.count %}
-              <table class="table table-hover table-condensed">
-                <thead>
-                  <tr>
-                    <th>{% trans 'ID' %}</th>
-                    <th>{% trans 'Date' %}</th>
-                    <th>{% trans 'File Type' %}</th>
-                    <th>{% trans 'Content' %}</th>
-                    <th>{% trans 'Description' %}</th>
-                    <th>{% trans 'Remarks' %}</th>
-                    <th>{% trans 'Download' %}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for file in station.gentityfile_set.all %}
-                    {% has_perm "enhydris.view_gentityfile_content" request.user file as can_view_file_data %}
-                    <tr>
-                      <td class="col-sm-1">{{ file.id }}</td>
-                      <td class="col-sm-1">{{ file.date|date:"Y/m/d" }}</td>
-                      <td class="col-sm-1">{{ file.file_type.descr }}</td>
-                      <td class="col-sm-1">{{ file.content }}</td>
-                      <td class="col-sm-1">{{ file.descr }}</td>
-                      <td class="col-sm-8">{{ file.remarks }}</td>
-                      <td class="col-sm-1">
-                        {% if can_view_file_data %}
-                          <a href="{% url "file-content" station_id=station.id pk=file.id %}"><i class="glyphicon glyphicon-cloud-download"></i></a>
-                        {% else %}
-                          {% trans "Unauthorized" %}
-                        {% endif %}
-                      </td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            {% else %}
-                <h4 class="tab-no-data">{% trans "No data available" %}</h4>
-            {% endif %}
-        </div>
-      </div>
-    <div class="tab-pane" id="gentity_events">
-      <h4>{% trans 'Station (Gentity) Events' %}</h4>
-      <div class="table-responsive">
-        {% if station.gentityevent_set.count %}
-            <table class="table table-hover table-condensed">
-              <thead>
-                <tr>
-                  <th>{% trans 'ID' %}</th>
-                  <th>{% trans 'Date' %}</th>
-                  <th>{% trans 'Type' %}</th>
-                  <th>{% trans 'User' %}</th>
-                  <th>{% trans 'Report' %}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for event in station.gentityevent_set.all %}
-                  <tr>
-                    <td>{{ event.id }}</td>
-                    <td>{{ event.date|date:"Y/m/d" }}</td>
-                    <td>{{ event.type }}</td>
-                    <td>{{ event.user }}</td>
-                    <td>{{ event.report }}</td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-        {% else %}
-            <h4 class="tab-no-data">{% trans "No data available" %}</h4>
-        {% endif %}
+      <div class="tab-content">
+        {% include "enhydris/station_detail/tabs/gentity_codes.html" %}
+        {% include "enhydris/station_detail/tabs/gentity_files.html" %}
+        {% include "enhydris/station_detail/tabs/gentity_events.html" %}
+        {% include "enhydris/station_detail/tabs/instruments.html" %}
+        {% include "enhydris/station_detail/tabs/timeseries.html" %}
       </div>
     </div>
-    <div class="tab-pane" id="instruments">
-      <h4>{% trans 'Instruments' %}</h4>
-      <div class="table-responsive">
-        {% if station.instrument_set.count %}
-            <table class="table table-hover table-condensed">
-              <thead>
-                <tr>
-                  <th>{% trans "ID" %}</th>
-                  <th>{% trans "Name" %}</th>
-                  <th>{% trans "Type" %}</th>
-                  <th>{% trans "Manufacturer" %}</th>
-                  <th>{% trans "Model" %}</th>
-                  <th>{% trans "Start Date" %}</th>
-                  <th>{% trans "End Date" %}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for instrument in station.instrument_set.all %}
-                  {% with instrument.id as instrument_id %}
-                  {% url "instrument_detail" instrument_id as instrument_url %}
-                  <tr>
-                      <td><a href="{% url "instrument_detail" station_id=station.id pk=instrument.id %}">{{ instrument_id }}</a></td>
-                      <td>{{ instrument.name }}</td>
-                      <td>{{ instrument.type }}</td>
-                      <td>{{ instrument.manufacturer }}</td>
-                      <td>{{ instrument.model }}</td>
-                      <td>{{ instrument.start_date|date:"Y/m/d" }}</td>
-                      <td>{{ instrument.end_date|date:"Y/m/d" }}</td>
-            </tr>
-                {% endwith %}
-              {% endfor %}
-            </tbody>
-          </table>
-        {% else %}
-            <h4 class="tab-no-data">{% trans "No data available" %}</h4>
-        {% endif %}
-      </div>
-    </div>
-    <div class="tab-pane active" id="timeseries">
-      <h4>{% trans 'Timeseries' %}</h4>
-      <div class="table-responsive">
-        {% if station.timeseries.count %}
-            <table class="table table-hover table-condensed">
-              <thead>
-                <tr>
-                  <th>{% trans "ID" %}</th>
-                  <th>{% trans "Name" %}</th>
-                  <th>{% trans "Variable" %}</th>
-                  <th>{% trans "Time step" %}</th>
-                  <th>{% trans "Unit" %}</th>
-                  <th>{% trans "Remarks" %}</th>
-                  <th>{% trans "Instrument" %}</th>
-                  <th>{% trans "Start Date" %}</th>
-                  <th>{% trans "End Date" %}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for t in station.timeseries.all %}
-                {% if not t.hidden %}
-                {% with t.id as t_id %}
-                {% url "timeseries_detail" t_id as timeseries_url %}
-                  <tr>
-                    <td><a href="{% url "timeseries_detail" station_id=station.id pk=t_id %}">{{ t_id }}</a></td>
-                    <td>{{ t.name }}</td>
-                    <td class="col-sm-1">{{ t.variable }}</td>
-                    <td class="col-sm-4">{% if not t.time_step %}
-                    {% trans 'Variable step' %}
-               {% else %}
-                {{ t.time_step }}
-              {% endif %}</td>
-                <td>{{ t.unit_of_measurement }}</td>
-                <td>{{ t.remarks }}</td>
-                <td class="col-sm-4">{{ t.instrument }}</td>
-                <td>{{ t.start_date|date:"Y/m/d H:i" }}</td>
-                <td>{{ t.end_date|date:"Y/m/d H:i" }}</td>
-              </tr>
-              {% endwith %}
-              {% endif %}
-              {% endfor %}
-            </tbody>
-          </table>
-      {% else %}
-          <h4 class="tab-no-data">{% trans "No data available" %}<h4>
-      {% endif %}
-    </div>
-    </div>
-    </div>
-    </div> <!--  id=contant -->
-  </div> <!-- container-->
+  </div>
 {% endblock %}

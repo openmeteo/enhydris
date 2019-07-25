@@ -1,0 +1,45 @@
+{% load i18n %}
+
+{% block extracss %}
+  <style>
+    .hoverable-item { background-color: inherit; }
+    .hoverable-item:hover { background-color: lightgray; }
+  </style>
+{% endblock %}
+
+<div role="tabpanel" class="tab-pane active" id="timeseries">
+  <div class="container">
+    {% if station.timeseries.count %}
+      <p>&nbsp;</p>
+      {% for t in station.timeseries.all %}
+        {% if not t.hidden %}
+          {% with t.id as t_id %}
+            {% url "timeseries_detail" t_id as timeseries_url %}
+            <a href="{% url "timeseries_detail" station_id=station.id pk=t_id %}" style="color: inherit; text-decoration: none;">
+              <div class="row hoverable-item">
+                <div class="col-sm-1">id={{ t_id }}</div>
+                <div class="col-sm-3">{% if t.name %}"{{ t.name }}"{% endif %}</div>
+                <div class="col-sm-2">{{ t.variable }}</div>
+                <div class="col-sm-3">
+                  {% if not t.time_step %}
+                    {% trans 'Variable step' %}
+                  {% else %}
+                    {{ t.time_step }}
+                  {% endif %}
+                </div>
+                <div class="col-sm-3">
+                  {% if t.start_date and t.end_date %}
+                    {{ t.start_date|date:"SHORT_DATE_FORMAT" }} — {{ t.end_date|date:"SHORT_DATETIME_FORMAT" }}
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+          {% endwith %}
+          <p>&nbsp;</p>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      <p class="tab-no-data">{% trans "No time series exist" %}<p>
+    {% endif %}
+  </div>
+</div>
