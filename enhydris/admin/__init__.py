@@ -1,6 +1,9 @@
 from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
+
+from parler.admin import TranslatableAdmin
 
 from enhydris import models
 
@@ -63,7 +66,7 @@ class EventTypeAdmin(admin.ModelAdmin):
 
 
 @admin.register(models.StationType)
-class StationTypeAdmin(admin.ModelAdmin):
+class StationTypeAdmin(TranslatableAdmin):
     list_display = ("id", "descr")
 
 
@@ -73,8 +76,13 @@ class InstrumentTypeAdmin(admin.ModelAdmin):
 
 
 @admin.register(models.Variable)
-class VariableAdmin(admin.ModelAdmin):
-    list_display = [f.name for f in models.Variable._meta.fields]
+class VariableAdmin(TranslatableAdmin):
+    list_display = ("id", "descr", "last_modified")
+
+    def get_queryset(self, request):
+        return models.Variable.objects.translated(settings.LANGUAGE_CODE).order_by(
+            "translations__descr"
+        )
 
 
 @admin.register(models.IntervalType)

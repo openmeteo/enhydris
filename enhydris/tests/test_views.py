@@ -154,7 +154,9 @@ class StationDetailPeriodOfOperationTestCase(TestCase):
 class TimeseriesDownloadLinkTestCase(TestCase):
     def setUp(self):
         self.station = mommy.make(Station, name="Komboti")
-        self.timeseries = mommy.make(Timeseries, gentity=self.station)
+        self.timeseries = mommy.make(
+            Timeseries, gentity=self.station, variable__descr="irrelevant"
+        )
         self.link = '<a href="/api/stations/{}/timeseries/{}/data/?fmt=hts">'.format(
             self.station.id, self.timeseries.id
         )

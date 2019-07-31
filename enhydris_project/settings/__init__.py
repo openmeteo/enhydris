@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     # django.contrib.admin.
     "django.contrib.admin",
     "rules.apps.AutodiscoverRulesConfig",
+    "parler",
 ]
 
 MIDDLEWARE = [

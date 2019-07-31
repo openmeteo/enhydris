@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.contrib.gis.geos import Point
+from django.test import override_settings
 from rest_framework.test import APITestCase
 
 from model_mommy import mommy
@@ -72,13 +74,31 @@ class StationSearchByWaterBasinTestCase(APITestCase):
         self.assertEqual(self.response.json()["results"][0]["name"], "Hobbiton")
 
 
+language_settings = {
+    "LANGUAGE_CODE": "en",
+    "PARLER_LANGUAGES": {
+        settings.SITE_ID: ({"code": "en"}, {"code": "el"}),
+        "default": {"fallbacks": ["en"], "hide_untranslated": False},
+    },
+}
+
+
+@override_settings(**language_settings)
 class StationSearchByVariableTestCase(APITestCase):
     def setUp(self):
         station1 = mommy.make(models.Station, name="Hobbiton")
         station2 = mommy.make(models.Station, name="Mithlond")
-        mommy.make(models.Timeseries, gentity=station1, variable__descr="Rain")
-        mommy.make(models.Timeseries, gentity=station2, variable__descr="Temperature")
+        self._create_timeseries(station1, "Rain", "Βροχόπτωση")
+        self._create_timeseries(station2, "Temperature", "Θερμοκρασία")
         self.response = self.client.get("/api/stations/", {"q": "variable:rain"})
+
+    def _create_timeseries(self, station, var_en, var_el):
+        timeseries = mommy.make(models.Timeseries, gentity=station)
+        timeseries.variable.set_current_language("en")
+        timeseries.variable.descr = var_en
+        timeseries.variable.set_current_language("el")
+        timeseries.variable.descr = var_el
+        timeseries.variable.save()
 
     def test_status_code(self):
         self.assertEqual(self.response.status_code, 200)
@@ -88,6 +108,13 @@ class StationSearchByVariableTestCase(APITestCase):
 
     def test_results(self):
         self.assertEqual(self.response.json()["results"][0]["name"], "Hobbiton")
+
+
+@override_settings(**language_settings)
+class StationSearchByVariableInInactiveTranslation(StationSearchByVariableTestCase):
+    def setUp(self):
+        self.client.cookies.load({settings.LANGUAGE_COOKIE_NAME: "el"})
+        super().setUp()
 
 
 class StationSearchByTsOnlyTestCase(APITestCase):

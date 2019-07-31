@@ -47,23 +47,102 @@ stable Enhydris version is 2.0). The procedure is this:
     and is replaced by ``enhydris``. You can omit it in case you need to
     go back or execute it if you want a cleaner database.)
 
- 8. Install version 3.0::
+ 8. In the settings, make sure SITE_ID_, LANGUAGE_CODE_ and
+    PARLER_LANGUAGES_ are set properly. See "Multilingual contents" in
+    the "Changes from 2.0" below for more information.
+
+ 9. Install version 3.0::
 
        git checkout 3.0
        pip install -r requirements.txt
 
- 9. If your settings file has been in ``enhydris/settings/``, you need
-    to create a settings file in ``enhydris_project/settings/``, as this
-    location has changed.
+ 10. If your settings file has been in ``enhydris/settings/``, you need
+     to create a settings file in ``enhydris_project/settings/``, as this
+     location has changed.
 
- 10. Execute migrations::
+ 11. Execute migrations::
 
        python manage.py migrate --fake-initial
 
- 11. Start the service
+ 12. Start the service
 
 Changes from 2.0
 ----------------
+
+Multilingual contents
+^^^^^^^^^^^^^^^^^^^^^
+
+The way we do multilingual database contents has changed.
+
+We were using a hacky system where two languages were offered; e.g.
+there was ``Gentity.name`` and ``Gentity.name_alt``, where the latter
+was the name in the "alternative" language. This system, rather than a
+"correct" one that uses, e.g., django-parler, was more trouble than it
+was worth, therefore all fields ending in ``_alt`` have been abolished.
+
+In the new Enhydris version, several lookups, such as variable names,
+are multilingual using django-parler. However, station, instrument and
+timeseries names and remarks, event reports, etc. (i.e. everything a
+on-admin user is expected to enter), are not multilingual. The idea is
+that a station in Greece will have a Greek name, and this does not need
+to be transliterated. The rationale is the same as for
+`OSM's-avoid-transliteration`_ rule: transliterations can be automated,
+and having users enter them manually would only create noise in the
+database. There may be valid cases for translation (e.g. when the name
+of a station is "bridge X", or translation of remarks), but users
+generally don't enter translations so we haven't developed this
+functionality yet.
+
+.. _osm's-avoid-transliteration: https://wiki.openstreetmap.org/wiki/Names#Avoid_transliteration
+
+For the case of fields that are untranslated in the new version, while
+upgrading, for each row, whichever of ``fieldname`` and
+``fieldname_alt`` is nonempty will be used for ``fieldname``. If both
+are nonempty and they are single-line fields, "value of ``fieldname``
+[value of ``fieldname_alt``]" will be used for ``fieldname``, i.e. the
+value of ``fieldname_alt`` will be appended in square brackets. If the
+number of characters available is insufficient an error message will be
+given and the upgrade will fail. If both fields are nonempty and they
+are multi-line fields such as ``TextField``, they will be joined
+together separated by ``\n\n---ALT---\n\n``.
+
+For the case of lookups translated with django-parler, ``fieldname``
+becomes the main language (set by LANGUAGE_CODE_ or
+PARLER_DEFAULT_LANGUAGE_CODE_), and ``fieldname_alt`` becomes the second
+language, i.e. the second entry of PARLER_LANGUAGES_. If
+PARLER_LANGUAGES_ has fewer than two languages, then the conversion
+described in the previous paragraph takes place.
+
+(In fact, because abolishing of ``_alt`` fields was decided and
+implemented several months before deciding to use django-parler on
+lookups, the migration system will convert everything to unilingual as
+described above, and then it will convert lookups back to multilingual.)
+
+Before upgrading the database, it is important to set SITE_ID_,
+LANGUAGE_CODE_, and PARLER_LANGUAGES_. SITE_ID_ is probably already set,
+probably by the default Enhydris settings. Keep it as it is. Set
+LANGUAGE_CODE_ to the language that corresponds to the main language of
+the site, i.e. the one to which lookup descriptions not ending in
+``_alt`` correspond. Finally, set PARLER_LANGUAGES_ as follows::
+
+   PARLER_LANGUAGES = {
+       SITE_ID: [
+         {"code", LANGUAGE_CODE},
+         {"code", "specify_your_second_language_here"},
+       ],
+   }
+
+Because of what is likely a `bug in django-parler`_ (at least 2.0), it
+is important to use ``SITE_ID`` as the key and not ``None``.
+
+.. _SITE_ID: https://docs.djangoproject.com/en/2.2/ref/settings/#site-id
+.. _LANGUAGE_CODE: https://docs.djangoproject.com/en/2.2/ref/settings/#language-code
+.. _PARLER_DEFAULT_LANGUAGE_CODE: https://django-parler.readthedocs.io/en/latest/configuration.html#parler-default-language-code
+.. _PARLER_LANGUAGES: https://django-parler.readthedocs.io/en/latest/configuration.html#parler-languages
+.. _but in django-parler: https://stackoverflow.com/questions/40187339/django-parler-doesnt-show-tabs-in-admin/
+
+Other changes
+^^^^^^^^^^^^^
 
 - The Web API has been reworked. Applications using the Enhydris 2.0 web
   API won't work unchanged with 3.0.
@@ -79,22 +158,6 @@ Changes from 2.0
   co-ordinates, they will be silently converted to latitude zero and
   longitude zero during upgrading.
 - SQLite is no longer supported.
-- Database contents are no longer multilingual. We were using a hacky
-  system where two languages were offered; e.g. there was
-  ``Gentity.name`` and ``Gentity.name_alt``, where the latter was the
-  name in the "alternative" language. This system, rather than a
-  "correct" one that uses, e.g., django-parler, was more trouble than it
-  was worth, therefore all fields ending in ``_alt`` have been
-  abolished. While upgrading, for each row, whichever of ``fieldname``
-  and ``fieldname_alt`` is nonempty will be used for ``fieldname``. If
-  both are nonempty and they are single-line fields, "value of
-  ``fieldname`` [value of ``fieldname_alt``]" will be used for
-  ``fieldname``, i.e. the value of ``fieldname_alt`` will be appended in
-  square brackets. If the number of characters available is insufficient
-  an error message will be given and the upgrade will fail. If both
-  fields are nonempty and they are multi-line fields such as
-  ``TextField``, they will be joined together separated by
-  ``\n\n---ALT---\n\n``.
 - The fields ``approximate`` (used to denote that a station's location
   has been assigned roughly) and ``asrid`` (altitude SRID) have been
   abolished. The field ``srid`` has been renamed to ``original_srid``.

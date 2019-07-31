@@ -34,7 +34,9 @@ class StationSerializerTestCase(APITestCase):
         self.assertEqual(self.serializer.data["political_division"]["name"], "Eriador")
 
     def test_stype(self):
-        self.assertEqual(self.serializer.data["stype"][0]["descr"], "Smurfy")
+        self.assertEqual(
+            self.serializer.data["stype"][0]["translations"]["en"]["descr"], "Smurfy"
+        )
 
     def test_overseer(self):
         self.assertEqual(self.serializer.data["overseer"], "Bilbo Baggins")

@@ -1,5 +1,8 @@
 from rest_framework import serializers
 
+from parler_rest.fields import TranslatedFieldsField
+from parler_rest.serializers import TranslatableModelSerializer
+
 from enhydris import models
 
 
@@ -39,9 +42,12 @@ class PersonSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class StationTypeSerializer(serializers.ModelSerializer):
+class StationTypeSerializer(TranslatableModelSerializer):
     # To see why we specify the id, check https://stackoverflow.com/questions/36473795/
     id = serializers.IntegerField(required=False)
+    translations = TranslatedFieldsField(
+        shared_model=models.StationType, required=False
+    )
 
     class Meta:
         model = models.StationType
@@ -102,7 +108,9 @@ class TimeStepSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class VariableSerializer(serializers.ModelSerializer):
+class VariableSerializer(TranslatableModelSerializer):
+    translations = TranslatedFieldsField(shared_model=models.Variable, required=False)
+
     class Meta:
         model = models.Variable
         fields = "__all__"

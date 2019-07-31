@@ -301,7 +301,10 @@ class TimeseriesInlineAdminFormAcceptsAppendingIfInOrderTestCase(TestCase):
     def setUp(self):
         station = mommy.make(Station)
         self.timeseries = mommy.make(
-            Timeseries, gentity=station, time_zone__utc_offset=0
+            Timeseries,
+            gentity=station,
+            time_zone__utc_offset=0,
+            variable__descr="irrelevant",
         )
         self.timeseries.set_data(StringIO("2019-01-01 00:30,25,\n"))
         self.data = {
@@ -340,7 +343,10 @@ class TimeseriesInlineAdminFormAcceptsReplacingTestCase(TestCase):
     def setUp(self):
         station = mommy.make(Station)
         self.timeseries = mommy.make(
-            Timeseries, gentity=station, time_zone__utc_offset=0
+            Timeseries,
+            gentity=station,
+            time_zone__utc_offset=0,
+            variable__descr="irrelevant",
         )
         self.timeseries.set_data(StringIO("2019-01-01 00:30,25,\n"))
         self.data = {
@@ -451,7 +457,10 @@ class TimeseriesUploadFileWithUnicodeHeadersTestCase(TestCase):
     def setUp(self):
         station = mommy.make(Station)
         self.timeseries = mommy.make(
-            Timeseries, gentity=station, time_zone__utc_offset=0
+            Timeseries,
+            gentity=station,
+            time_zone__utc_offset=0,
+            variable__descr="irrelevant",
         )
         self.data = {
             "replace_or_append": "REPLACE",

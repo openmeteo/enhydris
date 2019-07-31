@@ -280,7 +280,10 @@ class TsdataHeadTestCase(APITestCase):
         station = mommy.make(models.Station)
         self.tz = mommy.make(models.TimeZone, code="EET", utc_offset=120)
         self.timeseries = mommy.make(
-            models.Timeseries, time_zone=self.tz, gentity=station
+            models.Timeseries,
+            time_zone=self.tz,
+            gentity=station,
+            variable__descr="irrelevant",
         )
         self.timeseries.set_data(StringIO("2018-12-09 13:10,20,\n"))
 

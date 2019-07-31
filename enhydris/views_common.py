@@ -142,7 +142,11 @@ class StationListViewMixin:
         )
 
     def _filter_by_type(self, queryset, value):
-        return queryset.filter(stype__descr__icontains=value)
+        return queryset.filter(
+            stype__in=models.StationType.objects.filter(
+                translations__descr__icontains=value
+            )
+        )
 
     def _filter_by_water_division(self, queryset, value):
         return queryset.filter(water_division__name__icontains=value)
@@ -151,7 +155,11 @@ class StationListViewMixin:
         return queryset.filter(water_basin__name__icontains=value)
 
     def _filter_by_variable(self, queryset, value):
-        return queryset.filter(timeseries__variable__descr__icontains=value)
+        return queryset.filter(
+            timeseries__variable__in=models.Variable.objects.filter(
+                translations__descr__icontains=value
+            )
+        )
 
     def _filter_by_bbox(self, queryset, value):
         try:

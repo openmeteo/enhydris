@@ -14,6 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 
 import iso8601
 from htimeseries import HTimeseries
+from parler.models import TranslatableModel, TranslatedFields
 from simpletail import ropen
 
 #
@@ -291,8 +292,12 @@ class GentityEvent(models.Model):
 #
 
 
-class StationType(Lookup):
-    pass
+class StationType(TranslatableModel):
+    last_modified = models.DateTimeField(default=now, null=True, editable=False)
+    translations = TranslatedFields(descr=models.CharField(max_length=200, blank=True))
+
+    def __str__(self):
+        return self.descr
 
 
 class Station(Gpoint):
@@ -361,8 +366,12 @@ class Instrument(models.Model):
 #
 
 
-class Variable(Lookup):
-    pass
+class Variable(TranslatableModel):
+    last_modified = models.DateTimeField(default=now, null=True, editable=False)
+    translations = TranslatedFields(descr=models.CharField(max_length=200, blank=True))
+
+    def __str__(self):
+        return self.descr
 
 
 class UnitOfMeasurement(Lookup):
