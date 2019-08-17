@@ -11,3 +11,4 @@ django-rest-auth[with_social]>=0.9,<1
 django-rest-captcha>=0.1.0,<1
 django-parler>=2,<3
 django-parler-rest>=2,<3
+django-geowidgets
