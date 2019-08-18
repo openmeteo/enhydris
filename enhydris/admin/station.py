@@ -162,10 +162,18 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
     def _get_timeseries_without_moving_file_position(self, datastream):
         original_position = datastream.tell()
         wrapped_datastream = TextIOWrapper(datastream, encoding="utf-8", newline="\n")
-        result = HTimeseries(wrapped_datastream)
+        result = self._read_timeseries_from_stream(wrapped_datastream)
         wrapped_datastream.detach()  # If we don't do this the datastream will be closed
         datastream.seek(original_position)
         return result
+
+    def _read_timeseries_from_stream(self, stream):
+        try:
+            return HTimeseries(stream)
+        except UnicodeDecodeError as e:
+            raise forms.ValidationError(
+                _("The file does not seem to be a valid UTF-8 file: " + str(e))
+            )
 
     def _we_are_appending_data(self, ahtimeseries):
         data_exists = bool(self.instance and self.instance.start_date)

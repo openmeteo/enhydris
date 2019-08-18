@@ -478,6 +478,31 @@ class TimeseriesUploadFileWithUnicodeHeadersTestCase(TestCase):
         )
 
 
+class TimeseriesUploadInvalidFileTestCase(TestCase):
+    def setUp(self):
+        station = mommy.make(Station)
+        self.timeseries = mommy.make(
+            Timeseries,
+            gentity=station,
+            time_zone__utc_offset=0,
+            variable__descr="irrelevant",
+        )
+        self.data = {
+            "replace_or_append": "REPLACE",
+            "gentity": station.id,
+            "unit_of_measurement": self.timeseries.unit_of_measurement.id,
+            "variable": self.timeseries.variable.id,
+            "time_zone": self.timeseries.time_zone.id,
+        }
+        self.files = {"data": SimpleUploadedFile("mytimeseries.csv", b"\xbc\xbd")}
+        self.form = TimeseriesInlineAdminForm(
+            data=self.data, files=self.files, instance=self.timeseries
+        )
+
+    def test_form_is_invalid(self):
+        self.assertFalse(self.form.is_valid())
+
+
 class TimeseriesInlineAdminFormProcessWithoutFileTestCase(TestCase):
     def setUp(self):
         station = mommy.make(Station)
