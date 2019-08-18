@@ -431,6 +431,30 @@ class TimeseriesInlineAdminFormTimeStepNotNullTestCase(TestCase):
         self.form = TimeseriesInlineAdminForm(data=self.data, instance=self.timeseries)
         self.assertTrue(self.form.is_valid())
 
+    def test_form_is_invalid_when_rounding_mins_null_and_rounding_months_not_null(self):
+        self.data["timestamp_rounding_minutes"] = None
+        self.data["timestamp_rounding_months"] = 0
+        self.form = TimeseriesInlineAdminForm(data=self.data, instance=self.timeseries)
+        self.assertFalse(self.form.is_valid())
+
+    def test_form_is_invalid_when_rounding_months_null_and_rounding_mins_not_null(self):
+        self.data["timestamp_rounding_minutes"] = 0
+        self.data["timestamp_rounding_months"] = None
+        self.form = TimeseriesInlineAdminForm(data=self.data, instance=self.timeseries)
+        self.assertFalse(self.form.is_valid())
+
+    def test_form_is_valid_when_roundings_are_both_null(self):
+        self.data["timestamp_rounding_minutes"] = None
+        self.data["timestamp_rounding_months"] = None
+        self.form = TimeseriesInlineAdminForm(data=self.data, instance=self.timeseries)
+        self.assertTrue(self.form.is_valid())
+
+    def test_form_is_valid_when_roundings_are_both_not_null(self):
+        self.data["timestamp_rounding_minutes"] = 0
+        self.data["timestamp_rounding_months"] = 0
+        self.form = TimeseriesInlineAdminForm(data=self.data, instance=self.timeseries)
+        self.assertTrue(self.form.is_valid())
+
 
 class TimeseriesUploadFileWithUnicodeHeadersTestCase(TestCase):
     def setUp(self):

@@ -131,6 +131,7 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
     def _check_timestep(self):
         self._check_rounding_and_offset_are_none_when_timestep_is_none()
         self._check_offset_is_not_none_when_timestep_is_not_none()
+        self._check_rounding_consistency()
 
     def _check_rounding_and_offset_are_none_when_timestep_is_none(self):
         has_error = self.cleaned_data.get("time_step") is None and (
@@ -152,6 +153,14 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
         if has_error:
             raise forms.ValidationError(
                 _("When a time step is specified, the offset must have a value.")
+            )
+
+    def _check_rounding_consistency(self):
+        has_minutes = self.cleaned_data.get("timestamp_rounding_minutes") is not None
+        has_months = self.cleaned_data.get("timestamp_rounding_months") is not None
+        if (has_minutes and not has_months) or (has_months and not has_minutes):
+            raise forms.ValidationError(
+                _("Roundings must be both empty or both not empty")
             )
 
     def _check_submitted_data(self, datastream):
