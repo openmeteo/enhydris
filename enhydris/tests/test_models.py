@@ -766,13 +766,14 @@ class TimeseriesSetDataTestCase(TestCase):
         return result
 
     def _assert_file_contents(self):
-        # Instead of six decimal digits we should probably have gotten two digits
-        # because we specified precision=2. See Enhydris ticket #90.
         self.assertEqual(
             open(
                 os.path.join(settings.ENHYDRIS_TIMESERIES_DATA_DIR, "0000000042"), "rb"
             ).read(),
-            b"2017-11-23 17:23,1.000000,\r\n2018-11-25 01:00,2.000000,\r\n",
+            (
+                b"2017-11-23 17:23,1.000000000000000,\r\n"
+                b"2018-11-25 01:00,2.000000000000000,\r\n"
+            ),
         )
 
 
@@ -813,14 +814,12 @@ class TimeseriesAppendDataTestCase(TestCase):
         return result
 
     def _assert_wrote_data(self):
-        # Instead of six decimal digits we should probably have gotten two digits
-        # because we specified precision=2. See Enhydris ticket #90.
         self.assertEqual(
             open(self.timeseries.datafile.path, "rb").read(),
             (
-                b"2016-01-01 00:00,42.000000,\r\n"
-                b"2017-11-23 17:23,1.000000,\r\n"
-                b"2018-11-25 01:00,2.000000,\r\n"
+                b"2016-01-01 00:00,42.000000000000000,\r\n"
+                b"2017-11-23 17:23,1.000000000000000,\r\n"
+                b"2018-11-25 01:00,2.000000000000000,\r\n"
             ),
         )
 
@@ -847,11 +846,12 @@ class TimeseriesAppendDataToEmptyTimeseriesTestCase(TestCase):
         return result
 
     def _assert_wrote_data(self):
-        # Instead of six decimal digits we should probably have gotten two digits
-        # because we specified precision=2. See Enhydris ticket #90.
         self.assertEqual(
             open(self.timeseries.datafile.path, "rb").read(),
-            b"2017-11-23 17:23,1.000000,\r\n2018-11-25 01:00,2.000000,\r\n",
+            (
+                b"2017-11-23 17:23,1.000000000000000,\r\n"
+                b"2018-11-25 01:00,2.000000000000000,\r\n"
+            ),
         )
 
 

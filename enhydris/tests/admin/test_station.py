@@ -1,15 +1,19 @@
 import datetime as dt
+import os
+from glob import glob
 from io import StringIO
 from locale import LC_CTYPE, getlocale, setlocale
 
+from django.conf import settings
 from django.contrib.auth.models import Permission, User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 
 from model_mommy import mommy
 
+from enhydris import models
 from enhydris.admin.station import TimeseriesInlineAdminForm
-from enhydris.models import Organization, Station, StationType, Timeseries, TimeStep
+from enhydris.tests import RandomEnhydrisTimeseriesDataDir
 
 
 class StationPermsTestCaseBase(TestCase):
@@ -33,13 +37,13 @@ class StationPermsTestCaseBase(TestCase):
         )
 
         cls.azanulbizar = mommy.make(
-            Station, name="Azanulbizar", creator=bob, maintainers=[]
+            models.Station, name="Azanulbizar", creator=bob, maintainers=[]
         )
         cls.barazinbar = mommy.make(
-            Station, name="Barazinbar", creator=bob, maintainers=[charlie]
+            models.Station, name="Barazinbar", creator=bob, maintainers=[charlie]
         )
         cls.calenardhon = mommy.make(
-            Station, name="Calenardhon", creator=alice, maintainers=[]
+            models.Station, name="Calenardhon", creator=alice, maintainers=[]
         )
 
         po = Permission.objects
@@ -209,8 +213,10 @@ class StationCreateSetsCreatorTestCase(TestCase):
         self.bob = User.objects.create_user(
             username="bob", password="topsecret", is_staff=True, is_superuser=False
         )
-        self.serial_killers_sa = Organization.objects.create(name="Serial killers SA")
-        self.meteorological = mommy.make(StationType, descr="Meteorological")
+        self.serial_killers_sa = models.Organization.objects.create(
+            name="Serial killers SA"
+        )
+        self.meteorological = mommy.make(models.StationType, descr="Meteorological")
 
     def test_when_creating_station_creator_is_set(self):
         self.client.login(username="bob", password="topsecret")
@@ -237,14 +243,14 @@ class StationCreateSetsCreatorTestCase(TestCase):
             },
         )
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(Station.objects.first().creator, self.bob)
+        self.assertEqual(models.Station.objects.first().creator, self.bob)
 
 
 class TimeseriesInlineAdminFormRefusesToAppendIfNotInOrderTestCase(TestCase):
     def setUp(self):
-        station = mommy.make(Station)
+        station = mommy.make(models.Station)
         self.timeseries = mommy.make(
-            Timeseries, gentity=station, time_zone__utc_offset=0
+            models.Timeseries, gentity=station, time_zone__utc_offset=0
         )
         self.timeseries.set_data(
             StringIO("2005-11-01 18:00,3,\n2019-01-01 00:30,25,\n")
@@ -278,9 +284,9 @@ class TimeseriesInlineAdminFormRefusesToAppendIfNotInOrderTestCase(TestCase):
 
 class TimeseriesInlineAdminFormAcceptsAppendingIfInOrderTestCase(TestCase):
     def setUp(self):
-        station = mommy.make(Station)
+        station = mommy.make(models.Station)
         self.timeseries = mommy.make(
-            Timeseries,
+            models.Timeseries,
             gentity=station,
             time_zone__utc_offset=0,
             variable__descr="irrelevant",
@@ -320,9 +326,9 @@ class TimeseriesInlineAdminFormAcceptsAppendingIfInOrderTestCase(TestCase):
 
 class TimeseriesInlineAdminFormAcceptsReplacingTestCase(TestCase):
     def setUp(self):
-        station = mommy.make(Station)
+        station = mommy.make(models.Station)
         self.timeseries = mommy.make(
-            Timeseries,
+            models.Timeseries,
             gentity=station,
             time_zone__utc_offset=0,
             variable__descr="irrelevant",
@@ -364,9 +370,9 @@ class TimeseriesInlineAdminFormAcceptsReplacingTestCase(TestCase):
 
 class TimeseriesInlineAdminFormTimeStepNullTestCase(TestCase):
     def setUp(self):
-        station = mommy.make(Station)
+        station = mommy.make(models.Station)
         self.timeseries = mommy.make(
-            Timeseries, gentity=station, time_zone__utc_offset=0
+            models.Timeseries, gentity=station, time_zone__utc_offset=0
         )
         self.data = {
             "gentity": station.id,
@@ -402,11 +408,11 @@ class TimeseriesInlineAdminFormTimeStepNullTestCase(TestCase):
 
 class TimeseriesInlineAdminFormTimeStepNotNullTestCase(TestCase):
     def setUp(self):
-        station = mommy.make(Station)
+        station = mommy.make(models.Station)
         self.timeseries = mommy.make(
-            Timeseries, gentity=station, time_zone__utc_offset=0
+            models.Timeseries, gentity=station, time_zone__utc_offset=0
         )
-        self.time_step = mommy.make(TimeStep, length_minutes=1, length_months=0)
+        self.time_step = mommy.make(models.TimeStep, length_minutes=1, length_months=0)
         self.data = {
             "gentity": station.id,
             "unit_of_measurement": self.timeseries.unit_of_measurement.id,
@@ -456,11 +462,83 @@ class TimeseriesInlineAdminFormTimeStepNotNullTestCase(TestCase):
         self.assertTrue(self.form.is_valid())
 
 
+@RandomEnhydrisTimeseriesDataDir()
+class TimeseriesUploadFileTestCase(TestCase):
+    def setUp(self):
+        self.data = self._get_basic_form_contents()
+        self.alice = User.objects.create_user(
+            username="alice", password="topsecret", is_staff=True, is_superuser=False
+        )
+        self.client.login(username="alice", password="topsecret")
+        with StringIO("Precision=2\n\n2019-08-18 12:39,0.12345678901234,\n") as f:
+            self.data["timeseries-0-data"] = f
+            self.response = self.client.post("/admin/enhydris/station/add/", self.data)
+
+    def _get_basic_form_contents(self):
+        return {
+            "name": "Hobbiton",
+            "copyright_years": "2018",
+            "copyright_holder": "Bilbo Baggins",
+            "owner": models.Organization.objects.create(name="Serial killers SA").id,
+            "stype": [mommy.make(models.StationType, descr="Meteorological").id],
+            "point_0": "20.94565",
+            "point_1": "39.12102",
+            "gentityaltcode_set-TOTAL_FORMS": "0",
+            "gentityaltcode_set-INITIAL_FORMS": "0",
+            "instrument_set-TOTAL_FORMS": "0",
+            "instrument_set-INITIAL_FORMS": "0",
+            "gentityfile_set-TOTAL_FORMS": "0",
+            "gentityfile_set-INITIAL_FORMS": "0",
+            "gentityevent_set-TOTAL_FORMS": "0",
+            "gentityevent_set-INITIAL_FORMS": "0",
+            "timeseries-TOTAL_FORMS": "1",
+            "timeseries-INITIAL_FORMS": "0",
+            "timeseries-0-variable": mommy.make(models.Variable).id,
+            "timeseries-0-unit_of_measurement": mommy.make(models.UnitOfMeasurement).id,
+            "timeseries-0-precision": 2,
+            "timeseries-0-time_zone": mommy.make(
+                models.TimeZone, code="EET", utc_offset=120
+            ).id,
+            "timeseries-0-replace_or_append": "APPEND",
+        }
+
+    def test_response(self):
+        self.assertEqual(self.response.status_code, 302)
+
+    def test_data_was_saved_with_full_precision(self):
+        # Although the time series has a specified precision of 2, we want it to store
+        # all the decimal digits to avoid losing data when the user makes an error when
+        # entering the precision.
+        filename = glob(os.path.join(settings.ENHYDRIS_TIMESERIES_DATA_DIR, "*"))[0]
+        with open(filename) as f:
+            contents = f.read()
+        value = float(contents.split(",")[1])
+        self.assertAlmostEqual(value, 0.12345678901234)
+
+    def test_data_is_appended_with_full_precision(self):
+        station = models.Station.objects.first()
+        timeseries = models.Timeseries.objects.first()
+        self.client.login(username="alice", password="topsecret")
+        self.data["timeseries-0-id"] = timeseries.id
+        self.data["timeseries-0-gentity"] = station.id
+        self.data["timeseries-INITIAL_FORMS"] = "1"
+        with StringIO("Precision=2\n\n2019-08-19 12:39,3.14159065358979,\n") as f:
+            self.data["timeseries-0-data"] = f
+            self.client.post(
+                "/admin/enhydris/station/{}/change/".format(station.id), self.data
+            )
+        filename = glob(os.path.join(settings.ENHYDRIS_TIMESERIES_DATA_DIR, "*"))[0]
+        with open(filename) as f:
+            values = [float(line.split(",")[1]) for line in f]
+        self.assertAlmostEqual(values[0], 0.12345678901234)
+        self.assertAlmostEqual(values[1], 3.14159065358979)
+
+
 class TimeseriesUploadFileWithUnicodeHeadersTestCase(TestCase):
     def setUp(self):
-        station = mommy.make(Station)
+        station = mommy.make(models.Station)
         self.timeseries = mommy.make(
-            Timeseries,
+            models.Timeseries,
             gentity=station,
             time_zone__utc_offset=0,
             variable__descr="irrelevant",
@@ -504,9 +582,9 @@ class TimeseriesUploadFileWithUnicodeHeadersTestCase(TestCase):
 
 class TimeseriesUploadInvalidFileTestCase(TestCase):
     def setUp(self):
-        station = mommy.make(Station)
+        station = mommy.make(models.Station)
         self.timeseries = mommy.make(
-            Timeseries,
+            models.Timeseries,
             gentity=station,
             time_zone__utc_offset=0,
             variable__descr="irrelevant",
@@ -529,9 +607,9 @@ class TimeseriesUploadInvalidFileTestCase(TestCase):
 
 class TimeseriesInlineAdminFormProcessWithoutFileTestCase(TestCase):
     def setUp(self):
-        station = mommy.make(Station)
+        station = mommy.make(models.Station)
         self.timeseries = mommy.make(
-            Timeseries, gentity=station, time_zone__utc_offset=0
+            models.Timeseries, gentity=station, time_zone__utc_offset=0
         )
         self.timeseries.set_data(StringIO("2019-01-01 00:30,25,\n"))
         self.data = {

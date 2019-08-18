@@ -618,6 +618,7 @@ class Timeseries(models.Model):
 
     def set_data(self, data):
         ahtimeseries = self._get_htimeseries_from_data(data)
+        ahtimeseries.precision = 15
         if not self.datafile:
             self.datafile.name = "{:010}".format(self.id)
         with open(self.datafile.path, "w") as f:
@@ -629,6 +630,7 @@ class Timeseries(models.Model):
         if (not self.datafile) or (os.path.getsize(self.datafile.path) == 0):
             return self.set_data(data)
         ahtimeseries = self._get_htimeseries_from_data(data)
+        ahtimeseries.precision = 15
         if not len(ahtimeseries.data):
             return 0
         with ropen(self.datafile.path, bufsize=80) as f:
