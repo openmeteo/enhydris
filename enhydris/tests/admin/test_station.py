@@ -250,7 +250,7 @@ class TimeseriesInlineAdminFormRefusesToAppendIfNotInOrderTestCase(TestCase):
     def setUp(self):
         station = mommy.make(models.Station)
         self.timeseries = mommy.make(
-            models.Timeseries, gentity=station, time_zone__utc_offset=0
+            models.Timeseries, gentity=station, time_zone__utc_offset=0, precision=2
         )
         self.timeseries.set_data(
             StringIO("2005-11-01 18:00,3,\n2019-01-01 00:30,25,\n")
@@ -261,6 +261,7 @@ class TimeseriesInlineAdminFormRefusesToAppendIfNotInOrderTestCase(TestCase):
             "unit_of_measurement": self.timeseries.unit_of_measurement.id,
             "variable": self.timeseries.variable.id,
             "time_zone": self.timeseries.time_zone.id,
+            "precision": 2,
         }
         self.files = {
             "data": SimpleUploadedFile(
@@ -290,6 +291,7 @@ class TimeseriesInlineAdminFormAcceptsAppendingIfInOrderTestCase(TestCase):
             gentity=station,
             time_zone__utc_offset=0,
             variable__descr="irrelevant",
+            precision=2,
         )
         self.timeseries.set_data(StringIO("2019-01-01 00:30,25,\n"))
         self.data = {
@@ -298,6 +300,7 @@ class TimeseriesInlineAdminFormAcceptsAppendingIfInOrderTestCase(TestCase):
             "unit_of_measurement": self.timeseries.unit_of_measurement.id,
             "variable": self.timeseries.variable.id,
             "time_zone": self.timeseries.time_zone.id,
+            "precision": 2,
         }
         self.files = {
             "data": SimpleUploadedFile("mytimeseries.csv", b"2019-04-09 13:36,0,\n")
@@ -332,6 +335,7 @@ class TimeseriesInlineAdminFormAcceptsReplacingTestCase(TestCase):
             gentity=station,
             time_zone__utc_offset=0,
             variable__descr="irrelevant",
+            precision=2,
         )
         self.timeseries.set_data(StringIO("2019-01-01 00:30,25,\n"))
         self.data = {
@@ -340,6 +344,7 @@ class TimeseriesInlineAdminFormAcceptsReplacingTestCase(TestCase):
             "unit_of_measurement": self.timeseries.unit_of_measurement.id,
             "variable": self.timeseries.variable.id,
             "time_zone": self.timeseries.time_zone.id,
+            "precision": 2,
         }
         self.files = {
             "data": SimpleUploadedFile(
@@ -372,13 +377,14 @@ class TimeseriesInlineAdminFormTimeStepNullTestCase(TestCase):
     def setUp(self):
         station = mommy.make(models.Station)
         self.timeseries = mommy.make(
-            models.Timeseries, gentity=station, time_zone__utc_offset=0
+            models.Timeseries, gentity=station, time_zone__utc_offset=0, precision=2
         )
         self.data = {
             "gentity": station.id,
             "unit_of_measurement": self.timeseries.unit_of_measurement.id,
             "variable": self.timeseries.variable.id,
             "time_zone": self.timeseries.time_zone.id,
+            "precision": 2,
         }
 
     def test_form_is_not_valid_when_rounding_months_not_null(self):
@@ -410,7 +416,7 @@ class TimeseriesInlineAdminFormTimeStepNotNullTestCase(TestCase):
     def setUp(self):
         station = mommy.make(models.Station)
         self.timeseries = mommy.make(
-            models.Timeseries, gentity=station, time_zone__utc_offset=0
+            models.Timeseries, gentity=station, time_zone__utc_offset=0, precision=2
         )
         self.time_step = mommy.make(models.TimeStep, length_minutes=1, length_months=0)
         self.data = {
@@ -421,6 +427,7 @@ class TimeseriesInlineAdminFormTimeStepNotNullTestCase(TestCase):
             "time_step": self.time_step.id,
             "timestamp_offset_months": 0,
             "timestamp_offset_minutes": 0,
+            "precision": 2,
         }
 
     def test_form_is_not_valid_when_offset_months_null_and_timestep_not_null(self):
@@ -462,6 +469,7 @@ class TimeseriesInlineAdminFormTimeStepNotNullTestCase(TestCase):
         self.assertTrue(self.form.is_valid())
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 @RandomEnhydrisTimeseriesDataDir()
 class TimeseriesUploadFileTestCase(TestCase):
     def setUp(self):
@@ -542,6 +550,7 @@ class TimeseriesUploadFileWithUnicodeHeadersTestCase(TestCase):
             gentity=station,
             time_zone__utc_offset=0,
             variable__descr="irrelevant",
+            precision=2,
         )
         self.data = {
             "replace_or_append": "REPLACE",
@@ -549,6 +558,7 @@ class TimeseriesUploadFileWithUnicodeHeadersTestCase(TestCase):
             "unit_of_measurement": self.timeseries.unit_of_measurement.id,
             "variable": self.timeseries.variable.id,
             "time_zone": self.timeseries.time_zone.id,
+            "precision": 2,
         }
         self.files = {
             "data": SimpleUploadedFile(
@@ -588,6 +598,7 @@ class TimeseriesUploadInvalidFileTestCase(TestCase):
             gentity=station,
             time_zone__utc_offset=0,
             variable__descr="irrelevant",
+            precision=2,
         )
         self.data = {
             "replace_or_append": "REPLACE",
@@ -595,6 +606,7 @@ class TimeseriesUploadInvalidFileTestCase(TestCase):
             "unit_of_measurement": self.timeseries.unit_of_measurement.id,
             "variable": self.timeseries.variable.id,
             "time_zone": self.timeseries.time_zone.id,
+            "precision": 2,
         }
         self.files = {"data": SimpleUploadedFile("mytimeseries.csv", b"\xbc\xbd")}
         self.form = TimeseriesInlineAdminForm(
@@ -609,7 +621,7 @@ class TimeseriesInlineAdminFormProcessWithoutFileTestCase(TestCase):
     def setUp(self):
         station = mommy.make(models.Station)
         self.timeseries = mommy.make(
-            models.Timeseries, gentity=station, time_zone__utc_offset=0
+            models.Timeseries, gentity=station, time_zone__utc_offset=0, precision=2
         )
         self.timeseries.set_data(StringIO("2019-01-01 00:30,25,\n"))
         self.data = {
@@ -618,6 +630,7 @@ class TimeseriesInlineAdminFormProcessWithoutFileTestCase(TestCase):
             "unit_of_measurement": self.timeseries.unit_of_measurement.id,
             "variable": self.timeseries.variable.id,
             "time_zone": self.timeseries.time_zone.id,
+            "precision": 2,
         }
         self.form = TimeseriesInlineAdminForm(data=self.data, instance=self.timeseries)
 

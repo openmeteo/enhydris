@@ -221,16 +221,13 @@ class TimeseriesInline(InlinePermissionsMixin, admin.StackedInline):
         (
             _("Essential information"),
             {
-                "fields": ("name", ("variable", "unit_of_measurement")),
+                "fields": ("name", ("variable", "unit_of_measurement"), "precision"),
                 "classes": ("collapse",),
             },
         ),
         (
             _("Other details"),
-            {
-                "fields": ("hidden", "instrument", "precision", "remarks"),
-                "classes": ("collapse",),
-            },
+            {"fields": ("hidden", "instrument", "remarks"), "classes": ("collapse",)},
         ),
         (
             _("Time step"),

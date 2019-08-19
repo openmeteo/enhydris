@@ -43,7 +43,7 @@ class TsdataGetTestCase(APITestCase):
         )
         station = mommy.make(models.Station)
         timeseries = mommy.make(
-            models.Timeseries, gentity=station, time_zone__utc_offset=120
+            models.Timeseries, gentity=station, time_zone__utc_offset=120, precision=2
         )
         with patch("enhydris.models.Timeseries.get_data", return_value=ahtimeseries):
             self.response = self.client.get(
@@ -69,7 +69,7 @@ class TsdataGetPermissionsTestCase(APITestCase):
     def setUp(self):
         station = mommy.make(models.Station)
         timeseries = mommy.make(
-            models.Timeseries, gentity=station, time_zone__utc_offset=120
+            models.Timeseries, gentity=station, time_zone__utc_offset=120, precision=2
         )
         self.url = "/api/stations/{}/timeseries/{}/data/".format(
             station.id, timeseries.id
@@ -97,7 +97,7 @@ class TsdataGetHtsTestCase(APITestCase):
         )
         station = mommy.make(models.Station)
         timeseries = mommy.make(
-            models.Timeseries, gentity=station, time_zone__utc_offset=120
+            models.Timeseries, gentity=station, time_zone__utc_offset=120, precision=2
         )
         with patch("enhydris.models.Timeseries.get_data", return_value=ahtimeseries):
             self.response = self.client.get(
@@ -129,7 +129,7 @@ class TsdataPostTestCase(APITestCase):
         self.mock_append_data = m
         user = mommy.make(User, username="admin", is_superuser=True)
         station = mommy.make(models.Station)
-        timeseries = mommy.make(models.Timeseries, gentity=station)
+        timeseries = mommy.make(models.Timeseries, gentity=station, precision=2)
         self.client.force_authenticate(user=user)
         self.response = self.client.post(
             "/api/stations/{}/timeseries/{}/data/".format(station.id, timeseries.id),
@@ -159,7 +159,9 @@ class TsdataPostAuthorizationTestCase(APITestCase):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
         self.user2 = mommy.make(User, is_active=True, is_superuser=False)
         self.station = mommy.make(models.Station, creator=self.user1)
-        self.timeseries = mommy.make(models.Timeseries, gentity=self.station)
+        self.timeseries = mommy.make(
+            models.Timeseries, gentity=self.station, precision=2
+        )
 
     def _post_tsdata(self):
         return self.client.post(
@@ -194,7 +196,7 @@ class TsdataPostGarbageTestCase(APITestCase):
         self.mock_append_data = m
         user = mommy.make(User, username="admin", is_superuser=True)
         station = mommy.make(models.Station)
-        timeseries = mommy.make(models.Timeseries, gentity=station)
+        timeseries = mommy.make(models.Timeseries, gentity=station, precision=2)
         self.client.force_authenticate(user=user)
         self.response = self.client.post(
             "/api/stations/{}/timeseries/{}/data/".format(station.id, timeseries.id),
@@ -223,7 +225,7 @@ class TsdataStartAndEndDateTestCase(APITestCase):
 
     def setUp(self):
         self.tz = mommy.make(models.TimeZone, code="EET", utc_offset=120)
-        self.timeseries = mommy.make(models.Timeseries, time_zone=self.tz)
+        self.timeseries = mommy.make(models.Timeseries, time_zone=self.tz, precision=2)
 
     @patch("enhydris.models.Timeseries.get_data")
     def test_called_get_data_with_proper_start_date(self, m):
@@ -252,7 +254,7 @@ class TsdataStartAndEndDateTestCase(APITestCase):
 class TsdataInvalidStartOrEndDateTestCase(APITestCase):
     def setUp(self):
         self.tz = mommy.make(models.TimeZone, code="EET", utc_offset=120)
-        self.timeseries = mommy.make(models.Timeseries, time_zone=self.tz)
+        self.timeseries = mommy.make(models.Timeseries, time_zone=self.tz, precision=2)
 
     @patch("enhydris.models.Timeseries.get_data")
     def test_invalid_start_date(self, m):
@@ -284,6 +286,7 @@ class TsdataHeadTestCase(APITestCase):
             time_zone=self.tz,
             gentity=station,
             variable__descr="irrelevant",
+            precision=2,
         )
         self.timeseries.set_data(StringIO("2018-12-09 13:10,20,\n"))
 
@@ -312,7 +315,7 @@ class TimeseriesBottomTestCase(APITestCase):
     def setUp(self, m):
         station = mommy.make(models.Station)
         timeseries = mommy.make(
-            models.Timeseries, gentity=station, time_zone__utc_offset=120
+            models.Timeseries, gentity=station, time_zone__utc_offset=120, precision=2
         )
         self.response = self.client.get(
             "/api/stations/{}/timeseries/{}/bottom/".format(station.id, timeseries.id)
@@ -334,7 +337,7 @@ class TimeseriesBottomPermissionsTestCase(APITestCase):
     def setUp(self):
         station = mommy.make(models.Station)
         timeseries = mommy.make(
-            models.Timeseries, gentity=station, time_zone__utc_offset=120
+            models.Timeseries, gentity=station, time_zone__utc_offset=120, precision=2
         )
         self.url = "/api/stations/{}/timeseries/{}/bottom/".format(
             station.id, timeseries.id
@@ -370,6 +373,7 @@ class TimeseriesPostTestCase(APITestCase):
                 "variable": self.variable.id,
                 "time_zone": self.time_zone.id,
                 "unit_of_measurement": self.unit_of_measurement.id,
+                "precision": 2,
             },
         )
 
@@ -405,6 +409,7 @@ class TimeseriesPostWithWrongStationTestCase(APITestCase):
                 "variable": self.variable.id,
                 "time_zone": self.time_zone.id,
                 "unit_of_measurement": self.unit_of_measurement.id,
+                "precision": 2,
             },
         )
 
@@ -427,7 +432,9 @@ class TimeseriesDeleteTestCase(APITestCase):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
         self.user2 = mommy.make(User, is_active=True, is_superuser=False)
         self.station = mommy.make(models.Station, creator=self.user1)
-        self.timeseries = mommy.make(models.Timeseries, gentity=self.station)
+        self.timeseries = mommy.make(
+            models.Timeseries, gentity=self.station, precision=2
+        )
 
     def test_unauthenticated_user_is_denied_permission_to_delete_timeseries(self):
         response = self.client.delete(
