@@ -473,7 +473,17 @@ class Timeseries(models.Model):
     unit_of_measurement = models.ForeignKey(UnitOfMeasurement, on_delete=models.CASCADE)
     name = models.CharField(max_length=200, blank=True)
     hidden = models.BooleanField(null=False, blank=False, default=False)
-    precision = models.SmallIntegerField(null=True, blank=True)
+    precision = models.SmallIntegerField(
+        help_text=_(
+            "The number of decimal digits to which the values of the time series "
+            "will be rounded. It's usually positive, but it can be zero or negative; "
+            "for example, for humidity it is usually zero; for wind direction in "
+            "degrees, depending on the sensor, you might want to specify "
+            "precision -1, which means the value will be 10, or 20, or 30, etc. This "
+            "only affects the rounding of values when the time series is retrieved; "
+            "values are always stored with all the decimal digits provided."
+        )
+    )
     time_zone = models.ForeignKey(TimeZone, on_delete=models.CASCADE)
     remarks = models.TextField(blank=True)
     instrument = models.ForeignKey(

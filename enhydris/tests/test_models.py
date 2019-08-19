@@ -396,6 +396,7 @@ class StationLastUpdateTestCase(TestCase):
             gentity=self.station,
             time_zone=self.time_zone,
             end_date_utc=end_date_utc,
+            precision=2,
         )
 
     def test_last_update_when_all_timeseries_have_end_date(self, m):
@@ -542,6 +543,7 @@ class TimeseriesTestCase(TestCase):
             variable=variable,
             unit_of_measurement=unit,
             time_zone=time_zone,
+            precision=2,
         )
         timeseries.save()
         self.assertEqual(models.Timeseries.objects.first().name, "Temperature")
@@ -571,7 +573,9 @@ class TimeseriesTestCase(TestCase):
 
 class TimeseriesDatesTestCase(TestCase):
     def setUp(self):
-        self.timeseries = mommy.make(models.Timeseries, time_zone__utc_offset=120)
+        self.timeseries = mommy.make(
+            models.Timeseries, time_zone__utc_offset=120, precision=2
+        )
 
         # We can't have mommy save the following two, because it calls
         # Timeseries.save(), and .save() would overwrite them.
@@ -599,7 +603,9 @@ class TimeseriesDatesTestCase(TestCase):
 
 class TimeseriesSaveDatesTestCase(TestCase):
     def setUp(self):
-        self.timeseries = mommy.make(models.Timeseries, time_zone__utc_offset=120)
+        self.timeseries = mommy.make(
+            models.Timeseries, time_zone__utc_offset=120, precision=2
+        )
 
         # Mock self.timeseries.datafile
         self.timeseries.datafile = Mock(size=50)
@@ -922,6 +928,7 @@ class TimeseriesSaveWhenTimeStepIsNullTestCase(TestCase):
             variable=variable,
             unit_of_measurement=unit,
             time_zone=time_zone,
+            precision=2,
         )
 
     def test_rounding_minutes_must_be_null(self):
@@ -968,6 +975,7 @@ class TimeseriesSaveWhenTimeStepIsNotNullTestCase(TestCase):
             time_step=time_step,
             timestamp_offset_minutes=0,
             timestamp_offset_months=0,
+            precision=2,
         )
 
     def test_offset_must_be_not_null_when_time_step_is_not_null(self):
