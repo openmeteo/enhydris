@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     "django.contrib.gis",
     "django.contrib.flatpages",
+    "django.contrib.postgres",
     "rest_framework",
     "rest_framework.authtoken",
     "rest_auth",

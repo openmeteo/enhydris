@@ -7,6 +7,8 @@ from model_mommy import mommy
 
 from enhydris import models
 
+from .test_search import SearchTestCaseBase
+
 
 def make_timeseries(*, start_date, end_date, **kwargs):
     """Make a test timeseries, setting start_date and end_date.
@@ -23,8 +25,11 @@ def make_timeseries(*, start_date, end_date, **kwargs):
         )
 
 
-class TestCaseBase(APITestCase):
-    def setUp(self):
+class SearchWithYearExistingInOneStationTest(SearchTestCaseBase, APITestCase):
+    search_term = "ts_has_years:2005,2012,2016"
+    search_result = "Tharbad"
+
+    def _create_models(self):
         komboti = mommy.make(models.Station, name="Komboti")
         tharbad = mommy.make(models.Station, name="Tharbad")
         self.komboti_temperature = make_timeseries(
@@ -53,62 +58,18 @@ class TestCaseBase(APITestCase):
         )
 
 
-class SearchWithYearExistingInOneStationTestCase(TestCaseBase):
-    def setUp(self):
-        super().setUp()
-        self.response = self.client.get(
-            "/api/stations/", {"q": "ts_has_years:2005,2012,2016"}
-        )
-
-    def test_status_code(self):
-        self.assertEqual(self.response.status_code, 200)
-
-    def test_number_of_results(self):
-        self.assertEqual(len(self.response.json()["results"]), 1)
-
-    def test_results(self):
-        self.assertEqual(self.response.json()["results"][0]["name"], "Tharbad")
+class SearchWithYearsExistingInAllStationsTest(SearchWithYearExistingInOneStationTest):
+    search_term = "ts_has_years:2005,2012"
+    search_result = {"Komboti", "Tharbad"}
+    number_of_results = 2
 
 
-class SearchWithYearsExistingInAllStationsTestCase(TestCaseBase):
-    def setUp(self):
-        super().setUp()
-        self.response = self.client.get(
-            "/api/stations/", {"q": "ts_has_years:2005,2012"}
-        )
-
-    def test_status_code(self):
-        self.assertEqual(self.response.status_code, 200)
-
-    def test_number_of_results(self):
-        self.assertEqual(len(self.response.json()["results"]), 2)
-
-    def test_results(self):
-        results = self.response.json()["results"]
-        result_names = {results[0]["name"], results[1]["name"]}
-        self.assertEqual(result_names, {"Komboti", "Tharbad"})
+class SearchWithYearsExistingNowhereTest(SearchWithYearExistingInOneStationTest):
+    search_term = "ts_has_years:2005,2012,2018"
+    search_result = set()
+    number_of_results = 0
 
 
-class SearchWithYearsExistingNowhereTestCase(TestCaseBase):
-    def setUp(self):
-        super().setUp()
-        self.response = self.client.get(
-            "/api/stations/", {"q": "ts_has_years:2005,2012,2018"}
-        )
-
-    def test_status_code(self):
-        self.assertEqual(self.response.status_code, 200)
-
-    def test_number_of_results(self):
-        self.assertEqual(len(self.response.json()["results"]), 0)
-
-
-class SearchWithGarbageTestCase(TestCaseBase):
-    def setUp(self):
-        super().setUp()
-        self.response = self.client.get(
-            "/api/stations/", {"q": "ts_has_years:hello,world"}
-        )
-
-    def test_status_code(self):
-        self.assertEqual(self.response.status_code, 404)
+class SearchWithGarbageTest(SearchWithYearExistingInOneStationTest):
+    search_term = "ts_has_years:hello,world"
+    status_code = 404

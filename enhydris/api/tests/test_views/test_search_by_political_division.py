@@ -4,15 +4,20 @@ from model_mommy import mommy
 
 from enhydris import models
 
+from .test_search import SearchTestCaseBase
 
-class TestCaseBase(APITestCase):
-    def setUp(self):
+
+class SearchBy2ndLevelPoliticalDivisionTest(SearchTestCaseBase, APITestCase):
+    search_term = "political_division:cardolan"
+    search_result = "Tharbad"
+
+    def _create_models(self):
         mommy.make(
             models.Station,
-            name="Komboti",
-            political_division__name="Arta",
-            political_division__parent__name="Epirus",
-            political_division__parent__parent__name="Greece",
+            name="Verquières",
+            political_division__name="Châteaurenard",
+            political_division__parent__name="Bouches-du-Rhône",
+            political_division__parent__parent__name="France extrême",
         )
         mommy.make(
             models.Station,
@@ -23,35 +28,30 @@ class TestCaseBase(APITestCase):
         )
 
 
-class StationSearchBy2ndLevelPoliticalDivisionTestCase(TestCaseBase):
-    def setUp(self):
-        super().setUp()
-        self.response = self.client.get(
-            "/api/stations/", {"q": "political_division:Epirus"}
-        )
-
-    def test_status_code(self):
-        self.assertEqual(self.response.status_code, 200)
-
-    def test_number_of_results(self):
-        self.assertEqual(len(self.response.json()["results"]), 1)
-
-    def test_results(self):
-        self.assertEqual(self.response.json()["results"][0]["name"], "Komboti")
+class SearchBy3rdLevelPolDivTest(SearchBy2ndLevelPoliticalDivisionTest):
+    search_term = "political_division:earth"
+    search_result = "Tharbad"
 
 
-class StationSearchBy3rdLevelPoliticalDivisionTestCase(TestCaseBase):
-    def setUp(self):
-        super().setUp()
-        self.response = self.client.get(
-            "/api/stations/", {"q": "political_division:earth"}
-        )
+class SearchBy2ndLevelPolDivWithAccentsTest(SearchBy2ndLevelPoliticalDivisionTest):
+    search_term = "political_division:rhone"
+    search_result = "Verquières"
 
-    def test_status_code(self):
-        self.assertEqual(self.response.status_code, 200)
 
-    def test_number_of_results(self):
-        self.assertEqual(len(self.response.json()["results"]), 1)
+class SearchBy3rdLevelPolDivWithAccentsTest(SearchBy2ndLevelPoliticalDivisionTest):
+    search_term = "political_division:extreme"
+    search_result = "Verquières"
 
-    def test_results(self):
-        self.assertEqual(self.response.json()["results"][0]["name"], "Tharbad")
+
+# The tests above have tested search specifically for "political_division:X". The ones
+# below are for searching for a mere "X". However, this works only for the first level.
+
+
+class SearchGeneralPolDivTest(SearchBy2ndLevelPoliticalDivisionTest):
+    search_term = "cardolan"
+    search_result = "Tharbad"
+
+
+class SearchGeneralPolDivWithAccentsTest(SearchBy2ndLevelPoliticalDivisionTest):
+    search_term = "chateaurenard"
+    search_result = "Verquières"

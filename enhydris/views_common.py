@@ -109,16 +109,16 @@ class StationListViewMixin:
         search_term is a simple word searched in various places.
         """
         return queryset.filter(
-            Q(name__icontains=search_term)
-            | Q(short_name__icontains=search_term)
-            | Q(remarks__icontains=search_term)
-            | Q(water_basin__name__icontains=search_term)
-            | Q(water_division__name__icontains=search_term)
-            | Q(political_division__name__icontains=search_term)
-            | Q(owner__organization__name__icontains=search_term)
-            | Q(owner__person__first_name__icontains=search_term)
-            | Q(owner__person__last_name__icontains=search_term)
-            | Q(timeseries__remarks__icontains=search_term)
+            Q(name__unaccent__icontains=search_term)
+            | Q(short_name__unaccent__icontains=search_term)
+            | Q(remarks__unaccent__icontains=search_term)
+            | Q(water_basin__name__unaccent__icontains=search_term)
+            | Q(water_division__name__unaccent__icontains=search_term)
+            | Q(political_division__name__unaccent__icontains=search_term)
+            | Q(owner__organization__name__unaccent__icontains=search_term)
+            | Q(owner__person__first_name__unaccent__icontains=search_term)
+            | Q(owner__person__last_name__unaccent__icontains=search_term)
+            | Q(timeseries__remarks__unaccent__icontains=search_term)
         )
 
     def _specific_filter(self, queryset, name, value):
@@ -136,28 +136,28 @@ class StationListViewMixin:
 
     def _filter_by_owner(self, queryset, value):
         return queryset.filter(
-            Q(owner__organization__name__icontains=value)
-            | Q(owner__person__first_name__icontains=value)
-            | Q(owner__person__last_name__icontains=value)
+            Q(owner__organization__name__unaccent__icontains=value)
+            | Q(owner__person__first_name__unaccent__icontains=value)
+            | Q(owner__person__last_name__unaccent__icontains=value)
         )
 
     def _filter_by_type(self, queryset, value):
         return queryset.filter(
             stype__in=models.StationType.objects.filter(
-                translations__descr__icontains=value
+                translations__descr__unaccent__icontains=value
             )
         )
 
     def _filter_by_water_division(self, queryset, value):
-        return queryset.filter(water_division__name__icontains=value)
+        return queryset.filter(water_division__name__unaccent__icontains=value)
 
     def _filter_by_water_basin(self, queryset, value):
-        return queryset.filter(water_basin__name__icontains=value)
+        return queryset.filter(water_basin__name__unaccent__icontains=value)
 
     def _filter_by_variable(self, queryset, value):
         return queryset.filter(
             timeseries__variable__in=models.Variable.objects.filter(
-                translations__descr__icontains=value
+                translations__descr__unaccent__icontains=value
             )
         )
 
@@ -205,7 +205,7 @@ class StationListViewMixin:
                         SELECT garea_ptr_id FROM enhydris_politicaldivision
                         WHERE garea_ptr_id IN (
                             SELECT id FROM enhydris_gentity
-                            WHERE LOWER(name) LIKE LOWER('%%{}%%'))
+                            WHERE LOWER(UNACCENT(name)) LIKE LOWER(UNACCENT('%%{}%%')))
                     UNION ALL
                         SELECT pd.garea_ptr_id
                         FROM enhydris_politicaldivision pd, mytable
