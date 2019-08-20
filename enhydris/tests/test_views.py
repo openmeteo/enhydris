@@ -1,4 +1,5 @@
 import datetime as dt
+from time import sleep
 from unittest import skipUnless
 
 from django.conf import settings
@@ -290,3 +291,34 @@ class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
         self.td_komboti.wait_until_is_displayed()
         self.td_agios_athanasios.wait_until_is_displayed()
         self.assertFalse(self.td_tharbad.exists())
+
+
+@skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
+class ShowOnlySearchedForStationsOnMapTestCase(SeleniumTestCase):
+
+    markers = PageElement(By.CSS_SELECTOR, ".leaflet-marker-pane")
+
+    def setUp(self):
+        mommy.make(Station, name="West", point=Point(x=23.0, y=38.0, srid=4326))
+        mommy.make(Station, name="Middle", point=Point(x=23.1, y=38.0, srid=4326))
+        mommy.make(Station, name="East", point=Point(x=23.2, y=38.0, srid=4326))
+
+    def test_list_stations_visible_on_map(self):
+        # Visit site and wait until three stations are shown
+        self.selenium.get(self.live_server_url)
+        num_stations_shown = self._get_num_stations_shown()
+        self.assertEqual(num_stations_shown, 3)
+
+        # Search so that only two stations will be found in an area that could include
+        # all three stations, and verify only two stations are shown
+        self.selenium.get(self.live_server_url + "?q=st")
+        num_stations_shown = self._get_num_stations_shown()
+        self.assertEqual(num_stations_shown, 2)
+
+    def _get_num_stations_shown(self):
+        self.markers.wait_until_exists()
+        for i in range(6):
+            result = len(self.markers.find_elements_by_tag_name("img"))
+            if result:
+                return result
+            sleep(0.5)

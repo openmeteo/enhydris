@@ -29,4 +29,7 @@ def map(request):
     map_js += "enhydris.mapMarkers={0};\n".format(
         json.dumps(settings.ENHYDRIS_MAP_MARKERS)
     )
+    map_js += "enhydris.searchString = {};\n".format(
+        json.dumps(request.GET.get("q", ""))
+    )
     return {"map_js": map_js}
