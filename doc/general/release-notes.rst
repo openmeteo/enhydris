@@ -127,8 +127,8 @@ the site, i.e. the one to which lookup descriptions not ending in
 
    PARLER_LANGUAGES = {
        SITE_ID: [
-         {"code", LANGUAGE_CODE},
-         {"code", "specify_your_second_language_here"},
+         {"code": LANGUAGE_CODE},
+         {"code": "specify_your_second_language_here"},
        ],
    }
 
