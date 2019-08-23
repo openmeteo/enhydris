@@ -50,11 +50,6 @@ class WaterBasinAdmin(GareaAdmin):
     list_display = [f.name for f in models.WaterBasin._meta.fields]
 
 
-@admin.register(models.GentityAltCodeType)
-class GentityAltCodeTypeAdmin(admin.ModelAdmin):
-    list_display = [f.name for f in models.GentityAltCodeType._meta.fields]
-
-
 @admin.register(models.FileType)
 class FileTypeAdmin(admin.ModelAdmin):
     list_display = ("id", "mime_type", "descr")

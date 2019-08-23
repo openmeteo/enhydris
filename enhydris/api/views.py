@@ -51,11 +51,6 @@ class WaterDivisionViewSet(ReadOnlyModelViewSet):
     queryset = models.WaterDivision.objects.all()
 
 
-class GentityAltCodeTypeViewSet(ReadOnlyModelViewSet):
-    serializer_class = serializers.GentityAltCodeTypeSerializer
-    queryset = models.GentityAltCodeType.objects.all()
-
-
 class OrganizationViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.OrganizationSerializer
     queryset = models.Organization.objects.all()
@@ -119,15 +114,6 @@ class VariableViewSet(ReadOnlyModelViewSet):
 class UnitOfMeasurementViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.UnitOfMeasurementSerializer
     queryset = models.UnitOfMeasurement.objects.all()
-
-
-class GentityAltCodeViewSet(ReadOnlyModelViewSet):
-    serializer_class = serializers.GentityAltCodeSerializer
-
-    def get_queryset(self):
-        return models.GentityAltCode.objects.filter(
-            gentity_id=self.kwargs["station_id"]
-        )
 
 
 class GentityEventViewSet(ReadOnlyModelViewSet):

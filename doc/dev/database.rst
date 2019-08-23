@@ -243,35 +243,6 @@ about gentities.
       The :class:`water district <models.WaterDivision>` in which
       the water basin is.
 
-.. class:: enhydris.models.GentityAltCodeType(Lookup)
-
-   The different kinds of codes that a gentity may have; see
-   :class:`~enhydris.models.GentityAltCode` for more information.
-
-.. class:: enhydris.models.GentityAltCode
-
-   While each gentity is automatically given an id by the system, some
-   stations may also have alternative codes. For example, in Greece, if
-   a database contains a measuring station that is owned by a specific
-   organisation, the station has the id given to it by the database, but
-   in addition it may have a code assigned by the organisation; some
-   also have a code created by older inter-organisational efforts to
-   create a unique list of stations in Greece; and some also have a WMO
-   code. This model therefore stores alternative codes.
-
-   .. attribute:: enhydris.models.GentityAltCode.gentity
-
-      A foreign key to :class:`~enhydris.models.Gentity`.
-
-   .. attribute:: enhydris.models.GentityAltCode.type
-
-      The type of alternative code; one of those listed in
-      :class:`~enhydris.models.GentityAltCodeType`.
-
-   .. attribute:: enhydris.models.GentityAltCode.value
-
-      A character field with the actual code.
-
 .. class:: enhydris.models.FileType(Lookup)
 
    A lookup that contains one additional field:

@@ -73,11 +73,6 @@ class InlinePermissionsMixin:
             return super().has_view_permission(request, obj)
 
 
-class GentityAltCodeInline(InlinePermissionsMixin, admin.TabularInline):
-    model = models.GentityAltCode
-    classes = ("collapse",)
-
-
 class InstrumentInline(InlinePermissionsMixin, admin.StackedInline):
     model = models.Instrument
     classes = ("collapse",)
@@ -258,7 +253,6 @@ class StationAdmin(ObjectPermissionsModelAdmin):
         TextField: {"widget": forms.Textarea(attrs={"rows": 4, "cols": 40})}
     }
     inlines = [
-        GentityAltCodeInline,
         InstrumentInline,
         GentityFileInline,
         GentityEventInline,

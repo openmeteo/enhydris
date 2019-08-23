@@ -304,8 +304,8 @@ The result is a `paginated list`_ of station types::
         ]
     }
 
-Exactly the same applies to ``gentityaltcodetypes``, ``eventtypes``,
-``instrumenttypes``, and ``variables``.
+Exactly the same applies to ``eventtypes``, ``instrumenttypes``, and
+``variables``.
 
 Besides these there are several other lookups for which the response is
 similar but may have additional information. These are
@@ -853,26 +853,6 @@ Get content of such files::
 The response is the contents of the file (usually binary data). The
 response headers contain the appropriate ``Content-Type`` (derived from
 the file's ``file_type``).
-
-Alternative codes
------------------
-
-List or get detail of station alternative codes (i.e. alternative ids)::
-
-    curl https://openmeteo.org/api/stations/1334/altcodes/
-    curl https://openmeteo.org/api/stations/1334/altcodes/4/
-
-Response example for the detail request::
-
-    {
-      "id": 4,
-      "last_modified": null,
-      "value": "42B",
-      "gentity": 1334,
-      "type": 5
-    }
-
-For the list request, the result is a `paginated list`_ of items.
 
 Events
 ------

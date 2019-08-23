@@ -11,15 +11,43 @@ from enhydris import models
 
 
 class GentityFileTestCase(APITestCase):
-    # We have extensively tested GentityAltCode, which is practically the same code,
-    # so we test this briefly.
     def setUp(self):
         self.station = mommy.make(models.Station)
-        self.gentity_file = mommy.make(models.GentityFile, gentity=self.station)
+        self.gentity_file = mommy.make(
+            models.GentityFile, gentity=self.station, descr="hello"
+        )
+        self.station2 = mommy.make(models.Station)
+        self.gentity_file2 = mommy.make(models.GentityFile, gentity=self.station2)
 
     def test_list_status_code(self):
         r = self.client.get("/api/stations/{}/files/".format(self.station.id))
         self.assertEqual(r.status_code, 200)
+
+    def test_list_length(self):
+        r = self.client.get("/api/stations/{}/files/".format(self.station.id))
+        self.assertEqual(len(r.json()["results"]), 1)
+
+    def test_list_content(self):
+        r = self.client.get("/api/stations/{}/files/".format(self.station.id))
+        self.assertEqual(r.json()["results"][0]["descr"], "hello")
+
+    def test_detail_status_code(self):
+        r = self.client.get(
+            "/api/stations/{}/files/{}/".format(self.station.id, self.gentity_file.id)
+        )
+        self.assertEqual(r.status_code, 200)
+
+    def test_detail_content(self):
+        r = self.client.get(
+            "/api/stations/{}/files/{}/".format(self.station.id, self.gentity_file.id)
+        )
+        self.assertEqual(r.json()["descr"], "hello")
+
+    def test_detail_returns_nothing_if_wrong_station(self):
+        r = self.client.get(
+            "/api/stations/{}/files/{}/".format(self.station2.id, self.gentity_file.id)
+        )
+        self.assertEqual(r.status_code, 404)
 
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)

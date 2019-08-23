@@ -162,71 +162,40 @@ class WaterBasinTestCase(TestCase):
         self.assertEqual(str(water_basin), "Baranduin")
 
 
-class GentityAltCodeTypeTestCase(TestCase):
+class StationTypeTestCase(TestCase):
     """Test lookups.
 
-    We test GentityAltCodeType as an example of Lookup. We don't test
-    EventType, StationType, InstrumentType, Variable and IntervalType, because they are
-    trivial Lookup descendants.
+    We test StationType as an example of Lookup. We don't test EventType,
+    InstrumentType, Variable and IntervalType, because they are trivial Lookup
+    descendants.
     """
 
     def test_create(self):
-        gact = models.GentityAltCodeType(descr="Old")
+        gact = models.StationType(descr="Cheap")
         gact.save()
-        self.assertEqual(models.GentityAltCodeType.objects.first().descr, "Old")
+        self.assertEqual(models.StationType.objects.first().descr, "Cheap")
 
     def test_update(self):
-        mommy.make(models.GentityAltCodeType)
-        gact = models.GentityAltCodeType.objects.first()
-        gact.descr = "Old"
+        mommy.make(models.StationType)
+        gact = models.StationType.objects.first()
+        gact.descr = "Cheap"
         gact.save()
-        self.assertEqual(models.GentityAltCodeType.objects.first().descr, "Old")
+        self.assertEqual(models.StationType.objects.first().descr, "Cheap")
 
     def test_delete(self):
-        mommy.make(models.GentityAltCodeType)
-        gact = models.GentityAltCodeType.objects.first()
+        mommy.make(models.StationType)
+        gact = models.StationType.objects.first()
         gact.delete()
-        self.assertEqual(models.GentityAltCodeType.objects.count(), 0)
+        self.assertEqual(models.StationType.objects.count(), 0)
 
     def test_str(self):
-        gact = mommy.make(models.GentityAltCodeType, descr="Old")
-        self.assertEqual(str(gact), "Old")
-
-
-class GentityAltCodeTestCase(TestCase):
-    def test_create(self):
-        station = mommy.make(models.Station)
-        gact = mommy.make(models.GentityAltCodeType)
-        gac = models.GentityAltCode(gentity=station, value="18765", type=gact)
-        gac.save()
-        self.assertEqual(models.GentityAltCode.objects.first().value, "18765")
-
-    def test_update(self):
-        mommy.make(models.GentityAltCode)
-        gac = models.GentityAltCode.objects.first()
-        gac.value = "18765"
-        gac.save()
-        self.assertEqual(models.GentityAltCode.objects.first().value, "18765")
-
-    def test_delete(self):
-        mommy.make(models.GentityAltCode)
-        gac = models.GentityAltCode.objects.first()
-        gac.delete()
-        self.assertEqual(models.GentityAltCode.objects.count(), 0)
-
-    def test_str(self):
-        gac = mommy.make(models.GentityAltCode, value="18765", type__descr="Old")
-        self.assertEqual(str(gac), "Old 18765")
-
-    def test_related_station(self):
-        station = mommy.make(models.Station)
-        gac = mommy.make(models.GentityAltCode, gentity=station)
-        self.assertEqual(gac.related_station, station)
+        gact = mommy.make(models.StationType, descr="Cheap")
+        self.assertEqual(str(gact), "Cheap")
 
 
 class FileTypeTestCase(TestCase):
     # We don't test functionality inherited from Lookup, as this is tested in
-    # GentityAltCodeTypeTestCase.
+    # StationTypeTestCase.
 
     def test_str(self):
         file_type = mommy.make(models.FileType, mime_type="image/png")
@@ -452,7 +421,7 @@ class InstrumentTestCase(TestCase):
 
 class UnitOfMeasurementTestCase(TestCase):
     # We don't test functionality inherited from Lookup, as this is tested in
-    # GentityAltCodeTypeTestCase.
+    # StationTypeTestCase.
 
     def test_str(self):
         unit = mommy.make(models.UnitOfMeasurement, symbol="mm")
@@ -493,7 +462,7 @@ class TimeZoneTestCase(TestCase):
 
 class TimeStepTestCase(TestCase):
     # We don't test functionality inherited from Lookup, as this is tested in
-    # GentityAltCodeTypeTestCase.
+    # StationTypeTestCase.
 
     def test_str_with_minutes(self):
         time_step = mommy.make(

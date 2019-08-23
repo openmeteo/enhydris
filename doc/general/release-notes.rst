@@ -149,10 +149,11 @@ Other changes
 - The templates have been refactored. Applications and installations
   with custom templates or templates inheriting the Enhydris templates
   may need to be modified.
-- GentityGenericData has been abolished, as it wasn't being used in any of the
-  known installations. Upgrading requires the table to be empty; if not,
-  upgrading will stop with an error message. Make sure the table is
-  empty before upgrading.
+- GentityGenericData and GentityAltCode have been abolished, as they
+  were practically not being used in any of the known installations.
+  Upgrading requires the tables to be empty; if not, upgrading will stop
+  with an error message. Make sure the tables are empty before
+  upgrading.
 - Stations now must have co-ordinates, i.e. the related database field
   ``gpoint.point`` is not null. If you have any stations with null
   co-ordinates, they will be silently converted to latitude zero and

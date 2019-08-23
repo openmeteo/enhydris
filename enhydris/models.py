@@ -201,32 +201,6 @@ class WaterBasin(Garea):
     f_dependencies = ["Garea"]
 
 
-class GentityAltCodeType(Lookup):
-    pass
-
-
-class GentityAltCode(models.Model):
-    last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    gentity = models.ForeignKey(Gentity, on_delete=models.CASCADE)
-    type = models.ForeignKey(GentityAltCodeType, on_delete=models.CASCADE)
-    value = models.CharField(max_length=100)
-
-    class Meta:
-        ordering = ("type__descr", "value")
-        verbose_name = _("Alternative code")
-        verbose_name_plural = _("Alternative codes")
-
-    def __str__(self):
-        return self.type.descr + " " + self.value
-
-    @property
-    def related_station(self):
-        try:
-            return Station.objects.get(id=self.gentity.id)
-        except Station.DoesNotExist:
-            return None
-
-
 class FileType(Lookup):
     mime_type = models.CharField(max_length=64)
 

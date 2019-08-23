@@ -21,12 +21,6 @@ class WaterDivisionSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class GentityAltCodeTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.GentityAltCodeType
-        fields = "__all__"
-
-
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Organization
@@ -119,12 +113,6 @@ class VariableSerializer(TranslatableModelSerializer):
 class UnitOfMeasurementSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UnitOfMeasurement
-        fields = "__all__"
-
-
-class GentityAltCodeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.GentityAltCode
         fields = "__all__"
 
 

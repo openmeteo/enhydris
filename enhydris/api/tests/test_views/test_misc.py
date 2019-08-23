@@ -14,17 +14,6 @@ class WaterDivisionTestCase(APITestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class GentityAltCodeTypeTestCase(APITestCase):
-    def setUp(self):
-        self.gentity_alt_code_type = mommy.make(models.GentityAltCodeType)
-
-    def test_get_gentity_alt_code_type(self):
-        r = self.client.get(
-            "/api/gentityaltcodetypes/{}/".format(self.gentity_alt_code_type.id)
-        )
-        self.assertEqual(r.status_code, 200)
-
-
 class OrganizationTestCase(APITestCase):
     def setUp(self):
         self.organization = mommy.make(models.Organization)
@@ -144,48 +133,8 @@ class UnitOfMeasurementTestCase(APITestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class StationAltCodeTestCase(APITestCase):
-    def setUp(self):
-        self.station = mommy.make(models.Station)
-        self.alt_code = mommy.make(
-            models.GentityAltCode, gentity=self.station, value="666"
-        )
-        self.station2 = mommy.make(models.Station)
-        self.alt_code2 = mommy.make(models.GentityAltCode, gentity=self.station2)
-
-    def test_list_status_code(self):
-        r = self.client.get("/api/stations/{}/altcodes/".format(self.station.id))
-        self.assertEqual(r.status_code, 200)
-
-    def test_list_length(self):
-        r = self.client.get("/api/stations/{}/altcodes/".format(self.station.id))
-        self.assertEqual(len(r.json()["results"]), 1)
-
-    def test_list_content(self):
-        r = self.client.get("/api/stations/{}/altcodes/".format(self.station.id))
-        self.assertEqual(r.json()["results"][0]["value"], "666")
-
-    def test_detail_status_code(self):
-        r = self.client.get(
-            "/api/stations/{}/altcodes/{}/".format(self.station.id, self.alt_code.id)
-        )
-        self.assertEqual(r.status_code, 200)
-
-    def test_detail_content(self):
-        r = self.client.get(
-            "/api/stations/{}/altcodes/{}/".format(self.station.id, self.alt_code.id)
-        )
-        self.assertEqual(r.json()["value"], "666")
-
-    def test_detail_returns_nothing_if_wrong_station(self):
-        r = self.client.get(
-            "/api/stations/{}/altcodes/{}/".format(self.station2.id, self.alt_code.id)
-        )
-        self.assertEqual(r.status_code, 404)
-
-
 class GentityEventTestCase(APITestCase):
-    # We have extensively tested GentityAltCode, which is practically the same code,
+    # We have extensively tested GentityFile, which is practically the same code,
     # so we test this briefly.
     def setUp(self):
         self.station = mommy.make(models.Station)
@@ -197,7 +146,7 @@ class GentityEventTestCase(APITestCase):
 
 
 class InstrumentTestCase(APITestCase):
-    # We have extensively tested GentityAltCode, which is practically the same code,
+    # We have extensively tested GentityFile, which is practically the same code,
     # so we test this briefly.
     def setUp(self):
         self.station = mommy.make(models.Station)
