@@ -108,7 +108,7 @@ class TimeStepForm(forms.ModelForm):
 
 
 @admin.register(models.TimeStep)
-class TimeStepAdmin(admin.ModelAdmin):
+class TimeStepAdmin(TranslatableAdmin):
     form = TimeStepForm
     list_display = [f.name for f in models.TimeStep._meta.fields]
 

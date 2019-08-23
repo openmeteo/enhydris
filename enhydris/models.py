@@ -378,7 +378,9 @@ class TimeZone(models.Model):
         ordering = ("utc_offset",)
 
 
-class TimeStep(Lookup):
+class TimeStep(TranslatableModel):
+    last_modified = models.DateTimeField(default=now, null=True, editable=False)
+    translations = TranslatedFields(descr=models.CharField(max_length=200, blank=True))
     length_minutes = models.PositiveIntegerField()
     length_months = models.PositiveSmallIntegerField()
 

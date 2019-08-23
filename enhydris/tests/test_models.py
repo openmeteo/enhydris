@@ -482,21 +482,21 @@ class TimeStepTestCase(TestCase):
         self.assertEqual(str(time_step), "twentyeightmonthly - 2 year(s), 4 month(s)")
 
     def test_save_with_both_minutes_and_months(self):
-        time_step = models.TimeStep(length_minutes=5, length_months=2)
+        time_step = models.TimeStep(descr="hello", length_minutes=5, length_months=2)
         with self.assertRaises(IntegrityError):
             time_step.save()
 
     def test_save_with_neither_minutes_nor_months(self):
-        time_step = models.TimeStep(length_minutes=0, length_months=0)
+        time_step = models.TimeStep(descr="hello", length_minutes=0, length_months=0)
         with self.assertRaises(IntegrityError):
             time_step.save()
 
     def test_save_with_minutes(self):
-        time_step = models.TimeStep(length_minutes=10, length_months=0)
+        time_step = models.TimeStep(descr="hello", length_minutes=10, length_months=0)
         time_step.save()
 
     def test_save_with_months(self):
-        time_step = models.TimeStep(length_minutes=0, length_months=3)
+        time_step = models.TimeStep(descr="hello", length_minutes=0, length_months=3)
         time_step.save()
 
 

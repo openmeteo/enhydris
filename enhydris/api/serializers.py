@@ -96,7 +96,9 @@ class WaterBasinSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class TimeStepSerializer(serializers.ModelSerializer):
+class TimeStepSerializer(TranslatableModelSerializer):
+    translations = TranslatedFieldsField(shared_model=models.TimeStep, required=False)
+
     class Meta:
         model = models.TimeStep
         fields = "__all__"

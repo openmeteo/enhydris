@@ -83,7 +83,7 @@ was worth, therefore all fields ending in ``_alt`` have been abolished.
 In the new Enhydris version, several lookups, such as variable names,
 are multilingual using django-parler. However, station, instrument and
 timeseries names and remarks, event reports, etc. (i.e. everything a
-on-admin user is expected to enter), are not multilingual. The idea is
+non-admin user is expected to enter), are not multilingual. The idea is
 that a station in Greece will have a Greek name, and this does not need
 to be transliterated. The rationale is the same as for
 `OSM's-avoid-transliteration`_ rule: transliterations can be automated,
