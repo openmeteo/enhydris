@@ -36,6 +36,7 @@ urlpatterns = [
     path("timeseries/d/<int:pk>/", views.OldTimeseriesDetailRedirectView.as_view()),
     # For the following, see ticket #181
     path("timeseries/data/", views_old.timeseries_data, name="timeseries_data"),
+    path("_nested_admin/", include("nested_admin.urls")),
 ]
 
 # A view that does nothing, that will be used in some fake patterns below

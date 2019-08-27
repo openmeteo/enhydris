@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.db.models import Q, TextField
 from django.utils.translation import ugettext_lazy as _
 
+import nested_admin
 from geowidgets import LatLonField
 from htimeseries import HTimeseries
 from rules.contrib.admin import ObjectPermissionsModelAdmin
@@ -73,7 +74,7 @@ class InlinePermissionsMixin:
             return super().has_view_permission(request, obj)
 
 
-class InstrumentInline(InlinePermissionsMixin, admin.StackedInline):
+class InstrumentInline(InlinePermissionsMixin, nested_admin.NestedStackedInline):
     model = models.Instrument
     classes = ("collapse",)
     fields = (
@@ -85,13 +86,13 @@ class InstrumentInline(InlinePermissionsMixin, admin.StackedInline):
     )
 
 
-class GentityFileInline(InlinePermissionsMixin, admin.StackedInline):
+class GentityFileInline(InlinePermissionsMixin, nested_admin.NestedStackedInline):
     model = models.GentityFile
     classes = ("collapse",)
     fields = (("descr", "date"), ("content", "file_type"), "remarks")
 
 
-class GentityEventInline(InlinePermissionsMixin, admin.StackedInline):
+class GentityEventInline(InlinePermissionsMixin, nested_admin.NestedStackedInline):
     model = models.GentityEvent
     classes = ("collapse",)
     fields = (("user", "date"), "type", "report")
@@ -208,7 +209,7 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
             self.instance.set_data(data)
 
 
-class TimeseriesInline(InlinePermissionsMixin, admin.StackedInline):
+class TimeseriesInline(InlinePermissionsMixin, nested_admin.NestedStackedInline):
     form = TimeseriesInlineAdminForm
     model = models.Timeseries
     classes = ("collapse",)
@@ -247,7 +248,7 @@ class TimeseriesInline(InlinePermissionsMixin, admin.StackedInline):
 
 
 @admin.register(models.Station)
-class StationAdmin(ObjectPermissionsModelAdmin):
+class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
     form = StationAdminForm
     formfield_overrides = {
         TextField: {"widget": forms.Textarea(attrs={"rows": 4, "cols": 40})}

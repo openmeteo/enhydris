@@ -41,12 +41,10 @@ INSTALLED_APPS = [
     "rest_captcha",
     "enhydris",
     "enhydris.api",
-    # enhydris overrides some templates from django.contrib.admin; for
-    # this reason, it must be listed in INSTALLED_APPS before
-    # django.contrib.admin.
     "django.contrib.admin",
     "rules.apps.AutodiscoverRulesConfig",
     "parler",
+    "nested_admin",
 ]
 
 MIDDLEWARE = [

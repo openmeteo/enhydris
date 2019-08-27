@@ -12,3 +12,4 @@ django-rest-captcha>=0.1.0,<1
 django-parler>=2,<3
 django-parler-rest>=2,<3
 django-geowidgets
+django-nested-admin>=3.2,<4
