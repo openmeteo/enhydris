@@ -12,8 +12,9 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet-plugins/3.0.3/layer/vector/KML.js"></script>
   <script src="{% static "js/L.Control.MousePosition.js"%}"></script>
   <script type="text/javascript" src="{% static "js/arg.js.v1.1.min.js" %}"></script>
-  <script>
-    enhydris.mapMode = 'many-stations';
-    {{ map_js | safe }}
-  </script>
+  {% block map_js %}
+    <script type="text/javascript">
+      {{ map_js | safe }}
+    </script>
+  {% endblock %}
 {% endblock %}

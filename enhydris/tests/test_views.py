@@ -322,3 +322,32 @@ class ShowOnlySearchedForStationsOnMapTestCase(SeleniumTestCase):
             if result:
                 return result
             sleep(0.5)
+
+
+@skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
+class ShowStationOnStationDetailMapTestCase(SeleniumTestCase):
+
+    markers = PageElement(By.CSS_SELECTOR, ".leaflet-marker-pane")
+
+    def setUp(self):
+        mommy.make(Station, name="West", point=Point(x=23.0, y=38.0, srid=4326))
+        self.station = mommy.make(
+            Station, name="Middle", point=Point(x=23.001, y=38.0, srid=4326)
+        )
+        mommy.make(Station, name="East", point=Point(x=23.002, y=38.0, srid=4326))
+
+    def test_shows_a_single_station_in_station_detail(self):
+        self.selenium.get(
+            "{}/stations/{}/".format(self.live_server_url, self.station.id)
+        )
+        num_stations_shown = self._get_num_stations_shown()
+        self.assertEqual(num_stations_shown, 1)
+
+    def _get_num_stations_shown(self):
+        self.markers.wait_until_exists()
+        for i in range(6):
+            result = len(self.markers.find_elements_by_tag_name("img"))
+            if result:
+                return result
+            sleep(0.5)
+        return 0

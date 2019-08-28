@@ -10,10 +10,6 @@
 {% block mainjs %}
   {{ block.super }}
   <script type="text/javascript">
-    enhydris.mapMode = "single-station";
-    {% if station %}enhydris.agentityId = {{station.id}};{% endif %}
-  </script>
-  <script type="text/javascript">
     function togl(name) {
       $("#"+ name).stop().toggle()
     }
@@ -23,6 +19,16 @@
     });
   </script>
 {% endblock %}
+
+
+{% block map_js %}
+  {{ block.super }}
+  <script type="text/javascript">
+    enhydris.mapMode = 'single-station';
+    {% if station %}enhydris.agentityId = {{station.id}};{% endif %}
+  </script>
+{% endblock %}
+
 
 {% block content %}
   <div class="container">

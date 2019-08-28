@@ -14,3 +14,11 @@
     {% include "enhydris/station_list/station_list.html" %}
   </div>
 {% endblock %}
+
+
+{% block map_js %}
+  {{ block.super }}
+  <script type="text/javascript">
+    enhydris.mapMode = 'many-stations';
+  </script>
+{% endblock %}

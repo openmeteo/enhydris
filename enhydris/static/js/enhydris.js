@@ -26,8 +26,10 @@ enhydris.mapModule = (function namespace() {
     };
 
     var _setupStationsLayer = function () {
-        var url = enhydris.rootUrl + "stations/kml/?q=" + enhydris.searchString;
-        if(enhydris.mapMode == "single-station")
+        var url = enhydris.rootUrl + "stations/kml/"
+        if(enhydris.mapMode == "many-stations")
+            url += "?q=" + enhydris.searchString
+        else if(enhydris.mapMode == "single-station")
             url += "?gentity_id=" + enhydris.agentityId;
         stationsLayer = new L.KML(url, {async: true});
         map.addLayer(stationsLayer);
