@@ -16,6 +16,21 @@ from enhydris.admin.station import TimeseriesInlineAdminForm
 from enhydris.tests import RandomEnhydrisTimeseriesDataDir
 
 
+class StationSearchTestCase(TestCase):
+    def setUp(self):
+        self.alice = User.objects.create_user(
+            username="alice", password="topsecret", is_staff=True, is_superuser=True
+        )
+        mommy.make(models.Station, name="Hobbiton")
+        mommy.make(models.Station, name="Rivendell")
+
+    def test_search_returns_correct_result(self):
+        self.client.login(username="alice", password="topsecret")
+        response = self.client.get("/admin/enhydris/station/?q=vendel")
+        self.assertContains(response, "Rivendell")
+        self.assertNotContains(response, "Hobbiton")
+
+
 class StationPermsTestCaseBase(TestCase):
     @classmethod
     def setUpClass(cls):
