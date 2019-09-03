@@ -29,7 +29,6 @@ def _station_csv(s):
         s.id,
         s.name,
         s.short_name,
-        "+".join([t.descr for t in s.stype.all()]),
         s.owner,
         s.start_date,
         s.end_date,

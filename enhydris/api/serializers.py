@@ -36,18 +36,6 @@ class PersonSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class StationTypeSerializer(TranslatableModelSerializer):
-    # To see why we specify the id, check https://stackoverflow.com/questions/36473795/
-    id = serializers.IntegerField(required=False)
-    translations = TranslatedFieldsField(
-        shared_model=models.StationType, required=False
-    )
-
-    class Meta:
-        model = models.StationType
-        fields = "__all__"
-
-
 class TimeZoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.TimeZone
@@ -140,7 +128,6 @@ class StationSerializer(serializers.ModelSerializer):
     water_basin = WaterBasinSerializer(required=False)
     water_division = WaterDivisionSerializer(required=False)
     political_division = PoliticalDivisionSerializer(required=False)
-    stype = StationTypeSerializer(many=True, required=False)
 
     class Meta:
         model = models.Station
@@ -162,5 +149,4 @@ class StationSerializer(serializers.ModelSerializer):
         except KeyError as e:
             raise serializers.ValidationError(str(e))
 
-    validate_stype = validate_nested_many_serializer
     validate_maintainers = validate_nested_many_serializer

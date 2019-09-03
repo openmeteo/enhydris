@@ -78,13 +78,6 @@ Response::
             "political_division": null,
             "parent": null
           },
-          "stype": [
-            {
-              "id": 3,
-              "last_modified": "2011-06-22T00:21:05.436765-05:00",
-              "descr": "Abstract [Συνοπτικός]"
-            }
-          ],
           "overseer": "",
           "maintainers": []
         },
@@ -496,13 +489,6 @@ Response::
         "political_division": null,
         "parent": null
       },
-      "stype": [
-        {
-          "id": 3,
-          "last_modified": "2011-06-22T00:21:05.436765-05:00",
-          "descr": "Abstract [Συνοπτικός]"
-        }
-      ],
       "overseer": "",
       "maintainers": []
     }
@@ -653,8 +639,8 @@ The response is a 201 with a similar content as the GET detail response
 (with the new data), unless there is a problem, in which case there's a
 standard `error response`_.
 
-When specifying nested objects such as ``water_basin`` or ``stype``, these
-objects are not created or updated—only the id is used and a reference to the
+When specifying nested objects such as ``water_basin``, these objects
+are not created or updated—only the id is used and a reference to the
 nested object with that id is created.
 
 PUT or PATCH a station::

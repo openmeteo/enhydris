@@ -162,6 +162,9 @@ Other changes
 - The fields ``approximate`` (used to denote that a station's location
   has been assigned roughly) and ``asrid`` (altitude SRID) have been
   abolished. The field ``srid`` has been renamed to ``original_srid``.
+- Station types have been abolished. Stations now don't have a type.
+  The related information previously stored in the database will be
+  deleted in the upgrade.
 - Stations can now only have a single overseer, specified as a text
   field. Upgrading will convert as needed, and it will also delete any
   unreferenced Person objects.

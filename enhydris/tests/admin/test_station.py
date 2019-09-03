@@ -231,7 +231,6 @@ class StationCreateSetsCreatorTestCase(TestCase):
         self.serial_killers_sa = models.Organization.objects.create(
             name="Serial killers SA"
         )
-        self.meteorological = mommy.make(models.StationType, descr="Meteorological")
 
     def test_when_creating_station_creator_is_set(self):
         self.client.login(username="bob", password="topsecret")
@@ -242,7 +241,6 @@ class StationCreateSetsCreatorTestCase(TestCase):
                 "copyright_years": "2018",
                 "copyright_holder": "Bilbo Baggins",
                 "owner": self.serial_killers_sa.id,
-                "stype": [self.meteorological.id],
                 "point_0": "20.94565",
                 "point_1": "39.12102",
                 "instrument_set-TOTAL_FORMS": "0",
@@ -501,7 +499,6 @@ class TimeseriesUploadFileTestCase(TestCase):
             "copyright_years": "2018",
             "copyright_holder": "Bilbo Baggins",
             "owner": models.Organization.objects.create(name="Serial killers SA").id,
-            "stype": [mommy.make(models.StationType, descr="Meteorological").id],
             "point_0": "20.94565",
             "point_1": "39.12102",
             "instrument_set-TOTAL_FORMS": "0",

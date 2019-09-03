@@ -263,7 +263,6 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
         "id",
         "name",
         "short_name",
-        "stype__translations__descr",
         "water_basin__name",
         "owner__ordering_string",
     )
@@ -288,7 +287,7 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
                 {
                     "fields": (
                         ("name", "short_name"),
-                        ("stype", "is_automatic"),
+                        ("is_automatic"),
                         "owner",
                         ("copyright_years", "copyright_holder"),
                     ),

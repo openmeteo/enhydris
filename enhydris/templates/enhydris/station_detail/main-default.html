@@ -35,10 +35,7 @@
     <div class="row">
       <h1>{{ station.name }}</h1>
       <p>
-        [
-          {% for stype in station.stype.all %}{{ stype.descr }}{% if not forloop.last %}, {% endif %}{% endfor %},
-          {% if station.is_automatic %}{% trans "automatic" %}{% else %}{% trans "conventional" %}{% endif %}
-        ]
+        [{% if station.is_automatic %}{% trans "automatic" %}{% else %}{% trans "conventional" %}{% endif %}]
       </p>
       <div class="col-md-4">
         {% include "enhydris/station_detail/map.html" %}

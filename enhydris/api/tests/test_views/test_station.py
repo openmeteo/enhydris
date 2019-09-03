@@ -33,7 +33,6 @@ class StationCreateTestCase(APITestCase):
         self.time_zone = mommy.make(models.TimeZone)
         self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
         self.bilbo = mommy.make(models.Person, last_name="Baggins", first_name="Bilbo")
-        self.meteorological = mommy.make(models.StationType, descr="Meteorological")
 
     def _create_station(self):
         return self.client.post(
@@ -43,7 +42,6 @@ class StationCreateTestCase(APITestCase):
                 "copyright_years": "2018",
                 "copyright_holder": "Bilbo Baggins",
                 "owner": self.bilbo.id,
-                "stype": [{"id": self.meteorological.id}],
                 "point": "SRID=4326;POINT (20.94565 39.12102)",
             },
         )
@@ -85,7 +83,6 @@ class StationUpdateAndDeleteTestCase(APITestCase):
         self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
         self.station = mommy.make(models.Station, creator=self.user1)
         self.bilbo = mommy.make(models.Person, last_name="Baggins", first_name="Bilbo")
-        self.meteorological = mommy.make(models.StationType, descr="Meteorological")
 
     def _put_station(self):
         return self.client.put(
@@ -95,7 +92,6 @@ class StationUpdateAndDeleteTestCase(APITestCase):
                 "copyright_years": "2018",
                 "copyright_holder": "Bilbo Baggins",
                 "owner": self.bilbo.id,
-                "stype": [self.meteorological.id],
                 "point": "SRID=4326;POINT (20.94565 39.12102)",
             },
         )

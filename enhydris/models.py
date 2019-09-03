@@ -266,19 +266,10 @@ class GentityEvent(models.Model):
 #
 
 
-class StationType(TranslatableModel):
-    last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    translations = TranslatedFields(descr=models.CharField(max_length=200, blank=True))
-
-    def __str__(self):
-        return self.descr
-
-
 class Station(Gpoint):
     owner = models.ForeignKey(
         Lentity, related_name="owned_stations", on_delete=models.CASCADE
     )
-    stype = models.ManyToManyField(StationType, verbose_name="type")
     is_automatic = models.BooleanField(default=False)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)

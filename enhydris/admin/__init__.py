@@ -60,11 +60,6 @@ class EventTypeAdmin(admin.ModelAdmin):
     list_display = ("id", "descr")
 
 
-@admin.register(models.StationType)
-class StationTypeAdmin(TranslatableAdmin):
-    list_display = ("id", "descr")
-
-
 @admin.register(models.InstrumentType)
 class InstrumentTypeAdmin(admin.ModelAdmin):
     list_display = [f.name for f in models.InstrumentType._meta.fields]

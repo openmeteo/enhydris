@@ -61,11 +61,6 @@ class PersonViewSet(ReadOnlyModelViewSet):
     queryset = models.Person.objects.all()
 
 
-class StationTypeViewSet(ReadOnlyModelViewSet):
-    serializer_class = serializers.StationTypeSerializer
-    queryset = models.StationType.objects.all()
-
-
 class TimeZoneViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.TimeZoneSerializer
     queryset = models.TimeZone.objects.all()

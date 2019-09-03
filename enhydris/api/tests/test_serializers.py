@@ -15,7 +15,6 @@ class StationSerializerTestCase(APITestCase):
             water_basin__name="Baraduin",
             water_division__name="Middle Earth",
             political_division__name="Eriador",
-            stype=[mommy.make(models.StationType, descr="Smurfy")],
             overseer="Bilbo Baggins",
             maintainers=[mommy.make(User, username="Bilbo")],
         )
@@ -33,11 +32,6 @@ class StationSerializerTestCase(APITestCase):
     def test_political_division(self):
         self.assertEqual(self.serializer.data["political_division"]["name"], "Eriador")
 
-    def test_stype(self):
-        self.assertEqual(
-            self.serializer.data["stype"][0]["translations"]["en"]["descr"], "Smurfy"
-        )
-
     def test_overseer(self):
         self.assertEqual(self.serializer.data["overseer"], "Bilbo Baggins")
 
@@ -52,7 +46,6 @@ class StationSerializerNestedValidationTestCase(APITestCase):
         mommy.make(models.WaterBasin, id=42)
         mommy.make(models.WaterDivision, id=43)
         mommy.make(models.PoliticalDivision, id=44)
-        mommy.make(models.StationType, id=203)
         mommy.make(models.Person, id=204)
         mommy.make(User, id=205)
         self.base_data = {
@@ -97,12 +90,4 @@ class StationSerializerNestedValidationTestCase(APITestCase):
         serializer = StationSerializer(
             data={**self.base_data, "political_division": {"di": 44}}
         )
-        self.assertFalse(serializer.is_valid())
-
-    def test_correct_nested_stype_validates(self):
-        serializer = StationSerializer(data={**self.base_data, "stype": [{"id": 203}]})
-        self.assertTrue(serializer.is_valid())
-
-    def test_incorrect_nested_stype_does_not_validate(self):
-        serializer = StationSerializer(data={**self.base_data, "stype": [{"di": 203}]})
         self.assertFalse(serializer.is_valid())

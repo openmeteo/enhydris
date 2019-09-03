@@ -141,13 +141,6 @@ class StationListViewMixin:
             | Q(owner__person__last_name__unaccent__icontains=value)
         )
 
-    def _filter_by_type(self, queryset, value):
-        return queryset.filter(
-            stype__in=models.StationType.objects.filter(
-                translations__descr__unaccent__icontains=value
-            )
-        )
-
     def _filter_by_water_division(self, queryset, value):
         return queryset.filter(water_division__name__unaccent__icontains=value)
 

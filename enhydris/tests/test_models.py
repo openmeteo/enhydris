@@ -162,40 +162,39 @@ class WaterBasinTestCase(TestCase):
         self.assertEqual(str(water_basin), "Baranduin")
 
 
-class StationTypeTestCase(TestCase):
+class VariableTestCase(TestCase):
     """Test lookups.
 
-    We test StationType as an example of Lookup. We don't test EventType,
-    InstrumentType, Variable and IntervalType, because they are trivial Lookup
-    descendants.
+    We test Variable as an example of Lookup. We don't test EventType, InstrumentType,
+    and IntervalType, because they are trivial Lookup descendants.
     """
 
     def test_create(self):
-        gact = models.StationType(descr="Cheap")
+        gact = models.Variable(descr="Temperature")
         gact.save()
-        self.assertEqual(models.StationType.objects.first().descr, "Cheap")
+        self.assertEqual(models.Variable.objects.first().descr, "Temperature")
 
     def test_update(self):
-        mommy.make(models.StationType)
-        gact = models.StationType.objects.first()
-        gact.descr = "Cheap"
+        mommy.make(models.Variable)
+        gact = models.Variable.objects.first()
+        gact.descr = "Temperature"
         gact.save()
-        self.assertEqual(models.StationType.objects.first().descr, "Cheap")
+        self.assertEqual(models.Variable.objects.first().descr, "Temperature")
 
     def test_delete(self):
-        mommy.make(models.StationType)
-        gact = models.StationType.objects.first()
+        mommy.make(models.Variable)
+        gact = models.Variable.objects.first()
         gact.delete()
-        self.assertEqual(models.StationType.objects.count(), 0)
+        self.assertEqual(models.Variable.objects.count(), 0)
 
     def test_str(self):
-        gact = mommy.make(models.StationType, descr="Cheap")
-        self.assertEqual(str(gact), "Cheap")
+        gact = mommy.make(models.Variable, descr="Temperature")
+        self.assertEqual(str(gact), "Temperature")
 
 
 class FileTypeTestCase(TestCase):
     # We don't test functionality inherited from Lookup, as this is tested in
-    # StationTypeTestCase.
+    # VariableTestCase.
 
     def test_str(self):
         file_type = mommy.make(models.FileType, mime_type="image/png")
@@ -421,7 +420,7 @@ class InstrumentTestCase(TestCase):
 
 class UnitOfMeasurementTestCase(TestCase):
     # We don't test functionality inherited from Lookup, as this is tested in
-    # StationTypeTestCase.
+    # VariableTestCase.
 
     def test_str(self):
         unit = mommy.make(models.UnitOfMeasurement, symbol="mm")
@@ -462,7 +461,7 @@ class TimeZoneTestCase(TestCase):
 
 class TimeStepTestCase(TestCase):
     # We don't test functionality inherited from Lookup, as this is tested in
-    # StationTypeTestCase.
+    # VariableTestCase.
 
     def test_str_with_minutes(self):
         time_step = mommy.make(

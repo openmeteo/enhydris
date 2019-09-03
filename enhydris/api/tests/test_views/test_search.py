@@ -97,20 +97,6 @@ class SearchByRemarksWithAccentsTestCase(SearchByRemarksTestCase):
     search_result = "Rivendell"
 
 
-class SearchByTypeTestCase(SearchTestCaseBase, APITestCase):
-    search_term = "type:elf"
-    search_result = "Rivendell"
-
-    def _create_models(self):
-        mommy.make(models.Station, stype__descr=["météorologique"], name="Hobbiton")
-        mommy.make(models.Station, stype__descr=["Elfometric"], name="Rivendell")
-
-
-class SearchByTypeWithAccentsTestCase(SearchByTypeTestCase):
-    search_term = "type:meteo"
-    search_result = "Hobbiton"
-
-
 class SearchByWaterDivisionTestCase(SearchTestCaseBase, APITestCase):
     search_term = "water_division:ondor"
     search_result = "Pelargir"

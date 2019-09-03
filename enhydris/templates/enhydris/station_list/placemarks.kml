@@ -7,8 +7,6 @@
     <name>{% if station.name %}{{ station.name }}{% else %}{{ station }}{% endif %}</name>
     <id>{{ station.id }}</id>
     <description>
-      {% for stype in station.stype.all %}{% if not forloop.first %},{% endif %}{{ stype.descr }}{% endfor %}
-      <![CDATA[<br>]]>
       {% blocktrans with owner=station.owner %}
         Owner: {{ owner }}
       {% endblocktrans %}

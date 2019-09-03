@@ -67,9 +67,7 @@ class`_:
    A character field with a descriptive name.
 
 Most lookup tables are described in a relevant section of this
-document, where their description fits better; for example,
-:class:`~enhydris.models.StationType` is described at Section
-:ref:`station`.
+document, where their description fits better.
 
 Lentities
 ---------
@@ -317,19 +315,11 @@ about gentities.
 Station and its related models
 ------------------------------
 
-.. class:: enhydris.models.StationType(Lookup)
-
-   The station type, such as "meteorological" or "stage measuring".
-
 .. class:: enhydris.models.Station(Gpoint)
 
    .. attribute:: enhydris.models.Station.owner
 
       The :class:`~enhydris.models.Lentity` that owns the station.
-
-   .. attribute:: enhydris.models.Station.type
-
-      The :class:`~enhydris.models.StationType`.
 
    .. attribute:: enhydris.models.Station.is_automatic
 
