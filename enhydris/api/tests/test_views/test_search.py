@@ -227,8 +227,12 @@ class SearchByBboxTestCase(SearchTestCaseBase, APITestCase):
 
     def _create_models(self):
         mommy.make(
-            models.Station, point=Point(x=21.0607, y=39.0952, srid=4326), name="Komboti"
+            models.Station,
+            geometry=Point(x=21.0607, y=39.0952, srid=4326),
+            name="Komboti",
         )
         mommy.make(
-            models.Station, point=Point(x=20.7085, y=38.8336, srid=4326), name="Lefkada"
+            models.Station,
+            geometry=Point(x=20.7085, y=38.8336, srid=4326),
+            name="Lefkada",
         )

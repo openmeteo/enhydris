@@ -154,10 +154,11 @@ Other changes
   Upgrading requires the tables to be empty; if not, upgrading will stop
   with an error message. Make sure the tables are empty before
   upgrading.
+- ``Gpoint.point`` has been renamed to ``Gpoint.geometry``.
 - Stations now must have co-ordinates, i.e. the related database field
-  ``gpoint.point`` is not null. If you have any stations with null
-  co-ordinates, they will be silently converted to latitude zero and
-  longitude zero during upgrading.
+  ``gpoint.gemoetry`` (formerly ``gpoint.point``) is not null. If you
+  have any stations with null co-ordinates, they will be silently
+  converted to latitude zero and longitude zero during upgrading.
 - SQLite is no longer supported.
 - The fields ``approximate`` (used to denote that a station's location
   has been assigned roughly) and ``asrid`` (altitude SRID) have been

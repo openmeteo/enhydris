@@ -149,7 +149,7 @@ implemented by using Django's `multi-table inheritance`_.
 
 .. class:: enhydris.models.Gpoint(Gentity)
 
-   .. attribute:: enhydris.models.Gpoint.point
+   .. attribute:: enhydris.models.Gpoint.geometry
 
       This is a GeoDjango PointField_ that stores the 2-d location of
       the point.

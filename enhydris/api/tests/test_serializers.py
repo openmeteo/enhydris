@@ -53,7 +53,7 @@ class StationSerializerNestedValidationTestCase(APITestCase):
             "copyright_years": "2018",
             "copyright_holder": "Bilbo Baggins",
             "owner": 55,
-            "point": "SRID=4326;POINT (20.94565 39.12102)",
+            "geometry": "SRID=4326;POINT (20.94565 39.12102)",
         }
 
     def test_correct_nested_water_basin_validates(self):

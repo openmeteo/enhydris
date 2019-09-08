@@ -29,37 +29,37 @@ class StationListTestCase(TestCase):
         mommy.make(
             Station,
             name="Komboti",
-            point=Point(x=21.06071, y=39.09518, srid=4326),
+            geometry=Point(x=21.06071, y=39.09518, srid=4326),
             original_srid=4326,
         )
         mommy.make(
             Station,
             name="Agios Athanasios",
-            point=Point(x=21.60121, y=39.22440, srid=4326),
+            geometry=Point(x=21.60121, y=39.22440, srid=4326),
             original_srid=4326,
         )
         mommy.make(
             Station,
             name="Tharbad",
-            point=Point(x=-176.48368, y=0.19377, srid=4326),
+            geometry=Point(x=-176.48368, y=0.19377, srid=4326),
             original_srid=4326,
         )
         mommy.make(
             Station,
             name="SRID Point, NoSRID Station",
-            point=Point(x=-176.48368, y=0.19377, srid=4326),
+            geometry=Point(x=-176.48368, y=0.19377, srid=4326),
             original_srid=None,
         )
         mommy.make(
             Station,
             name="NoSRID Point, SRID Station",
-            point=Point(x=-176.48368, y=0.19377, srid=None),
+            geometry=Point(x=-176.48368, y=0.19377, srid=None),
             original_srid=4326,
         )
         mommy.make(
             Station,
             name="NoSRID Point, NoSRID Station",
-            point=Point(x=-176.48368, y=0.19377, srid=None),
+            geometry=Point(x=-176.48368, y=0.19377, srid=None),
             original_srid=None,
         )
 
@@ -100,7 +100,7 @@ class StationDetailTestCase(TestCase):
         self.station = mommy.make(
             Station,
             name="Komboti",
-            point=Point(x=21.00000, y=39.00000, srid=4326),
+            geometry=Point(x=21.00000, y=39.00000, srid=4326),
             original_srid=4326,
         )
 
@@ -115,7 +115,7 @@ class StationDetailPeriodOfOperationTestCase(TestCase):
         self.station = mommy.make(
             Station,
             name="Komboti",
-            point=Point(x=21.00000, y=39.00000, srid=4326),
+            geometry=Point(x=21.00000, y=39.00000, srid=4326),
             original_srid=4326,
         )
 
@@ -254,19 +254,19 @@ class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
         mommy.make(
             Station,
             name="Komboti",
-            point=Point(x=21.06071, y=39.09518, srid=4326),
+            geometry=Point(x=21.06071, y=39.09518, srid=4326),
             original_srid=4326,
         )
         mommy.make(
             Station,
             name="Agios Athanasios",
-            point=Point(x=21.60121, y=39.22440, srid=4326),
+            geometry=Point(x=21.60121, y=39.22440, srid=4326),
             original_srid=4326,
         )
         mommy.make(
             Station,
             name="Tharbad",
-            point=Point(x=-176.48368, y=0.19377, srid=4326),
+            geometry=Point(x=-176.48368, y=0.19377, srid=4326),
             original_srid=4326,
         )
 
@@ -299,9 +299,9 @@ class ShowOnlySearchedForStationsOnMapTestCase(SeleniumTestCase):
     markers = PageElement(By.CSS_SELECTOR, ".leaflet-marker-pane")
 
     def setUp(self):
-        mommy.make(Station, name="West", point=Point(x=23.0, y=38.0, srid=4326))
-        mommy.make(Station, name="Middle", point=Point(x=23.1, y=38.0, srid=4326))
-        mommy.make(Station, name="East", point=Point(x=23.2, y=38.0, srid=4326))
+        mommy.make(Station, name="West", geometry=Point(x=23.0, y=38.0, srid=4326))
+        mommy.make(Station, name="Middle", geometry=Point(x=23.1, y=38.0, srid=4326))
+        mommy.make(Station, name="East", geometry=Point(x=23.2, y=38.0, srid=4326))
 
     def test_list_stations_visible_on_map(self):
         # Visit site and wait until three stations are shown
@@ -330,11 +330,11 @@ class ShowStationOnStationDetailMapTestCase(SeleniumTestCase):
     markers = PageElement(By.CSS_SELECTOR, ".leaflet-marker-pane")
 
     def setUp(self):
-        mommy.make(Station, name="West", point=Point(x=23.0, y=38.0, srid=4326))
+        mommy.make(Station, name="West", geometry=Point(x=23.0, y=38.0, srid=4326))
         self.station = mommy.make(
-            Station, name="Middle", point=Point(x=23.001, y=38.0, srid=4326)
+            Station, name="Middle", geometry=Point(x=23.001, y=38.0, srid=4326)
         )
-        mommy.make(Station, name="East", point=Point(x=23.002, y=38.0, srid=4326))
+        mommy.make(Station, name="East", geometry=Point(x=23.002, y=38.0, srid=4326))
 
     def test_shows_a_single_station_in_station_detail(self):
         self.selenium.get(

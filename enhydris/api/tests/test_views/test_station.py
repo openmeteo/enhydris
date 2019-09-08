@@ -42,7 +42,7 @@ class StationCreateTestCase(APITestCase):
                 "copyright_years": "2018",
                 "copyright_holder": "Bilbo Baggins",
                 "owner": self.bilbo.id,
-                "point": "SRID=4326;POINT (20.94565 39.12102)",
+                "geometry": "SRID=4326;POINT (20.94565 39.12102)",
             },
         )
 
@@ -92,7 +92,7 @@ class StationUpdateAndDeleteTestCase(APITestCase):
                 "copyright_years": "2018",
                 "copyright_holder": "Bilbo Baggins",
                 "owner": self.bilbo.id,
-                "point": "SRID=4326;POINT (20.94565 39.12102)",
+                "geometry": "SRID=4326;POINT (20.94565 39.12102)",
             },
         )
 
@@ -152,37 +152,37 @@ class StationCsvTestCase(APITestCase):
         mommy.make(
             models.Station,
             name="Komboti",
-            point=Point(x=21.06071, y=39.09518, srid=4326),
+            geometry=Point(x=21.06071, y=39.09518, srid=4326),
             original_srid=4326,
         )
         mommy.make(
             models.Station,
             name="Agios Athanasios",
-            point=Point(x=21.60121, y=39.22440, srid=4326),
+            geometry=Point(x=21.60121, y=39.22440, srid=4326),
             original_srid=4326,
         )
         mommy.make(
             models.Station,
             name="Tharbad",
-            point=Point(x=-176.48368, y=0.19377, srid=4326),
+            geometry=Point(x=-176.48368, y=0.19377, srid=4326),
             original_srid=4326,
         )
         mommy.make(
             models.Station,
             name="SRID Point, NoSRID Station",
-            point=Point(x=-176.48368, y=0.19377, srid=4326),
+            geometry=Point(x=-176.48368, y=0.19377, srid=4326),
             original_srid=None,
         )
         mommy.make(
             models.Station,
             name="NoSRID Point, SRID Station",
-            point=Point(x=-176.48368, y=0.19377, srid=None),
+            geometry=Point(x=-176.48368, y=0.19377, srid=None),
             original_srid=4326,
         )
         mommy.make(
             models.Station,
             name="NoSRID Point, NoSRID Station",
-            point=Point(x=-176.48368, y=0.19377, srid=None),
+            geometry=Point(x=-176.48368, y=0.19377, srid=None),
             original_srid=None,
         )
 
@@ -202,7 +202,7 @@ class StationCsvTestCase(APITestCase):
                 stations_csv = f.open("stations.csv").read().decode()
                 self.assertIn("SRID Point, NoSRID Station", stations_csv)
 
-    def test_station_with_point_with_no_original_srid_is_included(self):
+    def test_station_with_geometry_with_no_original_srid_is_included(self):
         response = self.client.get("/api/stations/csv/")
         with tempfile.TemporaryFile() as t:
             t.write(response.content)
@@ -210,7 +210,7 @@ class StationCsvTestCase(APITestCase):
                 stations_csv = f.open("stations.csv").read().decode()
                 self.assertIn("NoSRID Point, SRID Station", stations_csv)
 
-    def test_station_with_no_srid_and_point_with_no_srid_is_included(self):
+    def test_station_with_no_srid_and_geometry_with_no_srid_is_included(self):
         response = self.client.get("/api/stations/csv/")
         with tempfile.TemporaryFile() as t:
             t.write(response.content)

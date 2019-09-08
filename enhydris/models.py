@@ -135,23 +135,23 @@ class Gpoint(Gentity):
     original_srid = models.IntegerField(null=True, blank=True)
     altitude = models.FloatField(null=True, blank=True)
     f_dependencies = ["Gentity"]
-    point = models.PointField()
+    geometry = models.PointField()
 
     def original_abscissa(self):
-        if self.point and self.original_srid:
-            (x, y) = self.point.transform(self.original_srid, clone=True)
+        if self.geometry and self.original_srid:
+            (x, y) = self.geometry.transform(self.original_srid, clone=True)
             return round(x, 2) if abs(x) > 180 and abs(y) > 90 else x
-        elif self.point:
-            return self.point.x
+        elif self.geometry:
+            return self.geometry.x
         else:
             return None
 
     def original_ordinate(self):
-        if self.point and self.original_srid:
-            (x, y) = self.point.transform(self.original_srid, clone=True)
+        if self.geometry and self.original_srid:
+            (x, y) = self.geometry.transform(self.original_srid, clone=True)
             return round(y, 2) if abs(x) > 180 and abs(y) > 90 else y
-        elif self.point:
-            return self.point.y
+        elif self.geometry:
+            return self.geometry.y
         else:
             return None
 
@@ -541,7 +541,7 @@ class Timeseries(models.Model):
             )
 
     def _set_extra_timeseries_properties(self, ahtimeseries):
-        if self.gentity.gpoint.point:
+        if self.gentity.gpoint.geometry:
             location = {
                 "abscissa": self.gentity.gpoint.original_abscissa(),
                 "ordinate": self.gentity.gpoint.original_ordinate(),

@@ -24,7 +24,7 @@ class StationDetail(DetailView):
     template_name = "enhydris/station_detail/main.html"
 
     def render_to_response(self, *args, **kwargs):
-        p = self.object.point
+        p = self.object.geometry
         map_extent = [p.x, p.y, p.x, p.y]
         ensure_extent_is_large_enough(map_extent)
         self.request.map_viewport = map_extent

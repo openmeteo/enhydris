@@ -15,7 +15,7 @@ from enhydris import models
 
 
 class StationAdminForm(forms.ModelForm):
-    point = LatLonField(
+    geometry = LatLonField(
         label=_("Co-ordinates"),
         help_text=_("Longitude and latitude in decimal degrees"),
     )
@@ -301,7 +301,7 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
                         "political_division",
                         "water_division",
                         "water_basin",
-                        ("point", "original_srid"),
+                        ("geometry", "original_srid"),
                         ("altitude"),
                     ),
                     "classes": ("collapse",),

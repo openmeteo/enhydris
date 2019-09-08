@@ -291,7 +291,7 @@ class StationTestCase(TestCase):
             copyright_holder="Bilbo Baggins",
             copyright_years="2018",
             name="Hobbiton",
-            point=Point(x=21.06071, y=39.09518, srid=4326),
+            geometry=Point(x=21.06071, y=39.09518, srid=4326),
         )
         station.save()
         self.assertEqual(models.Station.objects.first().name, "Hobbiton")
@@ -319,7 +319,7 @@ class StationOriginalCoordinatesTestCase(TestCase):
         mommy.make(
             models.Station,
             name="Komboti",
-            point=Point(x=21.06071, y=39.09518, srid=4326),
+            geometry=Point(x=21.06071, y=39.09518, srid=4326),
             original_srid=2100,
         )
         self.station = models.Station.objects.get(name="Komboti")
@@ -336,7 +336,7 @@ class StationOriginalCoordinatesWithNullSridTestCase(TestCase):
         mommy.make(
             models.Station,
             name="Komboti",
-            point=Point(x=21.06071, y=39.09518, srid=4326),
+            geometry=Point(x=21.06071, y=39.09518, srid=4326),
             original_srid=None,
         )
         self.station = models.Station.objects.get(name="Komboti")
@@ -616,7 +616,7 @@ class TimeseriesGetDataTestCase(TestCase):
             models.Station,
             name="Celduin",
             original_srid=2100,
-            point=Point(x=21.06071, y=39.09518, srid=4326),
+            geometry=Point(x=21.06071, y=39.09518, srid=4326),
             altitude=219,
         )
         cls.timeseries = mommy.make(
@@ -689,7 +689,7 @@ class TimeseriesGetDataTestCase(TestCase):
         self.assertEqual(self.data.comment, "Celduin\n\nThis timeseries rocks")
 
     def test_location_is_none(self):
-        self.timeseries.gentity.gpoint.point = None
+        self.timeseries.gentity.gpoint.geometry = None
         data = self.timeseries.get_data()
         self.assertIsNone(data.location)
 

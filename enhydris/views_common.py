@@ -163,7 +163,7 @@ class StationListViewMixin:
             ((minx, miny), (minx, maxy), (maxx, maxy), (maxx, miny), (minx, miny)),
             srid=4326,
         )
-        return queryset.filter(point__contained=geom)
+        return queryset.filter(geometry__contained=geom)
 
     def _filter_by_ts_only(self, queryset, value):
         return queryset.annotate(tsnum=Count("timeseries")).exclude(tsnum=0)
@@ -216,7 +216,7 @@ class StationListViewMixin:
 
     def _get_bounding_box(self):
         queryset = self._get_unsorted_undistinct_queryset()
-        extent = queryset.aggregate(Extent("point"))["point__extent"]
+        extent = queryset.aggregate(Extent("geometry"))["geometry__extent"]
         if extent is None:
             extent = settings.ENHYDRIS_MAP_DEFAULT_VIEWPORT[:]
         else:

@@ -13,7 +13,7 @@
       <![CDATA[<br><br>]]>
       <![CDATA[<a href='/stations/{{ station.id }}/'>{% trans "Details..." %}</a>]]>
     </description>
-    {{ station.point.kml|safe }}
+    {{ station.geometry.kml|safe }}
   </Placemark>
   {% endfor %}
 {% endblock %}
