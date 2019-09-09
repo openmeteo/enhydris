@@ -95,7 +95,7 @@ class StationListViewMixin:
         """Return the queryset refined according to search_term.
 
         search_term can either be a word or a "name:value" string, such as
-        political_division:greece.
+        variable:temperature.
         """
         if ":" not in search_term:
             return self._general_filter(queryset, search_term)
@@ -112,9 +112,6 @@ class StationListViewMixin:
             Q(name__unaccent__icontains=search_term)
             | Q(short_name__unaccent__icontains=search_term)
             | Q(remarks__unaccent__icontains=search_term)
-            | Q(water_basin__name__unaccent__icontains=search_term)
-            | Q(water_division__name__unaccent__icontains=search_term)
-            | Q(political_division__name__unaccent__icontains=search_term)
             | Q(owner__organization__name__unaccent__icontains=search_term)
             | Q(owner__person__first_name__unaccent__icontains=search_term)
             | Q(owner__person__last_name__unaccent__icontains=search_term)
@@ -124,7 +121,7 @@ class StationListViewMixin:
     def _specific_filter(self, queryset, name, value):
         """Return the queryset refined according to the specified name and value.
 
-        E.g. name can be "political_division" and value can be "greece". Value can also
+        E.g. name can be "variable" and value can be "temperature". Value can also
         be an integer, in which case it refers to the id.
         """
         method_name = "_filter_by_" + name
@@ -140,12 +137,6 @@ class StationListViewMixin:
             | Q(owner__person__first_name__unaccent__icontains=value)
             | Q(owner__person__last_name__unaccent__icontains=value)
         )
-
-    def _filter_by_water_division(self, queryset, value):
-        return queryset.filter(water_division__name__unaccent__icontains=value)
-
-    def _filter_by_water_basin(self, queryset, value):
-        return queryset.filter(water_basin__name__unaccent__icontains=value)
 
     def _filter_by_variable(self, queryset, value):
         return queryset.filter(
@@ -188,31 +179,21 @@ class StationListViewMixin:
             ]
         )
 
-    def _filter_by_political_division(self, queryset, value):
-        return queryset.extra(
-            where=[
-                """
-                enhydris_station.gpoint_ptr_id IN (
-                SELECT id FROM enhydris_gentity WHERE political_division_id IN (
-                    WITH RECURSIVE mytable(garea_ptr_id) AS (
-                        SELECT garea_ptr_id FROM enhydris_politicaldivision
-                        WHERE garea_ptr_id IN (
-                            SELECT id FROM enhydris_gentity
-                            WHERE LOWER(UNACCENT(name)) LIKE LOWER(UNACCENT('%%{}%%')))
-                    UNION ALL
-                        SELECT pd.garea_ptr_id
-                        FROM enhydris_politicaldivision pd, mytable
-                        WHERE pd.parent_id=mytable.garea_ptr_id
-                    )
-                    SELECT g.id FROM enhydris_gentity g, mytable
-                    WHERE g.id=mytable.garea_ptr_id))
-                """.format(
-                    value, value
-                )
-            ]
+    def _filter_by_in(self, queryset, value):
+        gareas = models.Garea.objects.filter(
+            Q(name__unaccent__icontains=value)
+            | Q(short_name__unaccent__icontains=value)
         )
-
-    _filter_by_country = _filter_by_political_division  # synonym
+        search_terms = None
+        for garea in gareas:
+            item = Q(geometry__contained=garea.geometry)
+            if search_terms is None:
+                search_terms = item
+            else:
+                search_terms = search_terms | item
+        if search_terms is None:
+            return queryset.none()
+        return queryset.filter(search_terms)
 
     def _get_bounding_box(self):
         queryset = self._get_unsorted_undistinct_queryset()

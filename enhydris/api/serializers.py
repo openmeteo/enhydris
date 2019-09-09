@@ -12,12 +12,12 @@ class TimeseriesSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class WaterDivisionSerializer(serializers.ModelSerializer):
+class GareaSerializer(serializers.ModelSerializer):
     # To see why we specify the id, check https://stackoverflow.com/questions/36473795/
     id = serializers.IntegerField(required=False)
 
     class Meta:
-        model = models.WaterDivision
+        model = models.Garea
         fields = "__all__"
 
 
@@ -42,15 +42,6 @@ class TimeZoneSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class PoliticalDivisionSerializer(serializers.ModelSerializer):
-    # To see why we specify the id, check https://stackoverflow.com/questions/36473795/
-    id = serializers.IntegerField(required=False)
-
-    class Meta:
-        model = models.PoliticalDivision
-        fields = "__all__"
-
-
 class IntervalTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.IntervalType
@@ -72,15 +63,6 @@ class EventTypeSerializer(serializers.ModelSerializer):
 class InstrumentTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.InstrumentType
-        fields = "__all__"
-
-
-class WaterBasinSerializer(serializers.ModelSerializer):
-    # To see why we specify the id, check https://stackoverflow.com/questions/36473795/
-    id = serializers.IntegerField(required=False)
-
-    class Meta:
-        model = models.WaterBasin
         fields = "__all__"
 
 
@@ -125,23 +107,9 @@ class InstrumentSerializer(serializers.ModelSerializer):
 
 
 class StationSerializer(serializers.ModelSerializer):
-    water_basin = WaterBasinSerializer(required=False)
-    water_division = WaterDivisionSerializer(required=False)
-    political_division = PoliticalDivisionSerializer(required=False)
-
     class Meta:
         model = models.Station
         exclude = ("creator", "maintainers")
-
-    def validate_nested_serializer(self, value):
-        try:
-            return value["id"]
-        except KeyError as e:
-            raise serializers.ValidationError(str(e))
-
-    validate_water_basin = validate_nested_serializer
-    validate_water_division = validate_nested_serializer
-    validate_political_division = validate_nested_serializer
 
     def validate_nested_many_serializer(self, value):
         try:

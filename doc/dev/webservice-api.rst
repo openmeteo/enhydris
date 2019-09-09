@@ -38,46 +38,7 @@ Response::
           "end_date": null,
           "copyright_holder": "HCMR",
           "copyright_years": "2012-",
-          "water_basin": {
-            "id": 1384,         
-            "last_modified": "2013-08-29T02:13:45.278429-05:00",
-            "name": "ΥΠΟΛΟΙΠΑ ΑΤΤΙΚΗΣ",
-            "short_name": "ΥΠΟΛΟΙΠΑ",
-            "remarks": "",
-            "area": null,
-            "mpoly": null,
-            "water_basin": null,
-            "water_division": 506,                                
-            "political_division": 84,         
-            "parent": null
-          },
-          "water_division": {
-            "id": 506,      
-            "last_modified": null,                            
-            "name": "ΑΤΤΙΚΗ              ",
-            "short_name": "ΑΤΤΙΚΗ  ",
-            "remarks": "",                               
-            "area": null,
-            "mpoly": null,     
-            "water_basin": null,
-            "water_division": null,
-            "political_division": null                                    
-          },                   
           "owner": 11,
-          "political_division": {    
-            "id": 84,      
-            "last_modified": null,   
-            "name": "GREECE",        
-            "short_name": "GREECE",
-            "remarks": "",
-            "area": null,    
-            "mpoly": null,
-            "code": "GR",
-            "water_basin": null,
-            "water_division": null,
-            "political_division": null,
-            "parent": null
-          },
           "overseer": "",
           "maintainers": []
         },
@@ -302,9 +263,8 @@ Exactly the same applies to ``eventtypes``, ``instrumenttypes``, and
 
 Besides these there are several other lookups for which the response is
 similar but may have additional information. These are
-``organizations``, ``persons``, ``timezones``, ``politicaldivisions``,
-``waterdivisions``, ``intervaltypes``, ``filetypes``, ``basins``,
-``timesteps`` and ``units``.
+``organizations``, ``persons``, ``timezones``, ``intervaltypes``,
+``filetypes``, ``timesteps`` and ``units``.
 
 Response format for ``organizations``::
 
@@ -337,38 +297,6 @@ Response format for ``timezones``::
         "utc_offset": -300
     }
 
-Response format for ``politicaldivisions``::
-
-    {
-      "id": 424,
-      "last_modified": null,
-      "name": "ΦΛΩΡΙΝΑΣ            ",
-      "short_name": "ΦΛΩΡΙΝΑΣ",
-      "remarks": "",
-      "area": null,
-      "mpoly": null,
-      "code": "",
-      "water_basin": null,
-      "water_division": null,
-      "political_division": null,
-      "parent": 307
-    }
-
-Response format for ``waterdivisions``::
-
-      {
-        "id": 511,
-        "last_modified": null,
-        "name": "ΑΝΑΤΟΛΙΚΗ ΜΑΚΕΔΟΝΙΑ ",
-        "short_name": "Α-ΜΑΚΕΔ ",
-        "remarks": "",
-        "area": null,
-        "mpoly": null,
-        "water_basin": null,
-        "water_division": null,
-        "political_division": null
-      }
-
 Response format for ``intervaltypes``::
 
     {
@@ -385,22 +313,6 @@ Response format for ``filetypes``::
     "last_modified": "2011-06-22T05:04:03.461401Z",
     "descr": "png Picture",
     "mime_type": "image/png"
-  }
-
-Response format for ``basins``::
-
-  {
-    "id": 1343,
-    "last_modified": "2011-12-15T12:39:48.264386Z",
-    "name": "Σαρανταπόταμος",
-    "short_name": "",
-    "remarks": "",
-    "area": null,
-    "mpoly": null,
-    "water_basin": null,
-    "water_division": 507,
-    "political_division": 303,
-    "parent": null
   }
 
 Response format for ``timesteps``::
@@ -449,46 +361,7 @@ Response::
       "end_date": null,
       "copyright_holder": "HCMR",
       "copyright_years": "2012-",
-      "water_basin": {
-        "id": 1384,         
-        "last_modified": "2013-08-29T02:13:45.278429-05:00",
-        "name": "ΥΠΟΛΟΙΠΑ ΑΤΤΙΚΗΣ",
-        "short_name": "ΥΠΟΛΟΙΠΑ",
-        "remarks": "",
-        "area": null,
-        "mpoly": null,
-        "water_basin": null,
-        "water_division": 506,                                
-        "political_division": 84,         
-        "parent": null
-      },
-      "water_division": {
-        "id": 506,      
-        "last_modified": null,                            
-        "name": "ΑΤΤΙΚΗ              ",
-        "short_name": "ΑΤΤΙΚΗ  ",
-        "remarks": "",                               
-        "area": null,
-        "mpoly": null,     
-        "water_basin": null,
-        "water_division": null,
-        "political_division": null                                    
-      },                   
       "owner": 11,
-      "political_division": {    
-        "id": 84,      
-        "last_modified": null,   
-        "name": "GREECE",        
-        "short_name": "GREECE",
-        "remarks": "",
-        "area": null,    
-        "mpoly": null,
-        "code": "GR",
-        "water_basin": null,
-        "water_division": null,
-        "political_division": null,
-        "parent": null
-      },
       "overseer": "",
       "maintainers": []
     }
@@ -526,10 +399,9 @@ Search stations
 
 Limit the returned stations with the ``q`` parameter. The following will
 return all stations where **the specified words appear anywhere** in the
-name, remarks, water basin name, water division name, political division
-name, owner name, or timeseries remarks. The match is case insensitive,
-and the words are actually substrings (i.e. they can match part of a
-word)::
+name, remarks, owner name, or timeseries remarks. The match is case
+insensitive, and the words are actually substrings (i.e. they can match
+part of a word)::
 
     curl 'https://openmeteo.org/api/stations/?q=athens+research'
 
@@ -550,31 +422,10 @@ Or **by type**::
 
     curl 'https://openmeteo.org/api/stations/?q=type:meteorological'
 
-Or **by water division**::
-
-    curl 'https://openmeteo.org/api/stations/?q=water_division:attica'
-
-Or **by water basin**::
-
-    curl 'https://openmeteo.org/api/stations/?q=water_basin:peneios'
-
 Or **by variable** (i.e. one of the timeseries of the station refers to that
 variable)::
 
     curl 'https://openmeteo.org/api/stations/?q=variable:temperature'
-
-Or **by political division or country**::
-
-    curl 'https://openmeteo.org/api/stations/?q=political_division:greece'
-
-Political divisions are recursive; the prefecture of Larissa is in the
-regional unit of Thessaly which is in the country Greece. If a station
-is registered as being in Larissa, it will match
-``political_division:larissa`` and ``political_division:thessaly`` and
-``political_division:greece``. You can also use ``country:greece``, but
-``country`` works merely as a synonym of ``political_division`` (i.e.
-``country:larissa`` would also work), so it's better to use the more
-accurate ``political_division``.
 
 You can also search **by bounding box**. The following will find
 stations that are enclosed in the specified rectangle (the numbers are
@@ -639,9 +490,9 @@ The response is a 201 with a similar content as the GET detail response
 (with the new data), unless there is a problem, in which case there's a
 standard `error response`_.
 
-When specifying nested objects such as ``water_basin``, these objects
-are not created or updated—only the id is used and a reference to the
-nested object with that id is created.
+When specifying nested objects, these objects are not created or
+updated—only the id is used and a reference to the nested object with
+that id is created.
 
 PUT or PATCH a station::
 

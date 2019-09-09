@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from django.conf import settings
-from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import MultiPolygon, Point, Polygon
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
@@ -97,54 +97,6 @@ class SearchByRemarksWithAccentsTestCase(SearchByRemarksTestCase):
     search_result = "Rivendell"
 
 
-class SearchByWaterDivisionTestCase(SearchTestCaseBase, APITestCase):
-    search_term = "water_division:ondor"
-    search_result = "Pelargir"
-
-    def _create_models(self):
-        mommy.make(models.Station, water_division__name="Sélune", name="Ducey")
-        mommy.make(models.Station, water_division__name="Gondor", name="Pelargir")
-
-
-class SearchByWaterDivisionWithAccentsTestCase(SearchByWaterDivisionTestCase):
-    search_term = "water_division:elu"
-    search_result = "Ducey"
-
-
-class SearchGeneralByWaterDivisionTestCase(SearchByWaterDivisionTestCase):
-    search_term = "ondor"
-    search_result = "Pelargir"
-
-
-class SearchGeneralByWaterDivisionWithAccentsTestCase(SearchByWaterDivisionTestCase):
-    search_term = "elu"
-    search_result = "Ducey"
-
-
-class SearchByWaterBasinTestCase(SearchTestCaseBase, APITestCase):
-    search_term = "water_basin:andu"
-    search_result = "Hobbiton"
-
-    def _create_models(self):
-        mommy.make(models.Station, water_basin__name="Baranduin", name="Hobbiton")
-        mommy.make(models.Station, water_basin__name="Lhûn", name="Mithlond")
-
-
-class SearchByWaterBasinWithAccentsTestCase(SearchByWaterBasinTestCase):
-    search_term = "water_basin:hun"
-    search_result = "Mithlond"
-
-
-class SearchGeneralByWaterBasinTestCase(SearchByWaterBasinTestCase):
-    search_term = "andu"
-    search_result = "Hobbiton"
-
-
-class SearchGeneralByWaterBasinWithAccentsTestCase(SearchByWaterBasinTestCase):
-    search_term = "hun"
-    search_result = "Mithlond"
-
-
 language_settings = {
     "LANGUAGE_CODE": "en",
     "PARLER_LANGUAGES": {
@@ -236,3 +188,28 @@ class SearchByBboxTestCase(SearchTestCaseBase, APITestCase):
             geometry=Point(x=20.7085, y=38.8336, srid=4326),
             name="Lefkada",
         )
+
+
+class SearchByInTestCase(SearchTestCaseBase, APITestCase):
+    search_term = "in:baranduin"
+    search_result = "Sarn Ford"
+
+    def _create_models(self):
+        mommy.make(
+            models.Garea,
+            geometry=MultiPolygon(Polygon(((30, 20), (45, 40), (10, 40), (30, 20)))),
+            name="Baranduin",
+            short_name="ME07",
+        )
+        mommy.make(models.Station, geometry=Point(x=35, y=20), name="Sarn Ford")
+        mommy.make(models.Station, geometry=Point(x=5, y=20), name="Mithlond")
+
+
+class SearchByInUsingCodeTestCase(SearchByInTestCase, APITestCase):
+    search_term = "in:me07"
+
+
+class SearchByInWithEmptyResultTestCase(SearchByInTestCase, APITestCase):
+    search_term = "in:nothing_has_this_name"
+    number_of_results = 0
+    search_result = set()

@@ -7,7 +7,6 @@
     <thead>
       <tr>
         <th>{% sorter "name" request.session.sort _("Name") %}</th>
-        <th>{% sorter "water_basin" request.session.sort _("Water basin") %}</th>
         <th>{% sorter "owner" request.session.sort _("Owner") %}</th>
         <th>{% trans "Last update" %}</th>
       </tr>
@@ -16,7 +15,6 @@
       {% for object in object_list %}
         <tr>
           <td><a href="{% url "station_detail" pk=object.id %}">{{ object.name }}</a></td>
-          <td>{{ object.water_basin|default_if_none:"" }}</td>
           <td>{{ object.owner|default_if_none:"" }}</td>
           <td>{{ object.last_update|naturaltime|default_if_none:"" }}</td>
         </tr>

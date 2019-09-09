@@ -46,9 +46,9 @@ class StationViewSet(StationListViewMixin, ModelViewSet):
         return response
 
 
-class WaterDivisionViewSet(ReadOnlyModelViewSet):
-    serializer_class = serializers.WaterDivisionSerializer
-    queryset = models.WaterDivision.objects.all()
+class GareaViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.GareaSerializer
+    queryset = models.Garea.objects.all()
 
 
 class OrganizationViewSet(ReadOnlyModelViewSet):
@@ -64,11 +64,6 @@ class PersonViewSet(ReadOnlyModelViewSet):
 class TimeZoneViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.TimeZoneSerializer
     queryset = models.TimeZone.objects.all()
-
-
-class PoliticalDivisionViewSet(ReadOnlyModelViewSet):
-    serializer_class = serializers.PoliticalDivisionSerializer
-    queryset = models.PoliticalDivision.objects.all()
 
 
 class IntervalTypeViewSet(ReadOnlyModelViewSet):
@@ -89,11 +84,6 @@ class EventTypeViewSet(ReadOnlyModelViewSet):
 class InstrumentTypeViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.InstrumentTypeSerializer
     queryset = models.InstrumentType.objects.all()
-
-
-class WaterBasinViewSet(ReadOnlyModelViewSet):
-    serializer_class = serializers.WaterBasinSerializer
-    queryset = models.WaterBasin.objects.all()
 
 
 class TimeStepViewSet(ReadOnlyModelViewSet):

@@ -5,12 +5,12 @@ from model_mommy import mommy
 from enhydris import models
 
 
-class WaterDivisionTestCase(APITestCase):
+class GareaTestCase(APITestCase):
     def setUp(self):
-        self.water_division = mommy.make(models.WaterDivision)
+        self.garea = mommy.make(models.Garea)
 
-    def test_get_water_division(self):
-        r = self.client.get("/api/waterdivisions/{}/".format(self.water_division.id))
+    def test_get_garea(self):
+        r = self.client.get("/api/gareas/{}/".format(self.garea.id))
         self.assertEqual(r.status_code, 200)
 
 
@@ -38,17 +38,6 @@ class TimeZoneTestCase(APITestCase):
 
     def test_get_time_zone(self):
         r = self.client.get("/api/timezones/{}/".format(self.time_zone.id))
-        self.assertEqual(r.status_code, 200)
-
-
-class PoliticalDivisionTestCase(APITestCase):
-    def setUp(self):
-        self.political_division = mommy.make(models.PoliticalDivision)
-
-    def test_get_political_division(self):
-        r = self.client.get(
-            "/api/politicaldivisions/{}/".format(self.political_division.id)
-        )
         self.assertEqual(r.status_code, 200)
 
 
@@ -85,15 +74,6 @@ class InstrumentTypeTestCase(APITestCase):
 
     def test_get_instrument_type(self):
         r = self.client.get("/api/instrumenttypes/{}/".format(self.instrument_type.id))
-        self.assertEqual(r.status_code, 200)
-
-
-class WaterBasinTestCase(APITestCase):
-    def setUp(self):
-        self.water_basin = mommy.make(models.WaterBasin)
-
-    def test_get_water_basin(self):
-        r = self.client.get("/api/basins/{}/".format(self.water_basin.id))
         self.assertEqual(r.status_code, 200)
 
 

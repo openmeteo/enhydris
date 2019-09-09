@@ -1,0 +1,13 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+  <form enctype="multipart/form-data" action="." method="post">
+    {% csrf_token %}
+    <table>
+        <tbody>
+            {{ form.as_table }}
+        </tbody>
+    </table>
+    <input type="submit" value="{% trans "Upload" %}">
+{% endblock %}

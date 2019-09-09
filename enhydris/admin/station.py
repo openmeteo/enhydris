@@ -259,14 +259,8 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
         GentityEventInline,
         TimeseriesInline,
     ]
-    search_fields = (
-        "id",
-        "name",
-        "short_name",
-        "water_basin__name",
-        "owner__ordering_string",
-    )
-    list_display = ("name", "water_basin", "owner")
+    search_fields = ("id", "name", "short_name", "owner__ordering_string")
+    list_display = ("name", "owner")
 
     def get_queryset(self, request):
         result = super().get_queryset(request)
@@ -297,13 +291,7 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
             (
                 _("Location"),
                 {
-                    "fields": (
-                        "political_division",
-                        "water_division",
-                        "water_basin",
-                        ("geometry", "original_srid"),
-                        ("altitude"),
-                    ),
+                    "fields": (("geometry", "original_srid"), ("altitude")),
                     "classes": ("collapse",),
                 },
             ),

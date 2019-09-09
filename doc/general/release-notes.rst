@@ -141,6 +141,28 @@ is important to use ``SITE_ID`` as the key and not ``None``.
 .. _PARLER_LANGUAGES: https://django-parler.readthedocs.io/en/latest/configuration.html#parler-languages
 .. _but in django-parler: https://stackoverflow.com/questions/40187339/django-parler-doesnt-show-tabs-in-admin/
 
+Geographical areas
+^^^^^^^^^^^^^^^^^^
+
+Each station (and more generally each Gentity) used to have three
+foreign keys to water basins, water divisions, and political divisions
+(the latter were hierarchical, being countries at the top level). This
+is no longer the case. Water basins, water divisions, and political
+divisions have been abolished. Instead, there is a mere Garea entity,
+that can belong in a category. You create as many categories as you want
+(countries, water basins according to the EU, water basins according to
+some other authority, prefectures, whatever you like) and you upload a
+shapefile of them (it's mandatory that they have a geometry).
+
+There is no foreign key between stations (or other Gentities) and
+Gareas. To find which stations are in a Garea, the system does a
+point-in-polygon query.
+
+The upgrade will delete all existing water basins, water divisions, and
+political divisions, and all existing relationships between them. This
+change is non-reversible. It will not create any Gareas. You can use the
+admin to upload Gareas.
+
 Other changes
 ^^^^^^^^^^^^^
 

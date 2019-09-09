@@ -110,15 +110,6 @@ post_save.connect(post_save_person_or_organization, sender=Organization)
 
 class Gentity(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    water_basin = models.ForeignKey(
-        "WaterBasin", null=True, blank=True, on_delete=models.CASCADE
-    )
-    water_division = models.ForeignKey(
-        "WaterDivision", null=True, blank=True, on_delete=models.CASCADE
-    )
-    political_division = models.ForeignKey(
-        "PoliticalDivision", null=True, blank=True, on_delete=models.CASCADE
-    )
     name = models.CharField(max_length=200, blank=True)
     short_name = models.CharField(max_length=50, blank=True)
     remarks = models.TextField(blank=True)
@@ -168,37 +159,21 @@ class Gline(Gentity):
     linestring = models.LineStringField(null=True, blank=True)
 
 
+class GareaCategory(Lookup):
+    class Meta:
+        verbose_name = "Garea categories"
+        verbose_name_plural = "Garea categories"
+
+
 class Garea(Gentity):
-    area = models.FloatField(null=True, blank=True)
+    category = models.ForeignKey(GareaCategory, on_delete=models.CASCADE)
+    geometry = models.MultiPolygonField()
     f_dependencies = ["Gentity"]
-    mpoly = models.MultiPolygonField(null=True, blank=True)
 
 
 #
 # Gentity-related models
 #
-
-
-class PoliticalDivision(Garea):
-    parent = models.ForeignKey("self", null=True, blank=True, on_delete=models.CASCADE)
-    code = models.CharField(max_length=5, blank=True)
-
-    f_dependencies = ["Garea"]
-
-    def __str__(self):
-        result = super().__str__()
-        if self.parent:
-            result = result + ", " + self.parent.__str__()
-        return result
-
-
-class WaterDivision(Garea):
-    f_dependencies = ["Garea"]
-
-
-class WaterBasin(Garea):
-    parent = models.ForeignKey("self", null=True, blank=True, on_delete=models.CASCADE)
-    f_dependencies = ["Garea"]
 
 
 class FileType(Lookup):

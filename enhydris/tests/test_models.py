@@ -4,7 +4,7 @@ from io import StringIO
 from unittest.mock import MagicMock, Mock, mock_open, patch
 
 from django.conf import settings
-from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import MultiPolygon, Point, Polygon
 from django.core.files.base import ContentFile
 from django.db import IntegrityError
 from django.test import TestCase
@@ -75,91 +75,6 @@ class OrganizationTestCase(TestCase):
         mommy.make(models.Organization, name="Crooks Intl", acronym="Crooks")
         organization = models.Organization.objects.first()
         self.assertEqual(organization.ordering_string, "Crooks Intl")
-
-
-class PoliticalDivisionTestCase(TestCase):
-    # We don't assume we start with a clean table, because a data migration creates
-    # countries.
-
-    def test_create(self):
-        poldiv = models.PoliticalDivision(name="Attica")
-        poldiv.save()
-        self.assertEqual(
-            models.PoliticalDivision.objects.get(pk=poldiv.pk).name, "Attica"
-        )
-
-    def test_update(self):
-        mommy.make(models.PoliticalDivision)
-        poldiv = models.PoliticalDivision.objects.first()
-        poldiv.name = "Attica"
-        poldiv.save()
-        self.assertEqual(
-            models.PoliticalDivision.objects.get(pk=poldiv.pk).name, "Attica"
-        )
-
-    def test_delete(self):
-        mommy.make(models.PoliticalDivision)
-        n = models.PoliticalDivision.objects.count()
-        poldiv = models.PoliticalDivision.objects.first()
-        poldiv.delete()
-        self.assertEqual(models.PoliticalDivision.objects.count(), n - 1)
-
-    def test_str(self):
-        poldiv = mommy.make(models.PoliticalDivision, name="Attica")
-        self.assertEqual(str(poldiv), "Attica")
-
-    def test_str_nested(self):
-        greece = mommy.make(models.PoliticalDivision, name="Greece")
-        attica = mommy.make(models.PoliticalDivision, name="Attica", parent=greece)
-        self.assertEqual(str(attica), "Attica, Greece")
-
-
-class WaterDivisionTestCase(TestCase):
-    def test_create(self):
-        watdiv = models.WaterDivision(name="Attica")
-        watdiv.save()
-        self.assertEqual(models.WaterDivision.objects.first().name, "Attica")
-
-    def test_update(self):
-        mommy.make(models.WaterDivision)
-        watdiv = models.WaterDivision.objects.first()
-        watdiv.name = "Attica"
-        watdiv.save()
-        self.assertEqual(models.WaterDivision.objects.first().name, "Attica")
-
-    def test_delete(self):
-        mommy.make(models.WaterDivision)
-        watdiv = models.WaterDivision.objects.first()
-        watdiv.delete()
-        self.assertEqual(models.WaterDivision.objects.count(), 0)
-
-    def test_str(self):
-        watdiv = mommy.make(models.WaterDivision, name="Attica")
-        self.assertEqual(str(watdiv), "Attica")
-
-
-class WaterBasinTestCase(TestCase):
-    def test_create(self):
-        water_basin = models.WaterBasin(name="Baranduin")
-        water_basin.save()
-        self.assertEqual(models.WaterBasin.objects.first().name, "Baranduin")
-
-    def test_update(self):
-        mommy.make(models.WaterBasin)
-        water_basin = models.WaterBasin.objects.first()
-        water_basin.name = "Baranduin"
-        water_basin.save()
-        self.assertEqual(models.WaterBasin.objects.first().name, "Baranduin")
-
-    def test_delete(self):
-        mommy.make(models.WaterBasin)
-        water_basin = models.WaterBasin.objects.first()
-        water_basin.delete()
-        self.assertEqual(models.WaterBasin.objects.count(), 0)
-
-    def test_str(self):
-        water_basin = mommy.make(models.WaterBasin, name="Baranduin")
-        self.assertEqual(str(water_basin), "Baranduin")
 
 
 class VariableTestCase(TestCase):
@@ -234,8 +149,8 @@ class GentityFileTestCase(TestCase):
         self.assertEqual(gentity_file.related_station, station)
 
     def test_related_station_is_empty_when_gentity_is_not_station(self):
-        water_basin = mommy.make(models.WaterBasin)
-        gentity_file = mommy.make(models.GentityFile, gentity=water_basin)
+        garea = mommy.make(models.Garea)
+        gentity_file = mommy.make(models.GentityFile, gentity=garea)
         self.assertIsNone(gentity_file.related_station)
 
 
@@ -278,9 +193,38 @@ class GentityEventTestCase(TestCase):
         self.assertEqual(gentity_event.related_station, station)
 
     def test_related_station_is_empty_when_gentity_is_not_station(self):
-        water_basin = mommy.make(models.WaterBasin)
-        gentity_event = mommy.make(models.GentityEvent, gentity=water_basin)
+        garea = mommy.make(models.Garea)
+        gentity_event = mommy.make(models.GentityEvent, gentity=garea)
         self.assertIsNone(gentity_event.related_station)
+
+
+class GareaTestCase(TestCase):
+    def test_create(self):
+        category = mommy.make(models.GareaCategory)
+        garea = models.Garea(
+            name="Esgalduin",
+            category=category,
+            geometry=MultiPolygon(Polygon(((30, 20), (45, 40), (10, 40), (30, 20)))),
+        )
+        garea.save()
+        self.assertEqual(models.Garea.objects.first().name, "Esgalduin")
+
+    def test_update(self):
+        mommy.make(models.Garea)
+        garea = models.Garea.objects.first()
+        garea.name = "Esgalduin"
+        garea.save()
+        self.assertEqual(models.Garea.objects.first().name, "Esgalduin")
+
+    def test_delete(self):
+        mommy.make(models.Garea)
+        garea = models.Garea.objects.first()
+        garea.delete()
+        self.assertEqual(models.Garea.objects.count(), 0)
+
+    def test_str(self):
+        garea = mommy.make(models.Garea, name="Esgalduin")
+        self.assertEqual(str(garea), "Esgalduin")
 
 
 class StationTestCase(TestCase):

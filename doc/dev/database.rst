@@ -115,7 +115,7 @@ geographical entities) are measuring stations, cities, boreholes and
 watersheds. A gentity can be a point (e.g. stations and boreholes), a
 surface (e.g. lakes and watersheds), a line (e.g. aqueducts), or a
 network (e.g. a river). The gentities implemented in the core are
-measuring stations and water basins. The gentity hierarchy is
+measuring stations and generic gareas. The gentity hierarchy is
 implemented by using Django's `multi-table inheritance`_.
 
 .. class:: enhydris.models.Gentity
@@ -132,20 +132,6 @@ implemented by using Django's `multi-table inheritance`_.
    .. attribute:: enhydris.models.Gentity.remarks
 
       A field with general remarks about the gentity. Unlimited length.
-
-   .. attribute:: enhydris.models.Gentity.water_basin
-
-      The :class:`water basin <models.WaterBasin>` where the gentity is.
-
-   .. attribute:: enhydris.models.Gentity.water_division
-
-      The water division in which the gentity is.  Foreign key to
-      :class:`~enhydris.models.WaterDivision`.
-
-   .. attribute:: enhydris.models.Gentity.political_division
-
-      The country or other political division in which the gentity is.
-      Foreign key to :class:`~enhydris.models.PoliticalDivision`.
 
 .. class:: enhydris.models.Gpoint(Gentity)
 
@@ -167,79 +153,22 @@ implemented by using Django's `multi-table inheritance`_.
 
       The altitude in metres above mean sea level.
 
-.. class:: enhydris.models.Gline(Gentity)
-
-   .. attribute:: enhydris.models.Gline.gpoint1
-                  enhydris.models.Gline.gpoint2
-
-      The starting and ending points of the line; foreign keys to
-      :class:`~enhydris.models.Gpoint`.
-
-   .. attribute:: enhydris.models.Gline.length
-
-      The length of the line in meters.
-
 .. class:: enhydris.models.Garea(Gentity)
 
-   .. attribute:: enhydris.models.Garea.area
+   .. attribute:: enhydris.models.Garea.category
 
-      The size of the area in square meters.
+      A Garea belongs to a category, such as "water basin" or "country".
+      Foreign key to ``GareaCategory``.
+
+   .. attribute:: enhydris.models.Garea.geometry
+
+      A MultiPolygon.
 
 Additional information for generic gentities
 --------------------------------------------
 
 This section describes models that provide additional information
 about gentities.
-
-.. class:: enhydris.models.PoliticalDivision(Garea)
-
-   From an administrative point of view, the world is divided into
-   countries. Each country is then divided into further divisions, which
-   may be called states, districts, counties, provinces, prefectures,
-   and so on, which may be further subdivided. Greece, for example, is
-   divided in districts, which are subdivided in prefectures. How these
-   divisions and subdivisions are named, and the way and depth of
-   subdividing, differs from country to country.
-
-   :class:`~enhydris.models.PoliticalDivision` is a recursive model that
-   represents such political divisions. The top-level political division
-   is a country, and lower levels differ from country to country.
-
-   .. attribute:: enhydris.models.PoliticalDivision.parent
-
-      For top-level political divisions, that is, countries, this
-      attribute is null; otherwise, it points to the containing
-      political division.
-
-   .. attribute:: enhydris.models.PoliticalDivision.code
-
-      For top-level political divisions, that is, countries, this is the
-      two-character ISO 3166 country code. For lower level political
-      divisions, it can be a country-specific division code; for
-      example, for US states, it can be the two-character state code. Up
-      to five characters.
-
-.. class:: enhydris.models.WaterDivision(Garea)
-
-   A water division is a collection of basins. Water divisions may be
-   used for administrative purposes, each water division being under
-   the authority of one organisation or organisational division.
-   Usually a water division consists of adjacent basins or of nearby
-   islands or both.
-
-.. class:: enhydris.models.WaterBasin(Garea)
-
-   A water basin.
-
-   .. attribute:: enhydris.models.WaterBasin.parent
-
-      If this is a subbasin, this field points to the containing
-      water basin.
-
-   .. attribute:: enhydris.models.WaterBasin.water_division
-
-      The :class:`water district <models.WaterDivision>` in which
-      the water basin is.
 
 .. class:: enhydris.models.FileType(Lookup)
 

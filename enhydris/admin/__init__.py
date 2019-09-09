@@ -7,6 +7,7 @@ from parler.admin import TranslatableAdmin
 
 from enhydris import models
 
+from .garea import GareaAdmin  # NOQA
 from .station import StationAdmin  # NOQA
 
 
@@ -23,31 +24,6 @@ class OrganizationAdmin(LentityAdmin):
 @admin.register(models.Person)
 class PersonAdmin(LentityAdmin):
     list_display = [f.name for f in models.Person._meta.fields]
-
-
-@admin.register(models.Gentity)
-class GentityAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(models.Garea)
-class GareaAdmin(GentityAdmin):
-    pass
-
-
-@admin.register(models.PoliticalDivision)
-class PoliticalDivisionAdmin(GareaAdmin):
-    list_display = [f.name for f in models.PoliticalDivision._meta.fields]
-
-
-@admin.register(models.WaterDivision)
-class WaterDivisionAdmin(GareaAdmin):
-    list_display = ("id", "last_modified", "name", "short_name")
-
-
-@admin.register(models.WaterBasin)
-class WaterBasinAdmin(GareaAdmin):
-    list_display = [f.name for f in models.WaterBasin._meta.fields]
 
 
 @admin.register(models.FileType)
