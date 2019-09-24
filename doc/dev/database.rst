@@ -125,9 +125,12 @@ implemented by using Django's `multi-table inheritance`_.
       A field with the name of the gentity, such as the name of a
       measuring station. Up to 200 characters.
 
-   .. attribute:: enhydris.models.Gentity.short_name
+   .. attribute:: enhydris.models.Gentity.code
 
-      A field with a short name of the gentity. Up to 50 characters.
+      An optional field with a code for the gentity. Up to 50
+      characters. It can be useful for entities that have a code, e.g.
+      watersheds are codified by the EU, and the watershed of Nestos
+      River has code EL07.
 
    .. attribute:: enhydris.models.Gentity.remarks
 

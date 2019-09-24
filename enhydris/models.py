@@ -111,7 +111,7 @@ post_save.connect(post_save_person_or_organization, sender=Organization)
 class Gentity(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
     name = models.CharField(max_length=200, blank=True)
-    short_name = models.CharField(max_length=50, blank=True)
+    code = models.CharField(max_length=50, blank=True)
     remarks = models.TextField(blank=True)
 
     class Meta:
@@ -119,7 +119,7 @@ class Gentity(models.Model):
         ordering = ("name",)
 
     def __str__(self):
-        return self.name or self.short_name or str(self.id)
+        return self.name or self.code or str(self.id)
 
 
 class Gpoint(Gentity):

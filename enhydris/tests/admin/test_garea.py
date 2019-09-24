@@ -194,10 +194,10 @@ class ProcessUploadedShapefileTestCase(ProcessUploadedShapefileTestCaseBase):
         self.assertAlmostEqual(esgalduin.area, 612.5)
 
     def test_esgalduin_code(self):
-        self.assertEqual(models.Garea.objects.get(name="Esgalduin").short_name, "")
+        self.assertEqual(models.Garea.objects.get(name="Esgalduin").code, "")
 
     def test_celduin_code(self):
-        self.assertEqual(models.Garea.objects.get(name="Celduin").short_name, "ME05")
+        self.assertEqual(models.Garea.objects.get(name="Celduin").code, "ME05")
 
 
 class WithMissingNameTestCase(ProcessUploadedShapefileTestCaseBase):

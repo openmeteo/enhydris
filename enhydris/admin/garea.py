@@ -86,7 +86,7 @@ class GareaForm(forms.ModelForm):
 @admin.register(models.Garea)
 class GareaAdmin(admin.ModelAdmin):
     form = GareaForm
-    list_display = ["id", "name", "short_name", "category"]
+    list_display = ["id", "name", "code", "category"]
 
     def get_urls(self):
         urls = super().get_urls()
@@ -157,9 +157,7 @@ class GareaAdmin(admin.ModelAdmin):
         else:
             garea.geometry = MultiPolygon(feature.geom.geos)
         garea.name = self._get_feature_attr(feature, "Name")
-        garea.short_name = (
-            self._get_feature_attr(feature, "Code", allow_empty=True) or ""
-        )
+        garea.code = self._get_feature_attr(feature, "Code", allow_empty=True) or ""
         garea.category = category
         return garea
 

@@ -110,7 +110,7 @@ class StationListViewMixin:
         """
         return queryset.filter(
             Q(name__unaccent__icontains=search_term)
-            | Q(short_name__unaccent__icontains=search_term)
+            | Q(code__unaccent__icontains=search_term)
             | Q(remarks__unaccent__icontains=search_term)
             | Q(owner__organization__name__unaccent__icontains=search_term)
             | Q(owner__person__first_name__unaccent__icontains=search_term)
@@ -181,8 +181,7 @@ class StationListViewMixin:
 
     def _filter_by_in(self, queryset, value):
         gareas = models.Garea.objects.filter(
-            Q(name__unaccent__icontains=value)
-            | Q(short_name__unaccent__icontains=value)
+            Q(name__unaccent__icontains=value) | Q(code__unaccent__icontains=value)
         )
         search_terms = None
         for garea in gareas:

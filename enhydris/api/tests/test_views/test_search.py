@@ -74,8 +74,8 @@ class SearchByShortNameTestCase(SearchTestCaseBase, APITestCase):
     search_result = "1"
 
     def _create_models(self):
-        mommy.make(models.Station, short_name="Hobbiton", name="1")
-        mommy.make(models.Station, short_name="Sélune", name="2")
+        mommy.make(models.Station, code="Hobbiton", name="1")
+        mommy.make(models.Station, code="Sélune", name="2")
 
 
 class SearchByShortNameWithAccentsTestCase(SearchByShortNameTestCase):
@@ -199,7 +199,7 @@ class SearchByInTestCase(SearchTestCaseBase, APITestCase):
             models.Garea,
             geometry=MultiPolygon(Polygon(((30, 20), (45, 40), (10, 40), (30, 20)))),
             name="Baranduin",
-            short_name="ME07",
+            code="ME07",
         )
         mommy.make(models.Station, geometry=Point(x=35, y=20), name="Sarn Ford")
         mommy.make(models.Station, geometry=Point(x=5, y=20), name="Mithlond")

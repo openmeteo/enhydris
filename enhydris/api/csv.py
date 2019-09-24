@@ -25,7 +25,7 @@ def _station_csv(s):
     return [
         s.id,
         s.name,
-        s.short_name,
+        s.code,
         s.owner,
         s.start_date,
         s.end_date,

@@ -15,6 +15,13 @@ from enhydris import models
 
 
 class StationAdminForm(forms.ModelForm):
+    code = forms.CharField(
+        required=False,
+        help_text=_(
+            "If the station has a code (e.g. one given by another agency), you "
+            "can enter it here."
+        ),
+    )
     geometry = LatLonField(
         label=_("Co-ordinates"),
         help_text=_("Longitude and latitude in decimal degrees"),
@@ -259,7 +266,7 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
         GentityEventInline,
         TimeseriesInline,
     ]
-    search_fields = ("id", "name", "short_name", "owner__ordering_string")
+    search_fields = ("id", "name", "code", "owner__ordering_string")
     list_display = ("name", "owner")
 
     def get_queryset(self, request):
@@ -280,7 +287,7 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
                 _("Essential information"),
                 {
                     "fields": (
-                        ("name", "short_name"),
+                        ("name", "code"),
                         ("is_automatic"),
                         "owner",
                         ("copyright_years", "copyright_holder"),
