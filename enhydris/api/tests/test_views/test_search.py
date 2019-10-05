@@ -179,14 +179,10 @@ class SearchByBboxTestCase(SearchTestCaseBase, APITestCase):
 
     def _create_models(self):
         mommy.make(
-            models.Station,
-            geometry=Point(x=21.0607, y=39.0952, srid=4326),
-            name="Komboti",
+            models.Station, geom=Point(x=21.0607, y=39.0952, srid=4326), name="Komboti"
         )
         mommy.make(
-            models.Station,
-            geometry=Point(x=20.7085, y=38.8336, srid=4326),
-            name="Lefkada",
+            models.Station, geom=Point(x=20.7085, y=38.8336, srid=4326), name="Lefkada"
         )
 
 
@@ -197,12 +193,12 @@ class SearchByInTestCase(SearchTestCaseBase, APITestCase):
     def _create_models(self):
         mommy.make(
             models.Garea,
-            geometry=MultiPolygon(Polygon(((30, 20), (45, 40), (10, 40), (30, 20)))),
+            geom=MultiPolygon(Polygon(((30, 20), (45, 40), (10, 40), (30, 20)))),
             name="Baranduin",
             code="ME07",
         )
-        mommy.make(models.Station, geometry=Point(x=35, y=20), name="Sarn Ford")
-        mommy.make(models.Station, geometry=Point(x=5, y=20), name="Mithlond")
+        mommy.make(models.Station, geom=Point(x=35, y=20), name="Sarn Ford")
+        mommy.make(models.Station, geom=Point(x=5, y=20), name="Mithlond")
 
 
 class SearchByInUsingCodeTestCase(SearchByInTestCase, APITestCase):

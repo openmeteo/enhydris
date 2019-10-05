@@ -5,7 +5,7 @@
     <div id="mapid" class="map"></div>
   </div>
   <div class="panel-footer">
-    ϕ, λ = {{ station.geometry.y | floatformat:5 }}, {{ station.geometry.x | floatformat:5 }}
+    ϕ, λ = {{ station.geom.y | floatformat:5 }}, {{ station.geom.x | floatformat:5 }}
     {% if station.original_srid != 4326 %}
       <small>
         <br>

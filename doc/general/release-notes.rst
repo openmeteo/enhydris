@@ -150,9 +150,8 @@ foreign keys to water basins, water divisions, and political divisions
 is no longer the case. Water basins, water divisions, and political
 divisions have been abolished. Instead, there is a mere Garea entity,
 that can belong in a category. You create as many categories as you want
-(countries, water basins according to the EU, water basins according to
-some other authority, prefectures, whatever you like) and you upload a
-shapefile of them (it's mandatory that they have a geometry).
+(countries, water basins, prefectures, whatever you like) and you upload
+a shapefile of them (it's mandatory that they have a geometry).
 
 There is no foreign key between stations (or other Gentities) and
 Gareas. To find which stations are in a Garea, the system does a
@@ -176,9 +175,9 @@ Other changes
   Upgrading requires the tables to be empty; if not, upgrading will stop
   with an error message. Make sure the tables are empty before
   upgrading.
-- ``Gpoint.point`` has been renamed to ``Gpoint.geometry``.
+- ``Gpoint.point`` has been renamed to ``Gpoint.geom``.
 - Stations now must have co-ordinates, i.e. the related database field
-  ``gpoint.gemoetry`` (formerly ``gpoint.point``) is not null. If you
+  ``gpoint.geometry`` (formerly ``gpoint.point``) is not null. If you
   have any stations with null co-ordinates, they will be silently
   converted to latitude zero and longitude zero during upgrading.
 - SQLite is no longer supported.

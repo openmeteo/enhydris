@@ -190,7 +190,7 @@ class ProcessUploadedShapefileTestCase(ProcessUploadedShapefileTestCaseBase):
         self.assertEqual(self.result, (2, 0))
 
     def test_esgalduin_area(self):
-        esgalduin = models.Garea.objects.get(name="Esgalduin").geometry
+        esgalduin = models.Garea.objects.get(name="Esgalduin").geom
         self.assertAlmostEqual(esgalduin.area, 612.5)
 
     def test_esgalduin_code(self):

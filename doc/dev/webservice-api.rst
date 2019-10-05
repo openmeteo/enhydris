@@ -32,7 +32,7 @@ Response::
           "remarks": "ΕΛΛΗΝΙΚΟ ΚΕΝΤΡΟ ΘΑΛΑΣΣΙΩΝ ΕΡΕΥΝΩΝ",
           "original_srid": 2100,
           "altitude": 2,
-          "geometry": "SRID=4326;POINT (23.7025252977241 37.91860884428689)",
+          "geom": "SRID=4326;POINT (23.7025252977241 37.91860884428689)",
           "is_automatic": true,
           "start_date": "2012-09-20",
           "end_date": null,
@@ -355,7 +355,7 @@ Response::
       "remarks": "ΕΛΛΗΝΙΚΟ ΚΕΝΤΡΟ ΘΑΛΑΣΣΙΩΝ ΕΡΕΥΝΩΝ",
       "original_srid": 2100,
       "altitude": 2,
-      "geometry": "SRID=4326;POINT (23.7025252977241 37.91860884428689)",
+      "geom": "SRID=4326;POINT (23.7025252977241 37.91860884428689)",
       "is_automatic": true,
       "start_date": "2012-09-20",
       "end_date": null,
@@ -483,7 +483,7 @@ POST to create a station::
 
     curl -X POST -H "Authorization: token OAUTH-TOKEN" \
         -d "name=My station" -d "copyright_holder=Joe User" \
-        -d "copyright_years=2019" -d "geometry=POINT(20.94565 39.12102)" \
+        -d "copyright_years=2019" -d "geom=POINT(20.94565 39.12102)" \
         -d "owner=11" https://openmeteo.org/api/stations/
 
 The response is a 201 with a similar content as the GET detail response

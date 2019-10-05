@@ -154,7 +154,7 @@ class StationListViewMixin:
             ((minx, miny), (minx, maxy), (maxx, maxy), (maxx, miny), (minx, miny)),
             srid=4326,
         )
-        return queryset.filter(geometry__contained=geom)
+        return queryset.filter(geom__contained=geom)
 
     def _filter_by_ts_only(self, queryset, value):
         return queryset.annotate(tsnum=Count("timeseries")).exclude(tsnum=0)
@@ -185,7 +185,7 @@ class StationListViewMixin:
         )
         search_terms = None
         for garea in gareas:
-            item = Q(geometry__contained=garea.geometry)
+            item = Q(geom__contained=garea.geom)
             if search_terms is None:
                 search_terms = item
             else:
@@ -196,7 +196,7 @@ class StationListViewMixin:
 
     def _get_bounding_box(self):
         queryset = self._get_unsorted_undistinct_queryset()
-        extent = queryset.aggregate(Extent("geometry"))["geometry__extent"]
+        extent = queryset.aggregate(Extent("geom"))["geom__extent"]
         if extent is None:
             extent = settings.ENHYDRIS_MAP_DEFAULT_VIEWPORT[:]
         else:

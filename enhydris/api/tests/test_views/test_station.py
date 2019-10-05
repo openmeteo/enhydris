@@ -42,7 +42,7 @@ class StationCreateTestCase(APITestCase):
                 "copyright_years": "2018",
                 "copyright_holder": "Bilbo Baggins",
                 "owner": self.bilbo.id,
-                "geometry": "SRID=4326;POINT (20.94565 39.12102)",
+                "geom": "SRID=4326;POINT (20.94565 39.12102)",
             },
         )
 
@@ -92,7 +92,7 @@ class StationUpdateAndDeleteTestCase(APITestCase):
                 "copyright_years": "2018",
                 "copyright_holder": "Bilbo Baggins",
                 "owner": self.bilbo.id,
-                "geometry": "SRID=4326;POINT (20.94565 39.12102)",
+                "geom": "SRID=4326;POINT (20.94565 39.12102)",
             },
         )
 
@@ -152,37 +152,37 @@ class StationCsvTestCase(APITestCase):
         mommy.make(
             models.Station,
             name="Komboti",
-            geometry=Point(x=21.06071, y=39.09518, srid=4326),
+            geom=Point(x=21.06071, y=39.09518, srid=4326),
             original_srid=4326,
         )
         mommy.make(
             models.Station,
             name="Agios Athanasios",
-            geometry=Point(x=21.60121, y=39.22440, srid=4326),
+            geom=Point(x=21.60121, y=39.22440, srid=4326),
             original_srid=4326,
         )
         mommy.make(
             models.Station,
             name="Tharbad",
-            geometry=Point(x=-176.48368, y=0.19377, srid=4326),
+            geom=Point(x=-176.48368, y=0.19377, srid=4326),
             original_srid=4326,
         )
         mommy.make(
             models.Station,
             name="SRID Point, NoSRID Station",
-            geometry=Point(x=-176.48368, y=0.19377, srid=4326),
+            geom=Point(x=-176.48368, y=0.19377, srid=4326),
             original_srid=None,
         )
         mommy.make(
             models.Station,
             name="NoSRID Point, SRID Station",
-            geometry=Point(x=-176.48368, y=0.19377, srid=None),
+            geom=Point(x=-176.48368, y=0.19377, srid=None),
             original_srid=4326,
         )
         mommy.make(
             models.Station,
             name="NoSRID Point, NoSRID Station",
-            geometry=Point(x=-176.48368, y=0.19377, srid=None),
+            geom=Point(x=-176.48368, y=0.19377, srid=None),
             original_srid=None,
         )
 

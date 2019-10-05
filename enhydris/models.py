@@ -113,6 +113,7 @@ class Gentity(models.Model):
     name = models.CharField(max_length=200, blank=True)
     code = models.CharField(max_length=50, blank=True)
     remarks = models.TextField(blank=True)
+    geom = models.GeometryField()
 
     class Meta:
         verbose_name_plural = "Gentities"
@@ -126,37 +127,20 @@ class Gpoint(Gentity):
     original_srid = models.IntegerField(null=True, blank=True)
     altitude = models.FloatField(null=True, blank=True)
     f_dependencies = ["Gentity"]
-    geometry = models.PointField()
 
     def original_abscissa(self):
-        if self.geometry and self.original_srid:
-            (x, y) = self.geometry.transform(self.original_srid, clone=True)
+        if self.original_srid:
+            (x, y) = self.geom.transform(self.original_srid, clone=True)
             return round(x, 2) if abs(x) > 180 and abs(y) > 90 else x
-        elif self.geometry:
-            return self.geometry.x
         else:
-            return None
+            return self.geom.x
 
     def original_ordinate(self):
-        if self.geometry and self.original_srid:
-            (x, y) = self.geometry.transform(self.original_srid, clone=True)
+        if self.original_srid:
+            (x, y) = self.geom.transform(self.original_srid, clone=True)
             return round(y, 2) if abs(x) > 180 and abs(y) > 90 else y
-        elif self.geometry:
-            return self.geometry.y
         else:
-            return None
-
-
-class Gline(Gentity):
-    gpoint1 = models.ForeignKey(
-        Gpoint, null=True, blank=True, related_name="glines1", on_delete=models.CASCADE
-    )
-    gpoint2 = models.ForeignKey(
-        Gpoint, null=True, blank=True, related_name="glines2", on_delete=models.CASCADE
-    )
-    length = models.FloatField(null=True, blank=True)
-    f_dependecies = ["Gentity"]
-    linestring = models.LineStringField(null=True, blank=True)
+            return self.geom.y
 
 
 class GareaCategory(Lookup):
@@ -167,7 +151,6 @@ class GareaCategory(Lookup):
 
 class Garea(Gentity):
     category = models.ForeignKey(GareaCategory, on_delete=models.CASCADE)
-    geometry = models.MultiPolygonField()
     f_dependencies = ["Gentity"]
 
 
@@ -516,7 +499,7 @@ class Timeseries(models.Model):
             )
 
     def _set_extra_timeseries_properties(self, ahtimeseries):
-        if self.gentity.gpoint.geometry:
+        if self.gentity.geom:
             location = {
                 "abscissa": self.gentity.gpoint.original_abscissa(),
                 "ordinate": self.gentity.gpoint.original_ordinate(),

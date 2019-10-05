@@ -153,9 +153,9 @@ class GareaAdmin(admin.ModelAdmin):
     def _get_garea(self, feature, category):
         garea = models.Garea()
         if isinstance(feature.geom.geos, MultiPolygon):
-            garea.geometry = feature.geom.geos
+            garea.geom = feature.geom.geos
         else:
-            garea.geometry = MultiPolygon(feature.geom.geos)
+            garea.geom = MultiPolygon(feature.geom.geos)
         garea.name = self._get_feature_attr(feature, "Name")
         garea.code = self._get_feature_attr(feature, "Code", allow_empty=True) or ""
         garea.category = category

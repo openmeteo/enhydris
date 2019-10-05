@@ -136,14 +136,14 @@ implemented by using Django's `multi-table inheritance`_.
 
       A field with general remarks about the gentity. Unlimited length.
 
+   .. attribute:: enhydris.models.Gentity.geom
+
+      This is a GeoDjango GeometryField_ that stores the geometry of the
+      gentity.
+
+      .. _geometryfield: https://docs.djangoproject.com/en/2.1/ref/contrib/gis/model-api/#geometryfield
+
 .. class:: enhydris.models.Gpoint(Gentity)
-
-   .. attribute:: enhydris.models.Gpoint.geometry
-
-      This is a GeoDjango PointField_ that stores the 2-d location of
-      the point.
-
-      .. _pointfield: https://docs.djangoproject.com/en/2.1/ref/contrib/gis/model-api/#pointfield
 
    .. attribute:: enhydris.models.Gpoint.original_srid
 
@@ -162,10 +162,6 @@ implemented by using Django's `multi-table inheritance`_.
 
       A Garea belongs to a category, such as "water basin" or "country".
       Foreign key to ``GareaCategory``.
-
-   .. attribute:: enhydris.models.Garea.geometry
-
-      A MultiPolygon.
 
 Additional information for generic gentities
 --------------------------------------------

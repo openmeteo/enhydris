@@ -22,7 +22,7 @@ class StationAdminForm(forms.ModelForm):
             "can enter it here."
         ),
     )
-    geometry = LatLonField(
+    geom = LatLonField(
         label=_("Co-ordinates"),
         help_text=_("Longitude and latitude in decimal degrees"),
     )
@@ -298,7 +298,7 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
             (
                 _("Location"),
                 {
-                    "fields": (("geometry", "original_srid"), ("altitude")),
+                    "fields": (("geom", "original_srid"), ("altitude")),
                     "classes": ("collapse",),
                 },
             ),

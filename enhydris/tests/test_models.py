@@ -204,7 +204,7 @@ class GareaTestCase(TestCase):
         garea = models.Garea(
             name="Esgalduin",
             category=category,
-            geometry=MultiPolygon(Polygon(((30, 20), (45, 40), (10, 40), (30, 20)))),
+            geom=MultiPolygon(Polygon(((30, 20), (45, 40), (10, 40), (30, 20)))),
         )
         garea.save()
         self.assertEqual(models.Garea.objects.first().name, "Esgalduin")
@@ -235,7 +235,7 @@ class StationTestCase(TestCase):
             copyright_holder="Bilbo Baggins",
             copyright_years="2018",
             name="Hobbiton",
-            geometry=Point(x=21.06071, y=39.09518, srid=4326),
+            geom=Point(x=21.06071, y=39.09518, srid=4326),
         )
         station.save()
         self.assertEqual(models.Station.objects.first().name, "Hobbiton")
@@ -263,7 +263,7 @@ class StationOriginalCoordinatesTestCase(TestCase):
         mommy.make(
             models.Station,
             name="Komboti",
-            geometry=Point(x=21.06071, y=39.09518, srid=4326),
+            geom=Point(x=21.06071, y=39.09518, srid=4326),
             original_srid=2100,
         )
         self.station = models.Station.objects.get(name="Komboti")
@@ -280,7 +280,7 @@ class StationOriginalCoordinatesWithNullSridTestCase(TestCase):
         mommy.make(
             models.Station,
             name="Komboti",
-            geometry=Point(x=21.06071, y=39.09518, srid=4326),
+            geom=Point(x=21.06071, y=39.09518, srid=4326),
             original_srid=None,
         )
         self.station = models.Station.objects.get(name="Komboti")
@@ -560,7 +560,7 @@ class TimeseriesGetDataTestCase(TestCase):
             models.Station,
             name="Celduin",
             original_srid=2100,
-            geometry=Point(x=21.06071, y=39.09518, srid=4326),
+            geom=Point(x=21.06071, y=39.09518, srid=4326),
             altitude=219,
         )
         cls.timeseries = mommy.make(
@@ -633,7 +633,7 @@ class TimeseriesGetDataTestCase(TestCase):
         self.assertEqual(self.data.comment, "Celduin\n\nThis timeseries rocks")
 
     def test_location_is_none(self):
-        self.timeseries.gentity.gpoint.geometry = None
+        self.timeseries.gentity.geom = None
         data = self.timeseries.get_data()
         self.assertIsNone(data.location)
 
