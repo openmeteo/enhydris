@@ -87,6 +87,8 @@ class GareaForm(forms.ModelForm):
 class GareaAdmin(admin.ModelAdmin):
     form = GareaForm
     list_display = ["id", "name", "code", "category"]
+    list_filter = ["category"]
+    search_fields = ("id", "name", "code")
 
     def get_urls(self):
         urls = super().get_urls()
