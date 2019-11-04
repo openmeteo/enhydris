@@ -122,6 +122,11 @@ class TsdataGetHtsTestCase(APITestCase):
     def test_response_content_header(self):
         self.assertIn("Count=2", self.response.content.decode())
 
+    def test_response_content_version(self):
+        # We return HTS version 2, because that is the version Hydrognomon currently
+        # supports.
+        self.assertTrue(self.response.content.decode().startswith("Version=2\r\n"))
+
 
 class TsdataPostTestCase(APITestCase):
     @patch("enhydris.models.Timeseries.append_data")

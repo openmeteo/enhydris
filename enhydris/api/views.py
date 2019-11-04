@@ -233,7 +233,7 @@ class TimeseriesViewSet(ModelViewSet):
             fmt = HTimeseries.TEXT
         if request.method == "GET":
             ahtimeseries = timeseries.get_data(start_date=start_date, end_date=end_date)
-            ahtimeseries.write(response, format=fmt)
+            ahtimeseries.write(response, format=fmt, version=2)
         return response
 
     def _post_data(self, request, pk, format=None):
