@@ -278,3 +278,8 @@ These are the settings available to Enhydris, in addition to the
 
    Number of stations per page for the pagination of the station list.
    The default is 100.
+
+.. data:: ENHYDRIS_CELERY_SEND_TASK_ERROR_EMAILS
+
+   If this is ``True`` (the default), celery will email the ``ADMINS``
+   whenever an exception occurs, like Django does by default.
