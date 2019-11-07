@@ -3,9 +3,18 @@
 
 {% has_perm "enhydris.view_timeseries_data" request.user timeseries as can_view_timeseries_data %}
 {% if can_view_timeseries_data %}
-    <p>
-    <a href="{% url "timeseries-data" station_id=timeseries.gentity.id pk=timeseries.id %}?fmt=hts"><i class="glyphicon glyphicon-cloud-download"></i> {% trans "Download time series" %}</a>
-    </p>
+  <div class="btn-group">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aira-haspopup="true" aria-expanded="false">
+      {% trans "Download data" %}<span class="caret"></span>
+    </button>
+    {% url "timeseries-data" station_id=timeseries.gentity.id pk=timeseries.id as base_url %}
+    <ul class="dropdown-menu">
+      <li><a href="{{ base_url }}?fmt=csv">CSV</a></li>
+      <li><a href="{{ base_url }}?fmt=hts2">Hydrognomon 4</a></li>
+      <li><a href="{{ base_url }}?fmt=hts">{% trans "Latest HTS" %}</a></li>
+    </ul>
+  </div>
+  <br><br>
 {% else %}
     <p class="text-warning">
     {% blocktrans %}

@@ -86,23 +86,32 @@ class TsdataGetPermissionsTestCase(APITestCase):
         self.assertEqual(self.response.status_code, 200)
 
 
-@override_settings(ENHYDRIS_OPEN_CONTENT=True)
-class TsdataGetHtsTestCase(APITestCase):
-    def setUp(self):
-        ahtimeseries = HTimeseries()
-        ahtimeseries.data = pd.DataFrame(
+class TimeseriesDataMixin:
+    def create_timeseries(self):
+        self.htimeseries = HTimeseries()
+        self.htimeseries.data = pd.DataFrame(
             index=[datetime(2017, 11, 23, 17, 23), datetime(2018, 11, 25, 1, 0)],
             data={"value": [1.0, 2.0], "flags": ["", ""]},
             columns=["value", "flags"],
         )
-        station = mommy.make(models.Station)
-        timeseries = mommy.make(
-            models.Timeseries, gentity=station, time_zone__utc_offset=120, precision=2
+        self.station = mommy.make(models.Station)
+        self.timeseries = mommy.make(
+            models.Timeseries,
+            gentity=self.station,
+            time_zone__utc_offset=120,
+            precision=2,
         )
-        with patch("enhydris.models.Timeseries.get_data", return_value=ahtimeseries):
+
+
+@override_settings(ENHYDRIS_OPEN_CONTENT=True)
+class GetDataTestCase(APITestCase, TimeseriesDataMixin):
+    def setUp(self):
+        self.create_timeseries()
+        p = patch("enhydris.models.Timeseries.get_data", return_value=self.htimeseries)
+        with p:
             self.response = self.client.get(
-                "/api/stations/{}/timeseries/{}/data/?fmt=hts".format(
-                    station.id, timeseries.id
+                "/api/stations/{}/timeseries/{}/data/".format(
+                    self.station.id, self.timeseries.id
                 )
             )
 
@@ -119,13 +128,38 @@ class TsdataGetHtsTestCase(APITestCase):
             )
         )
 
-    def test_response_content_header(self):
-        self.assertIn("Count=2", self.response.content.decode())
 
-    def test_response_content_version(self):
-        # We return HTS version 2, because that is the version Hydrognomon currently
-        # supports.
-        self.assertTrue(self.response.content.decode().startswith("Version=2\r\n"))
+@override_settings(ENHYDRIS_OPEN_CONTENT=True)
+class GetDataInVariousFormatsTestCase(APITestCase, TimeseriesDataMixin):
+    def setUp(self):
+        super().setUp()
+        self.create_timeseries()
+        self.get_data_patch = patch(
+            "enhydris.models.Timeseries.get_data", return_value=self.htimeseries
+        )
+        self.base_url = "/api/stations/{}/timeseries/{}/data/".format(
+            self.station.id, self.timeseries.id
+        )
+
+    def test_response_content_hts_version_2(self):
+        with self.get_data_patch:
+            response = self.client.get(self.base_url + "?fmt=hts2")
+        self.assertTrue(response.content.decode().startswith("Version=2\r\n"))
+
+    def test_response_content_hts_version_4(self):
+        with self.get_data_patch:
+            response = self.client.get(self.base_url + "?fmt=hts")
+        self.assertTrue(response.content.decode().startswith("Count=2\r\n"))
+
+    def test_response_content_csv(self):
+        with self.get_data_patch:
+            response = self.client.get(self.base_url + "?fmt=csv")
+        self.assertTrue(response.content.decode().startswith("2017-11-23 17:23,"))
+
+    def test_response_content_csv_default(self):
+        with self.get_data_patch:
+            response = self.client.get(self.base_url)
+        self.assertTrue(response.content.decode().startswith("2017-11-23 17:23,"))
 
 
 class TsdataPostTestCase(APITestCase):

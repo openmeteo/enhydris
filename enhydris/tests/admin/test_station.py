@@ -480,19 +480,7 @@ class TimeseriesInlineAdminFormTimeStepNotNullTestCase(TestCase):
         self.assertTrue(self.form.is_valid())
 
 
-@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
-@RandomEnhydrisTimeseriesDataDir()
-class TimeseriesUploadFileTestCase(TestCase):
-    def setUp(self):
-        self.data = self._get_basic_form_contents()
-        self.alice = User.objects.create_user(
-            username="alice", password="topsecret", is_staff=True, is_superuser=False
-        )
-        self.client.login(username="alice", password="topsecret")
-        with StringIO("Precision=2\n\n2019-08-18 12:39,0.12345678901234,\n") as f:
-            self.data["timeseries-0-data"] = f
-            self.response = self.client.post("/admin/enhydris/station/add/", self.data)
-
+class TimeseriesUploadFileMixin:
     def _get_basic_form_contents(self):
         return {
             "name": "Hobbiton",
@@ -509,7 +497,7 @@ class TimeseriesUploadFileTestCase(TestCase):
             "gentityevent_set-INITIAL_FORMS": "0",
             "timeseries-TOTAL_FORMS": "1",
             "timeseries-INITIAL_FORMS": "0",
-            "timeseries-0-variable": mommy.make(models.Variable).id,
+            "timeseries-0-variable": mommy.make(models.Variable, descr="myvar").id,
             "timeseries-0-unit_of_measurement": mommy.make(models.UnitOfMeasurement).id,
             "timeseries-0-precision": 2,
             "timeseries-0-time_zone": mommy.make(
@@ -517,6 +505,20 @@ class TimeseriesUploadFileTestCase(TestCase):
             ).id,
             "timeseries-0-replace_or_append": "APPEND",
         }
+
+
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@RandomEnhydrisTimeseriesDataDir()
+class TimeseriesUploadFileTestCase(TestCase, TimeseriesUploadFileMixin):
+    def setUp(self):
+        self.data = self._get_basic_form_contents()
+        self.alice = User.objects.create_user(
+            username="alice", password="topsecret", is_staff=True, is_superuser=False
+        )
+        self.client.login(username="alice", password="topsecret")
+        with StringIO("Precision=2\n\n2019-08-18 12:39,0.12345678901234,\n") as f:
+            self.data["timeseries-0-data"] = f
+            self.response = self.client.post("/admin/enhydris/station/add/", self.data)
 
     def test_response(self):
         self.assertEqual(self.response.status_code, 302)

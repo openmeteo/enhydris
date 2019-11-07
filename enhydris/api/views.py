@@ -227,13 +227,19 @@ class TimeseriesViewSet(ModelViewSet):
             end_date = end_date.replace(tzinfo=None)
 
         response = HttpResponse(content_type="text/plain; charset=utf-8")
-        if request.GET.get("fmt", "").lower() == "hts":
+        fmt_param = request.GET.get("fmt", "csv").lower()
+        if fmt_param == "hts":
             fmt = HTimeseries.FILE
+            version = 4
+        elif fmt_param == "hts2":
+            fmt = HTimeseries.FILE
+            version = 2
         else:
             fmt = HTimeseries.TEXT
+            version = "irrelevant"
         if request.method == "GET":
             ahtimeseries = timeseries.get_data(start_date=start_date, end_date=end_date)
-            ahtimeseries.write(response, format=fmt, version=2)
+            ahtimeseries.write(response, format=fmt, version=version)
         return response
 
     def _post_data(self, request, pk, format=None):
