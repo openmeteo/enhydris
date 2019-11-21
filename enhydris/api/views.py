@@ -226,17 +226,26 @@ class TimeseriesViewSet(ModelViewSet):
         if end_date:
             end_date = end_date.replace(tzinfo=None)
 
-        response = HttpResponse(content_type="text/plain; charset=utf-8")
         fmt_param = request.GET.get("fmt", "csv").lower()
         if fmt_param == "hts":
             fmt = HTimeseries.FILE
             version = 4
+            extension = "hts"
+            content_type = "text/vnd.openmeteo.timeseries"
         elif fmt_param == "hts2":
             fmt = HTimeseries.FILE
             version = 2
+            extension = "hts"
+            content_type = "text/vnd.openmeteo.timeseries"
         else:
             fmt = HTimeseries.TEXT
             version = "irrelevant"
+            extension = "csv"
+            content_type = "text/csv"
+        response = HttpResponse(content_type=content_type + "; charset=utf-8")
+        response["Content-Disposition"] = 'inline; filename="{}.{}"'.format(
+            pk, extension
+        )
         if request.method == "GET":
             ahtimeseries = timeseries.get_data(start_date=start_date, end_date=end_date)
             ahtimeseries.write(response, format=fmt, version=version)

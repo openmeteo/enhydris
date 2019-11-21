@@ -32,37 +32,6 @@ class Tsdata404TestCase(APITestCase):
         self.assertEqual(response.status_code, 404)
 
 
-@override_settings(ENHYDRIS_OPEN_CONTENT=True)
-class TsdataGetTestCase(APITestCase):
-    def setUp(self):
-        ahtimeseries = HTimeseries()
-        ahtimeseries.data = pd.DataFrame(
-            index=[datetime(2017, 11, 23, 17, 23), datetime(2018, 11, 25, 1, 0)],
-            data={"value": [1.0, 2.0], "flags": ["", ""]},
-            columns=["value", "flags"],
-        )
-        station = mommy.make(models.Station)
-        timeseries = mommy.make(
-            models.Timeseries, gentity=station, time_zone__utc_offset=120, precision=2
-        )
-        with patch("enhydris.models.Timeseries.get_data", return_value=ahtimeseries):
-            self.response = self.client.get(
-                "/api/stations/{}/timeseries/{}/data/".format(station.id, timeseries.id)
-            )
-
-    def test_status_code(self):
-        self.assertEqual(self.response.status_code, 200)
-
-    def test_content_type(self):
-        self.assertEqual(self.response["Content-Type"], "text/plain; charset=utf-8")
-
-    def test_response_content(self):
-        self.assertEqual(
-            self.response.content.decode(),
-            "2017-11-23 17:23,1.000000,\r\n2018-11-25 01:00,2.000000,\r\n",
-        )
-
-
 @override_settings(ENHYDRIS_OPEN_CONTENT=False)
 @patch("enhydris.models.Timeseries.get_data", return_value=HTimeseries())
 class TsdataGetPermissionsTestCase(APITestCase):
@@ -97,6 +66,7 @@ class TimeseriesDataMixin:
         self.station = mommy.make(models.Station)
         self.timeseries = mommy.make(
             models.Timeseries,
+            id=42,
             gentity=self.station,
             time_zone__utc_offset=120,
             precision=2,
@@ -119,7 +89,7 @@ class GetDataTestCase(APITestCase, TimeseriesDataMixin):
         self.assertEqual(self.response.status_code, 200)
 
     def test_content_type(self):
-        self.assertEqual(self.response["Content-Type"], "text/plain; charset=utf-8")
+        self.assertEqual(self.response["Content-Type"], "text/csv; charset=utf-8")
 
     def test_response_content(self):
         self.assertTrue(
@@ -146,20 +116,48 @@ class GetDataInVariousFormatsTestCase(APITestCase, TimeseriesDataMixin):
             response = self.client.get(self.base_url + "?fmt=hts2")
         self.assertTrue(response.content.decode().startswith("Version=2\r\n"))
 
+    def test_response_headers_hts_version_2(self):
+        with self.get_data_patch:
+            response = self.client.get(self.base_url + "?fmt=hts2")
+        self.assertEqual(
+            response["Content-Type"], "text/vnd.openmeteo.timeseries; charset=utf-8"
+        )
+        self.assertEqual(response["Content-Disposition"], 'inline; filename="42.hts"')
+
     def test_response_content_hts_version_4(self):
         with self.get_data_patch:
             response = self.client.get(self.base_url + "?fmt=hts")
         self.assertTrue(response.content.decode().startswith("Count=2\r\n"))
+
+    def test_response_headers_hts_version_4(self):
+        with self.get_data_patch:
+            response = self.client.get(self.base_url + "?fmt=hts")
+        self.assertEqual(
+            response["Content-Type"], "text/vnd.openmeteo.timeseries; charset=utf-8"
+        )
+        self.assertEqual(response["Content-Disposition"], 'inline; filename="42.hts"')
 
     def test_response_content_csv(self):
         with self.get_data_patch:
             response = self.client.get(self.base_url + "?fmt=csv")
         self.assertTrue(response.content.decode().startswith("2017-11-23 17:23,"))
 
+    def test_response_headers_csv(self):
+        with self.get_data_patch:
+            response = self.client.get(self.base_url + "?fmt=csv")
+        self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
+        self.assertEqual(response["Content-Disposition"], 'inline; filename="42.csv"')
+
     def test_response_content_csv_default(self):
         with self.get_data_patch:
             response = self.client.get(self.base_url)
         self.assertTrue(response.content.decode().startswith("2017-11-23 17:23,"))
+
+    def test_response_headers_csv_default(self):
+        with self.get_data_patch:
+            response = self.client.get(self.base_url)
+        self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
+        self.assertEqual(response["Content-Disposition"], 'inline; filename="42.csv"')
 
 
 class TsdataPostTestCase(APITestCase):
