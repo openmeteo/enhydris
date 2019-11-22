@@ -107,7 +107,7 @@ class StationDetailTestCase(TestCase):
     @override_settings(ENHYDRIS_MAP_MIN_VIEWPORT_SIZE=0.2)
     def test_map_viewport(self):
         response = self.client.get("/stations/{}/".format(self.station.id))
-        self.assertContains(response, "enhydris.mapViewport=[20.9, 38.9, 21.1, 39.1]")
+        self.assertContains(response, "enhydris.mapViewport = [20.9, 38.9, 21.1, 39.1]")
 
 
 class StationDetailPeriodOfOperationTestCase(TestCase):

@@ -1,0 +1,26 @@
+{% extends "enhydris/base/main.html" %}
+{% load static %}
+
+{% block body_onload %}
+  {{ block.super }};
+  enhydris.map = enhydris.mapModule.init();
+{% endblock %}
+
+{% block mainjs %}
+  {{ block.super }}
+  <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js"></script>
+  {% block leaflet_plugins %}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet-plugins/3.0.3/layer/vector/KML.js"></script>
+    <script src="{% static "js/L.Control.MousePosition.js"%}"></script>
+  {% endblock %}
+  <script type="text/javascript" src="{% static "js/arg.js.v1.1.min.js" %}"></script>
+  {% block map_js %}
+    <script type="text/javascript">
+      enhydris.mapBaseLayers = {{ map_base_layers|safe }};
+      enhydris.mapDefaultBaseLayer = "{{ map_default_base_layer|safe }}";
+      enhydris.mapViewport = {{ map_viewport|safe }};
+      enhydris.mapMarkers = {{ map_markers|safe }};
+      enhydris.searchString = {{ searchString|safe }};
+    </script>
+  {% endblock %}
+{% endblock %}
