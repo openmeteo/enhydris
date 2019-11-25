@@ -36,8 +36,8 @@ specified in :file:`requirements.txt`, probably in a virtualenv::
     git checkout 3.0
     virtualenv --system-site-packages --python=/usr/bin/python3 \
         enhydris/venv
-    ./enhydris/venv/bin/pip install -r enhydris/requirements.txt
-    ./enhydris/venv/bin/pip install -r enhydris/requirements-dev.txt
+    ./enhydris/venv/bin/pip install -r requirements.txt
+    ./enhydris/venv/bin/pip install -r requirements-dev.txt
 
 Configure Enhydris
 ==================
@@ -48,7 +48,7 @@ should begin with this::
 
     from enhydris_project.settings.development import *
 
-and it then it should go on to override ``DEBUG``, ``SECRET_KEY``,
+and then it should go on to override ``DEBUG``, ``SECRET_KEY``,
 ``DATABASES`` and ``STATIC_ROOT``. More settings you may want to
 override are the `Django settings`_ and the :ref:`Enhydris 
 settings <enhydris_settings>`.
@@ -130,7 +130,7 @@ To use Enhydris in production, you need to setup a web server such as
 apache. This is described in detail in `Deploying Django`_ and in
 https://djangodeployment.com/.
 
-.. _deploying django: http://docs.djangoproject.com/en/2.1/howto/deployment/
+.. _deploying django: http://docs.djangoproject.com/en/2.2/howto/deployment/
 
 Post-install configuration: domain name
 =======================================
@@ -150,7 +150,7 @@ Settings reference
 These are the settings available to Enhydris, in addition to the
 `Django settings`_.
 
-.. _django settings: http://docs.djangoproject.com/en/2.1/ref/settings/
+.. _django settings: http://docs.djangoproject.com/en/2.2/ref/settings/
 
 .. data:: ENHYDRIS_REGISTRATION_OPEN
 
