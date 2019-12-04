@@ -1,0 +1,26 @@
+{% load i18n %}
+
+{% block search_form %}
+  <form class="navbar-form navbar-left" action='{% url "station_list" %}' method="get">
+    <div class="form-group">
+      <div class="input-group">
+        <input id="search_input" type="text" name="q"
+          value="{{ query|escape }}" class="form-control"
+          placeholder="{% trans 'Search stations' %}">
+        <input type="hidden" name="check" value="search" />
+        <div class="input-group-btn">
+          <button class="btn btn-primary btn-block glyphicon glyphicon-search"></button>
+        </div>
+      </div>
+    </div>
+  </form>
+{% endblock %}
+{% block search_tips %}
+  <ul class="nav navbar-nav">
+    <li>
+      <a href="#searchtips" data-toggle="modal">
+        <i class="glyphicon glyphicon-eye-open"></i> {% trans "Search tips" %}
+      </a>
+    </li>
+  </ul>
+{% endblock %}
