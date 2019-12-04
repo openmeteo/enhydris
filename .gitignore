@@ -6,6 +6,15 @@ dist
 timeseries_data
 enhydris.db
 enhydris_project/settings/local.py
+enhydris_project/settings/urls.py
 
 # Selenium log files
 *driver.log
+
+# enhydris add-ons which may be linked or checked out in the current directory
+enhydris-openhigis
+enhydris_openhigis
+enhydris-autoprocess
+enhydris_autoprocess
+enhydris-synoptic
+enhydris_synoptic
