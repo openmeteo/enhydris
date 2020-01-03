@@ -180,6 +180,11 @@ Other changes
   ``gpoint.geometry`` (formerly ``gpoint.point``) is not null. If you
   have any stations with null co-ordinates, they will be silently
   converted to latitude zero and longitude zero during upgrading.
+- The time step is now stored as a pandas "frequency" string, e.g.
+  "10min", "H", "M", "Y". The ``TimeStep`` model does not exist any
+  more. The ``timestamp_rounding`` and ``timestamp_offset`` properties
+  have been abolished. During the database upgrade, they are simply
+  dropped.
 - SQLite is no longer supported.
 - The fields ``approximate`` (used to denote that a station's location
   has been assigned roughly) and ``asrid`` (altitude SRID) have been

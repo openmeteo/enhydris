@@ -71,10 +71,6 @@ The response will be 200 with the following content::
       "hidden": false,
       "precision": 1,
       "remarks": "Type: Raw data",
-      "timestamp_rounding_minutes": null,
-      "timestamp_rounding_months": null,
-      "timestamp_offset_minutes": 0,
-      "timestamp_offset_months": 0,
       "datafile": "http://stage.openmeteo.org/media/0000000242",
       "start_date_utc": "2000-05-11T10:00:00Z",
       "end_date_utc": "2006-07-14T12:10:00Z",
@@ -83,7 +79,7 @@ The response will be 200 with the following content::
       "unit_of_measurement": 7,
       "time_zone": 1,
       "instrument": 16,
-      "time_step": 1,
+      "time_step": "10min",
       "interval_type": null
     }
 
@@ -264,7 +260,7 @@ Exactly the same applies to ``eventtypes``, ``instrumenttypes``, and
 Besides these there are several other lookups for which the response is
 similar but may have additional information. These are
 ``organizations``, ``persons``, ``timezones``, ``intervaltypes``,
-``filetypes``, ``timesteps`` and ``units``.
+``filetypes`` and ``units``.
 
 Response format for ``organizations``::
 
@@ -313,16 +309,6 @@ Response format for ``filetypes``::
     "last_modified": "2011-06-22T05:04:03.461401Z",
     "descr": "png Picture",
     "mime_type": "image/png"
-  }
-
-Response format for ``timesteps``::
-
-  {
-    "id": 4,
-    "last_modified": "2011-06-22T05:11:53.556895Z",
-    "descr": "Monthly",
-    "length_minutes": 0,
-    "length_months": 1
   }
 
 Response format for ``units``::
@@ -523,10 +509,6 @@ Response::
           "hidden": false,
           "precision": 1,
           "remarks": "Type: Raw data",
-          "timestamp_rounding_minutes": null,
-          "timestamp_rounding_months": null,
-          "timestamp_offset_minutes": 0,
-          "timestamp_offset_months": 0,
           "datafile": "http://stage.openmeteo.org/media/0000000232",
           "start_date_utc": "1998-12-10T14:30:00Z",
           "end_date_utc": "2018-07-09T09:19:00Z",
@@ -535,7 +517,7 @@ Response::
           "unit_of_measurement": 14,
           "time_zone": 1,
           "instrument": 10,
-          "time_step": 1,
+          "time_step": "10min",
           "interval_type": null
         }
 
@@ -603,7 +585,6 @@ Response::
     Comment=Type: Raw data
     Timezone=EET (UTC+0200)
     Time_step=10,0
-    Timestamp_offset=0,0
     Variable=Mean temperature
     Precision=1
     Location=23.787430 37.973850 4326

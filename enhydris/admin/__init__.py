@@ -1,7 +1,5 @@
-from django import forms
 from django.conf import settings
 from django.contrib import admin
-from django.utils.translation import ugettext_lazy as _
 
 from parler.admin import TranslatableAdmin
 
@@ -59,29 +57,6 @@ class IntervalTypeAdmin(admin.ModelAdmin):
 @admin.register(models.UnitOfMeasurement)
 class UnitOfMeasurementAdmin(admin.ModelAdmin):
     list_display = [f.name for f in models.UnitOfMeasurement._meta.fields]
-
-
-class TimeStepForm(forms.ModelForm):
-    class Meta:
-        model = models.TimeStep
-        exclude = []
-
-    def clean(self):
-        """Ensure that exactly one of minutes and months is non-zero.
-        """
-        length_minutes = self.cleaned_data.get("length_minutes", None)
-        length_months = self.cleaned_data.get("length_months", None)
-        if bool(length_minutes) == bool(length_months):
-            raise forms.ValidationError(
-                _("Invalid timestep: exactly one of minutes and months must be zero")
-            )
-        return self.cleaned_data
-
-
-@admin.register(models.TimeStep)
-class TimeStepAdmin(TranslatableAdmin):
-    form = TimeStepForm
-    list_display = [f.name for f in models.TimeStep._meta.fields]
 
 
 @admin.register(models.TimeZone)

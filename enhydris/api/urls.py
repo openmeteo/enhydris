@@ -77,7 +77,6 @@ router.register("intervaltypes", views.IntervalTypeViewSet)
 router.register("filetypes", views.FileTypeViewSet)
 router.register("eventtypes", views.EventTypeViewSet)
 router.register("instrumenttypes", views.InstrumentTypeViewSet)
-router.register("timesteps", views.TimeStepViewSet)
 router.register("variables", views.VariableViewSet)
 router.register("units", views.UnitOfMeasurementViewSet)
 urlpatterns += router.urls

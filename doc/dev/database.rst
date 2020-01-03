@@ -347,21 +347,6 @@ Time series and related models
       observe summer time; they must always have the same utc offset
       throught the time series.
 
-.. class:: enhydris.models.TimeStep(Lookup)
-
-   This model holds time steps. The
-   :attr:`~enhydris.models.Lookup.descr` attribute inherited by
-   :class:`~enhydris.models.Lookup` holds a descriptive name for the
-   time step, such as "daily" or "monthly". The model has two additional
-   attributes:
-
-   .. attribute:: length_minutes
-                  length_months
-
-      One of these two attributes must be zero. For example, a daily
-      time step has length_minutes=1440 and length_months=0; an annual
-      time step has length_minutes=0 and length_months=12.
-
 .. class:: enhydris.models.Timeseries
 
    Holds time series.
@@ -413,31 +398,14 @@ Time series and related models
       pages.
 
    .. attribute:: enhydris.models.Timeseries.time_step
-                  enhydris.models.Timeseries.timestamp_rounding_minutes
-                  enhydris.models.Timeseries.timestamp_rounding_months
-                  enhydris.models.Timeseries.timestamp_offset_minutes
-                  enhydris.models.Timeseries.timestamp_offset_months
 
-      The :attr:`~enhydris.models.Timeseries.time_step` is a foreign key
-      to :class:`~enhydris.models.TimeStep`. Some time series are
-      completely irregular; in that case,
-      :attr:`~enhydris.models.Timeseries.time_step` (and all other time
-      step related attributes) is null. Otherwise, it contains an
-      appropriate time step. For an explanation of the other four
-      attributes, see the :class:`timeseries.TimeStep` class.
-      :attr:`~enhydris.models.Timeseries.timestamp_offset_minutes` and
-      :attr:`~enhydris.models.Timeseries.timestamp_offset_months` must
-      always be present if the time step is not null.  The rounding
-      attributes may, however, be null, if the time series is not
-      strict, that is, if it does have a time step, but that time step
-      contains irregularities. As an example, a time series measured by
-      an automatic meteorological station every ten minutes will usually
-      have a rounding of 0 minutes, which means the timestamps will end
-      in :10, :20, :30, etc; but a clock error or a setup error could
-      result in the timestamps ending in :11, :21, :31 for a brief
-      period of time. In that case, we say that the time series has a
-      nonstrict time step of 10 minutes, which means it has no specific
-      rounding.
+      The :attr:`~enhydris.models.Timeseries.time_step` is a string.
+      Some time series are completely irregular; in that case,
+      :attr:`~enhydris.models.Timeseries.time_step` is empty. Otherwise,
+      it contains an appropriate time step as a `pandas "frequency"
+      string`_, e.g.  "10min", "H", "M", "Y".
+
+      .. _pandas "frequency" string: https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#dateoffset-objects
 
    .. attribute:: enhydris.models.Timeseries.datafile
 

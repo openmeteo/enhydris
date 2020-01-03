@@ -86,11 +86,6 @@ class InstrumentTypeViewSet(ReadOnlyModelViewSet):
     queryset = models.InstrumentType.objects.all()
 
 
-class TimeStepViewSet(ReadOnlyModelViewSet):
-    serializer_class = serializers.TimeStepSerializer
-    queryset = models.TimeStep.objects.all()
-
-
 class VariableViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.VariableSerializer
     queryset = models.Variable.objects.all()
@@ -229,7 +224,7 @@ class TimeseriesViewSet(ModelViewSet):
         fmt_param = request.GET.get("fmt", "csv").lower()
         if fmt_param == "hts":
             fmt = HTimeseries.FILE
-            version = 4
+            version = 5
             extension = "hts"
             content_type = "text/vnd.openmeteo.timeseries"
         elif fmt_param == "hts2":

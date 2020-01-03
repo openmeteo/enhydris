@@ -1,5 +1,4 @@
 import os
-from collections import OrderedDict
 from datetime import timedelta, timezone
 
 from django.conf import settings
@@ -16,6 +15,30 @@ import iso8601
 from htimeseries import HTimeseries
 from parler.models import TranslatableModel, TranslatedFields
 from simpletail import ropen
+
+
+def check_time_step(time_step):
+    if not time_step:
+        return
+    else:
+        _check_nonempty_time_step(time_step)
+
+
+def _check_nonempty_time_step(time_step):
+    number, unit = _parse_time_step(time_step)
+    if unit not in ("min", "H", "D", "M", "Y"):
+        raise ValueError('"{}" is not a valid time step'.format(time_step))
+
+
+def _parse_time_step(time_step):
+    first_nondigit_pos = 0
+    length = len(time_step)
+    while first_nondigit_pos < length and time_step[first_nondigit_pos].isdigit():
+        first_nondigit_pos += 1
+    number = time_step[:first_nondigit_pos]
+    unit = time_step[first_nondigit_pos:]
+    return number, unit
+
 
 #
 # Lookups
@@ -327,47 +350,6 @@ class TimeZone(models.Model):
         ordering = ("utc_offset",)
 
 
-class TimeStep(TranslatableModel):
-    last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    translations = TranslatedFields(descr=models.CharField(max_length=200, blank=True))
-    length_minutes = models.PositiveIntegerField()
-    length_months = models.PositiveSmallIntegerField()
-
-    def __str__(self):
-        """Return timestep descriptions in a human readable format.
-        """
-        components = OrderedDict(
-            [
-                ("year", self.length_months // 12),
-                ("month", self.length_months % 12),
-                ("day", self.length_minutes // 1440),
-                ("hour", (self.length_minutes % 1440) // 60),
-                ("minute", self.length_minutes % 60),
-            ]
-        )
-        result = ""
-        if self.descr:
-            result = self.descr + " - "
-        items = [
-            "{} {}(s)".format(value, key) for key, value in components.items() if value
-        ]
-        result += ", ".join(items)
-        if result:
-            return result
-        else:
-            return "0 minutes, 0 months"
-
-    def save(self, force_insert=False, force_update=False, *args, **kwargs):
-        if not bool(self.length_minutes) ^ bool(self.length_months):
-            raise IntegrityError(
-                _(
-                    "{} is not a valid time step; exactly one of minutes and "
-                    "months must be zero"
-                ).format(self.__str__())
-            )
-        super(TimeStep, self).save(force_insert, force_update, *args, **kwargs)
-
-
 class IntervalType(Lookup):
     value = models.CharField(max_length=50)
 
@@ -414,54 +396,18 @@ class Timeseries(models.Model):
     instrument = models.ForeignKey(
         Instrument, null=True, blank=True, on_delete=models.CASCADE
     )
-    time_step = models.ForeignKey(
-        TimeStep, null=True, blank=True, on_delete=models.CASCADE
+    time_step = models.CharField(
+        max_length=7,
+        blank=True,
+        help_text=_(
+            'E.g. "10min", "H" (hourly), "D" (daily), "M" (monthly), "Y" (yearly). '
+            "More specifically, it's an optional number plus a unit, with no space in "
+            "between. The units available are min, H, D, M, Y. Leave empty if the time "
+            "series is irregular."
+        ),
     )
     interval_type = models.ForeignKey(
         IntervalType, null=True, blank=True, on_delete=models.CASCADE
-    )
-    timestamp_rounding_minutes = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        help_text=_(
-            "For an hourly time series whose timestamps end in :00, set this "
-            "to zero; if they end in :12, set it to 12. For a ten-minute time "
-            "series with timestamps ending in :12, :22, :32, etc., set it to "
-            "2.  For daily ending at 08:00, set it to 480. Leave empty if "
-            "timestamps are irregular."
-        ),
-    )
-    timestamp_rounding_months = models.PositiveSmallIntegerField(
-        null=True,
-        blank=True,
-        help_text=_(
-            "Set this to zero, except for annual time series, indicating the "
-            "difference from January; for example, set it to 9 if the "
-            "timestamps use a hydrological year starting in October. Leave "
-            "empty if timestamps are irregular."
-        ),
-    )
-    timestamp_offset_minutes = models.IntegerField(
-        null=True,
-        blank=True,
-        help_text=_(
-            "If unsure, set this to zero. It indicates the difference of "
-            "what is shown from what is meant. For example, if for an hourly "
-            "time series it is -5, then 2015-10-14 11:00 means the interval "
-            "from 2015-10-14 09:55 to 2015-10-14 10:55. -1440 is common for "
-            "daily time series."
-        ),
-    )
-    timestamp_offset_months = models.SmallIntegerField(
-        null=True,
-        blank=True,
-        help_text=_(
-            "If unsure, set this to 1 for monthly, 12 for annual, and zero "
-            "otherwise.  For a monthly time series, an offset of -475 "
-            "minutes and 1 month means that 2003-11-01 00:00 (normally "
-            "shown as 2003-11) denotes the interval 2003-10-31 18:05 to "
-            "2003-11-30 18:05."
-        ),
     )
     datafile = models.FileField(null=True, blank=True, storage=TimeseriesStorage())
     start_date_utc = models.DateTimeField(null=True, blank=True)
@@ -508,24 +454,7 @@ class Timeseries(models.Model):
             }
         else:
             location = None
-        ahtimeseries.time_step = "{},{}".format(
-            self.time_step.length_minutes if self.time_step else 0,
-            self.time_step.length_months if self.time_step else 0,
-        )
-        ahtimeseries.timestamp_rounding = (
-            None
-            if None in (self.timestamp_rounding_minutes, self.timestamp_rounding_months)
-            else "{},{}".format(
-                self.timestamp_rounding_minutes, self.timestamp_rounding_months
-            )
-        )
-        ahtimeseries.timestamp_offset = (
-            None
-            if None in (self.timestamp_offset_minutes, self.timestamp_offset_months)
-            else "{},{}".format(
-                self.timestamp_offset_minutes, self.timestamp_offset_months
-            )
-        )
+        ahtimeseries.time_step = self.time_step
         ahtimeseries.interval_type = (
             None if not self.interval_type else self.interval_type.value.lower()
         )
@@ -615,52 +544,8 @@ class Timeseries(models.Model):
     def __str__(self):
         return self.name
 
-    def _check_that_offset_and_rounding_are_null_when_time_step_is_null(self):
-        if self.time_step:
-            return
-        one_of_them_is_not_none = (
-            self.timestamp_rounding_minutes is not None
-            or self.timestamp_rounding_months is not None
-            or self.timestamp_offset_minutes is not None
-            or self.timestamp_offset_months is not None
-        )
-        if one_of_them_is_not_none:
-            raise IntegrityError(
-                _(
-                    "Invalid time step: if time_step is null, "
-                    "rounding and offset must also be null"
-                )
-            )
-
-    def _check_integrity_of_offset_and_rounding_when_time_step_is_not_null(self):
-        if not self.time_step:
-            return
-        an_offset_is_none = (
-            self.timestamp_offset_minutes is None
-            or self.timestamp_offset_months is None
-        )
-        if an_offset_is_none:
-            raise IntegrityError(
-                _(
-                    "Invalid time step: if time_step is not "
-                    "null, offset must be provided"
-                )
-            )
-        roundings_are_inconsistent = (
-            self.timestamp_rounding_minutes is None
-            and self.timestamp_rounding_months is not None
-        ) or (
-            self.timestamp_rounding_minutes is not None
-            and self.timestamp_rounding_months is None
-        )
-        if roundings_are_inconsistent:
-            raise IntegrityError(
-                _("Invalid time step: roundings must be both null or not null")
-            )
-
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
-        self._check_that_offset_and_rounding_are_null_when_time_step_is_null()
-        self._check_integrity_of_offset_and_rounding_when_time_step_is_not_null()
+        check_time_step(self.time_step)
         self._set_start_and_end_date()
         super(Timeseries, self).save(force_insert, force_update, *args, **kwargs)
 

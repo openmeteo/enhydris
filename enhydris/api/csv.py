@@ -76,10 +76,6 @@ _timeseries_list_csv_headers = [
     "Precision",
     "Time zone",
     "Time step",
-    "Nom. Offs. Min.",
-    "Nom. Offs. Mon.",
-    "Act. Offs. Min.",
-    "Act. Offs.  Mon.",
     "Remarks",
 ]
 
@@ -94,11 +90,7 @@ def _timeseries_csv(t):
         t.name,
         t.precision,
         t.time_zone.code,
-        t.time_step.descr if t.time_step else "",
-        t.timestamp_rounding_minutes,
-        t.timestamp_rounding_months,
-        t.timestamp_offset_minutes,
-        t.timestamp_offset_months,
+        t.time_step,
     ]
 
 

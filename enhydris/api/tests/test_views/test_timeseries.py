@@ -124,12 +124,12 @@ class GetDataInVariousFormatsTestCase(APITestCase, TimeseriesDataMixin):
         )
         self.assertEqual(response["Content-Disposition"], 'inline; filename="42.hts"')
 
-    def test_response_content_hts_version_4(self):
+    def test_response_content_hts_version_5(self):
         with self.get_data_patch:
             response = self.client.get(self.base_url + "?fmt=hts")
         self.assertTrue(response.content.decode().startswith("Count=2\r\n"))
 
-    def test_response_headers_hts_version_4(self):
+    def test_response_headers_hts_version_5(self):
         with self.get_data_patch:
             response = self.client.get(self.base_url + "?fmt=hts")
         self.assertEqual(

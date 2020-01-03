@@ -77,15 +77,6 @@ class InstrumentTypeTestCase(APITestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class TimeStepTestCase(APITestCase):
-    def setUp(self):
-        self.time_step = mommy.make(models.TimeStep, length_minutes=10, length_months=0)
-
-    def test_get_time_step(self):
-        r = self.client.get("/api/timesteps/{}/".format(self.time_step.id))
-        self.assertEqual(r.status_code, 200)
-
-
 class VariableTestCase(APITestCase):
     def setUp(self):
         self.variable = mommy.make(models.Variable)

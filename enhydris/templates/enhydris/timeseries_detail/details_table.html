@@ -49,52 +49,17 @@
     <td>{{ timeseries.end_date|date:"Y/m/d H:i" }}</td>
   </tr>
   <tr>
-    <td colspan="2" align="center"><strong>{% trans 'Time stamps properties' %}</strong></th></tr>
-  <tr>
-    <th>{% trans 'Time scale' %}</th>
+    <th>{% trans 'Time step' %}</th>
     <td>{% if not timeseries.time_step %}
-          {% trans 'Variable step' %}
+          {% trans 'Variable' %}
         {% else %}
-          {{ timeseries.time_step }}
+        {{ timeseries.time_step }},
+          {% if not timeseries.interval_type %}
+            {% trans 'Instantaneous' %}
+          {% else %}
+            {{ timeseries.interval_type }}
+          {% endif %}
         {% endif %}
     </td>
   </tr>
-  {% ifequal timeseries.timestamp_rounding_minutes NULL %}
-    <tr>
-      <th>{% trans 'Timestamp regularity' %}</th>
-      <td>{% trans 'Time step is not strict' %}</td>
-    </tr>
-  {% else %}
-    <tr>
-      <th>{% trans 'Timestamp regularity' %}</th>
-      <td>{% trans 'Time step is strict' %}</td>
-    </tr>
-    <tr>
-      <th>{% trans ' Timestamp rounding' %}</th>
-      <td>{{ timeseries.timestamp_rounding_minutes }}
-        {% trans 'minutes' %},
-        {{ timeseries.timestamp_rounding_months }}
-        {% trans 'months' %}
-      </td>
-    </tr>
-  {% endifequal %}
-  <tr>
-    <th>{% trans 'Time stamps reference' %}</th>
-    <td>{% if not timeseries.interval_type %}
-          {% trans 'Instantaneous values' %}
-        {% else %}
-          {% trans 'Interval, '%}{{ timeseries.interval_type }}
-        {% endif %}
-    </td>
-  </tr>
-  {% ifnotequal timeseries.timestamp_offset_months NULL %}
-    <tr>
-      <th>{% trans 'Timestamp offset' %}</th>
-      <td>{{ timeseries.timestamp_offset_minutes }}
-        {% trans 'minutes' %},
-        {{ timeseries.timestamp_offset_months }}
-        {% trans 'months' %}
-      </td>
-    </tr>
-  {% endifnotequal %}
 </table>

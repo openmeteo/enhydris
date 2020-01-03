@@ -403,46 +403,6 @@ class TimeZoneTestCase(TestCase):
         self.assertEqual(time_zone.as_tzinfo, dt.timezone(dt.timedelta(hours=2), "EET"))
 
 
-class TimeStepTestCase(TestCase):
-    # We don't test functionality inherited from Lookup, as this is tested in
-    # VariableTestCase.
-
-    def test_str_with_minutes(self):
-        time_step = mommy.make(
-            models.TimeStep, length_minutes=1563, length_months=0, descr="gazilliony"
-        )
-        self.assertEqual(
-            str(time_step), "gazilliony - 1 day(s), 2 hour(s), 3 minute(s)"
-        )
-
-    def test_str_with_months(self):
-        time_step = mommy.make(
-            models.TimeStep,
-            length_minutes=0,
-            length_months=28,
-            descr="twentyeightmonthly",
-        )
-        self.assertEqual(str(time_step), "twentyeightmonthly - 2 year(s), 4 month(s)")
-
-    def test_save_with_both_minutes_and_months(self):
-        time_step = models.TimeStep(descr="hello", length_minutes=5, length_months=2)
-        with self.assertRaises(IntegrityError):
-            time_step.save()
-
-    def test_save_with_neither_minutes_nor_months(self):
-        time_step = models.TimeStep(descr="hello", length_minutes=0, length_months=0)
-        with self.assertRaises(IntegrityError):
-            time_step.save()
-
-    def test_save_with_minutes(self):
-        time_step = models.TimeStep(descr="hello", length_minutes=10, length_months=0)
-        time_step.save()
-
-    def test_save_with_months(self):
-        time_step = models.TimeStep(descr="hello", length_minutes=0, length_months=3)
-        time_step.save()
-
-
 class TimeseriesTestCase(TestCase):
     def test_create(self):
         station = mommy.make(models.Station)
@@ -567,12 +527,7 @@ class TimeseriesGetDataTestCase(TestCase):
             models.Timeseries,
             name="Daily temperature",
             gentity=station,
-            time_step__length_minutes=60,
-            time_step__length_months=0,
-            timestamp_offset_minutes=0,
-            timestamp_offset_months=0,
-            timestamp_rounding_minutes=0,
-            timestamp_rounding_months=0,
+            time_step="H",
             interval_type__value="INSTANTANEOUS",
             unit_of_measurement__symbol="mm",
             time_zone__code="IST",
@@ -600,10 +555,7 @@ class TimeseriesGetDataTestCase(TestCase):
         self.assertAlmostEqual(self.data.location["altitude"], 219)
 
     def test_time_step(self):
-        self.assertEqual(self.data.time_step, "60,0")
-
-    def test_timestamp_rounding(self):
-        self.assertEqual(self.data.timestamp_rounding, "0,0")
+        self.assertEqual(self.data.time_step, "H")
 
     def test_interval_type(self):
         self.assertEqual(self.data.interval_type, "instantaneous")
@@ -828,92 +780,46 @@ class TimeseriesGetFirstOrLastLineTestCase(TestCase):
         self.assertEqual(first_line, "2018-11-25 01:00,2,\n")
 
 
-class TimeseriesSaveWhenTimeStepIsNullTestCase(TestCase):
+class TimestepTestCase(TestCase):
     def setUp(self):
-        station = mommy.make(models.Station)
-        variable = mommy.make(models.Variable)
-        unit = mommy.make(models.UnitOfMeasurement)
-        time_zone = mommy.make(models.TimeZone)
-        self.timeseries = models.Timeseries(
-            gentity=station,
-            name="Temperature",
-            variable=variable,
-            unit_of_measurement=unit,
-            time_zone=time_zone,
-            precision=2,
-        )
+        self.timeseries = mommy.make(models.Timeseries)
 
-    def test_rounding_minutes_must_be_null(self):
-        self.timeseries.time_step = None
-        self.timeseries.timestamp_rounding_minutes = 0
-        with self.assertRaises(IntegrityError):
-            self.timeseries.save()
+    def set_time_step(self, time_step):
+        self.timeseries.time_step = time_step
+        self.timeseries.save()
 
-    def test_rounding_months_must_be_null(self):
-        self.timeseries.time_step = None
-        self.timeseries.timestamp_rounding_months = 0
-        with self.assertRaises(IntegrityError):
-            self.timeseries.save()
+    def test_min(self):
+        self.set_time_step("27min")
+        self.assertEqual(models.Timeseries.objects.first().time_step, "27min")
 
-    def test_offset_minutes_must_be_null(self):
-        self.timeseries.time_step = None
-        self.timeseries.timestamp_offset_minutes = 0
-        with self.assertRaises(IntegrityError):
-            self.timeseries.save()
+    def test_hour(self):
+        self.set_time_step("3H")
+        self.assertEqual(models.Timeseries.objects.first().time_step, "3H")
 
-    def test_offset_months_must_be_null(self):
-        self.timeseries.time_step = None
-        self.timeseries.timestamp_offset_months = 0
-        with self.assertRaises(IntegrityError):
-            self.timeseries.save()
+    def test_day(self):
+        self.set_time_step("3D")
+        self.assertEqual(models.Timeseries.objects.first().time_step, "3D")
 
-    def test_everything_works_when_all_are_null(self):
-        self.timeseries.save()  # No exception raised
+    def test_month(self):
+        self.set_time_step("3M")
+        self.assertEqual(models.Timeseries.objects.first().time_step, "3M")
 
+    def test_3Y(self):
+        self.set_time_step("3Y")
+        self.assertEqual(models.Timeseries.objects.first().time_step, "3Y")
 
-class TimeseriesSaveWhenTimeStepIsNotNullTestCase(TestCase):
-    def setUp(self):
-        station = mommy.make(models.Station)
-        variable = mommy.make(models.Variable)
-        unit = mommy.make(models.UnitOfMeasurement)
-        time_zone = mommy.make(models.TimeZone)
-        time_step = mommy.make(models.TimeStep, length_minutes=10, length_months=0)
-        self.timeseries = models.Timeseries(
-            gentity=station,
-            name="Temperature",
-            variable=variable,
-            unit_of_measurement=unit,
-            time_zone=time_zone,
-            time_step=time_step,
-            timestamp_offset_minutes=0,
-            timestamp_offset_months=0,
-            precision=2,
-        )
+    def test_Y(self):
+        self.set_time_step("Y")
+        self.assertEqual(models.Timeseries.objects.first().time_step, "Y")
 
-    def test_offset_must_be_not_null_when_time_step_is_not_null(self):
-        self.timeseries.timestamp_offset_minutes = None
-        self.timeseries.timestamp_offset_months = None
-        with self.assertRaises(IntegrityError):
-            self.timeseries.save()
+    def test_garbage(self):
+        with self.assertRaisesRegex(ValueError, '"hello" is not a valid time step'):
+            self.set_time_step("hello")
 
-    def test_rounding_minutes_must_be_null_if_months_is_null(self):
-        self.timeseries.timestamp_rounding_minutes = 0
-        self.timeseries.timestamp_rounding_months = None
-        with self.assertRaises(IntegrityError):
-            self.timeseries.save()
+    def test_wrong_number(self):
+        with self.assertRaisesRegex(ValueError, '"FM" is not a valid time step'):
+            self.set_time_step("FM")
 
-    def test_rounding_months_must_be_null_if_minutes_is_null(self):
-        self.timeseries.timestamp_rounding_minutes = None
-        self.timeseries.timestamp_rounding_months = 0
-        with self.assertRaises(IntegrityError):
-            self.timeseries.save()
-
-    def test_rounding_minutes_and_months_both_null_is_ok(self):
-        self.timeseries.timestamp_rounding_minutes = None
-        self.timeseries.timestamp_rounding_months = None
-        self.timeseries.save()  # No exception raised
-
-    def test_rounding_minutes_and_months_both_not_null_is_ok(self):
-        self.timeseries.timestamp_rounding_minutes = 0
-        self.timeseries.timestamp_rounding_months = 0
-        self.timeseries.save()  # No exception raised
+    def test_wrong_unit(self):
+        with self.assertRaisesRegex(ValueError, '"3B" is not a valid time step'):
+            self.set_time_step("3B")
