@@ -42,12 +42,6 @@ class TimeZoneSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class IntervalTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.IntervalType
-        fields = "__all__"
-
-
 class FileTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FileType

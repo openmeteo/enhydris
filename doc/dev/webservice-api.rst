@@ -79,8 +79,7 @@ The response will be 200 with the following content::
       "unit_of_measurement": 7,
       "time_zone": 1,
       "instrument": 16,
-      "time_step": "10min",
-      "interval_type": null
+      "time_step": "10min"
     }
 
 Authentication and user management
@@ -259,8 +258,8 @@ Exactly the same applies to ``eventtypes``, ``instrumenttypes``, and
 
 Besides these there are several other lookups for which the response is
 similar but may have additional information. These are
-``organizations``, ``persons``, ``timezones``, ``intervaltypes``,
-``filetypes`` and ``units``.
+``organizations``, ``persons``, ``timezones``, ``filetypes`` and
+``units``.
 
 Response format for ``organizations``::
 
@@ -291,15 +290,6 @@ Response format for ``timezones``::
         "last_modified": "2011-06-28T16:42:34.760676Z",
         "code": "EST",
         "utc_offset": -300
-    }
-
-Response format for ``intervaltypes``::
-
-    {
-      "id": 1,
-      "last_modified": "2011-06-22T05:13:23.044416Z",
-      "descr": "Sum",
-      "value": "SUM"
     }
 
 Response format for ``filetypes``::
@@ -517,8 +507,7 @@ Response::
           "unit_of_measurement": 14,
           "time_zone": 1,
           "instrument": 10,
-          "time_step": "10min",
-          "interval_type": null
+          "time_step": "10min"
         }
 
 GET the list of time series of a station::

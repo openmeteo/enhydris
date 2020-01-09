@@ -70,9 +70,13 @@ def create_interval_types(apps, schema_editor):
     reset_sequence = [
         line for line in sqlsequencereset if '"enhydris_intervaltype"' in line
     ]
-    assert len(reset_sequence) == 1
-    with connection.cursor() as cursor:
-        cursor.execute(reset_sequence[0])
+    assert len(reset_sequence) <= 1
+    # In later migrations we delete IntervalType. Somehow, then, this sequence does
+    # not exist (probably a bug in the frozen models). This is why we have the "if"
+    # below.
+    if len(reset_sequence) == 1:
+        with connection.cursor() as cursor:
+            cursor.execute(reset_sequence[0])
 
 
 def reverse_migration(apps, schema_editor):

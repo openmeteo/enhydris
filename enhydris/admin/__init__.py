@@ -49,11 +49,6 @@ class VariableAdmin(TranslatableAdmin):
         )
 
 
-@admin.register(models.IntervalType)
-class IntervalTypeAdmin(admin.ModelAdmin):
-    list_display = [f.name for f in models.IntervalType._meta.fields]
-
-
 @admin.register(models.UnitOfMeasurement)
 class UnitOfMeasurementAdmin(admin.ModelAdmin):
     list_display = [f.name for f in models.UnitOfMeasurement._meta.fields]

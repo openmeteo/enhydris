@@ -350,10 +350,6 @@ class TimeZone(models.Model):
         ordering = ("utc_offset",)
 
 
-class IntervalType(Lookup):
-    value = models.CharField(max_length=50)
-
-
 class TimeseriesStorage(FileSystemStorage):
     """Stores timeseries data files in settings.ENHYDRIS_TIMESERIES_DATA_DIR.
 
@@ -406,9 +402,6 @@ class Timeseries(models.Model):
             "series is irregular."
         ),
     )
-    interval_type = models.ForeignKey(
-        IntervalType, null=True, blank=True, on_delete=models.CASCADE
-    )
     datafile = models.FileField(null=True, blank=True, storage=TimeseriesStorage())
     start_date_utc = models.DateTimeField(null=True, blank=True)
     end_date_utc = models.DateTimeField(null=True, blank=True)
@@ -455,9 +448,6 @@ class Timeseries(models.Model):
         else:
             location = None
         ahtimeseries.time_step = self.time_step
-        ahtimeseries.interval_type = (
-            None if not self.interval_type else self.interval_type.value.lower()
-        )
         ahtimeseries.unit = self.unit_of_measurement.symbol
         ahtimeseries.title = self.name
         sign = -1 if self.time_zone.utc_offset < 0 else 1

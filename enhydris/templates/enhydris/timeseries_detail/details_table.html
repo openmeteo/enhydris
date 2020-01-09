@@ -53,12 +53,7 @@
     <td>{% if not timeseries.time_step %}
           {% trans 'Variable' %}
         {% else %}
-        {{ timeseries.time_step }},
-          {% if not timeseries.interval_type %}
-            {% trans 'Instantaneous' %}
-          {% else %}
-            {{ timeseries.interval_type }}
-          {% endif %}
+          {{ timeseries.time_step }}
         {% endif %}
     </td>
   </tr>

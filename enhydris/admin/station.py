@@ -207,10 +207,7 @@ class TimeseriesInline(InlinePermissionsMixin, nested_admin.NestedStackedInline)
         ),
         (
             _("Time step"),
-            {
-                "fields": ("interval_type", ("time_step", "time_zone")),
-                "classes": ("collapse",),
-            },
+            {"fields": ("time_step", "time_zone"), "classes": ("collapse",)},
         ),
         (
             _("Data"),

@@ -80,8 +80,8 @@ class OrganizationTestCase(TestCase):
 class VariableTestCase(TestCase):
     """Test lookups.
 
-    We test Variable as an example of Lookup. We don't test EventType, InstrumentType,
-    and IntervalType, because they are trivial Lookup descendants.
+    We test Variable as an example of Lookup. We don't test EventType, and
+    InstrumentType, because they are trivial Lookup descendants.
     """
 
     def test_create(self):
@@ -528,7 +528,6 @@ class TimeseriesGetDataTestCase(TestCase):
             name="Daily temperature",
             gentity=station,
             time_step="H",
-            interval_type__value="INSTANTANEOUS",
             unit_of_measurement__symbol="mm",
             time_zone__code="IST",
             time_zone__utc_offset=330,
@@ -556,9 +555,6 @@ class TimeseriesGetDataTestCase(TestCase):
 
     def test_time_step(self):
         self.assertEqual(self.data.time_step, "H")
-
-    def test_interval_type(self):
-        self.assertEqual(self.data.interval_type, "instantaneous")
 
     def test_unit(self):
         self.assertEqual(self.data.unit, "mm")

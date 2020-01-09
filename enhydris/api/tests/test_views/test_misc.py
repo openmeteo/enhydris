@@ -41,15 +41,6 @@ class TimeZoneTestCase(APITestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class IntervalTypeTestCase(APITestCase):
-    def setUp(self):
-        self.interval_type = mommy.make(models.IntervalType)
-
-    def test_get_interval_type(self):
-        r = self.client.get("/api/intervaltypes/{}/".format(self.interval_type.id))
-        self.assertEqual(r.status_code, 200)
-
-
 class FileTypeTestCase(APITestCase):
     def setUp(self):
         self.file_type = mommy.make(models.FileType)
