@@ -1,3 +1,4 @@
+from configparser import ParsingError
 from io import TextIOWrapper
 
 from django import forms
@@ -140,7 +141,10 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
             raise forms.ValidationError(str(e))
 
     def _check_submitted_data(self, datastream):
-        ahtimeseries = self._get_timeseries_without_moving_file_position(datastream)
+        try:
+            ahtimeseries = self._get_timeseries_without_moving_file_position(datastream)
+        except (ParsingError, EOFError) as e:
+            raise forms.ValidationError(str(e))
         if self._we_are_appending_data(ahtimeseries):
             self._check_timeseries_for_appending(ahtimeseries)
 

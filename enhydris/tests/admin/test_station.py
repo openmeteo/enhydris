@@ -522,13 +522,22 @@ class TimeseriesUploadInvalidFileTestCase(TestCase):
             "time_zone": self.timeseries.time_zone.id,
             "precision": 2,
         }
-        self.files = {"data": SimpleUploadedFile("mytimeseries.csv", b"\xbc\xbd")}
-        self.form = TimeseriesInlineAdminForm(
-            data=self.data, files=self.files, instance=self.timeseries
-        )
 
-    def test_form_is_invalid(self):
-        self.assertFalse(self.form.is_valid())
+    def _test_with(self, uploaded_file):
+        files = {"data": uploaded_file}
+        form = TimeseriesInlineAdminForm(
+            data=self.data, files=files, instance=self.timeseries
+        )
+        self.assertFalse(form.is_valid())
+
+    def test_file_starting_with_garbage(self):
+        self._test_with(SimpleUploadedFile("mytimeseries.csv", b"\xbc\xbd"))
+
+    def test_file_with_wrong_header(self):
+        self._test_with(SimpleUploadedFile("mytimeseries.csv", b"hello\n"))
+
+    def test_file_not_ending_in_line_feed(self):
+        self._test_with(SimpleUploadedFile("mytimeseries.csv", b"2020-01-28 18:28,7,"))
 
 
 class TimeseriesInlineAdminFormProcessWithoutFileTestCase(TestCase):
