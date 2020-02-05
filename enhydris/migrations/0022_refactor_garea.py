@@ -3,18 +3,15 @@ import textwrap
 import django.contrib.gis.db.models.fields
 import django.db.models.deletion
 import django.utils.timezone
-from django.conf import settings
 from django.db import migrations, models
 
 
-def delete_countries_if_we_are_unit_testing(apps, schema_editor):
+def delete_countries_if_unused(apps, schema_editor):
     # Normally we require that PoliticalDivision has been emptied manually before
     # running this migration. However, countries that have been created by an earlier
-    # migration are removed automatically, otherwise unit tests can't run.
-    if settings.EMAIL_BACKEND != "django.core.mail.backends.locmem.EmailBackend":
-        return
+    # migration are removed automatically.
     PoliticalDivision = apps.get_model("enhydris", "PoliticalDivision")
-    PoliticalDivision.objects.filter(parent=None).delete()
+    PoliticalDivision.objects.filter(parent=None, id__lte=246).delete()
 
 
 def error():
@@ -69,8 +66,8 @@ class Migration(migrations.Migration):
     dependencies = [("enhydris", "0021_gpoint_geometry")]
 
     operations = [
-        migrations.RunPython(delete_countries_if_we_are_unit_testing, do_nothing),
         migrations.RunPython(check_gentity_geopointers_are_empty, do_nothing),
+        migrations.RunPython(delete_countries_if_unused, do_nothing),
         migrations.RunPython(check_garea_is_empty, do_nothing),
         migrations.CreateModel(
             name="GareaCategory",
