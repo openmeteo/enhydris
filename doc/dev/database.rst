@@ -35,19 +35,19 @@ need to know the model translation rules, which are quite simple:
   name of the database column for the key of the child table is the
   lower cased parent model name suffixed with ``_ptr_id``.
 
-The core of the Enhydris database is a list of measuring stations,
-with additional information such as instruments, photos, videos, and
-so on, and the hydrological and meteorological time series stored for
-each measuring station. This can be used in or assisted by many more
-applications, which may or may not be needed in each setup. A billing
-system is needed for agencies that charge for their data, but not for
-those who offer them freely or only internally. Some organisations may
-need to develop additional software for managing aqueducts, and some
-may not. Therefore, the core is kept as simple as possible. The core
-database tables use the ``enhydris_`` prefix.  Other applications use
-another prefix. The name of a table is the lowercased model name
-preceded by the prefix.  For example, the table that corresponds to
-the :class:`~enhydris.models.Gentity` model is ``enhydris_gentity``.
+The core of the Enhydris database is a list of measuring stations, with
+additional information such as photos, videos, and the hydrological and
+meteorological time series stored for each measuring station. This can
+be used in or assisted by many more applications, which may or may not
+be needed in each setup. A billing system is needed for agencies that
+charge for their data, but not for those who offer them freely or only
+internally. Some organisations may need to develop additional software
+for managing aqueducts, and some may not. Therefore, the core is kept as
+simple as possible. The core database tables use the ``enhydris_``
+prefix.  Other applications use another prefix.  The name of a table is
+the lowercased model name preceded by the prefix.  For example, the
+table that corresponds to the :class:`~enhydris.models.Gentity` model is
+``enhydris_gentity``.
 
 Lookup tables
 -------------
@@ -265,45 +265,6 @@ Station and its related models
       stations, this means the weather observers.  This is a simple text
       field.
 
-.. class:: enhydris.models.InstrumentType(Lookup)
-
-   The instrument type, such as "Thermometer".
-
-.. class:: enhydris.models.Instrument
-
-   A measuring instrument or sensor that belongs to a station.
-
-   .. attribute:: enhydris.models.Instrument.station
-
-      The :class:`~enhydris.models.Station` to which the instrument belongs.
-
-   .. attribute:: enhydris.models.Instrument.type
-
-      The :class:`~enhydris.models.InstrumentType`.
-
-   .. attribute:: enhydris.models.Instrument.name
-
-      A field with a descriptive name.
-
-   .. attribute:: enhydris.models.Instrument.remarks
-
-      A field with remarks of unlimited length.
-
-   .. attribute:: enhydris.models.Instrument.manufacturer
-
-      The name of the manufacturer. For simplicity, this is not a
-      foreign key to :class:`~enhydris.models.Organization`;
-      this would be overkill.
-
-   .. attribute:: enhydris.models.Instrument.model
-
-      The model name.
-
-   .. attribute:: enhydris.models.Instrument.start_date
-                  enhydris.models.Instrument.end_date
-
-      The dates of start and end of operation.
-
 Time series and related models
 ------------------------------
 
@@ -383,14 +344,6 @@ Time series and related models
    .. attribute:: enhydris.models.Timeseries.remarks
 
       A text field of unlimited length.
-
-   .. attribute:: enhydris.models.Timeseries.instrument
-
-      The instrument that measured the time series; a foreign key to
-      :class:`~enhydris.models.Instrument`. This can be null, as there
-      are time series that are not measured by instruments, as are, for
-      example, time series resulting from processing of other time
-      series.
 
    .. attribute:: enhydris.models.Timeseries.hidden
 

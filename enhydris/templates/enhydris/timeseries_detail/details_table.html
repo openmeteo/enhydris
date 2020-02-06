@@ -33,14 +33,6 @@
     <td>{{ timeseries.remarks }}</td>
   </tr>
   <tr>
-    <th>{% trans 'Instrument' %}</th>
-    {% if timeseries.instrument %}
-      <td><a href="{% url "instrument_detail" station_id=timeseries.gentity.id pk=timeseries.instrument.id %}">{{ timeseries.instrument }}</a></td>
-    {% else %}
-      <td>{% trans 'None' %}</td>
-    {% endif %}
-  </tr>
-  <tr>
     <th>{% trans 'Start Date' %}</th>
     <td>{{ timeseries.start_date|date:"Y/m/d H:i" }}</td>
   </tr>

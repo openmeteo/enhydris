@@ -34,11 +34,6 @@ class EventTypeAdmin(admin.ModelAdmin):
     list_display = ("id", "descr")
 
 
-@admin.register(models.InstrumentType)
-class InstrumentTypeAdmin(admin.ModelAdmin):
-    list_display = [f.name for f in models.InstrumentType._meta.fields]
-
-
 @admin.register(models.Variable)
 class VariableAdmin(TranslatableAdmin):
     list_display = ("id", "descr", "last_modified")

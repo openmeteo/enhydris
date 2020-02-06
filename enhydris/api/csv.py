@@ -39,37 +39,9 @@ def _station_csv(s):
     ]
 
 
-_instrument_list_csv_headers = [
-    "id",
-    "Station",
-    "Type",
-    "Name",
-    "Manufacturer",
-    "Model",
-    "Start date",
-    "End date",
-    "Remarks",
-]
-
-
-def _instrument_csv(i):
-    return [
-        i.id,
-        i.station.id,
-        i.type.descr if i.type else "",
-        i.name,
-        i.manufacturer,
-        i.model,
-        i.start_date,
-        i.end_date,
-        i.remarks,
-    ]
-
-
 _timeseries_list_csv_headers = [
     "id",
     "Station",
-    "Instrument",
     "Variable",
     "Unit",
     "Name",
@@ -84,7 +56,6 @@ def _timeseries_csv(t):
     return [
         t.id,
         t.gentity.id,
-        t.instrument.id if t.instrument else "",
         t.variable.descr if t.variable else "",
         t.unit_of_measurement.symbol,
         t.name,
@@ -104,19 +75,11 @@ def prepare_csv(queryset):
                     csvwriter.writerow(_station_csv(station))
                 zipfile.writestr("stations.csv", stations_csv.getvalue())
 
-            with StringIO() as instruments_csv:
-                csvwriter = csv.writer(instruments_csv)
-                csvwriter.writerow(_instrument_list_csv_headers)
-                for station in queryset:
-                    for instrument in station.instrument_set.all():
-                        csvwriter.writerow(_instrument_csv(instrument))
-                zipfile.writestr("instruments.csv", instruments_csv.getvalue())
-
             with StringIO() as timeseries_csv:
                 csvwriter = csv.writer(timeseries_csv)
                 csvwriter.writerow(_timeseries_list_csv_headers)
                 for station in queryset:
-                    for timeseries in station.timeseries.order_by("instrument__id"):
+                    for timeseries in station.timeseries.order_by("variable__id"):
                         csvwriter.writerow(_timeseries_csv(timeseries))
                 zipfile.writestr("timeseries.csv", timeseries_csv.getvalue())
 

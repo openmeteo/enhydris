@@ -66,7 +66,6 @@ router.register("stations", views.StationViewSet, "station")
 urlstart = r"stations/(?P<station_id>\d+)/"
 router.register(urlstart + "files", views.GentityFileViewSet, "file")
 router.register(urlstart + "events", views.GentityEventViewSet, "event")
-router.register(urlstart + "instruments", views.InstrumentViewSet, "instrument")
 router.register(urlstart + "timeseries", views.TimeseriesViewSet, "timeseries")
 
 router.register("gareas", views.GareaViewSet)
@@ -75,7 +74,6 @@ router.register("persons", views.PersonViewSet)
 router.register("timezones", views.TimeZoneViewSet)
 router.register("filetypes", views.FileTypeViewSet)
 router.register("eventtypes", views.EventTypeViewSet)
-router.register("instrumenttypes", views.InstrumentTypeViewSet)
 router.register("variables", views.VariableViewSet)
 router.register("units", views.UnitOfMeasurementViewSet)
 urlpatterns += router.urls

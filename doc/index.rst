@@ -3,9 +3,7 @@ Enhydris
 
 Enhydris is a free database system for the storage and management of
 hydrological and meteorological data. It allows the storage and
-retrieval of raw data, processed time series, model parameters, curves
-and meta-information such as measurement stations instruments, events
-etc.
+retrieval of measurement stations and their time series.
 
 General documentation:
 

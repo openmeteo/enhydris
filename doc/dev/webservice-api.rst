@@ -78,7 +78,6 @@ The response will be 200 with the following content::
       "variable": 1,
       "unit_of_measurement": 7,
       "time_zone": 1,
-      "instrument": 16,
       "time_step": "10min"
     }
 
@@ -253,8 +252,7 @@ The result is a `paginated list`_ of station types::
         ]
     }
 
-Exactly the same applies to ``eventtypes``, ``instrumenttypes``, and
-``variables``.
+Exactly the same applies to ``eventtypes`` and ``variables``.
 
 Besides these there are several other lookups for which the response is
 similar but may have additional information. These are
@@ -440,10 +438,9 @@ spreadsheet. This does this::
 
 The list can be sorted and filtered with the ``q`` and ``sort``
 parameters as explained above. The result is a zip file that contains a
-CSV with the stations, a CSV with all the instruments of these stations,
-and a CSV with all the time series (their metadata only) of these
-stations. These lists contain all the columns, so users can do whatever
-they want with them.
+CSV with the stations and a CSV with all the time series (their metadata
+only) of these stations. These lists contain all the columns, so users
+can do whatever they want with them.
 
 Create, update or delete stations
 ---------------------------------
@@ -506,7 +503,6 @@ Response::
           "variable": 3,
           "unit_of_measurement": 14,
           "time_zone": 1,
-          "instrument": 10,
           "time_step": "10min"
         }
 
@@ -680,31 +676,6 @@ Response example for the detail request::
       "gentity": 1334,
       "type": 2
     },
-
-For the list request, the result is a `paginated list`_ of items.
-
-Instruments
------------
-
-List or get detail of station instruments::
-
-    curl https://openmeteo.org/api/stations/1334/instruments/
-    curl https://openmeteo.org/api/stations/1334/instruments/19/
-
-Response example for the detail request::
-
-    {
-      "id": 19,
-      "last_modified": "2013-07-01T13:08:12.558369Z",
-      "manufacturer": "",
-      "model": "",
-      "start_date": "2001-04-10",
-      "end_date": null,
-      "name": "2nd air temperature & humidity",
-      "remarks": "Height from ground 2.35 m.",
-      "station": 1334,
-      "type": 23
-    }
 
 For the list request, the result is a `paginated list`_ of items.
 

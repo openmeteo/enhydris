@@ -59,15 +59,6 @@ class EventTypeTestCase(APITestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class InstrumentTypeTestCase(APITestCase):
-    def setUp(self):
-        self.instrument_type = mommy.make(models.InstrumentType)
-
-    def test_get_instrument_type(self):
-        r = self.client.get("/api/instrumenttypes/{}/".format(self.instrument_type.id))
-        self.assertEqual(r.status_code, 200)
-
-
 class VariableTestCase(APITestCase):
     def setUp(self):
         self.variable = mommy.make(models.Variable)
@@ -95,16 +86,4 @@ class GentityEventTestCase(APITestCase):
 
     def test_list_status_code(self):
         r = self.client.get("/api/stations/{}/events/".format(self.station.id))
-        self.assertEqual(r.status_code, 200)
-
-
-class InstrumentTestCase(APITestCase):
-    # We have extensively tested GentityFile, which is practically the same code,
-    # so we test this briefly.
-    def setUp(self):
-        self.station = mommy.make(models.Station)
-        self.gentity_file = mommy.make(models.Instrument, station=self.station)
-
-    def test_list_status_code(self):
-        r = self.client.get("/api/stations/{}/instruments/".format(self.station.id))
         self.assertEqual(r.status_code, 200)

@@ -54,12 +54,6 @@ class EventTypeSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class InstrumentTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.InstrumentType
-        fields = "__all__"
-
-
 class VariableSerializer(TranslatableModelSerializer):
     translations = TranslatedFieldsField(shared_model=models.Variable, required=False)
 
@@ -83,12 +77,6 @@ class GentityFileSerializer(serializers.ModelSerializer):
 class GentityEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.GentityEvent
-        fields = "__all__"
-
-
-class InstrumentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Instrument
         fields = "__all__"
 
 

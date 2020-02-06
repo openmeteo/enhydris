@@ -83,18 +83,6 @@ class InlinePermissionsMixin:
             return super().has_view_permission(request, obj)
 
 
-class InstrumentInline(InlinePermissionsMixin, nested_admin.NestedStackedInline):
-    model = models.Instrument
-    classes = ("collapse",)
-    fields = (
-        "name",
-        "type",
-        ("manufacturer", "model"),
-        ("start_date", "end_date"),
-        "remarks",
-    )
-
-
 class GentityFileInline(InlinePermissionsMixin, nested_admin.NestedStackedInline):
     model = models.GentityFile
     classes = ("collapse",)
@@ -207,7 +195,7 @@ class TimeseriesInline(InlinePermissionsMixin, nested_admin.NestedStackedInline)
         ),
         (
             _("Other details"),
-            {"fields": ("hidden", "instrument", "remarks"), "classes": ("collapse",)},
+            {"fields": ("hidden", "remarks"), "classes": ("collapse",)},
         ),
         (
             _("Time step"),
@@ -230,7 +218,6 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
         TextField: {"widget": forms.Textarea(attrs={"rows": 4, "cols": 40})}
     }
     inlines = [
-        InstrumentInline,
         GentityFileInline,
         GentityEventInline,
         TimeseriesInline,

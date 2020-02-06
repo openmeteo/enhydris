@@ -76,11 +76,6 @@ class EventTypeViewSet(ReadOnlyModelViewSet):
     queryset = models.EventType.objects.all()
 
 
-class InstrumentTypeViewSet(ReadOnlyModelViewSet):
-    serializer_class = serializers.InstrumentTypeSerializer
-    queryset = models.InstrumentType.objects.all()
-
-
 class VariableViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.VariableSerializer
     queryset = models.Variable.objects.all()
@@ -96,13 +91,6 @@ class GentityEventViewSet(ReadOnlyModelViewSet):
 
     def get_queryset(self):
         return models.GentityEvent.objects.filter(gentity_id=self.kwargs["station_id"])
-
-
-class InstrumentViewSet(ReadOnlyModelViewSet):
-    serializer_class = serializers.InstrumentSerializer
-
-    def get_queryset(self):
-        return models.Instrument.objects.filter(station_id=self.kwargs["station_id"])
 
 
 class GentityFileViewSet(ReadOnlyModelViewSet):

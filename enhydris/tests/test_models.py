@@ -80,8 +80,8 @@ class OrganizationTestCase(TestCase):
 class VariableTestCase(TestCase):
     """Test lookups.
 
-    We test Variable as an example of Lookup. We don't test EventType, and
-    InstrumentType, because they are trivial Lookup descendants.
+    We test Variable as an example of Lookup. We don't test EventType
+    because it is a similar trivial Lookup descendant.
     """
 
     def test_create(self):
@@ -334,32 +334,6 @@ class StationLastUpdateTestCase(TestCase):
 
     def test_last_update_when_no_timeseries(self, m):
         self.assertIsNone(self.station.last_update)
-
-
-class InstrumentTestCase(TestCase):
-    def test_create(self):
-        type = mommy.make(models.InstrumentType)
-        station = mommy.make(models.Station)
-        instrument = models.Instrument(type=type, station=station, name="Thermometer")
-        instrument.save()
-        self.assertEqual(models.Instrument.objects.first().name, "Thermometer")
-
-    def test_update(self):
-        mommy.make(models.Instrument)
-        instrument = models.Instrument.objects.first()
-        instrument.name = "Thermometer"
-        instrument.save()
-        self.assertEqual(models.Instrument.objects.first().name, "Thermometer")
-
-    def test_delete(self):
-        mommy.make(models.Instrument)
-        instrument = models.Instrument.objects.first()
-        instrument.delete()
-        self.assertEqual(models.Instrument.objects.count(), 0)
-
-    def test_str(self):
-        instrument = mommy.make(models.Instrument, name="Thermometer")
-        self.assertEqual(str(instrument), "Thermometer")
 
 
 class UnitOfMeasurementTestCase(TestCase):

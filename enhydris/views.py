@@ -55,8 +55,3 @@ class OldTimeseriesDetailRedirectView(RedirectView):
         return reverse(
             "timeseries_detail", kwargs={"station_id": station_id, "pk": timeseries_id}
         )
-
-
-class InstrumentDetail(DetailView):
-    model = models.Instrument
-    template_name = "enhydris/instrument_detail/main.html"

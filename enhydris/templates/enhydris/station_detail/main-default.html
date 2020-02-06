@@ -57,12 +57,10 @@
         <li role="presentation" class="active"><a href="#timeseries" data-toggle="tab" aria-controls="timeseries" role="tab">{% trans "Timeseries" %}</a></li>
         <li role="presentation" ><a href="#gentity_files" data-toggle="tab" aria-controls="gentity_files" role="tab">{% trans "Files" %}</a></li>
         <li role="presentation" ><a href="#gentity_events" data-toggle="tab" aria-controls="gentity_events" role="tab">{% trans "Events" %}</a></li>
-        <li role="presentation" ><a href="#instruments" data-toggle="tab" aria-controls="instruments" role="tab">{% trans "Instruments" %}</a></li>
       </ul>
       <div class="tab-content">
         {% include "enhydris/station_detail/tabs/gentity_files.html" %}
         {% include "enhydris/station_detail/tabs/gentity_events.html" %}
-        {% include "enhydris/station_detail/tabs/instruments.html" %}
         {% include "enhydris/station_detail/tabs/timeseries.html" %}
       </div>
     </div>

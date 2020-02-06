@@ -81,11 +81,11 @@ was the name in the "alternative" language. This system, rather than a
 was worth, therefore all fields ending in ``_alt`` have been abolished.
 
 In the new Enhydris version, several lookups, such as variable names,
-are multilingual using django-parler. However, station, instrument and
-timeseries names and remarks, event reports, etc. (i.e. everything a
-non-admin user is expected to enter), are not multilingual. The idea is
-that a station in Greece will have a Greek name, and this does not need
-to be transliterated. The rationale is the same as for
+are multilingual using django-parler. However, station and timeseries
+names and remarks, event reports, etc. (i.e. everything a non-admin user
+is expected to enter), are not multilingual. The idea is that a station
+in Greece will have a Greek name, and this does not need to be
+transliterated. The rationale is the same as for
 `OSM's-avoid-transliteration`_ rule: transliterations can be automated,
 and having users enter them manually would only create noise in the
 database. There may be valid cases for translation (e.g. when the name
@@ -170,6 +170,10 @@ Other changes
 - The templates have been refactored. Applications and installations
   with custom templates or templates inheriting the Enhydris templates
   may need to be modified.
+- Instruments have been abolished. Upgrading requires the database to
+  not have any instruments. If you try to upgrade and there are
+  instruments, it will give you an error message with instructions on
+  how to empty the instruments table.
 - GentityGenericData and GentityAltCode have been abolished, as they
   were practically not being used in any of the known installations.
   Upgrading requires the tables to be empty; if not, upgrading will stop

@@ -283,30 +283,6 @@ class Station(Gpoint):
             return freshest_timeseries.end_date
 
 
-class InstrumentType(Lookup):
-    pass
-
-
-class Instrument(models.Model):
-    last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    station = models.ForeignKey(Station, on_delete=models.CASCADE)
-    type = models.ForeignKey(InstrumentType, on_delete=models.CASCADE)
-    manufacturer = models.CharField(max_length=50, blank=True)
-    model = models.CharField(max_length=50, blank=True)
-    start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
-    name = models.CharField(max_length=100, blank=True)
-    remarks = models.TextField(blank=True)
-
-    class Meta:
-        ordering = ("name",)
-        verbose_name = _("Instrument")
-        verbose_name_plural = _("Instruments")
-
-    def __str__(self):
-        return self.name or str(self.id)
-
-
 #
 # Time series and related models
 #
@@ -389,9 +365,6 @@ class Timeseries(models.Model):
     )
     time_zone = models.ForeignKey(TimeZone, on_delete=models.CASCADE)
     remarks = models.TextField(blank=True)
-    instrument = models.ForeignKey(
-        Instrument, null=True, blank=True, on_delete=models.CASCADE
-    )
     time_step = models.CharField(
         max_length=7,
         blank=True,
