@@ -61,7 +61,7 @@ class EventTypeTestCase(APITestCase):
 
 class VariableTestCase(APITestCase):
     def setUp(self):
-        self.variable = mommy.make(models.Variable)
+        self.variable = mommy.make(models.Variable, descr="Temperature")
 
     def test_get_variable(self):
         r = self.client.get("/api/variables/{}/".format(self.variable.id))

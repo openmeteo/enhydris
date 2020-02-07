@@ -396,7 +396,7 @@ class TimeseriesPostTestCase(APITestCase):
     def setUp(self):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
         self.user2 = mommy.make(User, is_active=True, is_superuser=False)
-        self.variable = mommy.make(models.Variable)
+        self.variable = mommy.make(models.Variable, descr="Temperature")
         self.time_zone = mommy.make(models.TimeZone)
         self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
         self.station = mommy.make(models.Station, creator=self.user1)
@@ -430,7 +430,7 @@ class TimeseriesPostTestCase(APITestCase):
 class TimeseriesPostWithWrongStationTestCase(APITestCase):
     def setUp(self):
         self.user = mommy.make(User, is_active=True, is_superuser=False)
-        self.variable = mommy.make(models.Variable)
+        self.variable = mommy.make(models.Variable, descr="Temperature")
         self.time_zone = mommy.make(models.TimeZone)
         self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
         self.station1 = mommy.make(models.Station, creator=self.user)

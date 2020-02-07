@@ -539,8 +539,13 @@ class TimeseriesUploadInvalidFileTestCase(TestCase):
 class TimeseriesInlineAdminFormProcessWithoutFileTestCase(TestCase):
     def setUp(self):
         station = mommy.make(models.Station)
+        variable = mommy.make(models.Variable, descr="Temperature")
         self.timeseries = mommy.make(
-            models.Timeseries, gentity=station, time_zone__utc_offset=0, precision=2
+            models.Timeseries,
+            gentity=station,
+            variable=variable,
+            time_zone__utc_offset=0,
+            precision=2,
         )
         self.timeseries.set_data(StringIO("2019-01-01 00:30,25,\n"))
         self.data = {

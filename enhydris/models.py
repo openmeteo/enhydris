@@ -13,6 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 
 import iso8601
 from htimeseries import HTimeseries
+from parler.managers import TranslatableManager
 from parler.models import TranslatableModel, TranslatedFields
 from simpletail import ropen
 
@@ -288,9 +289,16 @@ class Station(Gpoint):
 #
 
 
+class VariableManager(TranslatableManager):
+    def get_queryset(self):
+        return super().get_queryset().translated().order_by("translations__descr")
+
+
 class Variable(TranslatableModel):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
     translations = TranslatedFields(descr=models.CharField(max_length=200, blank=True))
+
+    objects = VariableManager()
 
     def __str__(self):
         return self.descr
@@ -304,6 +312,9 @@ class UnitOfMeasurement(Lookup):
         if self.symbol:
             return self.symbol
         return str(self.id)
+
+    class Meta:
+        ordering = ["symbol"]
 
 
 class TimeZone(models.Model):

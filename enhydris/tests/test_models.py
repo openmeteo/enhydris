@@ -8,10 +8,12 @@ from django.contrib.gis.geos import MultiPolygon, Point, Polygon
 from django.core.files.base import ContentFile
 from django.db import IntegrityError
 from django.test import TestCase
+from django.utils import translation
 
 import pandas as pd
 from htimeseries import HTimeseries
 from model_mommy import mommy
+from parler.utils.context import switch_language
 
 from enhydris import models
 from enhydris.tests import RandomEnhydrisTimeseriesDataDir
@@ -78,39 +80,51 @@ class OrganizationTestCase(TestCase):
 
 
 class VariableTestCase(TestCase):
-    """Test lookups.
-
-    We test Variable as an example of Lookup. We don't test EventType
-    because it is a similar trivial Lookup descendant.
-    """
-
     def test_create(self):
         gact = models.Variable(descr="Temperature")
         gact.save()
         self.assertEqual(models.Variable.objects.first().descr, "Temperature")
 
     def test_update(self):
-        mommy.make(models.Variable)
+        mommy.make(models.Variable, descr="Irrelevant")
         gact = models.Variable.objects.first()
         gact.descr = "Temperature"
         gact.save()
         self.assertEqual(models.Variable.objects.first().descr, "Temperature")
 
     def test_delete(self):
-        mommy.make(models.Variable)
+        mommy.make(models.Variable, descr="Temperature")
         gact = models.Variable.objects.first()
         gact.delete()
         self.assertEqual(models.Variable.objects.count(), 0)
 
     def test_str(self):
-        gact = mommy.make(models.Variable, descr="Temperature")
+        gact = self._create_variable("Temperature", "Θερμοκρασία")
         self.assertEqual(str(gact), "Temperature")
+        with switch_language(gact, "el"):
+            self.assertEqual(str(gact), "Θερμοκρασία")
+
+    def test_sort(self):
+        self._create_variable("Temperature", "Θερμοκρασία")
+        self._create_variable("Humidity", "Υγρασία")
+        self.assertEqual(
+            [v.descr for v in models.Variable.objects.all()],
+            ["Humidity", "Temperature"],
+        )
+        with translation.override("el"):
+            self.assertEqual(
+                [v.descr for v in models.Variable.objects.all()],
+                ["Θερμοκρασία", "Υγρασία"],
+            )
+
+    def _create_variable(self, english_name, greek_name):
+        mommy.make(models.Variable, descr=english_name)
+        variable = models.Variable.objects.get(translations__descr=english_name)
+        variable.translations.create(language_code="el", descr=greek_name)
+        return variable
 
 
 class FileTypeTestCase(TestCase):
-    # We don't test functionality inherited from Lookup, as this is tested in
-    # VariableTestCase.
-
     def test_str(self):
         file_type = mommy.make(models.FileType, mime_type="image/png")
         self.assertEqual(str(file_type), "image/png")
@@ -337,9 +351,6 @@ class StationLastUpdateTestCase(TestCase):
 
 
 class UnitOfMeasurementTestCase(TestCase):
-    # We don't test functionality inherited from Lookup, as this is tested in
-    # VariableTestCase.
-
     def test_str(self):
         unit = mommy.make(models.UnitOfMeasurement, symbol="mm")
         self.assertEqual(str(unit), "mm")

@@ -159,3 +159,5 @@ if os.environ.get("SELENIUM_BROWSER", False):
             "kwargs": {},
         }
     }
+
+LANGUAGE_CODE = "en"
