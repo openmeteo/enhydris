@@ -86,7 +86,7 @@ class InlinePermissionsMixin:
 class GentityFileInline(InlinePermissionsMixin, nested_admin.NestedStackedInline):
     model = models.GentityFile
     classes = ("collapse",)
-    fields = (("descr", "date"), ("content", "file_type"), "remarks")
+    fields = (("descr", "date"), ("content"), "remarks")
 
 
 class GentityEventInline(InlinePermissionsMixin, nested_admin.NestedStackedInline):

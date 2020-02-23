@@ -625,8 +625,7 @@ Response::
           "content": "https://openmeteo.org/media/gentityfile/imported_hydria_gentityfile_1334-4.jpg",
           "descr": "West view",
           "remarks": "",
-          "gentity": 1334,
-          "file_type": 1
+          "gentity": 1334
         },
         ...
       ]
@@ -645,8 +644,7 @@ Response::
       "content": "https://openmeteo.org/media/gentityfile/imported_hydria_gentityfile_1334-4.jpg",
       "descr": "West view",
       "remarks": "",
-      "gentity": 1334,
-      "file_type": 1
+      "gentity": 1334
     },
 
 Get content of such files::
@@ -655,7 +653,7 @@ Get content of such files::
 
 The response is the contents of the file (usually binary data). The
 response headers contain the appropriate ``Content-Type`` (derived from
-the file's ``file_type``).
+the file's extension).
 
 Events
 ------

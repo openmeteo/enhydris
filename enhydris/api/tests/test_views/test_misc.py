@@ -41,15 +41,6 @@ class TimeZoneTestCase(APITestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class FileTypeTestCase(APITestCase):
-    def setUp(self):
-        self.file_type = mommy.make(models.FileType)
-
-    def test_get_file_type(self):
-        r = self.client.get("/api/filetypes/{}/".format(self.file_type.id))
-        self.assertEqual(r.status_code, 200)
-
-
 class EventTypeTestCase(APITestCase):
     def setUp(self):
         self.event_type = mommy.make(models.EventType)

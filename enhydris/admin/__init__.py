@@ -24,11 +24,6 @@ class PersonAdmin(LentityAdmin):
     list_display = [f.name for f in models.Person._meta.fields]
 
 
-@admin.register(models.FileType)
-class FileTypeAdmin(admin.ModelAdmin):
-    list_display = ("id", "mime_type", "descr")
-
-
 @admin.register(models.EventType)
 class EventTypeAdmin(admin.ModelAdmin):
     list_display = ("id", "descr")

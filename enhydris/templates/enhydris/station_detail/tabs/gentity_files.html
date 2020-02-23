@@ -10,7 +10,6 @@
             <tr>
               <th>{% trans 'ID' %}</th>
               <th>{% trans 'Date' %}</th>
-              <th>{% trans 'File Type' %}</th>
               <th>{% trans 'Content' %}</th>
               <th>{% trans 'Description' %}</th>
               <th>{% trans 'Remarks' %}</th>
@@ -23,7 +22,6 @@
               <tr>
                 <td class="col-sm-1">{{ file.id }}</td>
                 <td class="col-sm-1">{{ file.date|date:"Y/m/d" }}</td>
-                <td class="col-sm-1">{{ file.file_type.descr }}</td>
                 <td class="col-sm-1">{{ file.content }}</td>
                 <td class="col-sm-1">{{ file.descr }}</td>
                 <td class="col-sm-8">{{ file.remarks }}</td>

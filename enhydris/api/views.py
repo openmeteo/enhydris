@@ -66,11 +66,6 @@ class TimeZoneViewSet(ReadOnlyModelViewSet):
     queryset = models.TimeZone.objects.all()
 
 
-class FileTypeViewSet(ReadOnlyModelViewSet):
-    serializer_class = serializers.FileTypeSerializer
-    queryset = models.FileType.objects.all()
-
-
 class EventTypeViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.EventTypeSerializer
     queryset = models.EventType.objects.all()

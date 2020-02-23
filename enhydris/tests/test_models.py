@@ -124,19 +124,10 @@ class VariableTestCase(TestCase):
         return variable
 
 
-class FileTypeTestCase(TestCase):
-    def test_str(self):
-        file_type = mommy.make(models.FileType, mime_type="image/png")
-        self.assertEqual(str(file_type), "image/png")
-
-
 class GentityFileTestCase(TestCase):
     def test_create(self):
         station = mommy.make(models.Station)
-        file_type = mommy.make(models.FileType)
-        gentity_file = models.GentityFile(
-            gentity=station, file_type=file_type, descr="North view"
-        )
+        gentity_file = models.GentityFile(gentity=station, descr="North view")
         gentity_file.save()
         self.assertEqual(models.GentityFile.objects.first().descr, "North view")
 

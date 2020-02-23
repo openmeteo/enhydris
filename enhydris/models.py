@@ -183,18 +183,10 @@ class Garea(Gentity):
 #
 
 
-class FileType(Lookup):
-    mime_type = models.CharField(max_length=64)
-
-    def __str__(self):
-        return self.mime_type or str(self.id)
-
-
 class GentityFile(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
     gentity = models.ForeignKey(Gentity, on_delete=models.CASCADE)
     date = models.DateField(blank=True, null=True)
-    file_type = models.ForeignKey(FileType, on_delete=models.CASCADE)
     content = models.FileField(upload_to="gentityfile")
     descr = models.CharField(max_length=100)
     remarks = models.TextField(blank=True)

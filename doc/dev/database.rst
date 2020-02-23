@@ -169,14 +169,6 @@ Additional information for generic gentities
 This section describes models that provide additional information
 about gentities.
 
-.. class:: enhydris.models.FileType(Lookup)
-
-   A lookup that contains one additional field:
-
-   .. attribute:: enhydris.models.FileType.mime_type
-
-      The mime type, like ``image/jpeg``.
-
 .. class:: enhydris.models.GentityFile
 
    This model stores general files for the gentity. For examples, for
@@ -194,11 +186,6 @@ about gentities.
 
       For photos, it should be the date the photo was taken. For other
       kinds of files, it can be any kind of date.
-
-   .. attribute:: file_type
-
-      The type of the file; a foreign key to
-      :class:`~enhydris.models.FileType`.
 
    .. attribute:: content
 
