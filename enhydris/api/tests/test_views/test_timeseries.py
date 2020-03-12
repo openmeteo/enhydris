@@ -251,6 +251,30 @@ class TsdataPostGarbageTestCase(APITestCase):
         self.assertEqual(self.response.status_code, 400)
 
 
+class TsdataPostDuplicateTimestampsTestCase(APITestCase):
+    def setUp(self):
+        user = mommy.make(User, username="admin", is_superuser=True)
+        station = mommy.make(models.Station)
+        tz = mommy.make(models.TimeZone, code="EET", utc_offset=120)
+        timeseries = mommy.make(models.Timeseries, gentity=station, time_zone=tz)
+        self.client.force_authenticate(user=user)
+        self.response = self.client.post(
+            f"/api/stations/{station.id}/timeseries/{timeseries.id}/data/",
+            data={
+                "timeseries_records": (
+                    "2018-11-23 17:23,1.000000,\r\n2018-11-23 17:23,2.000000,\r\n"
+                )
+            },
+        )
+
+    def test_status_code(self):
+        self.assertContains(
+            self.response,
+            "the following timestamps appear more than once",
+            status_code=400,
+        )
+
+
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class TsdataStartAndEndDateTestCase(APITestCase):
     """Test that there's no aware/naive date confusion.

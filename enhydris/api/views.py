@@ -230,7 +230,7 @@ class TimeseriesViewSet(ModelViewSet):
             self.check_object_permissions(request, atimeseries)
             atimeseries.append_data(StringIO(request.data["timeseries_records"]))
             return HttpResponse(status=status.HTTP_204_NO_CONTENT)
-        except (IntegrityError, iso8601.ParseError) as e:
+        except (IntegrityError, iso8601.ParseError, ValueError) as e:
             return HttpResponse(
                 status=status.HTTP_400_BAD_REQUEST,
                 content=str(e),
