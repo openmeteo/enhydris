@@ -164,20 +164,11 @@ class StationListViewMixin:
             years = [int(y) for y in value.split(",")]
         except ValueError:
             raise Http404
-        return queryset.extra(
-            where=[
-                " AND ".join(
-                    [
-                        "enhydris_station.gpoint_ptr_id IN "
-                        "(SELECT t.gentity_id FROM enhydris_timeseries t "
-                        "WHERE " + str(year) + " BETWEEN "
-                        "EXTRACT(YEAR FROM t.start_date_utc) AND "
-                        "EXTRACT(YEAR FROM t.end_date_utc))"
-                        for year in years
-                    ]
-                )
-            ]
-        )
+        for year in years:
+            queryset = queryset.filter(
+                timeseries__timeseriesrecord__timestamp__year=year
+            )
+        return queryset
 
     def _filter_by_in(self, queryset, value):
         gareas = models.Garea.objects.filter(

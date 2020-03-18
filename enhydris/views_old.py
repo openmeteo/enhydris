@@ -6,6 +6,7 @@ import calendar
 import json
 import linecache
 import math
+import tempfile
 from datetime import datetime, timedelta
 
 from django.conf import settings
@@ -41,9 +42,26 @@ def bufcount(filename):
     return lines
 
 
-def timeseries_data(request, *args, **kwargs):  # NOQA
+def timeseries_data(request, *args, **kwargs):
+    # Timeseries data used to be stored in a CSV file. This was changed in #301 to use
+    # timescaledb. This view used to read the CSV file directly. Since the code is
+    # unreadable, until it is fixed (which is the subject of #181), we store the data
+    # to a CSV file and give it to the old code to process.
+    try:
+        object_id = int(request.GET["object_id"])
+        timeseries = Timeseries.objects.get(pk=object_id)
+    except (ValueError, Timeseries.DoesNotExist):
+        raise Http404
+    with tempfile.NamedTemporaryFile(mode="w", newline="\n") as f:
+        timeseries.get_data().write(f)
+        return old_code_for_timeseries_data(
+            request, *args, datafilename=f.name, **kwargs
+        )
+
+
+def old_code_for_timeseries_data(request, *args, datafilename, **kwargs):  # NOQA
     def date_at_pos(pos, tz):
-        s = linecache.getline(afilename, pos)
+        s = linecache.getline(datafilename, pos)
         return iso8601.parse_date(s.split(",")[0], default_timezone=tz)
 
     def timedeltadivide(a, b):
@@ -141,18 +159,13 @@ def timeseries_data(request, *args, **kwargs):  # NOQA
         timeseries = Timeseries.objects.get(pk=object_id)
     except (ValueError, Timeseries.DoesNotExist):
         raise Http404
-    try:
-        afilename = timeseries.datafile.path
-    except ValueError:
-        response.content = json.dumps({"data": [], "stats": {}})
-        return response
     tz = timeseries.time_zone.as_tzinfo
     chart_data = []
     if "start_pos" in request.GET and "end_pos" in request.GET:
         start_pos = int(request.GET["start_pos"])
         end_pos = int(request.GET["end_pos"])
     else:
-        end_pos = bufcount(afilename)
+        end_pos = bufcount(datafilename)
         tot_lines = end_pos
         if "last" in request.GET:
             if request.GET.get("date", False):
@@ -208,9 +221,9 @@ def timeseries_data(request, *args, **kwargs):  # NOQA
     }
     afloat = 0.01
     try:
-        linecache.checkcache(afilename)
+        linecache.checkcache(datafilename)
         while pos < start_pos + length:
-            s = linecache.getline(afilename, pos)
+            s = linecache.getline(datafilename, pos)
             if s.isspace():
                 pos += fine_step
                 continue
@@ -224,7 +237,7 @@ def timeseries_data(request, *args, **kwargs):  # NOQA
             except Exception:
                 if pos > prev_pos:
                     prev_pos = pos
-                    linecache.checkcache(afilename)
+                    linecache.checkcache(datafilename)
                     continue
                 else:
                     raise
@@ -247,7 +260,7 @@ def timeseries_data(request, *args, **kwargs):  # NOQA
             # timeseries.write_file). So every 5000 lines refresh the
             # cache.
             if (pos - start_pos) % 5000 == 0:
-                linecache.checkcache(afilename)
+                linecache.checkcache(datafilename)
             pos += fine_step
         if length > 0 and tick_pos < end_pos:
             if amax == "":

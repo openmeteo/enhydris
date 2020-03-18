@@ -12,7 +12,6 @@ from htimeseries import HTimeseries
 from model_mommy import mommy
 
 from enhydris import models
-from enhydris.tests import RandomEnhydrisTimeseriesDataDir
 
 
 class Tsdata404TestCase(APITestCase):
@@ -296,7 +295,8 @@ class TsdataStartAndEndDateTestCase(APITestCase):
             )
         )
         m.assert_called_once_with(
-            start_date=datetime(2005, 8, 23, 19, 54), end_date=None
+            start_date=datetime(2005, 8, 23, 19, 54, tzinfo=self.tz.as_tzinfo),
+            end_date=None,
         )
 
     @patch("enhydris.models.Timeseries.get_data")
@@ -307,7 +307,8 @@ class TsdataStartAndEndDateTestCase(APITestCase):
             )
         )
         m.assert_called_once_with(
-            start_date=None, end_date=datetime(2005, 8, 23, 19, 54)
+            start_date=None,
+            end_date=datetime(2005, 8, 23, 19, 54, tzinfo=self.tz.as_tzinfo),
         )
 
 
@@ -337,7 +338,6 @@ class TsdataInvalidStartOrEndDateTestCase(APITestCase):
 
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
-@RandomEnhydrisTimeseriesDataDir()
 class TsdataHeadTestCase(APITestCase):
     def setUp(self):
         station = mommy.make(models.Station)
@@ -370,14 +370,12 @@ class TsdataHeadTestCase(APITestCase):
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class TimeseriesBottomTestCase(APITestCase):
-    @patch(
-        "enhydris.models.Timeseries.get_last_line", return_value="2018-12-09 13:10,20,"
-    )
-    def setUp(self, m):
+    def setUp(self):
         station = mommy.make(models.Station)
         timeseries = mommy.make(
             models.Timeseries, gentity=station, time_zone__utc_offset=120, precision=2
         )
+        timeseries.set_data(StringIO("2018-12-09 13:10,20,\n"))
         self.response = self.client.get(
             "/api/stations/{}/timeseries/{}/bottom/".format(station.id, timeseries.id)
         )
@@ -389,26 +387,26 @@ class TimeseriesBottomTestCase(APITestCase):
         self.assertEqual(self.response["Content-Type"], "text/plain")
 
     def test_response_content(self):
-        self.assertEqual(self.response.content.decode(), "2018-12-09 13:10,20,")
+        self.assertEqual(self.response.content.decode(), "2018-12-09 13:10,20.00,")
 
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=False)
-@patch("enhydris.models.Timeseries.get_last_line", return_value="2018-12-09 13:10,20,")
 class TimeseriesBottomPermissionsTestCase(APITestCase):
     def setUp(self):
         station = mommy.make(models.Station)
         timeseries = mommy.make(
             models.Timeseries, gentity=station, time_zone__utc_offset=120, precision=2
         )
+        timeseries.set_data(StringIO("2018-12-09 13:10,20,\n"))
         self.url = "/api/stations/{}/timeseries/{}/bottom/".format(
             station.id, timeseries.id
         )
 
-    def test_anonymous_user_is_denied(self, m):
+    def test_anonymous_user_is_denied(self):
         self.response = self.client.get(self.url)
         self.assertEqual(self.response.status_code, 401)
 
-    def test_logged_on_user_is_ok(self, m):
+    def test_logged_on_user_is_ok(self):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
         self.client.force_authenticate(user=self.user1)
         self.response = self.client.get(self.url)

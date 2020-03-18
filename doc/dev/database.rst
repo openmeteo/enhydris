@@ -347,33 +347,6 @@ Time series and related models
 
       .. _pandas "frequency" string: https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#dateoffset-objects
 
-   .. attribute:: enhydris.models.Timeseries.datafile
-
-      The file where the time series data are stored. The attribute is a
-      Django FileField_. The format of this file is documented in
-      htimeseries as `text format`_.
-
-      Usually you don't need to access this file directly; instead, use
-      methods :meth:`~enhydris.models.Timeseries.get_data`,
-      :meth:`~enhydris.models.Timeseries.set_data`,
-      :meth:`~enhydris.models.Timeseries.append_data`,
-      :meth:`~enhydris.models.Timeseries.get_first_line` and
-      :meth:`~enhydris.models.Timeseries.get_last_line`.
-
-   .. attribute:: enhydris.models.Timeseries.start_date
-                  enhydris.models.Timeseries.end_date
-
-      The start and end date of the time series, or ``None`` if the time
-      series is empty. These are redundant; the start and end date of
-      the time series could be found with
-      :meth:`~enhydris.models.get_first_line` and
-      :meth:`~enhydris.models.get_last_line`. However, these attributes
-      can easily be used in database queries. Normally you don't need to
-      set them; they are set automatically when the time series is
-      saved. If you write to the
-      :attr:`~enhydris.models.Timeseries.datafile`, you must
-      subsequently call :meth:`save()` to update these fields.
-
    .. method:: enhydris.models.Timeseries.get_data(start_date=None, end_date=None)
 
       Return the data of the file in a HTimeseries_ object. If
@@ -398,12 +371,10 @@ Time series and related models
       ``ValueError`` if the new data is not more recent than the old
       data.
 
-   .. method:: enhydris.models.Timeseries.get_first_line()
-               enhydris.models.Timeseries.get_last_line()
+   .. method:: enhydris.models.Timeseries.get_last_record_as_string()
 
-      Return the first or last line of the data file (i.e. the first or
-      last record of the time series in text format), or an empty string
-      if the time series contains no records.
+      Return the last record of the data file in CSV format, or an empty
+      string if the time series contains no records.
 
 
 .. _htimeseries: https://github.com/openmeteo/htimeseries

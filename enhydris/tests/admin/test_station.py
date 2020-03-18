@@ -1,10 +1,7 @@
 import datetime as dt
-import os
-from glob import glob
 from io import StringIO
 from locale import LC_CTYPE, getlocale, setlocale
 
-from django.conf import settings
 from django.contrib.auth.models import Permission, User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
@@ -13,7 +10,6 @@ from model_mommy import mommy
 
 from enhydris import models
 from enhydris.admin.station import TimeseriesInlineAdminForm
-from enhydris.tests import RandomEnhydrisTimeseriesDataDir
 from enhydris.tests.admin import get_formset_parameters
 
 
@@ -407,7 +403,6 @@ class TimeseriesUploadFileMixin:
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
-@RandomEnhydrisTimeseriesDataDir()
 class TimeseriesUploadFileTestCase(TestCase, TimeseriesUploadFileMixin):
     def setUp(self):
         self.alice = User.objects.create_user(
@@ -426,11 +421,10 @@ class TimeseriesUploadFileTestCase(TestCase, TimeseriesUploadFileMixin):
         # Although the time series has a specified precision of 2, we want it to store
         # all the decimal digits to avoid losing data when the user makes an error when
         # entering the precision.
-        filename = glob(os.path.join(settings.ENHYDRIS_TIMESERIES_DATA_DIR, "*"))[0]
-        with open(filename) as f:
-            contents = f.read()
-        value = float(contents.split(",")[1])
-        self.assertAlmostEqual(value, 0.12345678901234)
+        self.assertAlmostEqual(
+            models.Timeseries.objects.first().timeseriesrecord_set.first().value,
+            0.12345678901234,
+        )
 
     def test_data_is_appended_with_full_precision(self):
         station = models.Station.objects.first()
@@ -444,11 +438,10 @@ class TimeseriesUploadFileTestCase(TestCase, TimeseriesUploadFileMixin):
             self.client.post(
                 "/admin/enhydris/station/{}/change/".format(station.id), self.data
             )
-        filename = glob(os.path.join(settings.ENHYDRIS_TIMESERIES_DATA_DIR, "*"))[0]
-        with open(filename) as f:
-            values = [float(line.split(",")[1]) for line in f]
-        self.assertAlmostEqual(values[0], 0.12345678901234)
-        self.assertAlmostEqual(values[1], 3.14159065358979)
+        self.assertAlmostEqual(
+            models.Timeseries.objects.first().timeseriesrecord_set.last().value,
+            3.14159065358979,
+        )
 
 
 class TimeseriesUploadFileWithUnicodeHeadersTestCase(TestCase):

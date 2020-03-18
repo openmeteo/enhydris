@@ -180,7 +180,7 @@ class TimeseriesViewSet(ModelViewSet):
         ts = get_object_or_404(models.Timeseries, pk=pk)
         self.check_object_permissions(request, ts)
         response = HttpResponse(content_type="text/plain")
-        response.write(ts.get_last_line())
+        response.write(ts.get_last_record_as_string())
         return response
 
     def _get_data(self, request, pk, format=None):
@@ -192,12 +192,6 @@ class TimeseriesViewSet(ModelViewSet):
         end_date = request.GET.get("end_date")
         start_date = self._get_date_from_string(start_date, tz)
         end_date = self._get_date_from_string(end_date, tz)
-
-        # The time series data are naive, so we also make start_date and end_date naive.
-        if start_date:
-            start_date = start_date.replace(tzinfo=None)
-        if end_date:
-            end_date = end_date.replace(tzinfo=None)
 
         fmt_param = request.GET.get("fmt", "csv").lower()
         if fmt_param == "hts":

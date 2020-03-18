@@ -6,10 +6,12 @@ from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.contrib.gis.geos import Point
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 
+import django_selenium_clean
 from bs4 import BeautifulSoup
-from django_selenium_clean import PageElement, SeleniumTestCase
+from django_selenium_clean import PageElement
 from model_mommy import mommy
 from selenium.webdriver.common.by import By
 
@@ -241,6 +243,38 @@ class RedirectOldUrlsTestCase(TestCase):
     def test_old_timeseries_url_for_nonexistent_timeseries_returns_404(self):
         r = self.client.get("/timeseries/d/1169/")
         self.assertEqual(r.status_code, 404)
+
+
+class SeleniumTestCase(django_selenium_clean.SeleniumTestCase):
+    """A change in SeleniumTestCase so that it succeeds in truncating.
+
+    SeleniumTestCase inherits LiveServerTestCase, which inherits TransactionTestCase.
+    In contrast to TestCase, which wraps tests in "atomic", TransactionTestCase
+    truncates the database in the end by calling the "flush" management command. In our
+    case, this fails with "ERROR: cannot truncate a table referenced in a foreign key
+    constraint". The reason is that TimeseriesRecord is unmanaged, so "flush" doesn't
+    truncate it, but "flush" truncates Timeseries, and TimeseriesRecord has a foreign
+    key to Timeseries.
+
+    To fix this, we override TransactionTestCase's _fixture_teardown(), ensuring it
+    executes TRUNCATE with CASCADE.
+
+    The same result might have been achieved by setting
+    TransactionTestCase.available_apps, but this is a private API that is subject to
+    change without notice, and, well, go figure.
+    """
+
+    def _fixture_teardown(self):
+        for db_name in self._databases_names(include_mirrors=False):
+            call_command(
+                "flush",
+                verbosity=0,
+                interactive=False,
+                database=db_name,
+                reset_sequences=False,
+                allow_cascade=True,
+                inhibit_post_migrate=False,
+            )
 
 
 @skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")

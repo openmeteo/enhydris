@@ -1,9 +1,10 @@
-import os
 from datetime import timedelta, timezone
+from itertools import islice
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
+from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
 from django.db import IntegrityError
 from django.db.models.signals import post_save
@@ -11,11 +12,10 @@ from django.utils._os import abspathu
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-import iso8601
+import pandas as pd
 from htimeseries import HTimeseries
 from parler.managers import TranslatableManager
 from parler.models import TranslatableModel, TranslatedFields
-from simpletail import ropen
 
 
 def check_time_step(time_step):
@@ -267,13 +267,22 @@ class Station(Gpoint):
 
     @property
     def last_update(self):
-        freshest_timeseries = (
-            self.timeseries.filter(end_date_utc__isnull=False)
-            .order_by("-end_date_utc")
-            .first()
-        )
-        if freshest_timeseries:
-            return freshest_timeseries.end_date
+        timeseries = Timeseries.objects.filter(gentity_id=self.id)
+        result = None
+        for t in timeseries:
+            try:
+                latest_record = TimeseriesRecord.objects.filter(
+                    timeseries_id=t.id
+                ).latest()
+            except TimeseriesRecord.DoesNotExist:
+                continue
+            latest_timestamp = latest_record.timestamp.astimezone(
+                t.time_zone.as_tzinfo
+            ).replace(tzinfo=None)
+
+            if result is None or latest_timestamp > result:
+                result = latest_timestamp
+        return result
 
 
 #
@@ -378,9 +387,6 @@ class Timeseries(models.Model):
             "series is irregular."
         ),
     )
-    datafile = models.FileField(null=True, blank=True, storage=TimeseriesStorage())
-    start_date_utc = models.DateTimeField(null=True, blank=True)
-    end_date_utc = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = "Time Series"
@@ -389,29 +395,43 @@ class Timeseries(models.Model):
 
     @property
     def start_date(self):
-        if self.start_date_utc is None:
+        try:
+            return self.timeseriesrecord_set.earliest().timestamp.astimezone(
+                self.time_zone.as_tzinfo
+            )
+        except TimeseriesRecord.DoesNotExist:
             return None
-        return self.start_date_utc.astimezone(tz=self.time_zone.as_tzinfo)
 
     @property
     def end_date(self):
-        if self.end_date_utc is None:
+        try:
+            return self.timeseriesrecord_set.latest().timestamp.astimezone(
+                self.time_zone.as_tzinfo
+            )
+        except TimeseriesRecord.DoesNotExist:
             return None
-        return self.end_date_utc.astimezone(tz=self.time_zone.as_tzinfo)
 
-    def _set_start_and_end_date(self):
-        if (not self.datafile) or (self.datafile.size < 10):
-            self.start_date_utc = None
-            self.end_date_utc = None
-            return
-        with open(self.datafile.path, "r") as f:
-            self.start_date_utc = iso8601.parse_date(
-                f.readline().split(",")[0], default_timezone=self.time_zone.as_tzinfo
+    @property
+    def start_date_naive(self):
+        try:
+            return (
+                self.timeseriesrecord_set.earliest()
+                .timestamp.astimezone(self.time_zone.as_tzinfo)
+                .replace(tzinfo=None)
             )
-        with ropen(self.datafile.path, bufsize=80) as f:
-            self.end_date_utc = iso8601.parse_date(
-                f.readline().split(",")[0], default_timezone=self.time_zone.as_tzinfo
+        except TimeseriesRecord.DoesNotExist:
+            return None
+
+    @property
+    def end_date_naive(self):
+        try:
+            return (
+                self.timeseriesrecord_set.latest()
+                .timestamp.astimezone(self.time_zone.as_tzinfo)
+                .replace(tzinfo=None)
             )
+        except TimeseriesRecord.DoesNotExist:
+            return None
 
     def _set_extra_timeseries_properties(self, ahtimeseries):
         if self.gentity.geom:
@@ -438,48 +458,53 @@ class Timeseries(models.Model):
         ahtimeseries.comment = "%s\n\n%s" % (self.gentity.name, self.remarks)
 
     def get_data(self, start_date=None, end_date=None):
-        if self.datafile:
-            with open(self.datafile.path, "r", newline="\n") as f:
-                result = HTimeseries(f, start_date=start_date, end_date=end_date)
-        else:
-            result = HTimeseries()
+        data = cache.get_or_set(f"timeseries_data_{self.id}", self._get_all_data_as_pd)
+        if start_date:
+            start_date = start_date.astimezone(self.time_zone.as_tzinfo)
+            start_date = start_date.replace(tzinfo=None)
+        if end_date:
+            end_date = end_date.astimezone(self.time_zone.as_tzinfo)
+            end_date = end_date.replace(tzinfo=None)
+        data = data.loc[start_date:end_date]
+        result = HTimeseries(data)
         self._set_extra_timeseries_properties(result)
+        return result
+
+    def _get_all_data_as_pd(self):
+        tzinfo = self.time_zone.as_tzinfo
+        data = {"value": [], "flags": []}
+        index = []
+        for record in self.timeseriesrecord_set.all().order_by("timestamp"):
+            timestamp = record.timestamp.astimezone(tzinfo).replace(tzinfo=None)
+            index.append(timestamp)
+            data["value"].append(record.value)
+            data["flags"].append(record.flags)
+        result = pd.DataFrame(data=data, columns=["value", "flags"], index=index)
+        result.index.name = "date"
         return result
 
     def set_data(self, data):
         ahtimeseries = self._get_htimeseries_from_data(data)
-        ahtimeseries.precision = 15
-        if not self.datafile:
-            self.datafile.name = "{:010}".format(self.id)
-        with open(self.datafile.path, "w") as f:
-            ahtimeseries.write(f)
-        self.save()
-        return len(ahtimeseries.data)
+        self.timeseriesrecord_set.all().delete()
+        return TimeseriesRecord.bulk_insert(self, ahtimeseries)
 
     def append_data(self, data):
-        if (not self.datafile) or (os.path.getsize(self.datafile.path) == 0):
-            return self.set_data(data)
         ahtimeseries = self._get_htimeseries_from_data(data)
-        ahtimeseries.precision = 15
+        self._check_new_data_is_newer(ahtimeseries)
+        return TimeseriesRecord.bulk_insert(self, ahtimeseries)
+
+    def _check_new_data_is_newer(self, ahtimeseries):
         if not len(ahtimeseries.data):
             return 0
-        with ropen(self.datafile.path, bufsize=80) as f:
-            old_data_end_date = iso8601.parse_date(f.readline().split(",")[0]).replace(
-                tzinfo=None
-            )
         new_data_start_date = ahtimeseries.data.index[0]
-        if old_data_end_date >= new_data_start_date:
+        if self.end_date is not None and self.end_date_naive >= new_data_start_date:
             raise IntegrityError(
                 (
                     "Cannot append time series: "
                     "its first record ({}) has a date earlier than the last "
                     "record ({}) of the timeseries to append to."
-                ).format(new_data_start_date, old_data_end_date)
+                ).format(new_data_start_date, self.end_date_naive)
             )
-        with open(self.datafile.path, "a") as f:
-            ahtimeseries.write(f)
-        self.save()
-        return len(ahtimeseries.data)
 
     def _get_htimeseries_from_data(self, data):
         if isinstance(data, HTimeseries):
@@ -487,18 +512,11 @@ class Timeseries(models.Model):
         else:
             return HTimeseries(data)
 
-    def get_first_line(self):
-        if not self.datafile or self.datafile.size < 10:
+    def get_last_record_as_string(self):
+        try:
+            return str(self.timeseriesrecord_set.latest())
+        except TimeseriesRecord.DoesNotExist:
             return ""
-        with open(self.datafile.path, "r") as f:
-            return f.readline()
-
-    def get_last_line(self):
-        if not self.datafile or self.datafile.size < 10:
-            return ""
-        with ropen(self.datafile.path, bufsize=80) as f:
-            lastline = f.readline()
-            return lastline if len(lastline) > 5 else f.readline()
 
     @property
     def related_station(self):
@@ -512,8 +530,54 @@ class Timeseries(models.Model):
 
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         check_time_step(self.time_step)
-        self._set_start_and_end_date()
         super(Timeseries, self).save(force_insert, force_update, *args, **kwargs)
+        cache.delete(f"timeseries_data_{self.id}")
+
+
+class TimeseriesRecord(models.Model):
+    # Ugly primary key hack.
+    # Django does not allow composite primary keys, whereas timescaledb can't work
+    # without them. Our composite primary key in this case is (timeseries, timestamp).
+    # What we do is set managed=False, so that Django won't create the table itself;
+    # we create it with migrations.RunSQL(). We also set "primary_key=True" in one of
+    # the fields. While technically this is wrong, it fools Django into not expecting
+    # an "id" field to exist, and it doesn't affect querying functionality.
+    timeseries = models.ForeignKey(Timeseries, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(primary_key=True)
+    value = models.FloatField(blank=True, null=True)
+    flags = models.CharField(max_length=237, blank=True)
+
+    class Meta:
+        managed = False
+        get_latest_by = "timestamp"
+
+    @classmethod
+    def bulk_insert(cls, timeseries, htimeseries):
+        tzinfo = timeseries.time_zone.as_tzinfo
+        record_generator = (
+            TimeseriesRecord(
+                timeseries_id=timeseries.id,
+                timestamp=t.Index.to_pydatetime().replace(tzinfo=tzinfo),
+                value=t.value,
+                flags=t.flags,
+            )
+            for t in htimeseries.data.itertuples()
+        )
+        batch_size = 1000
+        count = 0
+        while True:
+            batch = list(islice(record_generator, batch_size))
+            if not batch:
+                break
+            cls.objects.bulk_create(batch, batch_size)
+            count += len(batch)
+        return count
+
+    def __str__(self):
+        tzinfo = self.timeseries.time_zone.as_tzinfo
+        precision = self.timeseries.precision
+        datestr = self.timestamp.astimezone(tzinfo).strftime("%Y-%m-%d %H:%M")
+        return f"{datestr},{self.value:.{precision}f},{self.flags}"
 
 
 class UserProfile(models.Model):

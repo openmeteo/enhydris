@@ -2,7 +2,6 @@ Django>=2.2.2,<3
 djangorestframework>=3.9,<4
 gdal>=1.6
 django-bootstrap3>=11,<12
-simpletail>=0.1.2
 iso8601
 htimeseries>=3,<4
 pytz

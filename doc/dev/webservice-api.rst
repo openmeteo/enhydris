@@ -71,9 +71,6 @@ The response will be 200 with the following content::
       "hidden": false,
       "precision": 1,
       "remarks": "Type: Raw data",
-      "datafile": "http://stage.openmeteo.org/media/0000000242",
-      "start_date_utc": "2000-05-11T10:00:00Z",
-      "end_date_utc": "2006-07-14T12:10:00Z",
       "gentity": 1334,
       "variable": 1,
       "unit_of_measurement": 7,
@@ -414,9 +411,9 @@ the search term ``ts_only:``, without a search word::
 
 Finally, ``ts_has_years`` can limit to stations based on **the range of
 their time series**. The following will find stations that have at least
-one time series whose time range contains 1988, at least one time series
-whose time range contains 1989, and at least one time series whose time
-range contains 2004::
+one time series containing records in 1988, at least one time series
+containing records in 1989, and at least one time series containing
+records in 2004::
 
     curl 'https://openmeteo.org/api/stations/?q=ts_has_years:1988,1989,2004'
 
@@ -496,9 +493,6 @@ Response::
           "hidden": false,
           "precision": 1,
           "remarks": "Type: Raw data",
-          "datafile": "http://stage.openmeteo.org/media/0000000232",
-          "start_date_utc": "1998-12-10T14:30:00Z",
-          "end_date_utc": "2018-07-09T09:19:00Z",
           "gentity": 1334,
           "variable": 3,
           "unit_of_measurement": 14,
