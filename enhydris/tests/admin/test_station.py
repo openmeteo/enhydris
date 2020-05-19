@@ -14,6 +14,7 @@ from model_mommy import mommy
 from enhydris import models
 from enhydris.admin.station import TimeseriesInlineAdminForm
 from enhydris.tests import RandomEnhydrisTimeseriesDataDir
+from enhydris.tests.admin import get_formset_parameters
 
 
 class StationSearchTestCase(TestCase):
@@ -62,9 +63,15 @@ class StationPermsTestCaseBase(TestCase):
         )
 
         po = Permission.objects
-        elaine.user_permissions.add(po.get(codename="add_station"))
-        elaine.user_permissions.add(po.get(codename="change_station"))
-        elaine.user_permissions.add(po.get(codename="delete_station"))
+        elaine.user_permissions.add(
+            po.get(content_type__app_label="enhydris", codename="add_station")
+        )
+        elaine.user_permissions.add(
+            po.get(content_type__app_label="enhydris", codename="change_station")
+        )
+        elaine.user_permissions.add(
+            po.get(content_type__app_label="enhydris", codename="delete_station")
+        )
 
 
 class CommonTests:
@@ -243,12 +250,7 @@ class StationCreateSetsCreatorTestCase(TestCase):
                 "owner": self.serial_killers_sa.id,
                 "geom_0": "20.94565",
                 "geom_1": "39.12102",
-                "gentityfile_set-TOTAL_FORMS": "0",
-                "gentityfile_set-INITIAL_FORMS": "0",
-                "gentityevent_set-TOTAL_FORMS": "0",
-                "gentityevent_set-INITIAL_FORMS": "0",
-                "timeseries-TOTAL_FORMS": "0",
-                "timeseries-INITIAL_FORMS": "0",
+                **get_formset_parameters(self.client, "/admin/enhydris/station/add/"),
             },
         )
         self.assertEqual(response.status_code, 302)
@@ -391,10 +393,7 @@ class TimeseriesUploadFileMixin:
             "owner": models.Organization.objects.create(name="Serial killers SA").id,
             "geom_0": "20.94565",
             "geom_1": "39.12102",
-            "gentityfile_set-TOTAL_FORMS": "0",
-            "gentityfile_set-INITIAL_FORMS": "0",
-            "gentityevent_set-TOTAL_FORMS": "0",
-            "gentityevent_set-INITIAL_FORMS": "0",
+            **get_formset_parameters(self.client, "/admin/enhydris/station/add/"),
             "timeseries-TOTAL_FORMS": "1",
             "timeseries-INITIAL_FORMS": "0",
             "timeseries-0-variable": mommy.make(models.Variable, descr="myvar").id,
@@ -411,11 +410,11 @@ class TimeseriesUploadFileMixin:
 @RandomEnhydrisTimeseriesDataDir()
 class TimeseriesUploadFileTestCase(TestCase, TimeseriesUploadFileMixin):
     def setUp(self):
-        self.data = self._get_basic_form_contents()
         self.alice = User.objects.create_user(
             username="alice", password="topsecret", is_staff=True, is_superuser=False
         )
         self.client.login(username="alice", password="topsecret")
+        self.data = self._get_basic_form_contents()
         with StringIO("Precision=2\n\n2019-08-18 12:39,0.12345678901234,\n") as f:
             self.data["timeseries-0-data"] = f
             self.response = self.client.post("/admin/enhydris/station/add/", self.data)

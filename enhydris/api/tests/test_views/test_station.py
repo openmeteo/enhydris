@@ -59,7 +59,9 @@ class StationCreateTestCase(APITestCase):
 
     @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=False)
     def test_authorized_user_can_create_station(self):
-        permission = Permission.objects.get(codename="add_station")
+        permission = Permission.objects.get(
+            content_type__app_label="enhydris", codename="add_station"
+        )
         self.user.user_permissions.add(permission)
         self.user.save()
         self.client.force_authenticate(user=self.user)

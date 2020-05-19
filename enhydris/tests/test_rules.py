@@ -21,11 +21,21 @@ class RulesTestCaseBase(TestCase):
         cls.timeseries = mommy.make(models.Timeseries, gentity=cls.station)
 
         po = Permission.objects
-        cls.charlie.user_permissions.add(po.get(codename="view_station"))
-        cls.charlie.user_permissions.add(po.get(codename="change_station"))
-        cls.charlie.user_permissions.add(po.get(codename="delete_station"))
-        cls.charlie.user_permissions.add(po.get(codename="change_timeseries"))
-        cls.charlie.user_permissions.add(po.get(codename="delete_timeseries"))
+        cls.charlie.user_permissions.add(
+            po.get(content_type__app_label="enhydris", codename="view_station")
+        )
+        cls.charlie.user_permissions.add(
+            po.get(content_type__app_label="enhydris", codename="change_station")
+        )
+        cls.charlie.user_permissions.add(
+            po.get(content_type__app_label="enhydris", codename="delete_station")
+        )
+        cls.charlie.user_permissions.add(
+            po.get(content_type__app_label="enhydris", codename="change_timeseries")
+        )
+        cls.charlie.user_permissions.add(
+            po.get(content_type__app_label="enhydris", codename="delete_timeseries")
+        )
 
 
 class CommonTests:
@@ -159,11 +169,21 @@ class ContentRulesTestCaseBase(TestCase):
         cls.gentityfile = mommy.make(models.GentityFile, gentity=cls.station)
 
         po = Permission.objects
-        cls.charlie.user_permissions.add(po.get(codename="view_station"))
-        cls.charlie.user_permissions.add(po.get(codename="change_station"))
-        cls.charlie.user_permissions.add(po.get(codename="delete_station"))
-        cls.charlie.user_permissions.add(po.get(codename="change_timeseries"))
-        cls.charlie.user_permissions.add(po.get(codename="delete_timeseries"))
+        cls.charlie.user_permissions.add(
+            po.get(content_type__app_label="enhydris", codename="view_station")
+        )
+        cls.charlie.user_permissions.add(
+            po.get(content_type__app_label="enhydris", codename="change_station")
+        )
+        cls.charlie.user_permissions.add(
+            po.get(content_type__app_label="enhydris", codename="delete_station")
+        )
+        cls.charlie.user_permissions.add(
+            po.get(content_type__app_label="enhydris", codename="change_timeseries")
+        )
+        cls.charlie.user_permissions.add(
+            po.get(content_type__app_label="enhydris", codename="delete_timeseries")
+        )
 
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
