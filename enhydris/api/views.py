@@ -183,17 +183,56 @@ class TimeseriesViewSet(ModelViewSet):
         response.write(ts.get_last_record_as_string())
         return response
 
-    def _get_data(self, request, pk, format=None):
-        timeseries = get_object_or_404(models.Timeseries, pk=int(pk))
+    @action(detail=True, methods=["get"])
+    def chart(self, request, pk=None, *, station_id):
+        timeseries = get_object_or_404(models.Timeseries, pk=pk)
         self.check_object_permissions(request, timeseries)
+        start_date, end_date = self._get_date_bounds(request, timeseries)
+        data_frame = timeseries.get_data(start_date=start_date, end_date=end_date).data
+        chart_data = self._sample_equidistant(data_frame)
+        return Response(
+            serializers.TimeseriesRecordChartSerializer(chart_data, many=True).data
+        )
 
+    def _sample_equidistant(self, df, number_of_samples=200):
+        """
+        Divides dataframe/timeseries by time into "number_of_samples" equally,
+        and returns a list of dicts, where each dict contains timestamp, value
+        """
+        number_of_samples = min(number_of_samples, len(df.index))
+        min_time = df.index.min()
+        current_time = min_time
+        interval = (df.index.max() - df.index.min()) / number_of_samples
+        tolerance = interval / 2
+        result = []
+        for _ in range(number_of_samples):
+            current_time += interval
+            try:
+                idx = df.index.get_loc(
+                    current_time, method="nearest", tolerance=tolerance
+                )
+                value = df.iloc[idx].value
+            except KeyError:
+                # If no matching index is found (ie exceeds tolerance)
+                # a KeyError is raised rather than a graceful null return
+                value = pd.np.nan
+            result.append({"timestamp": current_time.timestamp(), "value": value})
+        return result
+
+    def _get_date_bounds(self, request, timeseries):
         tz = timeseries.time_zone.as_tzinfo
         start_date = request.GET.get("start_date")
         end_date = request.GET.get("end_date")
         start_date = self._get_date_from_string(start_date, tz)
         end_date = self._get_date_from_string(end_date, tz)
+        return start_date, end_date
 
+    def _get_data(self, request, pk, format=None):
+        timeseries = get_object_or_404(models.Timeseries, pk=int(pk))
+        self.check_object_permissions(request, timeseries)
+        start_date, end_date = self._get_date_bounds(request, timeseries)
         fmt_param = request.GET.get("fmt", "csv").lower()
+
         if fmt_param == "hts":
             fmt = HTimeseries.FILE
             version = 5

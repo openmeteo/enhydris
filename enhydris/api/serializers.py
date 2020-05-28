@@ -86,3 +86,8 @@ class StationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(str(e))
 
     validate_maintainers = validate_nested_many_serializer
+
+
+class TimeseriesRecordChartSerializer(serializers.Serializer):
+    timestamp = serializers.IntegerField()
+    value = serializers.DecimalField(max_digits=6, decimal_places=2)
