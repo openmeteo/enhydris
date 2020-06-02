@@ -1,14 +1,13 @@
 {% load i18n %}
-<div id="searchtips" class="modal fade" tabindex="-1" role="dialog"
-    aria-hidden="true">
+<div id="searchtips" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">{% trans "Search tips" %}
-        <button type="button" class="close" data-target="#searchtips"
-            data-toggle="modal" aria-label="Close">
+        <button type="button" class="close" data-target="#searchtips" data-toggle="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
-      </div>
+      </div> <!-- /.modal-header -->
+
       <div class="modal-body">
         <!-- List group -->
         <ul class="list-group">
@@ -40,10 +39,11 @@
             </li>
           {% endblocktrans %}
         </ul>
-      </div>
+      </div> <!-- /.modal-content -->
+
       <div class="modal-footer">
-        <a href="#" class="btn" data-dismiss="modal">Close</a>
-      </div>
-    </div>
-  </div>
-</div>
+        <button type="button" class="btn" data-dismiss="modal">Close</button>
+      </div> <!-- /.modal-footer -->
+    </div> <!-- /.modal-content -->
+  </div> <!-- /.modal-dialog -->
+</div> <!-- /.modal -->

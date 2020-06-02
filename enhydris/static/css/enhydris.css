@@ -22,3 +22,36 @@ h4.tab-no-data {
     border-top-right-radius: 0.25rem;
     border-bottom-right-radius: 0.25rem;
 }
+
+.custom .navbar .form-search {
+    position: relative;
+    margin-right: -15px;
+    margin-left: -15px;
+    padding-right: 15px;
+    padding-left: 15px;
+    border-top: 1px solid #e7e7e7;
+    border-bottom: 1px solid #e7e7e7;
+}
+
+.custom .navbar .form-search::before {
+    position: absolute;
+    top: -0.5rem;
+    right: -15px;
+    left: -15px;
+    content: "";
+    width: calc(100% + 15px);
+    height: 1px;
+    background-color: #e7e7e7;
+}
+
+@media (min-width: 992px) {
+    .custom .navbar .form-search {
+        margin: 0 15px;
+        padding: 0;
+        border: none;
+    }
+
+    .custom .navbar .form-search::before {
+        content: none;
+    }
+}
