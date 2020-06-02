@@ -1,29 +1,24 @@
 {% load i18n %}
-<div class="navbar navbar-default" role="navigation">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      {% block home_button %}
-        <a class="navbar-brand" href="{% url "station_list" %}">{% trans "Stations" %}</a>
-      {% endblock %}
-    </div>
-    <div class="navbar-collapse collapse">
-      {% block search %}
-        {% include "enhydris/base/search.html" %}
-      {% endblock %}
-      <ul class="nav navbar-nav navbar-right">
-        {% if user.is_authenticated %}
-          <li><a href="{% url "admin:index" %}">{% trans "Dashboard" %}</a></li>
-          <li><a href="{% url "admin:logout" %}?next={{request.path}}">{% blocktrans with username=user.username %}Logout {{ username }}{% endblocktrans %}</a></li>
-        {% else %}
-          <li><a href="{% url "admin:login" %}?next={{request.path}}">{% trans "Login" %}</a></li>
-        {% endif %}
-      </ul>
-    </div>
-  </div>
-</div>
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-3" role="navigation">
+  {% block home_button %}
+    <a class="navbar-brand" href="{% url 'station_list' %}">{% trans "Stations" %}</a>
+  {% endblock %}
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="navbar-collapse collapse" id="navbarSupportedContent">
+    {% block search %}
+      {% include "enhydris/base/search.html" %}
+    {% endblock %}
+    <ul class="navbar-nav ml-auto">
+      {% if user.is_authenticated %}
+      <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">{% trans "Dashboard" %}</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'admin:logout' %}?next={{request.path}}">{% blocktrans with username=user.username %}Logout {{username }}{% endblocktrans %}</a></li>
+      {% else %}
+      <li class="nav-item"><a class="nav-link" href="{% url 'admin:login' %}?next={{request.path}}">{% trans "Login" %}</a></li>
+      {% endif %}
+    </ul>
+  </div> <!-- /.navbar-collapse -->
+</nav>

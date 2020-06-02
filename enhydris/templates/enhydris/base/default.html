@@ -19,13 +19,17 @@
 {% block extra_head %}{% endblock %}
 
 <body onload="{% block body_onload %}{% endblock %}">
-  {% block header %}
-    {% include "enhydris/base/navbar.html" %}
-    {% include "enhydris/base/searchtips.html" %}
-    {% include "enhydris/base/messages.html" %}
-  {% endblock header %}
+  <header class="custom">
+    {% block header %}
+      {% include "enhydris/base/navbar.html" %}
+      {% include "enhydris/base/searchtips.html" %}
+      {% include "enhydris/base/messages.html" %}
+    {% endblock header %}
+  </header>
 
-  {% block content %}{% endblock %}
+  <main>
+    {% block content %}{% endblock %}
+  </main>
 
   <footer>
     {% block footer %}{% endblock %}

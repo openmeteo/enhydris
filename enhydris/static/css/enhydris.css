@@ -13,3 +13,12 @@ h4.tab-no-data {
   white-space: normal;
   min-height:25em;
 }
+
+.custom .navbar {
+    border-bottom: 1px solid #e7e7e7;
+}
+
+.custom .navbar .btn-search {
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+}
