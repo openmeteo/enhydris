@@ -14,16 +14,18 @@ h4.tab-no-data {
   min-height:25em;
 }
 
-.custom .navbar {
+/* HEADER */
+
+.custom-header .navbar {
     border-bottom: 1px solid #e7e7e7;
 }
 
-.custom .navbar .btn-search {
+.custom-header .navbar .btn-search {
     border-top-right-radius: 0.25rem;
     border-bottom-right-radius: 0.25rem;
 }
 
-.custom .navbar .form-search {
+.custom-header .navbar .form-search {
     position: relative;
     margin-right: -15px;
     margin-left: -15px;
@@ -33,7 +35,7 @@ h4.tab-no-data {
     border-bottom: 1px solid #e7e7e7;
 }
 
-.custom .navbar .form-search::before {
+.custom-header .navbar .form-search::before {
     position: absolute;
     top: -0.5rem;
     right: -15px;
@@ -45,13 +47,18 @@ h4.tab-no-data {
 }
 
 @media (min-width: 992px) {
-    .custom .navbar .form-search {
+    .custom-header .navbar .form-search {
         margin: 0 15px;
         padding: 0;
         border: none;
     }
 
-    .custom .navbar .form-search::before {
+    .custom-header .navbar .form-search::before {
         content: none;
     }
 }
+
+/* MAIN */
+
+
+/* FOOTER */
