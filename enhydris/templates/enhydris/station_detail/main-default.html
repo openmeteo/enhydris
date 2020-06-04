@@ -11,7 +11,7 @@
   {{ block.super }}
   <script type="text/javascript">
     function togl(name) {
-      $("#"+ name).stop().toggle()
+      $('#'+ name).stop().toggle()
     }
 
     $(document).ready(function ($) {
@@ -31,38 +31,49 @@
 
 
 {% block content %}
-  <div class="container">
-    <div class="row">
-      <h1>{{ station.name }}</h1>
+  <div class="container mt-4">
+    <div class="row flex-column">
+      <h1 class="h1">{{ station.name }}</h1>
       <p>
         [{% if station.is_automatic %}{% trans "automatic" %}{% else %}{% trans "conventional" %}{% endif %}]
       </p>
+    </div> <!-- end .row -->
+
+    <div class="row">
       <div class="col-md-4">
         {% include "enhydris/station_detail/map.html" %}
-      </div>
+      </div> <!-- /.col -->
+
       <div class="col-md-8">
         {% include "enhydris/station_detail/details.html" %}
         {% has_perm "enhydris.change_station" request.user station as can_edit_station %}
         {% if can_edit_station %}
-            <a class="btn btn-xs btn-primary" href='{% url "station_edit" pk=station.id%}'>{% trans "Edit" %}</a>
+          <a class="btn btn-xs btn-primary" href="{% url 'station_edit' pk=station.id%}">{% trans "Edit" %}</a>
         {% endif %}
-      </div>
-    </div>
-  </div>
+      </div> <!-- /.col -->
+    </div> <!-- /.row -->
+  </div> <!-- /.container -->
 
   <div class="container">
     <hr>
     <div id="content">
       <ul id="tabs" class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active"><a href="#timeseries" data-toggle="tab" aria-controls="timeseries" role="tab">{% trans "Timeseries" %}</a></li>
-        <li role="presentation" ><a href="#gentity_files" data-toggle="tab" aria-controls="gentity_files" role="tab">{% trans "Files" %}</a></li>
-        <li role="presentation" ><a href="#gentity_events" data-toggle="tab" aria-controls="gentity_events" role="tab">{% trans "Events" %}</a></li>
+        <li role="presentation" class="active">
+          <a href="#timeseries" data-toggle="tab" aria-controls="timeseries" role="tab">{% trans "Timeseries" %}</a>
+        </li>
+        <li role="presentation">
+          <a href="#gentity_files" data-toggle="tab" aria-controls="gentity_files" role="tab">{% trans "Files" %}</a>
+        </li>
+        <li role="presentation">
+          <a href="#gentity_events" data-toggle="tab" aria-controls="gentity_events" role="tab">{% trans "Events" %}</a>
+        </li>
       </ul>
+
       <div class="tab-content">
         {% include "enhydris/station_detail/tabs/gentity_files.html" %}
         {% include "enhydris/station_detail/tabs/gentity_events.html" %}
         {% include "enhydris/station_detail/tabs/timeseries.html" %}
-      </div>
-    </div>
-  </div>
+      </div> <!-- /.tab-content -->
+    </div> <!-- /#content -->
+  </div> <!-- /.container -->
 {% endblock %}

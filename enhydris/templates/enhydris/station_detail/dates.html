@@ -1,7 +1,7 @@
 {% load i18n %}
 
 <div class="row">
-  <div class="col-md-6">
+  <div class="col-6 col-xs-12">
     {% if station.start_date and station.end_date %}
       {% blocktrans with start_date=station.start_date|date:"SHORT_DATE_FORMAT" end_date=station.end_date|date:"SHORT_DATE_FORMAT" %}
         <b>Period of operation:</b> {{start_date}} - {{end_date}}
@@ -15,12 +15,13 @@
         <b>End of operation:</b> {{end_date}}
       {% endblocktrans %}
     {% endif %}
-  </div>
-  <div class="col-md-6">
+  </div> <!-- /.col -->
+
+  <div class="col-6 col-xs-12">
     {% if station.last_update %}
       {% blocktrans with last_update=station.last_update|date:"SHORT_DATETIME_FORMAT" %}
         <b>Last update:</b> {{last_update}}
       {% endblocktrans %}
     {% endif %}
-  </div>
-</div>
+  </div> <!-- /.col -->
+</div> <!-- /.row -->
