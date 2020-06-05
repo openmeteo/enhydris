@@ -54,18 +54,18 @@
     </div> <!-- /.row -->
   </div> <!-- /.container -->
 
-  <div class="container">
+  <div class="container mt-5">
     <hr>
     <div id="content">
       <ul id="tabs" class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active">
-          <a href="#timeseries" data-toggle="tab" aria-controls="timeseries" role="tab">{% trans "Timeseries" %}</a>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link active" href="#timeseries" data-toggle="tab" aria-controls="timeseries" role="tab" aria-selected="true">{% trans "Timeseries" %}</a>
         </li>
-        <li role="presentation">
-          <a href="#gentity_files" data-toggle="tab" aria-controls="gentity_files" role="tab">{% trans "Files" %}</a>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" href="#gentity_files" data-toggle="tab" aria-controls="gentity_files" role="tab" aria-selected="false">{% trans "Files" %}</a>
         </li>
-        <li role="presentation">
-          <a href="#gentity_events" data-toggle="tab" aria-controls="gentity_events" role="tab">{% trans "Events" %}</a>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" href="#gentity_events" data-toggle="tab" aria-controls="gentity_events" role="tab" aria-selected="false">{% trans "Events" %}</a>
         </li>
       </ul>
 

@@ -60,5 +60,40 @@ h4.tab-no-data {
 
 /* MAIN */
 
+.custom-main .table-station-detail tr:first-child td {
+    border-top: none;
+}
+
+.custom-main .table-station-detail a {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    color: #333;
+}
+
+.custom-main .table-station-detail a:hover {
+    text-decoration: none;
+    color: #333;
+}
+
+@media (max-width: 767px) {
+    .custom-main .table-station-detail tr {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .custom-main .table-station-detail td {
+        border: none
+    }
+
+    .custom-main .table-station-detail td:last-child {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .custom-main .table-station-detail td:not(:first-child) a {
+        padding-top: 0;
+    }
+
+}
 
 /* FOOTER */
