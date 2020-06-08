@@ -520,3 +520,32 @@ class TimeseriesDeleteTestCase(APITestCase):
             )
         )
         self.assertEqual(response.status_code, 204)
+
+
+class TimeseriesChartTestCase(APITestCase):
+    def test_unauthenticated_user_denied(self):
+        # TODO: Anon. worked though?
+        pass
+
+    def test_authenticated_user_allowed(self):
+        pass
+
+    def test_no_bounds_supplied_returns_all_data(self):
+        pass
+
+    def test_start_and_end_date_bounds(self):
+        # start only, end only, start and end
+        pass
+
+    def test_null_values_are_dropped(self):
+        pass
+
+    def test_zero_values_are_dropped(self):
+        pass
+
+    def test_data_sampled_by_equal_time_distance(self):
+        pass
+
+    @override_settings(ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR=5)
+    def test_all_data_returned_if_less_than_sample_size(self):
+        pass

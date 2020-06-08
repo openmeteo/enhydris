@@ -3,6 +3,7 @@ import os
 from io import StringIO
 from wsgiref.util import FileWrapper
 
+from django.conf import settings
 from django.db import IntegrityError
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
@@ -188,18 +189,24 @@ class TimeseriesViewSet(ModelViewSet):
         timeseries = get_object_or_404(models.Timeseries, pk=pk)
         self.check_object_permissions(request, timeseries)
         start_date, end_date = self._get_date_bounds(request, timeseries)
-        data_frame = timeseries.get_data(start_date=start_date, end_date=end_date).data
+        # Drop rows with value NaN or a zero
+        data_frame = timeseries.get_data(
+            start_date=start_date, end_date=end_date
+        ).data.dropna(subset=["value"])
+        data_frame = data_frame[data_frame["value"] != 0]
         chart_data = self._sample_equidistant(data_frame)
         return Response(
             serializers.TimeseriesRecordChartSerializer(chart_data, many=True).data
         )
 
-    def _sample_equidistant(self, df, number_of_samples=200):
+    def _sample_equidistant(self, df):
         """
         Divides dataframe/timeseries by time into "number_of_samples" equally,
         and returns a list of dicts, where each dict contains timestamp, value
         """
-        number_of_samples = min(number_of_samples, len(df.index))
+        number_of_samples = min(
+            settings.ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR, len(df.index)
+        )
         min_time = df.index.min()
         current_time = min_time
         interval = (df.index.max() - df.index.min()) / number_of_samples
