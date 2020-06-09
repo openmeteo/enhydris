@@ -521,6 +521,7 @@ class TimeseriesDeleteTestCase(APITestCase):
         )
         self.assertEqual(response.status_code, 204)
 
+
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
 @patch("enhydris.models.Timeseries.get_data")
 class TimeseriesChartDateBoundsTestCase(APITestCase):
