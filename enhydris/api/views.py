@@ -208,12 +208,12 @@ class TimeseriesViewSet(ModelViewSet):
             settings.ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR, len(df.index)
         )
         min_time = df.index.min()
+        # To accommodate the first data point
         current_time = min_time
-        interval = (df.index.max() - df.index.min()) / number_of_samples
+        interval = (df.index.max() - df.index.min()) / (number_of_samples - 1)
         tolerance = interval / 2
         result = []
         for _ in range(number_of_samples):
-            current_time += interval
             try:
                 idx = df.index.get_loc(
                     current_time, method="nearest", tolerance=tolerance
@@ -224,6 +224,7 @@ class TimeseriesViewSet(ModelViewSet):
                 # a KeyError is raised rather than a graceful null return
                 value = pd.np.nan
             result.append({"timestamp": current_time.timestamp(), "value": value})
+            current_time += interval
         return result
 
     def _get_date_bounds(self, request, timeseries):
