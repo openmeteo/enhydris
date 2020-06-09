@@ -129,7 +129,7 @@ class TimeseriesViewSet(ModelViewSet):
     serializer_class = serializers.TimeseriesSerializer
 
     def get_permissions(self):
-        if self.action in ("data", "bottom"):
+        if self.action in ("data", "bottom", "chart"):
             pc = [permissions.CanAccessTimeseriesData]
         else:
             pc = [permissions.CanEditOrReadOnly]
