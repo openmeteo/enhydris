@@ -565,26 +565,89 @@ class TimeseriesChartDateBoundsTestCase(APITestCase):
         )
 
 
+@override_settings(
+    ENHYDRIS_OPEN_CONTENT=True, ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR=20
+)
+@patch("enhydris.models.Timeseries.get_data")
+class TimeseriesChartTestCase(APITestCase, TimeseriesDataMixin):
+    def create_timeseries(self):
+        # Create the timeseries so that we have 5 entries, one per year basically
+        super().create_timeseries()
+        self.htimeseries = HTimeseries()
+        self.htimeseries.data = pd.DataFrame(
+            index=[datetime(year, 1, 1) for year in range(2010, 2015)],
+            data={
+                "value": [year for year in range(2010, 2015)],
+                "flags": ["" for _ in range(5)],
+            },
+            columns=["value", "flags"],
+        )
 
-    def test_authenticated_user_allowed(self):
-        pass
+    def setUp(self):
+        self.create_timeseries()
+        self.url = "/api/stations/{}/timeseries/{}/chart/".format(
+            self.station.id, self.timeseries.id
+        )
 
-    def test_no_bounds_supplied_returns_all_data(self):
-        pass
+    @override_settings(ENHYDRIS_OPEN_CONTENT=False)
+    def test_unauthenticated_user_denied(self, mock):
+        mock.return_value = self.htimeseries
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 401)
 
-    def test_start_and_end_date_bounds(self):
-        # start only, end only, start and end
-        pass
+    @override_settings(ENHYDRIS_OPEN_CONTENT=False)
+    def test_authenticated_user_allowed(self, mock):
+        self.client.force_authenticate(user=mommy.make(User, is_active=True))
+        mock.return_value = self.htimeseries
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
 
-    def test_null_values_are_dropped(self):
-        pass
+    def test_all_values_returned(self, mock):
+        mock.return_value = self.htimeseries
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data), 5)
+        expected_values = ["{}.00".format(y) for y in range(2010, 2015)]
+        self.assertEqual([x["value"] for x in data], expected_values)
 
-    def test_zero_values_are_dropped(self):
-        pass
+    def test_null_values_are_dropped(self, mock):
+        # TODO: Revisit this?
+        self.htimeseries.data["value"][0:1] = pd.np.nan
+        mock.return_value = self.htimeseries
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data), 4)
+        expected_values = ["{}.00".format(y) for y in range(2011, 2015)]
+        self.assertEqual([x["value"] for x in data], expected_values)
 
-    def test_data_sampled_by_equal_time_distance(self):
-        pass
+    def test_zero_values_are_dropped(self, mock):
+        # TODO: Revisit this?
+        self.htimeseries.data["value"][0] = 0
+        mock.return_value = self.htimeseries
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data), 4)
+        expected_values = ["{}.00".format(y) for y in range(2011, 2015)]
+        self.assertEqual([x["value"] for x in data], expected_values)
 
-    @override_settings(ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR=5)
-    def test_all_data_returned_if_less_than_sample_size(self):
-        pass
+    @override_settings(ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR=3)
+    def test_data_sampled_by_equal_time_distance(self, mock):
+        self.htimeseries.data = pd.DataFrame(
+            index=[datetime(year, 1, 1) for year in range(2010, 2020)],
+            data={
+                "value": [year for year in range(2010, 2020)],
+                "flags": ["" for _ in range(10)],
+            },
+            columns=["value", "flags"],
+        )
+        mock.return_value = self.htimeseries
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data), 3)
+        expected_years = [2010, 2015, 2019]
+        expected_values = ["{}.00".format(y) for y in expected_years]
+        self.assertEqual([x["value"] for x in data], expected_values)
