@@ -522,10 +522,49 @@ class TimeseriesDeleteTestCase(APITestCase):
         self.assertEqual(response.status_code, 204)
 
 
-class TimeseriesChartTestCase(APITestCase):
-    def test_unauthenticated_user_denied(self):
-        # TODO: Anon. worked though?
-        pass
+@patch("enhydris.models.Timeseries.get_data")
+class TimeseriesChartDateBoundsTestCase(APITestCase):
+    def setUp(self):
+        self.tz = mommy.make(models.TimeZone, code="EET", utc_offset=0)
+        timeseries = mommy.make(models.Timeseries, time_zone=self.tz)
+        self.url = "/api/stations/{}/timeseries/{}/chart/".format(
+            timeseries.gentity_id, timeseries.id
+        )
+
+    def test_no_bounds_supplied(self, mock):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        mock.assert_called_once_with(
+            start_date=None, end_date=None,
+        )
+
+    def test_start_date_filter(self, mock):
+        response = self.client.get(self.url + "?start_date=2012-03-01T00:00")
+        self.assertEqual(response.status_code, 200)
+        mock.assert_called_once_with(
+            start_date=datetime(2012, 3, 1, 0, 0, tzinfo=self.tz.as_tzinfo),
+            end_date=None,
+        )
+
+    def test_end_date_filter(self, mock):
+        response = self.client.get(self.url + "?end_date=2012-03-01T00:00")
+        self.assertEqual(response.status_code, 200)
+        mock.assert_called_once_with(
+            start_date=None,
+            end_date=datetime(2012, 3, 1, 0, 0, tzinfo=self.tz.as_tzinfo),
+        )
+
+    def test_start_and_end_date_filters(self, mock):
+        response = self.client.get(
+            self.url + "?start_date=2012-03-01T00:00&end_date=2017-03-01T00:00"
+        )
+        self.assertEqual(response.status_code, 200)
+        mock.assert_called_once_with(
+            start_date=datetime(2012, 3, 1, 0, 0, tzinfo=self.tz.as_tzinfo),
+            end_date=datetime(2017, 3, 1, 0, 0, tzinfo=self.tz.as_tzinfo),
+        )
+
+
 
     def test_authenticated_user_allowed(self):
         pass
