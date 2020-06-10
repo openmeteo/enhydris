@@ -574,7 +574,6 @@ class TimeseriesChartTestCase(APITestCase, TimeseriesDataMixin):
     def create_timeseries(self):
         # Create the timeseries so that we have 5 entries, one per year basically
         super().create_timeseries()
-        self.htimeseries = HTimeseries()
         self.htimeseries.data = pd.DataFrame(
             index=[datetime(year, 1, 1) for year in range(2010, 2015)],
             data={
@@ -613,19 +612,7 @@ class TimeseriesChartTestCase(APITestCase, TimeseriesDataMixin):
         self.assertEqual([x["value"] for x in data], expected_values)
 
     def test_null_values_are_dropped(self, mock):
-        # TODO: Revisit this?
-        self.htimeseries.data["value"][0:1] = pd.np.nan
-        mock.return_value = self.htimeseries
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        self.assertEqual(len(data), 4)
-        expected_values = ["{}.00".format(y) for y in range(2011, 2015)]
-        self.assertEqual([x["value"] for x in data], expected_values)
-
-    def test_zero_values_are_dropped(self, mock):
-        # TODO: Revisit this?
-        self.htimeseries.data["value"][0] = 0
+        self.htimeseries.data.loc["2010-01-01", "value"] = pd.np.nan
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
