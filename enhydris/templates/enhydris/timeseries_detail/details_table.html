@@ -1,52 +1,58 @@
 {% load i18n %}
-<table class="table table-hover table-condensed">
-  <tr>
-    <th>{% trans 'ID' %}</th>
-    <td>{{ timeseries.id }}</td>
-  </tr>
-  <tr>
-    <th>{% trans 'Related Station' %}</th>
-      <td><a href="{% url "station_detail" timeseries.gentity.id %}">{{ timeseries.gentity.name }}</a></td>
-  </tr>
-  <tr>
-    <th>{% trans 'Name' %}</th>
-    <td>{{ timeseries.name }}</td>
-  </tr>
-  <tr>
-    <th>{% trans 'Variable' %}</th>
-    <td>{{ timeseries.variable }}</td>
-  </tr>
-  <tr>
-    <th>{% trans 'Unit Of Measurement' %}</th>
-    <td>{{ timeseries.unit_of_measurement }}</td>
-  </tr>
-  <tr>
-    <th>{% trans 'Precision' %}</th>
-    <td>{{ timeseries.precision }}</td>
-  </tr>
-  <tr>
-    <th>{% trans 'Time Zone' %}</th>
-    <td>{{ timeseries.time_zone }}</td>
-  </tr>
-  <tr>
-    <th>{% trans 'Remarks' %}</th>
-    <td>{{ timeseries.remarks }}</td>
-  </tr>
-  <tr>
-    <th>{% trans 'Start Date' %}</th>
-    <td>{{ timeseries.start_date|date:"Y/m/d H:i" }}</td>
-  </tr>
-  <tr>
-    <th>{% trans 'End Date' %}</th>
-    <td>{{ timeseries.end_date|date:"Y/m/d H:i" }}</td>
-  </tr>
-  <tr>
-    <th>{% trans 'Time step' %}</th>
-    <td>{% if not timeseries.time_step %}
+
+<table class="table table-hover">
+  <tbody>
+    <tr>
+      <th scope="row">{% trans 'ID' %}</th>
+      <td>{{ timeseries.id }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Related Station' %}</th>
+      <td>
+        <a href="{% url 'station_detail' timeseries.gentity.id %}">{{ timeseries.gentity.name }}</a>
+      </td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Name' %}</th>
+      <td>{{ timeseries.name }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Variable' %}</th>
+      <td>{{ timeseries.variable }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Unit Of Measurement' %}</th>
+      <td>{{ timeseries.unit_of_measurement }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Precision' %}</th>
+      <td>{{ timeseries.precision }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Time Zone' %}</th>
+      <td>{{ timeseries.time_zone }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Remarks' %}</th>
+      <td>{{ timeseries.remarks }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Start Date' %}</th>
+      <td>{{ timeseries.start_date|date:"Y/m/d H:i" }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'End Date' %}</th>
+      <td>{{ timeseries.end_date|date:"Y/m/d H:i" }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Time step' %}</th>
+      <td>
+        {% if not timeseries.time_step %}
           {% trans 'Variable' %}
         {% else %}
           {{ timeseries.time_step }}
         {% endif %}
-    </td>
-  </tr>
+      </td>
+    </tr>
+  </tbody>
 </table>

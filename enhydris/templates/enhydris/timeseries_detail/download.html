@@ -3,22 +3,23 @@
 
 {% has_perm "enhydris.view_timeseries_data" request.user timeseries as can_view_timeseries_data %}
 {% if can_view_timeseries_data %}
-  <div class="btn-group">
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aira-haspopup="true" aria-expanded="false">
-      {% trans "Download data" %}<span class="caret"></span>
+  <div class="btn-group mb-3" role="group">
+    <button id="downloadData" type="button" class="btn btn-outline-secondary dropdown-toggle text-black"
+            data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+      {% trans "Download data" %}
     </button>
     {% url "timeseries-data" station_id=timeseries.gentity.id pk=timeseries.id as base_url %}
-    <ul class="dropdown-menu">
-      <li><a href="{{ base_url }}?fmt=csv">CSV</a></li>
-      <li><a href="{{ base_url }}?fmt=hts2">Hydrognomon 4</a></li>
-      <li><a href="{{ base_url }}?fmt=hts">{% trans "Latest HTS" %}</a></li>
+    <ul class="dropdown-menu" aria-labelledby="downloadData">
+      <li><a class="dropdown-item" href="{{ base_url }}?fmt=csv">CSV</a></li>
+      <li><a class="dropdown-item" href="{{ base_url }}?fmt=hts2">Hydrognomon 4</a></li>
+      <li><a class="dropdown-item" href="{{ base_url }}?fmt=hts">{% trans "Latest HTS" %}</a></li>
     </ul>
-  </div>
-  <br><br>
+  </div> <!-- /.btn-group -->
 {% else %}
-    <p class="text-warning">
+  <p class="text-warning">
     {% blocktrans %}
         You don't have permission to download the time series.
     {% endblocktrans %}
-    </p>
+  </p>
 {% endif %}
