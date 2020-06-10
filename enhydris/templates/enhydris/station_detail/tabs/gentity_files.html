@@ -1,43 +1,41 @@
 {% load i18n %}
 {% load rules %}
 
-<div role="tabpanel" class="tab-pane" id="gentity_files">
+<div id="gentity_files" class="tab-pane fade" aria-labelledby="gentity_files" role="tabpanel">
   <h4>{% trans 'Station (Gentity) Files' %}</h4>
-  <div class="table-responsive">
-    {% if station.gentityfile_set.count %}
-        <table class="table table-hover table-condensed">
-          <thead>
-            <tr>
-              <th>{% trans 'ID' %}</th>
-              <th>{% trans 'Date' %}</th>
-              <th>{% trans 'Content' %}</th>
-              <th>{% trans 'Description' %}</th>
-              <th>{% trans 'Remarks' %}</th>
-              <th>{% trans 'Download' %}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for file in station.gentityfile_set.all %}
-              {% has_perm "enhydris.view_gentityfile_content" request.user file as can_view_file_data %}
-              <tr>
-                <td class="col-sm-1">{{ file.id }}</td>
-                <td class="col-sm-1">{{ file.date|date:"Y/m/d" }}</td>
-                <td class="col-sm-1">{{ file.content }}</td>
-                <td class="col-sm-1">{{ file.descr }}</td>
-                <td class="col-sm-8">{{ file.remarks }}</td>
-                <td class="col-sm-1">
-                  {% if can_view_file_data %}
-                    <a href="{% url "file-content" station_id=station.id pk=file.id %}"><i class="glyphicon glyphicon-cloud-download"></i></a>
-                  {% else %}
-                    {% trans "Unauthorized" %}
-                  {% endif %}
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      {% else %}
-          <h4 class="tab-no-data">{% trans "No data available" %}</h4>
-      {% endif %}
-  </div>
-</div>
+  {% if station.gentityfile_set.count %}
+    <table class="table table-hover table-condensed">
+      <thead>
+        <tr>
+          <th>{% trans 'ID' %}</th>
+          <th>{% trans 'Date' %}</th>
+          <th>{% trans 'Content' %}</th>
+          <th>{% trans 'Description' %}</th>
+          <th>{% trans 'Remarks' %}</th>
+          <th>{% trans 'Download' %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for file in station.gentityfile_set.all %}
+          {% has_perm "enhydris.view_gentityfile_content" request.user file as can_view_file_data %}
+          <tr>
+            <td class="col-sm-1">{{ file.id }}</td>
+            <td class="col-sm-1">{{ file.date|date:"Y/m/d" }}</td>
+            <td class="col-sm-1">{{ file.content }}</td>
+            <td class="col-sm-1">{{ file.descr }}</td>
+            <td class="col-sm-8">{{ file.remarks }}</td>
+            <td class="col-sm-1">
+              {% if can_view_file_data %}
+                <a href="{% url 'file-content' station_id=station.id pk=file.id %}"><i class="glyphicon glyphicon-cloud-download"></i></a>
+              {% else %}
+                {% trans "Unauthorized" %}
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <h4 class="tab-no-data">{% trans "No data available" %}</h4>
+  {% endif %}
+</div> <!-- /.tab-pane -->
