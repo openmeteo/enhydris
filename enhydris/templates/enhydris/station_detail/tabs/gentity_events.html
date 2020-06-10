@@ -1,33 +1,31 @@
 {% load i18n %}
 
-<div role="tabpanel" class="tab-pane" id="gentity_events">
+<div id="gentity_events" class="tab-pane fade" aria-labelledby="gentity_events" role="tabpanel">
   <h4>{% trans 'Station (Gentity) Events' %}</h4>
-  <div class="table-responsive">
-    {% if station.gentityevent_set.count %}
-        <table class="table table-hover table-condensed">
-          <thead>
-            <tr>
-              <th>{% trans 'ID' %}</th>
-              <th>{% trans 'Date' %}</th>
-              <th>{% trans 'Type' %}</th>
-              <th>{% trans 'User' %}</th>
-              <th>{% trans 'Report' %}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for event in station.gentityevent_set.all %}
-              <tr>
-                <td>{{ event.id }}</td>
-                <td>{{ event.date|date:"Y/m/d" }}</td>
-                <td>{{ event.type }}</td>
-                <td>{{ event.user }}</td>
-                <td>{{ event.report }}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-    {% else %}
-        <h4 class="tab-no-data">{% trans "No data available" %}</h4>
-    {% endif %}
-  </div>
-</div>
+  {% if station.gentityevent_set.count %}
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>{% trans 'ID' %}</th>
+          <th>{% trans 'Date' %}</th>
+          <th>{% trans 'Type' %}</th>
+          <th>{% trans 'User' %}</th>
+          <th>{% trans 'Report' %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for event in station.gentityevent_set.all %}
+          <tr>
+            <td>{{ event.id }}</td>
+            <td>{{ event.date|date:"Y/m/d" }}</td>
+            <td>{{ event.type }}</td>
+            <td>{{ event.user }}</td>
+            <td>{{ event.report }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <h4 class="tab-no-data">{% trans "No data available" %}</h4>
+  {% endif %}
+</div> <!-- /.tab-pane -->
