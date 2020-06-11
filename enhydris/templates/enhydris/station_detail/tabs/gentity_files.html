@@ -1,31 +1,30 @@
 {% load i18n %}
 {% load rules %}
 
-<!--TODO Upgrade to Bootstrap v.4 -->
 <div id="gentity_files" class="tab-pane fade" aria-labelledby="gentity_files" role="tabpanel">
-  <h4>{% trans 'Station (Gentity) Files' %}</h4>
+  <h4 class="my-3">{% trans 'Station (Gentity) Files' %}</h4>
   {% if station.gentityfile_set.count %}
     <table class="table table-hover">
       <thead>
         <tr>
-          <th>{% trans 'ID' %}</th>
-          <th>{% trans 'Date' %}</th>
-          <th>{% trans 'Content' %}</th>
-          <th>{% trans 'Description' %}</th>
-          <th>{% trans 'Remarks' %}</th>
-          <th>{% trans 'Download' %}</th>
+          <th scope="col">{% trans 'ID' %}</th>
+          <th scope="col">{% trans 'Date' %}</th>
+          <th scope="col">{% trans 'Content' %}</th>
+          <th scope="col">{% trans 'Description' %}</th>
+          <th scope="col">{% trans 'Remarks' %}</th>
+          <th scope="col">{% trans 'Download' %}</th>
         </tr>
       </thead>
       <tbody>
         {% for file in station.gentityfile_set.all %}
           {% has_perm "enhydris.view_gentityfile_content" request.user file as can_view_file_data %}
           <tr>
-            <td class="col-sm-1">{{ file.id }}</td>
-            <td class="col-sm-1">{{ file.date|date:"Y/m/d" }}</td>
-            <td class="col-sm-1">{{ file.content }}</td>
-            <td class="col-sm-1">{{ file.descr }}</td>
-            <td class="col-sm-8">{{ file.remarks }}</td>
-            <td class="col-sm-1">
+            <td>{{ file.id }}</td>
+            <td>{{ file.date|date:"Y/m/d" }}</td>
+            <td>{{ file.content }}</td>
+            <td>{{ file.descr }}</td>
+            <td>{{ file.remarks }}</td>
+            <td>
               {% if can_view_file_data %}
                 <a href="{% url 'file-content' station_id=station.id pk=file.id %}"><i class="glyphicon glyphicon-cloud-download"></i></a>
               {% else %}

@@ -1,17 +1,16 @@
 {% load i18n %}
 
-<!--TODO Upgrade to Bootstrap v.4 -->
 <div id="gentity_events" class="tab-pane fade" aria-labelledby="gentity_events" role="tabpanel">
-  <h4>{% trans 'Station (Gentity) Events' %}</h4>
+  <h4 class="my-3">{% trans 'Station (Gentity) Events' %}</h4>
   {% if station.gentityevent_set.count %}
     <table class="table table-hover">
       <thead>
         <tr>
-          <th>{% trans 'ID' %}</th>
-          <th>{% trans 'Date' %}</th>
-          <th>{% trans 'Type' %}</th>
-          <th>{% trans 'User' %}</th>
-          <th>{% trans 'Report' %}</th>
+          <th scope="col">{% trans 'ID' %}</th>
+          <th scope="col">{% trans 'Date' %}</th>
+          <th scope="col">{% trans 'Type' %}</th>
+          <th scope="col">{% trans 'User' %}</th>
+          <th scope="col">{% trans 'Report' %}</th>
         </tr>
       </thead>
       <tbody>
