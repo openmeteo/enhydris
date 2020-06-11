@@ -1,3 +1,17 @@
+/* UTILS */
+
+.reset-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.reset-fieldset {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
 #mapid {
     width: 100%;
     height: 300px;
@@ -97,3 +111,25 @@ h4.tab-no-data {
 }
 
 /* FOOTER */
+
+.custom-footer ul {
+    display: flex;
+    justify-content: center;
+}
+
+.custom-footer li {
+    position: relative;
+    margin-right: 16px;
+}
+
+.custom-footer li:after {
+    position: absolute;
+    top: 0;
+    right: -8px;
+    content: "|";
+    margin-right: -2px;
+}
+
+.custom-footer li:last-child:after {
+    content: initial;
+}
