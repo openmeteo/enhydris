@@ -20,7 +20,7 @@
             <td>{{ event.date|date:"Y/m/d" }}</td>
             <td>{{ event.type }}</td>
             <td>{{ event.user }}</td>
-            <td>{{ event.report }}</td>
+            <td class="show-more"><p>{{ event.report }}</p></td>
           </tr>
         {% endfor %}
       </tbody>

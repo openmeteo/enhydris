@@ -147,3 +147,8 @@ enhydris.coordinatesUI = (function namespace() {
         toggleCoordinatesView: toggleCoordinatesView
     };
 }());
+
+$readMoreJS.init({
+    target: '.show-more p',
+    numOfWords: 25
+});

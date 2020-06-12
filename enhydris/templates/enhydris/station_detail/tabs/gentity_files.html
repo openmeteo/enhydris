@@ -23,7 +23,7 @@
             <td>{{ file.date|date:"Y/m/d" }}</td>
             <td>{{ file.content }}</td>
             <td>{{ file.descr }}</td>
-            <td>{{ file.remarks }}</td>
+            <td class="show-more"><p>{{ file.remarks }}</p></td>
             <td>
               {% if can_view_file_data %}
                 <a href="{% url 'file-content' station_id=station.id pk=file.id %}"><i class="glyphicon glyphicon-cloud-download"></i></a>
