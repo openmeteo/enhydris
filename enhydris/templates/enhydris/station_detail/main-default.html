@@ -44,7 +44,7 @@
         {% include "enhydris/station_detail/map.html" %}
       </div> <!-- /.col -->
 
-      <div class="col-md-8">
+      <div class="col-md-8 mt-4 mt-md-0">
         {% include "enhydris/station_detail/details.html" %}
         {% has_perm "enhydris.change_station" request.user station as can_edit_station %}
         {% if can_edit_station %}
