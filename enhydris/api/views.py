@@ -219,8 +219,8 @@ class TimeseriesViewSet(ModelViewSet):
                 )
                 value = df.iloc[idx].value
             except KeyError:
-                # If no matching index is found (ie exceeds tolerance)
-                # a KeyError is raised rather than a graceful null return
+                # If no matching index is found (i.e the tolerance is exceeded)
+                # a KeyError is raised rather than returning null gracefully
                 value = pd.np.nan
             result.append({"timestamp": current_time.timestamp(), "value": value})
             current_time += interval
