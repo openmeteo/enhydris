@@ -1,6 +1,7 @@
 {% extends "enhydris/base/main_with_map.html" %}
 {% load i18n %}
 {% load rules %}
+{% load static %}
 
 {% block title %}
   {{ station.name }} — {{ block.super }}
@@ -76,4 +77,14 @@
       </div> <!-- /.tab-content -->
     </div> <!-- /#content -->
   </div> <!-- /.container -->
+{% endblock %}
+
+{% block extrajs %}
+  <script src="{% static 'js/read-more-js.js' %}"></script>
+  <script>
+    $readMoreJS.init({
+      target: '.show-more p',
+      numOfWords: 25
+    });
+  </script>
 {% endblock %}
