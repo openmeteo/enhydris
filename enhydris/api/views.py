@@ -3,7 +3,6 @@ import os
 from io import StringIO
 from wsgiref.util import FileWrapper
 
-from django.conf import settings
 from django.db import IntegrityError
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
@@ -125,6 +124,7 @@ class GentityFileViewSet(ReadOnlyModelViewSet):
 
 
 class TimeseriesViewSet(ModelViewSet):
+    CHART_MAXIMUM_NUMBER_OF_SAMPLES = 200
     queryset = models.Timeseries.objects.all()
     serializer_class = serializers.TimeseriesSerializer
 
@@ -199,35 +199,38 @@ class TimeseriesViewSet(ModelViewSet):
         data_frame = timeseries.get_data(
             start_date=start_date, end_date=end_date
         ).data.dropna(subset=["value"])
-        return self._sample_equidistant(data_frame)
+        return self._get_sampled_data_to_plot(data_frame)
 
-    def _sample_equidistant(self, df):
+    def _get_sampled_data_to_plot(self, df):
+        """Returns a sample of the data to be plotted, by equally sampling across time.
+
+        Divides the dataframe/timeseries by time into "CHART_MAXIMUM_NUMBER_OF_SAMPLES"
+        data points, including the starting point. It works by looping from the min-date
+        till it reaches the max-date, incrementing the time by a calculated interval
+        that results in the required number of samples.
+        At each data point, we take the nearest value as the data point,
+        if no value exists, a NaN is returned at this timestamp.
         """
-        Divides dataframe/timeseries by time into "number_of_samples" equally,
-        and returns a list of dicts, where each dict contains timestamp, value
-        """
-        number_of_samples = min(
-            settings.ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR, len(df.index)
-        )
+        number_of_samples = min(self.CHART_MAXIMUM_NUMBER_OF_SAMPLES, len(df.index))
         min_time = df.index.min()
-        # To accommodate the first data point
-        current_time = min_time
-        interval = (df.index.max() - df.index.min()) / (number_of_samples - 1)
+        max_time = df.index.max()
+        interval = (max_time - min_time) / (number_of_samples - 1)
         tolerance = interval / 2
         result = []
-        for _ in range(number_of_samples):
-            try:
-                idx = df.index.get_loc(
-                    current_time, method="nearest", tolerance=tolerance
-                )
-                value = df.iloc[idx].value
-            except KeyError:
-                # If no matching index is found (i.e the tolerance is exceeded)
-                # a KeyError is raised rather than returning null gracefully
-                value = pd.np.nan
-            result.append({"timestamp": current_time.timestamp(), "value": value})
+
+        current_time = min_time
+        while current_time <= max_time:
+            result.append(self._get_nearest_data_point(df, current_time, tolerance))
             current_time += interval
         return result
+
+    def _get_nearest_data_point(self, df, current_time, tolerance):
+        try:
+            idx = df.index.get_loc(current_time, method="nearest", tolerance=tolerance)
+            value = df.iloc[idx].value
+        except KeyError:
+            value = pd.np.nan
+        return {"timestamp": current_time.timestamp(), "value": value}
 
     def _get_date_bounds(self, request, timeseries):
         tz = timeseries.time_zone.as_tzinfo
