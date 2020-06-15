@@ -20,7 +20,7 @@
   		if ( chart_data ) {
   			flot_init(chart_data['data']);
   		} else {
-  			$("#data_holder").html("<h3>No data locally available!</h3>");
+  			$("#data_holder").html("<div class='alert alert-info' role='alert'>No data locally available!</div>");
   		}
 
   	});
