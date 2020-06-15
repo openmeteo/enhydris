@@ -188,15 +188,18 @@ class TimeseriesViewSet(ModelViewSet):
     def chart(self, request, pk=None, *, station_id):
         timeseries = get_object_or_404(models.Timeseries, pk=pk)
         self.check_object_permissions(request, timeseries)
+        serializer = serializers.TimeseriesRecordChartSerializer(
+            self._get_chart_data(request, timeseries), many=True
+        )
+        return Response(serializer.data)
+
+    def _get_chart_data(self, request, timeseries):
         start_date, end_date = self._get_date_bounds(request, timeseries)
         # Drop rows with value "NaN"
         data_frame = timeseries.get_data(
             start_date=start_date, end_date=end_date
         ).data.dropna(subset=["value"])
-        chart_data = self._sample_equidistant(data_frame)
-        return Response(
-            serializers.TimeseriesRecordChartSerializer(chart_data, many=True).data
-        )
+        return self._sample_equidistant(data_frame)
 
     def _sample_equidistant(self, df):
         """
