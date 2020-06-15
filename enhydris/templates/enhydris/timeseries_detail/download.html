@@ -4,9 +4,7 @@
 {% has_perm "enhydris.view_timeseries_data" request.user timeseries as can_view_timeseries_data %}
 {% if can_view_timeseries_data %}
   <div class="btn-group mb-3" role="group">
-    <button id="downloadData" type="button" class="btn btn-outline-secondary dropdown-toggle text-black"
-            data-toggle="dropdown"
-            aria-haspopup="true" aria-expanded="false">
+    <button id="downloadData" type="button" class="btn btn-outline-secondary dropdown-toggle text-black" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
       {% trans "Download data" %}
     </button>
     {% url "timeseries-data" station_id=timeseries.gentity.id pk=timeseries.id as base_url %}
