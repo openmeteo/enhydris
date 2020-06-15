@@ -576,10 +576,7 @@ class TimeseriesChartTestCase(APITestCase, TimeseriesDataMixin):
         super().create_timeseries()
         self.htimeseries.data = pd.DataFrame(
             index=[datetime(year, 1, 1) for year in range(2010, 2015)],
-            data={
-                "value": [year for year in range(2010, 2015)],
-                "flags": ["" for _ in range(5)],
-            },
+            data={"value": [year for year in range(2010, 2015)], "flags": [""] * 5},
             columns=["value", "flags"],
         )
 
@@ -625,10 +622,7 @@ class TimeseriesChartTestCase(APITestCase, TimeseriesDataMixin):
     def test_data_sampled_by_equal_time_distance(self, mock):
         self.htimeseries.data = pd.DataFrame(
             index=[datetime(year, 1, 1) for year in range(2010, 2020)],
-            data={
-                "value": [year for year in range(2010, 2020)],
-                "flags": ["" for _ in range(10)],
-            },
+            data={"value": [year for year in range(2010, 2020)], "flags": [""] * 10},
             columns=["value", "flags"],
         )
         mock.return_value = self.htimeseries
