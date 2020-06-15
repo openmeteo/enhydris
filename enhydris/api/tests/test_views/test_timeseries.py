@@ -523,23 +523,26 @@ class TimeseriesDeleteTestCase(APITestCase):
 
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
+@patch("enhydris.api.views.TimeseriesViewSet._get_sampled_data_to_plot")
 @patch("enhydris.models.Timeseries.get_data")
 class TimeseriesChartDateBoundsTestCase(APITestCase):
     def setUp(self):
+        # "_get_sampled_data_to_plot" is mocked to avoid executing the actual logic of
+        # comparisions in the view, which would compare mocks; raising an exception
         self.tz = mommy.make(models.TimeZone, code="EET", utc_offset=0)
         timeseries = mommy.make(models.Timeseries, time_zone=self.tz)
         self.url = "/api/stations/{}/timeseries/{}/chart/".format(
             timeseries.gentity_id, timeseries.id
         )
 
-    def test_no_bounds_supplied(self, mock):
+    def test_no_bounds_supplied(self, mock, _):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         mock.assert_called_once_with(
             start_date=None, end_date=None,
         )
 
-    def test_start_date_filter(self, mock):
+    def test_start_date_filter(self, mock, _):
         response = self.client.get(self.url + "?start_date=2012-03-01T00:00")
         self.assertEqual(response.status_code, 200)
         mock.assert_called_once_with(
@@ -547,7 +550,7 @@ class TimeseriesChartDateBoundsTestCase(APITestCase):
             end_date=None,
         )
 
-    def test_end_date_filter(self, mock):
+    def test_end_date_filter(self, mock, _):
         response = self.client.get(self.url + "?end_date=2012-03-01T00:00")
         self.assertEqual(response.status_code, 200)
         mock.assert_called_once_with(
@@ -555,7 +558,7 @@ class TimeseriesChartDateBoundsTestCase(APITestCase):
             end_date=datetime(2012, 3, 1, 0, 0, tzinfo=self.tz.as_tzinfo),
         )
 
-    def test_start_and_end_date_filters(self, mock):
+    def test_start_and_end_date_filters(self, mock, _):
         response = self.client.get(
             self.url + "?start_date=2012-03-01T00:00&end_date=2017-03-01T00:00"
         )
@@ -566,9 +569,8 @@ class TimeseriesChartDateBoundsTestCase(APITestCase):
         )
 
 
-@override_settings(
-    ENHYDRIS_OPEN_CONTENT=True, ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR=20
-)
+@override_settings(ENHYDRIS_OPEN_CONTENT=True)
+@patch("enhydris.api.views.TimeseriesViewSet.CHART_MAXIMUM_NUMBER_OF_SAMPLES", new=20)
 @patch("enhydris.models.Timeseries.get_data")
 class TimeseriesChartTestCase(APITestCase, TimeseriesDataMixin):
     def create_timeseries(self):
@@ -618,13 +620,22 @@ class TimeseriesChartTestCase(APITestCase, TimeseriesDataMixin):
         expected_values = ["{}.00".format(y) for y in range(2011, 2015)]
         self.assertEqual([x["value"] for x in data], expected_values)
 
-    @override_settings(ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR=3)
-    def test_data_sampled_by_equal_time_distance(self, mock):
+
+@patch("enhydris.api.views.TimeseriesViewSet.CHART_MAXIMUM_NUMBER_OF_SAMPLES", new=3)
+@patch("enhydris.models.Timeseries.get_data")
+class TimeseriesChartSamplingTestCase(APITestCase, TimeseriesDataMixin):
+    def setUp(self):
+        self.create_timeseries()
         self.htimeseries.data = pd.DataFrame(
             index=[datetime(year, 1, 1) for year in range(2010, 2020)],
             data={"value": [year for year in range(2010, 2020)], "flags": [""] * 10},
             columns=["value", "flags"],
         )
+        self.url = "/api/stations/{}/timeseries/{}/chart/".format(
+            self.station.id, self.timeseries.id
+        )
+
+    def test_data_sampled_by_equal_time_distance(self, mock):
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
