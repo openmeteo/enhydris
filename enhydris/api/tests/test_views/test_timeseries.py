@@ -621,6 +621,7 @@ class TimeseriesChartTestCase(APITestCase, TimeseriesDataMixin):
         self.assertEqual([x["value"] for x in data], expected_values)
 
 
+@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 @patch("enhydris.api.views.TimeseriesViewSet.CHART_MAXIMUM_NUMBER_OF_SAMPLES", new=3)
 @patch("enhydris.models.Timeseries.get_data")
 class TimeseriesChartSamplingTestCase(APITestCase, TimeseriesDataMixin):
