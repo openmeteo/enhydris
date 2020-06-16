@@ -80,11 +80,12 @@
 {% endblock %}
 
 {% block extrajs %}
-  <script src="{% static 'js/read-more-js.js' %}"></script>
+
+  <script src="{% static 'js/readmore.min.js' %}"></script>
   <script>
-    $readMoreJS.init({
-      target: '.show-more p',
-      numOfWords: 25
+    $('.show-more').readmore({
+      maxHeight: 100,
+      lessLink: '<a href="#">Read less</a>'
     });
   </script>
 {% endblock %}
