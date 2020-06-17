@@ -569,10 +569,27 @@ class TimeseriesChartDateBoundsTestCase(APITestCase):
         )
 
 
+class TimeseriesChartTestMixin:
+    def _assertChartResponse(self, data, expected, tolerance_in_days=2):
+        """Assert chart response by allowing timestamp tolerance, but not values
+
+        The expected is a list of {value, date} rather than timestamp to make the
+        tests easier to write, they're translated into timestamps for comparision
+        """
+        tolerance_in_seconds = 86400 * tolerance_in_days
+        for d, e in zip(data, expected):
+            self.assertEqual(d["value"], e["value"])
+            self.assertAlmostEqual(
+                d["timestamp"], e["date"].timestamp(), delta=tolerance_in_seconds
+            )
+
+
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
 @patch("enhydris.api.views.TimeseriesViewSet.CHART_MAXIMUM_NUMBER_OF_SAMPLES", new=20)
 @patch("enhydris.models.Timeseries.get_data")
-class TimeseriesChartTestCase(APITestCase, TimeseriesDataMixin):
+class TimeseriesChartTestCase(
+    APITestCase, TimeseriesDataMixin, TimeseriesChartTestMixin
+):
     def create_timeseries(self):
         # Create the timeseries so that we have 5 entries, one per year basically
         super().create_timeseries()
@@ -607,8 +624,11 @@ class TimeseriesChartTestCase(APITestCase, TimeseriesDataMixin):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(len(data), 5)
-        expected_values = ["{}.00".format(y) for y in range(2010, 2015)]
-        self.assertEqual([x["value"] for x in data], expected_values)
+        expected = [
+            {"date": datetime(year, 1, 1), "value": f"{year}.00"}
+            for year in range(2010, 2015)
+        ]
+        self._assertChartResponse(data, expected)
 
     def test_null_values_are_dropped(self, mock):
         self.htimeseries.data.loc["2010-01-01", "value"] = pd.np.nan
@@ -617,19 +637,24 @@ class TimeseriesChartTestCase(APITestCase, TimeseriesDataMixin):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(len(data), 4)
-        expected_values = ["{}.00".format(y) for y in range(2011, 2015)]
-        self.assertEqual([x["value"] for x in data], expected_values)
+        expected = [
+            {"date": datetime(year, 1, 1), "value": f"{year}.00"}
+            for year in range(2011, 2015)
+        ]
+        self._assertChartResponse(data, expected)
 
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
 @patch("enhydris.api.views.TimeseriesViewSet.CHART_MAXIMUM_NUMBER_OF_SAMPLES", new=3)
 @patch("enhydris.models.Timeseries.get_data")
-class TimeseriesChartSamplingTestCase(APITestCase, TimeseriesDataMixin):
+class TimeseriesChartSamplingTestCase(
+    APITestCase, TimeseriesDataMixin, TimeseriesChartTestMixin
+):
     def setUp(self):
         self.create_timeseries()
         self.htimeseries.data = pd.DataFrame(
-            index=[datetime(year, 1, 1) for year in range(2010, 2020)],
-            data={"value": [year for year in range(2010, 2020)], "flags": [""] * 10},
+            index=[datetime(year, 1, 1) for year in range(2010, 2021)],
+            data={"value": [year for year in range(2010, 2021)], "flags": [""] * 11},
             columns=["value", "flags"],
         )
         self.url = "/api/stations/{}/timeseries/{}/chart/".format(
@@ -642,6 +667,8 @@ class TimeseriesChartSamplingTestCase(APITestCase, TimeseriesDataMixin):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(len(data), 3)
-        expected_years = [2010, 2015, 2019]
-        expected_values = ["{}.00".format(y) for y in expected_years]
-        self.assertEqual([x["value"] for x in data], expected_values)
+        expected = [
+            {"date": datetime(year, 1, 1), "value": f"{year}.00"}
+            for year in [2010, 2015, 2020]
+        ]
+        self._assertChartResponse(data, expected)
