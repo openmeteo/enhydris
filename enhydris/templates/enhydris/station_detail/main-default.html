@@ -83,9 +83,8 @@
 
   <script src="{% static 'js/vendor/readmore.min.js' %}"></script>
   <script>
-    $('.show-more').readmore({
-      maxHeight: 100,
-      lessLink: '<a href="#">Read less</a>'
+    $('.show-more p').readmore({
+      maxHeight: 200
     });
   </script>
 {% endblock %}
