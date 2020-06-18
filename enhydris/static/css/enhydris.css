@@ -94,6 +94,14 @@ h4.tab-no-data {
     border-top: none;
 }
 
+.custom-main .show-more .rm-link {
+    color: #007bff;
+}
+
+.custom-main .show-more .rm-link:hover {
+    color: #0056b3;
+}
+
 @media (max-width: 767px) {
     .custom-main .table-station-detail tr {
         display: flex;

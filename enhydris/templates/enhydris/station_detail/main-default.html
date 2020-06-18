@@ -83,8 +83,14 @@
 
   <script src="{% static 'js/vendor/readmore.min.js' %}"></script>
   <script>
-    $('.show-more p').readmore({
-      maxHeight: 200
+    $readMoreJS.init({
+      target: '.show-more p',
+      numOfWords: 35,
+      toggle: true,
+      moreLink: 'read more ...',
+      lessLink: 'read less',
+      linkClass: 'rm-link',
+      containerClass: 'rm-container'
     });
   </script>
 {% endblock %}
