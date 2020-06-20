@@ -7,30 +7,6 @@
   {{ station.name }} — {{ block.super }}
 {% endblock %}
 
-
-{% block mainjs %}
-  {{ block.super }}
-  <script type="text/javascript">
-    function togl(name) {
-      $('#'+ name).stop().toggle()
-    }
-
-    $(document).ready(function ($) {
-      $('#tabs').tab();
-    });
-  </script>
-{% endblock %}
-
-
-{% block map_js %}
-  {{ block.super }}
-  <script type="text/javascript">
-    enhydris.mapMode = 'single-station';
-    {% if station %}enhydris.agentityId = {{station.id}};{% endif %}
-  </script>
-{% endblock %}
-
-
 {% block content %}
   <div class="container mt-4">
     <div class="row flex-column px-3 px-sm-0">
@@ -79,8 +55,15 @@
   </div> <!-- /.container -->
 {% endblock %}
 
-{% block extrajs %}
+{% block map_js %}
+  {{ block.super }}
+  <script type="text/javascript">
+    enhydris.mapMode = 'single-station';
+    {% if station %}enhydris.agentityId = {{station.id}};{% endif %}
+  </script>
+{% endblock %}
 
+{% block extrajs %}
   <script src="{% static 'js/vendor/readmore.min.js' %}"></script>
   <script>
     $readMoreJS.init({
@@ -94,3 +77,5 @@
     });
   </script>
 {% endblock %}
+
+
