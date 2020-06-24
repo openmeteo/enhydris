@@ -43,7 +43,11 @@ def get_object_station(obj):
     try:
         return obj.station
     except AttributeError:
+        pass
+    try:
         return obj.gentity.gpoint.station
+    except AttributeError:
+        return obj.timeseries_group.gentity.gpoint.station
 
 
 @rules.predicate
@@ -110,15 +114,20 @@ can_edit_station = model_backend_can_edit_station | (
 can_delete_station = (
     users_can_add_content & ~is_new_object & is_station_creator
 ) | model_backend_can_delete_station
-can_touch_timeseries = (
+can_touch_timeseries_group = (
     users_can_add_content & (is_object_station_creator | is_object_station_maintainer)
 ) | model_backend_can_edit_timeseries
+can_touch_timeseries = can_touch_timeseries_group
 
 rules.add_perm("enhydris", rules.always_allow)
 rules.add_perm("enhydris.add_station", can_add_station)
 rules.add_perm("enhydris.view_station", rules.always_allow)
 rules.add_perm("enhydris.change_station", can_edit_station)
 rules.add_perm("enhydris.delete_station", can_delete_station)
+
+rules.add_perm("enhydris.add_timeseries_group", can_touch_timeseries_group)
+rules.add_perm("enhydris.change_timeseries_group", can_touch_timeseries_group)
+rules.add_perm("enhydris.delete_timeseries_group", can_touch_timeseries_group)
 
 rules.add_perm("enhydris.add_timeseries", can_touch_timeseries)
 rules.add_perm("enhydris.change_timeseries", can_touch_timeseries)

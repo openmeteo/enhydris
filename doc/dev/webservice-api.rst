@@ -477,62 +477,73 @@ way as for POST (see above).
 Time series
 ===========
 
-List, retrieve, create, update, or delete time series
------------------------------------------------------
+We develop API endpoints as we need them. We don't have an API for time
+series groups yet. We have an API for time series at
+`/api/stations/XXX/timeseriesgroups/YYY/timeseries/`, but we don't
+support it much since we aren't using it. It works similarly to the
+stations endpoint and you can find about it with experimentation. We
+only support the `data/`, `bottom/` and `chart/` sub-endpoints described
+below.
 
-GET a time series detail::
+Time series data
+----------------
 
-    curl https://openmeteo.org/api/stations/1334/timeseries/232/
+**GET the data** of a time series in CSV by appending ``data/`` to the
+URL::
+
+    curl https://openmeteo.org/api/stations/1334/timeseriesgroup/232/timeseries/10659/data/
+
+Example of response::
+
+    1998-12-10 16:40,6.3,
+    1998-12-10 16:50,6.1,
+    1998-12-10 17:00,6.0,
+    1998-12-10 17:10,5.6,
+    ...
+
+Instead of CSV, you can **get HTS** by specifying the parameter
+``fmt=hts``::
+
+    curl 'https://openmeteo.org/api/stations/1334/timeseriesgroup/235/timeseries/10659/data/?fmt=hts`
 
 Response::
 
-        {
-          "id": 232,
-          "last_modified": "2011-10-26T20:23:22.458770Z",
-          "name": "Temperature (from 1998)",
-          "hidden": false,
-          "precision": 1,
-          "remarks": "Type: Raw data",
-          "gentity": 1334,
-          "variable": 3,
-          "unit_of_measurement": 14,
-          "time_zone": 1,
-          "time_step": "10min"
-        }
+    Count=926108
+    Title=Temperature (from 1998)
+    Comment=NTUA University Campus of Zografou
+    Comment=
+    Comment=Type: Raw data
+    Timezone=EET (UTC+0200)
+    Time_step=10,0
+    Variable=Mean temperature
+    Precision=1
+    Location=23.787430 37.973850 4326
+    Altitude=219.00
 
-GET the list of time series of a station::
+    1998-12-10 16:40,6.3,
+    1998-12-10 16:50,6.1,
+    1998-12-10 17:00,6.0,
+    1998-12-10 17:10,5.6,
+    ...
 
-    curl https://openmeteo.org/api/stations/1334/timeseries/
+**Get only the last record** of the time series (in CSV) with ``bottom/``::
 
-The response is a `paginated list`_ of detail objects.
+    curl https://openmeteo.org/api/stations/1334/timeseriesgroup/235/timeseries/10659/bottom/
 
-POST to create a time series::
+Response::
+
+    2018-07-09 11:19,0.000000,
+
+**Append data** to the time series::
 
     curl -X POST -H "Authorization: token OAUTH-TOKEN" \
-        -d "gentity=1334" -d "variable=1" -d "time_zone=1" \
-        -d "unit_of_measurement=1" \
-        https://openmeteo.org/api/stations/1334/timeseries/
+        -d $'timeseries_records=2018-12-19T11:50,25.0,\n2018-12-19T12:00,25.1,\n' \
+        https://openmeteo.org/api/stations/1334/timeseriesgroups/235/timeseries/10659/data/
 
-The response is a 201 with a similar content as the GET detail response
-(with the new data), unless there is a problem, in which case there's a
-standard `error response`_.
+(The ``$'...'`` is a bash idiom that does nothing more than escape the
+``\n`` in the string.)
 
-DELETE a time series::
-
-    curl -X DELETE -H "Authorization: token OAUTH-TOKEN" \
-        https://openmeteo.org/api/stations/1334/timeseries/10657/
-
-The response is normally 204 (no content) or 404.
-
-PUT or PATCH a time series::
-
-    curl -X PATCH -H "Authorization: token OAUTH-TOKEN" \
-        -d "variable=1" \
-        https://openmeteo.org/api/stations/1334/timeseries/10657/
-
-The response is a 200 with a similar content as the GET detail response
-(with the updated data), unless there is a problem, in which case
-there's a standard `error response`_.
+The response is normally 204 (no content).
 
 Time series chart data
 ----------------------
@@ -563,68 +574,6 @@ You can provide time limits using the following query parameters
 For instance, to request data prior to 2015 only, we can do the following request::
 
     curl 'https://openmeteo.org/api/stations/1334/timeseries/232/chart/?end_date=2015-01-01T00:00`
-
-
-Time series data
-----------------
-
-**GET the data** of a time series in CSV by appending ``data/`` to the
-URL::
-
-    curl https://openmeteo.org/api/stations/1334/timeseries/232/data/
-
-Example of response::
-
-    1998-12-10 16:40,6.3,
-    1998-12-10 16:50,6.1,
-    1998-12-10 17:00,6.0,
-    1998-12-10 17:10,5.6,
-    ...
-
-Instead of CSV, you can **get HTS** by specifying the parameter
-``fmt=hts``::
-
-    curl 'https://openmeteo.org/api/stations/1334/timeseries/235/data/?fmt=hts`
-
-Response::
-
-    Count=926108
-    Title=Temperature (from 1998)
-    Comment=NTUA University Campus of Zografou
-    Comment=
-    Comment=Type: Raw data
-    Timezone=EET (UTC+0200)
-    Time_step=10,0
-    Variable=Mean temperature
-    Precision=1
-    Location=23.787430 37.973850 4326
-    Altitude=219.00
-
-    1998-12-10 16:40,6.3,
-    1998-12-10 16:50,6.1,
-    1998-12-10 17:00,6.0,
-    1998-12-10 17:10,5.6,
-    ...
-
-
-**Get only the last record** of the time series (in CSV) with ``bottom/``::
-
-    curl https://openmeteo.org/api/stations/1334/timeseries/235/bottom/
-
-Response::
-
-    2018-07-09 11:19,0.000000,
-
-**Append data** to the time series::
-
-    curl -X POST -H "Authorization: token OAUTH-TOKEN" \
-        -d $'timeseries_records=2018-12-19T11:50,25.0,\n2018-12-19T12:00,25.1,\n' \
-        https://openmeteo.org/api/stations/1334/timeseries/235/data/
-
-(The ``$'...'`` is a bash idiom that does nothing more than escape the
-``\n`` in the string.)
-
-The response is normally 204 (no content).
 
 Other items of stations
 =======================

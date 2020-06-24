@@ -1,0 +1,37 @@
+{% load i18n %}
+
+<div id="timeseries_groups" class="tab-pane fade show active" role="tabpanel" aria-labelledby="timeseries_groups">
+  {% if station.timeseriesgroup_set.count %}
+    <table class="table table-hover table-station-detail">
+      <tbody>
+        {% for tg in station.timeseriesgroup_set.all %}
+          {% if not tg.hidden %}
+            {% with tg.id as tg_id %}
+              {% url "timeseries_group_detail" tg_id as timeseries_group_url %}
+              <tr>
+                <td class="p-0">
+                  <a href="{% url 'timeseries_group_detail' station_id=station.id pk=tg_id %}">id={{ tg_id }}</a>
+                </td>
+                <td class="p-0">
+                  <a href="{% url 'timeseries_group_detail' station_id=station.id pk=tg_id %}">{% if tg.name %}"{{ tg.name }}"{% endif %}</a>
+                </td>
+                <td class="p-0">
+                  <a href="{% url 'timeseries_group_detail' station_id=station.id pk=tg_id %}">{{ tg.variable }}</a>
+                </td>
+                <td class="p-0">
+                  <a href="{% url 'timeseries_group_detail' station_id=station.id pk=tg_id %}">
+                    {% if tg.start_date and tg.end_date %}
+                      {{ tg.start_date|date:"SHORT_DATE_FORMAT" }} — {{ tg.end_date|date:"SHORT_DATETIME_FORMAT" }}
+                    {% endif %}
+                  </a>
+                </td>
+              </tr>
+            {% endwith %}
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="tab-no-data">{% trans "No data exist" %}<p>
+  {% endif %}
+</div>

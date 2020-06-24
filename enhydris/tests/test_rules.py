@@ -4,9 +4,10 @@ from django.test import TestCase, override_settings
 from model_mommy import mommy
 
 from enhydris import models
+from enhydris.tests.test_models import TestTimeseriesMixin
 
 
-class RulesTestCaseBase(TestCase):
+class RulesTestCaseBase(TestCase, TestTimeseriesMixin):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -15,10 +16,10 @@ class RulesTestCaseBase(TestCase):
         cls.charlie = User.objects.create_user(username="charlie")
         cls.david = User.objects.create_user(username="david")
 
-        cls.station = mommy.make(
-            models.Station, creator=cls.alice, maintainers=[cls.bob]
-        )
-        cls.timeseries = mommy.make(models.Timeseries, gentity=cls.station)
+        cls._create_test_timeseries()
+        cls.station.creator = cls.alice
+        cls.station.maintainers.set([cls.bob])
+        cls.station.save()
 
         po = Permission.objects
         cls.charlie.user_permissions.add(
@@ -53,6 +54,20 @@ class CommonTests:
     def test_user_with_model_permissions_can_delete_station(self):
         self.assertTrue(self.charlie.has_perm("enhydris.change_station", self.station))
 
+    def test_user_with_model_permissions_can_change_timeseries_group(self):
+        self.assertTrue(
+            self.charlie.has_perm(
+                "enhydris.change_timeseries_group", self.timeseries_group
+            )
+        )
+
+    def test_user_with_model_permissions_can_delete_timeseries_group(self):
+        self.assertTrue(
+            self.charlie.has_perm(
+                "enhydris.change_timeseries_group", self.timeseries_group
+            )
+        )
+
     def test_user_with_model_permissions_can_change_timeseries(self):
         self.assertTrue(
             self.charlie.has_perm("enhydris.change_timeseries", self.timeseries)
@@ -68,6 +83,20 @@ class CommonTests:
 
     def test_user_without_permissions_cannot_delete_station(self):
         self.assertFalse(self.david.has_perm("enhydris.change_station", self.station))
+
+    def test_user_without_permissions_cannot_change_timeseries_group(self):
+        self.assertFalse(
+            self.david.has_perm(
+                "enhydris.change_timeseries_group", self.timeseries_group
+            )
+        )
+
+    def test_user_without_permissions_cannot_delete_timeseries_group(self):
+        self.assertFalse(
+            self.david.has_perm(
+                "enhydris.change_timeseries_group", self.timeseries_group
+            )
+        )
 
     def test_user_without_permissions_cannot_change_timeseries(self):
         self.assertFalse(
@@ -88,6 +117,20 @@ class RulesTestCaseWhenUsersCanAddContent(RulesTestCaseBase, CommonTests):
     def test_creator_can_delete_station(self):
         self.assertTrue(self.alice.has_perm("enhydris.delete_station", self.station))
 
+    def test_creator_can_change_timeseries_group(self):
+        self.assertTrue(
+            self.alice.has_perm(
+                "enhydris.change_timeseries_group", self.timeseries_group
+            )
+        )
+
+    def test_creator_can_delete_timeseries_group(self):
+        self.assertTrue(
+            self.alice.has_perm(
+                "enhydris.delete_timeseries_group", self.timeseries_group
+            )
+        )
+
     def test_creator_can_change_timeseries(self):
         self.assertTrue(
             self.alice.has_perm("enhydris.change_timeseries", self.timeseries)
@@ -103,6 +146,16 @@ class RulesTestCaseWhenUsersCanAddContent(RulesTestCaseBase, CommonTests):
 
     def test_maintainer_cannot_delete_station(self):
         self.assertFalse(self.bob.has_perm("enhydris.delete_station", self.station))
+
+    def test_maintainer_can_change_timeseries_group(self):
+        self.assertTrue(
+            self.bob.has_perm("enhydris.change_timeseries_group", self.timeseries_group)
+        )
+
+    def test_maintainer_can_delete_timeseries_group(self):
+        self.assertTrue(
+            self.bob.has_perm("enhydris.delete_timeseries_group", self.timeseries_group)
+        )
 
     def test_maintainer_can_change_timeseries(self):
         self.assertTrue(
@@ -123,6 +176,20 @@ class RulesTestCaseWhenUsersCannotAddContent(RulesTestCaseBase, CommonTests):
     def test_creator_is_irrelevant_for_delete_station(self):
         self.assertFalse(self.alice.has_perm("enhydris.delete_station", self.station))
 
+    def test_creator_is_irrelevant_for_change_timeseries_group(self):
+        self.assertFalse(
+            self.alice.has_perm(
+                "enhydris.change_timeseries_group", self.timeseries_group
+            )
+        )
+
+    def test_creator_is_irrelevant_for_delete_timeseries_group(self):
+        self.assertFalse(
+            self.alice.has_perm(
+                "enhydris.delete_timeseries_group", self.timeseries_group
+            )
+        )
+
     def test_creator_is_irrelevant_for_change_timeseries(self):
         self.assertFalse(
             self.alice.has_perm("enhydris.change_timeseries", self.timeseries)
@@ -139,6 +206,16 @@ class RulesTestCaseWhenUsersCannotAddContent(RulesTestCaseBase, CommonTests):
     def test_maintainer_is_irrelevant_for_delete_station(self):
         self.assertFalse(self.bob.has_perm("enhydris.delete_station", self.station))
 
+    def test_maintainer_is_irrelevant_for_change_timeseries_group(self):
+        self.assertFalse(
+            self.bob.has_perm("enhydris.change_timeseries_group", self.timeseries_group)
+        )
+
+    def test_maintainer_is_irrelevant_for_delete_timeseries_group(self):
+        self.assertFalse(
+            self.bob.has_perm("enhydris.delete_timeseries_group", self.timeseries_group)
+        )
+
     def test_maintainer_is_irrelevant_for_change_timeseries(self):
         self.assertFalse(
             self.bob.has_perm("enhydris.change_timeseries", self.timeseries)
@@ -150,7 +227,7 @@ class RulesTestCaseWhenUsersCannotAddContent(RulesTestCaseBase, CommonTests):
         )
 
 
-class ContentRulesTestCaseBase(TestCase):
+class ContentRulesTestCaseBase(TestCase, TestTimeseriesMixin):
     """Test case base for time series data and file content."""
 
     @classmethod
@@ -162,10 +239,7 @@ class ContentRulesTestCaseBase(TestCase):
         cls.david = User.objects.create_user(username="david")
         cls.anonymous = AnonymousUser()
 
-        cls.station = mommy.make(
-            models.Station, creator=cls.alice, maintainers=[cls.bob]
-        )
-        cls.timeseries = mommy.make(models.Timeseries, gentity=cls.station)
+        cls._create_test_timeseries()
         cls.gentityfile = mommy.make(models.GentityFile, gentity=cls.station)
 
         po = Permission.objects

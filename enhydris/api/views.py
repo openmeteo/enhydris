@@ -4,6 +4,7 @@ from io import StringIO
 from wsgiref.util import FileWrapper
 
 from django.db import IntegrityError
+from django.db.models import Prefetch
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -39,7 +40,20 @@ class StationViewSet(StationListViewMixin, ModelViewSet):
 
     @action(detail=False, methods=["get"])
     def csv(self, request):
-        data = prepare_csv(self.get_queryset())
+        data = prepare_csv(
+            self.get_queryset()
+            .select_related("owner")
+            .prefetch_related(
+                Prefetch(
+                    "timeseriesgroup_set",
+                    queryset=models.TimeseriesGroup.objects.select_related(
+                        "variable", "unit_of_measurement", "time_zone"
+                    )
+                    .prefetch_related("timeseries_set")
+                    .order_by("variable__id"),
+                )
+            )
+        )
         response = HttpResponse(data, content_type="application/zip")
         response["Content-Disposition"] = "attachment; filename=data.zip"
         response["Content-Length"] = len(data)
@@ -136,7 +150,9 @@ class TimeseriesViewSet(ModelViewSet):
         return [x() for x in pc]
 
     def get_queryset(self):
-        return models.Timeseries.objects.filter(gentity_id=self.kwargs["station_id"])
+        return models.Timeseries.objects.filter(
+            timeseries_group_id=self.kwargs["timeseries_group_id"]
+        )
 
     def create(self, request, *args, **kwargs):
         """Redefine create, checking permissions and gentity_id.
@@ -153,31 +169,39 @@ class TimeseriesViewSet(ModelViewSet):
 
         # Check permissions
         try:
-            gentity_id = int(serializer.get_initial()["gentity"])
+            timeseries_group_id = int(serializer.get_initial()["timeseries_group"])
         except ValueError:
             raise Http404
-        station = get_object_or_404(models.Station, id=gentity_id)
+        timeseries_group = get_object_or_404(
+            models.TimeseriesGroup, id=timeseries_group_id
+        )
+        station = timeseries_group.gentity.gpoint.station
         if not request.user.is_authenticated:
             return Response("Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
         if not request.user.has_perm("enhydris.change_station", station):
             return Response("Forbidden", status=status.HTTP_403_FORBIDDEN)
 
-        # Check the correctness of gentity_id
-        if str(gentity_id) != self.kwargs["station_id"]:
+        # Check whether the station and timeseries group ids in the url and in the
+        # posted data are consistent
+        if str(timeseries_group.gentity_id) != self.kwargs["station_id"]:
             return Response("Wrong gentity_id", status=status.HTTP_400_BAD_REQUEST)
+        if str(timeseries_group.id) != self.kwargs["timeseries_group_id"]:
+            return Response(
+                "Wrong timeseries_group_id", status=status.HTTP_400_BAD_REQUEST
+            )
 
         # All checks passed, call inherited method to do the actual work.
         return super().create(request, *args, **kwargs)
 
     @action(detail=True, methods=["get", "post"])
-    def data(self, request, pk=None, *, station_id):
+    def data(self, request, pk=None, *, station_id, timeseries_group_id=None):
         if request.method in ("GET", "HEAD"):
             return self._get_data(request, pk)
         elif request.method == "POST":
             return self._post_data(request, pk)
 
     @action(detail=True, methods=["get"])
-    def bottom(self, request, pk=None, *, station_id):
+    def bottom(self, request, pk=None, *, station_id, timeseries_group_id=None):
         ts = get_object_or_404(models.Timeseries, pk=pk)
         self.check_object_permissions(request, ts)
         response = HttpResponse(content_type="text/plain")
@@ -185,7 +209,7 @@ class TimeseriesViewSet(ModelViewSet):
         return response
 
     @action(detail=True, methods=["get"])
-    def chart(self, request, pk=None, *, station_id):
+    def chart(self, request, pk=None, *, station_id, timeseries_group_id):
         timeseries = get_object_or_404(models.Timeseries, pk=pk)
         self.check_object_permissions(request, timeseries)
         serializer = serializers.TimeseriesRecordChartSerializer(
@@ -233,7 +257,7 @@ class TimeseriesViewSet(ModelViewSet):
         return {"timestamp": current_time.timestamp(), "value": value}
 
     def _get_date_bounds(self, request, timeseries):
-        tz = timeseries.time_zone.as_tzinfo
+        tz = timeseries.timeseries_group.time_zone.as_tzinfo
         start_date = request.GET.get("start_date")
         end_date = request.GET.get("end_date")
         start_date = self._get_date_from_string(start_date, tz)

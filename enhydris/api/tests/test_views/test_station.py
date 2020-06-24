@@ -151,13 +151,16 @@ class StationUpdateAndDeleteTestCase(APITestCase):
 
 class StationCsvTestCase(APITestCase):
     def setUp(self):
-        mommy.make(
+        self._create_stations()
+
+    def _create_stations(self):
+        self.station_komboti = mommy.make(
             models.Station,
             name="Komboti",
             geom=Point(x=21.06071, y=39.09518, srid=4326),
             original_srid=4326,
         )
-        mommy.make(
+        self.station_agios_athanasios = mommy.make(
             models.Station,
             name="Agios Athanasios",
             geom=Point(x=21.60121, y=39.22440, srid=4326),
@@ -186,6 +189,17 @@ class StationCsvTestCase(APITestCase):
             name="NoSRID Point, NoSRID Station",
             geom=Point(x=-176.48368, y=0.19377, srid=None),
             original_srid=None,
+        )
+
+    def _create_timeseries_groups(self):
+        self._create_timeseries_group(self.station_komboti, "Temperature")
+        self._create_timeseries_group(self.station_komboti, "Humidity")
+        self._create_timeseries_group(self.station_agios_athanasios, "Temperature")
+        self._create_timeseries_group(self.station_agios_athanasios, "Humidity")
+
+    def _create_timeseries_group(self, station, variable_descr):
+        mommy.make(
+            models.TimeseriesGroup, gentity=station, variable__descr=variable_descr
         )
 
     def test_station_csv(self):
@@ -219,3 +233,11 @@ class StationCsvTestCase(APITestCase):
             with ZipFile(t) as f:
                 stations_csv = f.open("stations.csv").read().decode()
                 self.assertIn("NoSRID Point, NoSRID Station", stations_csv)
+
+    def test_num_queries(self):
+        self._create_timeseries_groups()
+        # There should be seven queries: one for stations, one for timeseries_groups,
+        # one for timeseries. The other four are two for django_session and two
+        # for a savepoint.
+        with self.assertNumQueries(7):
+            self.client.get("/api/stations/csv/")

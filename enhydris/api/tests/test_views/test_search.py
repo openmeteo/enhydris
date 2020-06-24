@@ -6,6 +6,7 @@ from django.test import override_settings
 from rest_framework.test import APITestCase
 
 from model_mommy import mommy
+from parler.utils.context import switch_language
 
 from enhydris import models
 
@@ -118,12 +119,17 @@ class SearchByVariableTestCase(SearchTestCaseBase, APITestCase):
         self._create_timeseries(station2, "Humidity", "Humidité")
 
     def _create_timeseries(self, station, var_en, var_fr):
-        timeseries = mommy.make(models.Timeseries, gentity=station)
-        timeseries.variable.set_current_language("en")
-        timeseries.variable.descr = var_en
-        timeseries.variable.set_current_language("fr")
-        timeseries.variable.descr = var_fr
-        timeseries.variable.save()
+        variable = models.Variable()
+        with switch_language(variable, "en"):
+            variable.descr = var_en
+        with switch_language(variable, "fr"):
+            variable.descr = var_fr
+        variable.save()
+        mommy.make(
+            models.Timeseries,
+            timeseries_group__gentity=station,
+            timeseries_group__variable=variable,
+        )
 
 
 @override_settings(**language_settings)
@@ -145,31 +151,33 @@ class SearchByTsOnlyTestCase(SearchTestCaseBase, APITestCase):
 
     def _create_models(self):
         station1 = mommy.make(models.Station, name="Hobbiton")
-        mommy.make(models.Timeseries, gentity=station1)
+        mommy.make(models.TimeseriesGroup, gentity=station1)
         mommy.make(models.Station, name="Mithlond")
 
 
-class SearchInTimeseriesRemarksTestCase(SearchTestCaseBase, APITestCase):
+class SearchInTimeseriesGroupRemarksTestCase(SearchTestCaseBase, APITestCase):
     search_term = "really important time series"
     search_result = "Mithlond"
 
     def _create_models(self):
         station1 = mommy.make(models.Station, name="Hobbiton")
         mommy.make(
-            models.Timeseries,
+            models.TimeseriesGroup,
             gentity=station1,
-            remarks="Cette série chronologique est vraiment importante",
+            remarks="Ce group de séries chronologiques est vraiment important",
         )
         station2 = mommy.make(models.Station, name="Mithlond")
         mommy.make(
-            models.Timeseries,
+            models.TimeseriesGroup,
             gentity=station2,
-            remarks="This time series is really important",
+            remarks="This time series group is really important",
         )
 
 
-class SearchInTimeseriesRemarksWithAccentsTestCase(SearchInTimeseriesRemarksTestCase):
-    search_term = "cette serie"
+class SearchInTimeseriesGroupRemarksWithAccentsTestCase(
+    SearchInTimeseriesGroupRemarksTestCase
+):
+    search_term = "de series"
     search_result = "Hobbiton"
 
 

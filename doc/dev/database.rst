@@ -295,47 +295,99 @@ Time series and related models
       observe summer time; they must always have the same utc offset
       throught the time series.
 
-.. class:: enhydris.models.Timeseries
+.. class:: enhydris.models.TimeseriesGroup
 
-   Holds time series.
+   The time series a station holds are organized in groups. Each group
+   contains time series with essentially the same kind of data but in a
+   different time step or in a different checking status. For example,
+   if you have a temperature sensor that measures temperature every 10
+   minutes, then you will have a "temperature" time series group, which
+   will contain the raw time series, and it may also contain the checked
+   time series, the regularized time series, the hourly time series,
+   etc. (If you have two temperature sensors, you'll have two time
+   series groups.)
 
-   .. attribute:: enhydris.models.Timeseries.gentity
+   We avoid showing the term "time series group" to the user (instead,
+   we are being vague, like "Data", or we might sometimes use
+   "time series" when we actually mean a time series group). Sometimes
+   we can't avoid it though (notably in the admin).
+
+   .. attribute:: enhydris.models.TimeseriesGroup.gentity
 
       The :class:`~enhydris.models.Gentity` to which the time series
-      refers.
+      group refers.
 
-   .. attribute:: enhydris.models.Timeseries.variable
+   .. attribute:: enhydris.models.TimeseriesGroup.variable
 
-      The :class:`~enhydris.models.Variable` of the time series.
+      The :class:`~enhydris.models.Variable`.
 
-   .. attribute:: enhydris.models.Timeseries.unit_of_measurement
+   .. attribute:: enhydris.models.TimeseriesGroup.unit_of_measurement
 
       The :class:`~enhydris.models.UnitOfMeasurement`.
 
-   .. attribute:: enhydris.models.Timeseries.name
+   .. attribute:: enhydris.models.TimeseriesGroup.name
 
-      A descriptive name for the time series.
+      A descriptive name for the time series group. If this is blank,
+      the name of the variable is used (e.g. "Temperature"), which is
+      appropriate in most cases. However, if there are two time series
+      groups with the same variable (such as when you have two
+      temperature sensors), the user would want to specify a name for
+      the time series group.
 
-   .. attribute:: enhydris.models.Timeseries.precision
+   .. attribute:: enhydris.models.TimeseriesGroup.precision
 
       An integer specifying the precision of the values of the time
       series, in number of decimal digits. It can be negative; for
       example, a precision of -2 indicates that the values are accurate
       to the hundred, ex. 100, 200 etc.
 
-   .. attribute:: enhydris.models.Timeseries.time_zone
+   .. attribute:: enhydris.models.TimeseriesGroup.time_zone
 
       The :class:`~enhydris.models.TimeZone` in which the time series'
       timestamps are.
 
-   .. attribute:: enhydris.models.Timeseries.remarks
+   .. attribute:: enhydris.models.TimeseriesGroup.remarks
 
       A text field of unlimited length.
 
-   .. attribute:: enhydris.models.Timeseries.hidden
+   .. attribute:: enhydris.models.TimeseriesGroup.hidden
 
-      A boolean field to control the visibility of timeseries in related
-      pages.
+      A boolean field to control the visibility of the time series group
+      in related pages.
+
+   .. method:: enhydris.models.TimeseriesGroup.get_name()
+
+      The time series group name; if
+      :attr:`~enhydris.models.TimeseriesGroup.name` is empty, it is the
+      variable name, otherwise it is
+      :attr:`~enhydris.models.TimeseriesGroup.name`.
+
+   .. attribute:: enhydris.models.TimeseriesGroup.default_timeseries
+
+      This property returns the regularized time series of the group, and if
+      that does not exist, the checked time series, and if that does not exist,
+      the raw time series, and if that does not exist, ``None``.
+
+   .. attribute:: enhydris.models.TimeseriesGroup.start_date
+                  enhydris.models.TimeseriesGroup.end_date
+
+      These read-only properties are the start and end date of the
+      default time series (see
+      :attr:`~enhydris.models.TimeseriesGroup.default_timeseries`).
+
+.. class:: enhydris.models.Timeseries
+
+   Holds time series.
+
+   .. attribute:: enhydris.models.Timeseries.timeseries_group
+
+      The :class:`~enhydris.models.TimeseriesGroup` to which the time
+      series belongs.
+
+   .. attribute:: enhydris.models.Timeseries.type
+
+      An integer field with numbers that symbolize the time series type:
+      raw or checked or regularized or aggregated.
 
    .. attribute:: enhydris.models.Timeseries.time_step
 

@@ -11,6 +11,7 @@ from django.db.models import FilteredRelation, Q
 from django.db.models.functions import Coalesce
 from django.db.models.signals import post_save
 from django.utils._os import abspathu
+from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
@@ -270,7 +271,7 @@ class Station(Gpoint):
 
     @property
     def last_update(self):
-        timeseries = Timeseries.objects.filter(gentity_id=self.id)
+        timeseries = Timeseries.objects.filter(timeseries_group__gentity_id=self.id)
         result = None
         for t in timeseries:
             try:
@@ -280,7 +281,7 @@ class Station(Gpoint):
             except TimeseriesRecord.DoesNotExist:
                 continue
             latest_timestamp = latest_record.timestamp.astimezone(
-                t.time_zone.as_tzinfo
+                t.timeseries_group.time_zone.as_tzinfo
             ).replace(tzinfo=None)
 
             if result is None or latest_timestamp > result:
@@ -376,14 +377,21 @@ class TimeseriesStorage(FileSystemStorage):
         return super().path(name)
 
 
-class Timeseries(models.Model):
+class TimeseriesGroup(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    gentity = models.ForeignKey(
-        Gentity, related_name="timeseries", on_delete=models.CASCADE
-    )
+    gentity = models.ForeignKey(Gentity, on_delete=models.CASCADE)
     variable = models.ForeignKey(Variable, on_delete=models.CASCADE)
     unit_of_measurement = models.ForeignKey(UnitOfMeasurement, on_delete=models.CASCADE)
-    name = models.CharField(max_length=200, blank=True)
+    name = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text=_(
+            "In most cases, you want to leave this blank, and the name of the time "
+            'series group will be the name of the variable, such as "Temperature". '
+            "However, if you have two groups with the same variable (e.g. if you have "
+            "two temperature sensors), specify a name to tell them apart."
+        ),
+    )
     hidden = models.BooleanField(null=False, blank=False, default=False)
     precision = models.SmallIntegerField(
         help_text=_(
@@ -398,6 +406,66 @@ class Timeseries(models.Model):
     )
     time_zone = models.ForeignKey(TimeZone, on_delete=models.CASCADE)
     remarks = models.TextField(blank=True)
+
+    def get_name(self):
+        if self.name:
+            return self.name
+        try:
+            return self.variable.descr
+        except ValueError:
+            # Sometimes the current language is set to null; this happens particularly
+            # when the Django admin is recording what changes happened to an object (see
+            # django.contrib.admin.utils.construct_change_message). In that case,
+            # django-parler raises a ValueError exception when we attempt to access
+            # self.variable.descr. Not sure whether this is a Django problem or a
+            # django-parler problem. Working around by returning the group id.
+            return f"Timeseries group {self.id}"
+
+    def __str__(self):
+        return self.get_name()
+
+    @cached_property
+    def default_timeseries(self):
+        return (
+            self._get_timeseries(Timeseries.REGULARIZED)
+            or self._get_timeseries(Timeseries.CHECKED)
+            or self._get_timeseries(Timeseries.RAW)
+        )
+
+    def _get_timeseries(self, type):
+        # We don't just do self.timeseries_set.get(type=type) because sometimes we have
+        # the timeseries prefetched and this would cause another query.
+        for timeseries in self.timeseries_set.all():
+            if timeseries.type == type:
+                return timeseries
+
+    @property
+    def start_date(self):
+        if self.default_timeseries:
+            return self.default_timeseries.start_date
+
+    @property
+    def end_date(self):
+        if self.default_timeseries:
+            return self.default_timeseries.end_date
+
+
+class Timeseries(models.Model):
+    RAW = 100
+    PROCESSED = 150
+    CHECKED = 200
+    REGULARIZED = 300
+    AGGREGATED = 400
+    TIMESERIES_TYPES = (
+        (RAW, _("Raw")),
+        (PROCESSED, _("Processed")),
+        (CHECKED, _("Checked")),
+        (REGULARIZED, _("Regularized")),
+        (AGGREGATED, _("Aggregated")),
+    )
+    last_modified = models.DateTimeField(default=now, null=True, editable=False)
+    timeseries_group = models.ForeignKey(TimeseriesGroup, on_delete=models.CASCADE)
+    type = models.PositiveSmallIntegerField(choices=TIMESERIES_TYPES)
     time_step = models.CharField(
         max_length=7,
         blank=True,
@@ -410,15 +478,33 @@ class Timeseries(models.Model):
     )
 
     class Meta:
-        verbose_name = "Time Series"
-        verbose_name_plural = "Time Series"
-        ordering = ("hidden",)
+        verbose_name = "Time series"
+        verbose_name_plural = "Time series"
+        ordering = ("type",)
+        unique_together = ["timeseries_group", "type", "time_step"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["timeseries_group"],
+                condition=models.Q(type=100),
+                name="only_one_raw_timeseries_per_group",
+            ),
+            models.UniqueConstraint(
+                fields=["timeseries_group"],
+                condition=models.Q(type=200),
+                name="only_one_checked_timeseries_per_group",
+            ),
+            models.UniqueConstraint(
+                fields=["timeseries_group"],
+                condition=models.Q(type=300),
+                name="only_one_regularized_timeseries_per_group",
+            ),
+        ]
 
     @property
     def start_date(self):
         try:
             return self.timeseriesrecord_set.earliest().timestamp.astimezone(
-                self.time_zone.as_tzinfo
+                self.timeseries_group.time_zone.as_tzinfo
             )
         except TimeseriesRecord.DoesNotExist:
             return None
@@ -427,7 +513,7 @@ class Timeseries(models.Model):
     def end_date(self):
         try:
             return self.timeseriesrecord_set.latest().timestamp.astimezone(
-                self.time_zone.as_tzinfo
+                self.timeseries_group.time_zone.as_tzinfo
             )
         except TimeseriesRecord.DoesNotExist:
             return None
@@ -437,7 +523,7 @@ class Timeseries(models.Model):
         try:
             return (
                 self.timeseriesrecord_set.earliest()
-                .timestamp.astimezone(self.time_zone.as_tzinfo)
+                .timestamp.astimezone(self.timeseries_group.time_zone.as_tzinfo)
                 .replace(tzinfo=None)
             )
         except TimeseriesRecord.DoesNotExist:
@@ -448,43 +534,47 @@ class Timeseries(models.Model):
         try:
             return (
                 self.timeseriesrecord_set.latest()
-                .timestamp.astimezone(self.time_zone.as_tzinfo)
+                .timestamp.astimezone(self.timeseries_group.time_zone.as_tzinfo)
                 .replace(tzinfo=None)
             )
         except TimeseriesRecord.DoesNotExist:
             return None
 
     def _set_extra_timeseries_properties(self, ahtimeseries):
-        if self.gentity.geom:
+        if self.timeseries_group.gentity.geom:
             location = {
-                "abscissa": self.gentity.gpoint.original_abscissa(),
-                "ordinate": self.gentity.gpoint.original_ordinate(),
-                "srid": self.gentity.gpoint.original_srid,
-                "altitude": self.gentity.gpoint.altitude,
+                "abscissa": self.timeseries_group.gentity.gpoint.original_abscissa(),
+                "ordinate": self.timeseries_group.gentity.gpoint.original_ordinate(),
+                "srid": self.timeseries_group.gentity.gpoint.original_srid,
+                "altitude": self.timeseries_group.gentity.gpoint.altitude,
             }
         else:
             location = None
         ahtimeseries.time_step = self.time_step
-        ahtimeseries.unit = self.unit_of_measurement.symbol
-        ahtimeseries.title = self.name
-        sign = -1 if self.time_zone.utc_offset < 0 else 1
+        ahtimeseries.unit = self.timeseries_group.unit_of_measurement.symbol
+        ahtimeseries.title = self.timeseries_group.get_name()
+        sign = -1 if self.timeseries_group.time_zone.utc_offset < 0 else 1
         ahtimeseries.timezone = "{} (UTC{:+03d}{:02d})".format(
-            self.time_zone.code,
-            abs(self.time_zone.utc_offset) // 60 * sign,
-            abs(self.time_zone.utc_offset) % 60,
+            self.timeseries_group.time_zone.code,
+            abs(self.timeseries_group.time_zone.utc_offset) // 60 * sign,
+            abs(self.timeseries_group.time_zone.utc_offset) % 60,
         )
-        ahtimeseries.variable = self.variable.descr
-        ahtimeseries.precision = self.precision
+        ahtimeseries.variable = self.timeseries_group.variable.descr
+        ahtimeseries.precision = self.timeseries_group.precision
         ahtimeseries.location = location
-        ahtimeseries.comment = "%s\n\n%s" % (self.gentity.name, self.remarks)
+        ahtimeseries.comment = (
+            f"{self.timeseries_group.gentity.name}\n\n{self.timeseries_group.remarks}"
+        )
 
     def get_data(self, start_date=None, end_date=None):
         data = cache.get_or_set(f"timeseries_data_{self.id}", self._get_all_data_as_pd)
         if start_date:
-            start_date = start_date.astimezone(self.time_zone.as_tzinfo)
+            start_date = start_date.astimezone(
+                self.timeseries_group.time_zone.as_tzinfo
+            )
             start_date = start_date.replace(tzinfo=None)
         if end_date:
-            end_date = end_date.astimezone(self.time_zone.as_tzinfo)
+            end_date = end_date.astimezone(self.timeseries_group.time_zone.as_tzinfo)
             end_date = end_date.replace(tzinfo=None)
         data = data.loc[start_date:end_date]
         result = HTimeseries(data)
@@ -492,7 +582,7 @@ class Timeseries(models.Model):
         return result
 
     def _get_all_data_as_pd(self):
-        tzinfo = self.time_zone.as_tzinfo
+        tzinfo = self.timeseries_group.time_zone.as_tzinfo
         data = {"value": [], "flags": []}
         index = []
         for record in self.timeseriesrecord_set.all().order_by("timestamp"):
@@ -542,12 +632,15 @@ class Timeseries(models.Model):
     @property
     def related_station(self):
         try:
-            return Station.objects.get(id=self.gentity.id)
+            return Station.objects.get(id=self.timeseries_group.gentity.id)
         except Station.DoesNotExist:
             return None
 
     def __str__(self):
-        return self.name
+        result = self.get_type_display()
+        if self.type == self.AGGREGATED:
+            result = f"{result} ({self.time_step})"
+        return result
 
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         check_time_step(self.time_step)
@@ -574,7 +667,7 @@ class TimeseriesRecord(models.Model):
 
     @classmethod
     def bulk_insert(cls, timeseries, htimeseries):
-        tzinfo = timeseries.time_zone.as_tzinfo
+        tzinfo = timeseries.timeseries_group.time_zone.as_tzinfo
         record_generator = (
             TimeseriesRecord(
                 timeseries_id=timeseries.id,
@@ -595,8 +688,8 @@ class TimeseriesRecord(models.Model):
         return count
 
     def __str__(self):
-        tzinfo = self.timeseries.time_zone.as_tzinfo
-        precision = self.timeseries.precision
+        tzinfo = self.timeseries.timeseries_group.time_zone.as_tzinfo
+        precision = self.timeseries.timeseries_group.precision
         datestr = self.timestamp.astimezone(tzinfo).strftime("%Y-%m-%d %H:%M")
         return f"{datestr},{self.value:.{precision}f},{self.flags}"
 

@@ -32,9 +32,9 @@ class SearchWithYearExistingInOneStationTest(SearchTestCaseBase, APITestCase):
     def _make_timeseries(self, station, variable_descr, datastr):
         result = mommy.make(
             models.Timeseries,
-            gentity=station,
-            variable__descr=variable_descr,
-            time_zone__utc_offset=120,
+            timeseries_group__gentity=station,
+            timeseries_group__variable__descr=variable_descr,
+            timeseries_group__time_zone__utc_offset=120,
         )
         result.set_data(StringIO(datastr))
         return result

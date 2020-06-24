@@ -6,7 +6,7 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/jquery.flot.selection.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/jquery.flot.time.min.js"></script>
 <script>
-var BASE_URL = `{% url "timeseries-chart" station_id=timeseries.gentity.id pk=timeseries.id %}`;
+var BASE_URL = `{% url "timeseries-chart" station_id=object.gentity.id timeseries_group_id=object.id pk=object.default_timeseries.id %}`;
 // TODO: Remove this mapper
 function MAPPER(data) {
     // Somehow the current library's implementation doesn't normalize the data, so they

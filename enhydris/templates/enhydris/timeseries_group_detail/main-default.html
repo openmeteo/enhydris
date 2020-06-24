@@ -2,30 +2,30 @@
 {% load i18n %}
 
 {% block title %}
-  {{ timeseries.name }} (id={{ timeseries.id }}) — {{ timeseries.gentity }} — {{ block.super }}
+  {{ object.get_name }} — {{ object.gentity }} — {{ block.super }}
 {% endblock %}
 
 {% block mainjs %}
   {{ block.super }}
-  {% include "enhydris/timeseries_detail/chartjs.html" %}
+  {% include "enhydris/timeseries_group_detail/chartjs.html" %}
 {% endblock %}
 
 {% block content%}
   <div class="container mt-4">
     <div class="card">
       <div class="card-header">
-        <p class="my-0">{{ timeseries.related_station }} - {{ timeseries.name }}</p>
+        <p class="my-0">{{ object.gentity.name }} - {{ object.get_name }}</p>
       </div>
 
       <div class="card-body">
         <div class="row">
           <div class="col-xs-12 col-sm-5">
-            {% include "enhydris/timeseries_detail/chart.html" %}
+            {% include "enhydris/timeseries_group_detail/chart.html" %}
           </div>
 
           <div class="col-xs-12 col-sm-7">
-            {% include "enhydris/timeseries_detail/download.html" %}
-            {% include "enhydris/timeseries_detail/details_table.html" %}
+            {% include "enhydris/timeseries_group_detail/download.html" %}
+            {% include "enhydris/timeseries_group_detail/details_table.html" %}
           </div>
         </div>
       </div>

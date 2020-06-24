@@ -1,9 +1,10 @@
 from django.conf import settings
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.views.generic import DetailView, ListView, RedirectView
+from django.views.generic import DetailView, ListView, RedirectView, View
 
-from . import models
+from . import forms, models
 from .views_common import StationListViewMixin, ensure_extent_is_large_enough
 
 
@@ -41,17 +42,45 @@ class StationEdit(RedirectView):
         return reverse("admin:enhydris_station_change", args=(kwargs["pk"],))
 
 
-class TimeseriesDetail(DetailView):
-    model = models.Timeseries
-    template_name = "enhydris/timeseries_detail/main.html"
+class TimeseriesGroupDetail(DetailView):
+    model = models.TimeseriesGroup
+    template_name = "enhydris/timeseries_group_detail/main.html"
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context["download_data_form"] = forms.DownloadDataForm(
+            timeseries_group=self.object
+        )
+        return context
 
 
 class OldTimeseriesDetailRedirectView(RedirectView):
     permanent = True
 
     def get_redirect_url(self, *args, **kwargs):
-        timeseries_id = kwargs["pk"]
-        station_id = get_object_or_404(models.Timeseries, id=timeseries_id).gentity.id
+        timeseries = get_object_or_404(models.Timeseries, id=kwargs["pk"])
+        timeseries_group = timeseries.timeseries_group
+        gentity = timeseries_group.gentity
         return reverse(
-            "timeseries_detail", kwargs={"station_id": station_id, "pk": timeseries_id}
+            "timeseries_group_detail",
+            kwargs={"station_id": gentity.id, "pk": timeseries_group.id},
         )
+
+
+class DownloadData(View):
+    def get(self, *args, **kwargs):
+        self.form = forms.DownloadDataForm(self.request.GET)
+        if self.form.is_valid():
+            return self._get_redirect_response(*args, **kwargs)
+        else:
+            raise Http404
+
+    def _get_redirect_response(self, *args, **kwargs):
+        fields = {
+            "pk": self.form.cleaned_data["timeseries_id"],
+            "timeseries_group_id": self.form.cleaned_data["timeseries_group_id"],
+            "station_id": self.form.cleaned_data["station_id"],
+        }
+        fmt = self.form.cleaned_data["format"]
+        url = reverse("timeseries-data", kwargs=fields) + f"?fmt={fmt}"
+        return HttpResponseRedirect(url)
