@@ -14,11 +14,11 @@
     <tbody>
       {% for object in object_list %}
         <tr>
-          <td scope="row"><a href="{% url 'station_detail' pk=object.id %}">{{ object.name }}</a></td>
+          <td><a href="{% url 'station_detail' pk=object.id %}">{{ object.name }}</a></td>
           <td>{{ object.owner|default_if_none:"" }}</td>
           <td>{{ object.last_update|naturaltime|default_if_none:"" }}</td>
         </tr>
       {% endfor %}
     </tbody>
   </table>
-</div> <!-- /.table-responsive -->
+</div>

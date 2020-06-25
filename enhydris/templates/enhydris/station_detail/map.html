@@ -3,7 +3,7 @@
 <div class="card">
   <div class="card-body">
     <div id="mapid" class="map"></div>
-  </div> <!-- /.card-body -->
+  </div>
 
   <div class="card-footer text-muted">
     ϕ, λ = {{ station.geom.y | floatformat:5 }}, {{ station.geom.x | floatformat:5 }}
@@ -17,5 +17,5 @@
     {% if station.altitude != None %}
       z = {{ station.altitude|floatformat:2 }}
     {% endif %}
-  </div> <!-- /.card-footer -->
-</div> <!-- /.card -->
+  </div>
+</div>

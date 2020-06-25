@@ -1,37 +1,34 @@
 {% extends "enhydris/base/main.html" %}
 {% load i18n %}
 
-
 {% block title %}
   {{ timeseries.name }} (id={{ timeseries.id }}) — {{ timeseries.gentity }} — {{ block.super }}
 {% endblock %}
-
 
 {% block mainjs %}
   {{ block.super }}
   {% include "enhydris/timeseries_detail/chartjs.html" %}
 {% endblock %}
 
-
 {% block content%}
   <div class="container mt-4">
     <div class="card">
       <div class="card-header">
         <p class="my-0">{{ timeseries.related_station }} - {{ timeseries.name }}</p>
-      </div> <!-- /.card-header -->
+      </div>
 
       <div class="card-body">
         <div class="row">
           <div class="col-xs-12 col-sm-5">
             {% include "enhydris/timeseries_detail/chart.html" %}
-          </div> <!-- /.col -->
+          </div>
 
           <div class="col-xs-12 col-sm-7">
             {% include "enhydris/timeseries_detail/download.html" %}
             {% include "enhydris/timeseries_detail/details_table.html" %}
-          </div> <!-- /.col -->
-        </div> <!-- /.row -->
-      </div> <!-- .card-body -->
+          </div>
+        </div>
+      </div>
 
       {% if display_copyright and timeseries.related_station %}
         <div class="card-footer">
@@ -41,8 +38,8 @@
               {{ timeseries.related_station.copyright_holder }}
             </span>
           </p>
-        </div> <!-- /.card-footer -->
+        </div>
       {% endif %}
-    </div> <!-- /.card -->
-  </div> <!-- /.container -->
+    </div>
+  </div>
 {% endblock %}

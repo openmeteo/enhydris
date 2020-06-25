@@ -14,12 +14,12 @@
       <p>
         [{% if station.is_automatic %}{% trans "automatic" %}{% else %}{% trans "conventional" %}{% endif %}]
       </p>
-    </div> <!-- end .row -->
+    </div>
 
     <div class="row">
       <div class="col-md-4">
         {% include "enhydris/station_detail/map.html" %}
-      </div> <!-- /.col -->
+      </div>
 
       <div class="col-md-8 mt-4 mt-md-0">
         {% include "enhydris/station_detail/details.html" %}
@@ -27,9 +27,9 @@
         {% if can_edit_station %}
           <a class="btn btn-xs btn-primary" href="{% url 'station_edit' pk=station.id%}">{% trans "Edit" %}</a>
         {% endif %}
-      </div> <!-- /.col -->
-    </div> <!-- /.row -->
-  </div> <!-- /.container -->
+      </div>
+    </div>
+  </div>
 
   <div class="container mt-5">
     <hr>
@@ -50,9 +50,9 @@
         {% include "enhydris/station_detail/tabs/gentity_files.html" %}
         {% include "enhydris/station_detail/tabs/gentity_events.html" %}
         {% include "enhydris/station_detail/tabs/timeseries.html" %}
-      </div> <!-- /.tab-content -->
-    </div> <!-- /#content -->
-  </div> <!-- /.container -->
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block map_js %}
@@ -77,5 +77,3 @@
     });
   </script>
 {% endblock %}
-
-

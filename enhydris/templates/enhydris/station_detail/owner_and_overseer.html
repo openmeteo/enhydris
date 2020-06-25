@@ -5,13 +5,13 @@
     {% blocktrans with owner=station.owner %}
       <b>Owner:</b> {{owner}}
     {% endblocktrans %}
-  </div> <!-- /.col -->
+  </div>
 
   {% if station.overseer %}
     <div class="col-md-6">
       {% blocktrans with overseer=station.overseer %}
         <b>Overseer:</b> {{overseer}}
       {% endblocktrans %}
-    </div> <!-- /.col -->
+    </div>
   {% endif %}
-</div> <!-- /.row -->
+</div>
