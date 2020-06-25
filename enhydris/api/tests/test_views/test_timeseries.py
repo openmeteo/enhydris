@@ -571,10 +571,10 @@ class TimeseriesChartDateBoundsTestCase(APITestCase):
 
 class TimeseriesChartTestMixin:
     def _assertChartResponse(self, data, expected, tolerance_in_days=2):
-        """Assert chart response by allowing timestamp tolerance, but not values
+        """Assert chart response by allowing timestamp tolerance, but not values.
 
         The expected is a list of {value, date} rather than timestamp to make the
-        tests easier to write, they're translated into timestamps for comparision
+        tests easier to write, they're translated into timestamps for comparison.
         """
         tolerance_in_seconds = 86400 * tolerance_in_days
         for d, e in zip(data, expected):
