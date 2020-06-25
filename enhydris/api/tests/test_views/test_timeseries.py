@@ -570,12 +570,15 @@ class TimeseriesChartDateBoundsTestCase(APITestCase):
 
 
 class TimeseriesChartTestMixin:
-    def _assertChartResponse(self, data, expected, tolerance_in_days=2):
+    def _assertChartResponse(self, response, expected, tolerance_in_days=2):
         """Assert chart response by allowing timestamp tolerance, but not values.
 
         The expected is a list of {value, date} rather than timestamp to make the
         tests easier to write, they're translated into timestamps for comparison.
         """
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
         tolerance_in_seconds = 86400 * tolerance_in_days
         for d, e in zip(data, expected):
             self.assertEqual(d["value"], e["value"])
@@ -621,27 +624,21 @@ class TimeseriesChartTestCase(
     def test_all_values_returned(self, mock):
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        self.assertEqual(len(data), 5)
         expected = [
             {"date": datetime(year, 1, 1), "value": f"{year}.00"}
             for year in range(2010, 2015)
         ]
-        self._assertChartResponse(data, expected)
+        self._assertChartResponse(response, expected)
 
     def test_null_values_are_dropped(self, mock):
         self.htimeseries.data.loc["2010-01-01", "value"] = pd.np.nan
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        self.assertEqual(len(data), 4)
         expected = [
             {"date": datetime(year, 1, 1), "value": f"{year}.00"}
             for year in range(2011, 2015)
         ]
-        self._assertChartResponse(data, expected)
+        self._assertChartResponse(response, expected)
 
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
@@ -664,11 +661,8 @@ class TimeseriesChartSamplingTestCase(
     def test_data_sampled_by_equal_time_distance(self, mock):
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        self.assertEqual(len(data), 3)
         expected = [
             {"date": datetime(year, 1, 1), "value": f"{year}.00"}
             for year in [2010, 2015, 2020]
         ]
-        self._assertChartResponse(data, expected)
+        self._assertChartResponse(response, expected)
