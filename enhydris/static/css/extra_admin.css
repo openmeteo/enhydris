@@ -3,10 +3,11 @@
  */
 
 .inline-related h2 {
-    background: #f8f8f8;
-    color: #666;
+  color: #666;
+
+  background-color: #f8f8f8;
 }
 
 .inline-related h2 .collapse-toggle {
-    color: #447e9b;
+  color: #447e9b;
 }
