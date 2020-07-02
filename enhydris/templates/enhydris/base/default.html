@@ -25,7 +25,7 @@
   </head>
 
   <body onload="{% block body_onload %}{% endblock %}">
-    <header class="custom-header">
+    <header class="page-header">
       {% block header %}
         {% include "enhydris/base/navbar.html" %}
         {% include "enhydris/base/searchtips.html" %}
@@ -33,11 +33,11 @@
       {% endblock header %}
     </header>
 
-    <main class="custom-main">
+    <main class="page-main">
       {% block content %}{% endblock %}
     </main>
 
-    <footer class="custom-footer">
+    <footer class="page-footer">
       {% block footer %}
         {% include "enhydris/base/footer.html" %}
       {% endblock %}
