@@ -22,7 +22,7 @@ $(document).ready(function () {
   $.getJSON(BASE_URL, function (chart_data) {
     $('#progress').hide();
     $('#data_holder').show();
-    if (chart_data) {
+    if (chart_data && chart_data.length > 0) {
       flot_init(MAPPER(chart_data));
     } else {
       $('#data_holder').html('<h3>No data locally available!</h3>');
