@@ -534,6 +534,37 @@ The response is a 200 with a similar content as the GET detail response
 (with the updated data), unless there is a problem, in which case
 there's a standard `error response`_.
 
+Time series chart data
+----------------------
+
+**GET chart data points** of a time series by appending ``chart/``. This is served as a JSON response, to be consumed by charting libraries supporting panning/zooming by providing time limits.
+A maximum of **200 data points** are returned per request, sampled to produce an equally distant data points.
+URL::
+
+    curl https://openmeteo.org/api/stations/1334/timeseries/232/chart/
+
+Example of response::
+
+    [
+      {
+        "timestamp": 1579292086,
+        "value": "1.00"
+      },
+      {
+        "timestamp": 1580079590,
+        "value": "22.00"
+      },
+      ...
+    ]
+
+
+You can provide time limits using the following query parameters
+``start_date=<TIME>&end_date=<TIME>``.
+For instance, to request data prior to 2015 only, we can do the following request::
+
+    curl 'https://openmeteo.org/api/stations/1334/timeseries/232/chart/?end_date=2015-01-01T00:00`
+
+
 Time series data
 ----------------
 
