@@ -38,7 +38,9 @@
     </main>
 
     <footer class="page-footer">
-      <p class="text-center mt-3 mb-4">Powered by <a href="https://enhydris.readthedocs.org/">Enhydris</a></p>
+      {% block footer %}
+        <p class="text-center mt-3 mb-4">Powered by <a href="https://enhydris.readthedocs.org/">Enhydris</a></p>
+      {% endblock %}
     </footer>
 
     {% block bodyend %}{% endblock %}
