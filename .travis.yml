@@ -40,7 +40,7 @@ matrix:
        - python manage.py makemigrations --check
        - black --check .
        - flake8 --max-line-length=88 .
-       - isort --recursive --check-only --diff .
+       - isort --check-only --diff .
        - coverage run --include="./*" --omit="*/tests/*","*/tests.py","*/migrations/*","./enhydris_project/*" manage.py test -v2
       after_success:
        - codecov
