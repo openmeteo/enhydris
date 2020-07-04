@@ -74,8 +74,12 @@ class StationListTestCase(TestCase):
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=3)
     def test_two_pages(self):
         response = self.client.get("/")
-        self.assertContains(response, "<a href='?page=2'>2</a>", html=True)
-        self.assertNotContains(response, "<a href='?page=3'>3</a>", html=True)
+        self.assertContains(
+            response, '<a class="page-link" href="?page=2">2</a>', html=True
+        )
+        self.assertNotContains(
+            response, '<a class="page-link" href="?page=3">3</a>', html=True
+        )
 
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=2)
     def test_next_page_url(self):
@@ -161,8 +165,9 @@ class TimeseriesDownloadLinkTestCase(TestCase):
         self.timeseries = mommy.make(
             Timeseries, gentity=self.station, variable__descr="irrelevant"
         )
-        self.link = '<a href="/api/stations/{}/timeseries/{}/data/?fmt=hts">'.format(
-            self.station.id, self.timeseries.id
+        self.link = (
+            f'<a class="dropdown-item" href="/api/stations/{self.station.id}'
+            f'/timeseries/{self.timeseries.id}/data/?fmt=hts">'
         )
 
     def _get_response(self):
