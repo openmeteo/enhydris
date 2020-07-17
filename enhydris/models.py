@@ -1,4 +1,5 @@
 from datetime import timedelta, timezone
+from io import StringIO
 from itertools import islice
 
 from django.conf import settings
@@ -6,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
-from django.db import IntegrityError
+from django.db import IntegrityError, connection
 from django.db.models import FilteredRelation, Q
 from django.db.models.functions import Coalesce
 from django.db.models.signals import post_save
@@ -15,7 +16,6 @@ from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-import pandas as pd
 from htimeseries import HTimeseries
 from parler.managers import TranslatableManager
 from parler.models import TranslatableModel, TranslatedFields
@@ -350,11 +350,13 @@ class TimeZone(models.Model):
         return timezone(timedelta(minutes=self.utc_offset), self.code)
 
     def __str__(self):
-        return "%s (UTC%+03d%02d)" % (
-            self.code,
-            (abs(self.utc_offset) / 60) * (-1 if self.utc_offset < 0 else 1),
-            abs(self.utc_offset % 60),
-        )
+        return f"{self.code} (UTC{self.offset_string})"
+
+    @property
+    def offset_string(self):
+        hours = (abs(self.utc_offset) // 60) * (-1 if self.utc_offset < 0 else 1)
+        minutes = abs(self.utc_offset % 60)
+        return f"{hours:+03}{minutes:02}"
 
     class Meta:
         ordering = ("utc_offset",)
@@ -582,17 +584,31 @@ class Timeseries(models.Model):
         return result
 
     def _get_all_data_as_pd(self):
-        tzinfo = self.timeseries_group.time_zone.as_tzinfo
-        data = {"value": [], "flags": []}
-        index = []
-        for record in self.timeseriesrecord_set.all().order_by("timestamp"):
-            timestamp = record.timestamp.astimezone(tzinfo).replace(tzinfo=None)
-            index.append(timestamp)
-            data["value"].append(record.value)
-            data["flags"].append(record.flags)
-        result = pd.DataFrame(data=data, columns=["value", "flags"], index=index)
-        result.index.name = "date"
-        return result
+        tzoffsetstring = self._get_tzoffsetstring_for_pg()
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT STRING_AGG(
+                    TO_CHAR(timestamp at time zone %s, 'YYYY-MM-DD HH24:MI')
+                        || ',' || value || ',' || flags,
+                    E'\n'
+                    ORDER BY timestamp
+                ) || E'\n'
+                FROM enhydris_timeseriesrecord
+                WHERE timeseries_id=%s;
+                """,
+                [tzoffsetstring, self.id],
+            )
+            return HTimeseries(StringIO(cursor.fetchone()[0])).data
+
+    def _get_tzoffsetstring_for_pg(self):
+        # In tz offset supplied to PostgreSQL, use + for west of Greenwich because of
+        # POSIX madness.
+        tzoffsetstring = self.timeseries_group.time_zone.offset_string
+        sign = "-" if tzoffsetstring[0] == "+" else "+"
+        hours = tzoffsetstring[1:3]
+        minutes = tzoffsetstring[3:]
+        return f"{sign}{hours}:{minutes}"
 
     def set_data(self, data):
         ahtimeseries = self._get_htimeseries_from_data(data)
