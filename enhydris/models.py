@@ -7,6 +7,8 @@ from django.contrib.gis.db import models
 from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
 from django.db import IntegrityError
+from django.db.models import FilteredRelation, Q
+from django.db.models.functions import Coalesce
 from django.db.models.signals import post_save
 from django.utils._os import abspathu
 from django.utils.timezone import now
@@ -16,6 +18,7 @@ import pandas as pd
 from htimeseries import HTimeseries
 from parler.managers import TranslatableManager
 from parler.models import TranslatableModel, TranslatedFields
+from parler.utils import get_active_language_choices
 
 
 def check_time_step(time_step):
@@ -292,7 +295,25 @@ class Station(Gpoint):
 
 class VariableManager(TranslatableManager):
     def get_queryset(self):
-        return super().get_queryset().translated().order_by("translations__descr")
+        langs = get_active_language_choices()
+        lang1 = langs[0]
+        lang2 = langs[1] if len(langs) > 1 else "nonexistent"
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                translation1=FilteredRelation(
+                    "translations", condition=Q(translations__language_code=lang1)
+                )
+            )
+            .annotate(
+                translation2=FilteredRelation(
+                    "translations", condition=Q(translations__language_code=lang2)
+                )
+            )
+            .annotate(descr=Coalesce("translation1__descr", "translation2__descr"))
+            .order_by("descr")
+        )
 
 
 class Variable(TranslatableModel):

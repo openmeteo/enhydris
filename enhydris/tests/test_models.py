@@ -99,6 +99,12 @@ class VariableTestCase(TestCase):
         with switch_language(gact, "el"):
             self.assertEqual(str(gact), "Θερμοκρασία")
 
+    def test_manager_includes_objects_with_missing_translations(self):
+        variable = mommy.make(models.Variable, descr="hello")
+        self.assertEqual(str(variable), "hello")
+        with switch_language(variable, "el"):
+            models.Variable.objects.get(id=variable.id)  # Shouldn't raise anything
+
     def test_sort(self):
         self._create_variable("Temperature", "Θερμοκρασία")
         self._create_variable("Humidity", "Υγρασία")
