@@ -1,116 +1,236 @@
 {% load static %}
 
-<!--[if IE]><script language="javascript" type="text/javascript" src="../excanvas.min.js"></script><![endif]-->
-<script src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/excanvas.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/jquery.flot.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/jquery.flot.selection.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/flot/0.8.1/jquery.flot.time.min.js"></script>
-<script>
-var BASE_URL = `{% url "timeseries-chart" station_id=object.gentity.id timeseries_group_id=object.id pk=object.default_timeseries.id %}`;
-// TODO: Remove this mapper
-function MAPPER(data) {
-    // Somehow the current library's implementation doesn't normalize the data, so they
-    // have to be in the same precision/accuracy to group by years/months etc.
-    return data.map(({ timestamp, value }) => [Math.round(timestamp / 1000) * 1000000, value])
-}
-$(document).ready(function () {
-  $('#data_holder').hide();
-  $('#progress').append(
-    `<img style="display: block; margin: auto auto;" src="{% static "images/progress.gif" %}">`
-  );
-
-  $.getJSON(BASE_URL, function (chart_data) {
-    $('#progress').hide();
-    $('#data_holder').show();
-    if (chart_data && chart_data.length > 0) {
-      flot_init(MAPPER(chart_data));
-    } else {
-      $('#data_holder').html('<h3>No data locally available!</h3>');
-    }
-  });
-});
-
-function flot_init(chart_data) {
-  var d = chart_data;
-  var d_bak = d.slice();
-  var from_x, to_x, tol;
-  from_x = d[0][0];
-  to_x = d[d.length - 1][0];
-  tol = (to_x - from_x) * 0.01;
-  from_x -= tol;
-  to_x += tol;
-  var options = {
-    xaxis: { mode: 'time', min: from_x, max: to_x },
-    selection: { mode: 'x' },
-  };
-
-  var plot = $.plot($('#placeholder'), [d], options);
-
-  var overview = $.plot($('#overview'), [d], {
-    series: {
-      lines: { show: true, lineWidth: 1 },
-      shadowSize: 0,
-    },
-    xaxis: { ticks: [], mode: 'time', min: from_x, max: to_x },
-    yaxis: { ticks: [], min: 0, autoscaleMargin: 0.1 },
-    selection: { mode: 'x' },
-  });
-
-  function get_zoomed_data(ranges, data) {
-    var from_pos, to_pos;
-    var actual_xaxis_from, actual_xaxis_to;
-    from_pos = data[0][0]; // MODIFIED
-    to_pos = data[data.length - 1][0]; // MODIFIED
-    for (var i = 0; i < data.length; i++) {
-      if (ranges.xaxis.from <= data[i][0]) {
-        from_pos = data[i][0]; // MODIFIED
-        actual_xaxis_from = data[i][0];
-        break;
-      }
-    }
-    for (var i = data.length - 1; i >= 0; i--) {
-      if (ranges.xaxis.to >= data[i][0]) {
-        to_pos = data[i][0]; // MODIFIED
-        actual_xaxis_to = data[i][0];
-        break;
-      }
-    }
-    $('#placeholder').append(
-      `<img style="display: block; margin: auto auto;" src="{% static "images/progress.gif" %}">`
-    );
-    $.getJSON(
-      BASE_URL,
-      {
-        start_date: from_pos,
-        end_date: to_pos,
-      },
-      function (chart_data) {
-        d = MAPPER(chart_data);
-        var tol = (actual_xaxis_to - actual_xaxis_from) * 0.01;
-        plot = $.plot(
-          $('#placeholder'),
-          [d],
-          $.extend(true, {}, options, {
-            xaxis: { min: actual_xaxis_from - tol, max: actual_xaxis_to + tol },
-          })
-        );
-      }
-    );
-    $('placeholder').remove(":contains('img style')");
+<style>
+  #wrapper {
+    padding-top: 20px;
+    padding-left: 10px;
+    background: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 22px 35px -16px rgba(0, 0, 0, 0.1);
+    max-width: 650px;
+    margin: 35px auto;
   }
 
-  // now connect the two
-  $('#placeholder').bind('plotselected', function (event, ranges) {
-    get_zoomed_data(ranges, d);
+  #chart-line {
+    position: relative;
+    margin-top: -40px;
+  }
+</style>
 
-    // don't fire event on the overview to prevent eternal loop
-    overview.setSelection(ranges, true);
-  });
+<script>
+  window.Promise ||
+    document.write(
+      '<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"><\/script>'
+    );
+  window.Promise ||
+    document.write(
+      '<script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20171210/classList.min.js"><\/script>'
+    );
+  window.Promise ||
+    document.write(
+      '<script src="https://cdn.jsdelivr.net/npm/findindex_polyfill_mdn"><\/script>'
+    );
+</script>
 
-  $('#overview').bind('plotselected', function (event, ranges) {
-    d = d_bak;
-    plot.setSelection(ranges);
-  });
-}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.19.3/apexcharts.min.js"></script>
 
+<script type="text/javascript">
+  var BASE_URL = `{% url "timeseries-chart" station_id=object.gentity.id timeseries_group_id=object.id pk=object.default_timeseries.id %}`;
+
+  function debounce(func, wait, immediate) {
+    let timeout;
+
+    return function executedFunction() {
+      const context = this;
+      const args = arguments;
+
+      const later = function () {
+        timeout = null;
+        if (!immediate) func.apply(context, args);
+      };
+
+      const callNow = immediate && !timeout;
+
+      clearTimeout(timeout);
+
+      timeout = setTimeout(later, wait);
+
+      if (callNow) func.apply(context, args);
+    };
+  }
+
+  function refetch({ min, max }) {
+    chartArea.updateSeries([
+      {
+        data: [],
+      },
+    ]);
+    fetch(
+      `${BASE_URL}?start_date=${new Date(min * 1000)
+        .toISOString()
+        .substring(0, 16)}&end_date=${new Date(max * 1000)
+        .toISOString()
+        .substring(0, 16)}`
+    )
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (data) {
+        if (data && data[0]) {
+          const mappedData = data.map((i) => [
+            i.timestamp,
+            Number(i.value) || 0,
+          ]);
+          chartArea.updateSeries([
+            {
+              data: mappedData,
+            },
+          ]);
+          // chartLine.zoomX(min, max);
+        }
+      });
+  }
+
+  var debounceRefetch = debounce(refetch, 150);
+
+  var options = {
+    series: [
+      {
+        data: [],
+      },
+    ],
+    noData: {
+      text: "Loading...",
+    },
+    chart: {
+      id: "chart2",
+      type: "line",
+      height: 230,
+      zoom: {
+        type: "x",
+        enabled: true,
+        autoScaleYaxis: true,
+      },
+      toolbar: {
+        autoSelected: "zoom",
+        tools: {
+          reset: false,
+        },
+      },
+      events: {
+        zoomed: function (chartContext, { xaxis }) {
+          refetch(xaxis);
+        },
+      },
+    },
+    colors: ["#546E7A"],
+    stroke: {
+      width: 2,
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    fill: {
+      opacity: 1,
+    },
+    markers: {
+      size: 0,
+    },
+    xaxis: {
+      type: "datetime",
+    },
+  };
+
+  var chartArea = new ApexCharts(
+    document.querySelector("#chart-area"),
+    options
+  );
+  chartArea.render();
+
+  var optionsLine = {
+    series: [
+      {
+        data: [],
+      },
+    ],
+    chart: {
+      id: "chart1",
+      height: 130,
+      type: "area",
+      brush: {
+        target: "chart2",
+        enabled: true,
+      },
+      selection: {
+        enabled: true,
+      },
+      events: {
+        selection: function (chartContext, { xaxis }) {
+          debounceRefetch(xaxis);
+        },
+      },
+    },
+    colors: ["#008FFB"],
+    fill: {
+      type: "gradient",
+      gradient: {
+        opacityFrom: 0.91,
+        opacityTo: 0.1,
+      },
+    },
+    xaxis: {
+      type: "datetime",
+      tooltip: {
+        enabled: false,
+      },
+      labels: {
+        show: true,
+        datetimeFormatter: {
+          year: "yyyy",
+          month: "MMM 'yy",
+          day: "dd MMM",
+          hour: "HH:mm",
+        },
+      },
+    },
+    yaxis: {
+      tickAmount: 2,
+    },
+  };
+
+  var chartLine = new ApexCharts(
+    document.querySelector("#chart-line"),
+    optionsLine
+  );
+  chartLine.render();
+
+  var renderError = function () {
+    document.querySelector("#data_holder").innerHTML =
+      "<h3>No data locally available!</h3>";
+  };
+
+  fetch(BASE_URL)
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      if (data && data[0]) {
+        const mappedData = data.map((i) => [i.timestamp, Number(i.value) || 0]);
+        chartArea.updateSeries([
+          {
+            data: mappedData,
+          },
+        ]);
+        chartLine.updateSeries([
+          {
+            data: mappedData,
+          },
+        ]);
+      } else {
+        renderError();
+      }
+    })
+    .catch(function () {
+      renderError();
+    });
 </script>
