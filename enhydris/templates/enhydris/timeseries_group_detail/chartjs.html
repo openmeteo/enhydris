@@ -60,7 +60,7 @@
   }
 
   function refetch({ min, max }) {
-    chart.updateSeries([
+    chartArea.updateSeries([
       {
         data: [],
       },
@@ -81,7 +81,7 @@
             i.timestamp,
             Number(i.value) || 0,
           ]);
-          chart.updateSeries([
+          chartArea.updateSeries([
             {
               data: mappedData,
             },
@@ -141,8 +141,11 @@
     },
   };
 
-  var chart = new ApexCharts(document.querySelector("#chart-area"), options);
-  chart.render();
+  var chartArea = new ApexCharts(
+    document.querySelector("#chart-area"),
+    options
+  );
+  chartArea.render();
 
   var optionsLine = {
     series: [
@@ -213,7 +216,7 @@
     .then(function (data) {
       if (data && data[0]) {
         const mappedData = data.map((i) => [i.timestamp, Number(i.value) || 0]);
-        chart.updateSeries([
+        chartArea.updateSeries([
           {
             data: mappedData,
           },
