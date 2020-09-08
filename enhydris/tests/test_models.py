@@ -897,18 +897,6 @@ class TimeseriesSetDataTestCase(TestCase, TestTimeseriesMixin):
 class TimeseriesAppendDataTestCase(TestCase, TestTimeseriesMixin):
     def setUp(self):
         self._create_test_timeseries("2016-01-01 00:00,42,\n")
-        # station = mommy.make(models.Station)
-        # self.timeseries_group = mommy.make(
-
-        # self.timeseries = mommy.make(
-        #    models.Timeseries,
-        #    gentity=station,
-        #    id=42,
-        #    time_zone__utc_offset=0,
-        #    precision=2,
-        #    variable__descr="Temperature",
-        # )
-        # self.timeseries.set_data(StringIO("2016-01-01 00:00,42,\n"))
 
     def test_call_with_file_object(self):
         returned_length = self.timeseries.append_data(
@@ -1045,14 +1033,6 @@ class TimestepTestCase(TestCase):
 class TimeseriesRecordTestCase(TestCase, TestTimeseriesMixin):
     def setUp(self):
         self._create_test_timeseries("2017-11-23 17:23,3.14159,\n")
-        # timeseries = mommy.make(
-        #    models.Timeseries,
-        #    time_step="H",
-        #    time_zone__code="IST",
-        #    time_zone__utc_offset=330,
-        #    precision=2,
-        # )
-        # timeseries.set_data(StringIO("2017-11-23 17:23,3.14159,\n"))
 
     def test_str(self):
         record = models.TimeseriesRecord.objects.first()
