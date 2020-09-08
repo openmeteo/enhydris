@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 import iso8601
+import numpy as np
 import pandas as pd
 from htimeseries import HTimeseries
 
@@ -253,7 +254,7 @@ class TimeseriesViewSet(ModelViewSet):
             idx = df.index.get_loc(current_time, method="nearest", tolerance=tolerance)
             value = df.iloc[idx].value
         except KeyError:
-            value = pd.np.nan
+            value = np.nan
         return {"timestamp": current_time.timestamp(), "value": value}
 
     def _get_date_bounds(self, request, timeseries):

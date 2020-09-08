@@ -7,6 +7,7 @@ from django.test.utils import override_settings
 from rest_framework.test import APITestCase
 
 import iso8601
+import numpy as np
 import pandas as pd
 from htimeseries import HTimeseries
 from model_mommy import mommy
@@ -688,7 +689,7 @@ class TimeseriesChartTestCase(
         self._assertChartResponse(response, expected)
 
     def test_null_values_are_dropped(self, mock):
-        self.htimeseries.data.loc["2010-01-01", "value"] = pd.np.nan
+        self.htimeseries.data.loc["2010-01-01", "value"] = np.nan
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         expected = [
