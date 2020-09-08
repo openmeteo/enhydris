@@ -1031,10 +1031,31 @@ class TimestepTestCase(TestCase):
 
 
 class TimeseriesRecordTestCase(TestCase, TestTimeseriesMixin):
-    def setUp(self):
-        self._create_test_timeseries("2017-11-23 17:23,3.14159,\n")
-
     def test_str(self):
+        self._create_test_timeseries("2017-11-23 17:23,3.14159,\n")
         record = models.TimeseriesRecord.objects.first()
         self.assertAlmostEqual(record.value, 3.14159)
         self.assertEqual(str(record), "2017-11-23 17:23,3.1,")
+
+    def test_str_when_no_value(self):
+        self._create_test_timeseries("2017-11-23 17:23,,\n")
+        record = models.TimeseriesRecord.objects.first()
+        record.save()
+        self.assertEqual(str(record), "2017-11-23 17:23,,")
+
+
+class TimeseriesRecordBulkInsertTestCase(TestCase, TestTimeseriesMixin):
+    @classmethod
+    def setUpTestData(cls):
+        cls._create_test_timeseries()
+        ahtimeseries = HTimeseries(
+            StringIO("2020-09-08 20:00,15.7,,\n2020-09-08 21:00,,\n")
+        )
+        models.TimeseriesRecord.bulk_insert(cls.timeseries, ahtimeseries)
+        cls.timeseries_records = models.TimeseriesRecord.objects.all()
+
+    def test_first_value(self):
+        self.assertAlmostEqual(self.timeseries_records[0].value, 15.7)
+
+    def test_empty_value(self):
+        self.assertIsNone(self.timeseries_records[1].value)

@@ -16,6 +16,7 @@ from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
+import numpy as np
 from htimeseries import HTimeseries
 from parler.managers import TranslatableManager
 from parler.models import TranslatableModel, TranslatedFields
@@ -688,7 +689,7 @@ class TimeseriesRecord(models.Model):
             TimeseriesRecord(
                 timeseries_id=timeseries.id,
                 timestamp=t.Index.to_pydatetime().replace(tzinfo=tzinfo),
-                value=t.value,
+                value=None if np.isnan(t.value) else t.value,
                 flags=t.flags,
             )
             for t in htimeseries.data.itertuples()
@@ -707,7 +708,8 @@ class TimeseriesRecord(models.Model):
         tzinfo = self.timeseries.timeseries_group.time_zone.as_tzinfo
         precision = self.timeseries.timeseries_group.precision
         datestr = self.timestamp.astimezone(tzinfo).strftime("%Y-%m-%d %H:%M")
-        return f"{datestr},{self.value:.{precision}f},{self.flags}"
+        value = "" if self.value is None else f"{self.value:.{precision}f}"
+        return f"{datestr},{value},{self.flags}"
 
 
 class UserProfile(models.Model):
