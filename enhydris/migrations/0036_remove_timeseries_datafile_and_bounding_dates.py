@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="timeseries", name="datafile",),
-        migrations.RemoveField(model_name="timeseries", name="end_date_utc",),
-        migrations.RemoveField(model_name="timeseries", name="start_date_utc",),
+        migrations.RemoveField(model_name="timeseries", name="datafile"),
+        migrations.RemoveField(model_name="timeseries", name="end_date_utc"),
+        migrations.RemoveField(model_name="timeseries", name="start_date_utc"),
     ]

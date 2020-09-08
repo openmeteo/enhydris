@@ -20,13 +20,13 @@ class SearchWithYearExistingInOneStationTest(SearchTestCaseBase, APITestCase):
             komboti, "Temperature", "2005-03-23 18:20,5,\r\n2012-03-24 18:25,6,\r\n"
         )
         self.komboti_rain = self._make_timeseries(
-            komboti, "Rain", "2005-03-23 18:20,5,\r\n2011-03-24 18:25,6,\r\n",
+            komboti, "Rain", "2005-03-23 18:20,5,\r\n2011-03-24 18:25,6,\r\n"
         )
         self.tharbad_temperature = self._make_timeseries(
-            tharbad, "Temperature", "2005-03-23 18:20,5,\r\n2012-03-24 18:25,6,\r\n",
+            tharbad, "Temperature", "2005-03-23 18:20,5,\r\n2012-03-24 18:25,6,\r\n"
         )
         self.tharbad_rain = self._make_timeseries(
-            tharbad, "Rain", "2005-03-23 18:20,5,\r\n2016-03-24 18:25,6,\r\n",
+            tharbad, "Rain", "2005-03-23 18:20,5,\r\n2016-03-24 18:25,6,\r\n"
         )
 
     def _make_timeseries(self, station, variable_descr, datastr):

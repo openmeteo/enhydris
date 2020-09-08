@@ -425,7 +425,7 @@ class TimeseriesUploadFileWithUnicodeHeadersTestCase(TestCase, TestTimeseriesFor
             saved_locale = getlocale(LC_CTYPE)
             setlocale(LC_CTYPE, "C")
             self._create_timeseries_inline_admin_form(
-                "REPLACE", "Station=Πάπιγκο\n\n2019-04-09 13:36,0,\n".encode("utf-8"),
+                "REPLACE", "Station=Πάπιγκο\n\n2019-04-09 13:36,0,\n".encode("utf-8")
             )
             self.form.save()
         finally:

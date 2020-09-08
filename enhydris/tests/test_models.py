@@ -681,12 +681,12 @@ class TimeseriesDatesTestCase(TestCase):
 
     def test_start_date_naive(self):
         self.assertEqual(
-            self.timeseries.start_date_naive, dt.datetime(2018, 11, 15, 18, 0),
+            self.timeseries.start_date_naive, dt.datetime(2018, 11, 15, 18, 0)
         )
 
     def test_end_date_naive(self):
         self.assertEqual(
-            self.timeseries.end_date_naive, dt.datetime(2018, 11, 18, 1, 0),
+            self.timeseries.end_date_naive, dt.datetime(2018, 11, 18, 1, 0)
         )
 
 

@@ -8,6 +8,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="gentityfile", name="file_type",),
-        migrations.DeleteModel(name="FileType",),
+        migrations.RemoveField(model_name="gentityfile", name="file_type"),
+        migrations.DeleteModel(name="FileType"),
     ]

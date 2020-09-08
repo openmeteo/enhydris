@@ -587,9 +587,7 @@ class TimeseriesChartDateBoundsTestCase(APITestCase, TimeseriesDataMixin):
     def test_no_bounds_supplied(self, mock, _):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        mock.assert_called_once_with(
-            start_date=None, end_date=None,
-        )
+        mock.assert_called_once_with(start_date=None, end_date=None)
 
     def test_start_date_filter(self, mock, _):
         response = self.client.get(self.url + "?start_date=2012-03-01T00:00")
