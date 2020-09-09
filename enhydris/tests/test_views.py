@@ -417,7 +417,7 @@ class TimeseriesGroupDetailTestCase(TestCase, TimeseriesDataMixin):
     def test_download_form(self):
         self.assertContains(
             self.response,
-            '<input type="radio" name="timeseries_id" value="42" '
+            f'<input type="radio" name="timeseries_id" value="{self.timeseries.id}" '
             'id="id_timeseries_id_0" class="form-check-input" checked>'
             '<label class="form-check-label" for="id_timeseries_id_0">Raw</label>',
             html=True,

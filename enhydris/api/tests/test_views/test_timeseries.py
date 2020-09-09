@@ -110,7 +110,10 @@ class GetDataInVariousFormatsTestCase(APITestCase, TimeseriesDataMixin):
         self.assertEqual(
             response["Content-Type"], "text/vnd.openmeteo.timeseries; charset=utf-8"
         )
-        self.assertEqual(response["Content-Disposition"], 'inline; filename="42.hts"')
+        self.assertEqual(
+            response["Content-Disposition"],
+            f'inline; filename="{self.timeseries.id}.hts"',
+        )
 
     def test_response_content_hts_version_5(self):
         with self.get_data_patch:
@@ -123,7 +126,10 @@ class GetDataInVariousFormatsTestCase(APITestCase, TimeseriesDataMixin):
         self.assertEqual(
             response["Content-Type"], "text/vnd.openmeteo.timeseries; charset=utf-8"
         )
-        self.assertEqual(response["Content-Disposition"], 'inline; filename="42.hts"')
+        self.assertEqual(
+            response["Content-Disposition"],
+            f'inline; filename="{self.timeseries.id}.hts"',
+        )
 
     def test_response_content_csv(self):
         with self.get_data_patch:
@@ -134,7 +140,10 @@ class GetDataInVariousFormatsTestCase(APITestCase, TimeseriesDataMixin):
         with self.get_data_patch:
             response = self.client.get(self.base_url + "?fmt=csv")
         self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
-        self.assertEqual(response["Content-Disposition"], 'inline; filename="42.csv"')
+        self.assertEqual(
+            response["Content-Disposition"],
+            f'inline; filename="{self.timeseries.id}.csv"',
+        )
 
     def test_response_content_csv_default(self):
         with self.get_data_patch:
@@ -145,7 +154,10 @@ class GetDataInVariousFormatsTestCase(APITestCase, TimeseriesDataMixin):
         with self.get_data_patch:
             response = self.client.get(self.base_url)
         self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
-        self.assertEqual(response["Content-Disposition"], 'inline; filename="42.csv"')
+        self.assertEqual(
+            response["Content-Disposition"],
+            f'inline; filename="{self.timeseries.id}.csv"',
+        )
 
 
 class TsdataPostTestCase(APITestCase):

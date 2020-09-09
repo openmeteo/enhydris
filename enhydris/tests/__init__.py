@@ -20,7 +20,6 @@ class TimeseriesDataMixin:
         )
         self.station = mommy.make(
             models.Station,
-            id=20,
             name="Komboti",
             geom=Point(x=21.00000, y=39.00000, srid=4326),
             original_srid=4326,
@@ -32,7 +31,6 @@ class TimeseriesDataMixin:
             self.variable.save()
         self.timeseries_group = mommy.make(
             models.TimeseriesGroup,
-            id=31,
             gentity=self.station,
             time_zone=self.time_zone,
             precision=2,
@@ -40,7 +38,6 @@ class TimeseriesDataMixin:
         )
         self.timeseries = mommy.make(
             models.Timeseries,
-            id=42,
             type=models.Timeseries.RAW,
             timeseries_group=self.timeseries_group,
         )
