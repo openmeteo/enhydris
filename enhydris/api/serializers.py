@@ -1,3 +1,4 @@
+from django.utils import translation
 from rest_framework import serializers
 
 from parler_rest.fields import TranslatedFieldsField
@@ -6,7 +7,21 @@ from parler_rest.serializers import TranslatableModelSerializer
 from enhydris import models
 
 
+class TimeseriesTypeField(serializers.Field):
+    timeseries_types = dict(models.Timeseries.TIMESERIES_TYPES)
+    reverse_timeseries_types = {k: v for v, k in models.Timeseries.TIMESERIES_TYPES}
+
+    def to_representation(self, value):
+        with translation.override(None):
+            return str(self.timeseries_types[value])
+
+    def to_internal_value(self, data):
+        return self.reverse_timeseries_types[data]
+
+
 class TimeseriesSerializer(serializers.ModelSerializer):
+    type = TimeseriesTypeField()
+
     class Meta:
         model = models.Timeseries
         fields = "__all__"

@@ -478,12 +478,48 @@ Time series
 ===========
 
 We develop API endpoints as we need them. We don't have an API for time
-series groups yet. We have an API for time series at
-`/api/stations/XXX/timeseriesgroups/YYY/timeseries/`, but we don't
-support it much since we aren't using it. It works similarly to the
-stations endpoint and you can find about it with experimentation. We
-only support the `data/`, `bottom/` and `chart/` sub-endpoints described
-below.
+series groups yet. However, we have an API for time series.
+
+Time series detail
+------------------
+
+You can GET the detail of a single time series at
+``/api/stations/XXX/timeseriesgroups/YYY/timeseries/ZZZ/``::
+
+    curl https://openmeteo.org/api/stations/1403/timeseriesgroups/483/timeseries/9511/
+
+Response::
+
+    {
+        "id": 9511,
+        "last_modified": "2015-04-05T05:33:41.140506-05:00",
+        "type": "Raw",
+        "time_step": "10min",
+        "timeseries_group": 483
+    }
+
+The ``type`` is one of Raw, Checked, Regularized, Aggregated, and Processed.
+
+List time series
+----------------
+
+GET the list of time series for a group at
+``/api/stations/XXX/timeseriesgroups/YYY/timeseries/``::
+
+    curl https://openmeteo.org/api/stations/1403/timeseriesgroups/483/timeseries/
+
+The result is a `paginated list`_ of time series::
+
+    {
+        "count": 1,
+        "next": null,
+        "previous": null,
+        "results": [
+            {...},
+            {...},
+            ...
+        ]
+    }
 
 Time series data
 ----------------

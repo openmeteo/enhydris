@@ -467,7 +467,7 @@ class TimeseriesPostTestCase(APITestCase):
             data={
                 "name": "Great time series",
                 "timeseries_group": self.timeseries_group.id,
-                "type": models.Timeseries.RAW,
+                "type": "Raw",
                 "variable": self.variable.id,
                 "time_zone": self.time_zone.id,
                 "unit_of_measurement": self.unit_of_measurement.id,
@@ -515,7 +515,7 @@ class TimeseriesPostWithWrongStationOrTimeseriesGroupTestCase(APITestCase):
             data={
                 "name": "Great time series",
                 "timeseries_group": kwargs["timeseries_group_for_data"].id,
-                "type": models.Timeseries.RAW,
+                "type": "Raw",
                 "variable": self.variable.id,
                 "time_zone": self.time_zone.id,
                 "unit_of_measurement": self.unit_of_measurement.id,

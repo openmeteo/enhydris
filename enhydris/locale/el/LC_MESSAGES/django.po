@@ -133,6 +133,26 @@ msgstr "Προτιμήσεις χρήστη"
 msgid "Profiles"
 msgstr "Προτιμήσεις χρηστών"
 
+#: models.py:463
+msgid "Raw"
+msgstr "Πρωτογενής"
+
+#: models.py:464
+msgid "Processed"
+msgstr "Επεξεργασμένη"
+
+#: models.py:465
+msgid "Checked"
+msgstr "Ελεγμένη"
+
+#: models.py:466
+msgid "Regularized"
+msgstr "Κανονικοποιημένη"
+
+#: models.py:467
+msgid "Aggregated"
+msgstr "Συναθροισμένη"
+
 #: utils.py:5
 #, python-format
 msgid "%f is not a valid latitude"
