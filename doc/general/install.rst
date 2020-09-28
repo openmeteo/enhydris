@@ -26,7 +26,7 @@ also install gdal. However it can be tricky to install and it's
 usually easier to install a prepackaged version for your operating
 system.
 
-.. timescaledb: https://www.timescale.com
+.. _timescaledb: https://www.timescale.com
 
 Install Enhydris
 ================

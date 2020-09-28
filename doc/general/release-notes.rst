@@ -238,7 +238,7 @@ is important to use ``SITE_ID`` as the key and not ``None``.
 .. _LANGUAGE_CODE: https://docs.djangoproject.com/en/2.2/ref/settings/#language-code
 .. _PARLER_DEFAULT_LANGUAGE_CODE: https://django-parler.readthedocs.io/en/latest/configuration.html#parler-default-language-code
 .. _PARLER_LANGUAGES: https://django-parler.readthedocs.io/en/latest/configuration.html#parler-languages
-.. _but in django-parler: https://stackoverflow.com/questions/40187339/django-parler-doesnt-show-tabs-in-admin/
+.. _bug in django-parler: https://stackoverflow.com/questions/40187339/django-parler-doesnt-show-tabs-in-admin/
 
 Geographical areas
 ^^^^^^^^^^^^^^^^^^
