@@ -68,3 +68,51 @@ class TimeseriesSerializerTestCase(APITestCase):
         )
         assert serializer.is_valid(), serializer.errors
         self.assertEqual(serializer.validated_data["type"], 200)
+
+
+class TimeseriesSerializerUniqueTypeTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.timeseries_group = mommy.make(
+            models.TimeseriesGroup,
+            variable__descr="Temperature",
+        )
+
+    def test_only_one_raw_timeseries_per_group(self):
+        self._create_timeseries(models.Timeseries.RAW)
+        self.assertFalse(self._get_serializer("Raw").is_valid())
+
+    def test_only_one_checked_timeseries_per_group(self):
+        self._create_timeseries(models.Timeseries.CHECKED)
+        self.assertFalse(self._get_serializer("Checked").is_valid())
+
+    def test_only_one_regularized_timeseries_per_group(self):
+        self._create_timeseries(models.Timeseries.REGULARIZED)
+        self.assertFalse(self._get_serializer("Regularized").is_valid())
+
+    def _create_timeseries(self, type):
+        """Create a time series of the specified type with empty time step."""
+        self.timeseries = mommy.make(
+            models.Timeseries,
+            timeseries_group=self.timeseries_group,
+            type=type,
+            time_step="",
+        )
+
+    def _get_serializer(self, type):
+        """Create a serializer with the specified type and hourly time step.
+
+        If the serializer had the same time step as the one used in
+        _create_timeseries(), then the serializer would be invalid because of violation
+        of the unique key (timeseries_group, type, time_step). We choose a different
+        time step so that it won't be invalid for this reason. We want to check whether
+        it's invalid because of attempting to create two raw (or two checked, or two
+        regularized) time series for the same time series group.
+        """
+        return TimeseriesSerializer(
+            data={
+                "type": type,
+                "timeseries_group": self.timeseries_group.id,
+                "time_step": "H",
+            }
+        )

@@ -26,6 +26,34 @@ class TimeseriesSerializer(serializers.ModelSerializer):
         model = models.Timeseries
         fields = "__all__"
 
+    def validate(self, data):
+        result = super().validate(data)
+        self._check_for_uniqueness_of_type(result)
+        return result
+
+    def _check_for_uniqueness_of_type(self, data):
+        types = (
+            models.Timeseries.RAW,
+            models.Timeseries.CHECKED,
+            models.Timeseries.REGULARIZED,
+        )
+        if data["type"] in types:
+            self._check_timeseries_does_not_exist(
+                data["timeseries_group"], data["type"]
+            )
+
+    def _check_timeseries_does_not_exist(self, timeseries_group, type):
+        queryset = models.Timeseries.objects.filter(
+            timeseries_group=timeseries_group, type=type
+        )
+        if queryset.exists():
+            with translation.override(None):
+                type_str = str(dict(models.Timeseries.TIMESERIES_TYPES)[type])
+            raise serializers.ValidationError(
+                f"A time series with timeseries_group_id={timeseries_group.id} and "
+                f"type={type_str} already exists"
+            )
+
 
 class GareaSerializer(serializers.ModelSerializer):
     # To see why we specify the id, check https://stackoverflow.com/questions/36473795/

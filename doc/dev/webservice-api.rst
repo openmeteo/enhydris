@@ -521,6 +521,23 @@ The result is a `paginated list`_ of time series::
         ]
     }
 
+Create time series
+------------------
+
+POST to create a time series::
+
+    curl -X POST -H "Authorization: token OAUTH-TOKEN" \
+        -d "timeseries_group=42" -d "type=Raw"-d "time_step=H" \
+        https://openmeteo.org/api/stations/5/timeseriesgroups/42/timeseries/
+
+The response is a 201 with a similar content as the GET detail response
+(with the new data), unless there is a problem, in which case there's a
+standard `error response`_.
+
+When specifying nested objects, these objects are not created or
+updated—only the id is used and a reference to the nested object with
+that id is created.
+
 Time series data
 ----------------
 
@@ -745,3 +762,12 @@ Response::
         "Invalid pk \"1234\" - object does not exist."
       ]
     }
+
+If there is an error that does not apply to a specific field but to the
+data as a whole, the error message goes into ``non_field_errors``::
+
+   {
+     "non_field_errors": [
+       "A time series with timeseries_group_id=2 and type=Raw already exists"
+     ]
+   }

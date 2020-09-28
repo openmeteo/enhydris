@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from io import StringIO
 from unittest.mock import patch
@@ -460,7 +461,7 @@ class TimeseriesPostTestCase(APITestCase):
         self.station = mommy.make(models.Station, creator=self.user1)
         self.timeseries_group = mommy.make(models.TimeseriesGroup, gentity=self.station)
 
-    def _create_timeseries(self):
+    def _create_timeseries(self, **kwargs):
         return self.client.post(
             f"/api/stations/{self.station.id}/timeseriesgroups/"
             f"{self.timeseries_group.id}/timeseries/",
@@ -468,11 +469,8 @@ class TimeseriesPostTestCase(APITestCase):
                 "name": "Great time series",
                 "timeseries_group": self.timeseries_group.id,
                 "type": "Raw",
-                "variable": self.variable.id,
-                "time_zone": self.time_zone.id,
-                "unit_of_measurement": self.unit_of_measurement.id,
-                "precision": 2,
                 "time_step": "",
+                **kwargs,
             },
         )
 
@@ -486,6 +484,17 @@ class TimeseriesPostTestCase(APITestCase):
     def test_authorized_user_can_create_timeseries(self):
         self.client.force_authenticate(user=self.user1)
         self.assertEqual(self._create_timeseries().status_code, 201)
+
+    def test_returns_proper_error_when_creating_second_raw_timeseries(self):
+        self.client.force_authenticate(user=self.user1)
+        self._create_timeseries()
+        response = self._create_timeseries(time_step="H")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            json.loads(response.content.decode())["non_field_errors"][0],
+            f"A time series with timeseries_group_id={self.timeseries_group.id} and "
+            "type=Raw already exists",
+        )
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
