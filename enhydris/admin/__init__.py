@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib import admin
+from django.utils.translation import ugettext_lazy as _
 
 from parler.admin import TranslatableAdmin
 
@@ -7,6 +8,8 @@ from enhydris import models
 
 from .garea import GareaAdmin  # NOQA
 from .station import StationAdmin  # NOQA
+
+admin.site.site_header = _("Enhydris dashboard")
 
 
 @admin.register(models.Lentity)
