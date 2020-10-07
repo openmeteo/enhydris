@@ -7,7 +7,9 @@
 
 {% block mainjs %}
   {{ block.super }}
-  {% include "enhydris/timeseries_group_detail/chartjs.html" %}
+  {% if object.timeseries_set.exists %}
+    {% include "enhydris/timeseries_group_detail/chartjs.html" %}
+  {% endif %}
 {% endblock %}
 
 {% block content%}
@@ -20,7 +22,13 @@
       <div class="card-body">
         <div class="row">
           <div class="col-xs-12 col-sm-5">
-            {% include "enhydris/timeseries_group_detail/chart.html" %}
+            {% if object.timeseries_set.exits %}
+              {% include "enhydris/timeseries_group_detail/chart.html" %}
+            {% else %}
+              <div class="no-chart-label">
+                <h4 class="text-muted text-uppercase text-center">{% trans 'No Chart Data' %}</h4>
+              </div>
+            {% endif %}
           </div>
 
           <div class="col-xs-12 col-sm-7">

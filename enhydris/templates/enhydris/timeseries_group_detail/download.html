@@ -4,60 +4,68 @@
 {% has_perm "enhydris.view_timeseries_data" request.user timeseries as can_view_timeseries_data %}
 {% if can_view_timeseries_data %}
   <div class="btn-group mb-3" role="group">
-    <button id="downloadData" type="button" class="btn btn-outline-secondary dropdown-toggle text-black" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      {% trans "Download data" %}
-    </button>
-    {% url "timeseries-data" station_id=timeseries.timeseries_group.gentity.id timeseries_group_id=timeseries.timeseries_group.id pk=timeseries.id as base_url %}
-    <form method="get" action="{% url "download_data" %}" class="dropdown-menu" aira-labelledby="downloadData">
-      <div class="card">
-        <div class="card-body">
-          {% for hidden_field in download_data_form.hidden_fields %}
-            {{ hidden_field }}
-          {% endfor %}
-          <div class="form-group">
-            {% for pk, choice in download_data_form.timeseries_id.field.widget.choices %}
-              <div class="form-check" style="white-space: nowrap">
-                <input
-                  id="id_{{ download_data_form.timeseries_id.name }}_{{ forloop.counter0 }}"
-                  name="{{ download_data_form.timeseries_id.name }}"
-                  type="{{ download_data_form.timeseries_id.field.widget.input_type }}"
-                  value="{{ pk }}"
-                  class="form-check-input"
-                  {% if forloop.first %}checked{% endif %}
-                >
-                <label
-                  class="form-check-label" 
-                  for="id_{{ download_data_form.timeseries_id.name }}_{{ forloop.counter0 }}"
-                >{{ choice }}
-                </label>
-              </div>
+    {% if object.timeseries_set.exists %}
+      <button id="downloadData" type="button" class="btn btn-outline-secondary dropdown-toggle text-black" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        {% trans "Download data" %}
+      </button>
+      {% url "timeseries-data" station_id=timeseries.timeseries_group.gentity.id timeseries_group_id=timeseries.timeseries_group.id pk=timeseries.id as base_url %}
+      <form method="get" action="{% url "download_data" %}" class="dropdown-menu" aira-labelledby="downloadData">
+        <div class="card">
+          <div class="card-body">
+            {% for hidden_field in download_data_form.hidden_fields %}
+              {{ hidden_field }}
             {% endfor %}
-          </div>
-          <div class="form-group">
-            {% for pk, choice in download_data_form.format.field.widget.choices %}
-              <div class="form-check" style="white-space: nowrap">
-                <input
-                  id="id_{{ download_data_form.format.name }}_{{ forloop.counter0 }}"
-                  name="{{ download_data_form.format.name }}"
-                  type="{{ download_data_form.format.field.widget.input_type }}"
-                  value="{{ pk }}"
-                  class="form-check-input"
-                  {% if forloop.first %}checked{% endif %}
-                >
-                <label
-                  class="form-check-label" 
-                  for="id_{{ download_data_form.format.name }}_{{ forloop.counter0 }}"
-                >{{ choice }}
-                </label>
-              </div>
-            {% endfor %}
-          </div>
-          <div class="form-group">
-            <input type="submit" value="{% trans "Download" %}">
+            <div class="form-group">
+              {% for pk, choice in download_data_form.timeseries_id.field.widget.choices %}
+                <div class="form-check" style="white-space: nowrap">
+                  <input
+                    id="id_{{ download_data_form.timeseries_id.name }}_{{ forloop.counter0 }}"
+                    name="{{ download_data_form.timeseries_id.name }}"
+                    type="{{ download_data_form.timeseries_id.field.widget.input_type }}"
+                    value="{{ pk }}"
+                    class="form-check-input"
+                    {% if forloop.first %}checked{% endif %}
+                  >
+                  <label
+                    class="form-check-label" 
+                    for="id_{{ download_data_form.timeseries_id.name }}_{{ forloop.counter0 }}"
+                  >{{ choice }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="form-group">
+              {% for pk, choice in download_data_form.format.field.widget.choices %}
+                <div class="form-check" style="white-space: nowrap">
+                  <input
+                    id="id_{{ download_data_form.format.name }}_{{ forloop.counter0 }}"
+                    name="{{ download_data_form.format.name }}"
+                    type="{{ download_data_form.format.field.widget.input_type }}"
+                    value="{{ pk }}"
+                    class="form-check-input"
+                    {% if forloop.first %}checked{% endif %}
+                  >
+                  <label
+                    class="form-check-label" 
+                    for="id_{{ download_data_form.format.name }}_{{ forloop.counter0 }}"
+                  >{{ choice }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="form-group">
+              <input type="submit" value="{% trans "Download" %}">
+            </div>
           </div>
         </div>
-      </div>
-    </form>
+      </form>
+    {% else %}
+      <button
+        type="button"
+        class="btn btn-outline-secondary text-black"
+        title="{% trans 'No data to download' %}"
+        disabled>{% trans "Download data" %}</button>
+    {% endif %}
   </div> <!-- /.btn-group -->
 {% else %}
   <p class="alert alert-warning" role="alert">
