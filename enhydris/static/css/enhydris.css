@@ -116,14 +116,16 @@ h4.tab-no-data {
   cursor: not-allowed;
 }
 
-.page-main .no-chart-label {
+.page-main .message-no-data {
   min-height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.page-main .no-chart-label 
+.page-main .message-no-data p {
+  font-weight: 600;
+}
 
 @media (max-width: 767px) {
   .page-main .table-station-detail tr {
