@@ -5,9 +5,9 @@
 {% if can_view_timeseries_data %}
   <div class="btn-group mb-3" role="group">
     {% if object.timeseries_set.exists %}
-      {% include "enhydris/timeseries_group_detail/download-button-partials/button-active.html" %}
+      {% include "enhydris/timeseries_group_detail/download_button/button_active.html" %}
     {% else %}
-      {% include "enhydris/timeseries_group_detail/download-button-partials/button-disabled.html" %}
+      {% include "enhydris/timeseries_group_detail/download_button/button_disabled.html" %}
     {% endif %}
   </div> <!-- /.btn-group -->
 {% else %}
