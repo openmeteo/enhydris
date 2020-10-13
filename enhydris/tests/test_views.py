@@ -404,6 +404,13 @@ class TimeseriesGroupDetailTestCase(TestCase, TimeseriesDataMixin):
             f"/stations/{self.station.id}/timeseriesgroups/{self.timeseries_group.id}/"
         )
 
+    def test_timeseries_group_without_timeseries(self):
+        self.timeseries_group.timeseries_set.all().delete()
+        self.response = self.client.get(
+            f"/stations/{self.station.id}/timeseriesgroups/{self.timeseries_group.id}/"
+        )
+        self.assertContains(self.response, "This time series group has no data yet.")
+
     def test_title(self):
         self.assertContains(
             self.response, "<title>Beauty — Komboti — Enhydris</title>", html=True

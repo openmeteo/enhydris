@@ -112,6 +112,21 @@ h4.tab-no-data {
   color: #0056b3;
 }
 
+.page-main .btn[disabled] {
+  cursor: not-allowed;
+}
+
+.page-main .message-no-data {
+  min-height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.page-main .message-no-data p {
+  font-weight: 600;
+}
+
 @media (max-width: 767px) {
   .page-main .table-station-detail tr {
     display: flex;
