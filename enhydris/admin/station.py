@@ -181,30 +181,61 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
             self.instance.set_data(data)
 
 
+class TimeseriesInlineFormSet(nested_admin.formsets.NestedInlineFormSet):
+    def clean(self):
+        super().clean()
+        self._check_only_one_timeseries_with_type(models.Timeseries.RAW)
+        self._check_only_one_timeseries_with_type(models.Timeseries.CHECKED)
+        self._check_only_one_timeseries_with_type(models.Timeseries.REGULARIZED)
+
+    def _check_only_one_timeseries_with_type(self, type):
+        types = [
+            form.cleaned_data["type"]
+            for form in self.forms
+            if type == form.cleaned_data.get("type")
+        ]
+        if len(types) != len(set(types)):
+            type_name = dict(models.Timeseries.TIMESERIES_TYPES)[type]
+            raise forms.ValidationError(
+                _(
+                    f"There can be only one {type_name.lower()} time series "
+                    "in each time series group."
+                )
+            )
+
+
 class TimeseriesInline(InlinePermissionsMixin, nested_admin.NestedStackedInline):
     form = TimeseriesInlineAdminForm
+    formset = TimeseriesInlineFormSet
     model = models.Timeseries
     classes = ("collapse",)
+    extra = 1
+    fields = (
+        ("type", "time_step"),
+        ("data", "replace_or_append"),
+    )
+
+
+class TimeseriesGroupInline(InlinePermissionsMixin, nested_admin.NestedStackedInline):
+    model = models.TimeseriesGroup
+    classes = ("collapse",)
+    inlines = [TimeseriesInline]
+    extra = 1
     fieldsets = [
         (
-            _("Essential information"),
+            _("Metadata"),
             {
-                "fields": ("name", ("variable", "unit_of_measurement"), "precision"),
+                "fields": (
+                    "name",
+                    ("variable", "unit_of_measurement"),
+                    "precision",
+                    "time_zone",
+                    "hidden",
+                    "remarks",
+                ),
                 "classes": ("collapse",),
             },
-        ),
-        (
-            _("Other details"),
-            {"fields": ("hidden", "remarks"), "classes": ("collapse",)},
-        ),
-        (
-            _("Time step"),
-            {"fields": ("time_step", "time_zone"), "classes": ("collapse",)},
-        ),
-        (
-            _("Data"),
-            {"fields": (("data", "replace_or_append"),), "classes": ("collapse",)},
-        ),
+        )
     ]
 
     class Media:
@@ -220,7 +251,7 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
     inlines = [
         GentityFileInline,
         GentityEventInline,
-        TimeseriesInline,
+        TimeseriesGroupInline,
     ]
     search_fields = ("id", "name", "code", "owner__ordering_string")
     list_display = ("name", "owner")

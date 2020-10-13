@@ -1,12 +1,12 @@
 {% extends "enhydris/base/main.html" %}
 
-
 {% block title %}
   {{ flatpage.title }}
 {% endblock %}
 
-
 {% block content %}
-  <h1>{{ flatpage.title }}</h1>
-  {{ flatpage.content }}
+  <div class="container mt-4">
+    <h1>{{ flatpage.title }}</h1>
+    {{ flatpage.content }}
+  </div>
 {% endblock %}

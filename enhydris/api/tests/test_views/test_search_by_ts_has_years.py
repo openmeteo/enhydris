@@ -1,5 +1,4 @@
-from datetime import datetime, timezone
-from unittest.mock import patch
+from io import StringIO
 
 from rest_framework.test import APITestCase
 
@@ -10,21 +9,6 @@ from enhydris import models
 from .test_search import SearchTestCaseBase
 
 
-def make_timeseries(*, start_date, end_date, **kwargs):
-    """Make a test timeseries, setting start_date and end_date.
-
-    This is essentially the same as mommy.make(models.Timeseries, **kwargs), except
-    that it also sets start_date and end_date.
-    """
-    with patch("enhydris.models.Timeseries._set_start_and_end_date"):
-        return mommy.make(
-            models.Timeseries,
-            start_date_utc=start_date.replace(tzinfo=timezone.utc),
-            end_date_utc=end_date.replace(tzinfo=timezone.utc),
-            **kwargs,
-        )
-
-
 class SearchWithYearExistingInOneStationTest(SearchTestCaseBase, APITestCase):
     search_term = "ts_has_years:2005,2012,2016"
     search_result = "Tharbad"
@@ -32,30 +16,28 @@ class SearchWithYearExistingInOneStationTest(SearchTestCaseBase, APITestCase):
     def _create_models(self):
         komboti = mommy.make(models.Station, name="Komboti")
         tharbad = mommy.make(models.Station, name="Tharbad")
-        self.komboti_temperature = make_timeseries(
-            gentity=komboti,
-            start_date=datetime(2005, 8, 23, 18, 53),
-            end_date=datetime(2010, 8, 23, 22, 53),
-            variable__descr="Temperature",
+        self.komboti_temperature = self._make_timeseries(
+            komboti, "Temperature", "2005-03-23 18:20,5,\r\n2012-03-24 18:25,6,\r\n"
         )
-        self.komboti_rain = make_timeseries(
-            gentity=komboti,
-            start_date=datetime(2011, 8, 23, 18, 53),
-            end_date=datetime(2015, 8, 23, 22, 53),
-            variable__descr="Rain",
+        self.komboti_rain = self._make_timeseries(
+            komboti, "Rain", "2005-03-23 18:20,5,\r\n2011-03-24 18:25,6,\r\n"
         )
-        self.tharbad_temperature = make_timeseries(
-            gentity=tharbad,
-            start_date=datetime(2005, 8, 23, 18, 53),
-            end_date=datetime(2010, 8, 23, 22, 53),
-            variable__descr="Temperature",
+        self.tharbad_temperature = self._make_timeseries(
+            tharbad, "Temperature", "2005-03-23 18:20,5,\r\n2012-03-24 18:25,6,\r\n"
         )
-        self.tharbad_rain = make_timeseries(
-            gentity=tharbad,
-            start_date=datetime(2009, 8, 23, 18, 53),
-            end_date=datetime(2017, 8, 23, 22, 53),
-            variable__descr="Rain",
+        self.tharbad_rain = self._make_timeseries(
+            tharbad, "Rain", "2005-03-23 18:20,5,\r\n2016-03-24 18:25,6,\r\n"
         )
+
+    def _make_timeseries(self, station, variable_descr, datastr):
+        result = mommy.make(
+            models.Timeseries,
+            timeseries_group__gentity=station,
+            timeseries_group__variable__descr=variable_descr,
+            timeseries_group__time_zone__utc_offset=120,
+        )
+        result.set_data(StringIO(datastr))
+        return result
 
 
 class SearchWithYearsExistingInAllStationsTest(SearchWithYearExistingInOneStationTest):

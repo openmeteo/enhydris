@@ -1,0 +1,48 @@
+{% load i18n %}
+
+<table class="table table-hover">
+  <tbody>
+    <tr>
+      <th scope="row">{% trans 'ID' %}</th>
+      <td>{{ id }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Related Station' %}</th>
+      <td>
+        <a href="{% url 'station_detail' object.gentity.id %}">{{ object.gentity.name }}</a>
+      </td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Name' %}</th>
+      <td>{{ object.get_name }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Variable' %}</th>
+      <td>{{ object.variable }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Unit Of Measurement' %}</th>
+      <td>{{ object.unit_of_measurement }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Precision' %}</th>
+      <td>{{ object.precision }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Time Zone' %}</th>
+      <td>{{ object.time_zone }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Remarks' %}</th>
+      <td>{{ object.remarks }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'Start Date' %}</th>
+      <td>{{ object.start_date|date:"Y/m/d H:i" }}</td>
+    </tr>
+    <tr>
+      <th scope="row">{% trans 'End Date' %}</th>
+      <td>{{ object.end_date|date:"Y/m/d H:i" }}</td>
+    </tr>
+  </tbody>
+</table>

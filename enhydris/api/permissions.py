@@ -24,7 +24,7 @@ class CanAccessTimeseriesData(permissions.BasePermission):
             return request.user.has_perm("enhydris.view_timeseries_data", obj)
         else:
             return request.user.has_perm(
-                "enhydris.change_station", obj.gentity.gpoint.station
+                "enhydris.change_station", obj.timeseries_group.gentity.gpoint.station
             )
 
 

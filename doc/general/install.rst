@@ -13,7 +13,7 @@ Prerequisites
 Prerequisite                                          Version
 ===================================================== ============
 Python with setuptools and pip                        3 [1]
-PostgreSQL + PostGIS
+PostgreSQL + PostGIS + TimescaleDB_
 GDAL                                                  1.9 [2]
 ===================================================== ============
 
@@ -25,6 +25,8 @@ modules.
 also install gdal. However it can be tricky to install and it's
 usually easier to install a prepackaged version for your operating
 system.
+
+.. _timescaledb: https://www.timescale.com
 
 Install Enhydris
 ================
@@ -66,10 +68,15 @@ In production, it should not be allowed to create databases; in
 testing, it should be allowed, in order to be able to run the unit
 tests.)
 
-Here is a **Debian stretch example**::
+Here is a **Debian buster example**::
 
    # Install PostgreSQL and PostGIS
-   apt install postgis postgresql-9.6-postgis-2.3
+   apt install postgis postgresql-11-postgis-2.5
+
+   # Install TimescaleDB (you need to add repositories in /etc/apt as
+   # explained in the TimescaleDB installation documentation)
+   apt install timescaledb-postgresql-11
+   timescaledb-tune
 
    # Create database template
    sudo -u postgres -s
@@ -86,10 +93,13 @@ Here is a **Debian stretch example**::
    createdb --template template_postgis --owner enhydris_user enhydris_db
    exit
 
+   # Note: We don't need to install the timescaledb extension; the
+   Django migrations of Enhydris will do so automatically.
+
 Here is a **Windows example**, assuming PostgreSQL is installed at
 the default location::
 
-   cd C:\Program Files\PostgreSQL\9.6\bin
+   cd C:\Program Files\PostgreSQL\11\bin
    createdb template_postgis
    psql -d template_postgis -c "CREATE EXTENSION postgis;"
    psql -d template_postgis -c "UPDATE pg_database SET datistemplate='true'
@@ -99,6 +109,8 @@ the default location::
 
 At some point, these commands will ask you for the password of the
 operating system user.
+
+Note:
 
 Initialize the database
 =========================
@@ -252,17 +264,6 @@ These are the settings available to Enhydris, in addition to the
    anything.  Format is (minlon, minlat, maxlon, maxlat) where lon and
    lat is in decimal degrees, positive for north/east, negative for
    west/south.
-
-.. data:: ENHYDRIS_TIMESERIES_DATA_DIR
-
-   The directory where the files with the time series data are stored;
-   for example, ``/var/local/enhydris/timeseries_data``. You must
-   specify this in production. The default is ``timeseries_data``,
-   relative to the directory from which you start the server.
-
-   You might choose to put that under :data:`MEDIA_ROOT`, but in that
-   case all data might be publicly available, without permission
-   checking.
 
 .. data:: ENHYDRIS_SITE_STATION_FILTER
 

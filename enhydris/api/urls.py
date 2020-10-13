@@ -66,7 +66,17 @@ router.register("stations", views.StationViewSet, "station")
 urlstart = r"stations/(?P<station_id>\d+)/"
 router.register(urlstart + "files", views.GentityFileViewSet, "file")
 router.register(urlstart + "events", views.GentityEventViewSet, "event")
-router.register(urlstart + "timeseries", views.TimeseriesViewSet, "timeseries")
+router.register(
+    urlstart + r"timeseriesgroups/(?P<timeseries_group_id>\d+)/timeseries",
+    views.TimeseriesViewSet,
+    "timeseries",
+)
+# The following is a backwards-compatible access point for time series,
+# /api/stations/20/timeseries/, e.g. /api/stations/20/timeseries/42/data/. Its purpose
+# is to enable older loggertodb versions to continue to work. Only the data/ and bottom/
+# endpoints (which are the only ones used by loggertodb) are supported; the rest might
+# not work.
+router.register(urlstart + r"timeseries", views.TimeseriesViewSet, "old-timeseries")
 
 router.register("gareas", views.GareaViewSet)
 router.register("organizations", views.OrganizationViewSet)

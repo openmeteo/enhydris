@@ -1,20 +1,19 @@
 {% load i18n %}
 
-<div class="panel panel-default">
-  <div class="panel-body">
+<div class="card">
+  <div class="card-body">
     <div id="mapid" class="map"></div>
   </div>
-  <div class="panel-footer">
+
+  <div class="card-footer text-muted">
     ϕ, λ = {{ station.geom.y | floatformat:5 }}, {{ station.geom.x | floatformat:5 }}
     {% if station.original_srid != 4326 %}
-      <small>
-        <br>
+      <p>
         {% blocktrans with srid=station.original_srid x=station.original_abscissa y=station.original_ordinate %}
           (originally srid={{ srid }}, x={{ x }}, y={{ y }})
         {% endblocktrans %}
-      </small>
+      </p>
     {% endif %}
-    <br>
     {% if station.altitude != None %}
       z = {{ station.altitude|floatformat:2 }}
     {% endif %}

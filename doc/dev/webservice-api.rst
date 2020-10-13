@@ -71,9 +71,6 @@ The response will be 200 with the following content::
       "hidden": false,
       "precision": 1,
       "remarks": "Type: Raw data",
-      "datafile": "http://stage.openmeteo.org/media/0000000242",
-      "start_date_utc": "2000-05-11T10:00:00Z",
-      "end_date_utc": "2006-07-14T12:10:00Z",
       "gentity": 1334,
       "variable": 1,
       "unit_of_measurement": 7,
@@ -414,9 +411,9 @@ the search term ``ts_only:``, without a search word::
 
 Finally, ``ts_has_years`` can limit to stations based on **the range of
 their time series**. The following will find stations that have at least
-one time series whose time range contains 1988, at least one time series
-whose time range contains 1989, and at least one time series whose time
-range contains 2004::
+one time series containing records in 1988, at least one time series
+containing records in 1989, and at least one time series containing
+records in 2004::
 
     curl 'https://openmeteo.org/api/stations/?q=ts_has_years:1988,1989,2004'
 
@@ -480,65 +477,66 @@ way as for POST (see above).
 Time series
 ===========
 
-List, retrieve, create, update, or delete time series
------------------------------------------------------
+We develop API endpoints as we need them. We don't have an API for time
+series groups yet. However, we have an API for time series.
 
-GET a time series detail::
+Time series detail
+------------------
 
-    curl https://openmeteo.org/api/stations/1334/timeseries/232/
+You can GET the detail of a single time series at
+``/api/stations/XXX/timeseriesgroups/YYY/timeseries/ZZZ/``::
+
+    curl https://openmeteo.org/api/stations/1403/timeseriesgroups/483/timeseries/9511/
 
 Response::
 
-        {
-          "id": 232,
-          "last_modified": "2011-10-26T20:23:22.458770Z",
-          "name": "Temperature (from 1998)",
-          "hidden": false,
-          "precision": 1,
-          "remarks": "Type: Raw data",
-          "datafile": "http://stage.openmeteo.org/media/0000000232",
-          "start_date_utc": "1998-12-10T14:30:00Z",
-          "end_date_utc": "2018-07-09T09:19:00Z",
-          "gentity": 1334,
-          "variable": 3,
-          "unit_of_measurement": 14,
-          "time_zone": 1,
-          "time_step": "10min"
-        }
+    {
+        "id": 9511,
+        "last_modified": "2015-04-05T05:33:41.140506-05:00",
+        "type": "Raw",
+        "time_step": "10min",
+        "timeseries_group": 483
+    }
 
-GET the list of time series of a station::
+The ``type`` is one of Raw, Checked, Regularized, Aggregated, and Processed.
 
-    curl https://openmeteo.org/api/stations/1334/timeseries/
+List time series
+----------------
 
-The response is a `paginated list`_ of detail objects.
+GET the list of time series for a group at
+``/api/stations/XXX/timeseriesgroups/YYY/timeseries/``::
+
+    curl https://openmeteo.org/api/stations/1403/timeseriesgroups/483/timeseries/
+
+The result is a `paginated list`_ of time series::
+
+    {
+        "count": 1,
+        "next": null,
+        "previous": null,
+        "results": [
+            {...},
+            {...},
+            ...
+        ]
+    }
+
+Create time series
+------------------
 
 POST to create a time series::
 
     curl -X POST -H "Authorization: token OAUTH-TOKEN" \
-        -d "gentity=1334" -d "variable=1" -d "time_zone=1" \
-        -d "unit_of_measurement=1" \
-        https://openmeteo.org/api/stations/1334/timeseries/
+        -d "timeseries_group=42" -d "type=Raw"-d "time_step=H" \
+        https://openmeteo.org/api/stations/5/timeseriesgroups/42/timeseries/
 
 The response is a 201 with a similar content as the GET detail response
 (with the new data), unless there is a problem, in which case there's a
 standard `error response`_.
 
-DELETE a time series::
-
-    curl -X DELETE -H "Authorization: token OAUTH-TOKEN" \
-        https://openmeteo.org/api/stations/1334/timeseries/10657/
-
-The response is normally 204 (no content) or 404.
-
-PUT or PATCH a time series::
-
-    curl -X PATCH -H "Authorization: token OAUTH-TOKEN" \
-        -d "variable=1" \
-        https://openmeteo.org/api/stations/1334/timeseries/10657/
-
-The response is a 200 with a similar content as the GET detail response
-(with the updated data), unless there is a problem, in which case
-there's a standard `error response`_.
+When specifying nested objects, these objects are not created or
+updated—only the id is used and a reference to the nested object with
+that id is created.
 
 Time series data
 ----------------
@@ -546,7 +544,7 @@ Time series data
 **GET the data** of a time series in CSV by appending ``data/`` to the
 URL::
 
-    curl https://openmeteo.org/api/stations/1334/timeseries/232/data/
+    curl https://openmeteo.org/api/stations/1334/timeseriesgroup/232/timeseries/10659/data/
 
 Example of response::
 
@@ -559,7 +557,7 @@ Example of response::
 Instead of CSV, you can **get HTS** by specifying the parameter
 ``fmt=hts``::
 
-    curl 'https://openmeteo.org/api/stations/1334/timeseries/235/data/?fmt=hts`
+    curl 'https://openmeteo.org/api/stations/1334/timeseriesgroup/235/timeseries/10659/data/?fmt=hts`
 
 Response::
 
@@ -581,10 +579,9 @@ Response::
     1998-12-10 17:10,5.6,
     ...
 
-
 **Get only the last record** of the time series (in CSV) with ``bottom/``::
 
-    curl https://openmeteo.org/api/stations/1334/timeseries/235/bottom/
+    curl https://openmeteo.org/api/stations/1334/timeseriesgroup/235/timeseries/10659/bottom/
 
 Response::
 
@@ -594,12 +591,42 @@ Response::
 
     curl -X POST -H "Authorization: token OAUTH-TOKEN" \
         -d $'timeseries_records=2018-12-19T11:50,25.0,\n2018-12-19T12:00,25.1,\n' \
-        https://openmeteo.org/api/stations/1334/timeseries/235/data/
+        https://openmeteo.org/api/stations/1334/timeseriesgroups/235/timeseries/10659/data/
 
 (The ``$'...'`` is a bash idiom that does nothing more than escape the
 ``\n`` in the string.)
 
 The response is normally 204 (no content).
+
+Time series chart data
+----------------------
+
+**GET chart data points** of a time series by appending ``chart/``. This is served as a JSON response, to be consumed by charting libraries supporting panning/zooming by providing time limits.
+A maximum of **200 data points** are returned per request, sampled to produce an equally distant data points.
+URL::
+
+    curl https://openmeteo.org/api/stations/1334/timeseries/232/chart/
+
+Example of response::
+
+    [
+      {
+        "timestamp": 1579292086,
+        "value": "1.00"
+      },
+      {
+        "timestamp": 1580079590,
+        "value": "22.00"
+      },
+      ...
+    ]
+
+
+You can provide time limits using the following query parameters
+``start_date=<TIME>&end_date=<TIME>``.
+For instance, to request data prior to 2015 only, we can do the following request::
+
+    curl 'https://openmeteo.org/api/stations/1334/timeseries/232/chart/?end_date=2015-01-01T00:00`
 
 Other items of stations
 =======================
@@ -735,3 +762,12 @@ Response::
         "Invalid pk \"1234\" - object does not exist."
       ]
     }
+
+If there is an error that does not apply to a specific field but to the
+data as a whole, the error message goes into ``non_field_errors``::
+
+   {
+     "non_field_errors": [
+       "A time series with timeseries_group_id=2 and type=Raw already exists"
+     ]
+   }

@@ -6,14 +6,17 @@ from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.contrib.gis.geos import Point
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 
+import django_selenium_clean
 from bs4 import BeautifulSoup
-from django_selenium_clean import PageElement, SeleniumTestCase
+from django_selenium_clean import PageElement
 from model_mommy import mommy
 from selenium.webdriver.common.by import By
 
 from enhydris.models import GentityFile, Station, Timeseries
+from enhydris.tests import TimeseriesDataMixin
 
 
 class StationListTestCase(TestCase):
@@ -72,8 +75,12 @@ class StationListTestCase(TestCase):
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=3)
     def test_two_pages(self):
         response = self.client.get("/")
-        self.assertContains(response, "<a href='?page=2'>2</a>", html=True)
-        self.assertNotContains(response, "<a href='?page=3'>3</a>", html=True)
+        self.assertContains(
+            response, '<a class="page-link" href="?page=2">2</a>', html=True
+        )
+        self.assertNotContains(
+            response, '<a class="page-link" href="?page=3">3</a>', html=True
+        )
 
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=2)
     def test_next_page_url(self):
@@ -95,19 +102,22 @@ class StationListTestCase(TestCase):
         self.assertNotContains(response, "<a href='?page=2'>2</a>", html=True)
 
 
-class StationDetailTestCase(TestCase):
+class StationDetailTestCase(TestCase, TimeseriesDataMixin):
     def setUp(self):
-        self.station = mommy.make(
-            Station,
-            name="Komboti",
-            geom=Point(x=21.00000, y=39.00000, srid=4326),
-            original_srid=4326,
-        )
+        self.create_timeseries()
 
     @override_settings(ENHYDRIS_MAP_MIN_VIEWPORT_SIZE=0.2)
     def test_map_viewport(self):
-        response = self.client.get("/stations/{}/".format(self.station.id))
+        response = self.client.get(f"/stations/{self.station.id}/")
         self.assertContains(response, "enhydris.mapViewport = [20.9, 38.9, 21.1, 39.1]")
+
+    def test_timeseries_group_list(self):
+        response = self.client.get(f"/stations/{self.station.id}/")
+        self.assertContains(
+            response,
+            f'<a href="/stations/{self.station.id}/timeseriesgroups'
+            f'/{self.timeseries_group.id}/">Beauty</a>',
+        )
 
 
 class StationDetailPeriodOfOperationTestCase(TestCase):
@@ -153,30 +163,25 @@ class StationDetailPeriodOfOperationTestCase(TestCase):
         self.assertNotContains(response, "operation")
 
 
-class TimeseriesDownloadLinkTestCase(TestCase):
+class TimeseriesDownloadButtonTestCase(TestCase, TimeseriesDataMixin):
     def setUp(self):
-        self.station = mommy.make(Station, name="Komboti")
-        self.timeseries = mommy.make(
-            Timeseries, gentity=self.station, variable__descr="irrelevant"
-        )
-        self.link = '<a href="/api/stations/{}/timeseries/{}/data/?fmt=hts">'.format(
-            self.station.id, self.timeseries.id
-        )
+        self.create_timeseries()
+        self.download_button = '<input type="submit" value="Download">'
 
     def _get_response(self):
         self.response = self.client.get(
-            "/stations/{}/timeseries/{}/".format(self.station.id, self.timeseries.id)
+            f"/stations/{self.station.id}/timeseriesgroups/{self.timeseries_group.id}/"
         )
 
     @override_settings(ENHYDRIS_OPEN_CONTENT=True)
-    def test_contains_download_link_when_site_content_is_free(self):
+    def test_contains_download_button_when_site_content_is_free(self):
         self._get_response()
-        self.assertContains(self.response, self.link)
+        self.assertContains(self.response, self.download_button)
 
     @override_settings(ENHYDRIS_OPEN_CONTENT=False)
     def test_has_no_download_link_when_site_content_is_restricted(self):
         self._get_response()
-        self.assertNotContains(self.response, self.link)
+        self.assertNotContains(self.response, self.download_button)
 
     @override_settings(ENHYDRIS_OPEN_CONTENT=True)
     def test_has_no_permission_denied_message_when_site_content_is_free(self):
@@ -229,11 +234,16 @@ class RedirectOldUrlsTestCase(TestCase):
         )
 
     def test_old_timeseries_url_redirects(self):
-        mommy.make(Timeseries, id=1169, gentity__id=200348)
+        mommy.make(
+            Timeseries,
+            id=1169,
+            timeseries_group__id=100174,
+            timeseries_group__gentity__id=200348,
+        )
         r = self.client.get("/timeseries/d/1169/")
         self.assertRedirects(
             r,
-            "/stations/200348/timeseries/1169/",
+            "/stations/200348/timeseriesgroups/100174/",
             status_code=301,
             fetch_redirect_response=False,
         )
@@ -241,6 +251,38 @@ class RedirectOldUrlsTestCase(TestCase):
     def test_old_timeseries_url_for_nonexistent_timeseries_returns_404(self):
         r = self.client.get("/timeseries/d/1169/")
         self.assertEqual(r.status_code, 404)
+
+
+class SeleniumTestCase(django_selenium_clean.SeleniumTestCase):
+    """A change in SeleniumTestCase so that it succeeds in truncating.
+
+    SeleniumTestCase inherits LiveServerTestCase, which inherits TransactionTestCase.
+    In contrast to TestCase, which wraps tests in "atomic", TransactionTestCase
+    truncates the database in the end by calling the "flush" management command. In our
+    case, this fails with "ERROR: cannot truncate a table referenced in a foreign key
+    constraint". The reason is that TimeseriesRecord is unmanaged, so "flush" doesn't
+    truncate it, but "flush" truncates Timeseries, and TimeseriesRecord has a foreign
+    key to Timeseries.
+
+    To fix this, we override TransactionTestCase's _fixture_teardown(), ensuring it
+    executes TRUNCATE with CASCADE.
+
+    The same result might have been achieved by setting
+    TransactionTestCase.available_apps, but this is a private API that is subject to
+    change without notice, and, well, go figure.
+    """
+
+    def _fixture_teardown(self):
+        for db_name in self._databases_names(include_mirrors=False):
+            call_command(
+                "flush",
+                verbosity=0,
+                interactive=False,
+                database=db_name,
+                reset_sequences=False,
+                allow_cascade=True,
+                inhibit_post_migrate=False,
+            )
 
 
 @skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
@@ -352,3 +394,86 @@ class ShowStationOnStationDetailMapTestCase(SeleniumTestCase):
                 return result
             sleep(0.5)
         return 0
+
+
+@override_settings(ENHYDRIS_OPEN_CONTENT=True)
+class TimeseriesGroupDetailTestCase(TestCase, TimeseriesDataMixin):
+    def setUp(self):
+        self.create_timeseries()
+        self.response = self.client.get(
+            f"/stations/{self.station.id}/timeseriesgroups/{self.timeseries_group.id}/"
+        )
+
+    def test_timeseries_group_without_timeseries(self):
+        self.timeseries_group.timeseries_set.all().delete()
+        self.response = self.client.get(
+            f"/stations/{self.station.id}/timeseriesgroups/{self.timeseries_group.id}/"
+        )
+        self.assertContains(self.response, "This time series group has no data yet.")
+
+    def test_title(self):
+        self.assertContains(
+            self.response, "<title>Beauty — Komboti — Enhydris</title>", html=True
+        )
+
+    def test_heading(self):
+        self.assertContains(
+            self.response, '<p class="my-0">Komboti - Beauty</p>', html=True
+        )
+
+    def test_download_form(self):
+        self.assertContains(
+            self.response,
+            f'<input type="radio" name="timeseries_id" value="{self.timeseries.id}" '
+            'id="id_timeseries_id_0" class="form-check-input" checked>'
+            '<label class="form-check-label" for="id_timeseries_id_0">Raw</label>',
+            html=True,
+        )
+
+
+class DownloadDataTestCase(TestCase, TimeseriesDataMixin):
+    def setUp(self):
+        self.create_timeseries()
+
+    def _make_request(self, station_id, timeseries_group_id, timeseries_id):
+        self.response = self.client.get(
+            f"/downloaddata/?station_id={station_id}"
+            f"&timeseries_group_id={timeseries_group_id}"
+            f"&timeseries_id={timeseries_id}&format=csv"
+        )
+
+    def test_redirects(self):
+        self._make_request(
+            self.station.id, self.timeseries_group.id, self.timeseries.id
+        )
+        self.assertRedirects(
+            self.response,
+            expected_url=(
+                f"/api/stations/{self.station.id}/timeseriesgroups"
+                f"/{self.timeseries_group.id}/timeseries/{self.timeseries.id}"
+                "/data/?fmt=csv"
+            ),
+            fetch_redirect_response=False,
+        )
+
+    def test_returns_404_on_total_garbage(self):
+        self.response = self.client.get("/downloaddata/?hello=world")
+        self.assertEqual(self.response.status_code, 404)
+
+    def test_returns_404_on_garbage_timeseries_group(self):
+        self.response = self.client.get(
+            "/downloaddata/?station_id=hello&timeseries_group_id=world"
+            "&timeseries_id=earth&format=CSV"
+        )
+        self.assertEqual(self.response.status_code, 404)
+
+    def test_returns_404_on_garbage_station(self):
+        self.response = self.client.get(
+            "/downloaddata/?station_id=hello&timeseries_group_id=50"
+            "&timeseries_id=earth&format=CSV"
+        )
+        self.assertEqual(self.response.status_code, 404)
+
+    def test_returns_404_on_no_data(self):
+        self.response = self.client.get("/downloaddata/")
+        self.assertEqual(self.response.status_code, 404)

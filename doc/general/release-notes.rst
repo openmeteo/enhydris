@@ -9,9 +9,8 @@ Release notes
 Version 3.0
 ===========
 
-As of June 2019, version 3.0 is in heavy development and it is not
-expected to become stable before late 2019. Until then, install version
-2.0 in production.
+As of March 2020, version 3.0 is in heavy development and it is not
+expected to become stable before late 2020.
 
 Upgrading
 ---------
@@ -47,27 +46,127 @@ stable Enhydris version is 2.0). The procedure is this:
     and is replaced by ``enhydris``. You can omit it in case you need to
     go back or execute it if you want a cleaner database.)
 
- 8. In the settings, make sure SITE_ID_, LANGUAGE_CODE_ and
+ 8. `Install TimescaleDB`_ and restart PostgreSQL. You don't need to
+    create the extension in the database; the Django migrations will do
+    so automatically. See "TimescaleDB" in the "Changes from 2.0" below
+    for more information.
+
+    .. _install timescaledb: https://docs.timescale.com/latest/getting-started/installation
+
+ 9. In the settings, make sure SITE_ID_, LANGUAGE_CODE_ and
     PARLER_LANGUAGES_ are set properly. See "Multilingual contents" in
     the "Changes from 2.0" below for more information.
 
- 9. Install version 3.0::
+ 10. Install version 3.0::
 
        git checkout 3.0
        pip install -r requirements.txt
 
- 10. If your settings file has been in ``enhydris/settings/``, you need
+ 11. If your settings file has been in ``enhydris/settings/``, you need
      to create a settings file in ``enhydris_project/settings/``, as this
      location has changed.
 
- 11. Execute migrations::
+ 12. Execute migrations::
 
        python manage.py migrate --fake-initial
 
- 12. Start the service
+ 13. Remove obsolete settings from the settings file.
+
+ 14. Start the service
 
 Changes from 2.0
 ----------------
+
+Time series groups
+^^^^^^^^^^^^^^^^^^
+
+In 2.0, a station has time series. Now it has time series groups and
+each group consists of time series with essentially the same kind of
+data but in a different time step or in a different checking status. For
+example, if you have a temperature sensor that measures temperature
+every 10 minutes, then you will have a "temperature" time series group,
+which will contain the raw time series, and it may also contain the
+checked time series, the regularized time series, the hourly time
+series, etc. (If you have two temperature sensors, you'll have two time
+series groups.)
+
+We avoid showing the term "time series group" to the user (instead, we
+are being vague, like "Data", or we might sometimes use "time series"
+when we actually mean a time series group). Sometimes we can't avoid it
+though (notably in the admin).
+
+Each time series in the group has a "type" (which is enumerated): it can
+be raw, checked, regularized, or aggregated.
+
+During database upgrade, unless enhydris-autoprocess is installed, each
+existing time series goes in a separate group, and it is assumed it is
+raw. In many cases, this is the correct assumption. If
+enhydris-autoprocess is installed, the database upgrade attempts to find
+out which time series is raw, which is checked, and which is aggregated
+(however enhydris-autoprocess did not exist for Enhydris 2.0, so this
+applies only to installations of Enhydris development versions).
+
+TimescaleDB
+^^^^^^^^^^^
+
+We now store time series data in the database using TimescaleDB_.
+Before that, time series data was stored in files in the filesystem,
+in CSV format, one file per time series.
+
+The location where the files were being stored was specified by setting
+``ENHYDRIS_TIMESERIES_DATA_DIR``. This setting has now been abolished.
+
+The size of your database will increase considerably. The increase in
+size maybe eight times the size of ``ENHYDRIS_TIMESERIES_DATA_DIR``.
+Make sure you have the available disk space. Also make sure that your
+PostgreSQL backup strategy can handle the increased size of the
+database.
+
+When executing the migrations, the time series data will be read from
+the files and entered to the database. The files will not be removed.
+
+The migration will only work if the PostgreSQL server runs in the same
+machine as Enhydris. This is because, in order to speed up the importing
+of the data to the database, the files are read directly by the database
+server using the SQL ``COPY ... FROM`` command. See the code for the
+migration for more details.
+
+Since a single transaction could be too much for the entire importing
+(it would use lots of space and be very slow), the transaction is
+committed for each time series. This means that if you interrupt the
+migration, the database will contain some, but not all, records.
+Attempting to run the migration a second time will therefore fail. In
+such a case, before attempting to re-run the migration, empty the table
+like this::
+
+   echo "DELETE FROM enhydris_timeseriesrecord" | ./manage.py dbshell
+
+In addition, to speed up importing of the data, table constraints and
+indexes are created after the data is imported. This may mean that it
+could fail after importing if there are duplicate dates in the
+timeseries data. This can happen because of an `old bug`_. In such a
+case, reverse the migration (empty the table as above if needed), run
+the following inside the ``ENHYDRIS_TIMESERIES_DATA_DIR`` directory to
+find the problems, fix them and re-run the migration::
+
+    for x in *; do
+        a=`uniq -w 16 -D $x`
+        if [ -n "$a" ]; then
+            echo ========= $x
+            echo "$a"
+            echo
+        fi
+    done
+
+As an order of magnitude, conversion of the data should take something
+like 40 minutes per GB of ``ENHYDRIS_TIMESERIES_DATA_DIR`` storage
+space, but of course this depends on several factors. Roughly half of
+this time will be for the importing of the data, and another half for
+the creation of the indexes (however these times might not actually be
+linear).
+
+.. timescaledb: https://www.timescale.com
+.. _old bug: https://github.com/openmeteo/htimeseries/issues/22
 
 Multilingual contents
 ^^^^^^^^^^^^^^^^^^^^^
@@ -139,7 +238,7 @@ is important to use ``SITE_ID`` as the key and not ``None``.
 .. _LANGUAGE_CODE: https://docs.djangoproject.com/en/2.2/ref/settings/#language-code
 .. _PARLER_DEFAULT_LANGUAGE_CODE: https://django-parler.readthedocs.io/en/latest/configuration.html#parler-default-language-code
 .. _PARLER_LANGUAGES: https://django-parler.readthedocs.io/en/latest/configuration.html#parler-languages
-.. _but in django-parler: https://stackoverflow.com/questions/40187339/django-parler-doesnt-show-tabs-in-admin/
+.. _bug in django-parler: https://stackoverflow.com/questions/40187339/django-parler-doesnt-show-tabs-in-admin/
 
 Geographical areas
 ^^^^^^^^^^^^^^^^^^

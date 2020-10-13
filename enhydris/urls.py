@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView, View
 
-from enhydris import views, views_old
+from enhydris import views
 from enhydris.api import urls as enhydris_api_urls
 
 admin.autodiscover()
@@ -18,10 +18,11 @@ urlpatterns = [
     path("stations/<int:pk>/", views.StationDetail.as_view(), name="station_detail"),
     path("stations/<int:pk>/edit/", station_edit_view, name="station_edit"),
     path(
-        "stations/<int:station_id>/timeseries/<int:pk>/",
-        views.TimeseriesDetail.as_view(),
-        name="timeseries_detail",
+        "stations/<int:station_id>/timeseriesgroups/<int:pk>/",
+        views.TimeseriesGroupDetail.as_view(),
+        name="timeseries_group_detail",
     ),
+    path("downloaddata/", views.DownloadData.as_view(), name="download_data"),
     path("admin/", admin.site.urls),
     path("api/", include(enhydris_api_urls)),
     path(
@@ -29,8 +30,6 @@ urlpatterns = [
         RedirectView.as_view(pattern_name="station_detail", permanent=True),
     ),
     path("timeseries/d/<int:pk>/", views.OldTimeseriesDetailRedirectView.as_view()),
-    # For the following, see ticket #181
-    path("timeseries/data/", views_old.timeseries_data, name="timeseries_data"),
     path("_nested_admin/", include("nested_admin.urls")),
 ]
 

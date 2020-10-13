@@ -1,0 +1,19 @@
+{% load i18n %}
+{% load rules %}
+
+{% has_perm "enhydris.view_timeseries_data" request.user timeseries as can_view_timeseries_data %}
+{% if can_view_timeseries_data %}
+  <div class="btn-group mb-3" role="group">
+    {% if object.timeseries_set.exists %}
+      {% include "enhydris/timeseries_group_detail/download_button/button_active.html" %}
+    {% else %}
+      {% include "enhydris/timeseries_group_detail/download_button/button_disabled.html" %}
+    {% endif %}
+  </div> <!-- /.btn-group -->
+{% else %}
+  <p class="alert alert-warning" role="alert">
+    {% blocktrans %}
+      You don't have permission to download the data.
+    {% endblocktrans %}
+  </p>
+{% endif %}

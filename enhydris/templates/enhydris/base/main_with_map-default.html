@@ -8,12 +8,12 @@
 
 {% block mainjs %}
   {{ block.super }}
-  <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js"></script>
   {% block leaflet_plugins %}
-    <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet-plugins/3.0.3/layer/vector/KML.js"></script>
-    <script src="{% static "js/L.Control.MousePosition.js"%}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-plugins/3.0.3/layer/vector/KML.min.js"></script>
+    <script src="{% static 'js/L.Control.MousePosition.js'%}"></script>
   {% endblock %}
-  <script type="text/javascript" src="{% static "js/arg.js.v1.1.min.js" %}"></script>
+  <script type="text/javascript" src="{% static 'js/arg.js.v1.1.min.js' %}"></script>
   {% block map_js %}
     <script type="text/javascript">
       enhydris.mapBaseLayers = {{ map_base_layers|safe }};

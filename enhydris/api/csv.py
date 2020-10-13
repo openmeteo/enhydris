@@ -52,16 +52,17 @@ _timeseries_list_csv_headers = [
 ]
 
 
-def _timeseries_csv(t):
+def _timeseries_group_csv(tg):
+    time_step = tg.default_timeseries.time_step if tg.default_timeseries else ""
     return [
-        t.id,
-        t.gentity.id,
-        t.variable.descr if t.variable else "",
-        t.unit_of_measurement.symbol,
-        t.name,
-        t.precision,
-        t.time_zone.code,
-        t.time_step,
+        tg.id,
+        tg.gentity.id,
+        tg.variable.descr if tg.variable else "",
+        tg.unit_of_measurement.symbol,
+        tg.name,
+        tg.precision,
+        tg.time_zone.code,
+        time_step,
     ]
 
 
@@ -79,8 +80,8 @@ def prepare_csv(queryset):
                 csvwriter = csv.writer(timeseries_csv)
                 csvwriter.writerow(_timeseries_list_csv_headers)
                 for station in queryset:
-                    for timeseries in station.timeseries.order_by("variable__id"):
-                        csvwriter.writerow(_timeseries_csv(timeseries))
+                    for timeseries_group in station.timeseriesgroup_set.all():
+                        csvwriter.writerow(_timeseries_group_csv(timeseries_group))
                 zipfile.writestr("timeseries.csv", timeseries_csv.getvalue())
 
         return result.getvalue()

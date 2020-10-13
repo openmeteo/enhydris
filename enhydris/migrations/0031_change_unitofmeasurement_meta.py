@@ -11,6 +11,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterModelOptions(
-            name="unitofmeasurement", options={"ordering": ["symbol"]},
+            name="unitofmeasurement", options={"ordering": ["symbol"]}
         ),
     ]

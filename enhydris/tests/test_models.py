@@ -1,13 +1,9 @@
 import datetime as dt
-import os
 from io import StringIO
-from unittest.mock import MagicMock, Mock, mock_open, patch
 
-from django.conf import settings
 from django.contrib.gis.geos import MultiPolygon, Point, Polygon
-from django.core.files.base import ContentFile
 from django.db import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import translation
 
 import pandas as pd
@@ -16,7 +12,34 @@ from model_mommy import mommy
 from parler.utils.context import switch_language
 
 from enhydris import models
-from enhydris.tests import RandomEnhydrisTimeseriesDataDir
+from enhydris.tests import TimeseriesDataMixin
+
+
+class TestTimeseriesMixin:
+    @classmethod
+    def _create_test_timeseries(cls, data=""):
+        cls.station = mommy.make(
+            models.Station,
+            name="Celduin",
+            original_srid=2100,
+            geom=Point(x=21.06071, y=39.09518, srid=4326),
+            altitude=219,
+        )
+        cls.timeseries_group = mommy.make(
+            models.TimeseriesGroup,
+            name="Daily temperature",
+            gentity=cls.station,
+            unit_of_measurement__symbol="mm",
+            time_zone__code="IST",
+            time_zone__utc_offset=330,
+            variable__descr="Temperature",
+            precision=1,
+            remarks="This timeseries group rocks",
+        )
+        cls.timeseries = mommy.make(
+            models.Timeseries, timeseries_group=cls.timeseries_group, time_step="H"
+        )
+        cls.timeseries.set_data(StringIO(data))
 
 
 class PersonTestCase(TestCase):
@@ -103,6 +126,12 @@ class VariableTestCase(TestCase):
         self.assertEqual(str(gact), "Temperature")
         with switch_language(gact, "el"):
             self.assertEqual(str(gact), "Θερμοκρασία")
+
+    def test_manager_includes_objects_with_missing_translations(self):
+        variable = mommy.make(models.Variable, descr="hello")
+        self.assertEqual(str(variable), "hello")
+        with switch_language(variable, "el"):
+            models.Variable.objects.get(id=variable.id)  # Shouldn't raise anything
 
     def test_sort(self):
         self._create_variable("Temperature", "Θερμοκρασία")
@@ -297,47 +326,49 @@ class StationOriginalCoordinatesWithNullSridTestCase(TestCase):
         self.assertAlmostEqual(self.station.original_ordinate(), 39.09518)
 
 
-@patch("enhydris.models.Timeseries._set_start_and_end_date")
 class StationLastUpdateTestCase(TestCase):
     def setUp(self):
         self.station = mommy.make(models.Station)
         self.time_zone = mommy.make(models.TimeZone, code="EET", utc_offset=120)
+        self.timeseries_group = mommy.make(
+            models.TimeseriesGroup,
+            gentity=self.station,
+            time_zone=self.time_zone,
+            variable__descr="irrelevant",
+            precision=2,
+        )
 
-    def _create_timeseries(self, ye=None, mo=None, da=None, ho=None, mi=None):
+    def _create_timeseries(
+        self, ye=None, mo=None, da=None, ho=None, mi=None, type=models.Timeseries.RAW
+    ):
         if ye:
             end_date_utc = dt.datetime(ye, mo, da, ho, mi, tzinfo=dt.timezone.utc)
         else:
             end_date_utc = None
-        mommy.make(
-            models.Timeseries,
-            gentity=self.station,
-            time_zone=self.time_zone,
-            end_date_utc=end_date_utc,
-            precision=2,
+        timeseries = mommy.make(
+            models.Timeseries, timeseries_group=self.timeseries_group, type=type
         )
+        if end_date_utc:
+            timeseries.timeseriesrecord_set.create(
+                timestamp=end_date_utc, value=0, flags=""
+            )
 
-    def test_last_update_when_all_timeseries_have_end_date(self, m):
-        self._create_timeseries(2019, 7, 24, 11, 26)
-        self._create_timeseries(2019, 7, 23, 5, 10)
-        self.assertEqual(
-            self.station.last_update,
-            dt.datetime(2019, 7, 24, 13, 26, tzinfo=self.time_zone.as_tzinfo),
-        )
+    def test_last_update_when_all_timeseries_have_end_date(self):
+        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.RAW)
+        self._create_timeseries(2019, 7, 23, 5, 10, type=models.Timeseries.CHECKED)
+        self.assertEqual(self.station.last_update, dt.datetime(2019, 7, 24, 13, 26))
 
-    def test_last_update_when_one_timeseries_has_no_data(self, m):
-        self._create_timeseries(2019, 7, 24, 11, 26)
-        self._create_timeseries()
-        self.assertEqual(
-            self.station.last_update,
-            dt.datetime(2019, 7, 24, 13, 26, tzinfo=self.time_zone.as_tzinfo),
-        )
+    def test_last_update_when_one_timeseries_has_no_data(self):
+        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.RAW)
+        self._create_timeseries(type=models.Timeseries.CHECKED)
+        self.assertEqual(self.station.last_update, dt.datetime(2019, 7, 24, 13, 26))
 
-    def test_last_update_when_all_timeseries_has_no_data(self, m):
-        self._create_timeseries()
-        self._create_timeseries()
+    def test_last_update_when_all_timeseries_has_no_data(self):
+        self._create_timeseries(type=models.Timeseries.RAW)
+        self._create_timeseries(type=models.Timeseries.CHECKED)
         self.assertIsNone(self.station.last_update)
 
-    def test_last_update_when_no_timeseries(self, m):
+    def test_last_update_when_no_timeseries(self):
         self.assertIsNone(self.station.last_update)
 
 
@@ -379,29 +410,135 @@ class TimeZoneTestCase(TestCase):
         self.assertEqual(time_zone.as_tzinfo, dt.timezone(dt.timedelta(hours=2), "EET"))
 
 
+class TimeseriesGroupGetNameTestCase(TestCase):
+    def setUp(self):
+        self.timeseries_group = mommy.make(
+            models.TimeseriesGroup, variable__descr="Temperature", name=""
+        )
+
+    def test_get_name_when_name_is_blank(self):
+        self.assertEqual(self.timeseries_group.get_name(), "Temperature")
+
+    def test_get_name_when_name_is_not_blank(self):
+        self.timeseries_group.name = "Temperature from sensor 1"
+        self.assertEqual(self.timeseries_group.get_name(), "Temperature from sensor 1")
+
+    def test_get_name_when_translations_are_inactive(self):
+        with translation.override(None):
+            self.timeseries_group.variable._current_language = None
+            self.assertEqual(
+                self.timeseries_group.get_name(),
+                f"Timeseries group {self.timeseries_group.id}",
+            )
+
+
+class TimeseriesGroupDefaultTimeseriesTestCase(TestCase):
+    def setUp(self):
+        self.timeseries_group = mommy.make(
+            models.TimeseriesGroup, variable__descr="Temperature", name=""
+        )
+        self.raw_timeseries = self._make_timeseries(models.Timeseries.RAW)
+        self.checked_timeseries = self._make_timeseries(models.Timeseries.CHECKED)
+        self.regularized_timeseries = self._make_timeseries(
+            models.Timeseries.REGULARIZED
+        )
+
+    def _make_timeseries(self, type):
+        return mommy.make(
+            models.Timeseries, timeseries_group=self.timeseries_group, type=type
+        )
+
+    def test_returns_regularized(self):
+        self.assertEqual(
+            self.timeseries_group.default_timeseries, self.regularized_timeseries
+        )
+
+    def test_returns_checked(self):
+        self.regularized_timeseries.delete()
+        self.assertEqual(
+            self.timeseries_group.default_timeseries, self.checked_timeseries
+        )
+
+    def test_returns_raw(self):
+        self.regularized_timeseries.delete()
+        self.checked_timeseries.delete()
+        self.assertEqual(self.timeseries_group.default_timeseries, self.raw_timeseries)
+
+    def test_returns_none(self):
+        self.regularized_timeseries.delete()
+        self.checked_timeseries.delete()
+        self.raw_timeseries.delete()
+        self.assertIsNone(self.timeseries_group.default_timeseries)
+
+    def test_caching(self):
+        with self.assertNumQueries(1):
+            self.timeseries_group.default_timeseries
+        with self.assertNumQueries(0):
+            self.timeseries_group.default_timeseries
+
+    def test_num_queries(self):
+        with self.assertNumQueries(2):
+            # The following should cause two queries.
+            group = models.TimeseriesGroup.objects.prefetch_related(
+                "timeseries_set"
+            ).first()
+            # The following should cause no queries since the time series have
+            # been prefetched.
+            group.default_timeseries
+
+
+class TimeseriesGroupStartAndEndDateTestCase(TestCase, TimeseriesDataMixin):
+    def setUp(self):
+        self.create_timeseries()
+
+    def test_start_date(self):
+        self.assertEqual(
+            self.timeseries_group.start_date,
+            dt.datetime(2017, 11, 23, 17, 23, tzinfo=self.time_zone.as_tzinfo),
+        )
+
+    def test_end_date(self):
+        self.assertEqual(
+            self.timeseries_group.end_date,
+            dt.datetime(2018, 11, 25, 1, 0, tzinfo=self.time_zone.as_tzinfo),
+        )
+
+    def test_start_date_when_timeseries_is_empty(self):
+        self.timeseries.set_data(StringIO(""))
+        self.assertIsNone(self.timeseries_group.start_date)
+
+    def test_end_date_when_timeseries_is_empty(self):
+        self.timeseries.set_data(StringIO(""))
+        self.assertIsNone(self.timeseries_group.end_date)
+
+    def test_start_date_when_timeseries_does_not_exist(self):
+        self.timeseries.delete()
+        self.assertIsNone(self.timeseries_group.start_date)
+
+    def test_end_date_when_timeseries_does_not_exist(self):
+        self.timeseries.delete()
+        self.assertIsNone(self.timeseries_group.end_date)
+
+
 class TimeseriesTestCase(TestCase):
     def test_create(self):
-        station = mommy.make(models.Station)
-        variable = mommy.make(models.Variable)
-        unit = mommy.make(models.UnitOfMeasurement)
-        time_zone = mommy.make(models.TimeZone)
+        timeseries_group = mommy.make(models.TimeseriesGroup)
         timeseries = models.Timeseries(
-            gentity=station,
-            name="Temperature",
-            variable=variable,
-            unit_of_measurement=unit,
-            time_zone=time_zone,
-            precision=2,
+            type=models.Timeseries.AGGREGATED, timeseries_group=timeseries_group
         )
         timeseries.save()
-        self.assertEqual(models.Timeseries.objects.first().name, "Temperature")
+        self.assertEqual(
+            models.Timeseries.objects.first().type, models.Timeseries.AGGREGATED
+        )
 
     def test_update(self):
-        mommy.make(models.Timeseries)
+        mommy.make(models.Timeseries, type=models.Timeseries.RAW)
         timeseries = models.Timeseries.objects.first()
-        timeseries.name = "Temperature"
+        timeseries.type = models.Timeseries.AGGREGATED
         timeseries.save()
-        self.assertEqual(models.Timeseries.objects.first().name, "Temperature")
+        self.assertEqual(
+            models.Timeseries.objects.first().type, models.Timeseries.AGGREGATED
+        )
 
     def test_delete(self):
         mommy.make(models.Timeseries)
@@ -409,112 +546,167 @@ class TimeseriesTestCase(TestCase):
         timeseries.delete()
         self.assertEqual(models.Timeseries.objects.count(), 0)
 
-    def test_str(self):
-        timeseries = mommy.make(models.Timeseries, name="Temperature")
-        self.assertEqual(str(timeseries), "Temperature")
+    def test_str_raw(self):
+        self._test_str(type=models.Timeseries.RAW, result="Raw")
 
-    def test_related_station(self):
-        station = mommy.make(models.Station)
-        timeseries = mommy.make(models.Timeseries, gentity=station)
-        self.assertEqual(timeseries.related_station, station)
+    def test_str_checked(self):
+        self._test_str(type=models.Timeseries.CHECKED, result="Checked")
+
+    def test_str_regularized(self):
+        self._test_str(type=models.Timeseries.REGULARIZED, result="Regularized")
+
+    def test_str_aggregated(self):
+        self._test_str(type=models.Timeseries.AGGREGATED, result="Aggregated (H)")
+
+    def _make_timeseries(self, timeseries_group, type):
+        return mommy.make(
+            models.Timeseries,
+            timeseries_group=timeseries_group,
+            type=type,
+            time_step="H",
+        )
+
+    def _test_str(self, type, result):
+        timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
+        timeseries = self._make_timeseries(timeseries_group, type)
+        self.assertEqual(str(timeseries), result)
+
+    def test_only_one_raw_per_group(self):
+        timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
+        self._make_timeseries(timeseries_group, models.Timeseries.RAW)
+        with self.assertRaises(IntegrityError):
+            models.Timeseries(
+                timeseries_group=timeseries_group,
+                type=models.Timeseries.RAW,
+                time_step="D",
+            ).save()
+
+    def test_only_one_checked_per_group(self):
+        timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
+        self._make_timeseries(timeseries_group, models.Timeseries.CHECKED)
+        with self.assertRaises(IntegrityError):
+            models.Timeseries(
+                timeseries_group=timeseries_group,
+                type=models.Timeseries.CHECKED,
+                time_step="D",
+            ).save()
+
+    def test_only_one_regularized_per_group(self):
+        timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
+        self._make_timeseries(timeseries_group, models.Timeseries.REGULARIZED)
+        with self.assertRaises(IntegrityError):
+            models.Timeseries(
+                timeseries_group=timeseries_group,
+                type=models.Timeseries.REGULARIZED,
+                time_step="D",
+            ).save()
+
+    def test_uniqueness(self):
+        timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
+        self._make_timeseries(timeseries_group, models.Timeseries.AGGREGATED)
+        with self.assertRaises(IntegrityError):
+            models.Timeseries(
+                timeseries_group=timeseries_group,
+                type=models.Timeseries.AGGREGATED,
+                time_step="H",
+            ).save()
+
+    def test_many_aggregated_per_group(self):
+        timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
+        self._make_timeseries(timeseries_group, models.Timeseries.AGGREGATED)
+        models.Timeseries(
+            timeseries_group=timeseries_group,
+            type=models.Timeseries.AGGREGATED,
+            time_step="D",
+        ).save()
+
+
+def make_timeseries(*, start_date, end_date, **kwargs):
+    """Make a test timeseries, setting start_date and end_date.
+    This is essentially the same as mommy.make(models.Timeseries, **kwargs), except
+    that it also creates two records with the specified dates.
+    """
+    result = mommy.make(models.Timeseries, **kwargs)
+    result.timeseriesrecord_set.create(timestamp=start_date, value=0, flags="")
+    result.timeseriesrecord_set.create(timestamp=end_date, value=0, flags="")
+    return result
 
 
 class TimeseriesDatesTestCase(TestCase):
     def setUp(self):
-        self.timeseries = mommy.make(
-            models.Timeseries, time_zone__utc_offset=120, precision=2
-        )
-
-        # We can't have mommy save the following two, because it calls
-        # Timeseries.save(), and .save() would overwrite them.
-        self.timeseries.start_date_utc = dt.datetime(
-            2018, 11, 15, 16, 0, tzinfo=dt.timezone.utc
-        )
-        self.timeseries.end_date_utc = dt.datetime(
-            2018, 11, 17, 23, 0, tzinfo=dt.timezone.utc
+        self.timeseries = make_timeseries(
+            timeseries_group__time_zone__utc_offset=120,
+            timeseries_group__precision=2,
+            start_date=dt.datetime(2018, 11, 15, 16, 0, tzinfo=dt.timezone.utc),
+            end_date=dt.datetime(2018, 11, 17, 23, 0, tzinfo=dt.timezone.utc),
         )
 
     def test_start_date(self):
         self.assertEqual(
             self.timeseries.start_date,
             dt.datetime(
-                2018, 11, 15, 18, 0, tzinfo=self.timeseries.time_zone.as_tzinfo
+                2018,
+                11,
+                15,
+                18,
+                0,
+                tzinfo=self.timeseries.timeseries_group.time_zone.as_tzinfo,
             ),
+        )
+
+    def test_start_date_tzinfo(self):
+        self.assertEqual(
+            self.timeseries.start_date.tzinfo,
+            self.timeseries.timeseries_group.time_zone.as_tzinfo,
         )
 
     def test_end_date(self):
         self.assertEqual(
             self.timeseries.end_date,
-            dt.datetime(2018, 11, 18, 1, 0, tzinfo=self.timeseries.time_zone.as_tzinfo),
+            dt.datetime(
+                2018,
+                11,
+                18,
+                1,
+                0,
+                tzinfo=self.timeseries.timeseries_group.time_zone.as_tzinfo,
+            ),
         )
 
-
-class TimeseriesSaveDatesTestCase(TestCase):
-    def setUp(self):
-        self.timeseries = mommy.make(
-            models.Timeseries, time_zone__utc_offset=120, precision=2
-        )
-
-        # Mock self.timeseries.datafile
-        self.timeseries.datafile = Mock(size=50)
-
-        # Mock open so that it appears to provide some data
-        m = mock_open(read_data="2017-11-23 17:23,1,\n" "2018-11-25 01:00,2,\n")
-        patch_open = patch("enhydris.models.open", m)
-
-        # Mock ropen so that it appears to provide the same data in reverse
-        m = mock_open(read_data="2018-11-25 01:00,2,\n" "2017-11-23 17:23,1,\n")
-        patch_ropen = patch("enhydris.models.ropen", m)
-
-        # Mock django's Model.save(), otherwise when it runs under this mock mess
-        # it causes an error
-        patch_save = patch("enhydris.models.models.Model.save")
-
-        # Execute Timeseries.save(); then we will verify dates were overwritten
-        with patch_open, patch_ropen, patch_save:
-            self.timeseries.save()
-
-    def test_start_date(self):
+    def test_end_date_tzinfo(self):
         self.assertEqual(
-            self.timeseries.start_date_utc,
-            dt.datetime(2017, 11, 23, 15, 23, tzinfo=dt.timezone.utc),
+            self.timeseries.end_date.tzinfo,
+            self.timeseries.timeseries_group.time_zone.as_tzinfo,
         )
 
-    def test_end_date(self):
+    def test_start_date_naive(self):
         self.assertEqual(
-            self.timeseries.end_date_utc,
-            dt.datetime(2018, 11, 24, 23, 0, tzinfo=dt.timezone.utc),
+            self.timeseries.start_date_naive, dt.datetime(2018, 11, 15, 18, 0)
+        )
+
+    def test_end_date_naive(self):
+        self.assertEqual(
+            self.timeseries.end_date_naive, dt.datetime(2018, 11, 18, 1, 0)
         )
 
 
-@RandomEnhydrisTimeseriesDataDir()
-class TimeseriesGetDataTestCase(TestCase):
+class DataTestCase(TestCase, TestTimeseriesMixin):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        station = mommy.make(
-            models.Station,
-            name="Celduin",
-            original_srid=2100,
-            geom=Point(x=21.06071, y=39.09518, srid=4326),
-            altitude=219,
+        cls._create_test_timeseries("2017-11-23 17:23,1,\n2018-11-25 01:00,2,\n")
+        cls.expected_result = pd.DataFrame(
+            data={"value": [1.0, 2.0], "flags": ["", ""]},
+            columns=["value", "flags"],
+            index=[dt.datetime(2017, 11, 23, 17, 23), dt.datetime(2018, 11, 25, 1, 0)],
         )
-        cls.timeseries = mommy.make(
-            models.Timeseries,
-            name="Daily temperature",
-            gentity=station,
-            time_step="H",
-            unit_of_measurement__symbol="mm",
-            time_zone__code="IST",
-            time_zone__utc_offset=330,
-            variable__descr="Temperature",
-            precision=1,
-            remarks="This timeseries rocks",
-        )
-        cls.timeseries.datafile.save(
-            "filename", ContentFile("2017-11-23 17:23,1,\n2018-11-25 01:00,2,\n")
-        )
+        cls.expected_result.index.name = "date"
 
+
+class TimeseriesGetDataTestCase(DataTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
         cls.data = cls.timeseries.get_data()
 
     def test_abscissa(self):
@@ -542,8 +734,8 @@ class TimeseriesGetDataTestCase(TestCase):
         self.assertEqual(self.data.timezone, "IST (UTC+0530)")
 
     def test_negative_timezone(self):
-        self.timeseries.time_zone.code = "NST"
-        self.timeseries.time_zone.utc_offset = -210
+        self.timeseries.timeseries_group.time_zone.code = "NST"
+        self.timeseries.timeseries_group.time_zone.utc_offset = -210
         data = self.timeseries.get_data()
         self.assertEqual(data.timezone, "NST (UTC-0330)")
 
@@ -554,49 +746,109 @@ class TimeseriesGetDataTestCase(TestCase):
         self.assertEqual(self.data.precision, 1)
 
     def test_comment(self):
-        self.assertEqual(self.data.comment, "Celduin\n\nThis timeseries rocks")
+        self.assertEqual(self.data.comment, "Celduin\n\nThis timeseries group rocks")
 
     def test_location_is_none(self):
-        self.timeseries.gentity.geom = None
+        self.timeseries.timeseries_group.gentity.geom = None
         data = self.timeseries.get_data()
         self.assertIsNone(data.location)
 
     def test_data(self):
-        expected_result = pd.DataFrame(
+        pd.testing.assert_frame_equal(self.data.data, self.expected_result)
+
+
+class TimeseriesGetDataWithStartAndEndDateTestCase(DataTestCase):
+    def _check(self, start_index=None, end_index=None):
+        """Check self.htimeseries.data against the initial timeseries sliced from
+        start_index to end_index.
+        """
+        full_result = pd.DataFrame(
             data={"value": [1.0, 2.0], "flags": ["", ""]},
             columns=["value", "flags"],
             index=[dt.datetime(2017, 11, 23, 17, 23), dt.datetime(2018, 11, 25, 1, 0)],
         )
-        expected_result.index.name = "date"
-        pd.testing.assert_frame_equal(self.data.data, expected_result)
+        full_result.index.name = "date"
+        expected_result = full_result.iloc[start_index:end_index]
+        pd.testing.assert_frame_equal(self.ahtimeseries.data, expected_result)
+
+    def test_with_start_date_just_before_start_of_timeseries(self):
+        tzinfo = self.timeseries.timeseries_group.time_zone.as_tzinfo
+        start_date = dt.datetime(2017, 11, 23, 17, 22, tzinfo=tzinfo)
+        self.ahtimeseries = self.timeseries.get_data(start_date=start_date)
+        self._check()
+
+    def test_with_start_date_on_start_of_timeseries(self):
+        tzinfo = self.timeseries.timeseries_group.time_zone.as_tzinfo
+        start_date = dt.datetime(2017, 11, 23, 17, 23, tzinfo=tzinfo)
+        self.ahtimeseries = self.timeseries.get_data(start_date=start_date)
+        self._check()
+
+    def test_with_start_date_just_after_start_of_timeseries(self):
+        tzinfo = self.timeseries.timeseries_group.time_zone.as_tzinfo
+        start_date = dt.datetime(2017, 11, 23, 17, 24, tzinfo=tzinfo)
+        self.ahtimeseries = self.timeseries.get_data(start_date=start_date)
+        self._check(start_index=1)
+
+    def test_with_end_date_just_after_end_of_timeseries(self):
+        tzinfo = self.timeseries.timeseries_group.time_zone.as_tzinfo
+        end_date = dt.datetime(2018, 11, 25, 1, 1, tzinfo=tzinfo)
+        self.ahtimeseries = self.timeseries.get_data(end_date=end_date)
+        self._check()
+
+    def test_with_end_date_on_end_of_timeseries(self):
+        tzinfo = self.timeseries.timeseries_group.time_zone.as_tzinfo
+        end_date = dt.datetime(2018, 11, 25, 1, 0, tzinfo=tzinfo)
+        self.ahtimeseries = self.timeseries.get_data(end_date=end_date)
+        self._check()
+
+    def test_with_end_date_just_before_end_of_timeseries(self):
+        tzinfo = self.timeseries.timeseries_group.time_zone.as_tzinfo
+        end_date = dt.datetime(2018, 11, 25, 0, 59, tzinfo=tzinfo)
+        self.ahtimeseries = self.timeseries.get_data(end_date=end_date)
+        self._check(end_index=1)
 
 
-@RandomEnhydrisTimeseriesDataDir()
-class TimeseriesSetDataTestCase(TestCase):
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+)
+class TimeseriesGetDataCacheTestCase(DataTestCase):
+    def test_cache(self):
+        # Make sure we've accessed gpoint already, otherwise it screws up the number of
+        # queries later
+        self.timeseries.timeseries_group.gentity.gpoint.altitude
+
+        self._get_data_and_check_num_queries(1)
+        self._get_data_and_check_num_queries(0)
+
+        # Check cache invalidation
+        self.timeseries.save()
+        self._get_data_and_check_num_queries(1)
+
+    def _get_data_and_check_num_queries(self, num_queries):
+        with self.assertNumQueries(num_queries):
+            data = self.timeseries.get_data()
+        pd.testing.assert_frame_equal(data.data, self.expected_result)
+
+
+class TimeseriesSetDataTestCase(TestCase, TestTimeseriesMixin):
     def setUp(self):
-        self.timeseries = mommy.make(
-            models.Timeseries, id=42, time_zone__utc_offset=0, precision=2
-        )
+        self._create_test_timeseries()
 
     def test_call_with_file_object(self):
-        returned_length = self.timeseries.set_data(
+        self.returned_length = self.timeseries.set_data(
             StringIO("2017-11-23 17:23,1,\n" "2018-11-25 01:00,2,\n")
         )
-        self.assertEqual(returned_length, 2)
-        self.assertEqual(self.timeseries.datafile.name, "0000000042")
-        self._assert_file_contents()
+        self._check_results()
 
     def test_call_with_dataframe(self):
-        returned_length = self.timeseries.set_data(self._get_dataframe())
-        self.assertEqual(returned_length, 2)
-        self.assertEqual(self.timeseries.datafile.name, "0000000042")
-        self._assert_file_contents()
+        self.returned_length = self.timeseries.set_data(self._get_dataframe())
+        self._check_results()
 
     def test_call_with_htimeseries(self):
-        returned_length = self.timeseries.set_data(HTimeseries(self._get_dataframe()))
-        self.assertEqual(returned_length, 2)
-        self.assertEqual(self.timeseries.datafile.name, "0000000042")
-        self._assert_file_contents()
+        self.returned_length = self.timeseries.set_data(
+            HTimeseries(self._get_dataframe())
+        )
+        self._check_results()
 
     def _get_dataframe(self):
         result = pd.DataFrame(
@@ -607,25 +859,44 @@ class TimeseriesSetDataTestCase(TestCase):
         result.index.name = "date"
         return result
 
-    def _assert_file_contents(self):
+    def _check_results(self):
+        self.assertEqual(self.returned_length, 2)
         self.assertEqual(
-            open(
-                os.path.join(settings.ENHYDRIS_TIMESERIES_DATA_DIR, "0000000042"), "rb"
-            ).read(),
-            (
-                b"2017-11-23 17:23,1.000000000000000,\r\n"
-                b"2018-11-25 01:00,2.000000000000000,\r\n"
-            ),
+            list(self.timeseries.timeseriesrecord_set.values()),
+            [
+                {
+                    "timeseries_id": self.timeseries.id,
+                    "timestamp": dt.datetime(
+                        2017,
+                        11,
+                        23,
+                        17,
+                        23,
+                        tzinfo=models.TimeZone(code="IST", utc_offset=330).as_tzinfo,
+                    ),
+                    "value": 1.0,
+                    "flags": "",
+                },
+                {
+                    "timeseries_id": self.timeseries.id,
+                    "timestamp": dt.datetime(
+                        2018,
+                        11,
+                        25,
+                        1,
+                        0,
+                        tzinfo=models.TimeZone(code="IST", utc_offset=330).as_tzinfo,
+                    ),
+                    "value": 2.0,
+                    "flags": "",
+                },
+            ],
         )
 
 
-@RandomEnhydrisTimeseriesDataDir()
-class TimeseriesAppendDataTestCase(TestCase):
+class TimeseriesAppendDataTestCase(TestCase, TestTimeseriesMixin):
     def setUp(self):
-        self.timeseries = mommy.make(
-            models.Timeseries, id=42, time_zone__utc_offset=0, precision=2
-        )
-        self.timeseries.set_data(StringIO("2016-01-01 00:00,42,\n"))
+        self._create_test_timeseries("2016-01-01 00:00,42,\n")
 
     def test_call_with_file_object(self):
         returned_length = self.timeseries.append_data(
@@ -656,22 +927,22 @@ class TimeseriesAppendDataTestCase(TestCase):
         return result
 
     def _assert_wrote_data(self):
-        self.assertEqual(
-            open(self.timeseries.datafile.path, "rb").read(),
-            (
-                b"2016-01-01 00:00,42.000000000000000,\r\n"
-                b"2017-11-23 17:23,1.000000000000000,\r\n"
-                b"2018-11-25 01:00,2.000000000000000,\r\n"
-            ),
+        expected_result = pd.DataFrame(
+            data={"value": [42.0, 1.0, 2.0], "flags": ["", "", ""]},
+            columns=["value", "flags"],
+            index=[
+                dt.datetime(2016, 1, 1, 0, 0),
+                dt.datetime(2017, 11, 23, 17, 23),
+                dt.datetime(2018, 11, 25, 1, 0),
+            ],
         )
+        expected_result.index.name = "date"
+        pd.testing.assert_frame_equal(self.timeseries.get_data().data, expected_result)
 
 
-@RandomEnhydrisTimeseriesDataDir()
-class TimeseriesAppendDataToEmptyTimeseriesTestCase(TestCase):
+class TimeseriesAppendDataToEmptyTimeseriesTestCase(TestCase, TestTimeseriesMixin):
     def setUp(self):
-        self.timeseries = mommy.make(
-            models.Timeseries, id=42, time_zone__utc_offset=0, precision=2
-        )
+        self._create_test_timeseries()
 
     def test_call_with_dataframe(self):
         returned_length = self.timeseries.append_data(self._get_dataframe())
@@ -688,68 +959,30 @@ class TimeseriesAppendDataToEmptyTimeseriesTestCase(TestCase):
         return result
 
     def _assert_wrote_data(self):
-        self.assertEqual(
-            open(self.timeseries.datafile.path, "rb").read(),
-            (
-                b"2017-11-23 17:23,1.000000000000000,\r\n"
-                b"2018-11-25 01:00,2.000000000000000,\r\n"
-            ),
+        pd.testing.assert_frame_equal(
+            self.timeseries.get_data().data, self._get_dataframe()
         )
 
 
-@RandomEnhydrisTimeseriesDataDir()
-class TimeseriesAppendErrorTestCase(TestCase):
+class TimeseriesAppendErrorTestCase(TestCase, TestTimeseriesMixin):
     def test_does_not_update_if_data_to_append_are_not_later(self):
-        self.timeseries = mommy.make(
-            models.Timeseries, id=42, time_zone__utc_offset=0, precision=2
-        )
-        self.timeseries.set_data(StringIO("2018-01-01 00:00,42,\n"))
+        self._create_test_timeseries("2018-01-01 00:00,42,\n")
         with self.assertRaises(IntegrityError):
             self.timeseries.append_data(
                 StringIO("2017-11-23 17:23,1,\n2018-11-25 01:00,2,\n")
             )
 
 
-class TimeseriesGetFirstOrLastLineTestCase(TestCase):
-    def test_get_first_line(self):
-        timeseries = mommy.make(
-            models.Timeseries, id=42, time_zone__utc_offset=0, precision=2
+class TimeseriesGetLastRecordAsStringTestCase(TestCase, TestTimeseriesMixin):
+    def test_when_record_exists(self):
+        self._create_test_timeseries("2017-11-23 17:23,1,\n2018-11-25 01:00,2,\n")
+        self.assertEqual(
+            self.timeseries.get_last_record_as_string(), "2018-11-25 01:00,2.0,"
         )
 
-        # Mock self.timeseries.datafile
-        timeseries.datafile = MagicMock(size=50)
-
-        # Mock open() so that it supposedly returns some data
-        m = mock_open(read_data="2017-11-23 17:23,1,\n" "2018-11-25 01:00,2,\n")
-        patch1 = patch("enhydris.models.open", m)
-
-        # Mock Timeseries.save(), otherwise there's chaos
-        patch2 = patch("enhydris.models.Timeseries.save")
-
-        with patch1, patch2:
-            first_line = timeseries.get_first_line()
-
-        self.assertEqual(first_line, "2017-11-23 17:23,1,\n")
-
-    def test_get_last_line(self):
-        timeseries = mommy.make(
-            models.Timeseries, id=42, time_zone__utc_offset=0, precision=2
-        )
-
-        # Mock self.timeseries.datafile
-        timeseries.datafile = MagicMock(size=50)
-
-        # Mock ropen() so that it supposedly returns some data
-        m = mock_open(read_data="2018-11-25 01:00,2,\n" "2017-11-23 17:23,1,\n")
-        patch1 = patch("enhydris.models.ropen", m)
-
-        # Mock Timeseries.save(), otherwise there's chaos
-        patch2 = patch("enhydris.models.Timeseries.save")
-
-        with patch1, patch2:
-            first_line = timeseries.get_last_line()
-
-        self.assertEqual(first_line, "2018-11-25 01:00,2,\n")
+    def test_when_record_does_not_exist(self):
+        self._create_test_timeseries()
+        self.assertEqual(self.timeseries.get_last_record_as_string(), "")
 
 
 class TimestepTestCase(TestCase):
@@ -795,3 +1028,34 @@ class TimestepTestCase(TestCase):
     def test_wrong_unit(self):
         with self.assertRaisesRegex(ValueError, '"3B" is not a valid time step'):
             self.set_time_step("3B")
+
+
+class TimeseriesRecordTestCase(TestCase, TestTimeseriesMixin):
+    def test_str(self):
+        self._create_test_timeseries("2017-11-23 17:23,3.14159,\n")
+        record = models.TimeseriesRecord.objects.first()
+        self.assertAlmostEqual(record.value, 3.14159)
+        self.assertEqual(str(record), "2017-11-23 17:23,3.1,")
+
+    def test_str_when_no_value(self):
+        self._create_test_timeseries("2017-11-23 17:23,,\n")
+        record = models.TimeseriesRecord.objects.first()
+        record.save()
+        self.assertEqual(str(record), "2017-11-23 17:23,,")
+
+
+class TimeseriesRecordBulkInsertTestCase(TestCase, TestTimeseriesMixin):
+    @classmethod
+    def setUpTestData(cls):
+        cls._create_test_timeseries()
+        ahtimeseries = HTimeseries(
+            StringIO("2020-09-08 20:00,15.7,,\n2020-09-08 21:00,,\n")
+        )
+        models.TimeseriesRecord.bulk_insert(cls.timeseries, ahtimeseries)
+        cls.timeseries_records = models.TimeseriesRecord.objects.all()
+
+    def test_first_value(self):
+        self.assertAlmostEqual(self.timeseries_records[0].value, 15.7)
+
+    def test_empty_value(self):
+        self.assertIsNone(self.timeseries_records[1].value)

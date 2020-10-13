@@ -115,7 +115,7 @@ class StationListViewMixin:
             | Q(owner__organization__name__unaccent__icontains=search_term)
             | Q(owner__person__first_name__unaccent__icontains=search_term)
             | Q(owner__person__last_name__unaccent__icontains=search_term)
-            | Q(timeseries__remarks__unaccent__icontains=search_term)
+            | Q(timeseriesgroup__remarks__unaccent__icontains=search_term)
         )
 
     def _specific_filter(self, queryset, name, value):
@@ -140,7 +140,7 @@ class StationListViewMixin:
 
     def _filter_by_variable(self, queryset, value):
         return queryset.filter(
-            timeseries__variable__in=models.Variable.objects.filter(
+            timeseriesgroup__variable__in=models.Variable.objects.filter(
                 translations__descr__unaccent__icontains=value
             )
         )
@@ -157,27 +157,18 @@ class StationListViewMixin:
         return queryset.filter(geom__contained=geom)
 
     def _filter_by_ts_only(self, queryset, value):
-        return queryset.annotate(tsnum=Count("timeseries")).exclude(tsnum=0)
+        return queryset.annotate(tsnum=Count("timeseriesgroup")).exclude(tsnum=0)
 
     def _filter_by_ts_has_years(self, queryset, value):
         try:
             years = [int(y) for y in value.split(",")]
         except ValueError:
             raise Http404
-        return queryset.extra(
-            where=[
-                " AND ".join(
-                    [
-                        "enhydris_station.gpoint_ptr_id IN "
-                        "(SELECT t.gentity_id FROM enhydris_timeseries t "
-                        "WHERE " + str(year) + " BETWEEN "
-                        "EXTRACT(YEAR FROM t.start_date_utc) AND "
-                        "EXTRACT(YEAR FROM t.end_date_utc))"
-                        for year in years
-                    ]
-                )
-            ]
-        )
+        for year in years:
+            queryset = queryset.filter(
+                timeseriesgroup__timeseries__timeseriesrecord__timestamp__year=year
+            )
+        return queryset
 
     def _filter_by_in(self, queryset, value):
         gareas = models.Garea.objects.filter(

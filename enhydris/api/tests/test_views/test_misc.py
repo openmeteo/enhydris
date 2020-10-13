@@ -78,3 +78,22 @@ class GentityEventTestCase(APITestCase):
     def test_list_status_code(self):
         r = self.client.get("/api/stations/{}/events/".format(self.station.id))
         self.assertEqual(r.status_code, 200)
+
+
+class GetTokenTestCase(APITestCase):
+    """Test a workaround against a DRF <3.13 problem.
+
+    There's a nasty typo in a Greek translation string in DRF—instead of '"{method}"' it
+    has '"{method"}'. This causes an internal server error when we try to visit
+    "/api/auth/login/" and the language is Greek. As of this writing, the latest version
+    of DRF (3.12) still has the problem, although they tell us it's been fixed in
+    Transifex (see https://github.com/encode/django-rest-framework/pull/7591). While
+    waiting for a new version, we've worked around by overriding the translation (see
+    enhydris/translation_overrides.py and locale/el/LC_MESSAGES/django.po). We test this
+    here. When a fixed DRF is out, this test should be removed together with the
+    translation override.
+    """
+
+    def test_greek(self):
+        r = self.client.get("/api/auth/login/", HTTP_ACCEPT_LANGUAGE="el")
+        self.assertContains(r, "δεν επιτρέπεται", status_code=405)

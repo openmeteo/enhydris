@@ -4,6 +4,7 @@ from io import StringIO
 from wsgiref.util import FileWrapper
 
 from django.db import IntegrityError
+from django.db.models import Prefetch
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -12,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 import iso8601
+import numpy as np
 import pandas as pd
 from htimeseries import HTimeseries
 
@@ -39,7 +41,20 @@ class StationViewSet(StationListViewMixin, ModelViewSet):
 
     @action(detail=False, methods=["get"])
     def csv(self, request):
-        data = prepare_csv(self.get_queryset())
+        data = prepare_csv(
+            self.get_queryset()
+            .select_related("owner")
+            .prefetch_related(
+                Prefetch(
+                    "timeseriesgroup_set",
+                    queryset=models.TimeseriesGroup.objects.select_related(
+                        "variable", "unit_of_measurement", "time_zone"
+                    )
+                    .prefetch_related("timeseries_set")
+                    .order_by("variable__id"),
+                )
+            )
+        )
         response = HttpResponse(data, content_type="application/zip")
         response["Content-Disposition"] = "attachment; filename=data.zip"
         response["Content-Length"] = len(data)
@@ -124,18 +139,30 @@ class GentityFileViewSet(ReadOnlyModelViewSet):
 
 
 class TimeseriesViewSet(ModelViewSet):
+    CHART_MAXIMUM_NUMBER_OF_SAMPLES = 200
     queryset = models.Timeseries.objects.all()
     serializer_class = serializers.TimeseriesSerializer
 
     def get_permissions(self):
-        if self.action in ("data", "bottom"):
+        if self.action in ("data", "bottom", "chart"):
             pc = [permissions.CanAccessTimeseriesData]
         else:
             pc = [permissions.CanEditOrReadOnly]
         return [x() for x in pc]
 
     def get_queryset(self):
-        return models.Timeseries.objects.filter(gentity_id=self.kwargs["station_id"])
+        try:
+            return models.Timeseries.objects.filter(
+                timeseries_group_id=self.kwargs["timeseries_group_id"]
+            )
+        except KeyError:
+            # Sometimes we know the station_id but not the timeseries_group_id. This
+            # happens in backwards-compatible URLs like /api/stations/1403/timeseries/.
+            # We don't unit-test this since it's deprecated and will be removed in a
+            # future version.
+            return models.Timeseries.objects.filter(
+                timeseries_group__gentity_id=self.kwargs["station_id"]
+            )
 
     def create(self, request, *args, **kwargs):
         """Redefine create, checking permissions and gentity_id.
@@ -152,54 +179,107 @@ class TimeseriesViewSet(ModelViewSet):
 
         # Check permissions
         try:
-            gentity_id = int(serializer.get_initial()["gentity"])
+            timeseries_group_id = int(serializer.get_initial()["timeseries_group"])
         except ValueError:
             raise Http404
-        station = get_object_or_404(models.Station, id=gentity_id)
+        timeseries_group = get_object_or_404(
+            models.TimeseriesGroup, id=timeseries_group_id
+        )
+        station = timeseries_group.gentity.gpoint.station
         if not request.user.is_authenticated:
             return Response("Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
         if not request.user.has_perm("enhydris.change_station", station):
             return Response("Forbidden", status=status.HTTP_403_FORBIDDEN)
 
-        # Check the correctness of gentity_id
-        if str(gentity_id) != self.kwargs["station_id"]:
+        # Check whether the station and timeseries group ids in the url and in the
+        # posted data are consistent
+        if str(timeseries_group.gentity_id) != self.kwargs["station_id"]:
             return Response("Wrong gentity_id", status=status.HTTP_400_BAD_REQUEST)
+        if str(timeseries_group.id) != self.kwargs["timeseries_group_id"]:
+            return Response(
+                "Wrong timeseries_group_id", status=status.HTTP_400_BAD_REQUEST
+            )
 
         # All checks passed, call inherited method to do the actual work.
         return super().create(request, *args, **kwargs)
 
     @action(detail=True, methods=["get", "post"])
-    def data(self, request, pk=None, *, station_id):
+    def data(self, request, pk=None, *, station_id, timeseries_group_id=None):
         if request.method in ("GET", "HEAD"):
             return self._get_data(request, pk)
         elif request.method == "POST":
             return self._post_data(request, pk)
 
     @action(detail=True, methods=["get"])
-    def bottom(self, request, pk=None, *, station_id):
+    def bottom(self, request, pk=None, *, station_id, timeseries_group_id=None):
         ts = get_object_or_404(models.Timeseries, pk=pk)
         self.check_object_permissions(request, ts)
         response = HttpResponse(content_type="text/plain")
-        response.write(ts.get_last_line())
+        response.write(ts.get_last_record_as_string())
         return response
 
-    def _get_data(self, request, pk, format=None):
-        timeseries = get_object_or_404(models.Timeseries, pk=int(pk))
+    @action(detail=True, methods=["get"])
+    def chart(self, request, pk=None, *, station_id, timeseries_group_id):
+        timeseries = get_object_or_404(models.Timeseries, pk=pk)
         self.check_object_permissions(request, timeseries)
+        serializer = serializers.TimeseriesRecordChartSerializer(
+            self._get_chart_data(request, timeseries), many=True
+        )
+        return Response(serializer.data)
 
-        tz = timeseries.time_zone.as_tzinfo
+    def _get_chart_data(self, request, timeseries):
+        start_date, end_date = self._get_date_bounds(request, timeseries)
+        # Drop rows with value "NaN"
+        data_frame = timeseries.get_data(
+            start_date=start_date, end_date=end_date
+        ).data.dropna(subset=["value"])
+        return self._get_sampled_data_to_plot(data_frame)
+
+    def _get_sampled_data_to_plot(self, df):
+        """Returns a sample of the data to be plotted, by equally sampling across time.
+
+        Divides the dataframe/timeseries by time into "CHART_MAXIMUM_NUMBER_OF_SAMPLES"
+        data points, including the starting point. It works by looping from the min-date
+        till it reaches the max-date, incrementing the time by a calculated interval
+        that results in the required number of samples.
+        At each data point, we take the nearest value as the data point,
+        if no value exists, a NaN is returned at this timestamp.
+        """
+        number_of_samples = min(self.CHART_MAXIMUM_NUMBER_OF_SAMPLES, len(df.index))
+        min_time = df.index.min()
+        max_time = df.index.max()
+        interval = (max_time - min_time) / (number_of_samples - 1)
+        tolerance = interval / 2
+        result = []
+
+        current_time = min_time
+        while current_time <= max_time:
+            result.append(self._get_nearest_data_point(df, current_time, tolerance))
+            current_time += interval
+        return result
+
+    def _get_nearest_data_point(self, df, current_time, tolerance):
+        try:
+            idx = df.index.get_loc(current_time, method="nearest", tolerance=tolerance)
+            value = df.iloc[idx].value
+        except KeyError:
+            value = np.nan
+        return {"timestamp": current_time.timestamp(), "value": value}
+
+    def _get_date_bounds(self, request, timeseries):
+        tz = timeseries.timeseries_group.time_zone.as_tzinfo
         start_date = request.GET.get("start_date")
         end_date = request.GET.get("end_date")
         start_date = self._get_date_from_string(start_date, tz)
         end_date = self._get_date_from_string(end_date, tz)
+        return start_date, end_date
 
-        # The time series data are naive, so we also make start_date and end_date naive.
-        if start_date:
-            start_date = start_date.replace(tzinfo=None)
-        if end_date:
-            end_date = end_date.replace(tzinfo=None)
-
+    def _get_data(self, request, pk, format=None):
+        timeseries = get_object_or_404(models.Timeseries, pk=int(pk))
+        self.check_object_permissions(request, timeseries)
+        start_date, end_date = self._get_date_bounds(request, timeseries)
         fmt_param = request.GET.get("fmt", "csv").lower()
+
         if fmt_param == "hts":
             fmt = HTimeseries.FILE
             version = 5

@@ -1,0 +1,55 @@
+{% extends "enhydris/base/main.html" %}
+{% load i18n %}
+
+{% block title %}
+  {{ object.get_name }} — {{ object.gentity }} — {{ block.super }}
+{% endblock %}
+
+{% block mainjs %}
+  {{ block.super }}
+  {% if object.timeseries_set.exists %}
+    {% include "enhydris/timeseries_group_detail/chartjs.html" %}
+  {% endif %}
+{% endblock %}
+
+{% block content%}
+  <div class="container mt-4">
+    <div class="card">
+      <div class="card-header">
+        <p class="my-0">{{ object.gentity.name }} - {{ object.get_name }}</p>
+      </div>
+
+      <div class="card-body">
+        <div class="row">
+          <div class="col-xs-12 col-sm-5">
+            {% if object.timeseries_set.exits %}
+              {% include "enhydris/timeseries_group_detail/chart.html" %}
+            {% else %}
+              <div class="message-no-data">
+                <p class="text-muted text-center">
+                  {% trans "This time series group has no data yet." %}
+                </p>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="col-xs-12 col-sm-7">
+            {% include "enhydris/timeseries_group_detail/download.html" %}
+            {% include "enhydris/timeseries_group_detail/details_table.html" %}
+          </div>
+        </div>
+      </div>
+
+      {% if display_copyright and timeseries.related_station %}
+        <div class="card-footer">
+          <p>&copy;
+            <span class="text-warning">sdgdggdsgdsg
+              {{ timeseries.related_station.copyright_years }}
+              {{ timeseries.related_station.copyright_holder }}
+            </span>
+          </p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
