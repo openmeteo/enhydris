@@ -22,7 +22,7 @@
       <div class="card-body">
         <div class="row">
           <div class="col-xs-12 col-sm-5">
-            {% if object.timeseries_set.exits %}
+            {% if object.timeseries_set.exists %}
               {% include "enhydris/timeseries_group_detail/chart.html" %}
             {% else %}
               <div class="message-no-data">

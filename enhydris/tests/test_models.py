@@ -353,23 +353,34 @@ class StationLastUpdateTestCase(TestCase):
                 timestamp=end_date_utc, value=0, flags=""
             )
 
-    def test_last_update_when_all_timeseries_have_end_date(self):
+    def test_last_update_naive_when_all_timeseries_have_end_date(self):
         self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.RAW)
         self._create_timeseries(2019, 7, 23, 5, 10, type=models.Timeseries.CHECKED)
-        self.assertEqual(self.station.last_update, dt.datetime(2019, 7, 24, 13, 26))
+        self.assertEqual(
+            self.station.last_update_naive, dt.datetime(2019, 7, 24, 13, 26)
+        )
 
-    def test_last_update_when_one_timeseries_has_no_data(self):
+    def test_last_update_naive_when_one_timeseries_has_no_data(self):
         self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.RAW)
         self._create_timeseries(type=models.Timeseries.CHECKED)
-        self.assertEqual(self.station.last_update, dt.datetime(2019, 7, 24, 13, 26))
+        self.assertEqual(
+            self.station.last_update_naive, dt.datetime(2019, 7, 24, 13, 26)
+        )
 
-    def test_last_update_when_all_timeseries_has_no_data(self):
+    def test_last_update_naive_when_all_timeseries_has_no_data(self):
         self._create_timeseries(type=models.Timeseries.RAW)
         self._create_timeseries(type=models.Timeseries.CHECKED)
-        self.assertIsNone(self.station.last_update)
+        self.assertIsNone(self.station.last_update_naive)
 
-    def test_last_update_when_no_timeseries(self):
-        self.assertIsNone(self.station.last_update)
+    def test_last_update_naive_when_no_timeseries(self):
+        self.assertIsNone(self.station.last_update_naive)
+
+    def test_last_update(self):
+        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.RAW)
+        tzinfo = dt.timezone(dt.timedelta(hours=2), "EET")
+        self.assertEqual(
+            self.station.last_update, dt.datetime(2019, 7, 24, 13, 26, tzinfo=tzinfo)
+        )
 
 
 class UnitOfMeasurementTestCase(TestCase):
@@ -518,6 +529,24 @@ class TimeseriesGroupStartAndEndDateTestCase(TestCase, TimeseriesDataMixin):
     def test_end_date_when_timeseries_does_not_exist(self):
         self.timeseries.delete()
         self.assertIsNone(self.timeseries_group.end_date)
+
+    def test_start_date_naive(self):
+        self.assertEqual(
+            self.timeseries_group.start_date_naive, dt.datetime(2017, 11, 23, 17, 23)
+        )
+
+    def test_end_date_naive(self):
+        self.assertEqual(
+            self.timeseries_group.end_date_naive, dt.datetime(2018, 11, 25, 1, 0)
+        )
+
+    def test_start_date_naive_when_timeseries_is_empty(self):
+        self.timeseries.set_data(StringIO(""))
+        self.assertIsNone(self.timeseries_group.start_date_naive)
+
+    def test_end_date_naive_when_timeseries_is_empty(self):
+        self.timeseries.set_data(StringIO(""))
+        self.assertIsNone(self.timeseries_group.end_date_naive)
 
 
 class TimeseriesTestCase(TestCase):

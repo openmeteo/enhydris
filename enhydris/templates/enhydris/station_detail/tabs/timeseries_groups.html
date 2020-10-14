@@ -20,8 +20,8 @@
                 </td>
                 <td class="p-0">
                   <a href="{% url 'timeseries_group_detail' station_id=station.id pk=tg_id %}">
-                    {% if tg.start_date and tg.end_date %}
-                      {{ tg.start_date|date:"SHORT_DATE_FORMAT" }} — {{ tg.end_date|date:"SHORT_DATETIME_FORMAT" }}
+                    {% if tg.start_date_naive and tg.end_date_naive %}
+                      {{ tg.start_date_naive|date:"SHORT_DATE_FORMAT" }} — {{ tg.end_date_naive|date:"SHORT_DATETIME_FORMAT" }}
                     {% endif %}
                   </a>
                 </td>
