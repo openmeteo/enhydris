@@ -38,11 +38,11 @@
     </tr>
     <tr>
       <th scope="row">{% trans 'Start Date' %}</th>
-      <td>{{ object.start_date|date:"Y/m/d H:i" }}</td>
+      <td>{{ object.start_date_naive|date:"Y/m/d H:i" }}</td>
     </tr>
     <tr>
       <th scope="row">{% trans 'End Date' %}</th>
-      <td>{{ object.end_date|date:"Y/m/d H:i" }}</td>
+      <td>{{ object.end_date_naive|date:"Y/m/d H:i" }}</td>
     </tr>
   </tbody>
 </table>

@@ -271,6 +271,13 @@ class Station(Gpoint):
     f_dependencies = ["Gpoint"]
 
     @property
+    def last_update_naive(self):
+        result = self.last_update
+        if result is not None:
+            result = result.replace(tzinfo=None)
+        return result
+
+    @property
     def last_update(self):
         timeseries = Timeseries.objects.filter(timeseries_group__gentity_id=self.id)
         result = None
@@ -283,7 +290,7 @@ class Station(Gpoint):
                 continue
             latest_timestamp = latest_record.timestamp.astimezone(
                 t.timeseries_group.time_zone.as_tzinfo
-            ).replace(tzinfo=None)
+            )
 
             if result is None or latest_timestamp > result:
                 result = latest_timestamp
@@ -451,6 +458,18 @@ class TimeseriesGroup(models.Model):
     def end_date(self):
         if self.default_timeseries:
             return self.default_timeseries.end_date
+
+    @property
+    def start_date_naive(self):
+        result = self.start_date
+        if result is not None:
+            return result.replace(tzinfo=None)
+
+    @property
+    def end_date_naive(self):
+        result = self.end_date
+        if result is not None:
+            return result.replace(tzinfo=None)
 
 
 class Timeseries(models.Model):
