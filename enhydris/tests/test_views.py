@@ -411,6 +411,9 @@ class TimeseriesGroupDetailTestCase(TestCase, TimeseriesDataMixin):
         )
         self.assertContains(self.response, "This time series group has no data yet.")
 
+    def test_timeseries_group_with_timeseries(self):
+        self.assertNotContains(self.response, "This time series group has no data yet.")
+
     def test_title(self):
         self.assertContains(
             self.response, "<title>Beauty — Komboti — Enhydris</title>", html=True
