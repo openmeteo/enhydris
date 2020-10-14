@@ -282,18 +282,11 @@ class Station(Gpoint):
         timeseries = Timeseries.objects.filter(timeseries_group__gentity_id=self.id)
         result = None
         for t in timeseries:
-            try:
-                latest_record = TimeseriesRecord.objects.filter(
-                    timeseries_id=t.id
-                ).latest()
-            except TimeseriesRecord.DoesNotExist:
+            t_end_date = t.end_date
+            if t_end_date is None:
                 continue
-            latest_timestamp = latest_record.timestamp.astimezone(
-                t.timeseries_group.time_zone.as_tzinfo
-            )
-
-            if result is None or latest_timestamp > result:
-                result = latest_timestamp
+            if result is None or t_end_date > result:
+                result = t_end_date
         return result
 
 
