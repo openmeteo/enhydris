@@ -415,12 +415,6 @@ class TimeseriesGroupDetailTestCase(TestCase, TimeseriesDataMixin):
     def test_timeseries_group_with_timeseries(self):
         self.assertContains(self.response, "data_holder")
         self.assertNotContains(self.response, "message-no-data")
-        self.assertContains(
-            self.response, f"{self.timeseries_group.start_date_naive:%Y/%m/%d %H:%M}"
-        )
-        self.assertContains(
-            self.response, f"{self.timeseries_group.end_date_naive:%Y/%m/%d %H:%M}"
-        )
 
     def test_title(self):
         self.assertContains(
