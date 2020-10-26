@@ -409,7 +409,12 @@ class TimeseriesGroupDetailTestCase(TestCase, TimeseriesDataMixin):
         self.response = self.client.get(
             f"/stations/{self.station.id}/timeseriesgroups/{self.timeseries_group.id}/"
         )
-        self.assertContains(self.response, "This time series group has no data yet.")
+        self.assertNotContains(self.response, "data_holder")
+        self.assertContains(self.response, "message-no-data")
+
+    def test_timeseries_group_with_timeseries(self):
+        self.assertContains(self.response, "data_holder")
+        self.assertNotContains(self.response, "message-no-data")
 
     def test_title(self):
         self.assertContains(

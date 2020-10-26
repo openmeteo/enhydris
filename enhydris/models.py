@@ -624,14 +624,15 @@ class Timeseries(models.Model):
         return f"{sign}{hours}:{minutes}"
 
     def set_data(self, data):
-        ahtimeseries = self._get_htimeseries_from_data(data)
         self.timeseriesrecord_set.all().delete()
-        return TimeseriesRecord.bulk_insert(self, ahtimeseries)
+        return self.append_data(data)
 
     def append_data(self, data):
         ahtimeseries = self._get_htimeseries_from_data(data)
         self._check_new_data_is_newer(ahtimeseries)
-        return TimeseriesRecord.bulk_insert(self, ahtimeseries)
+        result = TimeseriesRecord.bulk_insert(self, ahtimeseries)
+        self.save()
+        return result
 
     def _check_new_data_is_newer(self, ahtimeseries):
         if not len(ahtimeseries.data):
@@ -722,29 +723,3 @@ class TimeseriesRecord(models.Model):
         datestr = self.timestamp.astimezone(tzinfo).strftime("%Y-%m-%d %H:%M")
         value = "" if self.value is None else f"{self.value:.{precision}f}"
         return f"{datestr},{value},{self.flags}"
-
-
-class UserProfile(models.Model):
-    """Unused model for backwards compatibility.
-
-    This model isn't being used. We need it so that Enhydris 3 and Enhydris 2.2 can
-    co-exist, using the same database. This is because, for some time, Enhydris 2.2
-    will be in production but Enhydris 3 will be running on the same database being
-    tested. When production is switched to use Enhydris 3 and 2.2 is pronounced dead,
-    this model should be removed.
-    """
-
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, verbose_name=_("Username")
-    )
-    fname = models.CharField(_("First Name"), null=True, blank=True, max_length=30)
-    lname = models.CharField(_("Last Name"), null=True, blank=True, max_length=30)
-    address = models.CharField(_("Location"), null=True, blank=True, max_length=100)
-    organization = models.CharField(
-        _("Organization"), null=True, blank=True, max_length=100
-    )
-    email_is_public = models.BooleanField(default=False)
-
-    class Meta:
-        verbose_name = _("Profile")
-        verbose_name_plural = _("Profiles")

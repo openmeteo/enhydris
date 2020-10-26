@@ -1,8 +1,10 @@
 import datetime as dt
 from io import StringIO
+from unittest import mock
 
 from django.contrib.gis.geos import MultiPolygon, Point, Polygon
 from django.db import IntegrityError
+from django.db.models.signals import post_save
 from django.test import TestCase, override_settings
 from django.utils import translation
 
@@ -1012,6 +1014,23 @@ class TimeseriesGetLastRecordAsStringTestCase(TestCase, TestTimeseriesMixin):
     def test_when_record_does_not_exist(self):
         self._create_test_timeseries()
         self.assertEqual(self.timeseries.get_last_record_as_string(), "")
+
+
+class TimeseriesExecutesTriggersUponAddingRecordsTestCase(DataTestCase):
+    def setUp(self):
+        self.trigger = mock.MagicMock()
+        post_save.connect(self.trigger, sender="enhydris.Timeseries")
+
+    def tearDown(self):
+        post_save.disconnect(self.trigger, sender="enhydris.Timeseries")
+
+    def test_calls_trigger_upon_setting_data(self):
+        self.timeseries.set_data(StringIO("2020-10-26 09:34,18,\n"))
+        self.trigger.assert_called()
+
+    def test_calls_trigger_upon_appending_data(self):
+        self.timeseries.append_data(StringIO("2020-10-26 09:34,18,\n"))
+        self.trigger.assert_called()
 
 
 class TimestepTestCase(TestCase):
