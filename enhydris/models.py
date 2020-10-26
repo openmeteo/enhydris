@@ -624,14 +624,15 @@ class Timeseries(models.Model):
         return f"{sign}{hours}:{minutes}"
 
     def set_data(self, data):
-        ahtimeseries = self._get_htimeseries_from_data(data)
         self.timeseriesrecord_set.all().delete()
-        return TimeseriesRecord.bulk_insert(self, ahtimeseries)
+        return self.append_data(data)
 
     def append_data(self, data):
         ahtimeseries = self._get_htimeseries_from_data(data)
         self._check_new_data_is_newer(ahtimeseries)
-        return TimeseriesRecord.bulk_insert(self, ahtimeseries)
+        result = TimeseriesRecord.bulk_insert(self, ahtimeseries)
+        self.save()
+        return result
 
     def _check_new_data_is_newer(self, ahtimeseries):
         if not len(ahtimeseries.data):
