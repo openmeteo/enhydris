@@ -477,6 +477,15 @@ class TimeseriesGroupDefaultTimeseriesTestCase(TestCase):
         self.checked_timeseries.delete()
         self.assertEqual(self.timeseries_group.default_timeseries, self.raw_timeseries)
 
+    def test_returns_processed(self):
+        self.regularized_timeseries.delete()
+        self.checked_timeseries.delete()
+        self.raw_timeseries.delete()
+        self.processed_timeseries = self._make_timeseries(models.Timeseries.PROCESSED)
+        self.assertEqual(
+            self.timeseries_group.default_timeseries, self.processed_timeseries
+        )
+
     def test_returns_none(self):
         self.regularized_timeseries.delete()
         self.checked_timeseries.delete()
@@ -609,6 +618,26 @@ class TimeseriesTestCase(TestCase):
             models.Timeseries(
                 timeseries_group=timeseries_group,
                 type=models.Timeseries.RAW,
+                time_step="D",
+            ).save()
+
+    def test_only_one_processed_per_group(self):
+        timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
+        self._make_timeseries(timeseries_group, models.Timeseries.PROCESSED)
+        with self.assertRaises(IntegrityError):
+            models.Timeseries(
+                timeseries_group=timeseries_group,
+                type=models.Timeseries.PROCESSED,
+                time_step="D",
+            ).save()
+
+    def test_only_one_raw_or_processed_per_group(self):
+        timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
+        self._make_timeseries(timeseries_group, models.Timeseries.RAW)
+        with self.assertRaises(IntegrityError):
+            models.Timeseries(
+                timeseries_group=timeseries_group,
+                type=models.Timeseries.PROCESSED,
                 time_step="D",
             ).save()
 
