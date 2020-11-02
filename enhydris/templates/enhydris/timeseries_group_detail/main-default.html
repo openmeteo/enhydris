@@ -1,15 +1,9 @@
 {% extends "enhydris/base/main.html" %}
+{% load static %}
 {% load i18n %}
 
 {% block title %}
   {{ object.get_name }} — {{ object.gentity }} — {{ block.super }}
-{% endblock %}
-
-{% block mainjs %}
-  {{ block.super }}
-  {% if object.timeseries_set.exists %}
-    {% include "enhydris/timeseries_group_detail/chartjs.html" %}
-  {% endif %}
 {% endblock %}
 
 {% block content%}
@@ -52,4 +46,20 @@
       {% endif %}
     </div>
   </div>
+{% endblock %}
+
+{% block extrajs %}
+  {{ block.super }}
+  <script>
+    enhydris.strLoading = "{% trans 'Loading...'  %}";
+    enhydris.strNoData = "{% trans 'No data' %}";
+
+    {% if object.default_timeseries %}
+      enhydris.chartApiUrl = "{% url 'timeseries-chart' station_id=object.gentity.id timeseries_group_id=object.id pk=object.default_timeseries.id %}";
+    {% endif %}
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.19.3/apexcharts.min.js"></script>
+  {% if object.default_timeseries %}
+    <script src="{% static 'js/chart.js' %}"></script>
+  {% endif %}
 {% endblock %}
