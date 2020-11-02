@@ -1,109 +1,23 @@
 {% load static %}
-
-<style>
-  #wrapper {
-    padding-top: 20px;
-    padding-left: 10px;
-    background: #fff;
-    border: 1px solid #ddd;
-    box-shadow: 0 22px 35px -16px rgba(0, 0, 0, 0.1);
-    max-width: 650px;
-    margin: 35px auto;
-  }
-
-  #chart-line {
-    position: relative;
-    margin-top: -40px;
-  }
-</style>
-
-<script>
-  window.Promise ||
-    document.write(
-      '<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"><\/script>'
-    );
-  window.Promise ||
-    document.write(
-      '<script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20171210/classList.min.js"><\/script>'
-    );
-  window.Promise ||
-    document.write(
-      '<script src="https://cdn.jsdelivr.net/npm/findindex_polyfill_mdn"><\/script>'
-    );
-</script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.19.3/apexcharts.min.js"></script>
-
 <script type="text/javascript">
-  var BASE_URL = `{% url "timeseries-chart" station_id=object.gentity.id timeseries_group_id=object.id pk=object.default_timeseries.id %}`;
+  // Global configuration values
+  const config = {
+    blue: "#008FFB",
+    gray: "#546E7A",
+    api: "{% url 'timeseries-chart' station_id=object.gentity.id timeseries_group_id=object.id pk=object.default_timeseries.id %}"
+  };
 
-  function debounce(func, wait, immediate) {
-    let timeout;
-
-    return function executedFunction() {
-      const context = this;
-      const args = arguments;
-
-      const later = function () {
-        timeout = null;
-        if (!immediate) func.apply(context, args);
-      };
-
-      const callNow = immediate && !timeout;
-
-      clearTimeout(timeout);
-
-      timeout = setTimeout(later, wait);
-
-      if (callNow) func.apply(context, args);
-    };
-  }
-
-  function refetch({ min, max }) {
-    chartArea.updateSeries([
-      {
-        data: [],
-      },
-    ]);
-    fetch(
-      `${BASE_URL}?start_date=${new Date(min * 1000)
-        .toISOString()
-        .substring(0, 16)}&end_date=${new Date(max * 1000)
-        .toISOString()
-        .substring(0, 16)}`
-    )
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (data) {
-        if (data && data[0]) {
-          const mappedData = data.map((i) => [
-            i.timestamp,
-            Number(i.value) || 0,
-          ]);
-          chartArea.updateSeries([
-            {
-              data: mappedData,
-            },
-          ]);
-          // chartLine.zoomX(min, max);
-        }
-      });
-  }
-
-  var debounceRefetch = debounce(refetch, 150);
-
-  var options = {
-    series: [
-      {
-        data: [],
-      },
-    ],
+  // Line chart
+  const optionsLine = {
+    series: [{
+        data: []
+    }],
     noData: {
-      text: "Loading...",
+      text: "Loading..."
     },
     chart: {
-      id: "chart2",
+      id: "chartLine",
       type: "line",
       height: 230,
       zoom: {
@@ -113,75 +27,79 @@
       },
       toolbar: {
         autoSelected: "zoom",
+        show: true,
         tools: {
-          reset: false,
+          download: true,
+          pan: true,
+          zoom: true,
+          zoomin: false,
+          zoomout: false,
+          reset: false
         },
-      },
-      events: {
-        zoomed: function (chartContext, { xaxis }) {
-          refetch(xaxis);
-        },
-      },
+      }
     },
-    colors: ["#546E7A"],
+    colors: [config.gray],
     stroke: {
-      width: 2,
+      width: 2
     },
     dataLabels: {
-      enabled: false,
+      enabled: false
     },
     fill: {
-      opacity: 1,
+      opacity: 1
     },
     markers: {
-      size: 0,
+      size: 0
     },
     xaxis: {
       type: "datetime",
+      tooltip: {
+        enabled: false
+      }
     },
+    tooltip: {
+      enabled: true,
+      x: {
+        show: true,
+        format: "MMM dd, yyyy"
+      }
+    }
   };
-
-  var chartArea = new ApexCharts(
-    document.querySelector("#chart-area"),
-    options
+  const chartLine = new ApexCharts(
+    document.querySelector("#chart-line"),
+    optionsLine
   );
-  chartArea.render();
+  chartLine.render();
 
-  var optionsLine = {
-    series: [
-      {
-        data: [],
-      },
-    ],
+  // Area ("mini") chart
+  const optionsArea = {
+    series: [{
+        data: []
+    }],
     chart: {
-      id: "chart1",
-      height: 130,
+      id: "chartArea",
+      height: 100,
       type: "area",
       brush: {
-        target: "chart2",
-        enabled: true,
+        target: "chartLine",
+        enabled: true
       },
       selection: {
-        enabled: true,
-      },
-      events: {
-        selection: function (chartContext, { xaxis }) {
-          debounceRefetch(xaxis);
-        },
-      },
+        enabled: true
+      }
     },
-    colors: ["#008FFB"],
+    colors: [config.blue],
     fill: {
       type: "gradient",
       gradient: {
         opacityFrom: 0.91,
-        opacityTo: 0.1,
+        opacityTo: 0.1
       },
     },
     xaxis: {
       type: "datetime",
       tooltip: {
-        enabled: false,
+        enabled: false
       },
       labels: {
         show: true,
@@ -189,41 +107,40 @@
           year: "yyyy",
           month: "MMM 'yy",
           day: "dd MMM",
-          hour: "HH:mm",
+          hour: "HH:mm"
         },
       },
     },
     yaxis: {
-      tickAmount: 2,
+      tickAmount: 2
     },
   };
 
-  var chartLine = new ApexCharts(
-    document.querySelector("#chart-line"),
-    optionsLine
+  const chartArea = new ApexCharts(
+    document.querySelector("#chart-area"),
+    optionsArea
   );
-  chartLine.render();
+  chartArea.render();
 
-  var renderError = function () {
+  const renderError = () => {
     document.querySelector("#data_holder").innerHTML =
       "<h3>No data locally available!</h3>";
   };
 
-  fetch(BASE_URL)
-    .then(function (response) {
-      return response.json();
-    })
-    .then(function (data) {
+  // Populate charts via API call
+  fetch(config.api)
+    .then(response => response.json())
+    .then(data => {
       if (data && data[0]) {
-        const mappedData = data.map((i) => [i.timestamp, Number(i.value) || 0]);
-        chartArea.updateSeries([
-          {
-            data: mappedData,
-          },
-        ]);
+        const mappedData = data.map((i) => [i.timestamp * 1000, Number(i.value) || 0]);
         chartLine.updateSeries([
           {
-            data: mappedData,
+            data: mappedData
+          },
+        ]);
+        chartArea.updateSeries([
+          {
+            data: mappedData
           },
         ]);
       } else {
