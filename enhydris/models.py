@@ -325,7 +325,12 @@ class Variable(TranslatableModel):
     objects = VariableManager()
 
     def __str__(self):
-        return self.descr
+        # For an explanation of this, see
+        # enhydris.tests.test_models.VariableTestCase.test_translation_bug()
+        result = self.descr
+        if result is None:
+            return self.translations.first().descr
+        return result
 
 
 class UnitOfMeasurement(Lookup):

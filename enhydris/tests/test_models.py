@@ -2,6 +2,7 @@ import datetime as dt
 from io import StringIO
 from unittest import mock
 
+from django.contrib.auth.models import User
 from django.contrib.gis.geos import MultiPolygon, Point, Polygon
 from django.db import IntegrityError
 from django.db.models.signals import post_save
@@ -153,6 +154,39 @@ class VariableTestCase(TestCase):
         variable = models.Variable.objects.get(translations__descr=english_name)
         variable.translations.create(language_code="el", descr=greek_name)
         return variable
+
+    @override_settings(
+        ENHYDRIS_USERS_CAN_ADD_CONTENT=True,
+        LANGUAGE_CODE="en",
+        LANGUAGES={("en", "English"), ("el", "Ελληνικά")},
+    )
+    def test_translation_bug(self):
+        # Normally Variable.__str__() should return a simple "return self.descr".
+        # However, there's a tricky bug somewhere, most probably in django-parler, but I
+        # can't nail it.  Sometimes, when there's no registered translation in the
+        # active language, self.descr is None (when it should fall back to the fallback
+        # language). It occurs when trying to visit /admin/enhydris/station/add/, the
+        # active language is Greek, and one of the variables has an English translation
+        # but not a Greek translation. We work around it by changing Variable.__str__()
+        # to return whatever translation exists.
+        #
+        # Unfortunately, PARLER_LANGUAGES seems to not be overridable in tests;
+        # therefore, if you change Variable.__str__() to a simple "return self.descr",
+        # the only way to make this test fail is by manually specifying this in the
+        # settings:
+        #     PARLER_LANGUAGES={
+        #         SITE_ID: [{"code": "en"}, {"code": "el"}],
+        #         "default": {"fallbacks": ["en"], "hide_untranslated": True},
+        #     }
+        User.objects.create_user(
+            username="alice", password="topsecret", is_active=True, is_staff=True
+        )
+        self.client.login(username="alice", password="topsecret")
+        mommy.make(models.Variable, descr="pH")
+        response = self.client.get(
+            "/admin/enhydris/station/add/", HTTP_ACCEPT_LANGUAGE="el"
+        )
+        self.assertEqual(response.status_code, 200)
 
 
 class GentityFileTestCase(TestCase):
