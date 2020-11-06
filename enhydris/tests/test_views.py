@@ -120,6 +120,7 @@ class StationDetailTestCase(TestCase, TimeseriesDataMixin):
         )
 
 
+@override_settings(LANGUAGE_CODE="en-gb", LANGUAGES={"en-gb": "English"})
 class StationDetailPeriodOfOperationTestCase(TestCase):
     def setUp(self):
         self.station = mommy.make(

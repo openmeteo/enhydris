@@ -10,4 +10,12 @@ DATABASES = {
         "PORT": 5432,
     }
 }
-ENHYDRIS_TIMESERIES_DATA_DIR = "/tmp"
+LANGUAGE_CODE = "en"
+LANGUAGES = {
+    ("en", "English"),
+    ("el", "Ελληνικά"),
+}
+PARLER_LANGUAGES = {
+    SITE_ID: [{"code": LANGUAGE_CODE}, {"code": "el"}],  # NOQA
+    "default": {"fallbacks": ["en"], "hide_untranslated": True},
+}
