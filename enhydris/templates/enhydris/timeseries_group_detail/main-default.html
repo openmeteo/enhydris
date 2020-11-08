@@ -5,13 +5,6 @@
   {{ object.get_name }} — {{ object.gentity }} — {{ block.super }}
 {% endblock %}
 
-{% block mainjs %}
-  {{ block.super }}
-  {% if object.timeseries_set.exists %}
-    {% include "enhydris/timeseries_group_detail/chartjs.html" %}
-  {% endif %}
-{% endblock %}
-
 {% block content%}
   <div class="container mt-4">
     <div class="card">

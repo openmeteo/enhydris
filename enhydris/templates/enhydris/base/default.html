@@ -55,8 +55,17 @@
         var enhydris = {};
         enhydris.staticUrl = '{% static "" %}';
         enhydris.rootUrl = '{% url "station_list" %}';
+
+        {% if object.gentity.id and object.default_timeseries.id %}
+          const chartApiUrl = "{% url 'timeseries-chart' station_id=object.gentity.id timeseries_group_id=object.id pk=object.default_timeseries.id %}";
+        {% endif %}
       </script>
       <script src="{% static 'js/enhydris.js' %}"></script>
+
+      {% if object.gentity.id and object.default_timeseries.id %}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.19.3/apexcharts.min.js"></script>
+        <script src="{% static 'js/chart.js' %}"></script>
+      {% endif %}
     {% endblock %}
 
     {% block extrajs %}{% endblock %}
