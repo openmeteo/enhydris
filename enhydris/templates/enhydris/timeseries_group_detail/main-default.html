@@ -1,4 +1,5 @@
 {% extends "enhydris/base/main.html" %}
+{% load static %}
 {% load i18n %}
 
 {% block title %}
@@ -45,4 +46,22 @@
       {% endif %}
     </div>
   </div>
+{% endblock %}
+
+{% block extrajs %}
+  {{ block.super }}
+  <script>
+    enhydris.strLoading = "{% trans 'Loading...'  %}";
+    enhydris.strNoData = "{% trans 'No data' %}";
+
+    {% if object.default_timeseries %}
+      enhydris.chartApiUrl = "{% url 'timeseries-chart' station_id=object.gentity.id timeseries_group_id=object.id pk=object.default_timeseries.id %}";
+    {% endif %}
+  </script>
+
+  {# Only load Apex library & JavaScript code if chart data exists #}
+  {% if object.default_timeseries %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.19.3/apexcharts.min.js"></script>
+    <script src="{% static 'js/chart.js' %}"></script>
+  {% endif %}
 {% endblock %}

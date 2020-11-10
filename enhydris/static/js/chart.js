@@ -5,19 +5,27 @@ $(function() {
 		gray: "#546E7A",
 	};
 
-	// Debounce function
-	const debounceRefetch = debounce(refetch, 200);
+	/* When attempting to select section of the mini ("small") chart,
+	the `selection` event of the chart is executed multiple times for each
+	mouse drags. Since the `refetchChart` function is part of the `selection`
+	event, this causes multiple API calls to the chart endpoint before the user
+	has completed the selection. This is not efficient. Thus, by using the
+	`debounce` function, we can create another function that delay the execution
+	of the `refetchChart` function by a certain amount of milliseconds, in order
+	to give the user enough time to complete the selection. 
+	*/
+	const debounceRefetchChart = debounce(refetchChart, 200);
 
-	// Line chart
-	const optionsLine = {
+	// Main ("big") chart
+	const mainChartOption = {
 		series: [{
-				data: []
+			data: []
 		}],
 		noData: {
-			text: "Loading..."
+			text: enhydris.strLoading
 		},
 		chart: {
-			id: "chartLine",
+			id: "mainChart",
 			type: "line",
 			height: 230,
 			zoom: {
@@ -38,8 +46,8 @@ $(function() {
 			},
 			events: {
 				zoomed: function (chartContext, { xaxis }) {
-					refetch(xaxis);
-					chartArea.updateOptions({
+					refetchChart(xaxis);
+					miniChart.updateOptions({
 						chart: {
 							selection: {
 								xaxis: xaxis
@@ -77,23 +85,23 @@ $(function() {
 		}
 	};
 
-	const chartLine = new ApexCharts(
-		document.querySelector("#chart-line"),
-		optionsLine
+	const mainChart = new ApexCharts(
+		document.querySelector("#chart-main"),
+		mainChartOption
 	);
-	chartLine.render();
+	mainChart.render();
 
-	// Area ("mini") chart
-	const optionsArea = {
+	// Mini ("small") chart
+	const miniChartOptions = {
 		series: [{
 				data: []
 		}],
 		chart: {
-			id: "chartArea",
+			id: "miniChart",
 			height: 100,
 			type: "area",
 			brush: {
-				target: "chartLine",
+				target: "mainChart",
 				enabled: true
 			},
 			selection: {
@@ -101,7 +109,7 @@ $(function() {
 			},
 			events: {
 				selection: function (chartContext, { xaxis, yaxis }) {
-					debounceRefetch(xaxis);
+					debounceRefetchChart(xaxis);
 				}
 			},
 		},
@@ -133,14 +141,14 @@ $(function() {
 		},
 	};
 
-	const chartArea = new ApexCharts(
-		document.querySelector("#chart-area"),
-		optionsArea
+	const miniChart = new ApexCharts(
+		document.querySelector("#chart-mini"),
+		miniChartOptions
 	);
-	chartArea.render();
+	miniChart.render();
 
 	// Make API call
-	fetch(chartApiUrl)
+	fetch(enhydris.chartApiUrl)
 		.then(function (response) {
 			return response.json();
 		})
@@ -148,12 +156,12 @@ $(function() {
 			if (data && data[0]) {
 				const mappedData = mapData(data);
 
-				chartArea.updateSeries([
+				mainChart.updateSeries([
 					{
 						data: mappedData,
 					},
 				]);
-				chartLine.updateSeries([
+				miniChart.updateSeries([
 					{
 						data: mappedData,
 					},
@@ -173,38 +181,46 @@ $(function() {
 	function formatDate(timestamp) {
 		return new Date(timestamp).toISOString().substring(0, 16);
 	}
-	
-	function debounce(func, wait, immediate) {
+
+	function debounce(func, wait, immediate=false) {
+		/* Returns a modified callable that waits a certain amount of time
+		(i.e. the value of `wait` parameter) before running the function. If the
+		function attempts to execute within the wait time, the call is blocked.
+		
+		To read more about it:
+		https://educative.io/edpresso/how-to-use-the-debounce-function-in-javascript
+		*/
 		let timeout;
 
-		return function() {
-			const context = this;
-			const args = arguments;
-			const later = function () {
+		return (...args) => {
+			const later = () => {
 				timeout = null;
-				if (!immediate) func.apply(context, args);
-			};
+				if (!immediate) func.apply(this, args)
+			}
 			const callNow = immediate && !timeout;
 			clearTimeout(timeout);
 			timeout = setTimeout(later, wait);
-			if (callNow) func.apply(context, args);
-		};
+			if (callNow) func.apply(this, args);
+		}
 	}
 	
-	function refetch({ min, max }) {
+	function refetchChart({ min, max }) {
+		/* Make API call to fetch & populate chart data between two selected
+		data points (i.e. start datetime and end datetime).
+		*/
 		const startDate = formatDate(min);
 		const endDate = formatDate(max);
 
-		chartLine.updateSeries([
+		mainChart.updateSeries([
 			{
 				data: [],
 			},
 		]);
-		fetch(`${chartApiUrl}?start_date=${startDate}&end_date=${endDate}`)
+		fetch(`${enhydris.chartApiUrl}?start_date=${startDate}&end_date=${endDate}`)
 			.then(response => response.json())
 			.then(data => {
 				if (data && data[0]) {
-					chartLine.updateSeries([
+					mainChart.updateSeries([
 						{
 							data: mapData(data)
 						},
@@ -215,6 +231,6 @@ $(function() {
 
 	function renderError () {
 		document.querySelector("#data_holder").innerHTML =
-			"<h3>No data locally available!</h3>";
+			`<p>${enhydris.strNoData}</p>`;
 	};
 });

@@ -158,9 +158,17 @@ h4.tab-no-data {
   margin: 35px auto;
 }
 
-#chart-area {
+#chart-mini {
   position: relative;
   margin-top: -40px;
+}
+
+#data_holder p {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 /* FOOTER */
