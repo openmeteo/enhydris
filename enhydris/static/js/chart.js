@@ -1,5 +1,4 @@
 $(function() {
-	// Global configuration values
 	const config = {
 		blue: "#008FFB",
 		gray: "#546E7A",
@@ -16,7 +15,6 @@ $(function() {
 	*/
 	const debounceRefetchChart = debounce(refetchChart, 200);
 
-	// Main ("big") chart
 	const mainChartOption = {
 		series: [{
 			data: []
@@ -91,7 +89,6 @@ $(function() {
 	);
 	mainChart.render();
 
-	// Mini ("small") chart
 	const miniChartOptions = {
 		series: [{
 				data: []
@@ -147,7 +144,6 @@ $(function() {
 	);
 	miniChart.render();
 
-	// Make API call
 	fetch(enhydris.chartApiUrl)
 		.then(function (response) {
 			return response.json();
