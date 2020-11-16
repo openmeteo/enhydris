@@ -609,7 +609,11 @@ class Timeseries(models.Model):
                 """
                 SELECT STRING_AGG(
                     TO_CHAR(timestamp at time zone %s, 'YYYY-MM-DD HH24:MI')
-                        || ',' || value || ',' || flags,
+                        || ','
+                        || CASE WHEN value is NULL THEN DOUBLE PRECISION 'NaN'
+                           ELSE value END
+                        || ','
+                        || flags,
                     E'\n'
                     ORDER BY timestamp
                 ) || E'\n'
