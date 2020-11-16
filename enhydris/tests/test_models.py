@@ -851,6 +851,23 @@ class TimeseriesGetDataTestCase(DataTestCase):
         pd.testing.assert_frame_equal(self.data.data, self.expected_result)
 
 
+class TimeseriesGetDataWithNullTestCase(TestCase, TestTimeseriesMixin):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls._create_test_timeseries("2017-11-23 17:23,,\n2018-11-25 01:00,2,\n")
+        cls.expected_result = pd.DataFrame(
+            data={"value": [float("NaN"), 2.0], "flags": ["", ""]},
+            columns=["value", "flags"],
+            index=[dt.datetime(2017, 11, 23, 17, 23), dt.datetime(2018, 11, 25, 1, 0)],
+        )
+        cls.expected_result.index.name = "date"
+        cls.data = cls.timeseries.get_data()
+
+    def test_data(self):
+        pd.testing.assert_frame_equal(self.data.data, self.expected_result)
+
+
 class TimeseriesGetDataWithStartAndEndDateTestCase(DataTestCase):
     def _check(self, start_index=None, end_index=None):
         """Check self.htimeseries.data against the initial timeseries sliced from
