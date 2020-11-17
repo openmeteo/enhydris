@@ -199,9 +199,9 @@ class TimeseriesInlineFormSet(nested_admin.formsets.NestedInlineFormSet):
             type_name = dict(models.Timeseries.TIMESERIES_TYPES)[type]
             raise forms.ValidationError(
                 _(
-                    f"There can be only one {type_name.lower()} time series "
+                    "There can be only one {type_name} time series "
                     "in each time series group."
-                )
+                ).format(type_name=type_name.lower())
             )
 
 
