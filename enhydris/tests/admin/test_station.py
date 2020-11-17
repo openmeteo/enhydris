@@ -459,6 +459,16 @@ class TimeseriesUploadInvalidFileTestCase(TestCase, TestTimeseriesFormMixin):
         self._create_timeseries_inline_admin_form("REPLACE", b"2020-01-28 18:28,7,")
         self.assertFalse(self.form.is_valid())
 
+    def test_file_not_having_three_columns(self):
+        self._create_timeseries_inline_admin_form("REPLACE", b"2020-01-28 18:28,7\n")
+        self.assertFalse(self.form.is_valid())
+
+    def test_file_with_multiple_timestamps(self):
+        self._create_timeseries_inline_admin_form(
+            "REPLACE", b"2020-01-28 18:28,7,\n2020-01-28 18:28,8,\n"
+        )
+        self.assertFalse(self.form.is_valid())
+
 
 class TimeseriesInlineAdminFormProcessWithoutFileTestCase(
     TestCase, TestTimeseriesFormMixin

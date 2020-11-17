@@ -657,7 +657,7 @@ class TimeseriesChartTestMixin:
         data = response.json()
         tolerance_in_seconds = 86400 * tolerance_in_days
         for d, e in zip(data, expected):
-            self.assertEqual(d["value"], e["value"])
+            self.assertAlmostEqual(d["value"], e["value"])
             self.assertAlmostEqual(
                 d["timestamp"], e["date"].timestamp(), delta=tolerance_in_seconds
             )
@@ -702,8 +702,7 @@ class TimeseriesChartTestCase(
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         expected = [
-            {"date": datetime(year, 1, 1), "value": f"{year}.00"}
-            for year in range(2010, 2015)
+            {"date": datetime(year, 1, 1), "value": year} for year in range(2010, 2015)
         ]
         self._assertChartResponse(response, expected)
 
@@ -712,8 +711,7 @@ class TimeseriesChartTestCase(
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         expected = [
-            {"date": datetime(year, 1, 1), "value": f"{year}.00"}
-            for year in range(2011, 2015)
+            {"date": datetime(year, 1, 1), "value": year} for year in range(2011, 2015)
         ]
         self._assertChartResponse(response, expected)
 
@@ -740,7 +738,43 @@ class TimeseriesChartSamplingTestCase(
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         expected = [
-            {"date": datetime(year, 1, 1), "value": f"{year}.00"}
-            for year in [2010, 2015, 2020]
+            {"date": datetime(year, 1, 1), "value": year} for year in [2010, 2015, 2020]
         ]
+        self._assertChartResponse(response, expected)
+
+    def test_null_data(self, mock):
+        """Test that unspecified data points get a value of null.
+
+        In this test we use this test time series:
+            timestamp  value
+            2010-01-01 2010
+            2011-01-01 2011
+            2020-01-01 2020
+        When sampling occurs, 2010-01-01 will get the value 2010, 2015-01-01 will get
+        null, and 2020-01-01 will get 2020. This test is about checking the null in
+        2015-01-01.
+        """
+        mock.return_value = self.htimeseries
+        self.htimeseries.data = pd.DataFrame(
+            index=[datetime(2010, 1, 1), datetime(2011, 1, 1), datetime(2020, 1, 1)],
+            data={"value": [2010, 2011, 2020], "flags": ["", "", ""]},
+            columns=["value", "flags"],
+        )
+        response = self.client.get(self.url)
+        expected = [
+            {"date": datetime(2010, 1, 1), "value": 2010},
+            {"date": datetime(2015, 1, 1), "value": None},
+            {"date": datetime(2020, 1, 1), "value": 2020},
+        ]
+        self._assertChartResponse(response, expected)
+
+    def test_insufficient_number_of_records(self, mock):
+        mock.return_value = self.htimeseries
+        self.htimeseries.data = pd.DataFrame(
+            index=[datetime(2010, 1, 1)],
+            data={"value": [2010], "flags": [""]},
+            columns=["value", "flags"],
+        )
+        response = self.client.get(self.url)
+        expected = []
         self._assertChartResponse(response, expected)
