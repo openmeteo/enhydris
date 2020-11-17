@@ -245,6 +245,8 @@ class TimeseriesViewSet(ModelViewSet):
         this timestamp.
         """
         number_of_samples = min(self.CHART_MAXIMUM_NUMBER_OF_SAMPLES, len(df.index))
+        if number_of_samples < 2:
+            return []
         min_time = df.index.min()
         max_time = df.index.max()
         interval = (max_time - min_time) / (number_of_samples - 1)

@@ -767,3 +767,14 @@ class TimeseriesChartSamplingTestCase(
             {"date": datetime(2020, 1, 1), "value": 2020},
         ]
         self._assertChartResponse(response, expected)
+
+    def test_insufficient_number_of_records(self, mock):
+        mock.return_value = self.htimeseries
+        self.htimeseries.data = pd.DataFrame(
+            index=[datetime(2010, 1, 1)],
+            data={"value": [2010], "flags": [""]},
+            columns=["value", "flags"],
+        )
+        response = self.client.get(self.url)
+        expected = []
+        self._assertChartResponse(response, expected)
