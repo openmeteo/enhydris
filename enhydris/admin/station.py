@@ -8,6 +8,7 @@ from django.db.models import Q, TextField
 from django.utils.translation import ugettext_lazy as _
 
 import nested_admin
+import pandas as pd
 from geowidgets import LatLonField
 from htimeseries import HTimeseries
 from rules.contrib.admin import ObjectPermissionsModelAdmin
@@ -131,7 +132,7 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
     def _check_submitted_data(self, datastream):
         try:
             ahtimeseries = self._get_timeseries_without_moving_file_position(datastream)
-        except (ParsingError, EOFError) as e:
+        except (ParsingError, EOFError, pd.errors.ParserError, ValueError) as e:
             raise forms.ValidationError(str(e))
         if self._we_are_appending_data(ahtimeseries):
             self._check_timeseries_for_appending(ahtimeseries)
