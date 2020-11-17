@@ -133,4 +133,4 @@ class StationSerializer(serializers.ModelSerializer):
 
 class TimeseriesRecordChartSerializer(serializers.Serializer):
     timestamp = serializers.IntegerField()
-    value = serializers.DecimalField(max_digits=6, decimal_places=2)
+    value = serializers.FloatField()

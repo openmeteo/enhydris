@@ -13,7 +13,6 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 import iso8601
-import numpy as np
 import pandas as pd
 from htimeseries import HTimeseries
 
@@ -241,9 +240,9 @@ class TimeseriesViewSet(ModelViewSet):
         Divides the dataframe/timeseries by time into "CHART_MAXIMUM_NUMBER_OF_SAMPLES"
         data points, including the starting point. It works by looping from the min-date
         till it reaches the max-date, incrementing the time by a calculated interval
-        that results in the required number of samples.
-        At each data point, we take the nearest value as the data point,
-        if no value exists, a NaN is returned at this timestamp.
+        that results in the required number of samples.  At each data point, we take the
+        nearest value as the data point; if no value exists, the value None is set at
+        this timestamp.
         """
         number_of_samples = min(self.CHART_MAXIMUM_NUMBER_OF_SAMPLES, len(df.index))
         min_time = df.index.min()
@@ -251,7 +250,6 @@ class TimeseriesViewSet(ModelViewSet):
         interval = (max_time - min_time) / (number_of_samples - 1)
         tolerance = interval / 2
         result = []
-
         current_time = min_time
         while current_time <= max_time:
             result.append(self._get_nearest_data_point(df, current_time, tolerance))
@@ -263,7 +261,7 @@ class TimeseriesViewSet(ModelViewSet):
             idx = df.index.get_loc(current_time, method="nearest", tolerance=tolerance)
             value = df.iloc[idx].value
         except KeyError:
-            value = np.nan
+            value = None
         return {"timestamp": current_time.timestamp(), "value": value}
 
     def _get_date_bounds(self, request, timeseries):
