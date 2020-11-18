@@ -6,6 +6,7 @@ matrix:
     - name: "Python 3.7 unit tests"
       language: python
       python: 3.7
+      node_js: "10"
       cache: pip
       addons:
         postgresql: "10"
@@ -30,6 +31,8 @@ matrix:
        - pip install isort flake8 black
        - wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2
        - tar xjf phantomjs-2.1.1-linux-x86_64.tar.bz2
+       - nvm install 10
+       - npm install
       before_script:
        - psql -U postgres -c "create extension postgis"
        - psql -U postgres -c "create database openmeteo"
@@ -42,6 +45,8 @@ matrix:
        - black --check .
        - flake8 --max-line-length=88 .
        - isort --check-only --diff .
+       - npm run lint
        - coverage run --include="./*" --omit="*/tests/*","*/tests.py","*/migrations/*","./enhydris_project/*" manage.py test -v2
+       - npm run test
       after_success:
        - codecov
