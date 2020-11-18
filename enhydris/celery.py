@@ -27,7 +27,7 @@ app.autodiscover_tasks()
 def email_failed_task(**kwargs):
     if not settings.ENHYDRIS_CELERY_SEND_TASK_ERROR_EMAILS:
         return
-    subject = "[celery@{host}] {sender.name}: {exception}".format(
+    subject = "[celery@{host}] {sender.name}: {exception.__class__.__name__}".format(
         host=socket.gethostname(), **kwargs
     )
     message = textwrap.dedent(

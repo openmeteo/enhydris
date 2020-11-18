@@ -17,7 +17,7 @@ class EmailFailedTaskTestCase(TestCase):
         sender.name = "Alice"
         email_failed_task(
             sender=sender,
-            exception="Things went wrong",
+            exception=Exception("Things went wrong\n"),
             task_id="42",
             einfo="Things went really wrong",
         )
