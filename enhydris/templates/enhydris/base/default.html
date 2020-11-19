@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     {% block basecss %}
+      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet">
       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
       <link href="{% static 'css/enhydris.css' %}" rel="stylesheet">
       <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" rel="stylesheet" media="screen">
@@ -24,24 +25,32 @@
     {% block extra_head %}{% endblock %}
   </head>
 
-  <body onload="{% block body_onload %}{% endblock %}">
+  <!--TODO add if rule for using different classes depending on the map vie on the page -->
+  <body class="page page-map-full" onload="{% block body_onload %}{% endblock %}">
     <header class="page-header">
-      {% block header %}
+      <div class="container">
+        {% block header %}
         {% include "enhydris/base/navbar.html" %}
-        {% include "enhydris/base/searchtips.html" %}
-        {% include "enhydris/base/messages.html" %}
-      {% endblock header %}
+        <!--TODO temp comment -->
+        <!--{% include "enhydris/base/searchtips.html" %}-->
+        <!--{% include "enhydris/base/messages.html" %}-->
+        {% endblock header %}
+      </div>
     </header>
 
     <main class="page-main">
+      {% block search %}
+        {% include "enhydris/base/search.html" %}
+      {% endblock %}
       {% block content %}{% endblock %}
     </main>
 
+    <!--TODO temp comment
     <footer class="page-footer">
       {% block footer %}
         <p class="text-center mt-3 mb-4">Powered by <a href="https://enhydris.readthedocs.org/">Enhydris</a></p>
       {% endblock %}
-    </footer>
+    </footer>-->
 
     {% block bodyend %}{% endblock %}
 
