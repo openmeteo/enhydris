@@ -1,34 +1,15 @@
 {% load i18n %}
 
 {% block search_form %}
-  <form class="form-inline mb-2 mt-3 my-lg-0 form-search" action='{% url "station_list" %}' method="get">
-    <div class="col-12 px-0 py-2 py-lg-0">
-      <div class="input-group">
-        <input id="search_input" type="text" name="q"
-               value="{{ query|escape }}" class="form-control"
-               placeholder="{% trans 'Search stations' %}">
-        <div class="input-group-prepend">
-          <button class="btn btn-primary my-sm-0 btn-search" type="submit">
-            <svg class="bi bi-search" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path fill-rule="evenodd" d="M10.442 10.442a1 1 0 0 1 1.415 0l3.85 3.85a1 1 0 0 1-1.414 1.415l-3.85-3.85a1 1 0 0 1 0-1.415z"/>
-              <path fill-rule="evenodd" d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 6.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  </form>
-{% endblock %}
+  <div class="form-search-wrapper">
+    <form class="form-inline form-search" action='{% url "station_list" %}' method="get">
+      <label for="search_input" class="visually-hidden">Search stations</label>
+      <input id="search_input" type="text" name="q" value="{{ query|escape }}" class="form-control">
+      <button class="btn custom-button btn-search" type="submit">search</button>
+    </form>
 
-{% block search_tips %}
-  <ul class="navbar-nav">
-    <li class="nav-item">
-      <a class="nav-link" href="#searchtips" data-toggle="modal">
-        <svg class="bi bi-eye" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.134 13.134 0 0 0 1.66 2.043C4.12 11.332 5.88 12.5 8 12.5c2.12 0 3.879-1.168 5.168-2.457A13.134 13.134 0 0 0 14.828 8a13.133 13.133 0 0 0-1.66-2.043C11.879 4.668 10.119 3.5 8 3.5c-2.12 0-3.879 1.168-5.168 2.457A13.133 13.133 0 0 0 1.172 8z"/>
-          <path fill-rule="evenodd" d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
-        </svg> {% trans "Search tips" %}
-      </a>
-    </li>
-  </ul>
+    <a href="#searchtips" class="btn-searchtips" data-toggle="modal" aria-label="Show searchtips">?</a>
+
+    <a id="limit-to-map" href="#" class="btn custom-button btn-station-list" onclick="enhydris.mapModule.listStationsVisibleOnMap();">list stations visible on map</a>
+  </div>
 {% endblock %}

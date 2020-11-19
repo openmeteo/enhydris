@@ -6,10 +6,20 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container-fluid">
-    {% include "enhydris/station_list/map.html" %}
-    <hr>
-    {% include "enhydris/station_list/station_list.html" %}
+  {% include "enhydris/station_list/map.html" %}
+  <div class="page-main-content">
+    <div class="container search-content-wrapper">
+      {% if request.GET.q %}
+        <article class="search-result">
+          {% include "enhydris/station_list/station_list.html" %}
+        </article>
+      {% endif %}
+
+      {% block search %}
+        {% include "enhydris/base/search.html" %}
+        {% include "enhydris/base/searchtips.html" %}
+      {% endblock %}
+    </div>
   </div>
 {% endblock %}
 
