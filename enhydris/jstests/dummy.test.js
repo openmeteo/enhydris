@@ -1,3 +1,3 @@
 test('Dummy Jest test works', () => {
-    expect(true).toBe(true);
+  expect(true).toBe(true);
 });

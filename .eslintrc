@@ -12,5 +12,9 @@
         "moment": "readonly",
         "L": "readonly",
         "ApexCharts": "readonly"
+    },
+    "rules": {
+        "prefer-arrow-callback": "off",
+        "func-names": "off"
     }
 }
