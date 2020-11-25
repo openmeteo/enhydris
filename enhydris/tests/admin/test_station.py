@@ -136,7 +136,7 @@ class StationPermsTestCaseWhenUsersCanAddContent(StationPermsTestCaseBase, Commo
             "/admin/enhydris/station/{}/change/".format(self.azanulbizar.id)
         )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Creator")
+        self.assertContains(response, "Administrator")
         self.assertContains(response, "Maintainers")
 
     def test_station_detail_has_creator_and_maintainers_for_user_with_model_perms(self):
@@ -145,7 +145,7 @@ class StationPermsTestCaseWhenUsersCanAddContent(StationPermsTestCaseBase, Commo
             "/admin/enhydris/station/{}/change/".format(self.azanulbizar.id)
         )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Creator")
+        self.assertContains(response, "Administrator")
         self.assertContains(response, "Maintainers")
 
     def test_station_detail_has_only_maintainers_for_creator(self):
@@ -154,7 +154,7 @@ class StationPermsTestCaseWhenUsersCanAddContent(StationPermsTestCaseBase, Commo
             "/admin/enhydris/station/{}/change/".format(self.azanulbizar.id)
         )
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "Creator")
+        self.assertNotContains(response, "Administrator")
         self.assertContains(response, "Maintainers")
 
     def test_station_detail_has_neither_creator_nor_maintainers_for_maintainer(self):
@@ -163,28 +163,28 @@ class StationPermsTestCaseWhenUsersCanAddContent(StationPermsTestCaseBase, Commo
             "/admin/enhydris/station/{}/change/".format(self.barazinbar.id)
         )
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "Creator")
+        self.assertNotContains(response, "Administrator")
         self.assertNotContains(response, "Maintainers")
 
     def test_add_station_has_creator_and_maintainers_for_superuser(self):
         self.client.login(username="alice", password="topsecret")
         response = self.client.get("/admin/enhydris/station/add/")
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Creator")
+        self.assertContains(response, "Administrator")
         self.assertContains(response, "Maintainers")
 
     def test_add_station_has_creator_and_maintainers_for_user_with_model_perms(self):
         self.client.login(username="elaine", password="topsecret")
         response = self.client.get("/admin/enhydris/station/add/")
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Creator")
+        self.assertContains(response, "Administrator")
         self.assertContains(response, "Maintainers")
 
     def test_add_station_has_only_maintainers_for_user_without_model_perms(self):
         self.client.login(username="bob", password="topsecret")
         response = self.client.get("/admin/enhydris/station/add/")
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "Creator")
+        self.assertNotContains(response, "Administrator")
         self.assertContains(response, "Maintainers")
 
 
@@ -212,14 +212,14 @@ class StationPermsTestCaseWhenUsersCannotAddCont(StationPermsTestCaseBase, Commo
             "/admin/enhydris/station/{}/change/".format(self.azanulbizar.id)
         )
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "Creator")
+        self.assertNotContains(response, "Administrator")
         self.assertNotContains(response, "Maintainers")
 
     def test_add_station_has_no_creator_or_maintainers_for_user_with_model_perms(self):
         self.client.login(username="elaine", password="topsecret")
         response = self.client.get("/admin/enhydris/station/add/")
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "Creator")
+        self.assertNotContains(response, "Administrator")
         self.assertNotContains(response, "Maintainers")
 
 

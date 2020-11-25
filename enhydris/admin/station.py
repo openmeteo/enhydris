@@ -20,6 +20,7 @@ from enhydris.models import check_time_step
 class StationAdminForm(forms.ModelForm):
     code = forms.CharField(
         required=False,
+        label=_("Code"),
         help_text=_(
             "If the station has a code (e.g. one given by another agency), you "
             "can enter it here."

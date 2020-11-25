@@ -14,7 +14,8 @@ from django.db.models.signals import post_save
 from django.utils._os import abspathu
 from django.utils.functional import cached_property
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 import numpy as np
 from htimeseries import HTimeseries
@@ -53,7 +54,7 @@ def _parse_time_step(time_step):
 
 class Lookup(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    descr = models.CharField(max_length=200, blank=True)
+    descr = models.CharField(max_length=200, blank=True, verbose_name=_("Description"))
 
     class Meta:
         abstract = True
@@ -87,7 +88,7 @@ def post_save_person_or_organization(sender, **kwargs):
 
 class Lentity(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    remarks = models.TextField(blank=True)
+    remarks = models.TextField(blank=True, verbose_name=_("Remarks"))
     ordering_string = models.CharField(
         max_length=255, null=True, blank=True, editable=False
     )
@@ -101,13 +102,21 @@ class Lentity(models.Model):
 
 
 class Person(Lentity):
-    last_name = models.CharField(max_length=100, blank=True)
-    first_name = models.CharField(max_length=100, blank=True)
-    middle_names = models.CharField(max_length=100, blank=True)
-    initials = models.CharField(max_length=20, blank=True)
+    last_name = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Last name")
+    )
+    first_name = models.CharField(
+        max_length=100, blank=True, verbose_name=_("First name")
+    )
+    middle_names = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Middle names")
+    )
+    initials = models.CharField(max_length=20, blank=True, verbose_name=_("Initials"))
     f_dependencies = ["Lentity"]
 
     class Meta:
+        verbose_name = _("Person")
+        verbose_name_plural = _("Persons")
         ordering = ("last_name", "first_name")
 
     def __str__(self):
@@ -118,11 +127,13 @@ post_save.connect(post_save_person_or_organization, sender=Person)
 
 
 class Organization(Lentity):
-    name = models.CharField(max_length=200, blank=True)
-    acronym = models.CharField(max_length=50, blank=True)
+    name = models.CharField(max_length=200, blank=True, verbose_name=_("Name"))
+    acronym = models.CharField(max_length=50, blank=True, verbose_name=_("Acronym"))
     f_dependencies = ["Lentity"]
 
     class Meta:
+        verbose_name = _("Organization")
+        verbose_name_plural = _("Organization")
         ordering = ("name",)
 
     def __str__(self):
@@ -139,9 +150,9 @@ post_save.connect(post_save_person_or_organization, sender=Organization)
 
 class Gentity(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    name = models.CharField(max_length=200, blank=True)
-    code = models.CharField(max_length=50, blank=True)
-    remarks = models.TextField(blank=True)
+    name = models.CharField(max_length=200, blank=True, verbose_name=_("Name"))
+    code = models.CharField(max_length=50, blank=True, verbose_name=_("Code"))
+    remarks = models.TextField(blank=True, verbose_name=_("Remarks"))
     geom = models.GeometryField()
 
     class Meta:
@@ -153,8 +164,10 @@ class Gentity(models.Model):
 
 
 class Gpoint(Gentity):
-    original_srid = models.IntegerField(null=True, blank=True)
-    altitude = models.FloatField(null=True, blank=True)
+    original_srid = models.IntegerField(
+        null=True, blank=True, verbose_name=_("Original SRID")
+    )
+    altitude = models.FloatField(null=True, blank=True, verbose_name=_("Altitude"))
     f_dependencies = ["Gentity"]
 
     def original_abscissa(self):
@@ -174,13 +187,19 @@ class Gpoint(Gentity):
 
 class GareaCategory(Lookup):
     class Meta:
-        verbose_name = "Garea categories"
-        verbose_name_plural = "Garea categories"
+        verbose_name = _("Area category")
+        verbose_name_plural = _("Area categories")
 
 
 class Garea(Gentity):
-    category = models.ForeignKey(GareaCategory, on_delete=models.CASCADE)
+    category = models.ForeignKey(
+        GareaCategory, on_delete=models.CASCADE, verbose_name=_("Category")
+    )
     f_dependencies = ["Gentity"]
+
+    class Meta:
+        verbose_name = _("Area")
+        verbose_name_plural = _("Areas")
 
 
 #
@@ -191,15 +210,15 @@ class Garea(Gentity):
 class GentityFile(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
     gentity = models.ForeignKey(Gentity, on_delete=models.CASCADE)
-    date = models.DateField(blank=True, null=True)
-    content = models.FileField(upload_to="gentityfile")
-    descr = models.CharField(max_length=100)
-    remarks = models.TextField(blank=True)
+    date = models.DateField(blank=True, null=True, verbose_name=_("Date"))
+    content = models.FileField(upload_to="gentityfile", verbose_name=_("Content"))
+    descr = models.CharField(max_length=100, verbose_name=_("Description"))
+    remarks = models.TextField(blank=True, verbose_name=_("Remarks"))
 
     class Meta:
-        ordering = ("descr",)
         verbose_name = _("File")
         verbose_name_plural = _("Files")
+        ordering = ("descr",)
 
     def __str__(self):
         return self.descr or str(self.id)
@@ -213,21 +232,25 @@ class GentityFile(models.Model):
 
 
 class EventType(Lookup):
-    pass
+    class Meta:
+        verbose_name = _("Log entry type")
+        verbose_name_plural = _("Log entry types")
 
 
 class GentityEvent(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
     gentity = models.ForeignKey(Gentity, on_delete=models.CASCADE)
-    date = models.DateField()
-    type = models.ForeignKey(EventType, on_delete=models.CASCADE)
-    user = models.CharField(blank=True, max_length=64)
-    report = models.TextField(blank=True)
+    date = models.DateField(verbose_name=_("Date"))
+    type = models.ForeignKey(
+        EventType, on_delete=models.CASCADE, verbose_name=_("Type")
+    )
+    user = models.CharField(blank=True, max_length=64, verbose_name=_("User"))
+    report = models.TextField(blank=True, verbose_name=_("Report"))
 
     class Meta:
-        ordering = ["-date"]
         verbose_name = _("Log entry")
         verbose_name_plural = _("Log entries")
+        ordering = ["-date"]
 
     def __str__(self):
         return str(self.date) + " " + self.type.__str__()
@@ -247,14 +270,25 @@ class GentityEvent(models.Model):
 
 class Station(Gpoint):
     owner = models.ForeignKey(
-        Lentity, related_name="owned_stations", on_delete=models.CASCADE
+        Lentity,
+        related_name="owned_stations",
+        on_delete=models.CASCADE,
+        verbose_name=pgettext_lazy("Entity that owns the station", "Owner"),
     )
-    is_automatic = models.BooleanField(default=False)
-    start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
-    overseer = models.CharField(max_length=30, blank=True)
-    copyright_holder = models.TextField()
-    copyright_years = models.CharField(max_length=10)
+    is_automatic = models.BooleanField(default=False, verbose_name=_("Is automatic"))
+    start_date = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name=pgettext_lazy("Station start date", "Start date"),
+    )
+    end_date = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name=pgettext_lazy("Station end date", "End date"),
+    )
+    overseer = models.CharField(max_length=30, blank=True, verbose_name=_("Overseer"))
+    copyright_holder = models.TextField(verbose_name=_("Copyright holder"))
+    copyright_years = models.CharField(max_length=10, verbose_name=_("Copyright years"))
     # The following two fields are only useful when USERS_CAN_ADD_CONTENT
     # is set.
     creator = models.ForeignKey(
@@ -263,12 +297,22 @@ class Station(Gpoint):
         blank=True,
         related_name="created_stations",
         on_delete=models.CASCADE,
+        verbose_name=pgettext_lazy(
+            "User who has full permissions on station", "Administrator"
+        ),
     )
     maintainers = models.ManyToManyField(
-        User, blank=True, related_name="maintaining_stations"
+        User,
+        blank=True,
+        related_name="maintaining_stations",
+        verbose_name=_("Maintainers"),
     )
 
     f_dependencies = ["Gpoint"]
+
+    class Meta:
+        verbose_name = _("Station")
+        verbose_name_plural = _("Stations")
 
     @property
     def last_update_naive(self):
@@ -320,9 +364,17 @@ class VariableManager(TranslatableManager):
 
 class Variable(TranslatableModel):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    translations = TranslatedFields(descr=models.CharField(max_length=200, blank=True))
+    translations = TranslatedFields(
+        descr=models.CharField(
+            max_length=200, blank=True, verbose_name=_("Description")
+        )
+    )
 
     objects = VariableManager()
+
+    class Meta:
+        verbose_name = _("Variable")
+        verbose_name_plural = _("Variables")
 
     def __str__(self):
         # For an explanation of this, see
@@ -334,7 +386,7 @@ class Variable(TranslatableModel):
 
 
 class UnitOfMeasurement(Lookup):
-    symbol = models.CharField(max_length=50)
+    symbol = models.CharField(max_length=50, verbose_name=_("Symbol"))
     variables = models.ManyToManyField(Variable)
 
     def __str__(self):
@@ -343,13 +395,15 @@ class UnitOfMeasurement(Lookup):
         return str(self.id)
 
     class Meta:
+        verbose_name = _("Unit of measurement")
+        verbose_name_plural = _("Units of measurement")
         ordering = ["symbol"]
 
 
 class TimeZone(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
     code = models.CharField(max_length=50)
-    utc_offset = models.SmallIntegerField()
+    utc_offset = models.SmallIntegerField(verbose_name=_("UTC offset"))
 
     @property
     def as_tzinfo(self):
@@ -365,6 +419,8 @@ class TimeZone(models.Model):
         return f"{hours:+03}{minutes:02}"
 
     class Meta:
+        verbose_name = _("Time zone")
+        verbose_name_plural = _("Time zones")
         ordering = ("utc_offset",)
 
 
@@ -388,8 +444,14 @@ class TimeseriesStorage(FileSystemStorage):
 class TimeseriesGroup(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
     gentity = models.ForeignKey(Gentity, on_delete=models.CASCADE)
-    variable = models.ForeignKey(Variable, on_delete=models.CASCADE)
-    unit_of_measurement = models.ForeignKey(UnitOfMeasurement, on_delete=models.CASCADE)
+    variable = models.ForeignKey(
+        Variable, on_delete=models.CASCADE, verbose_name=_("Variable")
+    )
+    unit_of_measurement = models.ForeignKey(
+        UnitOfMeasurement,
+        on_delete=models.CASCADE,
+        verbose_name=_("Unit of measurement"),
+    )
     name = models.CharField(
         max_length=200,
         blank=True,
@@ -399,8 +461,11 @@ class TimeseriesGroup(models.Model):
             "However, if you have two groups with the same variable (e.g. if you have "
             "two temperature sensors), specify a name to tell them apart."
         ),
+        verbose_name=_("Name"),
     )
-    hidden = models.BooleanField(null=False, blank=False, default=False)
+    hidden = models.BooleanField(
+        null=False, blank=False, default=False, verbose_name=_("Hidden")
+    )
     precision = models.SmallIntegerField(
         help_text=_(
             "The number of decimal digits to which the values of the time series "
@@ -410,10 +475,13 @@ class TimeseriesGroup(models.Model):
             "precision -1, which means the value will be 10, or 20, or 30, etc. This "
             "only affects the rounding of values when the time series is retrieved; "
             "values are always stored with all the decimal digits provided."
-        )
+        ),
+        verbose_name=_("Precision"),
     )
-    time_zone = models.ForeignKey(TimeZone, on_delete=models.CASCADE)
-    remarks = models.TextField(blank=True)
+    time_zone = models.ForeignKey(
+        TimeZone, on_delete=models.CASCADE, verbose_name=_("Time zone")
+    )
+    remarks = models.TextField(blank=True, verbose_name=_("Remarks"))
 
     def get_name(self):
         if self.name:
@@ -428,6 +496,10 @@ class TimeseriesGroup(models.Model):
             # self.variable.descr. Not sure whether this is a Django problem or a
             # django-parler problem. Working around by returning the group id.
             return f"Timeseries group {self.id}"
+
+    class Meta:
+        verbose_name = _("Time series group")
+        verbose_name_plural = _("Time series groups")
 
     def __str__(self):
         return self.get_name()
@@ -486,7 +558,9 @@ class Timeseries(models.Model):
     )
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
     timeseries_group = models.ForeignKey(TimeseriesGroup, on_delete=models.CASCADE)
-    type = models.PositiveSmallIntegerField(choices=TIMESERIES_TYPES)
+    type = models.PositiveSmallIntegerField(
+        choices=TIMESERIES_TYPES, verbose_name=_("Type")
+    )
     time_step = models.CharField(
         max_length=7,
         blank=True,
@@ -496,11 +570,12 @@ class Timeseries(models.Model):
             "between. The units available are min, H, D, M, Y. Leave empty if the time "
             "series is irregular."
         ),
+        verbose_name=_("Time step"),
     )
 
     class Meta:
-        verbose_name = "Time series"
-        verbose_name_plural = "Time series"
+        verbose_name = pgettext_lazy("Singular", "Time series")
+        verbose_name_plural = pgettext_lazy("Plural", "Time series")
         ordering = ("type",)
         unique_together = ["timeseries_group", "type", "time_step"]
         constraints = [
@@ -697,11 +772,13 @@ class TimeseriesRecord(models.Model):
     # the fields. While technically this is wrong, it fools Django into not expecting
     # an "id" field to exist, and it doesn't affect querying functionality.
     timeseries = models.ForeignKey(Timeseries, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(primary_key=True)
-    value = models.FloatField(blank=True, null=True)
-    flags = models.CharField(max_length=237, blank=True)
+    timestamp = models.DateTimeField(primary_key=True, verbose_name=_("Timestamp"))
+    value = models.FloatField(blank=True, null=True, verbose_name=_("Value"))
+    flags = models.CharField(max_length=237, blank=True, verbose_name=_("Flags"))
 
     class Meta:
+        verbose_name = _("Time series record")
+        verbose_name_plural = _("Time series records")
         managed = False
         get_latest_by = "timestamp"
 
