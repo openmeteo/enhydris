@@ -314,14 +314,14 @@ class Station(Gpoint):
         verbose_name = _("Station")
         verbose_name_plural = _("Stations")
 
-    @property
+    @cached_property
     def last_update_naive(self):
         result = self.last_update
         if result is not None:
             result = result.replace(tzinfo=None)
         return result
 
-    @property
+    @cached_property
     def last_update(self):
         timeseries = Timeseries.objects.filter(timeseries_group__gentity_id=self.id)
         result = None
@@ -520,23 +520,23 @@ class TimeseriesGroup(models.Model):
             if timeseries.type == type:
                 return timeseries
 
-    @property
+    @cached_property
     def start_date(self):
         if self.default_timeseries:
             return self.default_timeseries.start_date
 
-    @property
+    @cached_property
     def end_date(self):
         if self.default_timeseries:
             return self.default_timeseries.end_date
 
-    @property
+    @cached_property
     def start_date_naive(self):
         result = self.start_date
         if result is not None:
             return result.replace(tzinfo=None)
 
-    @property
+    @cached_property
     def end_date_naive(self):
         result = self.end_date
         if result is not None:
@@ -596,7 +596,7 @@ class Timeseries(models.Model):
             ),
         ]
 
-    @property
+    @cached_property
     def start_date(self):
         try:
             return self.timeseriesrecord_set.earliest().timestamp.astimezone(
@@ -605,7 +605,7 @@ class Timeseries(models.Model):
         except TimeseriesRecord.DoesNotExist:
             return None
 
-    @property
+    @cached_property
     def end_date(self):
         try:
             return self.timeseriesrecord_set.latest().timestamp.astimezone(
@@ -614,7 +614,7 @@ class Timeseries(models.Model):
         except TimeseriesRecord.DoesNotExist:
             return None
 
-    @property
+    @cached_property
     def start_date_naive(self):
         try:
             return (
@@ -625,7 +625,7 @@ class Timeseries(models.Model):
         except TimeseriesRecord.DoesNotExist:
             return None
 
-    @property
+    @cached_property
     def end_date_naive(self):
         try:
             return (
@@ -751,6 +751,40 @@ class Timeseries(models.Model):
         except Station.DoesNotExist:
             return None
 
+    @staticmethod
+    def _invalidate_prop_cache(obj, prop):
+        try:
+            delattr(obj, prop)
+        except AttributeError:
+            pass
+
+    def _invalidate_date_caches(self):
+        """
+        Invalidate cached dates for related model instances.
+
+        Invalidate cached values of:
+         - last_update, last_update_naive of related `Station` model instance.
+         - start_date, start_date_naive, end_date, end_date_naive of
+            the related `TimeSeriesGroup` model instance.
+         - start_date`, start_date_naive, end_date, end_date_naive of
+           the current `Timeseries` model instance.
+        """
+        cached_property_names = [
+            "start_date",
+            "start_date_naive",
+            "end_date",
+            "end_date_naive",
+            "last_update",
+            "last_update_naive",
+        ]
+
+        for prop in cached_property_names:
+            self._invalidate_prop_cache(self.timeseries_group.gentity, prop)
+            self._invalidate_prop_cache(self.timeseries_group, prop)
+            self._invalidate_prop_cache(self, prop)
+
+        self._invalidate_prop_cache(self.timeseries_group, "default_timeseries")
+
     def __str__(self):
         result = self.get_type_display()
         if self.type == self.AGGREGATED:
@@ -761,6 +795,7 @@ class Timeseries(models.Model):
         check_time_step(self.time_step)
         super(Timeseries, self).save(force_insert, force_update, *args, **kwargs)
         cache.delete(f"timeseries_data_{self.id}")
+        self._invalidate_date_caches()
 
 
 class TimeseriesRecord(models.Model):
