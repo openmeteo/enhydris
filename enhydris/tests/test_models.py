@@ -418,6 +418,44 @@ class StationLastUpdateTestCase(TestCase):
             self.station.last_update, dt.datetime(2019, 7, 24, 13, 26, tzinfo=tzinfo)
         )
 
+    def test_last_update_cache_when_atleast_one_timeseries_has_end_date(self):
+        # Since it's not possible to cache `None` values, ensure to create
+        # at least one timeseries with an end date value.
+        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.RAW)
+
+        # Make sure to fetch the `end_date` value of the timeseries
+        timeseries = models.Timeseries.objects.filter(
+            timeseries_group__gentity_id=self.station.id
+        )
+        for t in timeseries:
+            t.end_date
+
+        with self.assertNumQueries(1):
+            self.station.last_update
+
+        station = models.Station.objects.get(id=self.station.id)
+        with self.assertNumQueries(0):
+            station.last_update
+
+    def test_last_update_naive_cace_when_atleast_one_timeseries_has_end_date(self):
+        # Since it's not possible to cache `None` values, ensure to create
+        # at least one timeseries with an end date value.
+        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.RAW)
+
+        # Make sure to fetch the `end_date` value of the timeseries
+        timeseries = models.Timeseries.objects.filter(
+            timeseries_group__gentity_id=self.station.id
+        )
+        for t in timeseries:
+            t.end_date
+
+        with self.assertNumQueries(1):
+            self.station.last_update_naive
+
+        station = models.Station.objects.get(id=self.station.id)
+        with self.assertNumQueries(0):
+            station.last_update_naive
+
 
 class UnitOfMeasurementTestCase(TestCase):
     def test_str(self):
@@ -553,11 +591,37 @@ class TimeseriesGroupStartAndEndDateTestCase(TestCase, TimeseriesDataMixin):
             dt.datetime(2017, 11, 23, 17, 23, tzinfo=self.time_zone.as_tzinfo),
         )
 
+    def test_start_date_cache(self):
+        # Make sure to retrieve the `default_timeseries` first.
+        self.timeseries_group.default_timeseries
+
+        with self.assertNumQueries(1):
+            self.timeseries_group.start_date
+
+        timeseries_group = models.TimeseriesGroup.objects.get(
+            id=self.timeseries_group.id
+        )
+        with self.assertNumQueries(0):
+            timeseries_group.start_date
+
     def test_end_date(self):
         self.assertEqual(
             self.timeseries_group.end_date,
             dt.datetime(2018, 11, 25, 1, 0, tzinfo=self.time_zone.as_tzinfo),
         )
+
+    def test_end_date_cache(self):
+        # Make sure to retrieve the `default_timeseries` first.
+        self.timeseries_group.default_timeseries
+
+        with self.assertNumQueries(1):
+            self.timeseries_group.end_date
+
+        timeseries_group = models.TimeseriesGroup.objects.get(
+            id=self.timeseries_group.id
+        )
+        with self.assertNumQueries(0):
+            timeseries_group.end_date
 
     def test_start_date_when_timeseries_is_empty(self):
         self.timeseries.set_data(StringIO(""))
@@ -580,10 +644,30 @@ class TimeseriesGroupStartAndEndDateTestCase(TestCase, TimeseriesDataMixin):
             self.timeseries_group.start_date_naive, dt.datetime(2017, 11, 23, 17, 23)
         )
 
+    def test_start_date_naive_cache(self):
+        # Make sure to have access to the `start_date` first
+        self.timeseries_group.start_date
+
+        timeseries_group = models.TimeseriesGroup.objects.get(
+            id=self.timeseries_group.id
+        )
+        with self.assertNumQueries(0):
+            timeseries_group.start_date_naive
+
     def test_end_date_naive(self):
         self.assertEqual(
             self.timeseries_group.end_date_naive, dt.datetime(2018, 11, 25, 1, 0)
         )
+
+    def test_end_date_naive_cache(self):
+        # Make sure to have access to the `end_date` first
+        self.timeseries_group.end_date
+
+        timeseries_group = models.TimeseriesGroup.objects.get(
+            id=self.timeseries_group.id
+        )
+        with self.assertNumQueries(0):
+            timeseries_group.end_date_naive
 
     def test_start_date_naive_when_timeseries_is_empty(self):
         self.timeseries.set_data(StringIO(""))
@@ -754,6 +838,14 @@ class TimeseriesDatesTestCase(TestCase):
             self.timeseries.timeseries_group.time_zone.as_tzinfo,
         )
 
+    def test_start_date_cache(self):
+        with self.assertNumQueries(1):
+            self.timeseries.start_date
+
+        timeseries = models.Timeseries.objects.get(id=self.timeseries.id)
+        with self.assertNumQueries(0):
+            timeseries.start_date
+
     def test_end_date(self):
         self.assertEqual(
             self.timeseries.end_date,
@@ -773,15 +865,39 @@ class TimeseriesDatesTestCase(TestCase):
             self.timeseries.timeseries_group.time_zone.as_tzinfo,
         )
 
+    def test_end_date_cache(self):
+        with self.assertNumQueries(1):
+            self.timeseries.end_date
+
+        timeseries = models.Timeseries.objects.get(id=self.timeseries.id)
+        with self.assertNumQueries(0):
+            timeseries.end_date
+
     def test_start_date_naive(self):
         self.assertEqual(
             self.timeseries.start_date_naive, dt.datetime(2018, 11, 15, 18, 0)
         )
 
+    def test_start_date_naive_cache(self):
+        with self.assertNumQueries(1):
+            self.timeseries.start_date_naive
+
+        timeseries = models.Timeseries.objects.get(id=self.timeseries.id)
+        with self.assertNumQueries(0):
+            timeseries.start_date_naive
+
     def test_end_date_naive(self):
         self.assertEqual(
             self.timeseries.end_date_naive, dt.datetime(2018, 11, 18, 1, 0)
         )
+
+    def test_end_date_naive_cache(self):
+        with self.assertNumQueries(1):
+            self.timeseries.end_date_naive
+
+        timeseries = models.Timeseries.objects.get(id=self.timeseries.id)
+        with self.assertNumQueries(0):
+            timeseries.end_date_naive
 
 
 class DataTestCase(TestCase, TestTimeseriesMixin):
@@ -1187,3 +1303,118 @@ class TimeseriesRecordBulkInsertTestCase(TestCase, TestTimeseriesMixin):
 
     def test_empty_value(self):
         self.assertIsNone(self.timeseries_records[1].value)
+
+
+class TimeseriesDatesCacheInvalidationTestCase(TestCase):
+    def setUp(self):
+        self.station = mommy.make(models.Station, name="Celduin")
+        self.timeseries_group = mommy.make(models.TimeseriesGroup, gentity=self.station)
+        self.timeseries = mommy.make(
+            models.Timeseries,
+            timeseries_group=self.timeseries_group,
+            type=models.Timeseries.RAW,
+        )
+
+    def test_station_last_update_cache_invalidation(self):
+        with self.assertNumQueries(2):
+            self.station.last_update
+
+        # Check cache invalidation
+        self.timeseries.save()
+        with self.assertNumQueries(2):
+            self.station.last_update
+
+    def test_station_last_update_naive_cache_invalidation(self):
+        with self.assertNumQueries(2):
+            self.station.last_update_naive
+
+        # Check cache invalidation
+        self.timeseries.save()
+        with self.assertNumQueries(2):
+            self.station.last_update_naive
+
+    def test_timeseries_group_start_date_cache_invalidation(self):
+        self.timeseries_group.default_timeseries
+        with self.assertNumQueries(1):
+            self.timeseries_group.start_date
+
+        # Check cache invalidation
+        self.timeseries.save()
+        self.timeseries_group.default_timeseries
+        with self.assertNumQueries(1):
+            self.timeseries_group.start_date
+
+    def test_timeseries_group_start_date_naive_cache_invalidation(self):
+        # Make sure to retrieve the `default_timeseries` first.
+        self.timeseries_group.default_timeseries
+
+        with self.assertNumQueries(1):
+            self.timeseries_group.start_date_naive
+
+        # Check cache invalidation
+        self.timeseries.save()
+        self.timeseries_group.default_timeseries
+        with self.assertNumQueries(1):
+            self.timeseries_group.start_date_naive
+
+    def test_timeseries_group_end_date_cache_invalidation(self):
+        # Make sure to retrieve the `default_timeseries` first.
+        self.timeseries_group.default_timeseries
+
+        with self.assertNumQueries(1):
+            self.timeseries_group.end_date
+
+        # Check cache invalidation
+        self.timeseries.save()
+        self.timeseries_group.default_timeseries
+        with self.assertNumQueries(1):
+            self.timeseries_group.end_date
+
+    def test_timeseries_group_end_date_naive_cache_invalidation(self):
+        # Make sure to retrieve the `default_timeseries` first.
+        self.timeseries_group.default_timeseries
+
+        with self.assertNumQueries(1):
+            self.timeseries_group.end_date_naive
+
+        # Check cache invalidation
+        self.timeseries.save()
+        self.timeseries_group.default_timeseries
+        with self.assertNumQueries(1):
+            self.timeseries_group.end_date_naive
+
+    def test_timeseries_start_date_cache_invalidation(self):
+        with self.assertNumQueries(1):
+            self.timeseries.start_date
+
+        # Check cache invalidation
+        self.timeseries.save()
+        with self.assertNumQueries(1):
+            self.timeseries.start_date
+
+    def test_timeseries_start_date_naive_cache_invalidation(self):
+        with self.assertNumQueries(1):
+            self.timeseries.start_date_naive
+
+        # Check cache invalidation
+        self.timeseries.save()
+        with self.assertNumQueries(1):
+            self.timeseries.start_date_naive
+
+    def test_timeseries_end_date_cache_invalidation(self):
+        with self.assertNumQueries(1):
+            self.timeseries.end_date
+
+        # Check cache invalidation
+        self.timeseries.save()
+        with self.assertNumQueries(1):
+            self.timeseries.end_date
+
+    def test_timeseries_end_date_naive_cache_invalidation(self):
+        with self.assertNumQueries(1):
+            self.timeseries.end_date_naive
+
+        # Check cache invalidation
+        self.timeseries.save()
+        with self.assertNumQueries(1):
+            self.timeseries.end_date_naive
