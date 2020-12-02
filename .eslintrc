@@ -1,0 +1,20 @@
+{
+    "extends": "airbnb-base",
+    "env": {
+        "browser": true,
+        "jquery": true,
+        "jest": true
+    },
+    "globals": {
+        "enhydris": "writable",
+        "OpenLayers": "readonly",
+        "google": "readonly",
+        "moment": "readonly",
+        "L": "readonly",
+        "ApexCharts": "readonly"
+    },
+    "rules": {
+        "prefer-arrow-callback": "off",
+        "func-names": "off"
+    }
+}

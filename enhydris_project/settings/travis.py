@@ -1,3 +1,6 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+
 from . import *  # NOQA
 
 DATABASES = {
@@ -18,4 +21,15 @@ LANGUAGES = {
 PARLER_LANGUAGES = {
     SITE_ID: [{"code": LANGUAGE_CODE}, {"code": "el"}],  # NOQA
     "default": {"fallbacks": ["en"], "hide_untranslated": True},
+}
+
+headless = ChromeOptions()
+headless.add_argument("--headless")
+
+SELENIUM_WEBDRIVERS = {
+    "headless": {
+        "callable": webdriver.Chrome,
+        "args": [],
+        "kwargs": {"options": headless},
+    },
 }

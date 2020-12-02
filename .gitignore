@@ -1,6 +1,7 @@
 *.pyc
 *.egg
 *.egg-info
+node_modules
 doc/_build
 dist
 timeseries_data

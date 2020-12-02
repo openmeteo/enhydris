@@ -20,6 +20,7 @@ from enhydris.models import check_time_step
 class StationAdminForm(forms.ModelForm):
     code = forms.CharField(
         required=False,
+        label=_("Code"),
         help_text=_(
             "If the station has a code (e.g. one given by another agency), you "
             "can enter it here."
@@ -185,23 +186,36 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
 class TimeseriesInlineFormSet(nested_admin.formsets.NestedInlineFormSet):
     def clean(self):
         super().clean()
-        self._check_only_one_timeseries_with_type(models.Timeseries.RAW)
-        self._check_only_one_timeseries_with_type(models.Timeseries.CHECKED)
-        self._check_only_one_timeseries_with_type(models.Timeseries.REGULARIZED)
+        self._check_only_one_timeseries_with_type_one_of(
+            models.Timeseries.RAW, models.Timeseries.PROCESSED
+        )
+        self._check_only_one_timeseries_with_type_one_of(models.Timeseries.CHECKED)
+        self._check_only_one_timeseries_with_type_one_of(models.Timeseries.REGULARIZED)
 
-    def _check_only_one_timeseries_with_type(self, type):
-        types = [
-            form.cleaned_data["type"]
-            for form in self.forms
-            if type == form.cleaned_data.get("type")
-        ]
-        if len(types) != len(set(types)):
-            type_name = dict(models.Timeseries.TIMESERIES_TYPES)[type]
+    def _check_only_one_timeseries_with_type_one_of(self, *types):
+        """Check for duplicate time series.
+
+        Ensures that there is only one time series whose type is one of the supplied
+        types. I.e. if "types" is [RAW, PROCESSED], it ensures that only one (or zero)
+        time series with a type of raw or processed exists; if two raw or two processed
+        or one raw and one processed exists, it raises ValidationError.
+        """
+        total_occurrences = 0
+        for type in types:
+            total_occurrences += len(
+                [form for form in self.forms if type == form.cleaned_data.get("type")]
+            )
+        if total_occurrences > 1:
+            type_names = _(" or ").join(
+                [
+                    dict(models.Timeseries.TIMESERIES_TYPES)[type].lower()
+                    for type in types
+                ]
+            )
             raise forms.ValidationError(
                 _(
-                    "There can be only one {type_name} time series "
-                    "in each time series group."
-                ).format(type_name=type_name.lower())
+                    "There can be only one {} time series in each time series group."
+                ).format(type_names)
             )
 
 
