@@ -316,22 +316,30 @@ class Station(Gpoint):
 
     @property
     def last_update_naive(self):
-        result = self.last_update
-        if result is not None:
-            result = result.replace(tzinfo=None)
-        return result
+        def get_last_update_naive():
+            result = self.last_update
+            if result is not None:
+                result = result.replace(tzinfo=None)
+            return result
+
+        return cache.get_or_set(
+            f"station_last_update_naive_{self.id}", get_last_update_naive
+        )
 
     @property
     def last_update(self):
-        timeseries = Timeseries.objects.filter(timeseries_group__gentity_id=self.id)
-        result = None
-        for t in timeseries:
-            t_end_date = t.end_date
-            if t_end_date is None:
-                continue
-            if result is None or t_end_date > result:
-                result = t_end_date
-        return result
+        def get_last_update():
+            timeseries = Timeseries.objects.filter(timeseries_group__gentity_id=self.id)
+            result = None
+            for t in timeseries:
+                t_end_date = t.end_date
+                if t_end_date is None:
+                    continue
+                if result is None or t_end_date > result:
+                    result = t_end_date
+            return result
+
+        return cache.get_or_set(f"station_last_update_{self.id}", get_last_update)
 
 
 #
@@ -522,25 +530,43 @@ class TimeseriesGroup(models.Model):
 
     @property
     def start_date(self):
-        if self.default_timeseries:
-            return self.default_timeseries.start_date
+        def get_start_date():
+            if self.default_timeseries:
+                return self.default_timeseries.start_date
+
+        return cache.get_or_set(
+            f"timeseries_group_start_date_{self.id}", get_start_date
+        )
 
     @property
     def end_date(self):
-        if self.default_timeseries:
-            return self.default_timeseries.end_date
+        def get_end_date():
+            if self.default_timeseries:
+                return self.default_timeseries.end_date
+
+        return cache.get_or_set(f"timeseries_group_end_date_{self.id}", get_end_date)
 
     @property
     def start_date_naive(self):
         result = self.start_date
-        if result is not None:
-            return result.replace(tzinfo=None)
+
+        def get_start_date_naive():
+            if result is not None:
+                return result.replace(tzinfo=None)
+
+        return cache.get_or_set(
+            f"timeseries_start_date_naive_{self.id}", get_start_date_naive
+        )
 
     @property
     def end_date_naive(self):
         result = self.end_date
-        if result is not None:
-            return result.replace(tzinfo=None)
+
+        def get_end_date():
+            if result is not None:
+                return result.replace(tzinfo=None)
+
+        return cache.get_or_set(f"timeseries_end_date_naive_{self.id}", get_end_date)
 
 
 class Timeseries(models.Model):
@@ -598,43 +624,59 @@ class Timeseries(models.Model):
 
     @property
     def start_date(self):
-        try:
-            return self.timeseriesrecord_set.earliest().timestamp.astimezone(
-                self.timeseries_group.time_zone.as_tzinfo
-            )
-        except TimeseriesRecord.DoesNotExist:
-            return None
+        def get_start_date():
+            try:
+                return self.timeseriesrecord_set.earliest().timestamp.astimezone(
+                    self.timeseries_group.time_zone.as_tzinfo
+                )
+            except TimeseriesRecord.DoesNotExist:
+                return None
+
+        return cache.get_or_set(f"timeseries_start_date_{self.id}", get_start_date)
 
     @property
     def end_date(self):
-        try:
-            return self.timeseriesrecord_set.latest().timestamp.astimezone(
-                self.timeseries_group.time_zone.as_tzinfo
-            )
-        except TimeseriesRecord.DoesNotExist:
-            return None
+        def get_end_date():
+            try:
+                return self.timeseriesrecord_set.latest().timestamp.astimezone(
+                    self.timeseries_group.time_zone.as_tzinfo
+                )
+            except TimeseriesRecord.DoesNotExist:
+                return None
+
+        return cache.get_or_set(f"timeseries_end_date_{self.id}", get_end_date)
 
     @property
     def start_date_naive(self):
-        try:
-            return (
-                self.timeseriesrecord_set.earliest()
-                .timestamp.astimezone(self.timeseries_group.time_zone.as_tzinfo)
-                .replace(tzinfo=None)
-            )
-        except TimeseriesRecord.DoesNotExist:
-            return None
+        def get_start_date_naive():
+            try:
+                return (
+                    self.timeseriesrecord_set.earliest()
+                    .timestamp.astimezone(self.timeseries_group.time_zone.as_tzinfo)
+                    .replace(tzinfo=None)
+                )
+            except TimeseriesRecord.DoesNotExist:
+                return None
+
+        return cache.get_or_set(
+            f"timeseries_start_date_naive_{self.id}", get_start_date_naive
+        )
 
     @property
     def end_date_naive(self):
-        try:
-            return (
-                self.timeseriesrecord_set.latest()
-                .timestamp.astimezone(self.timeseries_group.time_zone.as_tzinfo)
-                .replace(tzinfo=None)
-            )
-        except TimeseriesRecord.DoesNotExist:
-            return None
+        def get_end_date_naive():
+            try:
+                return (
+                    self.timeseriesrecord_set.latest()
+                    .timestamp.astimezone(self.timeseries_group.time_zone.as_tzinfo)
+                    .replace(tzinfo=None)
+                )
+            except TimeseriesRecord.DoesNotExist:
+                return None
+
+        return cache.get_or_set(
+            f"timeseries_end_date_naive_{self.id}", get_end_date_naive
+        )
 
     def _set_extra_timeseries_properties(self, ahtimeseries):
         if self.timeseries_group.gentity.geom:
@@ -751,6 +793,36 @@ class Timeseries(models.Model):
         except Station.DoesNotExist:
             return None
 
+    def _invalidate_cached_data(self):
+        """
+        Invalidate cached data for related model instances.
+
+        Invalidate cached values of:
+         - timeseries_data from `get_data` method
+         - last_update, last_update_naive of related `Station` model instance.
+         - start_date, start_date_naive, end_date, end_date_naive of
+            the related `TimeSeriesGroup` model instance.
+         - start_date`, start_date_naive, end_date, end_date_naive of
+           the current `Timeseries` model instance.
+        """
+        cached_property_names = [
+            f"timeseries_data_{self.id}",
+            f"timeseries_start_date_{self.id}",
+            f"timeseries_end_date_{self.id}",
+            f"timeseries_start_date_naive_{self.id}",
+            f"timeseries_end_date_naive_{self.id}",
+            f"timeseries_group_start_date_{self.timeseries_group.id}",
+            f"timeseries_group_end_date_{self.timeseries_group.id}",
+            f"timeseries_group_start_date_naive_{self.timeseries_group.id}",
+            f"timeseries_group_end_date_naive_{self.timeseries_group.id}",
+        ]
+        if self.related_station:
+            cached_property_names += [
+                f"station_last_update_{self.related_station.id}",
+                f"station_last_update_naive_{self.related_station.id}",
+            ]
+        cache.delete_many(cached_property_names)
+
     def __str__(self):
         result = self.get_type_display()
         if self.type == self.AGGREGATED:
@@ -760,7 +832,7 @@ class Timeseries(models.Model):
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         check_time_step(self.time_step)
         super(Timeseries, self).save(force_insert, force_update, *args, **kwargs)
-        cache.delete(f"timeseries_data_{self.id}")
+        self._invalidate_cached_data()
 
 
 class TimeseriesRecord(models.Model):
