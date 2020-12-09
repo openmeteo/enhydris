@@ -218,7 +218,7 @@ class TimeseriesViewSet(ModelViewSet):
         return response
 
     @action(detail=True, methods=["get"])
-    def chart(self, request, pk=None, *, station_id, timeseries_group_id):
+    def chart(self, request, pk=None, *, station_id, timeseries_group_id=None):
         timeseries = get_object_or_404(models.Timeseries, pk=pk)
         self.check_object_permissions(request, timeseries)
         serializer = serializers.TimeseriesRecordChartSerializer(
