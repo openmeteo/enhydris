@@ -122,6 +122,11 @@ $(function () {
     },
     yaxis: {
       tickAmount: 2,
+      labels: {
+        formatter(val) {
+          return val.toFixed(1);
+        },
+      },
     },
   };
 
@@ -190,6 +195,13 @@ $(function () {
         enabled: false,
       },
     },
+    yaxis: {
+      labels: {
+        formatter(val) {
+          return val.toFixed(1);
+        },
+      },
+    },
     tooltip: {
       enabled: true,
       x: {
@@ -209,6 +221,7 @@ $(function () {
     .then((response) => response.json())
     .then((data) => {
       if (data && data[0]) {
+        console.log('Returned data: ', data);
         const mappedData = mapData(data);
 
         chartConfigs.mainChart.updateSeries([
