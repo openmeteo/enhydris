@@ -124,7 +124,7 @@ $(function () {
       tickAmount: 2,
       labels: {
         formatter(val) {
-          return val.toFixed(1);
+          return val.toFixed(enhydris.precision >= 0 ? enhydris.precision : 0);
         },
       },
     },
@@ -198,7 +198,7 @@ $(function () {
     yaxis: {
       labels: {
         formatter(val) {
-          return val.toFixed(1);
+          return val.toFixed(enhydris.precision >= 0 ? enhydris.precision : 0);
         },
       },
     },
@@ -221,7 +221,6 @@ $(function () {
     .then((response) => response.json())
     .then((data) => {
       if (data && data[0]) {
-        console.log('Returned data: ', data);
         const mappedData = mapData(data);
 
         chartConfigs.mainChart.updateSeries([
