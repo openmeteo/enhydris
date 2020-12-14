@@ -38,7 +38,7 @@ enhydris.mapModule = (function namespace() {
   };
 
   const listStationsVisibleOnMap = function () {
-    const queryParams = Arg.all(); /* eslint no-undef: "off" */
+    const queryParams = Arg.all();
     queryParams.bbox = map.getBounds().toBBoxString();
     let queryString = '';
     Object.keys(queryParams).forEach((param) => {
