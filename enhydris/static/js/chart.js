@@ -122,6 +122,11 @@ $(function () {
     },
     yaxis: {
       tickAmount: 2,
+      labels: {
+        formatter(val) {
+          return val.toFixed(enhydris.precision >= 0 ? enhydris.precision : 0);
+        },
+      },
     },
   };
 
@@ -188,6 +193,13 @@ $(function () {
       type: 'datetime',
       tooltip: {
         enabled: false,
+      },
+    },
+    yaxis: {
+      labels: {
+        formatter(val) {
+          return val.toFixed(enhydris.precision >= 0 ? enhydris.precision : 0);
+        },
       },
     },
     tooltip: {
