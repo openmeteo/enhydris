@@ -323,9 +323,7 @@ class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
 
         # Zoom station to an area that covers only two of these stations.
         self.selenium.execute_script(
-            """
-            enhydris.map.fitBounds([[39.0, 21.0], [40.0, 22.0]]);
-            """
+            "enhydris.map.leafletMap.fitBounds([[39.0, 21.0], [40.0, 22.0]]);"
         )
 
         # Click on "List stations visible on map"
