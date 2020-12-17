@@ -287,8 +287,6 @@ class Station(Gpoint):
         verbose_name=pgettext_lazy("Station end date", "End date"),
     )
     overseer = models.CharField(max_length=30, blank=True, verbose_name=_("Overseer"))
-    copyright_holder = models.TextField(verbose_name=_("Copyright holder"))
-    copyright_years = models.CharField(max_length=10, verbose_name=_("Copyright years"))
     # The following two fields are only useful when USERS_CAN_ADD_CONTENT
     # is set.
     creator = models.ForeignKey(

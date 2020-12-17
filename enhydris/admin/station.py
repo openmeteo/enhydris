@@ -288,12 +288,7 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
             (
                 _("Essential information"),
                 {
-                    "fields": (
-                        ("name", "code"),
-                        ("is_automatic"),
-                        "owner",
-                        ("copyright_years", "copyright_holder"),
-                    ),
+                    "fields": (("name", "code"), ("is_automatic"), "owner"),
                     "classes": ("collapse",),
                 },
             ),

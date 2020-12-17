@@ -36,8 +36,6 @@ Response::
           "is_automatic": true,
           "start_date": "2012-09-20",
           "end_date": null,
-          "copyright_holder": "HCMR",
-          "copyright_years": "2012-",
           "owner": 11,
           "overseer": "",
           "maintainers": []
@@ -330,8 +328,6 @@ Response::
       "is_automatic": true,
       "start_date": "2012-09-20",
       "end_date": null,
-      "copyright_holder": "HCMR",
-      "copyright_years": "2012-",
       "owner": 11,
       "overseer": "",
       "maintainers": []
@@ -421,9 +417,9 @@ Sort the list of stations
 -------------------------
 
 Sort the returned stations with the ``sort`` parameter, which can be
-specified many times. This will sort by copyright holder, then by name::
+specified many times. This will sort by start date, then by name::
 
-    curl 'https://openmeteo.org/api/stations/?sort=copyright_holder&sort=name'
+    curl 'https://openmeteo.org/api/stations/?sort=start_date&sort=name'
 
 Export stations in a CSV
 ------------------------
@@ -452,8 +448,7 @@ The response is normally 204 (no content) or 404.
 POST to create a station::
 
     curl -X POST -H "Authorization: token OAUTH-TOKEN" \
-        -d "name=My station" -d "copyright_holder=Joe User" \
-        -d "copyright_years=2019" -d "geom=POINT(20.94565 39.12102)" \
+        -d "name=My station" -d "geom=POINT(20.94565 39.12102)" \
         -d "owner=11" https://openmeteo.org/api/stations/
 
 The response is a 201 with a similar content as the GET detail response

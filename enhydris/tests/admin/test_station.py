@@ -242,8 +242,6 @@ class StationCreateSetsCreatorTestCase(TestCase):
             "/admin/enhydris/station/add/",
             {
                 "name": "Hobbiton",
-                "copyright_years": "2018",
-                "copyright_holder": "Bilbo Baggins",
                 "owner": self.serial_killers_sa.id,
                 "geom_0": "20.94565",
                 "geom_1": "39.12102",
@@ -348,8 +346,6 @@ class TimeseriesUploadFileMixin:
     def _get_basic_form_contents(self):
         return {
             "name": "Hobbiton",
-            "copyright_years": "2018",
-            "copyright_holder": "Bilbo Baggins",
             "owner": models.Organization.objects.create(name="Serial killers SA").id,
             "geom_0": "20.94565",
             "geom_1": "39.12102",
@@ -459,8 +455,8 @@ class TimeseriesUploadInvalidFileTestCase(TestCase, TestTimeseriesFormMixin):
         self._create_timeseries_inline_admin_form("REPLACE", b"2020-01-28 18:28,7,")
         self.assertFalse(self.form.is_valid())
 
-    def test_file_not_having_three_columns(self):
-        self._create_timeseries_inline_admin_form("REPLACE", b"2020-01-28 18:28,7\n")
+    def test_file_not_having_enough_columns(self):
+        self._create_timeseries_inline_admin_form("REPLACE", b"2020-01-28 18:28\n")
         self.assertFalse(self.form.is_valid())
 
     def test_file_with_multiple_timestamps(self):
@@ -496,8 +492,6 @@ class TimeseriesInlineFormSetTestCase(TestCase):
     def _get_basic_form_contents(self):
         return {
             "name": "Hobbiton",
-            "copyright_years": "2018",
-            "copyright_holder": "Bilbo Baggins",
             "owner": models.Organization.objects.create(name="Serial killers SA").id,
             "geom_0": "20.94565",
             "geom_1": "39.12102",

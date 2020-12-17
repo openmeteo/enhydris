@@ -33,17 +33,6 @@
           </div>
         </div>
       </div>
-
-      {% if display_copyright and timeseries.related_station %}
-        <div class="card-footer">
-          <p>&copy;
-            <span class="text-warning">sdgdggdsgdsg
-              {{ timeseries.related_station.copyright_years }}
-              {{ timeseries.related_station.copyright_holder }}
-            </span>
-          </p>
-        </div>
-      {% endif %}
     </div>
   </div>
 {% endblock %}
@@ -53,6 +42,7 @@
   <script>
     enhydris.strLoading = "{% trans 'Loading...'  %}";
     enhydris.strNoData = "{% trans 'No data' %}";
+    enhydris.precision = parseInt("{{ object.precision }}");
 
     {% if object.default_timeseries %}
       enhydris.chartApiUrl = "{% url 'timeseries-chart' station_id=object.gentity.id timeseries_group_id=object.id pk=object.default_timeseries.id %}";

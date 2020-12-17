@@ -299,6 +299,10 @@ Other changes
 - Stations can now only have a single overseer, specified as a text
   field. Upgrading will convert as needed, and it will also delete any
   unreferenced Person objects.
+- The database fields ``copyright_years`` and ``copyright_holder`` have
+  been abolished. The database upgrade will remove them and any
+  information stored in them will be lost. Accordingly, the setting
+  ``ENHYDRIS_DISPLAY_COPYRIGHT_INFO`` has been abolished.
 - OpenLayers has been replaced with Leaflet. Accordingly, the form of
   the :data:`ENHYDRIS_MAP_BASE_LAYERS` setting has been changed and the
   setting :data:`ENHYDRIS_MAP_DEFAULT_BASE_LAYER` has been added.

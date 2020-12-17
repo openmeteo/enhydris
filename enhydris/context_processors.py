@@ -27,6 +27,5 @@ def map(request):
         "map_base_layers": map_base_layers,
         "map_default_base_layer": settings.ENHYDRIS_MAP_DEFAULT_BASE_LAYER,
         "map_viewport": getattr(request, "map_viewport", "[0, 0, 0, 0]"),
-        "map_markers": json.dumps(settings.ENHYDRIS_MAP_MARKERS),
         "searchString": json.dumps(request.GET.get("q", "")),
     }
