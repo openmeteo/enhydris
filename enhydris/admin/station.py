@@ -286,24 +286,17 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
     def get_fieldsets(self, request, obj):
         fieldsets = [
             (
-                _("Essential information"),
+                _("General information"),
                 {
-                    "fields": (("name", "code"), ("is_automatic"), "owner"),
-                    "classes": ("collapse",),
-                },
-            ),
-            (
-                _("Location"),
-                {
-                    "fields": (("geom", "original_srid"), ("altitude")),
-                    "classes": ("collapse",),
-                },
-            ),
-            (
-                _("Other details"),
-                {
-                    "fields": ("remarks", ("start_date", "end_date")),
-                    "classes": ("collapse",),
+                    "fields": (
+                        ("name", "code"),
+                        "is_automatic",
+                        "owner",
+                        ("geom", "original_srid"),
+                        "altitude",
+                        "remarks",
+                        ("start_date", "end_date"),
+                    ),
                 },
             ),
         ]
