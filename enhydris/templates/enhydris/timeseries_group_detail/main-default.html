@@ -33,17 +33,6 @@
           </div>
         </div>
       </div>
-
-      {% if display_copyright and timeseries.related_station %}
-        <div class="card-footer">
-          <p>&copy;
-            <span class="text-warning">sdgdggdsgdsg
-              {{ timeseries.related_station.copyright_years }}
-              {{ timeseries.related_station.copyright_holder }}
-            </span>
-          </p>
-        </div>
-      {% endif %}
     </div>
   </div>
 {% endblock %}

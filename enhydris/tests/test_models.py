@@ -302,8 +302,6 @@ class StationTestCase(TestCase):
         person = mommy.make(models.Person)
         station = models.Station(
             owner=person,
-            copyright_holder="Bilbo Baggins",
-            copyright_years="2018",
             name="Hobbiton",
             geom=Point(x=21.06071, y=39.09518, srid=4326),
         )

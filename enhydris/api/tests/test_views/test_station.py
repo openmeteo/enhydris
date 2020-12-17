@@ -39,8 +39,6 @@ class StationCreateTestCase(APITestCase):
             "/api/stations/",
             data={
                 "name": "Hobbiton",
-                "copyright_years": "2018",
-                "copyright_holder": "Bilbo Baggins",
                 "owner": self.bilbo.id,
                 "geom": "SRID=4326;POINT (20.94565 39.12102)",
             },
@@ -91,8 +89,6 @@ class StationUpdateAndDeleteTestCase(APITestCase):
             "/api/stations/{}/".format(self.station.id),
             data={
                 "name": "Hobbiton",
-                "copyright_years": "2018",
-                "copyright_holder": "Bilbo Baggins",
                 "owner": self.bilbo.id,
                 "geom": "SRID=4326;POINT (20.94565 39.12102)",
             },

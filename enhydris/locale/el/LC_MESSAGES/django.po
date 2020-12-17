@@ -293,14 +293,6 @@ msgstr "Οριστική παύση λειτουργίας"
 msgid "Overseer"
 msgstr "Παρατηρητής"
 
-#: enhydris/models.py:290
-msgid "Copyright holder"
-msgstr "Κάτοχος copyright"
-
-#: enhydris/models.py:291
-msgid "Copyright years"
-msgstr "Έτη copyright"
-
 #: enhydris/models.py:301
 msgctxt "User who has full permissions on station"
 msgid "Administrator"
