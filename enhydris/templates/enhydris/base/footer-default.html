@@ -1,56 +1,60 @@
 {% load i18n %}
 
-<section class="footer-contact">
-  <h2 class="reset-text">contact:</h2>
-  <ul class="reset-list">
-    <li>
-      <ul class="reset-list social">
-        <li>
-          <a href="#" class="social-github-link">
-            <img src="static/images/icon-github.svg" width="100%" height="auto" alt="Github icon">
-          </a>
-        </li>
-        <li>
-          <a href="#" class="social-mail-link">
-            <img src="static/images/icon-mail.svg" width="100%" height="auto" alt="Mail icon">
-          </a>
-        </li>
-      </ul>
-    </li>
-    <li>
-      <ul class="reset-list sponsors">
-        <li>
-          <a href="#" class="sponsors-euro-link" aria-label="Visit Europeon Union website"></a>
-        </li>
-        <li>
-          <a href="#" class="sponsors-lubeck-link" aria-label="Visit Techische Hochschule Lubeck website"></a>
-        </li>
-      </ul>
-    </li>
-  </ul>
-</section>
+{%  if 'enhydris' in request.path %}
+  <section class="footer-contact">
+    <h2 class="reset-text">contact:</h2>
+    <ul class="reset-list">
+      <li>
+        <ul class="reset-list social">
+          <li>
+            <a href="#" class="social-github-link">
+              <img src="static/images/icon-github.svg" width="100%" height="auto" alt="Github icon">
+            </a>
+          </li>
+          <li>
+            <a href="#" class="social-mail-link">
+              <img src="static/images/icon-mail.svg" width="100%" height="auto" alt="Mail icon">
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <ul class="reset-list sponsors">
+          <li>
+            <a href="#" class="sponsors-euro-link" aria-label="Visit Europeon Union website"></a>
+          </li>
+          <li>
+            <a href="#" class="sponsors-lubeck-link" aria-label="Visit Techische Hochschule Lubeck website"></a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </section>
 
-<section class="website-credentials">
-  <h2 class="reset-text">
-    <a href="#">openmeteo.org</a>
-  </h2>
-  <a href="#">Terms of service</a>
-  <p class="reset-text">&copy; openmeteo.org 2020</p>
-</section>
+  <section class="website-credentials">
+    <h2 class="reset-text">
+      <a href="#">openmeteo.org</a>
+    </h2>
+    <a href="#">Terms of service</a>
+    <p class="reset-text">&copy; openmeteo.org 2020</p>
+  </section>
 
-<section class="footer-nav">
-  <h2 class="visually-hidden">Navigation</h2>
+  <section class="footer-nav">
+    <h2 class="visually-hidden">Navigation</h2>
 
-  <ul class="navbar-nav">
-    <li class="nav-item"><a class="nav-link" href="{% url 'admin:login' %}?next={{request.path}}">{% trans "faq" %}</a></li>
-    <li class="nav-item"><a class="nav-link" href="{% url 'admin:login' %}?next={{request.path}}">{% trans "about" %}</a></li>
-    <li class="nav-item">
-      <div class="dropdown language-picker">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownPickLang" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{% trans "english (en)" %}</button>
-        <div class="dropdown-menu" aria-labelledby="dropdownPickLang">
-          <a class="dropdown-item" href="#">{% trans "greek (grk)" %}</a>
+    <ul class="navbar-nav">
+      <li class="nav-item"><a class="nav-link" href="{% url 'admin:login' %}?next={{request.path}}">{% trans "faq" %}</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'admin:login' %}?next={{request.path}}">{% trans "about" %}</a></li>
+      <li class="nav-item">
+        <div class="dropdown language-picker">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownPickLang" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{% trans "english (en)" %}</button>
+          <div class="dropdown-menu" aria-labelledby="dropdownPickLang">
+            <a class="dropdown-item" href="#">{% trans "greek (grk)" %}</a>
+          </div>
         </div>
-      </div>
-    </li>
-  </ul>
-</section>
+      </li>
+    </ul>
+  </section>
+{% else %}
+  <p>Powered by <a href="https://enhydris.readthedocs.io/" target="_blank" rel="noreferrer nofollow">Enhydris</a></p>
+{% endif %}

@@ -28,4 +28,9 @@
   <script type="text/javascript">
     enhydris.mapMode = 'many-stations';
   </script>
+  <script>
+    if (document.querySelector(".search-result")) {
+      document.querySelector(".page-map-full").classList.add("page-search-result");
+    }
+  </script>
 {% endblock %}

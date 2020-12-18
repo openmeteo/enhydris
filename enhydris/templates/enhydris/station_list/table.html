@@ -18,7 +18,6 @@
         <div class="dropdown-menu" aria-labelledby="dropdownSortBy">
           <a class="dropdown-item" href="#">Name</a>
           <a class="dropdown-item" href="#">Owner</a>
-          <a class="dropdown-item" href="#">Start of operation</a>
           <a class="dropdown-item" href="#">Last update</a>
         </div>
       </div>
@@ -37,14 +36,12 @@
         </p>
 
         <div>
-          <p class="reset-text">
-            <b>Start of operation:</b>
-            <span>???</span>
-          </p>
-          <p class="reset-text">
-            <b>Last update:</b>
-            <span>{{ object.last_update|naturaltime|default_if_none:"" }}</span>
-          </p>
+          {% if object.last_update %}
+            <p class="reset-text">
+              <b>Last update:</b>
+              <span>{{ object.last_update|naturaltime|default_if_none:"" }}</span>
+            </p>
+          {% endif %}
         </div>
       </li>
     {% endfor %}

@@ -1,3 +1,35 @@
+/* FONTS */
+
+/* noto-sans-regular - latin-ext_greek-ext_cyrillic-ext */
+@font-face {
+  font-family: "Noto Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/noto-sans-v11-latin-ext_greek-ext_cyrillic-ext-regular.eot"); /* IE9 Compat Modes */
+  src: local("Noto Sans"), local("NotoSans"),
+  url("../fonts/noto-sans-v11-latin-ext_greek-ext_cyrillic-ext-regular.eot?#iefix") format("embedded-opentype"), /* IE6-IE8 */
+  url("../fonts/noto-sans-v11-latin-ext_greek-ext_cyrillic-ext-regular.woff2") format("woff2"), /* Super Modern Browsers */
+  url("../fonts/noto-sans-v11-latin-ext_greek-ext_cyrillic-ext-regular.woff") format("woff"), /* Modern Browsers */
+  url("../fonts/noto-sans-v11-latin-ext_greek-ext_cyrillic-ext-regular.ttf") format("truetype"), /* Safari, Android, iOS */
+  url("../fonts/noto-sans-v11-latin-ext_greek-ext_cyrillic-ext-regular.svg#NotoSans") format("svg"); /* Legacy iOS */
+}
+
+/* noto-sans-700 - latin-ext_greek-ext_cyrillic-ext */
+@font-face {
+  font-family: "Noto Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/noto-sans-v11-latin-ext_greek-ext_cyrillic-ext-700.eot"); /* IE9 Compat Modes */
+  src: local("Noto Sansn Bold"), local("NotoSans-Bold"),
+  url("../fonts/noto-sans-v11-latin-ext_greek-ext_cyrillic-ext-700.eot?#iefix") format("embedded-opentype"), /* IE6-IE8 */
+  url("../fonts/noto-sans-v11-latin-ext_greek-ext_cyrillic-ext-700.woff2") format("woff2"), /* Super Modern Browsers */
+  url("../fonts/noto-sans-v11-latin-ext_greek-ext_cyrillic-ext-700.woff") format("woff"), /* Modern Browsers */
+  url("../fonts/noto-sans-v11-latin-ext_greek-ext_cyrillic-ext-700.ttf") format("truetype"), /* Safari, Android, iOS */
+  url("../fonts/noto-sans-v11-latin-ext_greek-ext_cyrillic-ext-700.svg#NotoSans") format("svg"); /* Legacy iOS */
+}
+
 /* GENERAL */
 
 body {
@@ -114,7 +146,7 @@ body {
 
 .leaflet-popup-content h2 {
   font-size: 1em;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 h4.tab-no-data {
@@ -127,9 +159,16 @@ h4.tab-no-data {
   top: 120px !important; /* Overrides positioning of tools on map to be displayed under page header  */
 }
 
+@media (max-width: 1500px) {
+  .page-map-full .leaflet-control-container .leaflet-top.leaflet-right {
+    top: 240px !important; /* Adjust position in order to fully appear */
+  }
+}
+
 @media (max-width: 992px) {
-  .page-map-full .leaflet-control-container .leaflet-top {
-    top: 130px !important; /* Overrides positioning of tools on map to be displayed under page header */
+  .page-map-full .leaflet-control-container .leaflet-top,
+  .page-map-full .leaflet-control-container .leaflet-top.leaflet-right {
+    top: 130px !important; /* Adjusts position on small devices */
   }
 }
 
@@ -140,6 +179,10 @@ h4.tab-no-data {
 
   width: 100%;
   min-height: calc(100vh + 98px + 121px); /* full viewport + header + footer */
+}
+
+.page-map-full-sub {
+  min-height: calc(100vh + 98px + 64px); /* full viewport + header + footer */
 }
 
 /* HEADER */
@@ -212,6 +255,10 @@ h4.tab-no-data {
     min-height: calc(100vh + 59px + 350px + 442px); /* full viewport + header + footer + margin bottom (form-search-wrapper) */
   }
 
+  .page-map-full-sub.page-search-result {
+    min-height: calc(100vh + 59px + 54px + 442px); /* full viewport + header + footer + margin bottom (form-search-wrapper) */
+  }
+
   .page-header {
     background-color: #ffffff;
   }
@@ -272,6 +319,24 @@ h4.tab-no-data {
 
 .page-footer-content > section {
   width: 33.333%;
+}
+
+.page-footer-content > p:only-child {
+  margin: 0 auto;
+}
+
+.page-footer-content > p:only-child > a {
+  font-weight: 700;
+  color: #2f80ed;
+  text-decoration: none;
+}
+
+.page-footer-content > p:only-child > a:hover {
+  opacity: 0.7;
+}
+
+.page-footer-content > p:only-child > a:active {
+  opacity: 0.5;
 }
 
 .footer-contact {
@@ -477,6 +542,10 @@ h4.tab-no-data {
     padding-bottom: 15px;
   }
 
+  .page-map-full-sub .page-footer {
+    padding-top: 15px;
+  }
+
   .page-footer-content {
     flex-direction: column;
     align-items: flex-start;
@@ -601,7 +670,7 @@ h4.tab-no-data {
 }
 
 .page-main .message-no-data p {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 @media (max-width: 992px) {
@@ -642,6 +711,8 @@ h4.tab-no-data {
   margin-top: 30px;
   margin-right: auto;
   margin-left: auto;
+
+  text-align: center;
 }
 
 .page-map-full .form-search {
@@ -694,8 +765,8 @@ h4.tab-no-data {
 .btn-station-list {
   position: relative;
 
-  display: block;
-  width: 252px;
+  display: inline-block;
+  min-width: 252px;
   margin: 20px auto 0;
   padding-top: 9px;
   padding-bottom: 12px;
@@ -703,6 +774,7 @@ h4.tab-no-data {
 
   font-size: 14px;
   line-height: 19px;
+  vertical-align: bottom;
 }
 
 .btn-station-list::before {
@@ -804,6 +876,10 @@ h4.tab-no-data {
 
   background-color: #e0e0e0;
   border-radius: 14px;
+}
+
+.page-map-full-sub .search-result .station-list {
+  height: calc(100vh - 64px + 12px); /* full viewport - footer + top spacing from header  */
 }
 
 .search-result header {
@@ -958,7 +1034,7 @@ h4.tab-no-data {
     background-color: #fff;
   }
 
-  .search-result .station-list {
+  .page-map-full-sub .search-result .station-list {
     height: calc(100vh - 80px - 101px - 109px); /* full viewport - top coordinate for main content - form block - search result header */
   }
 
