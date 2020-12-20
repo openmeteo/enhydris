@@ -50,6 +50,8 @@
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.19.3/apexcharts.min.js"></script>
   {% if object.default_timeseries %}
-    <script src="{% static 'js/chart.js' %}"></script>
+    <script>
+      enhydris.chart.initialize();
+    </script>
   {% endif %}
 {% endblock %}
