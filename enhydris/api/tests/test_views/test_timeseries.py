@@ -1,5 +1,5 @@
+import datetime as dt
 import json
-from datetime import datetime
 from io import StringIO
 from unittest.mock import patch
 
@@ -292,13 +292,6 @@ class TsdataPostDuplicateTimestampsTestCase(APITestCase):
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class TsdataStartAndEndDateTestCase(APITestCase):
-    """Test that there's no aware/naive date confusion.
-
-    There was this bug where you'd ask to download from start date, and the start date
-    was interpreted as aware whereas the time series data was interpreted as naive. This
-    test checks there's no such bug.
-    """
-
     def setUp(self):
         self.tz = mommy.make(models.TimeZone, code="EET", utc_offset=120)
         self.station = mommy.make(models.Station)
@@ -320,7 +313,7 @@ class TsdataStartAndEndDateTestCase(APITestCase):
     def test_called_get_data_with_proper_start_date(self, m):
         self._make_request("start_date=2005-08-23T19:54")
         m.assert_called_once_with(
-            start_date=datetime(2005, 8, 23, 19, 54, tzinfo=self.tz.as_tzinfo),
+            start_date=dt.datetime(2005, 8, 23, 19, 54, tzinfo=self.tz.as_tzinfo),
             end_date=None,
         )
 
@@ -329,7 +322,23 @@ class TsdataStartAndEndDateTestCase(APITestCase):
         self._make_request("end_date=2005-08-23T19:54")
         m.assert_called_once_with(
             start_date=None,
-            end_date=datetime(2005, 8, 23, 19, 54, tzinfo=self.tz.as_tzinfo),
+            end_date=dt.datetime(2005, 8, 23, 19, 54, tzinfo=self.tz.as_tzinfo),
+        )
+
+    @patch("enhydris.models.Timeseries.get_data")
+    def test_called_get_data_with_very_early_start_date(self, m):
+        self._make_request("start_date=0001-01-01T00:01")
+        m.assert_called_once_with(
+            start_date=dt.datetime(1680, 1, 1, 0, 0, tzinfo=self.tz.as_tzinfo),
+            end_date=None,
+        )
+
+    @patch("enhydris.models.Timeseries.get_data")
+    def test_called_get_data_with_very_late_start_date(self, m):
+        self._make_request("end_date=3999-01-01T00:01")
+        m.assert_called_once_with(
+            start_date=None,
+            end_date=dt.datetime(2260, 1, 1, 0, 0, tzinfo=self.tz.as_tzinfo),
         )
 
 
@@ -614,7 +623,7 @@ class TimeseriesChartDateBoundsTestCase(APITestCase, TimeseriesDataMixin):
         response = self.client.get(self.url + "?start_date=2012-03-01T00:00")
         self.assertEqual(response.status_code, 200)
         mock.assert_called_once_with(
-            start_date=datetime(
+            start_date=dt.datetime(
                 2012, 3, 1, 0, 0, tzinfo=self.timeseries_group.time_zone.as_tzinfo
             ),
             end_date=None,
@@ -625,7 +634,7 @@ class TimeseriesChartDateBoundsTestCase(APITestCase, TimeseriesDataMixin):
         self.assertEqual(response.status_code, 200)
         mock.assert_called_once_with(
             start_date=None,
-            end_date=datetime(
+            end_date=dt.datetime(
                 2012, 3, 1, 0, 0, tzinfo=self.timeseries_group.time_zone.as_tzinfo
             ),
         )
@@ -636,10 +645,10 @@ class TimeseriesChartDateBoundsTestCase(APITestCase, TimeseriesDataMixin):
         )
         self.assertEqual(response.status_code, 200)
         mock.assert_called_once_with(
-            start_date=datetime(
+            start_date=dt.datetime(
                 2012, 3, 1, 0, 0, tzinfo=self.timeseries_group.time_zone.as_tzinfo
             ),
-            end_date=datetime(
+            end_date=dt.datetime(
                 2017, 3, 1, 0, 0, tzinfo=self.timeseries_group.time_zone.as_tzinfo
             ),
         )
@@ -673,7 +682,7 @@ class TimeseriesChartTestCase(
         # Create the timeseries so that we have 5 entries, one per year basically
         super().create_timeseries()
         self.htimeseries.data = pd.DataFrame(
-            index=[datetime(year, 1, 1) for year in range(2010, 2015)],
+            index=[dt.datetime(year, 1, 1) for year in range(2010, 2015)],
             data={"value": [year for year in range(2010, 2015)], "flags": [""] * 5},
             columns=["value", "flags"],
         )
@@ -702,7 +711,8 @@ class TimeseriesChartTestCase(
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         expected = [
-            {"date": datetime(year, 1, 1), "value": year} for year in range(2010, 2015)
+            {"date": dt.datetime(year, 1, 1), "value": year}
+            for year in range(2010, 2015)
         ]
         self._assertChartResponse(response, expected)
 
@@ -711,7 +721,8 @@ class TimeseriesChartTestCase(
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         expected = [
-            {"date": datetime(year, 1, 1), "value": year} for year in range(2011, 2015)
+            {"date": dt.datetime(year, 1, 1), "value": year}
+            for year in range(2011, 2015)
         ]
         self._assertChartResponse(response, expected)
 
@@ -725,7 +736,7 @@ class TimeseriesChartSamplingTestCase(
     def setUp(self):
         self.create_timeseries()
         self.htimeseries.data = pd.DataFrame(
-            index=[datetime(year, 1, 1) for year in range(2010, 2021)],
+            index=[dt.datetime(year, 1, 1) for year in range(2010, 2021)],
             data={"value": [year for year in range(2010, 2021)], "flags": [""] * 11},
             columns=["value", "flags"],
         )
@@ -738,7 +749,8 @@ class TimeseriesChartSamplingTestCase(
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         expected = [
-            {"date": datetime(year, 1, 1), "value": year} for year in [2010, 2015, 2020]
+            {"date": dt.datetime(year, 1, 1), "value": year}
+            for year in [2010, 2015, 2020]
         ]
         self._assertChartResponse(response, expected)
 
@@ -756,22 +768,26 @@ class TimeseriesChartSamplingTestCase(
         """
         mock.return_value = self.htimeseries
         self.htimeseries.data = pd.DataFrame(
-            index=[datetime(2010, 1, 1), datetime(2011, 1, 1), datetime(2020, 1, 1)],
+            index=[
+                dt.datetime(2010, 1, 1),
+                dt.datetime(2011, 1, 1),
+                dt.datetime(2020, 1, 1),
+            ],
             data={"value": [2010, 2011, 2020], "flags": ["", "", ""]},
             columns=["value", "flags"],
         )
         response = self.client.get(self.url)
         expected = [
-            {"date": datetime(2010, 1, 1), "value": 2010},
-            {"date": datetime(2015, 1, 1), "value": None},
-            {"date": datetime(2020, 1, 1), "value": 2020},
+            {"date": dt.datetime(2010, 1, 1), "value": 2010},
+            {"date": dt.datetime(2015, 1, 1), "value": None},
+            {"date": dt.datetime(2020, 1, 1), "value": 2020},
         ]
         self._assertChartResponse(response, expected)
 
     def test_insufficient_number_of_records(self, mock):
         mock.return_value = self.htimeseries
         self.htimeseries.data = pd.DataFrame(
-            index=[datetime(2010, 1, 1)],
+            index=[dt.datetime(2010, 1, 1)],
             data={"value": [2010], "flags": [""]},
             columns=["value", "flags"],
         )
