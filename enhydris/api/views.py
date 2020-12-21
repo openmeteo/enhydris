@@ -1,3 +1,4 @@
+import datetime as dt
 import mimetypes
 import os
 from io import StringIO
@@ -13,7 +14,6 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 import iso8601
-import pandas as pd
 from htimeseries import HTimeseries
 
 from enhydris import models
@@ -330,8 +330,8 @@ class TimeseriesViewSet(ModelViewSet):
             return None
 
     def _bring_date_within_system_limits(self, date):
-        if date.isoformat() < pd.Timestamp.min.isoformat():
-            date = pd.Timestamp.min
-        if date.isoformat() > pd.Timestamp.max.isoformat():
-            date = pd.Timestamp.max
+        if date.isoformat() < "1680-01-01T00:00":
+            date = dt.datetime(1680, 1, 1, 0, 0, tzinfo=date.tzinfo)
+        if date.isoformat() > "2260-01-01T00:00":
+            date = dt.datetime(2260, 1, 1, 0, 0, tzinfo=date.tzinfo)
         return date
