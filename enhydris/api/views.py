@@ -137,6 +137,15 @@ class GentityFileViewSet(ReadOnlyModelViewSet):
         return response
 
 
+class TimeseriesGroupViewSet(ReadOnlyModelViewSet):
+    serializer_class = serializers.TimeseriesGroupSerializer
+
+    def get_queryset(self):
+        return models.TimeseriesGroup.objects.filter(
+            gentity_id=self.kwargs["station_id"]
+        )
+
+
 class TimeseriesViewSet(ModelViewSet):
     CHART_MAXIMUM_NUMBER_OF_SAMPLES = 200
     queryset = models.Timeseries.objects.all()

@@ -506,6 +506,7 @@ class TimeseriesGroup(models.Model):
     class Meta:
         verbose_name = _("Time series group")
         verbose_name_plural = _("Time series groups")
+        ordering = ["gentity", "name"]
 
     def __str__(self):
         return self.get_name()

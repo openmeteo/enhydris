@@ -67,6 +67,11 @@ urlstart = r"stations/(?P<station_id>\d+)/"
 router.register(urlstart + "files", views.GentityFileViewSet, "file")
 router.register(urlstart + "events", views.GentityEventViewSet, "event")
 router.register(
+    urlstart + "timeseriesgroups",
+    views.TimeseriesGroupViewSet,
+    "timeseries_group",
+)
+router.register(
     urlstart + r"timeseriesgroups/(?P<timeseries_group_id>\d+)/timeseries",
     views.TimeseriesViewSet,
     "timeseries",
