@@ -131,6 +131,12 @@ class StationSerializer(serializers.ModelSerializer):
     validate_maintainers = validate_nested_many_serializer
 
 
+class TimeseriesGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.TimeseriesGroup
+        fields = "__all__"
+
+
 class TimeseriesRecordChartSerializer(serializers.Serializer):
     timestamp = serializers.IntegerField()
     value = serializers.FloatField()

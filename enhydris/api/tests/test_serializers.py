@@ -5,7 +5,11 @@ from rest_framework.test import APITestCase
 from model_mommy import mommy
 
 from enhydris import models
-from enhydris.api.serializers import StationSerializer, TimeseriesSerializer
+from enhydris.api.serializers import (
+    StationSerializer,
+    TimeseriesGroupSerializer,
+    TimeseriesSerializer,
+)
 
 
 class StationSerializerTestCase(APITestCase):
@@ -27,6 +31,18 @@ class StationSerializerTestCase(APITestCase):
     def test_no_maintainers(self):
         # There shouldn't be information about maintainers, this is security information
         self.assertTrue("maintainers" not in self.serializer.data)
+
+
+class TimeseriesGroupSerializerTestCase(APITestCase):
+    def setUp(self):
+        timeseries_group = mommy.make(
+            models.TimeseriesGroup,
+            name="My time series group",
+        )
+        self.serializer = TimeseriesGroupSerializer(timeseries_group)
+
+    def test_name(self):
+        self.assertEqual(self.serializer.data["name"], "My time series group")
 
 
 class TimeseriesSerializerTestCase(APITestCase):

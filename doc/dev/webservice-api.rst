@@ -469,11 +469,55 @@ The response is a 200 with a similar content as the GET detail response
 there's a standard `error response`_. Nested objects are handled in the same
 way as for POST (see above).
 
+Time series groups
+==================
+
+Time series group detail
+------------------------
+
+You can GET the detail of a single time series group at
+``/api/stations/XXX/timeseriesgroups/YYY/``::
+
+   curl https://openmeteo.org/api/stations/1403/timeseriesgroups/483/
+
+Response::
+
+   {
+       "id": 522,
+       "last_modified": "2015-04-05T05:33:41.140506-05:00",
+       "name": "Temperature",
+       "hidden": false,
+       "precision": 2,
+       "remarks": "",
+       "gentity": 1403,
+       "variable": 5683,
+       "unit_of_measurement": 14,
+       "time_zone": 1
+   }
+
+List time series groups
+-----------------------
+
+GET the list of time series groups for a station at
+``/api/stations/XXX/timeseriesgroups/``::
+
+   curl https://openmeteo.org/api/stations/1403/timeseriesgroups/
+
+The result is a `paginated list`_ of time series groups::
+
+    {
+        "count": 13,
+        "next": null,
+        "previous": null,
+        "results": [
+            {...},
+            {...},
+            ...
+        ]
+    }
+
 Time series
 ===========
-
-We develop API endpoints as we need them. We don't have an API for time
-series groups yet. However, we have an API for time series.
 
 Time series detail
 ------------------
@@ -506,7 +550,7 @@ GET the list of time series for a group at
 The result is a `paginated list`_ of time series::
 
     {
-        "count": 1,
+        "count": 5,
         "next": null,
         "previous": null,
         "results": [
