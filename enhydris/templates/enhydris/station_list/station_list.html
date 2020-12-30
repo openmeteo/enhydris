@@ -1,7 +1,11 @@
 {% load i18n %}
 
 {% if object_list %}
-  {% include "enhydris/station_list/table.html" %}
+  <div class="search-result-wrapper">
+    {% include "enhydris/station_list/header.html" %}
+    {% include "enhydris/station_list/table.html" %}
+    {% include "enhydris/station_list/page_navigation.html" %}
+  </div>
 {% else %}
   <p>{% trans "No entries found." %}</p>
 {% endif %}

@@ -67,38 +67,36 @@ class StationListTestCase(TestCase):
         )
 
     def test_station_list(self):
-        response = self.client.get("/")
-        self.assertContains(
-            response, '<a href="?sort=-name&amp;sort=name">Name&nbsp;↓</a>', html=True
-        )
+        response = self.client.get("/?q=t")
+        self.assertContains(response, "Search results", html=True)
 
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=3)
     def test_two_pages(self):
-        response = self.client.get("/")
+        response = self.client.get("/?q=t")
         self.assertContains(
-            response, '<a class="page-link" href="?page=2">2</a>', html=True
+            response, '<a class="page-link" href="?page=2&q=t">2</a>', html=True
         )
         self.assertNotContains(
-            response, '<a class="page-link" href="?page=3">3</a>', html=True
+            response, '<a class="page-link" href="?page=3&q=t">3</a>', html=True
         )
 
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=2)
     def test_next_page_url(self):
-        response = self.client.get("/")
+        response = self.client.get("/?q=t")
         soup = BeautifulSoup(response.content, "html.parser")
         next_page_url = soup.find("a", id="next-page").get("href")
-        self.assertEqual(next_page_url, "?page=2")
+        self.assertEqual(next_page_url, "?page=2&q=t")
 
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=2)
     def test_previous_page_url(self):
-        response = self.client.get("/?page=2")
+        response = self.client.get("/?q=t&page=2")
         soup = BeautifulSoup(response.content, "html.parser")
         next_page_url = soup.find("a", id="previous-page").get("href")
-        self.assertEqual(next_page_url, "?page=1")
+        self.assertEqual(next_page_url, "?page=1&q=t")
 
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=100)
     def test_one_page(self):
-        response = self.client.get("/")
+        response = self.client.get("/?q=t")
         self.assertNotContains(response, "<a href='?page=2'>2</a>", html=True)
 
 
@@ -290,9 +288,9 @@ class SeleniumTestCase(django_selenium_clean.SeleniumTestCase):
 class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
 
     button_limit_to_map = PageElement(By.ID, "limit-to-map")
-    td_komboti = PageElement(By.XPATH, '//td//a[text()="Komboti"]')
-    td_agios_athanasios = PageElement(By.XPATH, '//td//a[text()="Agios Athanasios"]')
-    td_tharbad = PageElement(By.XPATH, '//td//a[text()="Tharbad"]')
+    komboti = PageElement(By.XPATH, '//h3//a[text()="Komboti"]')
+    agios_athanasios = PageElement(By.XPATH, '//h3//a[text()="Agios Athanasios"]')
+    tharbad = PageElement(By.XPATH, '//h3//a[text()="Tharbad"]')
 
     def setUp(self):
         mommy.make(
@@ -315,11 +313,13 @@ class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
         )
 
     def test_list_stations_visible_on_map(self):
-        # Visit site and wait until three stations are shown
+        # Visit site, click on button, and wait until three stations are shown
         self.selenium.get(self.live_server_url)
-        self.td_komboti.wait_until_is_displayed()
-        self.td_agios_athanasios.wait_until_is_displayed()
-        self.td_tharbad.wait_until_is_displayed()
+        self.button_limit_to_map.wait_until_is_displayed()
+        self.button_limit_to_map.click()
+        self.komboti.wait_until_is_displayed()
+        self.agios_athanasios.wait_until_is_displayed()
+        self.tharbad.wait_until_is_displayed()
 
         # Zoom station to an area that covers only two of these stations.
         self.selenium.execute_script(
@@ -330,9 +330,9 @@ class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
         self.button_limit_to_map.click()
 
         # Now only two stations should be displayed
-        self.td_komboti.wait_until_is_displayed()
-        self.td_agios_athanasios.wait_until_is_displayed()
-        self.assertFalse(self.td_tharbad.exists())
+        self.komboti.wait_until_is_displayed()
+        self.agios_athanasios.wait_until_is_displayed()
+        self.assertFalse(self.tharbad.exists())
 
 
 @skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")

@@ -16,8 +16,19 @@ enhydris.map = {
   },
 
   setupViewport() {
-    const vp = enhydris.mapViewport;
-    this.leafletMap.fitBounds([[vp[1], vp[0]], [vp[3], vp[2]]]);
+    const [lon1, lat1, lon2, lat2] = enhydris.mapViewport;
+    let newLon1 = lon1;
+    if (window.innerWidth > 992 && document.querySelector('.with-search-result')) {
+      const container = document.querySelector('.search-content-wrapper');
+      const searchResult = document.querySelector('.search-result');
+      const searchResultWidth = searchResult.clientWidth;
+      const containerStyle = window.getComputedStyle(container);
+      const leftPadding = parseInt(containerStyle.paddingLeft, 10);
+      const leftMargin = parseInt(containerStyle.marginLeft, 10);
+      const availableSpace = window.innerWidth - leftMargin - leftPadding - searchResultWidth;
+      newLon1 = lon2 - (window.innerWidth / availableSpace) * (lon2 - lon1);
+    }
+    this.leafletMap.fitBounds([[lat1, newLon1], [lat2, lon2]]);
   },
 
   setupMapControls() {

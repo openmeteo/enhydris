@@ -1,15 +1,22 @@
 {% extends "enhydris/station_list/common.html" %}
 {% load i18n %}
 
+
+{% block body_classes %}
+  page page-map-full
+{% endblock %}
+
+
 {% block title %}
   {% trans 'Stations' %} — {{ block.super }}
 {% endblock %}
+
 
 {% block content %}
   {% include "enhydris/station_list/map.html" %}
   <div class="page-main-content">
     <div class="container search-content-wrapper">
-      {% if request.GET.q %}
+      {% if request.GET.q or request.GET.bbox %}
         <article class="search-result">
           {% include "enhydris/station_list/station_list.html" %}
         </article>
@@ -23,9 +30,13 @@
   </div>
 {% endblock %}
 
+
 {% block map_js %}
   {{ block.super }}
   <script type="text/javascript">
     enhydris.mapMode = 'many-stations';
+    if (document.querySelector(".search-result")) {
+      document.querySelector(".page-map-full").classList.add("page-search-result");
+    }
   </script>
 {% endblock %}

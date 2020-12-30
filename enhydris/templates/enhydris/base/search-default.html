@@ -3,13 +3,13 @@
 {% block search_form %}
   <div class="form-search-wrapper">
     <form class="form-inline form-search" action='{% url "station_list" %}' method="get">
-      <label for="search_input" class="visually-hidden">Search stations</label>
+      <label for="search_input" class="visually-hidden">{% trans "Search stations" %}</label>
       <input id="search_input" type="text" name="q" value="{{ query|escape }}" class="form-control">
-      <button class="btn custom-button btn-search" type="submit">search</button>
+      <button class="btn custom-button btn-search" type="submit">{% trans "search" %}</button>
     </form>
 
     <a href="#searchtips" class="btn-searchtips" data-toggle="modal" aria-label="Show searchtips">?</a>
 
-    <a id="limit-to-map" href="#" class="btn custom-button btn-station-list" onclick="enhydris.mapModule.listStationsVisibleOnMap();">list stations visible on map</a>
+    <a id="limit-to-map" href="#" class="btn custom-button btn-station-list" onclick="enhydris.map.listStationsVisibleOnMap();">{% trans "list stations visible on map" %}</a>
   </div>
 {% endblock %}

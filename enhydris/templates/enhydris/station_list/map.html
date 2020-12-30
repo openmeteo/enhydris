@@ -1,5 +1,5 @@
 {% load i18n %}
 
-<div class="map map-fullpage">
+<div class="map map-fullpage {% if request.GET.q or request.GET.bbox %}with-search-result{% endif %}">
   <div id="mapid"></div>
 </div>

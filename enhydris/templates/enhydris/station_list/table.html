@@ -1,52 +1,25 @@
 {% load i18n %}
-{% load sorting %}
 {% load humanize %}
-<div class="search-result-wrapper">
-  <header>
-    <div>
-      <p class="reset-text">Results on request:</p>
-      <h2 class="reset-text">Search query name</h2>
-    </div>
 
-    <div class="search-result-sort">
-      <p class="reset-text">Sort by:</p>
-      <div class="dropdown">
-        <button class="sort-toggle" type="button">Current sort</button>
+<ul class="reset-list station-list">
+  {% for object in object_list %}
+    <li>
+      <h3 class="reset-text">
+        <a href="{% url 'station_detail' pk=object.id %}">{{ object.name }}</a>
+      </h3>
+      <p class="reset-text">
+        <b>Owner:</b>
+        <span>{{ object.owner|default_if_none:"" }}</span>
+      </p>
 
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownSortBy" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-
-        <div class="dropdown-menu" aria-labelledby="dropdownSortBy">
-          <a class="dropdown-item" href="#">Name</a>
-          <a class="dropdown-item" href="#">Owner</a>
-          <a class="dropdown-item" href="#">Start of operation</a>
-          <a class="dropdown-item" href="#">Last update</a>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <ul class="reset-list station-list">
-    {% for object in object_list %}
-      <li>
-        <h3 class="reset-text">
-          <a href="{% url 'station_detail' pk=object.id %}">{{ object.name }}</a>
-        </h3>
-        <p class="reset-text">
-          <b>Owner:</b>
-          <span>{{ object.owner|default_if_none:"" }}</span>
-        </p>
-
-        <div>
-          <p class="reset-text">
-            <b>Start of operation:</b>
-            <span>???</span>
-          </p>
+      <div>
+        {% if object.last_update %}
           <p class="reset-text">
             <b>Last update:</b>
             <span>{{ object.last_update|naturaltime|default_if_none:"" }}</span>
           </p>
-        </div>
-      </li>
-    {% endfor %}
-  </ul>
-</div>
+        {% endif %}
+      </div>
+    </li>
+  {% endfor %}
+</ul>
