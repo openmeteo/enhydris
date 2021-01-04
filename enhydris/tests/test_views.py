@@ -430,7 +430,7 @@ class TimeseriesGroupDetailTestCase(TestCase, TimeseriesDataMixin):
             self.response,
             f'<input type="radio" name="timeseries_id" value="{self.timeseries.id}" '
             'id="id_timeseries_id_0" class="form-check-input" checked>'
-            '<label class="form-check-label" for="id_timeseries_id_0">Raw</label>',
+            '<label class="form-check-label" for="id_timeseries_id_0">Initial</label>',
             html=True,
         )
 

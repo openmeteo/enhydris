@@ -477,7 +477,7 @@ class TimeseriesPostTestCase(APITestCase):
             data={
                 "name": "Great time series",
                 "timeseries_group": self.timeseries_group.id,
-                "type": "Raw",
+                "type": "Initial",
                 "time_step": "",
                 **kwargs,
             },
@@ -494,7 +494,7 @@ class TimeseriesPostTestCase(APITestCase):
         self.client.force_authenticate(user=self.user1)
         self.assertEqual(self._create_timeseries().status_code, 201)
 
-    def test_returns_proper_error_when_creating_second_raw_timeseries(self):
+    def test_returns_proper_error_when_creating_second_initial_timeseries(self):
         self.client.force_authenticate(user=self.user1)
         self._create_timeseries()
         response = self._create_timeseries(time_step="H")
@@ -502,7 +502,7 @@ class TimeseriesPostTestCase(APITestCase):
         self.assertEqual(
             json.loads(response.content.decode())["non_field_errors"][0],
             f"A time series with timeseries_group_id={self.timeseries_group.id} and "
-            "type=Raw already exists",
+            "type=Initial already exists",
         )
 
 
@@ -533,7 +533,7 @@ class TimeseriesPostWithWrongStationOrTimeseriesGroupTestCase(APITestCase):
             data={
                 "name": "Great time series",
                 "timeseries_group": kwargs["timeseries_group_for_data"].id,
-                "type": "Raw",
+                "type": "Initial",
                 "variable": self.variable.id,
                 "time_zone": self.time_zone.id,
                 "unit_of_measurement": self.unit_of_measurement.id,

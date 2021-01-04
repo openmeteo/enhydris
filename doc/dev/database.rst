@@ -302,10 +302,10 @@ Time series and related models
    different time step or in a different checking status. For example,
    if you have a temperature sensor that measures temperature every 10
    minutes, then you will have a "temperature" time series group, which
-   will contain the raw time series, and it may also contain the checked
-   time series, the regularized time series, the hourly time series,
-   etc. (If you have two temperature sensors, you'll have two time
-   series groups.)
+   will contain the initial (raw) time series, and it may also contain
+   the checked time series, the regularized time series, the hourly time
+   series, etc. (If you have two temperature sensors, you'll have two
+   time series groups.)
 
    We avoid showing the term "time series group" to the user (instead,
    we are being vague, like "Data", or we might sometimes use
@@ -366,7 +366,7 @@ Time series and related models
 
       This property returns the regularized time series of the group, and if
       that does not exist, the checked time series, and if that does not exist,
-      the raw time series, and if that does not exist, ``None``.
+      the initial time series, and if that does not exist, ``None``.
 
    .. attribute:: enhydris.models.TimeseriesGroup.start_date
                   enhydris.models.TimeseriesGroup.end_date
@@ -387,7 +387,7 @@ Time series and related models
    .. attribute:: enhydris.models.Timeseries.type
 
       An integer field with numbers that symbolize the time series type:
-      raw or checked or regularized or aggregated.
+      initial or checked or regularized or aggregated.
 
    .. attribute:: enhydris.models.Timeseries.time_step
 

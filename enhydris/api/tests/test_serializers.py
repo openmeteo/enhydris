@@ -50,23 +50,23 @@ class TimeseriesSerializerTestCase(APITestCase):
     def setUpTestData(cls):
         cls.timeseries_group = mommy.make(models.TimeseriesGroup)
 
-    def test_type_serialization_for_raw(self):
+    def test_type_serialization_for_initial(self):
         serializer = TimeseriesSerializer(models.Timeseries(type=100))
-        self.assertEqual(serializer.data["type"], "Raw")
+        self.assertEqual(serializer.data["type"], "Initial")
 
     def test_type_serialization_for_checked(self):
         serializer = TimeseriesSerializer(models.Timeseries(type=200))
         self.assertEqual(serializer.data["type"], "Checked")
 
-    def test_type_serialization_for_raw_when_nondefault_language(self):
+    def test_type_serialization_for_initial_when_nondefault_language(self):
         serializer = TimeseriesSerializer(models.Timeseries(type=100))
         with translation.override("el"):
-            self.assertEqual(serializer.data["type"], "Raw")
+            self.assertEqual(serializer.data["type"], "Initial")
 
-    def test_type_deserialization_for_raw(self):
+    def test_type_deserialization_for_initial(self):
         serializer = TimeseriesSerializer(
             data={
-                "type": "Raw",
+                "type": "Initial",
                 "timeseries_group": self.timeseries_group.id,
                 "time_step": "",
             }
@@ -94,9 +94,9 @@ class TimeseriesSerializerUniqueTypeTestCase(APITestCase):
             variable__descr="Temperature",
         )
 
-    def test_only_one_raw_timeseries_per_group(self):
-        self._create_timeseries(models.Timeseries.RAW)
-        self.assertFalse(self._get_serializer("Raw").is_valid())
+    def test_only_one_initial_timeseries_per_group(self):
+        self._create_timeseries(models.Timeseries.INITIAL)
+        self.assertFalse(self._get_serializer("Initial").is_valid())
 
     def test_only_one_checked_timeseries_per_group(self):
         self._create_timeseries(models.Timeseries.CHECKED)
@@ -122,7 +122,7 @@ class TimeseriesSerializerUniqueTypeTestCase(APITestCase):
         _create_timeseries(), then the serializer would be invalid because of violation
         of the unique key (timeseries_group, type, time_step). We choose a different
         time step so that it won't be invalid for this reason. We want to check whether
-        it's invalid because of attempting to create two raw (or two checked, or two
+        it's invalid because of attempting to create two initial (or two checked, or two
         regularized) time series for the same time series group.
         """
         return TimeseriesSerializer(

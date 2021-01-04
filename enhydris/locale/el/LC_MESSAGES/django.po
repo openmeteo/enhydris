@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-31 08:25-0600\n"
+"POT-Creation-Date: 2021-01-04 02:49-0600\n"
 "PO-Revision-Date: 2011-11-24 14:33+0200\n"
 "Last-Translator: Antonis Christofides <anthony@itia.ntua.gr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -109,23 +109,19 @@ msgstr ""
 "Δεν είναι δυνατή η πρόσθεση δεδομένων στο τέλος, γιατί η πρώτη εγγραφή του "
 "αρχείου προηγείται της τελευταίας εγγραφής της υπάρχουσας χρονοσειράς."
 
-#: enhydris/admin/station.py:209
-msgid " or "
-msgstr " ή "
-
-#: enhydris/admin/station.py:217
+#: enhydris/admin/station.py:204
 msgid "There can be only one {} time series in each time series group."
 msgstr "Μπορεί να υπάρχει μόνο μία {} χρονοσειρά σε κάθε ομάδα χρονοσειρών."
 
-#: enhydris/admin/station.py:241
+#: enhydris/admin/station.py:228
 msgid "Metadata"
 msgstr "Μεταδεδομένα"
 
-#: enhydris/admin/station.py:289
+#: enhydris/admin/station.py:276
 msgid "General information"
 msgstr "Γενικές πληροφορίες"
 
-#: enhydris/admin/station.py:311
+#: enhydris/admin/station.py:298
 msgid "Permissions"
 msgstr "Δικαιώματα πρόσβασης"
 
@@ -178,7 +174,7 @@ msgid "Persons"
 msgstr "Άτομα"
 
 #: enhydris/models.py:130 enhydris/models.py:153 enhydris/models.py:470
-#: enhydris/templates/enhydris/station_list/header.html:14
+#: enhydris/templates/enhydris/station_list/header.html:11
 #: enhydris/templates/enhydris/timeseries_group_detail/details_table.html:16
 msgid "Name"
 msgstr "Όνομα"
@@ -239,7 +235,7 @@ msgstr "Τύπος ημερολογιακών καταχωρήσεων"
 msgid "Log entry types"
 msgstr "Τύποι ημερολογιακών καταχωρήσεων"
 
-#: enhydris/models.py:245 enhydris/models.py:587
+#: enhydris/models.py:245 enhydris/models.py:584
 #: enhydris/templates/enhydris/station_detail/tabs/gentity_events.html:11
 msgid "Type"
 msgstr "Τύπος"
@@ -383,27 +379,23 @@ msgstr "Ομάδα χρονοσειρών"
 msgid "Time series groups"
 msgstr "Ομάδες χρονοσειρών"
 
-#: enhydris/models.py:578
-msgid "Raw"
-msgstr "Πρωτογενής"
+#: enhydris/models.py:576
+msgid "Initial"
+msgstr "Αρχική"
 
-#: enhydris/models.py:579
-msgid "Processed"
-msgstr "Επεξεργασμένη"
-
-#: enhydris/models.py:580
+#: enhydris/models.py:577
 msgid "Checked"
 msgstr "Ελεγμένη"
 
-#: enhydris/models.py:581
+#: enhydris/models.py:578
 msgid "Regularized"
 msgstr "Κανονικοποιημένη"
 
-#: enhydris/models.py:582
+#: enhydris/models.py:579
 msgid "Aggregated"
 msgstr "Συναθροισμένη"
 
-#: enhydris/models.py:593
+#: enhydris/models.py:590
 msgid ""
 "E.g. \"10min\", \"H\" (hourly), \"D\" (daily), \"M\" (monthly), \"Y"
 "\" (yearly). More specifically, it's an optional number plus a unit, with no "
@@ -415,37 +407,37 @@ msgstr ""
 "μεταξύ τους. Οι διαθέσιμες μονάδες είναι min, H, D, M, Y. Αφήστε το κενό αν "
 "η χρονοσειρά είναι ακανόνιστη."
 
-#: enhydris/models.py:598
+#: enhydris/models.py:595
 msgid "Time step"
 msgstr "Βήμα"
 
-#: enhydris/models.py:602
+#: enhydris/models.py:599
 msgctxt "Singular"
 msgid "Time series"
 msgstr "Χρονοσειρά"
 
-#: enhydris/models.py:603
+#: enhydris/models.py:600
 msgctxt "Plural"
 msgid "Time series"
 msgstr "Χρονοσειρές"
 
-#: enhydris/models.py:846
+#: enhydris/models.py:843
 msgid "Timestamp"
 msgstr "Χρονοσφραγίδα"
 
-#: enhydris/models.py:847
+#: enhydris/models.py:844
 msgid "Value"
 msgstr "Τιμή"
 
-#: enhydris/models.py:848
+#: enhydris/models.py:845
 msgid "Flags"
 msgstr "Σημαίες"
 
-#: enhydris/models.py:851
+#: enhydris/models.py:848
 msgid "Time series record"
 msgstr "Εγγραφή χρονοσειράς"
 
-#: enhydris/models.py:852
+#: enhydris/models.py:849
 msgid "Time series records"
 msgstr "Εγγραφές χρονοσειράς"
 
@@ -676,15 +668,15 @@ msgstr "Δεν έχετε δικαίωμα λήψης"
 msgid "No data exist"
 msgstr "Δεν υπάρχουν δεδομένα"
 
-#: enhydris/templates/enhydris/station_list/header.html:5
+#: enhydris/templates/enhydris/station_list/header.html:4
 msgid "Search results"
 msgstr "Αποτελέσματα αναζήτησης"
 
-#: enhydris/templates/enhydris/station_list/header.html:10
+#: enhydris/templates/enhydris/station_list/header.html:7
 msgid "Sort"
 msgstr "Ταξινόμηση"
 
-#: enhydris/templates/enhydris/station_list/header.html:15
+#: enhydris/templates/enhydris/station_list/header.html:12
 msgid "Owner"
 msgstr "Ιδιοκτήτης"
 
@@ -758,6 +750,3 @@ msgstr "Δεν υπάρχουν δεδομένα"
 #, python-brace-format
 msgid "Method \"{method}\" not allowed."
 msgstr "Η μέθοδος \"{method}\" δεν επιτρέπεται."
-
-#~ msgid "Last update"
-#~ msgstr "Τελευταία ενημέρωση"

@@ -532,12 +532,12 @@ Response::
     {
         "id": 9511,
         "last_modified": "2015-04-05T05:33:41.140506-05:00",
-        "type": "Raw",
+        "type": "Initial",
         "time_step": "10min",
         "timeseries_group": 483
     }
 
-The ``type`` is one of Raw, Checked, Regularized, Aggregated, and Processed.
+The ``type`` is one of Initial, Checked, Regularized, and Aggregated.
 
 List time series
 ----------------
@@ -566,7 +566,7 @@ Create time series
 POST to create a time series::
 
     curl -X POST -H "Authorization: token OAUTH-TOKEN" \
-        -d "timeseries_group=42" -d "type=Raw"-d "time_step=H" \
+        -d "timeseries_group=42" -d "type=Initial"-d "time_step=H" \
         https://openmeteo.org/api/stations/5/timeseriesgroups/42/timeseries/
 
 The response is a 201 with a similar content as the GET detail response
@@ -807,6 +807,6 @@ data as a whole, the error message goes into ``non_field_errors``::
 
    {
      "non_field_errors": [
-       "A time series with timeseries_group_id=2 and type=Raw already exists"
+       "A time series with timeseries_group_id=2 and type=Initial already exists"
      ]
    }

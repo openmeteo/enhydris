@@ -373,7 +373,13 @@ class StationLastUpdateTestCase(TestCase):
         )
 
     def _create_timeseries(
-        self, ye=None, mo=None, da=None, ho=None, mi=None, type=models.Timeseries.RAW
+        self,
+        ye=None,
+        mo=None,
+        da=None,
+        ho=None,
+        mi=None,
+        type=models.Timeseries.INITIAL,
     ):
         if ye:
             end_date_utc = dt.datetime(ye, mo, da, ho, mi, tzinfo=dt.timezone.utc)
@@ -388,21 +394,21 @@ class StationLastUpdateTestCase(TestCase):
             )
 
     def test_last_update_naive_when_all_timeseries_have_end_date(self):
-        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.RAW)
+        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.INITIAL)
         self._create_timeseries(2019, 7, 23, 5, 10, type=models.Timeseries.CHECKED)
         self.assertEqual(
             self.station.last_update_naive, dt.datetime(2019, 7, 24, 13, 26)
         )
 
     def test_last_update_naive_when_one_timeseries_has_no_data(self):
-        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.RAW)
+        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.INITIAL)
         self._create_timeseries(type=models.Timeseries.CHECKED)
         self.assertEqual(
             self.station.last_update_naive, dt.datetime(2019, 7, 24, 13, 26)
         )
 
     def test_last_update_naive_when_all_timeseries_has_no_data(self):
-        self._create_timeseries(type=models.Timeseries.RAW)
+        self._create_timeseries(type=models.Timeseries.INITIAL)
         self._create_timeseries(type=models.Timeseries.CHECKED)
         self.assertIsNone(self.station.last_update_naive)
 
@@ -410,7 +416,7 @@ class StationLastUpdateTestCase(TestCase):
         self.assertIsNone(self.station.last_update_naive)
 
     def test_last_update(self):
-        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.RAW)
+        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.INITIAL)
         tzinfo = dt.timezone(dt.timedelta(hours=2), "EET")
         self.assertEqual(
             self.station.last_update, dt.datetime(2019, 7, 24, 13, 26, tzinfo=tzinfo)
@@ -419,7 +425,7 @@ class StationLastUpdateTestCase(TestCase):
     def test_last_update_cache_when_atleast_one_timeseries_has_end_date(self):
         # Since it's not possible to cache `None` values, ensure to create
         # at least one timeseries with an end date value.
-        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.RAW)
+        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.INITIAL)
 
         # Make sure to fetch the `end_date` value of the timeseries
         timeseries = models.Timeseries.objects.filter(
@@ -438,7 +444,7 @@ class StationLastUpdateTestCase(TestCase):
     def test_last_update_naive_cace_when_atleast_one_timeseries_has_end_date(self):
         # Since it's not possible to cache `None` values, ensure to create
         # at least one timeseries with an end date value.
-        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.RAW)
+        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.INITIAL)
 
         # Make sure to fetch the `end_date` value of the timeseries
         timeseries = models.Timeseries.objects.filter(
@@ -520,7 +526,7 @@ class TimeseriesGroupDefaultTimeseriesTestCase(TestCase):
         self.timeseries_group = mommy.make(
             models.TimeseriesGroup, variable__descr="Temperature", name=""
         )
-        self.raw_timeseries = self._make_timeseries(models.Timeseries.RAW)
+        self.initial_timeseries = self._make_timeseries(models.Timeseries.INITIAL)
         self.checked_timeseries = self._make_timeseries(models.Timeseries.CHECKED)
         self.regularized_timeseries = self._make_timeseries(
             models.Timeseries.REGULARIZED
@@ -542,24 +548,17 @@ class TimeseriesGroupDefaultTimeseriesTestCase(TestCase):
             self.timeseries_group.default_timeseries, self.checked_timeseries
         )
 
-    def test_returns_raw(self):
+    def test_returns_initial(self):
         self.regularized_timeseries.delete()
         self.checked_timeseries.delete()
-        self.assertEqual(self.timeseries_group.default_timeseries, self.raw_timeseries)
-
-    def test_returns_processed(self):
-        self.regularized_timeseries.delete()
-        self.checked_timeseries.delete()
-        self.raw_timeseries.delete()
-        self.processed_timeseries = self._make_timeseries(models.Timeseries.PROCESSED)
         self.assertEqual(
-            self.timeseries_group.default_timeseries, self.processed_timeseries
+            self.timeseries_group.default_timeseries, self.initial_timeseries
         )
 
     def test_returns_none(self):
         self.regularized_timeseries.delete()
         self.checked_timeseries.delete()
-        self.raw_timeseries.delete()
+        self.initial_timeseries.delete()
         self.assertIsNone(self.timeseries_group.default_timeseries)
 
     def test_caching(self):
@@ -688,7 +687,7 @@ class TimeseriesTestCase(TestCase):
         )
 
     def test_update(self):
-        mommy.make(models.Timeseries, type=models.Timeseries.RAW)
+        mommy.make(models.Timeseries, type=models.Timeseries.INITIAL)
         timeseries = models.Timeseries.objects.first()
         timeseries.type = models.Timeseries.AGGREGATED
         timeseries.save()
@@ -702,8 +701,8 @@ class TimeseriesTestCase(TestCase):
         timeseries.delete()
         self.assertEqual(models.Timeseries.objects.count(), 0)
 
-    def test_str_raw(self):
-        self._test_str(type=models.Timeseries.RAW, result="Raw")
+    def test_str_initial(self):
+        self._test_str(type=models.Timeseries.INITIAL, result="Initial")
 
     def test_str_checked(self):
         self._test_str(type=models.Timeseries.CHECKED, result="Checked")
@@ -727,33 +726,13 @@ class TimeseriesTestCase(TestCase):
         timeseries = self._make_timeseries(timeseries_group, type)
         self.assertEqual(str(timeseries), result)
 
-    def test_only_one_raw_per_group(self):
+    def test_only_one_initial_per_group(self):
         timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
-        self._make_timeseries(timeseries_group, models.Timeseries.RAW)
+        self._make_timeseries(timeseries_group, models.Timeseries.INITIAL)
         with self.assertRaises(IntegrityError):
             models.Timeseries(
                 timeseries_group=timeseries_group,
-                type=models.Timeseries.RAW,
-                time_step="D",
-            ).save()
-
-    def test_only_one_processed_per_group(self):
-        timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
-        self._make_timeseries(timeseries_group, models.Timeseries.PROCESSED)
-        with self.assertRaises(IntegrityError):
-            models.Timeseries(
-                timeseries_group=timeseries_group,
-                type=models.Timeseries.PROCESSED,
-                time_step="D",
-            ).save()
-
-    def test_only_one_raw_or_processed_per_group(self):
-        timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
-        self._make_timeseries(timeseries_group, models.Timeseries.RAW)
-        with self.assertRaises(IntegrityError):
-            models.Timeseries(
-                timeseries_group=timeseries_group,
-                type=models.Timeseries.PROCESSED,
+                type=models.Timeseries.INITIAL,
                 time_step="D",
             ).save()
 
@@ -1310,7 +1289,7 @@ class TimeseriesDatesCacheInvalidationTestCase(TestCase):
         self.timeseries = mommy.make(
             models.Timeseries,
             timeseries_group=self.timeseries_group,
-            type=models.Timeseries.RAW,
+            type=models.Timeseries.INITIAL,
         )
 
     def test_station_last_update_cache_invalidation(self):
