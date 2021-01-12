@@ -15,7 +15,7 @@ from django_selenium_clean import PageElement
 from model_mommy import mommy
 from selenium.webdriver.common.by import By
 
-from enhydris.models import GentityFile, Station, Timeseries
+from enhydris.models import GentityFile, Organization, Station, Timeseries
 from enhydris.tests import TimeseriesDataMixin
 
 
@@ -341,9 +341,18 @@ class ShowOnlySearchedForStationsOnMapTestCase(SeleniumTestCase):
     markers = PageElement(By.CSS_SELECTOR, ".leaflet-marker-pane")
 
     def setUp(self):
-        mommy.make(Station, name="West", geom=Point(x=23.0, y=38.0, srid=4326))
-        mommy.make(Station, name="Middle", geom=Point(x=23.1, y=38.0, srid=4326))
-        mommy.make(Station, name="East", geom=Point(x=23.2, y=38.0, srid=4326))
+        self.organization = mommy.make(Organization, name="Assassination Bureau, Ltd")
+        self._make_station("West", 23.0, 38.0)
+        self._make_station("Middle", 23.1, 38.0)
+        self._make_station("East", 23.2, 38.0)
+
+    def _make_station(self, name, lon, lat):
+        mommy.make(
+            Station,
+            name=name,
+            geom=Point(x=lon, y=lat, srid=4326),
+            owner=self.organization,
+        )
 
     def test_list_stations_visible_on_map(self):
         # Visit site and wait until three stations are shown
@@ -360,10 +369,10 @@ class ShowOnlySearchedForStationsOnMapTestCase(SeleniumTestCase):
     def _get_num_stations_shown(self):
         self.markers.wait_until_exists()
         for i in range(6):
+            sleep(0.5)
             result = len(self.markers.find_elements_by_tag_name("img"))
             if result:
                 return result
-            sleep(0.5)
 
 
 @skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
@@ -372,11 +381,18 @@ class ShowStationOnStationDetailMapTestCase(SeleniumTestCase):
     markers = PageElement(By.CSS_SELECTOR, ".leaflet-marker-pane")
 
     def setUp(self):
-        mommy.make(Station, name="West", geom=Point(x=23.0, y=38.0, srid=4326))
-        self.station = mommy.make(
-            Station, name="Middle", geom=Point(x=23.001, y=38.0, srid=4326)
+        self.organization = mommy.make(Organization, name="Assassination Bureau, Ltd")
+        self._make_station("West", 23.0, 38.0)
+        self.station = self._make_station("Middle", 23.001, 38.0)
+        self._make_station("East", 23.002, 38.0)
+
+    def _make_station(self, name, lon, lat):
+        return mommy.make(
+            Station,
+            name=name,
+            geom=Point(x=lon, y=lat, srid=4326),
+            owner=self.organization,
         )
-        mommy.make(Station, name="East", geom=Point(x=23.002, y=38.0, srid=4326))
 
     def test_shows_a_single_station_in_station_detail(self):
         self.selenium.get(
@@ -388,10 +404,10 @@ class ShowStationOnStationDetailMapTestCase(SeleniumTestCase):
     def _get_num_stations_shown(self):
         self.markers.wait_until_exists()
         for i in range(6):
+            sleep(0.5)
             result = len(self.markers.find_elements_by_tag_name("img"))
             if result:
                 return result
-            sleep(0.5)
         return 0
 
 

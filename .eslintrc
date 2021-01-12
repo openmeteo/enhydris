@@ -12,7 +12,8 @@
         "moment": "readonly",
         "L": "readonly",
         "ApexCharts": "readonly",
-        "Arg": "readonly"
+        "Arg": "readonly",
+        "axios": "readonly"
     },
     "rules": {
         "prefer-arrow-callback": "off",

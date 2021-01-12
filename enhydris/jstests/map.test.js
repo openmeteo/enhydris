@@ -65,3 +65,112 @@ describe('setupViewport', () => {
     checkForCalledWith(38, 22.536, 39, 25);
   });
 });
+
+describe('enhydris.stationsLayer.getOwnerName', () => {
+  beforeAll(() => {
+    axios = { // eslint-disable-line no-global-assign
+      get: jest.fn(() => Promise.resolve({ data: { name: 'Assassination Bureau, Ltd' } })),
+    };
+  });
+
+  beforeEach(() => { enhydris.stationsLayer.ownerNames = {}; });
+
+  afterEach(() => jest.clearAllMocks());
+
+  test('returns already registered owner name', async () => {
+    enhydris.stationsLayer.ownerNames = { 18: 'Extortion Bureau, Ltd' };
+    const result = await enhydris.stationsLayer.getOwnerName(18);
+    expect(result).toEqual('Extortion Bureau, Ltd');
+  });
+
+  test('returns requested owner name', async () => {
+    const result = await enhydris.stationsLayer.getOwnerName(18);
+    expect(result).toEqual('Assassination Bureau, Ltd');
+  });
+});
+
+describe('enhydris.stationsLayer.addStationsPageToStationsLayer', () => {
+  const response = {
+    data: {
+      results: [
+        {
+          id: 42,
+          owner: 18,
+          name: 'Hobbiton',
+          geom: 'SRID=4326;POINT (20.984238 39.147111)',
+        },
+        {
+          id: 43,
+          owner: 18,
+          name: 'Rivendell',
+          geom: 'SRID=4326;POINT (21.984238 39.547111)',
+        },
+      ],
+    },
+  };
+  const bindPopup = jest.fn();
+  const addTo = jest.fn();
+  const marker = { bindPopup, addTo };
+
+  beforeAll(() => {
+    L = { marker: jest.fn(() => marker) }; // eslint-disable-line no-global-assign
+    enhydris.stationsLayer.ownerNames[18] = 'Assassination Bureau, Ltd';
+    enhydris.stationsLayer.addStationsPageToStationsLayer(response);
+  });
+
+  test('has created markers', () => {
+    expect(L.marker.mock.calls).toEqual([
+      [[39.147111, 20.984238]],
+      [[39.547111, 21.984238]],
+    ]);
+  });
+
+  test('has created popups', () => {
+    expect(bindPopup.mock.calls).toEqual([
+      [`
+        <h2>Hobbiton</h2>
+        <p>Owner: Assassination Bureau, Ltd</p>
+        <p><a href="/stations/42/">Details...</a></p>
+      `],
+      [`
+        <h2>Rivendell</h2>
+        <p>Owner: Assassination Bureau, Ltd</p>
+        <p><a href="/stations/43/">Details...</a></p>
+      `],
+    ]);
+  });
+
+  test('has added markers to layer', () => {
+    expect(marker.addTo.mock.calls).toEqual([
+      [enhydris.stationsLayer],
+      [enhydris.stationsLayer],
+    ]);
+  });
+});
+
+describe('enhydris.stationsLayer.fillWithStations', () => {
+  const responses = [
+    { data: { next: 'https://assassinationbureau.com/?page=irrelevant', results: [] } },
+    { data: { next: null, results: [] } },
+  ];
+  let counter = 0;
+
+  beforeAll(() => {
+    axios = { // eslint-disable-line no-global-assign
+      get: jest.fn(() => {
+        const result = Promise.resolve(responses[counter]);
+        counter += 1;
+        return result;
+      }),
+    };
+    enhydris.stationsLayer.addStationsPageToStationsLayer = jest.fn();
+    enhydris.stationsLayer.fillWithStations();
+  });
+
+  test('has made two requests', () => {
+    expect(axios.get.mock.calls).toEqual([
+      ['/api/stations/'],
+      ['https://assassinationbureau.com/?page=irrelevant'],
+    ]);
+  });
+});

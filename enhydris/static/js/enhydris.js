@@ -40,15 +40,10 @@ enhydris.map = {
   },
 
   setupStationsLayer() {
-    let url = `${enhydris.rootUrl}stations/kml/`;
-    if (enhydris.mapMode === 'many-stations') {
-      url += `?q=${enhydris.searchString}`;
-    } else if (enhydris.mapMode === 'single-station') {
-      url += `?gentity_id=${enhydris.agentityId}`;
-    }
-    this.stationsLayer = new L.KML(url, { async: true });
+    this.stationsLayer = enhydris.stationsLayer.create();
     this.leafletMap.addLayer(this.stationsLayer);
     this.layerControl.addOverlay(this.stationsLayer, 'Stations');
+    this.stationsLayer.fillWithStations();
   },
 
   listStationsVisibleOnMap() {
@@ -66,6 +61,52 @@ enhydris.map = {
       }
     });
     window.location = `${window.location.pathname}?${queryString}`;
+  },
+};
+
+enhydris.stationsLayer = {
+  create() {
+    return Object.assign(L.layerGroup(), this);
+  },
+
+  async fillWithStations() {
+    let url = '/api/stations/';
+    if (enhydris.mapMode === 'many-stations') {
+      url += `?q=${enhydris.searchString}`;
+    } else if (enhydris.mapMode === 'single-station') {
+      url += `?gentity_id=${enhydris.agentityId}`;
+    }
+    for (;;) {
+      const response = await axios.get(url); // eslint-disable-line no-await-in-loop
+      this.addStationsPageToStationsLayer(response);
+      url = response.data.next;
+      if (!url) break;
+    }
+  },
+
+  addStationsPageToStationsLayer(response) {
+    response.data.results.forEach(async (station) => {
+      const [i, j] = [station.geom.indexOf('('), station.geom.indexOf(')')];
+      const [lon, lat] = station.geom.slice(i + 1, j).split(' ').map((x) => parseFloat(x));
+      const marker = L.marker([lat, lon]);
+      const ownerName = await this.getOwnerName(station.owner);
+      marker.bindPopup(`
+        <h2>${station.name}</h2>
+        <p>Owner: ${ownerName}</p>
+        <p><a href="/stations/${station.id}/">Details...</a></p>
+      `);
+      marker.addTo(this);
+    });
+  },
+
+  ownerNames: {},
+
+  async getOwnerName(ownerId) {
+    if (!(ownerId in this.ownerNames)) {
+      const response = await axios.get(`/api/organizations/${ownerId}/`);
+      this.ownerNames[ownerId] = response.data.name;
+    }
+    return this.ownerNames[ownerId];
   },
 };
 
