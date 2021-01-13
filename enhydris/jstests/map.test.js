@@ -26,20 +26,20 @@ describe('setupViewport', () => {
   }
 
   test('use whole map in small widths', () => {
-    window.innerWidth = 992;
+    window.innerWidth = 991;
     enhydris.map.setupViewport();
     checkForCalledWith(38, 24, 39, 25);
   });
 
   test('use whole map in small widths with search result', () => {
-    window.innerWidth = 992;
+    window.innerWidth = 991;
     document.body.innerHTML = '<div class="map map-fullpage with-search-result"></div>';
     enhydris.map.setupViewport();
     checkForCalledWith(38, 24, 39, 25);
   });
 
   test('use part of map in large widths with search result', () => {
-    window.innerWidth = 993;
+    window.innerWidth = 992;
     document.querySelector = (selector) => {
       if (selector === '.with-search-result') {
         return 'mapDiv';
@@ -56,13 +56,13 @@ describe('setupViewport', () => {
       element === 'searchContentWrapper' ? { marginLeft: 50, paddingLeft: 100 } : null
     );
     enhydris.map.setupViewport();
-    /* The screen is 993 px wide, but only the rightmost 993 - 440 - 50 - 100 = 403 px
-     * are clear, so the viewport should be set so that the rightmost 403 px show the
-     * requested 24-25 degrees. The entire 993px-wide map should therefore
-     * be 993/403*(25-24) = 2.464 degrees wide; it should therefore span
-     * 22.536-25 degrees.
+    /* The screen is 992 px wide, but only the rightmost 992 - 440 - 50 - 100 = 402 px
+     * are clear, so the viewport should be set so that the rightmost 402 px show the
+     * requested 24-25 degrees. The entire 992px-wide map should therefore
+     * be 992/402*(25-24) = 2.468 degrees wide; it should therefore span
+     * 22.532-25 degrees.
      */
-    checkForCalledWith(38, 22.536, 39, 25);
+    checkForCalledWith(38, 22.532, 39, 25);
   });
 });
 

@@ -18,7 +18,7 @@ enhydris.map = {
   setupViewport() {
     const [lon1, lat1, lon2, lat2] = enhydris.mapViewport;
     let newLon1 = lon1;
-    if (window.innerWidth > 992 && document.querySelector('.with-search-result')) {
+    if (window.innerWidth > 991 && document.querySelector('.with-search-result')) {
       const container = document.querySelector('.search-content-wrapper');
       const searchResult = document.querySelector('.search-result');
       const searchResultWidth = searchResult.clientWidth;
