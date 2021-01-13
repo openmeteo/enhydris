@@ -15,6 +15,12 @@ class StationList(StationListViewMixin, ListView):
     def get_paginate_by(self, queryset):
         return getattr(settings, "ENHYDRIS_STATIONS_PER_PAGE", 100)
 
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        parms = self.request.GET.copy()
+        context["query_string_parms"] = parms.pop("page", True) and parms.urlencode()
+        return context
+
     def render_to_response(self, *args, **kwargs):
         self.request.map_viewport = self._get_bounding_box()
         return super().render_to_response(*args, **kwargs)

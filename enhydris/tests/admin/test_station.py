@@ -257,7 +257,7 @@ class TestTimeseriesFormMixin(TestTimeseriesMixin):
         self.data = {
             "replace_or_append": replace_or_append,
             "timeseries_group": self.timeseries_group.id,
-            "type": models.Timeseries.RAW,
+            "type": models.Timeseries.INITIAL,
         }
         if file_contents:
             self.files = {"data": SimpleUploadedFile("mytimeseries.csv", file_contents)}
@@ -525,7 +525,7 @@ class TimeseriesInlineFormSetTestCase(TestCase):
         response = self.client.post("/admin/enhydris/station/add/", data)
         self.assertContains(response, "must be unique")
 
-    def test_checks_unique_raw(self):
+    def test_checks_unique_initial(self):
         data = {
             **self._get_basic_form_contents(),
             "timeseriesgroup_set-0-timeseries_set-TOTAL_FORMS": "3",
@@ -540,41 +540,7 @@ class TimeseriesInlineFormSetTestCase(TestCase):
             "timeseriesgroup_set-0-timeseries_set-2-replace_or_append": "APPEND",
         }
         response = self.client.post("/admin/enhydris/station/add/", data)
-        self.assertContains(response, "only one raw or processed time series")
-
-    def test_checks_unique_processed(self):
-        data = {
-            **self._get_basic_form_contents(),
-            "timeseriesgroup_set-0-timeseries_set-TOTAL_FORMS": "3",
-            "timeseriesgroup_set-0-timeseries_set-0-type": "150",
-            "timeseriesgroup_set-0-timeseries_set-0-time_step": "10min",
-            "timeseriesgroup_set-0-timeseries_set-0-replace_or_append": "APPEND",
-            "timeseriesgroup_set-0-timeseries_set-1-type": "150",
-            "timeseriesgroup_set-0-timeseries_set-1-time_step": "20min",
-            "timeseriesgroup_set-0-timeseries_set-1-replace_or_append": "APPEND",
-            "timeseriesgroup_set-0-timeseries_set-2-type": "200",
-            "timeseriesgroup_set-0-timeseries_set-2-time_step": "10min",
-            "timeseriesgroup_set-0-timeseries_set-2-replace_or_append": "APPEND",
-        }
-        response = self.client.post("/admin/enhydris/station/add/", data)
-        self.assertContains(response, "only one raw or processed time series")
-
-    def test_checks_unique_raw_or_processed(self):
-        data = {
-            **self._get_basic_form_contents(),
-            "timeseriesgroup_set-0-timeseries_set-TOTAL_FORMS": "3",
-            "timeseriesgroup_set-0-timeseries_set-0-type": "100",
-            "timeseriesgroup_set-0-timeseries_set-0-time_step": "10min",
-            "timeseriesgroup_set-0-timeseries_set-0-replace_or_append": "APPEND",
-            "timeseriesgroup_set-0-timeseries_set-1-type": "150",
-            "timeseriesgroup_set-0-timeseries_set-1-time_step": "20min",
-            "timeseriesgroup_set-0-timeseries_set-1-replace_or_append": "APPEND",
-            "timeseriesgroup_set-0-timeseries_set-2-type": "200",
-            "timeseriesgroup_set-0-timeseries_set-2-time_step": "10min",
-            "timeseriesgroup_set-0-timeseries_set-2-replace_or_append": "APPEND",
-        }
-        response = self.client.post("/admin/enhydris/station/add/", data)
-        self.assertContains(response, "only one raw or processed time series")
+        self.assertContains(response, "only one initial time series")
 
     def test_checks_unique_checked(self):
         data = {

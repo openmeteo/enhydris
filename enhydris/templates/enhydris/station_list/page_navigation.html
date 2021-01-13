@@ -4,7 +4,7 @@
   <ul class="pagination">
     {% if page_obj.has_previous %}
       <li class="page-item">
-        <a class="page-link" aria-label="{% trans 'Previous' %}" id="previous-page" href="?page={{ page_obj.previous_page_number }}">
+        <a class="page-link" aria-label="{% trans 'Previous' %}" id="previous-page" href="?page={{ page_obj.previous_page_number }}&{{ query_string_parms }}">
           <span aria-hidden="true">&laquo;</span>
         </a>
       </li>
@@ -22,14 +22,14 @@
       {% else %}
         <li class="page-item">
       {% endif %}
-        <a class="page-link" href="?page={{ forloop.counter }}">{{ forloop.counter }}</a>
+        <a class="page-link" href="?page={{ forloop.counter }}&{{ query_string_parms }}">{{ forloop.counter }}</a>
       </li>
     {% endfor %}
 
     {% if page_obj.has_next %}
       <li class="page-item">
         <a class="page-link" aria-label="{% trans 'Next' %}" id="next-page"
-           href="?page={{ page_obj.next_page_number }}">
+         href="?page={{ page_obj.next_page_number }}&{{ query_string_parms }}">
           <span aria-hidden="true">&raquo;</span>
         </a>
       </li>

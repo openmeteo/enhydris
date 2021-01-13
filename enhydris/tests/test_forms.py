@@ -12,7 +12,7 @@ class DownloadDataFormTestCase(TestCase, TimeseriesDataMixin):
         form = DownloadDataForm(timeseries_group=self.timeseries_group)
         self.assertIn(
             f'<input type="radio" name="timeseries_id" value="{self.timeseries.id}" '
-            'required id="id_timeseries_id_0">\n Raw',
+            'required id="id_timeseries_id_0">\n Initial',
             form.as_p(),
         )
 

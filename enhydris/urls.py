@@ -7,14 +7,10 @@ from enhydris.api import urls as enhydris_api_urls
 
 admin.autodiscover()
 
-stations_kml_view = views.StationList.as_view(
-    template_name="enhydris/station_list/placemarks.kml"
-)
 station_edit_view = views.StationEdit.as_view()
 
 urlpatterns = [
     path("", views.StationList.as_view(), name="station_list"),
-    path("stations/kml/", stations_kml_view),
     path("stations/<int:pk>/", views.StationDetail.as_view(), name="station_detail"),
     path("stations/<int:pk>/edit/", station_edit_view, name="station_edit"),
     path(

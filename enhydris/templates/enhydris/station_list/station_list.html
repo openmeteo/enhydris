@@ -1,10 +1,11 @@
 {% load i18n %}
 
-<div class="col-12">
-  {% if object_list %}
+{% if object_list %}
+  <div class="search-result-wrapper">
+    {% include "enhydris/station_list/header.html" %}
     {% include "enhydris/station_list/table.html" %}
     {% include "enhydris/station_list/page_navigation.html" %}
-  {% else %}
-    <p>{% trans "No entries found." %}</p>
-  {% endif %}
-</div>
+  </div>
+{% else %}
+  <p>{% trans "No entries found." %}</p>
+{% endif %}

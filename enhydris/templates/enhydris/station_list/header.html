@@ -1,0 +1,15 @@
+{% load i18n %}
+
+<header>
+  <h2 class="reset-text">{% trans "Search results" %}</h2>
+
+  <div class="search-result-sort dropdown">
+    <button class="sort-toggle" type="button">{% trans "Sort" %}</button>
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownSortBy" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+
+    <div class="dropdown-menu" aria-labelledby="dropdownSortBy">
+      <a class="dropdown-item" href="{% url 'station_list' %}?sort=name&{{ request.META.QUERY_STRING }}">{% trans "Name" %}</a>
+      <a class="dropdown-item" href="{% url 'station_list' %}?sort=owner&{{ request.META.QUERY_STRING }}">{% trans "Owner" %}</a>
+    </div>
+  </div>
+</header>

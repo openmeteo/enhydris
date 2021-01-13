@@ -38,7 +38,7 @@ class TimeseriesDataMixin:
         )
         self.timeseries = mommy.make(
             models.Timeseries,
-            type=models.Timeseries.RAW,
+            type=models.Timeseries.INITIAL,
             timeseries_group=self.timeseries_group,
         )
         self.timeseries.set_data(self.htimeseries.data)

@@ -85,7 +85,7 @@ each group consists of time series with essentially the same kind of
 data but in a different time step or in a different checking status. For
 example, if you have a temperature sensor that measures temperature
 every 10 minutes, then you will have a "temperature" time series group,
-which will contain the raw time series, and it may also contain the
+which will contain the initial time series, and it may also contain the
 checked time series, the regularized time series, the hourly time
 series, etc. (If you have two temperature sensors, you'll have two time
 series groups.)
@@ -96,15 +96,15 @@ when we actually mean a time series group). Sometimes we can't avoid it
 though (notably in the admin).
 
 Each time series in the group has a "type" (which is enumerated): it can
-be raw, checked, regularized, or aggregated.
+be initial, checked, regularized, or aggregated.
 
 During database upgrade, unless enhydris-autoprocess is installed, each
 existing time series goes in a separate group, and it is assumed it is
-raw. In many cases, this is the correct assumption. If
+the initial. In many cases, this is the correct assumption. If
 enhydris-autoprocess is installed, the database upgrade attempts to find
-out which time series is raw, which is checked, and which is aggregated
-(however enhydris-autoprocess did not exist for Enhydris 2.0, so this
-applies only to installations of Enhydris development versions).
+out which time series is the initial, which is checked, and which is
+aggregated (however enhydris-autoprocess did not exist for Enhydris 2.0,
+so this applies only to installations of Enhydris development versions).
 
 TimescaleDB
 ^^^^^^^^^^^

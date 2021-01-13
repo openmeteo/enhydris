@@ -15,7 +15,7 @@ from django_selenium_clean import PageElement
 from model_mommy import mommy
 from selenium.webdriver.common.by import By
 
-from enhydris.models import GentityFile, Station, Timeseries
+from enhydris.models import GentityFile, Organization, Station, Timeseries
 from enhydris.tests import TimeseriesDataMixin
 
 
@@ -67,38 +67,36 @@ class StationListTestCase(TestCase):
         )
 
     def test_station_list(self):
-        response = self.client.get("/")
-        self.assertContains(
-            response, '<a href="?sort=-name&amp;sort=name">Name&nbsp;↓</a>', html=True
-        )
+        response = self.client.get("/?q=t")
+        self.assertContains(response, "Search results", html=True)
 
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=3)
     def test_two_pages(self):
-        response = self.client.get("/")
+        response = self.client.get("/?q=t")
         self.assertContains(
-            response, '<a class="page-link" href="?page=2">2</a>', html=True
+            response, '<a class="page-link" href="?page=2&q=t">2</a>', html=True
         )
         self.assertNotContains(
-            response, '<a class="page-link" href="?page=3">3</a>', html=True
+            response, '<a class="page-link" href="?page=3&q=t">3</a>', html=True
         )
 
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=2)
     def test_next_page_url(self):
-        response = self.client.get("/")
+        response = self.client.get("/?q=t")
         soup = BeautifulSoup(response.content, "html.parser")
         next_page_url = soup.find("a", id="next-page").get("href")
-        self.assertEqual(next_page_url, "?page=2")
+        self.assertEqual(next_page_url, "?page=2&q=t")
 
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=2)
     def test_previous_page_url(self):
-        response = self.client.get("/?page=2")
+        response = self.client.get("/?q=t&page=2")
         soup = BeautifulSoup(response.content, "html.parser")
         next_page_url = soup.find("a", id="previous-page").get("href")
-        self.assertEqual(next_page_url, "?page=1")
+        self.assertEqual(next_page_url, "?page=1&q=t")
 
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=100)
     def test_one_page(self):
-        response = self.client.get("/")
+        response = self.client.get("/?q=t")
         self.assertNotContains(response, "<a href='?page=2'>2</a>", html=True)
 
 
@@ -290,9 +288,9 @@ class SeleniumTestCase(django_selenium_clean.SeleniumTestCase):
 class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
 
     button_limit_to_map = PageElement(By.ID, "limit-to-map")
-    td_komboti = PageElement(By.XPATH, '//td//a[text()="Komboti"]')
-    td_agios_athanasios = PageElement(By.XPATH, '//td//a[text()="Agios Athanasios"]')
-    td_tharbad = PageElement(By.XPATH, '//td//a[text()="Tharbad"]')
+    komboti = PageElement(By.XPATH, '//h3//a[text()="Komboti"]')
+    agios_athanasios = PageElement(By.XPATH, '//h3//a[text()="Agios Athanasios"]')
+    tharbad = PageElement(By.XPATH, '//h3//a[text()="Tharbad"]')
 
     def setUp(self):
         mommy.make(
@@ -315,11 +313,13 @@ class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
         )
 
     def test_list_stations_visible_on_map(self):
-        # Visit site and wait until three stations are shown
+        # Visit site, click on button, and wait until three stations are shown
         self.selenium.get(self.live_server_url)
-        self.td_komboti.wait_until_is_displayed()
-        self.td_agios_athanasios.wait_until_is_displayed()
-        self.td_tharbad.wait_until_is_displayed()
+        self.button_limit_to_map.wait_until_is_displayed()
+        self.button_limit_to_map.click()
+        self.komboti.wait_until_is_displayed()
+        self.agios_athanasios.wait_until_is_displayed()
+        self.tharbad.wait_until_is_displayed()
 
         # Zoom station to an area that covers only two of these stations.
         self.selenium.execute_script(
@@ -330,9 +330,9 @@ class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
         self.button_limit_to_map.click()
 
         # Now only two stations should be displayed
-        self.td_komboti.wait_until_is_displayed()
-        self.td_agios_athanasios.wait_until_is_displayed()
-        self.assertFalse(self.td_tharbad.exists())
+        self.komboti.wait_until_is_displayed()
+        self.agios_athanasios.wait_until_is_displayed()
+        self.assertFalse(self.tharbad.exists())
 
 
 @skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
@@ -341,9 +341,18 @@ class ShowOnlySearchedForStationsOnMapTestCase(SeleniumTestCase):
     markers = PageElement(By.CSS_SELECTOR, ".leaflet-marker-pane")
 
     def setUp(self):
-        mommy.make(Station, name="West", geom=Point(x=23.0, y=38.0, srid=4326))
-        mommy.make(Station, name="Middle", geom=Point(x=23.1, y=38.0, srid=4326))
-        mommy.make(Station, name="East", geom=Point(x=23.2, y=38.0, srid=4326))
+        self.organization = mommy.make(Organization, name="Assassination Bureau, Ltd")
+        self._make_station("West", 23.0, 38.0)
+        self._make_station("Middle", 23.1, 38.0)
+        self._make_station("East", 23.2, 38.0)
+
+    def _make_station(self, name, lon, lat):
+        mommy.make(
+            Station,
+            name=name,
+            geom=Point(x=lon, y=lat, srid=4326),
+            owner=self.organization,
+        )
 
     def test_list_stations_visible_on_map(self):
         # Visit site and wait until three stations are shown
@@ -360,10 +369,10 @@ class ShowOnlySearchedForStationsOnMapTestCase(SeleniumTestCase):
     def _get_num_stations_shown(self):
         self.markers.wait_until_exists()
         for i in range(6):
+            sleep(0.5)
             result = len(self.markers.find_elements_by_tag_name("img"))
             if result:
                 return result
-            sleep(0.5)
 
 
 @skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
@@ -372,11 +381,18 @@ class ShowStationOnStationDetailMapTestCase(SeleniumTestCase):
     markers = PageElement(By.CSS_SELECTOR, ".leaflet-marker-pane")
 
     def setUp(self):
-        mommy.make(Station, name="West", geom=Point(x=23.0, y=38.0, srid=4326))
-        self.station = mommy.make(
-            Station, name="Middle", geom=Point(x=23.001, y=38.0, srid=4326)
+        self.organization = mommy.make(Organization, name="Assassination Bureau, Ltd")
+        self._make_station("West", 23.0, 38.0)
+        self.station = self._make_station("Middle", 23.001, 38.0)
+        self._make_station("East", 23.002, 38.0)
+
+    def _make_station(self, name, lon, lat):
+        return mommy.make(
+            Station,
+            name=name,
+            geom=Point(x=lon, y=lat, srid=4326),
+            owner=self.organization,
         )
-        mommy.make(Station, name="East", geom=Point(x=23.002, y=38.0, srid=4326))
 
     def test_shows_a_single_station_in_station_detail(self):
         self.selenium.get(
@@ -388,10 +404,10 @@ class ShowStationOnStationDetailMapTestCase(SeleniumTestCase):
     def _get_num_stations_shown(self):
         self.markers.wait_until_exists()
         for i in range(6):
+            sleep(0.5)
             result = len(self.markers.find_elements_by_tag_name("img"))
             if result:
                 return result
-            sleep(0.5)
         return 0
 
 
@@ -430,7 +446,7 @@ class TimeseriesGroupDetailTestCase(TestCase, TimeseriesDataMixin):
             self.response,
             f'<input type="radio" name="timeseries_id" value="{self.timeseries.id}" '
             'id="id_timeseries_id_0" class="form-check-input" checked>'
-            '<label class="form-check-label" for="id_timeseries_id_0">Raw</label>',
+            '<label class="form-check-label" for="id_timeseries_id_0">Initial</label>',
             html=True,
         )
 

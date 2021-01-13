@@ -516,8 +516,7 @@ class TimeseriesGroup(models.Model):
         return (
             self._get_timeseries(Timeseries.REGULARIZED)
             or self._get_timeseries(Timeseries.CHECKED)
-            or self._get_timeseries(Timeseries.RAW)
-            or self._get_timeseries(Timeseries.PROCESSED)
+            or self._get_timeseries(Timeseries.INITIAL)
         )
 
     def _get_timeseries(self, type):
@@ -569,14 +568,12 @@ class TimeseriesGroup(models.Model):
 
 
 class Timeseries(models.Model):
-    RAW = 100
-    PROCESSED = 150
+    INITIAL = 100
     CHECKED = 200
     REGULARIZED = 300
     AGGREGATED = 400
     TIMESERIES_TYPES = (
-        (RAW, _("Raw")),
-        (PROCESSED, _("Processed")),
+        (INITIAL, _("Initial")),
         (CHECKED, _("Checked")),
         (REGULARIZED, _("Regularized")),
         (AGGREGATED, _("Aggregated")),
@@ -606,8 +603,8 @@ class Timeseries(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["timeseries_group"],
-                condition=models.Q(type__in=(100, 150)),
-                name="only_one_raw_or_processed_timeseries_per_group",
+                condition=models.Q(type=100),
+                name="only_one_initial_timeseries_per_group",
             ),
             models.UniqueConstraint(
                 fields=["timeseries_group"],

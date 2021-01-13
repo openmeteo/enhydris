@@ -33,7 +33,7 @@ class TimeseriesSerializer(serializers.ModelSerializer):
 
     def _check_for_uniqueness_of_type(self, data):
         types = (
-            models.Timeseries.RAW,
+            models.Timeseries.INITIAL,
             models.Timeseries.CHECKED,
             models.Timeseries.REGULARIZED,
         )
