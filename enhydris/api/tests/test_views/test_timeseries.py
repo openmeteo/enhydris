@@ -568,6 +568,42 @@ class TimeseriesPostWithWrongStationOrTimeseriesGroupTestCase(APITestCase):
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+class TimeseriesPostWithWrongTimeseriesTypeTestCase(APITestCase):
+    def setUp(self):
+        self.user = mommy.make(User, is_active=True, is_superuser=False)
+        self.variable = mommy.make(models.Variable, descr="Temperature")
+        self.time_zone = mommy.make(models.TimeZone)
+        self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
+        self.station = mommy.make(models.Station, creator=self.user)
+        self.timeseries_group = mommy.make(models.TimeseriesGroup, gentity=self.station)
+
+    def _create_timeseries(self, type):
+        self.client.force_authenticate(user=self.user)
+        return self.client.post(
+            f"/api/stations/{self.station.id}/timeseriesgroups/"
+            f"{self.timeseries_group.id}/timeseries/",
+            data={
+                "name": "Great time series",
+                "timeseries_group": self.timeseries_group.id,
+                "type": type,
+                "variable": self.variable.id,
+                "time_zone": self.time_zone.id,
+                "unit_of_measurement": self.unit_of_measurement.id,
+                "precision": 2,
+                "time_step": "",
+            },
+        )
+
+    def test_create_timeseries_with_wrong_type(self):
+        response = self._create_timeseries(type="Raw")
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_timeseries_with_correct_type(self):
+        response = self._create_timeseries(type="Initial")
+        self.assertEqual(response.status_code, 201)
+
+
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class TimeseriesDeleteTestCase(APITestCase):
     def setUp(self):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
