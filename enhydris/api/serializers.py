@@ -16,7 +16,12 @@ class TimeseriesTypeField(serializers.Field):
             return str(self.timeseries_types[value])
 
     def to_internal_value(self, data):
-        return self.reverse_timeseries_types[data]
+        try:
+            return self.reverse_timeseries_types[data]
+        except KeyError:
+            raise serializers.ValidationError(
+                f'"{data}" is not a valid time series type'
+            )
 
 
 class TimeseriesSerializer(serializers.ModelSerializer):
