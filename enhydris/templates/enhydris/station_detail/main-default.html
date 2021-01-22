@@ -29,10 +29,25 @@
         {% endif %}
       </div>
     </div>
+
+    <hr>
+    <div class="row">
+      <div class="featured-image col-md-4">
+        {% with img=object.gentityimage_set.first %}
+          <a href="{{ img.content.url }}"><img src="{{ img.content.url }}" width="100%" title="{{ img.descr }}"></a>
+        {% endwith %}
+      </div>
+      <div class="other-images col-md-8">
+        {% for img in object.gentityimage_set.all %}
+          {% if not forloop.first %}
+            <a href="{{ img.content.url }}"><img style="vertical-align: top" src="{{ img.content.url }}" width="100px" title="{{ img.descr }}"></a>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
   </div>
 
   <div class="container mt-5">
-    <hr>
     <div id="content">
       <ul id="tabs" class="nav nav-tabs" role="tablist">
         <li class="nav-item" role="presentation">
