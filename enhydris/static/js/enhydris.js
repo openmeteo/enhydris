@@ -117,8 +117,21 @@ enhydris.chart = {
     this.fetchInitialChartData();
   },
 
-  mapData(data) {
-    return data.map((i) => [i.timestamp * 1000, Number(i.value) || 0]);
+  chartSeries(data) {
+    return [
+      {
+        name: 'mean',
+        data: data.map((i) => [i.timestamp * 1000, Number(i.mean) || 0]),
+      },
+      {
+        name: 'max',
+        data: data.map((i) => [i.timestamp * 1000, Number(i.max) || 0]),
+      },
+      {
+        name: 'min',
+        data: data.map((i) => [i.timestamp * 1000, Number(i.min) || 0]),
+      },
+    ];
   },
 
   debounce(func, wait, immediate = false) {
@@ -163,11 +176,7 @@ enhydris.chart = {
       .then((response) => response.json())
       .then((data) => {
         if (data && data[0]) {
-          this.mainChart.updateSeries([
-            {
-              data: this.mapData(data),
-            },
-          ]);
+          this.mainChart.updateSeries(this.chartSeries(data));
         }
       });
   },
@@ -236,6 +245,9 @@ enhydris.chart = {
           },
         },
       },
+      legend: {
+        show: false,
+      },
     };
 
     this.miniChart = new ApexCharts(
@@ -247,6 +259,7 @@ enhydris.chart = {
 
   initializeMainChart() {
     const self = this;
+    const lightColor = '#CCCCCC';
     const grayColor = '#546E7A';
     const mainChartOption = {
       series: [{
@@ -288,7 +301,7 @@ enhydris.chart = {
           },
         },
       },
-      colors: [grayColor],
+      colors: [grayColor, lightColor, lightColor],
       stroke: {
         width: 2,
       },
@@ -321,6 +334,9 @@ enhydris.chart = {
           format: 'MMM dd, yyyy',
         },
       },
+      legend: {
+        show: false,
+      },
     };
     this.mainChart = new ApexCharts(
       document.querySelector('#chart-main'),
@@ -334,17 +350,9 @@ enhydris.chart = {
       .then((response) => response.json())
       .then((data) => {
         if (data && data[0]) {
-          const mappedData = this.mapData(data);
-          this.mainChart.updateSeries([
-            {
-              data: mappedData,
-            },
-          ]);
-          this.miniChart.updateSeries([
-            {
-              data: mappedData,
-            },
-          ]);
+          const series = this.chartSeries(data);
+          this.mainChart.updateSeries(series);
+          this.miniChart.updateSeries(series.filter((item) => item.name === 'mean'));
         } else {
           this.renderError();
         }

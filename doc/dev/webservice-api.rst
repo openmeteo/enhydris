@@ -640,9 +640,7 @@ The response is normally 204 (no content).
 Time series chart data
 ----------------------
 
-**GET chart data points** of a time series by appending ``chart/``. This is served as a JSON response, to be consumed by charting libraries supporting panning/zooming by providing time limits.
-A maximum of **200 data points** are returned per request, sampled to produce an equally distant data points.
-URL::
+GET statistics for timeseries data in intervals by appending ``chart/``::
 
     curl https://openmeteo.org/api/stations/1334/timeseries/232/chart/
 
@@ -651,21 +649,37 @@ Example of response::
     [
       {
         "timestamp": 1579292086,
-        "value": "1.00"
+        "min": "1.00",
+        "max": "18.00",
+        "mean": 14.00"
       },
       {
         "timestamp": 1580079590,
-        "value": "22.00"
+        "min": "4.00",
+        "max": "22.00",
+        "mean": "18.53"
       },
       ...
     ]
 
 
 You can provide time limits using the following query parameters
-``start_date=<TIME>&end_date=<TIME>``.
-For instance, to request data prior to 2015 only, we can do the following request::
+``start_date=<TIME>&end_date=<TIME>``.  For instance, to request data prior to
+2015 only, we can make the following request::
 
     curl 'https://openmeteo.org/api/stations/1334/timeseries/232/chart/?end_date=2015-01-01T00:00`
+
+The purpose of this endpoint is to be used when creating a chart for the
+time series. When the user pans or zooms the chart, a new request with
+different ``start_date`` and/or ``end_date`` is made. While transferring
+the entire time series to the client would be simpler, it can be too
+large. This endpoint only provides 200 points, so the transfer is
+instant.
+
+What the endpoint does is divide the time between ``start_date`` and
+``end_date`` (or the entire time series time range) in 200 intervals.
+For each interval it returns the interval's statistics and the middle of
+the interval as the timestamp.
 
 Other items of stations
 =======================
