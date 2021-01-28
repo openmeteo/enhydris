@@ -31,20 +31,6 @@
     </div>
 
     <hr>
-    <div class="row">
-      <div class="featured-image col-md-4">
-        {% with img=object.gentityimage_set.first %}
-          <a href="{{ img.content.url }}"><img src="{{ img.content.url }}" width="100%" title="{{ img.descr }}"></a>
-        {% endwith %}
-      </div>
-      <div class="other-images col-md-8">
-        {% for img in object.gentityimage_set.all %}
-          {% if not forloop.first %}
-            <a href="{{ img.content.url }}"><img style="vertical-align: top" src="{{ img.content.url }}" width="100px" title="{{ img.descr }}"></a>
-          {% endif %}
-        {% endfor %}
-      </div>
-    </div>
   </div>
 
   <div class="container mt-5">
@@ -59,12 +45,16 @@
         <li class="nav-item" role="presentation">
           <a class="nav-link" href="#gentity_events" data-toggle="tab" aria-controls="gentity_events" role="tab" aria-selected="false">{% trans "Events" %}</a>
         </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" href="#gentity_images" data-toggle="tab" aria-control="gentity_images" role="tab" aria-selected="false">{% trans "Gallery" %}</a>
+        </li>
       </ul>
 
       <div class="tab-content">
         {% include "enhydris/station_detail/tabs/gentity_files.html" %}
         {% include "enhydris/station_detail/tabs/gentity_events.html" %}
         {% include "enhydris/station_detail/tabs/timeseries_groups.html" %}
+        {% include "enhydris/station_detail/tabs/gallery.html" %}
       </div>
     </div>
   </div>

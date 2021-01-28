@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-23 08:11-0600\n"
+"POT-Creation-Date: 2021-01-28 08:11-0600\n"
 "PO-Revision-Date: 2011-11-24 14:33+0200\n"
 "Last-Translator: Antonis Christofides <anthony@itia.ntua.gr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -236,7 +236,7 @@ msgid "Images"
 msgstr "Εικόνες"
 
 #: enhydris/models.py:249
-#: enhydris/templates/enhydris/station_detail/main-default.html:57
+#: enhydris/templates/enhydris/station_detail/main-default.html:43
 msgid "Files"
 msgstr "Αρχεία"
 
@@ -608,13 +608,17 @@ msgstr "συμβατικός"
 msgid "Edit"
 msgstr "Επεξεργασία"
 
-#: enhydris/templates/enhydris/station_detail/main-default.html:54
+#: enhydris/templates/enhydris/station_detail/main-default.html:40
 msgid "Data"
 msgstr "Δεδομένα"
 
-#: enhydris/templates/enhydris/station_detail/main-default.html:60
+#: enhydris/templates/enhydris/station_detail/main-default.html:46
 msgid "Events"
 msgstr "Ημερολόγιο"
+
+#: enhydris/templates/enhydris/station_detail/main-default.html:49
+msgid "Gallery"
+msgstr "Φωτογραφίες"
 
 #: enhydris/templates/enhydris/station_detail/map.html:12
 #, python-format

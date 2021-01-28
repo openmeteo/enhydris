@@ -130,19 +130,18 @@ class StationDetailImagesTestCase(TestCase):
             GentityImage, gentity=self.station, descr=descr, content=content
         )
 
-    def test_featured_image_is_first_image(self):
+    def test_no_featured_image_when_no_image_is_featured(self):
         response = self.client.get(f"/stations/{self.station.id}/")
         soup = BeautifulSoup(response.content, "html.parser")
-        img = soup.find("div", class_="featured-image").a.img
-        self.assertEqual(img["src"], "/media/image1.png")
+        self.assertIsNone(soup.find("div", class_="featured-image"))
 
-    def test_non_featured_image_is_second_image(self):
+    def test_first_image_when_no_image_is_featured(self):
         response = self.client.get(f"/stations/{self.station.id}/")
         soup = BeautifulSoup(response.content, "html.parser")
         img = soup.find("div", class_="other-images").a.img
-        self.assertEqual(img["src"], "/media/image2.png")
+        self.assertEqual(img["src"], "/media/image1.png")
 
-    def test_featured_image_is_the_one_marked_as_featured(self):
+    def test_featured_image_is_featured(self):
         self.image2.featured = True
         self.image2.save()
         response = self.client.get(f"/stations/{self.station.id}/")
@@ -150,7 +149,7 @@ class StationDetailImagesTestCase(TestCase):
         img = soup.find("div", class_="featured-image").a.img
         self.assertEqual(img["src"], "/media/image2.png")
 
-    def test_non_featured_image_is_the_one_not_marked_as_featured(self):
+    def test_first_non_featured_image_when_one_is_featured(self):
         self.image2.featured = True
         self.image2.save()
         response = self.client.get(f"/stations/{self.station.id}/")
