@@ -331,7 +331,7 @@ enhydris.chart = {
         enabled: true,
         x: {
           show: true,
-          format: 'MMM dd, yyyy',
+          format: 'dd MMM yyyy HH:mm',
         },
       },
       legend: {
