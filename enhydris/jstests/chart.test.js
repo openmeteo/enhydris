@@ -103,9 +103,9 @@ describe('chartSeries', () => {
     }];
     const result = enhydris.chart.chartSeries(data);
     expect(result).toEqual([
-      { data: [[1424940000, 0]], name: 'mean' },
-      { data: [[1424940000, 0]], name: 'max' },
-      { data: [[1424940000, 0]], name: 'min' },
+      { data: [[1424940000, null]], name: 'mean' },
+      { data: [[1424940000, null]], name: 'max' },
+      { data: [[1424940000, null]], name: 'min' },
     ]);
   });
 });

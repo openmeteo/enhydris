@@ -121,15 +121,15 @@ enhydris.chart = {
     return [
       {
         name: 'mean',
-        data: data.map((i) => [i.timestamp * 1000, Number(i.mean) || 0]),
+        data: data.map((i) => [i.timestamp * 1000, i.mean === null ? null : Number(i.mean)]),
       },
       {
         name: 'max',
-        data: data.map((i) => [i.timestamp * 1000, Number(i.max) || 0]),
+        data: data.map((i) => [i.timestamp * 1000, i.max === null ? null : Number(i.max)]),
       },
       {
         name: 'min',
-        data: data.map((i) => [i.timestamp * 1000, Number(i.min) || 0]),
+        data: data.map((i) => [i.timestamp * 1000, i.min === null ? null : Number(i.min)]),
       },
     ];
   },
@@ -199,6 +199,12 @@ enhydris.chart = {
       }],
       chart: {
         id: 'miniChart',
+        animations: {
+          /* We do not animate the mini chart because there's something wrong when
+           * there are missing values, probably a bug.
+           */
+          enabled: false,
+        },
         height: 100,
         type: 'area',
         brush: {
