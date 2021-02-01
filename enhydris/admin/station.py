@@ -85,6 +85,13 @@ class InlinePermissionsMixin:
             return super().has_view_permission(request, obj)
 
 
+class ImageInline(InlinePermissionsMixin, nested_admin.NestedStackedInline):
+    model = models.GentityImage
+    classes = ("collapse",)
+    fields = (("descr", "date"), ("content"), "remarks", "featured")
+    extra = 0
+
+
 class GentityFileInline(InlinePermissionsMixin, nested_admin.NestedStackedInline):
     model = models.GentityFile
     classes = ("collapse",)
@@ -251,6 +258,7 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
         TextField: {"widget": forms.Textarea(attrs={"rows": 4, "cols": 40})}
     }
     inlines = [
+        ImageInline,
         GentityFileInline,
         GentityEventInline,
         TimeseriesGroupInline,

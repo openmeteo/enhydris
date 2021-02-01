@@ -14,6 +14,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 import iso8601
+import numpy as np
 from htimeseries import HTimeseries
 
 from enhydris import models
@@ -147,7 +148,7 @@ class TimeseriesGroupViewSet(ReadOnlyModelViewSet):
 
 
 class TimeseriesViewSet(ModelViewSet):
-    CHART_MAXIMUM_NUMBER_OF_SAMPLES = 200
+    CHART_MAX_INTERVALS = 200
     queryset = models.Timeseries.objects.all()
     serializer_class = serializers.TimeseriesSerializer
 
@@ -237,43 +238,42 @@ class TimeseriesViewSet(ModelViewSet):
 
     def _get_chart_data(self, request, timeseries):
         start_date, end_date = self._get_date_bounds(request, timeseries)
-        # Drop rows with value "NaN"
-        data_frame = timeseries.get_data(
+        df = self._drop_nan_rows(timeseries, start_date, end_date)
+        return self._get_stats_for_all_intervals(df)
+
+    def _drop_nan_rows(self, timeseries, start_date, end_date):
+        return timeseries.get_data(
             start_date=start_date, end_date=end_date
         ).data.dropna(subset=["value"])
-        return self._get_sampled_data_to_plot(data_frame)
 
-    def _get_sampled_data_to_plot(self, df):
-        """Returns a sample of the data to be plotted, by equally sampling across time.
-
-        Divides the dataframe/timeseries by time into "CHART_MAXIMUM_NUMBER_OF_SAMPLES"
-        data points, including the starting point. It works by looping from the min-date
-        till it reaches the max-date, incrementing the time by a calculated interval
-        that results in the required number of samples.  At each data point, we take the
-        nearest value as the data point; if no value exists, the value None is set at
-        this timestamp.
-        """
-        number_of_samples = min(self.CHART_MAXIMUM_NUMBER_OF_SAMPLES, len(df.index))
+    def _get_stats_for_all_intervals(self, df):
+        number_of_samples = min(self.CHART_MAX_INTERVALS, len(df.index))
         if number_of_samples < 2:
             return []
         min_time = df.index.min()
         max_time = df.index.max()
-        interval = (max_time - min_time) / (number_of_samples - 1)
-        tolerance = interval / 2
+        interval = (max_time - min_time) / number_of_samples
         result = []
-        current_time = min_time
-        while current_time <= max_time:
-            result.append(self._get_nearest_data_point(df, current_time, tolerance))
-            current_time += interval
+        start_time = min_time
+        while start_time < max_time:
+            end_time = start_time + interval
+            result.append(self._get_stats_for_interval(df, start_time, end_time))
+            start_time = end_time
         return result
 
-    def _get_nearest_data_point(self, df, current_time, tolerance):
-        try:
-            idx = df.index.get_loc(current_time, method="nearest", tolerance=tolerance)
-            value = df.iloc[idx].value
-        except KeyError:
-            value = None
-        return {"timestamp": current_time.timestamp(), "value": value}
+    def _get_stats_for_interval(self, df, start_time, end_time):
+        df_part = df[start_time:end_time]
+        min_value = df_part["value"].min()
+        max_value = df_part["value"].max()
+        mean_value = df_part["value"].mean()
+        if np.isnan(min_value):
+            min_value = max_value = mean_value = None
+        return {
+            "timestamp": (start_time + (end_time - start_time) / 2).timestamp(),
+            "min": min_value,
+            "max": max_value,
+            "mean": mean_value,
+        }
 
     def _get_date_bounds(self, request, timeseries):
         tz = timeseries.timeseries_group.time_zone.as_tzinfo

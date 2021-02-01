@@ -11,6 +11,7 @@ General documentation:
    :maxdepth: 1
 
    general/install
+   general/chart
    general/release-notes
    general/copyright
 

@@ -170,13 +170,18 @@ This section describes models that provide additional information
 about gentities.
 
 .. class:: enhydris.models.GentityFile
+           enhydris.models.GentityImage
 
-   This model stores general files for the gentity. For examples, for
-   measuring stations, it can be photos, videos, sensor manuals, etc.
+   These models store files and images for the gentity. The difference
+   between :class:`~enhydris.models.GentityFile` and
+   :class:`~enhydris.models.GentityImage` is that
+   :class:`~enhydris.models.GentityImage` objects are shown in a gallery
+   in the station detail page, whereas files are shown in a much less
+   prominent list.
 
    .. attribute:: descr
 
-      A short description or legend of the file.
+      A short description or legend of the file/image.
 
    .. attribute:: remarks
 
@@ -189,10 +194,18 @@ about gentities.
 
    .. attribute:: content
 
-      The actual content of the file; a Django FileField_. Note that,
-      for generality, images are also stored in this attribute, and
-      therefore they don't use an ImageField_, which means that the few
-      facilities that ImageField offers are not available.
+      The actual content of the file; a Django FileField_ (for
+      :class:`~enhydris.models.GentityImage`) or ImageField_ (for
+      :class:`~enhydris.models.GentityFile`).
+
+   .. attribute:: featured
+
+      This attribute exists for :class:`~enhydris.models.GentityImage`
+      only. In the station detail page, one of the images (the
+      "featured" image) is shown in large size (the rest are shown as a
+      thumbnail gallery).  This attribute indicates the featured image.
+      If there are more than one featured images (or if there is none),
+      images are sorted by :attr:`descr`, and the first one is featured.
 
 .. class:: enhydris.models.EventType(Lookup)
 

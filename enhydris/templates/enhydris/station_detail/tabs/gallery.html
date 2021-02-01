@@ -1,0 +1,26 @@
+{% load i18n %}
+
+<div id="gentity_images" class="tab-pane fade" aria-labelledby="gentity_images" role="tabpanel">
+  <div class="row">
+    {% if object.gentityimage_set.first.featured %}
+      <div class="featured-image col-md-4">
+        {% with img=object.gentityimage_set.first %}
+          <a href="{{ img.content.url }}"><img src="{{ img.content.url }}" width="100%" title="{{ img.descr }}"></a>
+        {% endwith %}
+      </div>
+      <div class="other-images col-md-8">
+        {% for img in object.gentityimage_set.all %}
+          {% if not forloop.first %}
+            <a href="{{ img.content.url }}"><img style="vertical-align: top" src="{{ img.content.url }}" width="100px" title="{{ img.descr }}"></a>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="other-images col-md-12">
+        {% for img in object.gentityimage_set.all %}
+          <a href="{{ img.content.url }}"><img style="vertical-align: top" src="{{ img.content.url }}" width="100px" title="{{ img.descr }}"></a>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>

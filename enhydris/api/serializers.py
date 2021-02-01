@@ -144,4 +144,6 @@ class TimeseriesGroupSerializer(serializers.ModelSerializer):
 
 class TimeseriesRecordChartSerializer(serializers.Serializer):
     timestamp = serializers.IntegerField()
-    value = serializers.FloatField()
+    min = serializers.FloatField()
+    max = serializers.FloatField()
+    mean = serializers.FloatField()

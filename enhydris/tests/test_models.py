@@ -224,6 +224,20 @@ class GentityFileTestCase(TestCase):
         self.assertIsNone(gentity_file.related_station)
 
 
+class GentityImageTestCase(TestCase):
+    def test_str_desc(self):
+        image = mommy.make(models.GentityImage, descr="hello")
+        self.assertEqual(str(image), "hello")
+
+    def test_str_date(self):
+        image = mommy.make(models.GentityImage, descr="", date=dt.datetime(2021, 1, 22))
+        self.assertEqual(str(image), "2021-01-22")
+
+    def test_str_id(self):
+        image = mommy.make(models.GentityImage, descr="", date=None, id=85)
+        self.assertEqual(str(image), "85")
+
+
 class GentityEventTestCase(TestCase):
     def test_create(self):
         station = mommy.make(models.Station)

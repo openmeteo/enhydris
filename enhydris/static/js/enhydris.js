@@ -117,8 +117,21 @@ enhydris.chart = {
     this.fetchInitialChartData();
   },
 
-  mapData(data) {
-    return data.map((i) => [i.timestamp * 1000, Number(i.value) || 0]);
+  chartSeries(data) {
+    return [
+      {
+        name: 'mean',
+        data: data.map((i) => [i.timestamp * 1000, i.mean === null ? null : Number(i.mean)]),
+      },
+      {
+        name: 'max',
+        data: data.map((i) => [i.timestamp * 1000, i.max === null ? null : Number(i.max)]),
+      },
+      {
+        name: 'min',
+        data: data.map((i) => [i.timestamp * 1000, i.min === null ? null : Number(i.min)]),
+      },
+    ];
   },
 
   debounce(func, wait, immediate = false) {
@@ -163,11 +176,7 @@ enhydris.chart = {
       .then((response) => response.json())
       .then((data) => {
         if (data && data[0]) {
-          this.mainChart.updateSeries([
-            {
-              data: this.mapData(data),
-            },
-          ]);
+          this.mainChart.updateSeries(this.chartSeries(data));
         }
       });
   },
@@ -190,6 +199,12 @@ enhydris.chart = {
       }],
       chart: {
         id: 'miniChart',
+        animations: {
+          /* We do not animate the mini chart because there's something wrong when
+           * there are missing values, probably a bug.
+           */
+          enabled: false,
+        },
         height: 100,
         type: 'area',
         brush: {
@@ -236,6 +251,9 @@ enhydris.chart = {
           },
         },
       },
+      legend: {
+        show: false,
+      },
     };
 
     this.miniChart = new ApexCharts(
@@ -247,6 +265,7 @@ enhydris.chart = {
 
   initializeMainChart() {
     const self = this;
+    const lightColor = '#CCCCCC';
     const grayColor = '#546E7A';
     const mainChartOption = {
       series: [{
@@ -288,7 +307,7 @@ enhydris.chart = {
           },
         },
       },
-      colors: [grayColor],
+      colors: [grayColor, lightColor, lightColor],
       stroke: {
         width: 2,
       },
@@ -318,8 +337,11 @@ enhydris.chart = {
         enabled: true,
         x: {
           show: true,
-          format: 'MMM dd, yyyy',
+          format: 'dd MMM yyyy HH:mm',
         },
+      },
+      legend: {
+        show: false,
       },
     };
     this.mainChart = new ApexCharts(
@@ -334,17 +356,9 @@ enhydris.chart = {
       .then((response) => response.json())
       .then((data) => {
         if (data && data[0]) {
-          const mappedData = this.mapData(data);
-          this.mainChart.updateSeries([
-            {
-              data: mappedData,
-            },
-          ]);
-          this.miniChart.updateSeries([
-            {
-              data: mappedData,
-            },
-          ]);
+          const series = this.chartSeries(data);
+          this.mainChart.updateSeries(series);
+          this.miniChart.updateSeries(series.filter((item) => item.name === 'mean'));
         } else {
           this.renderError();
         }

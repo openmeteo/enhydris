@@ -638,12 +638,12 @@ class TimeseriesDeleteTestCase(APITestCase):
 
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
-@patch("enhydris.api.views.TimeseriesViewSet._get_sampled_data_to_plot")
+@patch("enhydris.api.views.TimeseriesViewSet._get_stats_for_all_intervals")
 @patch("enhydris.models.Timeseries.get_data")
 class TimeseriesChartDateBoundsTestCase(APITestCase, TimeseriesDataMixin):
     def setUp(self):
         # "_get_sampled_data_to_plot" is mocked to avoid executing the actual logic of
-        # comparisions in the view, which would compare mocks; raising an exception
+        # comparisons in the view, which would compare mocks, raising an exception
         self.create_timeseries()
         self.url = (
             f"/api/stations/{self.station.id}/timeseriesgroups"
@@ -702,20 +702,30 @@ class TimeseriesChartTestMixin:
         data = response.json()
         tolerance_in_seconds = 86400 * tolerance_in_days
         for d, e in zip(data, expected):
-            self.assertAlmostEqual(d["value"], e["value"])
+            self.assertAlmostEqual(d["min"], e["min"])
+            self.assertAlmostEqual(d["max"], e["max"])
+            self.assertAlmostEqual(d["mean"], e["mean"])
             self.assertAlmostEqual(
                 d["timestamp"], e["date"].timestamp(), delta=tolerance_in_seconds
             )
 
+    def _value(self, yyyymmddhhmm, min, max, mean):
+        return {
+            "date": dt.datetime(*yyyymmddhhmm),
+            "min": min,
+            "max": max,
+            "mean": mean,
+        }
+
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
-@patch("enhydris.api.views.TimeseriesViewSet.CHART_MAXIMUM_NUMBER_OF_SAMPLES", new=20)
+@patch("enhydris.api.views.TimeseriesViewSet.CHART_MAX_INTERVALS", new=20)
 @patch("enhydris.models.Timeseries.get_data")
 class TimeseriesChartTestCase(
     APITestCase, TimeseriesDataMixin, TimeseriesChartTestMixin
 ):
     def create_timeseries(self):
-        # Create the timeseries so that we have 5 entries, one per year basically
+        # Create the timeseries so that we have 5 entries, one per year
         super().create_timeseries()
         self.htimeseries.data = pd.DataFrame(
             index=[dt.datetime(year, 1, 1) for year in range(2010, 2015)],
@@ -747,8 +757,11 @@ class TimeseriesChartTestCase(
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         expected = [
-            {"date": dt.datetime(year, 1, 1), "value": year}
-            for year in range(2010, 2015)
+            self._value((2010, 5, 27, 2, 24), min=2010, max=2010, mean=2010),
+            self._value((2011, 3, 15, 7, 12), min=2011, max=2011, mean=2011),
+            self._value((2012, 1, 1, 12, 0), min=2012, max=2012, mean=2012),
+            self._value((2012, 10, 19, 16, 48), min=2013, max=2013, mean=2013),
+            self._value((2013, 8, 7, 21, 36), min=2014, max=2014, mean=2014),
         ]
         self._assertChartResponse(response, expected)
 
@@ -757,16 +770,18 @@ class TimeseriesChartTestCase(
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         expected = [
-            {"date": dt.datetime(year, 1, 1), "value": year}
-            for year in range(2011, 2015)
+            self._value((2011, 5, 18, 0, 0), min=2011, max=2011, mean=2011),
+            self._value((2012, 2, 16, 0, 0), min=2012, max=2012, mean=2012),
+            self._value((2012, 11, 16, 0, 0), min=2013, max=2013, mean=2013),
+            self._value((2013, 8, 17, 0, 0), min=2014, max=2014, mean=2014),
         ]
         self._assertChartResponse(response, expected)
 
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
-@patch("enhydris.api.views.TimeseriesViewSet.CHART_MAXIMUM_NUMBER_OF_SAMPLES", new=3)
+@patch("enhydris.api.views.TimeseriesViewSet.CHART_MAX_INTERVALS", new=3)
 @patch("enhydris.models.Timeseries.get_data")
-class TimeseriesChartSamplingTestCase(
+class TimeseriesChartValuesTestCase(
     APITestCase, TimeseriesDataMixin, TimeseriesChartTestMixin
 ):
     def setUp(self):
@@ -781,16 +796,17 @@ class TimeseriesChartSamplingTestCase(
             f"/{self.timeseries_group.id}/timeseries/{self.timeseries.id}/chart/"
         )
 
-    def test_data_sampled_by_equal_time_distance(self, mock):
+    def test_simple(self, mock):
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         expected = [
-            {"date": dt.datetime(year, 1, 1), "value": year}
-            for year in [2010, 2015, 2020]
+            self._value((2011, 9, 1, 16, 0), min=2010, max=2013, mean=2011.5),
+            self._value((2015, 1, 1, 0, 0), min=2014, max=2016, mean=2015),
+            self._value((2018, 5, 2, 8, 0), min=2017, max=2020, mean=2018.5),
         ]
         self._assertChartResponse(response, expected)
 
-    def test_null_data(self, mock):
+    def test_null(self, mock):
         """Test that unspecified data points get a value of null.
 
         In this test we use this test time series:
@@ -798,9 +814,7 @@ class TimeseriesChartSamplingTestCase(
             2010-01-01 2010
             2011-01-01 2011
             2020-01-01 2020
-        When sampling occurs, 2010-01-01 will get the value 2010, 2015-01-01 will get
-        null, and 2020-01-01 will get 2020. This test is about checking the null in
-        2015-01-01.
+        In this case, the second interval should get min and max = None.
         """
         mock.return_value = self.htimeseries
         self.htimeseries.data = pd.DataFrame(
@@ -814,9 +828,9 @@ class TimeseriesChartSamplingTestCase(
         )
         response = self.client.get(self.url)
         expected = [
-            {"date": dt.datetime(2010, 1, 1), "value": 2010},
-            {"date": dt.datetime(2015, 1, 1), "value": None},
-            {"date": dt.datetime(2020, 1, 1), "value": 2020},
+            self._value((2011, 9, 1, 16, 0), min=2010, max=2011, mean=2010.5),
+            self._value((2015, 1, 1, 0, 0), min=None, max=None, mean=None),
+            self._value((2018, 5, 2, 8, 0), min=2020, max=2020, mean=2020),
         ]
         self._assertChartResponse(response, expected)
 

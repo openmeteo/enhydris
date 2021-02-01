@@ -15,7 +15,7 @@ from django_selenium_clean import PageElement
 from model_mommy import mommy
 from selenium.webdriver.common.by import By
 
-from enhydris.models import GentityFile, Organization, Station, Timeseries
+from enhydris.models import GentityFile, GentityImage, Organization, Station, Timeseries
 from enhydris.tests import TimeseriesDataMixin
 
 
@@ -116,6 +116,46 @@ class StationDetailTestCase(TestCase, TimeseriesDataMixin):
             f'<a href="/stations/{self.station.id}/timeseriesgroups'
             f'/{self.timeseries_group.id}/">Beauty</a>',
         )
+
+
+@override_settings(MEDIA_URL="/media/")
+class StationDetailImagesTestCase(TestCase):
+    def setUp(self):
+        self.station = mommy.make(Station)
+        self.image1 = self._create_image(descr="a", content="/image1.png")
+        self.image2 = self._create_image(descr="b", content="/image2.png")
+
+    def _create_image(self, descr, content):
+        return mommy.make(
+            GentityImage, gentity=self.station, descr=descr, content=content
+        )
+
+    def test_no_featured_image_when_no_image_is_featured(self):
+        response = self.client.get(f"/stations/{self.station.id}/")
+        soup = BeautifulSoup(response.content, "html.parser")
+        self.assertIsNone(soup.find("div", class_="featured-image"))
+
+    def test_first_image_when_no_image_is_featured(self):
+        response = self.client.get(f"/stations/{self.station.id}/")
+        soup = BeautifulSoup(response.content, "html.parser")
+        img = soup.find("div", class_="other-images").a.img
+        self.assertEqual(img["src"], "/media/image1.png")
+
+    def test_featured_image_is_featured(self):
+        self.image2.featured = True
+        self.image2.save()
+        response = self.client.get(f"/stations/{self.station.id}/")
+        soup = BeautifulSoup(response.content, "html.parser")
+        img = soup.find("div", class_="featured-image").a.img
+        self.assertEqual(img["src"], "/media/image2.png")
+
+    def test_first_non_featured_image_when_one_is_featured(self):
+        self.image2.featured = True
+        self.image2.save()
+        response = self.client.get(f"/stations/{self.station.id}/")
+        soup = BeautifulSoup(response.content, "html.parser")
+        img = soup.find("div", class_="other-images").a.img
+        self.assertEqual(img["src"], "/media/image1.png")
 
 
 @override_settings(LANGUAGE_CODE="en-gb", LANGUAGES={"en-gb": "English"})

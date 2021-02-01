@@ -207,7 +207,36 @@ class Garea(Gentity):
 #
 
 
-class GentityFile(models.Model):
+class RelatedStationMixin:
+    @property
+    def related_station(self):
+        try:
+            return Station.objects.get(id=self.gentity.id)
+        except Station.DoesNotExist:
+            return None
+
+
+class GentityImage(models.Model, RelatedStationMixin):
+    last_modified = models.DateTimeField(default=now, null=True, editable=False)
+    gentity = models.ForeignKey(Gentity, on_delete=models.CASCADE)
+    date = models.DateField(blank=True, null=True, verbose_name=_("Date"))
+    content = models.ImageField(upload_to="gentityfile", verbose_name=_("Content"))
+    descr = models.CharField(max_length=100, blank=True, verbose_name=_("Description"))
+    remarks = models.TextField(blank=True, verbose_name=_("Remarks"))
+    featured = models.BooleanField(default=False, verbose_name=_("Featured"))
+
+    class Meta:
+        verbose_name = _("Image")
+        verbose_name_plural = _("Images")
+        ordering = ("-featured", "date", "descr")
+
+    def __str__(self):
+        return (
+            self.descr or (self.date and self.date.date().isoformat()) or str(self.id)
+        )
+
+
+class GentityFile(models.Model, RelatedStationMixin):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
     gentity = models.ForeignKey(Gentity, on_delete=models.CASCADE)
     date = models.DateField(blank=True, null=True, verbose_name=_("Date"))
@@ -222,13 +251,6 @@ class GentityFile(models.Model):
 
     def __str__(self):
         return self.descr or str(self.id)
-
-    @property
-    def related_station(self):
-        try:
-            return Station.objects.get(id=self.gentity.id)
-        except Station.DoesNotExist:
-            return None
 
 
 class EventType(Lookup):
