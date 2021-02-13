@@ -11,3 +11,9 @@
 .inline-related h2 .collapse-toggle {
   color: #447e9b;
 }
+
+/* DJANGO ADMIN */
+
+.help {
+  max-width: 30em;
+}
