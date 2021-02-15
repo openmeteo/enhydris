@@ -168,7 +168,7 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
         return data_exists and submitted_data_exists and user_wants_to_append
 
     def _check_timeseries_for_appending(self, ahtimeseries):
-        if self.instance.end_date.replace(tzinfo=None) >= ahtimeseries.data.index[0]:
+        if self.instance.end_date.replace(tzinfo=None) >= ahtimeseries.data.index.min():
             raise forms.ValidationError(
                 _(
                     "Can't append; the first record of the time series to append is "

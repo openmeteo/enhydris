@@ -466,6 +466,17 @@ class TimeseriesUploadInvalidFileTestCase(TestCase, TestTimeseriesFormMixin):
         self.assertFalse(self.form.is_valid())
 
 
+class TimeseriesUploadAppendWithOverlapTestCase(TestCase, TestTimeseriesFormMixin):
+    def setUp(self):
+        self._create_test_timeseries(data="2005-11-01 18:00,3,\n2019-01-01 00:30,25,\n")
+
+    def test_append_badly_ordered_file_that_overlaps(self):
+        self._create_timeseries_inline_admin_form(
+            "APPEND", b"2019-01-02 00:30,42,\n2019-01-01 00:30,42,\n"
+        )
+        self.assertFalse(self.form.is_valid())
+
+
 class TimeseriesInlineAdminFormProcessWithoutFileTestCase(
     TestCase, TestTimeseriesFormMixin
 ):
