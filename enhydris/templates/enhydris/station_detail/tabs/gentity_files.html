@@ -9,7 +9,6 @@
         <tr>
           <th scope="col">{% trans 'ID' %}</th>
           <th scope="col">{% trans 'Date' %}</th>
-          <th scope="col">{% trans 'Content' %}</th>
           <th scope="col">{% trans 'Description' %}</th>
           <th scope="col">{% trans 'Remarks' %}</th>
           <th scope="col">{% trans 'Download' %}</th>
@@ -21,12 +20,11 @@
           <tr>
             <td>{{ file.id }}</td>
             <td>{{ file.date|date:"Y/m/d" }}</td>
-            <td>{{ file.content }}</td>
             <td>{{ file.descr }}</td>
             <td class="show-more"><p>{{ file.remarks }}</p></td>
             <td>
               {% if can_view_file_data %}
-                <a href="{% url 'file-content' station_id=station.id pk=file.id %}"><i class="glyphicon glyphicon-cloud-download"></i></a>
+                <a href="{% url 'file-content' station_id=station.id pk=file.id %}"><i class="bi bi-cloud-arrow-down"></i></a>
               {% else %}
                 {% trans "Unauthorized" %}
               {% endif %}
