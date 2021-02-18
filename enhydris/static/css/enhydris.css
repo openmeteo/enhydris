@@ -341,13 +341,14 @@ h4.tab-no-data {
   position: relative;
   z-index: 990;
 
+  display: flex;
+  align-items: center;
   margin-top: 30px;
   margin-right: auto;
   margin-left: auto;
 }
 
 .page-map-full .form-search {
-  width: 100%;
   margin: 0 auto;
 }
 
@@ -355,25 +356,10 @@ h4.tab-no-data {
   position: relative;
 }
 
-.form-search::before {
-  position: absolute;
-  top: 50%;
-  left: 18px;
-  content: "";
-
-  width: 18px;
-  height: 18px;
-  margin-top: -9px;
-
-  background-image: url("../images/icon-search.svg");
-  background-repeat: no-repeat;
-}
-
 .form-search input.form-control {
   width: 100%;
   height: 41px;
-  padding-right: 143px;
-  padding-left: 40px;
+  padding: 0 50px 0 15px;
 
   background-color: #fff;
   border: 2px solid #fff;
@@ -385,25 +371,41 @@ h4.tab-no-data {
   top: 2px;
   right: 2px;
 
-  padding-top: 7px;
-  padding-bottom: 7px;
+  min-width: 48px;
+  height: calc(100% - 4px);
 
   line-height: 23px;
   font-size: 18px;
 }
 
+.form-search button::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  content: "";
+
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  margin-left: -9px;
+
+  background-image: url("../images/icon-search.svg");
+  background-repeat: no-repeat;
+}
+
 .btn-station-list {
   position: relative;
 
-  display: block;
-  min-width: 252px;
-  margin: 20px auto 0;
-  padding-top: 9px;
-  padding-bottom: 12px;
-  padding-left: 50px;
+  min-width: 56px;
+  min-height: 36px;
+  padding-left: 46px;
 
   font-size: 14px;
   line-height: 19px;
+}
+
+.btn-station-list:hover {
+  opacity: 1;
 }
 
 .btn-station-list::before {
@@ -421,15 +423,13 @@ h4.tab-no-data {
 }
 
 .btn-searchtips {
-  position: absolute;
-  top: 10px;
-  right: -30px;
+  margin: 0 10px;
 
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 21px;
-  height: 21px;
+  width: 30px;
+  height: 30px;
 
   color: #fff;
   font-size: 16px;
