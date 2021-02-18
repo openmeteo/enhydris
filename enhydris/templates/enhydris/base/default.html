@@ -65,6 +65,12 @@
         enhydris.rootUrl = '{% url "station_list" %}';
       </script>
       <script src="{% static 'js/enhydris.js' %}"></script>
+      <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+      </script>
     {% endblock %}
 
     {% block extrajs %}{% endblock %}
