@@ -1,5 +1,6 @@
 {% extends "enhydris/base/main.html" %}
 {% load static %}
+{% load i18n %}
 
 {% block body_onload %}
   {{ block.super }};
@@ -14,6 +15,7 @@
       enhydris.mapDefaultBaseLayer = "{{ map_default_base_layer|safe }}";
       enhydris.mapViewport = {{ map_viewport|safe }};
       enhydris.searchString = {{ searchString|safe }};
+      enhydris.strStations = '{% trans "Stations" %}';
     </script>
   {% endblock %}
 {% endblock %}

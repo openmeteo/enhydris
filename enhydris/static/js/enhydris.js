@@ -42,7 +42,7 @@ enhydris.map = {
   setupStationsLayer() {
     this.stationsLayer = enhydris.stationsLayer.create();
     this.leafletMap.addLayer(this.stationsLayer);
-    this.layerControl.addOverlay(this.stationsLayer, 'Stations');
+    this.layerControl.addOverlay(this.stationsLayer, enhydris.strStations);
     this.stationsLayer.fillWithStations();
   },
 
