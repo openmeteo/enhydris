@@ -5,11 +5,15 @@
     <form class="form-inline form-search" action='{% url "station_list" %}' method="get">
       <label for="search_input" class="visually-hidden">{% trans "Search stations" %}</label>
       <input id="search_input" type="text" name="q" value="{{ query|escape }}" class="form-control">
-      <button class="btn custom-button btn-search" type="submit">{% trans "search" %}</button>
+
+        <button class="btn custom-button btn-search" type="submit">
+          <span class="visually-hidden">{% trans "search" %}</span>
+        </button>
+
     </form>
 
     <a href="#searchtips" class="btn-searchtips" data-toggle="modal" aria-label="Show searchtips">?</a>
 
-    <a id="limit-to-map" href="#" class="btn custom-button btn-station-list" onclick="enhydris.map.listStationsVisibleOnMap();">{% trans "list stations visible on map" %}</a>
+    <a id="limit-to-map" href="#" class="btn custom-button btn-station-list" data-bs-toggle="tooltip" data-bs-placement="top" title="{% trans 'list stations visible on map' %}" onclick="enhydris.map.listStationsVisibleOnMap();"></a>
   </div>
 {% endblock %}
