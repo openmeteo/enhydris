@@ -1,31 +1,31 @@
 {% load i18n %}
 
 <div id="gentity_events" class="tab-pane fade" aria-labelledby="gentity_events" role="tabpanel">
-  <h4 class="my-3 h5">{% trans 'Station (Gentity) Events' %}</h4>
   {% if station.gentityevent_set.count %}
-    <table class="table table-responsive table-hover">
+    <table class="table station-table">
+      <caption>{% trans 'Station (Gentity) Events' %}</caption>
       <thead>
         <tr>
-          <th scope="col">{% trans 'ID' %}</th>
-          <th scope="col">{% trans 'Date' %}</th>
-          <th scope="col">{% trans 'Type' %}</th>
-          <th scope="col">{% trans 'User' %}</th>
-          <th scope="col">{% trans 'Report' %}</th>
+          <th class="station-column-id">{% trans 'ID' %}</th>
+          <th class="station-column-date">{% trans 'Date' %}</th>
+          <th class="station-column-type">{% trans 'Type' %}</th>
+          <th class="station-column-user">{% trans 'User' %}</th>
+          <th class="station-column-report">{% trans 'Report' %}</th>
         </tr>
       </thead>
       <tbody>
         {% for event in station.gentityevent_set.all %}
           <tr>
-            <td>{{ event.id }}</td>
-            <td>{{ event.date|date:"Y/m/d" }}</td>
-            <td>{{ event.type }}</td>
-            <td>{{ event.user }}</td>
-            <td class="show-more"><p>{{ event.report }}</p></td>
+            <td class="station-column-id">{{ event.id }}</td>
+            <td class="station-column-date">{{ event.date|date:"Y/m/d" }}</td>
+            <td class="station-column-type">{{ event.type }}</td>
+            <td class="station-column-user">{{ event.user }}</td>
+            <td class="station-column-report show-more"><p>{{ event.report }}</p></td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
   {% else %}
-    <div class="alert alert-info" role="alert">{% trans "No data available" %}</div>
+    <div class="mt-4 alert alert-info" role="alert">{% trans 'No data available' %}</div>
   {% endif %}
 </div>

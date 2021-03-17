@@ -1,17 +1,13 @@
 {% load i18n %}
 
-<div class="row">
-  <div class="col-md-{% if station.overseer %}6{% else %}12{% endif %}">
-    {% blocktrans with owner=station.owner %}
-      <b>Owner:</b> {{owner}}
-    {% endblocktrans %}
-  </div>
+<div class="station-info-group">
+  {% blocktrans with owner=station.owner %}
+    <p><b>Owner:</b> {{owner}}</p>
+  {% endblocktrans %}
 
   {% if station.overseer %}
-    <div class="col-md-6">
-      {% blocktrans with overseer=station.overseer %}
-        <b>Overseer:</b> {{overseer}}
-      {% endblocktrans %}
-    </div>
+    {% blocktrans with overseer=station.overseer %}
+      <p><b>Overseer:</b> {{overseer}}</p>
+    {% endblocktrans %}
   {% endif %}
 </div>

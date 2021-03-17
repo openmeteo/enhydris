@@ -2,29 +2,38 @@
 
 <div id="timeseries_groups" class="tab-pane fade show active" role="tabpanel" aria-labelledby="timeseries_groups">
   {% if station.timeseriesgroup_set.count %}
-    <table class="table table-hover table-station-detail">
+    <table class="table station-table">
+      <caption>{% trans 'Station Information:' %}</caption>
+      <thead>
+        <tr>
+          <th class="station-column-id">{% trans 'ID' %}</th>
+          <th class="station-column-desc">{% trans 'Parameters' %}</th>
+          <th class="station-column-date">{% trans 'Start date' %}</th>
+          <th class="station-column-date">{% trans 'End date' %}</th>
+          <th class="station-column-blank"></th>
+        </tr>
+      </thead>
       <tbody>
         {% for tg in station.timeseriesgroup_set.all %}
           {% if not tg.hidden %}
             {% with tg.id as tg_id %}
               {% url "timeseries_group_detail" tg_id as timeseries_group_url %}
               <tr>
-                <td class="p-0">
-                  <a href="{% url 'timeseries_group_detail' station_id=station.id pk=tg_id %}">id={{ tg_id }}</a>
-                </td>
-                <td class="p-0">
+                <td class="station-column-id">{{ tg_id }}</td>
+                <td class="station-column-desc">
                   <a href="{% url 'timeseries_group_detail' station_id=station.id pk=tg_id %}">{% if tg.name %}"{{ tg.name }}"{% endif %}</a>
                 </td>
-                <td class="p-0">
-                  <a href="{% url 'timeseries_group_detail' station_id=station.id pk=tg_id %}">{{ tg.variable }}</a>
+                <td class="station-column-date">
+                  {% if tg.start_date_naive and tg.end_date_naive %}
+                    {{ tg.start_date_naive|date:"SHORT_DATE_FORMAT" }}
+                  {% endif %}
                 </td>
-                <td class="p-0">
-                  <a href="{% url 'timeseries_group_detail' station_id=station.id pk=tg_id %}">
-                    {% if tg.start_date_naive and tg.end_date_naive %}
-                      {{ tg.start_date_naive|date:"SHORT_DATE_FORMAT" }} — {{ tg.end_date_naive|date:"SHORT_DATETIME_FORMAT" }}
-                    {% endif %}
-                  </a>
+                <td class="station-column-date">
+                  {% if tg.start_date_naive and tg.end_date_naive %}
+                    {{ tg.end_date_naive|date:"SHORT_DATETIME_FORMAT" }}
+                  {% endif %}
                 </td>
+                <td class="station-column-blank"></td>
               </tr>
             {% endwith %}
           {% endif %}
@@ -32,6 +41,6 @@
       </tbody>
     </table>
   {% else %}
-    <p class="tab-no-data">{% trans "No data exist" %}<p>
+    <div class="mt-4 alert alert-info" role="alert">{% trans 'No data exist' %}</div>
   {% endif %}
 </div>

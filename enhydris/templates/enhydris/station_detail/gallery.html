@@ -1,0 +1,86 @@
+{% load i18n %}
+
+<div class="swiper-container gallery-top">
+  <div class="swiper-wrapper">
+    {% if object.gentityimage_set.first.featured %}
+      {% with img=object.gentityimage_set.first %}
+        <div class="swiper-slide">
+          <img src="{{ img.content.url }}" width="100%" height="auto" alt="{{ img.descr }}">
+        </div>
+      {% endwith %}
+
+      {% for img in object.gentityimage_set.all %}
+        {% if not forloop.first %}
+          <div class="swiper-slide">
+            <img src="{{ img.content.url }}" width="100%" height="auto" alt="{{ img.descr }}">
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      {% for img in object.gentityimage_set.all %}
+        <div class="swiper-slide">
+          <img src="{{ img.content.url }}" width="100%" height="auto" alt="{{ img.descr }}">
+        </div>
+      {% endfor %}
+    {% endif %}ff
+  </div>
+</div>
+
+<div class="swiper-container gallery-thumbs">
+  <div class="swiper-wrapper">
+    {% if object.gentityimage_set.first.featured %}
+      {% with img=object.gentityimage_set.first %}
+        <div class="swiper-slide">
+          <img src="{{ img.content.url }}" width="100%" height="auto" alt="{{ img.descr }}">
+        </div>
+      {% endwith %}
+      {% for img in object.gentityimage_set.all %}
+        {% if not forloop.first %}
+          <div class="swiper-slide">
+            <img src="{{ img.content.url }}" width="100%" height="auto" alt="{{ img.descr }}">
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      {% for img in object.gentityimage_set.all %}
+        <div class="swiper-slide">
+          <img src="{{ img.content.url }}" width="100%" height="auto" alt="{{ img.descr }}">
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
+
+<!--
+<div id="gentity_images" class="swiper-container gallery-top">
+  <div class="swiper-wrapper">
+    {% if object.gentityimage_set.first.featured %}
+      {% with img=object.gentityimage_set.first %}
+        <div class="swiper-slide">
+          <a href="{{ img.content.url }}">
+            <img src="{{ img.content.url }}" width="100%" height="auto" alt="{{ img.descr }}">
+          </a>
+        </div>
+      {% endwith %}
+
+      {% for img in object.gentityimage_set.all %}
+        {% if not forloop.first %}
+          <div class="swiper-slide">
+            <a href="{{ img.content.url }}">
+              <img src="{{ img.content.url }}" width="100%" height="auto" alt="{{ img.descr }}">
+            </a>
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      {% for img in object.gentityimage_set.all %}
+        <div class="swiper-slide">
+          <a href="{{ img.content.url }}">
+            <img src="{{ img.content.url }}" width="100%" height="auto" alt="{{ img.descr }}">
+          </a>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>-->

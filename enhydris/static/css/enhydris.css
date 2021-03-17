@@ -14,6 +14,8 @@ body {
   cursor: not-allowed;
 }
 
+/* BUTTONS */
+
 .custom-button {
   text-align: center;
   font-weight: 700;
@@ -35,6 +37,29 @@ body {
 
   opacity: 0.5;
 }
+
+/* ICONS */
+
+.icon-download {
+  position: relative;
+
+  text-align: center;
+}
+
+.icon-download::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  content: "";
+
+  width: 24px;
+  height: 24px;
+
+  background-image: url("../images/icon-download.svg");
+  background-repeat: no-repeat;
+}
+
+/* DROPDOWNS */
 
 .language-picker .dropdown-toggle {
   font-size: 18px;
@@ -125,12 +150,12 @@ h4.tab-no-data {
   white-space: normal;
 }
 
-.page-map-full .leaflet-control-container .leaflet-top {
+.leaflet-control-container .leaflet-top {
   top: 120px !important; /* Overrides positioning of tools on map to be displayed under page header  */
 }
 
 @media (max-width: 991px) {
-  .page-map-full .leaflet-control-container .leaflet-top {
+  .leaflet-control-container .leaflet-top {
     top: 70px !important; /* Overrides positioning of tools on map to be displayed under page header */
   }
 
@@ -154,7 +179,7 @@ h4.tab-no-data {
 
 /* HEADER */
 
-.page-map-full .page-header {
+.page-header {
   position: absolute;
   top: 0;
   left: 0;
@@ -319,18 +344,6 @@ h4.tab-no-data {
 }
 
 /* MAIN > search form */
-
-.page-main .table-station-detail tr:first-child td {
-  border-top: none;
-}
-
-.page-main .table-station-detail a {
-  display: block;
-  width: 100%;
-  padding: 0.75rem;
-
-  color: #333;
-}
 
 .search-result + .form-search-wrapper {
   margin-left: 15.65%;
@@ -720,26 +733,273 @@ h4.tab-no-data {
   color: #0056b3;
 }
 
-.table-station-detail a:hover {
-  color: #333;
-  text-decoration: none;
+/* STATION MAP */
+
+.station-map {
+  height: 515px;
 }
 
-@media (max-width: 767px) {
-  .table-station-detail tr {
-    display: flex;
-    flex-direction: column;
-  }
+.station-map #mapid {
+  height: 100%;
+}
 
-  .table-station-detail td {
-    border: none
-  }
+/* STATION INFO */
 
-  .table-station-detail td:last-child {
-    border-bottom: 1px solid #dee2e6;
-  }
+.station-info {
+  position: relative;
+}
 
-  .table-station-detail td:not(:first-child) a {
-    padding-top: 0;
-  }
+.station-info-header {
+  position: absolute;
+  top: -89px;
+  right: 50px;
+  left: 50px;
+  z-index: 1000;
+
+  padding-top: 30px;
+  padding-bottom: 10px;
+
+  text-align: center;
+
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
+  background-color: #ffffff;
+}
+
+.station-info-header h1 {
+  margin: 0;
+
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.station-info-header div {
+  font-size: 14px;
+  color: #828282;
+}
+
+.station-info-main {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+/* GALLERY */
+
+.station-gallery-wrapper {
+  max-width: 530px;
+  margin-right: 40px;
+}
+
+.station-text-wrapper + .station-gallery-wrapper {
+  order: -1;
+}
+
+.swiper-container {
+  width: 100%;
+  height: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.gallery-top {
+  height: 80%;
+  width: 100%;
+}
+
+.gallery-thumbs {
+  height: 20%;
+  box-sizing: border-box;
+  padding: 10px 0;
+}
+
+.gallery-thumbs .swiper-slide {
+  width: 25%;
+  height: 100%;
+  opacity: 0.4;
+}
+
+.gallery-thumbs .swiper-slide-thumb-active {
+  opacity: 1;
+}
+
+/* TEXT */
+
+.station-info-group {
+  margin-bottom: 15px;
+}
+
+.station-info-group p {
+  margin: 0;
+  margin-bottom: 3px;
+
+  font-size: 16px;
+  color: #333333;
+}
+
+.station-info-group > p:last-child {
+  margin-bottom: 0;
+}
+
+.btn-station-edit {
+  background-color: #2f80ed;
+}
+
+.btn-station-edit:hover {
+  background-color: #2f80ed;
+  opacity: 0.7;
+}
+
+/* STATION ADDITIONAL */
+
+.station-info-additional {
+  margin-top: 35px;
+  color: #333333;
+}
+
+/* TABS */
+
+.station-info-additional .nav-tabs {
+  border: none;
+}
+
+.station-info-additional .nav-tabs .nav-item {
+  margin-right: 3px;
+}
+
+.station-info-additional .nav-tabs .nav-item:last-child {
+  margin-right: 0;
+}
+
+.station-info-additional .nav-tabs .nav-link {
+  min-width: 175px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #bdbdbd;
+
+  border: none;
+  border-bottom: 3px solid #bdbdbd;
+}
+
+.station-info-additional .nav-tabs .nav-link:hover {
+  opacity: 0.7;
+}
+
+.station-info-additional .nav-tabs .nav-link:active {
+  opacity: 0.3;
+}
+
+.station-info-additional .nav-tabs .nav-link.active {
+  color: #2f80ed;
+
+  border-color: #2f80ed;
+  cursor: default;
+}
+
+.station-info-additional .nav-tabs .nav-link.active:hover,
+.station-info-additional .nav-tabs .nav-link.active:active {
+  opacity: 1;
+}
+
+/* TABLE */
+
+.station-table {
+  table-layout: fixed;
+}
+
+.station-table caption {
+  padding-top: 25px;
+  padding-bottom: 35px;
+
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 700;
+  color: #333333;
+
+  caption-side: top;
+}
+
+.station-table .station-column-id {
+  width: 6%;
+}
+
+.station-table .station-column-date {
+  width: 18%;
+}
+
+.station-table .station-column-id + .station-column-date {
+  width: 9%;
+}
+
+.station-table .station-column-desc {
+  width: 28%;
+}
+
+.station-table .station-column-download {
+  width: 7%;
+
+  text-align: center;
+}
+
+.station-table .station-column-report {
+  width: 34%;
+}
+
+.station-table .station-column-user {
+  width: 18%;
+}
+
+.station-table .station-column-type {
+  width: 27%;
+}
+
+.station-table .station-column-blank {
+  width: auto;
+}
+
+.station-table thead th {
+  padding: 0 0 20px 0;
+
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 25px;
+  color: #333333;
+
+  border: none;
+}
+
+.station-table td {
+  padding: 9px 0;
+
+  font-size: 18px;
+  line-height: 25px;
+  color: #333333;
+
+  border: none;
+}
+
+.station-info-additional .station-table a {
+  display: inline;
+  padding: 0;
+
+  color: #2f80ed;
+  text-decoration: underline;
+}
+
+.station-info-additional .station-table a:hover {
+  text-decoration: none;
+
+  opacity: 0.7;
+}
+
+.station-info-additional .station-table a:active {
+  opacity: 0.3;
+}
+
+.station-table .station-column-download .icon-download::before {
+  left: -12px;
 }

@@ -9,7 +9,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     {% block basecss %}
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" integrity="sha512-oc9+XSs1H243/FRN9Rw62Fn8EtxjEYWHXRvjS43YtueEewbS6ObfXcJNyohjHqVKFPoXXUxwc+q1K7Dee6vv9g==" crossorigin="anonymous" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap.min.css" integrity="sha512-oc9+XSs1H243/FRN9Rw62Fn8EtxjEYWHXRvjS43YtueEewbS6ObfXcJNyohjHqVKFPoXXUxwc+q1K7Dee6vv9g==" crossorigin="anonymous">
+      {% if object.gentityimage_set.exists %}
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/6.4.15/swiper-bundle.min.css" integrity="sha512-uA1+kHA/0O68FTSM4jeTzJNnRvNWxdCCSnE3gv8LaySXYxQT3nc5uPX9buMPtI1gxUBcxm0+5Lcw59jjl0nMDQ==" crossorigin="anonymous">
+      {% endif %}
       <link href="{% static 'css/enhydris.css' %}" rel="stylesheet">
       <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" rel="stylesheet" media="screen">
       <link href="{% static 'css/vendor/L.Control.MousePosition.css' %}" rel="stylesheet">
@@ -64,6 +67,25 @@
         enhydris.staticUrl = '{% static "" %}';
         enhydris.rootUrl = '{% url "station_list" %}';
       </script>
+      {% if object.gentityimage_set.exists %}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/6.4.15/swiper-bundle.min.js" integrity="sha512-NahckN+grB6fSxu3vQdKiyC69swjW6+xYUjaPVWTGtRuia8zUIlw2gkgjhZmAd8lAECEHV3HdCudarnAZaWkZw==" crossorigin="anonymous"></script>
+        <script>
+          var galleryThumbs = new Swiper('.gallery-thumbs', {
+            spaceBetween: 20,
+            slidesPerView: 3,
+            freeMode: true,
+            watchSlidesVisibility: true,
+            watchSlidesProgress: true,
+          });
+          var galleryTop = new Swiper('.gallery-top', {
+            autoHeight: true,
+            spaceBetween: 10,
+            thumbs: {
+              swiper: galleryThumbs
+            }
+          });
+        </script>
+      {% endif %}
       <script src="{% static 'js/enhydris.js' %}"></script>
       <script>
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));

@@ -8,53 +8,65 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container mt-4">
-    <div class="row flex-column px-3 px-sm-0">
-      <h1 class="h3">{{ station.name }}</h1>
-    </div>
 
-    <div class="row">
-      <div class="col-md-4">
-        {% include "enhydris/station_detail/map.html" %}
+  <section class="station-detail">
+    {% include "enhydris/station_detail/map.html" %}
+
+    <div class="container station-info">
+      <div class="station-info-header">
+        <h1>{{ station.name }}</h1>
+        <div>
+          ϕ, λ = {{ station.geom.y | floatformat:5 }}, {{ station.geom.x | floatformat:5 }}
+          {% if station.original_srid != 4326 %}
+          <p>
+            {% blocktrans with srid=station.original_srid x=station.original_abscissa y=station.original_ordinate %}
+              (originally srid={{ srid }}, x={{ x }}, y={{ y }})
+            {% endblocktrans %}
+          </p>
+          {% endif %}
+          {% if station.altitude != None %}
+            z = {{ station.altitude|floatformat:2 }}
+          {% endif %}
+        </div>
       </div>
 
-      <div class="col-md-8 mt-4 mt-md-0">
-        {% include "enhydris/station_detail/details.html" %}
-        {% has_perm "enhydris.change_station" request.user station as can_edit_station %}
-        {% if can_edit_station %}
-          <a class="btn btn-xs btn-primary" href="{% url 'station_edit' pk=station.id%}">{% trans "Edit" %}</a>
+      <div class="station-info-main">
+        <div class="station-text-wrapper">
+          {% include "enhydris/station_detail/details.html" %}
+          {% has_perm "enhydris.change_station" request.user station as can_edit_station %}
+          {% if can_edit_station %}
+            <a class="btn btn-station-edit" href="{% url 'station_edit' pk=station.id%}">{% trans "Edit" %}</a>
+          {% endif %}
+        </div>
+
+        {% if object.gentityimage_set.exists %}
+          <div class="station-gallery-wrapper">
+            {% include "enhydris/station_detail/gallery.html" %}
+          </div>
         {% endif %}
       </div>
-    </div>
 
-    <hr>
-  </div>
+      <div id="content" class="station-info-additional">
+        <ul id="tabs" class="nav nav-tabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a class="nav-link active" href="#timeseries_groups" data-toggle="tab" aria-controls="timeseries" role="tab" aria-selected="true">{% trans "Data" %}</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" href="#gentity_files" data-toggle="tab" aria-controls="gentity_files" role="tab" aria-selected="false">{% trans "Files" %} (2)</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" href="#gentity_events" data-toggle="tab" aria-controls="gentity_events" role="tab" aria-selected="false">{% trans "Events" %} (1)</a>
+          </li>
+        </ul>
 
-  <div class="container mt-5">
-    <div id="content">
-      <ul id="tabs" class="nav nav-tabs" role="tablist">
-        <li class="nav-item" role="presentation">
-          <a class="nav-link active" href="#timeseries_groups" data-toggle="tab" aria-controls="timeseries" role="tab" aria-selected="true">{% trans "Data" %}</a>
-        </li>
-        <li class="nav-item" role="presentation">
-          <a class="nav-link" href="#gentity_files" data-toggle="tab" aria-controls="gentity_files" role="tab" aria-selected="false">{% trans "Files" %}</a>
-        </li>
-        <li class="nav-item" role="presentation">
-          <a class="nav-link" href="#gentity_events" data-toggle="tab" aria-controls="gentity_events" role="tab" aria-selected="false">{% trans "Events" %}</a>
-        </li>
-        <li class="nav-item" role="presentation">
-          <a class="nav-link" href="#gentity_images" data-toggle="tab" aria-control="gentity_images" role="tab" aria-selected="false">{% trans "Gallery" %}</a>
-        </li>
-      </ul>
-
-      <div class="tab-content">
-        {% include "enhydris/station_detail/tabs/gentity_files.html" %}
-        {% include "enhydris/station_detail/tabs/gentity_events.html" %}
-        {% include "enhydris/station_detail/tabs/timeseries_groups.html" %}
-        {% include "enhydris/station_detail/tabs/gallery.html" %}
+        <div class="tab-content">
+          {% include "enhydris/station_detail/tabs/gentity_files.html" %}
+          {% include "enhydris/station_detail/tabs/gentity_events.html" %}
+          {% include "enhydris/station_detail/tabs/timeseries_groups.html" %}
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 {% endblock %}
 
 {% block map_js %}
