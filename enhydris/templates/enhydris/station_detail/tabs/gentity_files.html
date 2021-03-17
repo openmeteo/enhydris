@@ -4,7 +4,6 @@
 <div id="gentity_files" class="tab-pane fade" aria-labelledby="gentity_files" role="tabpanel">
   {% if station.gentityfile_set.count %}
     <table class="table station-table">
-      <caption>{% trans 'Station (Gentity) Files:' %}</caption>
       <thead>
         <tr>
           <th class="station-column-id">{% trans 'ID' %}</th>
@@ -18,12 +17,22 @@
         {% for file in station.gentityfile_set.all %}
           {% has_perm "enhydris.view_gentityfile_content" request.user file as can_view_file_data %}
           <tr>
-            <td class="station-column-id">{{ file.id }}</td>
-            <td class="station-column-desc">{{ file.descr }}</td>
-            <td class="station-column-date">{{ file.date|date:"SHORT_DATETIME_FORMAT" }}</td>
+            <td class="station-column-id">
+              <span class="station-cell-title">{% trans 'ID' %}</span>
+              <span>{{ file.id }}</span>
+            </td>
+            <td class="station-column-desc">
+              <span class="station-cell-title">{% trans 'Description' %}</span>
+              <span>{{ file.descr }}</span>
+            </td>
+            <td class="station-column-date">
+              <span class="station-cell-title">{% trans 'Upload date' %}</span>
+              <span>{{ file.date|date:"SHORT_DATETIME_FORMAT" }}</span>
+            </td>
             <td class="station-column-download">
+              <span class="station-cell-title">{% trans 'Download' %}</span>
               {% if can_view_file_data %}
-              <a href="{% url 'file-content' station_id=station.id pk=file.id %}" aria-label="{% trans 'Download' %}"><i class="icon-download"></i></a>
+                <a href="{% url 'file-content' station_id=station.id pk=file.id %}" aria-label="{% trans 'Download' %}"><i class="icon-download"></i></a>
               {% else %}
                 {% trans 'Unauthorized' %}
               {% endif %}

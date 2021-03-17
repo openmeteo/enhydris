@@ -3,11 +3,10 @@
 <div id="timeseries_groups" class="tab-pane fade show active" role="tabpanel" aria-labelledby="timeseries_groups">
   {% if station.timeseriesgroup_set.count %}
     <table class="table station-table">
-      <caption>{% trans 'Station Information:' %}</caption>
       <thead>
         <tr>
           <th class="station-column-id">{% trans 'ID' %}</th>
-          <th class="station-column-desc">{% trans 'Parameters' %}</th>
+          <th class="station-column-desc">{% trans 'Name' %}</th>
           <th class="station-column-date">{% trans 'Start date' %}</th>
           <th class="station-column-date">{% trans 'End date' %}</th>
           <th class="station-column-blank"></th>
@@ -19,19 +18,29 @@
             {% with tg.id as tg_id %}
               {% url "timeseries_group_detail" tg_id as timeseries_group_url %}
               <tr>
-                <td class="station-column-id">{{ tg_id }}</td>
+                <td class="station-column-id">
+                  <span class="station-cell-title">{% trans 'ID' %}</span>
+                  <span>{{ tg_id }}</span>
+                </td>
                 <td class="station-column-desc">
-                  <a href="{% url 'timeseries_group_detail' station_id=station.id pk=tg_id %}">{% if tg.name %}"{{ tg.name }}"{% endif %}</a>
+                  <span class="station-cell-title">{% trans 'Name' %}</span>
+                  <a href="{% url 'timeseries_group_detail' station_id=station.id pk=tg_id %}">{% if tg.name %}{{ tg.name }}{% endif %}</a>
                 </td>
                 <td class="station-column-date">
-                  {% if tg.start_date_naive and tg.end_date_naive %}
-                    {{ tg.start_date_naive|date:"SHORT_DATE_FORMAT" }}
-                  {% endif %}
+                  <span class="station-cell-title">{% trans 'Start date' %}</span>
+                  <span>
+                    {% if tg.start_date_naive and tg.end_date_naive %}
+                      {{ tg.start_date_naive|date:"Y/m/d H:i"  }}
+                    {% endif %}
+                  </span>
                 </td>
                 <td class="station-column-date">
-                  {% if tg.start_date_naive and tg.end_date_naive %}
-                    {{ tg.end_date_naive|date:"SHORT_DATETIME_FORMAT" }}
-                  {% endif %}
+                  <span class="station-cell-title">{% trans 'End date' %}</span>
+                  <span>
+                    {% if tg.start_date_naive and tg.end_date_naive %}
+                      {{ tg.end_date_naive|date:"Y/m/d H:i" }}
+                    {% endif %}
+                  </span>
                 </td>
                 <td class="station-column-blank"></td>
               </tr>

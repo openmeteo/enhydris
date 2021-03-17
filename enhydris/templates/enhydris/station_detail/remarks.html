@@ -1,5 +1,5 @@
-<div class="station-info-group">
-  {% if station.remarks %}
-    <div><b>Station description:</b> {{ station.remarks|linebreaks }}</div>
-  {% endif %}
-</div>
+{% if station.remarks %}
+  <div class="station-info-group station-info-remarks">
+    {{ station.remarks|linebreaks }}
+  </div>
+{% endif %}

@@ -14,15 +14,21 @@
 
     <div class="container station-info">
       <div class="station-info-header">
-        <h1>{{ station.name }}</h1>
+        <div class="station-title-wrapper">
+          <h1>{{ station.name }}</h1>
+          {% has_perm "enhydris.change_station" request.user station as can_edit_station %}
+          {% if can_edit_station %}
+            <a class="btn btn-station-edit" href="{% url 'station_edit' pk=station.id%}"></a>
+          {% endif %}
+        </div>
         <div>
           ϕ, λ = {{ station.geom.y | floatformat:5 }}, {{ station.geom.x | floatformat:5 }}
           {% if station.original_srid != 4326 %}
-          <p>
-            {% blocktrans with srid=station.original_srid x=station.original_abscissa y=station.original_ordinate %}
-              (originally srid={{ srid }}, x={{ x }}, y={{ y }})
-            {% endblocktrans %}
-          </p>
+            <p>
+              {% blocktrans with srid=station.original_srid x=station.original_abscissa y=station.original_ordinate %}
+                (originally srid={{ srid }}, x={{ x }}, y={{ y }})
+              {% endblocktrans %}
+            </p>
           {% endif %}
           {% if station.altitude != None %}
             z = {{ station.altitude|floatformat:2 }}
@@ -31,19 +37,20 @@
       </div>
 
       <div class="station-info-main">
-        <div class="station-text-wrapper">
-          {% include "enhydris/station_detail/details.html" %}
-          {% has_perm "enhydris.change_station" request.user station as can_edit_station %}
-          {% if can_edit_station %}
-            <a class="btn btn-station-edit" href="{% url 'station_edit' pk=station.id%}">{% trans "Edit" %}</a>
-          {% endif %}
-        </div>
-
         {% if object.gentityimage_set.exists %}
-          <div class="station-gallery-wrapper">
-            {% include "enhydris/station_detail/gallery.html" %}
+          <div class="station-image-wrapper">
+            {% include "enhydris/station_detail/station-image.html" %}
           </div>
         {% endif %}
+
+        <div class="station-text-wrapper">
+          {% include "enhydris/station_detail/details.html" %}
+          {% if object.gentityimage_set.exists %}
+            <div class="station-gallery-wrapper">
+              {% include "enhydris/station_detail/station-gallery.html" %}
+            </div>
+          {% endif %}
+        </div>
       </div>
 
       <div id="content" class="station-info-additional">

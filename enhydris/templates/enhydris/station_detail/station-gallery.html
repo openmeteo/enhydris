@@ -1,0 +1,16 @@
+{% load i18n %}
+
+<div class="swiper-container swiper-station">
+  <div class="swiper-wrapper">
+    {% for img in object.gentityimage_set.all %}
+      {% if not forloop.first %}
+        <a class="swiper-slide" href="{{ img.content.url }}">
+          <img src="{{ img.content.url }}" width="100%" height="auto" alt="{{ img.descr }}">
+        </a>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="swiper-button-next"></div>
+  <div class="swiper-button-prev"></div>
+</div>

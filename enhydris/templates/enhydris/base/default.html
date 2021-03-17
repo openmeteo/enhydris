@@ -70,18 +70,19 @@
       {% if object.gentityimage_set.exists %}
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/6.4.15/swiper-bundle.min.js" integrity="sha512-NahckN+grB6fSxu3vQdKiyC69swjW6+xYUjaPVWTGtRuia8zUIlw2gkgjhZmAd8lAECEHV3HdCudarnAZaWkZw==" crossorigin="anonymous"></script>
         <script>
-          var galleryThumbs = new Swiper('.gallery-thumbs', {
-            spaceBetween: 20,
-            slidesPerView: 3,
-            freeMode: true,
-            watchSlidesVisibility: true,
-            watchSlidesProgress: true,
-          });
-          var galleryTop = new Swiper('.gallery-top', {
-            autoHeight: true,
-            spaceBetween: 10,
-            thumbs: {
-              swiper: galleryThumbs
+          var galleryStation = new Swiper('.swiper-container', {
+            slidesPerView: 'auto',
+            navigation: {
+              nextEl: '.swiper-button-next',
+              prevEl: '.swiper-button-prev',
+            },
+            breakpoints: {
+              768: {
+                spaceBetween: 20,
+              },
+              320: {
+                spaceBetween: 15,
+              }
             }
           });
         </script>
