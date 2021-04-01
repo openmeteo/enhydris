@@ -39,13 +39,17 @@ class StationSortByReverseNameTestCase(APITestCase):
         self.assertEqual(self.response.json()["results"][0]["name"], "Rivendell")
 
 
-class StationSortWithInvalidAndDuplicateFieldsTestCase(APITestCase):
-    @patch(
-        "django.db.models.query.QuerySet.order_by",
-        return_value=models.Station.objects.none(),
-    )
+@patch(
+    "django.db.models.query.QuerySet.order_by",
+    return_value=models.Station.objects.none(),
+)
+class StationSortWithInvalidParametersTestCase(APITestCase):
     def test_invalid_and_duplicate_fields_are_removed(self, m):
         self.client.get(
             "/api/stations/?sort=-name&sort=name&sort=nonexistent&sort=remarks"
         )
         m.assert_called_once_with("-name", "remarks")
+
+    def test_empty_sort_field_is_ignored(self, m):
+        self.client.get("/api/stations/?sort=")
+        m.assert_not_called()
