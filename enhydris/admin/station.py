@@ -285,7 +285,6 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
                 {
                     "fields": (
                         ("name", "code"),
-                        "is_automatic",
                         "owner",
                         ("geom", "original_srid"),
                         "altitude",

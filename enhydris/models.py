@@ -297,7 +297,6 @@ class Station(Gpoint):
         on_delete=models.CASCADE,
         verbose_name=pgettext_lazy("Entity that owns the station", "Owner"),
     )
-    is_automatic = models.BooleanField(default=False, verbose_name=_("Is automatic"))
     start_date = models.DateField(
         null=True,
         blank=True,

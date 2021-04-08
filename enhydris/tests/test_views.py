@@ -99,6 +99,12 @@ class StationListTestCase(TestCase):
         response = self.client.get("/?q=t")
         self.assertNotContains(response, "<a href='?page=2'>2</a>", html=True)
 
+    @override_settings(ENHYDRIS_MAP_DEFAULT_VIEWPORT=(1.1, 2.2, 3.3, 4.4))
+    def test_default_map_viewport_when_given_as_a_tuple(self):
+        Station.objects.all().delete()
+        response = self.client.get("/")
+        self.assertContains(response, "enhydris.mapViewport = [1.1, 2.2, 3.3, 4.4]")
+
 
 class StationDetailTestCase(TestCase, TimeseriesDataMixin):
     def setUp(self):

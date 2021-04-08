@@ -23,12 +23,6 @@ licenses for more details.
 You should have received a copy of the license along with this
 program.  If not, see http://www.gnu.org/licenses/.
 
-The database of Enhydris was originally written by Antonis
-Christofides of the National Technical University of Athens.  The rest
-of Enhydris was originally developed by Andreas Loupasakis and
-Seraphim Mellos of Indifex_. Other contributors are Stefanos Kozanis and
-Stavros Anastasiadis.
-
 Enhydris was funded by several organizations:
 
 * From 2005 to 2015 by NTUA_ (Antonis Christofides was an employee and worked
@@ -37,8 +31,8 @@ Enhydris was funded by several organizations:
   Hydroscope_ project.
 * In 2013-2014 by the `TEI of Epirus`_ as part of the IRMA_ project.
 * In 2015 by GRNET_ as an open technology project.
+* In 2018-2021 by NTUA_ and ICCS_ as part of the OpenHi_ project.
 
-.. _indifex: http://indifex.com/
 .. _ntua: http://www.ntua.gr/
 .. _itia: http://www.itia.ntua.gr/
 .. _ministry of environment: http://ypeka.gr/
@@ -46,3 +40,5 @@ Enhydris was funded by several organizations:
 .. _tei of epirus: http://www.teiep.gr/en/
 .. _irma: http://www.irrigation-management.eu/
 .. _grnet: https://edet.gr/en
+.. _iccs: https://www.iccs.gr
+.. _openhi: https://openhi.net

@@ -15,7 +15,6 @@ _station_list_csv_headers = [
     "SRID",
     "Altitude",
     "SRID",
-    "Automatic",
     "Remarks",
     "Last modified",
 ]
@@ -33,7 +32,6 @@ def _station_csv(s):
         s.original_ordinate(),
         s.original_srid,
         s.altitude,
-        s.is_automatic,
         s.remarks,
         s.last_modified,
     ]

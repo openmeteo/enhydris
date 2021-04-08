@@ -299,6 +299,7 @@ Other changes
 - Stations can now only have a single overseer, specified as a text
   field. Upgrading will convert as needed, and it will also delete any
   unreferenced Person objects.
+- The field ``Station.is_automatic`` has been abolished.
 - The database fields ``copyright_years`` and ``copyright_holder`` have
   been abolished. The database upgrade will remove them and any
   information stored in them will be lost. Accordingly, the setting

@@ -249,10 +249,6 @@ Station and its related models
 
       The :class:`~enhydris.models.Lentity` that owns the station.
 
-   .. attribute:: enhydris.models.Station.is_automatic
-
-      A boolean field showing whether the station is automatic.
-
    .. attribute:: enhydris.models.Station.start_date
                   enhydris.models.Station.end_date
 

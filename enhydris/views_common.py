@@ -61,7 +61,8 @@ class StationListViewMixin:
         result = self._get_unsorted_undistinct_queryset(**kwargs).distinct()
         sort_order = self._get_sort_order()
         self.request.session["sort"] = sort_order
-        result = result.order_by(*sort_order)
+        if sort_order:
+            result = result.order_by(*sort_order)
         return result
 
     def _get_sort_order(self):
@@ -78,11 +79,13 @@ class StationListViewMixin:
         if not sort_order:
             sort_order = self.request.session.get("sort", ["name"])
 
-        # Create a copy of sort_order with duplicates and nonexistent fields removed
+        # Create a copy of sort_order with duplicates and invalid fields removed
         result = []
         fields = [x.name for x in models.Station._meta.get_fields()]
         fields_seen = set()
         for item in sort_order:
+            if not item:
+                continue
             field = item[1:] if item[0] == "-" else item
             if field in fields_seen or field not in fields:
                 continue
@@ -190,8 +193,7 @@ class StationListViewMixin:
         extent = queryset.aggregate(Extent("geom"))["geom__extent"]
         if extent is None:
             extent = settings.ENHYDRIS_MAP_DEFAULT_VIEWPORT[:]
-        else:
-            extent = list(extent)
+        extent = list(extent)
 
         ensure_extent_is_large_enough(extent)
 
