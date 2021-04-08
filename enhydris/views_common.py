@@ -193,8 +193,7 @@ class StationListViewMixin:
         extent = queryset.aggregate(Extent("geom"))["geom__extent"]
         if extent is None:
             extent = settings.ENHYDRIS_MAP_DEFAULT_VIEWPORT[:]
-        else:
-            extent = list(extent)
+        extent = list(extent)
 
         ensure_extent_is_large_enough(extent)
 
