@@ -27,8 +27,8 @@ matrix:
        - CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install 'gdal==2.2.3'
        - pip install psycopg2==2.7.4
        - pip install codecov coverage
-       - wget https://chromedriver.storage.googleapis.com/LATEST_RELEASE
-       - wget https://chromedriver.storage.googleapis.com/`cat LATEST_RELEASE`/chromedriver_linux64.zip
+       - wget -O chromedriver_version https://chromedriver.storage.googleapis.com/LATEST_RELEASE_`google-chrome --version|awk '{ print $3 }'|awk -F. '{ print $1 }'`
+       - wget https://chromedriver.storage.googleapis.com/`cat chromedriver_version`/chromedriver_linux64.zip
        - sudo unzip chromedriver_linux64.zip -d /usr/local/bin
        - pip install -r requirements.txt
        - pip install -r requirements-dev.txt
