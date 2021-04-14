@@ -234,8 +234,8 @@ the site, i.e. the one to which lookup descriptions not ending in
 Because of what is likely a `bug in django-parler`_ (at least 2.0), it
 is important to use ``SITE_ID`` as the key and not ``None``.
 
-.. _SITE_ID: https://docs.djangoproject.com/en/2.2/ref/settings/#site-id
-.. _LANGUAGE_CODE: https://docs.djangoproject.com/en/2.2/ref/settings/#language-code
+.. _SITE_ID: https://docs.djangoproject.com/en/3.2/ref/settings/#site-id
+.. _LANGUAGE_CODE: https://docs.djangoproject.com/en/3.2/ref/settings/#language-code
 .. _PARLER_DEFAULT_LANGUAGE_CODE: https://django-parler.readthedocs.io/en/latest/configuration.html#parler-default-language-code
 .. _PARLER_LANGUAGES: https://django-parler.readthedocs.io/en/latest/configuration.html#parler-languages
 .. _bug in django-parler: https://stackoverflow.com/questions/40187339/django-parler-doesnt-show-tabs-in-admin/

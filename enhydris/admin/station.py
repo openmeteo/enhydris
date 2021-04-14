@@ -60,11 +60,11 @@ class InlinePermissionsMixin:
     The truth is that this hasn't been exhaustively tested (but it should).
     """
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj):
         if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
             return True
         else:
-            return super().has_add_permission(request)
+            return super().has_add_permission(request, obj)
 
     def has_change_permission(self, request, obj):
         if settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:

@@ -142,7 +142,7 @@ To use Enhydris in production, you need to setup a web server such as
 apache. This is described in detail in `Deploying Django`_ and in
 https://djangodeployment.com/.
 
-.. _deploying django: http://docs.djangoproject.com/en/2.2/howto/deployment/
+.. _deploying django: http://docs.djangoproject.com/en/3.2/howto/deployment/
 
 Post-install configuration: domain name
 =======================================
@@ -162,7 +162,7 @@ Settings reference
 These are the settings available to Enhydris, in addition to the
 `Django settings`_.
 
-.. _django settings: http://docs.djangoproject.com/en/2.2/ref/settings/
+.. _django settings: http://docs.djangoproject.com/en/3.2/ref/settings/
 
 .. data:: ENHYDRIS_REGISTRATION_OPEN
 

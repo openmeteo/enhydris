@@ -1,7 +1,6 @@
-Django>=2.2.2,<3
+Django>=3.2,<4
 djangorestframework>=3.9,<4
 gdal>=1.6
-django-bootstrap3>=11,<12
 iso8601
 htimeseries>=3.1,<4
 pytz
@@ -10,5 +9,5 @@ django-rest-auth[with_social]>=0.9,<1
 django-rest-captcha>=0.1.0,<1
 django-parler>=2,<3
 django-parler-rest>=2,<3
-django-geowidgets
+django-geowidgets>=0.1.1,<1
 django-nested-admin>=3.2,<4
