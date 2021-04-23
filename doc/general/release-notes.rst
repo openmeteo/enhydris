@@ -66,15 +66,31 @@ stable Enhydris version is 2.0). The procedure is this:
      to create a settings file in ``enhydris_project/settings/``, as this
      location has changed.
 
- 12. Execute migrations::
+ 12. Empty the migrations table for the registration app::
+
+       python manage.py migrate --fake registration zero
+
+     If you fail to perform this step, you may get the message 'relation
+     "registration_registrationprofile" does not exist' or similar. The
+     exact cause is not known, however lots of things have changed
+     regarding the registration system.
+
+ 13. Execute migrations::
 
        python manage.py migrate --fake-initial
 
- 13. Remove obsolete settings from the settings file.
+     If some migrations succeed and there is a failure later, you should
+     probably omit the --fake-initial parameter in subsequent attempts.
+     There is, notably, a possibility of an error related to
+     registration happening (as described in the previous step); in such
+     a case, repeat the previous step and then re-execute the above
+     migration command (possibly without --fake-initial).
 
- 14. Start the service.
+ 14. Remove obsolete settings from the settings file.
 
- 15. Create and start a celery service.
+ 15. Start the service.
+
+ 16. Create and start a celery service.
 
 Changes from 2.0
 ----------------

@@ -2,8 +2,11 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView, View
 
+from registration.backends.default.views import RegistrationView
+
 from enhydris import views
 from enhydris.api import urls as enhydris_api_urls
+from enhydris.forms import MyRegistrationForm
 
 admin.autodiscover()
 
@@ -11,6 +14,13 @@ station_edit_view = views.StationEdit.as_view()
 
 urlpatterns = [
     path("", views.StationList.as_view(), name="station_list"),
+    path(
+        "accounts/register/",
+        RegistrationView.as_view(form_class=MyRegistrationForm),
+        name="registration_register",
+    ),
+    path("accounts/", include("registration.backends.default.urls")),
+    path("captcha/", include("captcha.urls")),
     path("stations/<int:pk>/", views.StationDetail.as_view(), name="station_detail"),
     path("stations/<int:pk>/edit/", station_edit_view, name="station_edit"),
     path(

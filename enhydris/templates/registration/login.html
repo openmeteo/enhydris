@@ -1,0 +1,43 @@
+{% extends "enhydris/base/main.html" %}
+{% load i18n %}
+{% load bootstrap4 %}
+
+{% block title %}{% trans "Login" %}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-sm-offset-1 col-sm-10">
+      <h1>{% trans "Login" %}</h1>
+    </div>
+  </div>
+  {% if form.errors %}
+  <div class="row">
+    <div class="alert alert-danger col-sm-offset-2 col-sm-6">
+      <p><strong>{% trans "Wrong username or password." %}</strong></p>
+    </div>
+  </div>
+  {% endif %}
+  <div class="col-md-6">
+    <form action="{% url 'auth_login' %}"
+        method="post"
+        role="form"
+        class="form-horizontal">
+      {% csrf_token %}
+      {% bootstrap_field form.username layout='horizontal' %}
+      {% bootstrap_field form.password layout='horizontal' %}
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}" />
+      {% else %}
+        <input type="hidden" name="next" value="{% url 'station_list' %}"/>
+      {% endif %}
+      {% buttons %}
+      <div class="col-sm-offset-3 col-sm-10">
+        <button type="submit" class="btn btn-primary">{% trans "Login" %}</button>
+        <br><br>
+        <a href="{% url 'auth_password_reset' %}">{% trans "Forgot password?" %}</a>
+      </div>
+      {% endbuttons %}
+    </form>
+  </div>
+{% endblock %}

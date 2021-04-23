@@ -1,0 +1,16 @@
+{% extends "enhydris/base/main.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Account activation complete" %}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>{% trans "Account successfully activated" %}.</h1>
+  <p><a href="{% url 'auth_login' %}"
+		class="btn btn-success"
+        role="button">{% trans "Login" %}</a>
+  </p>
+</div>
+{% endblock %}
+
+

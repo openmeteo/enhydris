@@ -1,4 +1,5 @@
 import os
+import sys
 
 # Development settings (to be overridden in production settings.py)
 DEBUG = True
@@ -39,6 +40,11 @@ INSTALLED_APPS = [
     "parler",
     "nested_admin",
     "crequest",
+    #
+    # Registration
+    "registration",
+    "captcha",
+    "bootstrap4",  # We only use this for the django-registration-redux templates
 ]
 
 MIDDLEWARE = [
@@ -108,7 +114,13 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 20,
 }
 
-ENHYDRIS_REGISTRATION_OPEN = False
+ACCOUNT_ACTIVATION_DAYS = 1
+REGISTRATION_OPEN = False
+
+# For an explanation of the following, see
+# https://github.com/mbi/django-simple-captcha/issues/84
+CAPTCHA_TEST_MODE = len(sys.argv) > 1 and sys.argv[1] == "test"
+
 ENHYDRIS_USERS_CAN_ADD_CONTENT = False
 ENHYDRIS_OPEN_CONTENT = False
 
