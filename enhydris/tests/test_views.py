@@ -136,15 +136,10 @@ class StationDetailImagesTestCase(TestCase):
             GentityImage, gentity=self.station, descr=descr, content=content
         )
 
-    def test_no_featured_image_when_no_image_is_featured(self):
+    def test_first_image_is_featured_when_no_image_is_marked_as_featured(self):
         response = self.client.get(f"/stations/{self.station.id}/")
         soup = BeautifulSoup(response.content, "html.parser")
-        self.assertIsNone(soup.find("div", class_="featured-image"))
-
-    def test_first_image_when_no_image_is_featured(self):
-        response = self.client.get(f"/stations/{self.station.id}/")
-        soup = BeautifulSoup(response.content, "html.parser")
-        img = soup.find("div", class_="other-images").a.img
+        img = soup.find("div", class_="featured-image").a.img
         self.assertEqual(img["src"], "/media/image1.png")
 
     def test_featured_image_is_featured(self):
@@ -160,7 +155,7 @@ class StationDetailImagesTestCase(TestCase):
         self.image2.save()
         response = self.client.get(f"/stations/{self.station.id}/")
         soup = BeautifulSoup(response.content, "html.parser")
-        img = soup.find("div", class_="other-images").a.img
+        img = soup.find("div", class_="swiper-wrapper").a.img
         self.assertEqual(img["src"], "/media/image1.png")
 
 
@@ -243,9 +238,9 @@ class GentityFileDownloadLinkTestCase(TestCase):
     def setUp(self):
         self.station = mommy.make(Station, name="Komboti")
         self.gentityfile = mommy.make(GentityFile, gentity=self.station)
-        self.link = '<a href="/api/stations/{}/files/{}/content/">'.format(
-            self.station.id, self.gentityfile.id
-        )
+        self.link = (
+            '<a href="/api/stations/{}/files/{}/content/" aria-label="Download">'
+        ).format(self.station.id, self.gentityfile.id)
 
     @override_settings(ENHYDRIS_OPEN_CONTENT=True)
     def test_contains_download_link_when_site_content_is_free(self):

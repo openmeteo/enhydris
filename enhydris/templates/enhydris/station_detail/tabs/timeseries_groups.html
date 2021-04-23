@@ -24,7 +24,7 @@
                 </td>
                 <td class="station-column-desc">
                   <span class="station-cell-title">{% trans 'Name' %}</span>
-                  <a href="{% url 'timeseries_group_detail' station_id=station.id pk=tg_id %}">{% if tg.name %}{{ tg.name }}{% endif %}</a>
+                  <a href="{% url 'timeseries_group_detail' station_id=station.id pk=tg_id %}">{% if tg.name %}{{ tg.name }}{% else %}{{ tg.variable }}{% endif %}</a>
                 </td>
                 <td class="station-column-date">
                   <span class="station-cell-title">{% trans 'Start date' %}</span>
