@@ -1,15 +1,15 @@
-# We use a different file for the rest_auth-related serializers because we need to
+# We use a different file for the dj_rest_auth-related serializers because we need to
 # import RegisterSerializer. If it's put in serializers.py, it somehow causes errors in
 # unit tests that attempt to import it (the error is "ProgrammingError: relation
 # "django_site" does not exist").  Apparently this is because objects for django_site
-# are being accessed before the table has been created. Possibly a rest_auth bug.
+# are being accessed before the table has been created. Possibly a dj_rest_auth bug.
 
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 import rest_captcha.serializers
 import rest_captcha.utils
-from rest_auth.registration.serializers import RegisterSerializer
+from dj_rest_auth.registration.serializers import RegisterSerializer
 
 # The following class should probably be
 #     class RegisterWithCaptchaSerializer(RegisterSerializer, RestCaptchaSerializer):

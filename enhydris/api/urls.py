@@ -5,7 +5,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from rest_auth.registration import views as auth_registration_views
+from dj_rest_auth.registration import views as auth_registration_views
 
 from . import views
 
@@ -13,7 +13,7 @@ from . import views
 class RegistrationMixin:
     """Override dispatch method so that it raises 404 if registration isn't open.
 
-    We want the views from rest_auth.registration to raise 404 if
+    We want the views from dj_rest_auth.registration to raise 404 if
     ENHYDRIS_REGISTRATION_OPEN is False.   We could just add them to
     urlpatterns conditionally, but then ENHYDRIS_REGISTRATION_OPEN wouldn't be
     overridable in tests. So what we do is we modify their dispatch() method so that
@@ -43,7 +43,7 @@ urlpatterns = [
         VerifyEmailView.as_view(),
         name="rest_verify_email",
     ),
-    path("auth/", include("rest_auth.urls")),
+    path("auth/", include("dj_rest_auth.urls")),
     path(
         "auth/password/reset/confirm/<str:uidb64>/<str:token>/",
         auth_views.PasswordResetConfirmView.as_view(),

@@ -140,7 +140,7 @@ user can specify a new password. After succeeding in specifying a new
 password, he is redirected to ``/api/auth/password/reset/complete/``,
 which is a page that says "your password has been set". However these
 two aren't API endpoints (they're just the convenient defaults of
-``django-rest-auth``).
+``dj-rest-auth``).
 
 User profile management
 -----------------------

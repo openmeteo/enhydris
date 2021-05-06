@@ -2,7 +2,7 @@
 
 Technically these aren't unit tests, they are functional tests. We don't need
 unit tests because authentication is handled by third-party applications (namely
-Django, DRF, and django-rest-auth). But we make these functional tests to ensure
+Django, DRF, and dj-rest-auth). But we make these functional tests to ensure
 we have the configuration setup correctly.
 
 Since we use Token authentication, "login" doesn't really login; it only provides
