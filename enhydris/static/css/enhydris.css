@@ -155,7 +155,9 @@ h4.tab-no-data {
 
 .leaflet-control-container .leaflet-bottom.leaflet-right {
   bottom: 10px;
+}
 
+.station-detail .leaflet-control-container .leaflet-bottom.leaflet-right {
   width: 90px;
 }
 
@@ -168,13 +170,15 @@ h4.tab-no-data {
     top: 70px !important; /* Overrides positioning of tools on map to be displayed under page header */
   }
 
-  .leaflet-control-container .leaflet-bottom.leaflet-right {
+  .station-detail .leaflet-control-container .leaflet-bottom.leaflet-right {
     bottom: 50px;
+  }
 
+  .station-detail .leaflet-control-container .leaflet-bottom.leaflet-right {
     width: 110px;
   }
 
-  .leaflet-control-container .leaflet-bottom.leaflet-left {
+  .station-detail .leaflet-control-container .leaflet-bottom.leaflet-left {
     bottom: 45px;
   }
 
