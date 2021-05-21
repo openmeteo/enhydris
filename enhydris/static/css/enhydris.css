@@ -229,24 +229,7 @@ h4.tab-no-data {
 }
 
 .breadcrumbs li:last-child a {
-  position: relative;
-
   color: #333333;
-}
-
-.breadcrumbs li:last-child a::after {
-  position: absolute;
-  top: 50%;
-  right: -15px;
-  content: "";
-
-  width: 10px;
-  height: 5px;
-  margin-top: -2.5px;
-
-  background-image: url("../images/icon-arrow-down.svg");
-  background-repeat: no-repeat;
-  background-size: contain;
 }
 
 @media (max-width: 768px) {
@@ -1366,7 +1349,6 @@ h4.tab-no-data {
 .station-timeseries-main h2 + p {
   font-size: 14px;
   line-height: 19px;
-  color: #bdbdbd;
 }
 
 .station-timeseries-additional {
@@ -1450,7 +1432,8 @@ h4.tab-no-data {
 
 .form-list-download {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   flex-wrap: wrap;
   max-width: 560px;
   width: 100%;
@@ -1459,9 +1442,11 @@ h4.tab-no-data {
 }
 
 .form-item-download {
-  min-width: 120px;
-  max-width: 33.333%;
   margin-bottom: 10px;
+}
+
+.form-group-download:first-child {
+  margin-bottom: 5px;
 }
 
 .form-group-download:last-child {

@@ -2,15 +2,17 @@
 {% load rules %}
 
 <div class="station-download">
-  <p><b>Download report:</b></p>
+  <p><b>Download data</b></p>
   <p>Total observation period: 9 years 6 months 23 days</p>
 
   {% has_perm "enhydris.view_timeseries_data" request.user timeseries as can_view_timeseries_data %}
   {% if can_view_timeseries_data %}
   <div>
-
+    {% if object.timeseries_set.exists %}
+      {% include "enhydris/timeseries_group_detail/download_button/button_active.html" %}
+    {% else %}
       {% include "enhydris/timeseries_group_detail/download_button/button_disabled.html" %}
-
+    {% endif %}
   </div>
   {% else %}
     <div class="mt-4 alert alert-info" role="alert">
