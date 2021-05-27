@@ -1,4 +1,4 @@
-{% extends "enhydris/base/main.html" %}
+{% extends "enhydris/base/main_with_map.html" %}
 {% load static %}
 {% load i18n %}
 
@@ -7,34 +7,51 @@
 {% endblock %}
 
 {% block content%}
-  <div class="container mt-4">
-    <div class="card">
-      <div class="card-header">
-        <p class="my-0">{{ object.gentity.name }} - {{ object.get_name }}</p>
+  <section class="station-detail">
+    {% include "enhydris/station_detail/map.html" %}
+
+    <div class="container station-info">
+      <div class="station-info-header">
+        <h1>{{ object.gentity.name }}</h1>
+
+        <div>
+          ϕ, λ = {{ object.gentity.geom.y | floatformat:5 }}, {{ object.gentity.geom.x | floatformat:5 }}
+          {% if object.gentity.gpoint.original_srid != 4326 %}
+            <p>
+              {% blocktrans with srid=object.gentity.gpoint.original_srid x=object.gentity.gpoint.original_abscissa y=object.gentity.gpoint.original_ordinate %}
+                (originally srid={{ srid }}, x={{ x }}, y={{ y }})
+              {% endblocktrans %}
+            </p>
+          {% endif %}
+          {% if object.gentity.gpoint.altitude != None %}
+            z = {{ object.gentity.gpoint.altitude|floatformat:2 }}
+          {% endif %}
+        </div>
       </div>
 
-      <div class="card-body">
-        <div class="row">
-          <div class="col-xs-12 col-sm-5">
-            {% if object.timeseries_set.exists %}
-              {% include "enhydris/timeseries_group_detail/chart.html" %}
-            {% else %}
-              <div class="message-no-data">
-                <p class="text-muted text-center">
-                  {% trans "This time series group has no data yet." %}
-                </p>
-              </div>
-            {% endif %}
-          </div>
+      {% include "enhydris/timeseries_group_detail/breadcrumbs.html" %}
 
-          <div class="col-xs-12 col-sm-7">
-            {% include "enhydris/timeseries_group_detail/download.html" %}
+      <div class="station-info-main">
+        <div class="station-timeseries-wrapper">
+          <section class="station-timeseries">
+
             {% include "enhydris/timeseries_group_detail/details_table.html" %}
-          </div>
+            {% include "enhydris/timeseries_group_detail/download.html" %}
+          </section>
+        </div>
+
+        <div class="station-chart-wrapper">
+          {% if object.timeseries_set.exists %}
+            {% include "enhydris/timeseries_group_detail/chart.html" %}
+          {% else %}
+            <div class="alert alert-info" role="alert">
+              {% trans "This time series group has no data yet." %}
+            </div>
+          {% endif %}
         </div>
       </div>
     </div>
-  </div>
+  </section>
 {% endblock %}
 
 {% block extrajs %}

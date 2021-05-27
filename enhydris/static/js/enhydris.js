@@ -205,7 +205,7 @@ enhydris.chart = {
            */
           enabled: false,
         },
-        height: 100,
+        height: '25%',
         type: 'area',
         brush: {
           target: 'mainChart',
@@ -277,7 +277,7 @@ enhydris.chart = {
       chart: {
         id: 'mainChart',
         type: 'line',
-        height: 230,
+        height: '75%',
         zoom: {
           type: 'x',
           enabled: true,
