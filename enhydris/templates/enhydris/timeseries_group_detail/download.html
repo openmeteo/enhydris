@@ -1,19 +1,20 @@
 {% load i18n %}
 {% load rules %}
 
-{% has_perm "enhydris.view_timeseries_data" request.user timeseries as can_view_timeseries_data %}
-{% if can_view_timeseries_data %}
-  <div class="btn-group mb-3" role="group">
-    {% if object.timeseries_set.exists %}
-      {% include "enhydris/timeseries_group_detail/download_button/button_active.html" %}
-    {% else %}
+<div class="station-download">
+  <p><b>Download report:</b></p>
+  <p>Total observation period: 9 years 6 months 23 days</p>
+
+  {% has_perm "enhydris.view_timeseries_data" request.user timeseries as can_view_timeseries_data %}
+  {% if can_view_timeseries_data %}
+  <div>
+
       {% include "enhydris/timeseries_group_detail/download_button/button_disabled.html" %}
-    {% endif %}
-  </div> <!-- /.btn-group -->
-{% else %}
-  <p class="alert alert-warning" role="alert">
-    {% blocktrans %}
-      You don't have permission to download the data.
-    {% endblocktrans %}
-  </p>
-{% endif %}
+
+  </div>
+  {% else %}
+    <div class="mt-4 alert alert-info" role="alert">
+      {% trans "You don't have permission to download the data." %}
+    </div>
+  {% endif %}
+</div>

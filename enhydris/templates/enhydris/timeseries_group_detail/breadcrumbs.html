@@ -1,0 +1,10 @@
+{% load i18n %}
+
+<ol class="reset-list breadcrumbs">
+  <li>
+    <a href="{% url 'station_detail' pk=object.gentity.id %}">{{ object.gentity.name }}</a>
+  </li>
+  <li>
+    <a>{{ object.get_name }}</a>
+  </li>
+</ol>
