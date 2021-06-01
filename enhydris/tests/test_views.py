@@ -206,7 +206,9 @@ class StationDetailPeriodOfOperationTestCase(TestCase):
 class TimeseriesDownloadButtonTestCase(TestCase, TimeseriesDataMixin):
     def setUp(self):
         self.create_timeseries()
-        self.download_button = '<input type="submit" value="Download">'
+        self.download_button = (
+            '<button type="submit" class="btn form-btn-download">download</button>'
+        )
 
     def _get_response(self):
         self.response = self.client.get(
@@ -465,12 +467,12 @@ class TimeseriesGroupDetailTestCase(TestCase, TimeseriesDataMixin):
         self.response = self.client.get(
             f"/stations/{self.station.id}/timeseriesgroups/{self.timeseries_group.id}/"
         )
-        self.assertNotContains(self.response, "data_holder")
-        self.assertContains(self.response, "message-no-data")
+        self.assertNotContains(self.response, "form-item-download")
+        self.assertContains(self.response, "alert-info")  # "No data" message
 
     def test_timeseries_group_with_timeseries(self):
-        self.assertContains(self.response, "data_holder")
-        self.assertNotContains(self.response, "message-no-data")
+        self.assertContains(self.response, "form-item-download")
+        self.assertNotContains(self.response, "alert-info")  # "No data" message
 
     def test_title(self):
         self.assertContains(
@@ -479,16 +481,12 @@ class TimeseriesGroupDetailTestCase(TestCase, TimeseriesDataMixin):
 
     def test_heading(self):
         self.assertContains(
-            self.response, '<p class="my-0">Komboti - Beauty</p>', html=True
+            self.response, "<h2>Beauty <span>(beauton)</span></h2>", html=True
         )
 
     def test_download_form(self):
         self.assertContains(
-            self.response,
-            f'<input type="radio" name="timeseries_id" value="{self.timeseries.id}" '
-            'id="id_timeseries_id_0" class="form-check-input" checked>'
-            '<label class="form-check-label" for="id_timeseries_id_0">Initial</label>',
-            html=True,
+            self.response, '<label for="id_timeseries_id_0">Initial</label>', html=True
         )
 
 

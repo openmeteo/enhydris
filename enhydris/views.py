@@ -26,16 +26,21 @@ class StationList(StationListViewMixin, ListView):
         return super().render_to_response(*args, **kwargs)
 
 
-class StationDetail(DetailView):
-    model = models.Station
-    template_name = "enhydris/station_detail/main.html"
-
+class MapWithSingleStationBaseView(DetailView):
     def render_to_response(self, *args, **kwargs):
-        p = self.object.geom
+        try:
+            p = self.object.geom
+        except AttributeError:
+            p = self.object.gentity.geom
         map_extent = [p.x, p.y, p.x, p.y]
         ensure_extent_is_large_enough(map_extent)
         self.request.map_viewport = map_extent
         return super().render_to_response(*args, **kwargs)
+
+
+class StationDetail(MapWithSingleStationBaseView):
+    model = models.Station
+    template_name = "enhydris/station_detail/main.html"
 
 
 class StationEdit(RedirectView):
@@ -43,7 +48,7 @@ class StationEdit(RedirectView):
         return reverse("admin:enhydris_station_change", args=(kwargs["pk"],))
 
 
-class TimeseriesGroupDetail(DetailView):
+class TimeseriesGroupDetail(MapWithSingleStationBaseView):
     model = models.TimeseriesGroup
     template_name = "enhydris/timeseries_group_detail/main.html"
 

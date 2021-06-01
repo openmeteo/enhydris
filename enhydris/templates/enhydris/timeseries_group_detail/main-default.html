@@ -54,6 +54,14 @@
   </section>
 {% endblock %}
 
+{% block map_js %}
+  {{ block.super }}
+  <script type="text/javascript">
+    enhydris.mapMode = 'single-station';
+    enhydris.agentityId = {{ object.gentity.id }};
+  </script>
+{% endblock %}
+
 {% block extrajs %}
   {{ block.super }}
   <script>
