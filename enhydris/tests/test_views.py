@@ -136,15 +136,10 @@ class StationDetailImagesTestCase(TestCase):
             GentityImage, gentity=self.station, descr=descr, content=content
         )
 
-    def test_no_featured_image_when_no_image_is_featured(self):
+    def test_first_image_is_featured_when_no_image_is_marked_as_featured(self):
         response = self.client.get(f"/stations/{self.station.id}/")
         soup = BeautifulSoup(response.content, "html.parser")
-        self.assertIsNone(soup.find("div", class_="featured-image"))
-
-    def test_first_image_when_no_image_is_featured(self):
-        response = self.client.get(f"/stations/{self.station.id}/")
-        soup = BeautifulSoup(response.content, "html.parser")
-        img = soup.find("div", class_="other-images").a.img
+        img = soup.find("div", class_="featured-image").a.img
         self.assertEqual(img["src"], "/media/image1.png")
 
     def test_featured_image_is_featured(self):
@@ -160,7 +155,7 @@ class StationDetailImagesTestCase(TestCase):
         self.image2.save()
         response = self.client.get(f"/stations/{self.station.id}/")
         soup = BeautifulSoup(response.content, "html.parser")
-        img = soup.find("div", class_="other-images").a.img
+        img = soup.find("div", class_="swiper-wrapper").a.img
         self.assertEqual(img["src"], "/media/image1.png")
 
 
@@ -211,7 +206,9 @@ class StationDetailPeriodOfOperationTestCase(TestCase):
 class TimeseriesDownloadButtonTestCase(TestCase, TimeseriesDataMixin):
     def setUp(self):
         self.create_timeseries()
-        self.download_button = '<input type="submit" value="Download">'
+        self.download_button = (
+            '<button type="submit" class="btn form-btn-download">download</button>'
+        )
 
     def _get_response(self):
         self.response = self.client.get(
@@ -243,9 +240,9 @@ class GentityFileDownloadLinkTestCase(TestCase):
     def setUp(self):
         self.station = mommy.make(Station, name="Komboti")
         self.gentityfile = mommy.make(GentityFile, gentity=self.station)
-        self.link = '<a href="/api/stations/{}/files/{}/content/">'.format(
-            self.station.id, self.gentityfile.id
-        )
+        self.link = (
+            '<a href="/api/stations/{}/files/{}/content/" aria-label="Download">'
+        ).format(self.station.id, self.gentityfile.id)
 
     @override_settings(ENHYDRIS_OPEN_CONTENT=True)
     def test_contains_download_link_when_site_content_is_free(self):
@@ -470,12 +467,12 @@ class TimeseriesGroupDetailTestCase(TestCase, TimeseriesDataMixin):
         self.response = self.client.get(
             f"/stations/{self.station.id}/timeseriesgroups/{self.timeseries_group.id}/"
         )
-        self.assertNotContains(self.response, "data_holder")
-        self.assertContains(self.response, "message-no-data")
+        self.assertNotContains(self.response, "form-item-download")
+        self.assertContains(self.response, "alert-info")  # "No data" message
 
     def test_timeseries_group_with_timeseries(self):
-        self.assertContains(self.response, "data_holder")
-        self.assertNotContains(self.response, "message-no-data")
+        self.assertContains(self.response, "form-item-download")
+        self.assertNotContains(self.response, "alert-info")  # "No data" message
 
     def test_title(self):
         self.assertContains(
@@ -484,16 +481,12 @@ class TimeseriesGroupDetailTestCase(TestCase, TimeseriesDataMixin):
 
     def test_heading(self):
         self.assertContains(
-            self.response, '<p class="my-0">Komboti - Beauty</p>', html=True
+            self.response, "<h2>Beauty <span>(beauton)</span></h2>", html=True
         )
 
     def test_download_form(self):
         self.assertContains(
-            self.response,
-            f'<input type="radio" name="timeseries_id" value="{self.timeseries.id}" '
-            'id="id_timeseries_id_0" class="form-check-input" checked>'
-            '<label class="form-check-label" for="id_timeseries_id_0">Initial</label>',
-            html=True,
+            self.response, '<label for="id_timeseries_id_0">Initial</label>', html=True
         )
 
 

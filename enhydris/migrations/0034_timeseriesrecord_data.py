@@ -4,7 +4,6 @@ import tempfile
 
 from django.conf import settings
 from django.db import connection, migrations
-from django.utils._os import abspathu
 
 
 def convert_files_to_data(apps, schema_editor):
@@ -47,7 +46,7 @@ class TimeseriesConverter:
 
     @property
     def datafilename(self):
-        directory = abspathu(settings.ENHYDRIS_TIMESERIES_DATA_DIR)
+        directory = os.path.abspath(settings.ENHYDRIS_TIMESERIES_DATA_DIR)
         filename = "{:010}".format(self.timeseries.id)
         return os.path.join(directory, filename)
 

@@ -1,0 +1,7 @@
+{% load i18n %}
+
+{% with img=object.gentityimage_set.first %}
+  <a href="{{ img.content.url }}">
+    <img src="{{ img.content.url }}" width="100%" height="auto" alt="{{ img.descr }}">
+  </a>
+{% endwith %}

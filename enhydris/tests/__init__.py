@@ -35,6 +35,7 @@ class TimeseriesDataMixin:
             time_zone=self.time_zone,
             precision=2,
             variable=self.variable,
+            unit_of_measurement__symbol="beauton",
         )
         self.timeseries = mommy.make(
             models.Timeseries,

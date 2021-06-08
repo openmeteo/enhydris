@@ -2,38 +2,47 @@
 {% load rules %}
 
 <div id="gentity_files" class="tab-pane fade" aria-labelledby="gentity_files" role="tabpanel">
-  <h4 class="my-3 h5">{% trans 'Station (Gentity) Files' %}</h4>
   {% if station.gentityfile_set.count %}
-    <table class="table table-responsive table-hover">
+    <table class="table station-table">
       <thead>
         <tr>
-          <th scope="col">{% trans 'ID' %}</th>
-          <th scope="col">{% trans 'Date' %}</th>
-          <th scope="col">{% trans 'Description' %}</th>
-          <th scope="col">{% trans 'Remarks' %}</th>
-          <th scope="col">{% trans 'Download' %}</th>
+          <th class="station-column-id">{% trans 'ID' %}</th>
+          <th class="station-column-desc">{% trans 'Description' %}</th>
+          <th class="station-column-date">{% trans 'Upload date' %}</th>
+          <th class="station-column-download">{% trans 'Download' %}</th>
+          <th class="station-column-blank"></th>
         </tr>
       </thead>
       <tbody>
         {% for file in station.gentityfile_set.all %}
           {% has_perm "enhydris.view_gentityfile_content" request.user file as can_view_file_data %}
           <tr>
-            <td>{{ file.id }}</td>
-            <td>{{ file.date|date:"Y/m/d" }}</td>
-            <td>{{ file.descr }}</td>
-            <td class="show-more"><p>{{ file.remarks }}</p></td>
-            <td>
+            <td class="station-column-id">
+              <span class="station-cell-title">{% trans 'ID' %}</span>
+              <span>{{ file.id }}</span>
+            </td>
+            <td class="station-column-desc">
+              <span class="station-cell-title">{% trans 'Description' %}</span>
+              <span>{{ file.descr }}</span>
+            </td>
+            <td class="station-column-date">
+              <span class="station-cell-title">{% trans 'Upload date' %}</span>
+              <span>{{ file.date|date:"SHORT_DATETIME_FORMAT" }}</span>
+            </td>
+            <td class="station-column-download">
+              <span class="station-cell-title">{% trans 'Download' %}</span>
               {% if can_view_file_data %}
-                <a href="{% url 'file-content' station_id=station.id pk=file.id %}"><i class="bi bi-cloud-arrow-down"></i></a>
+                <a href="{% url 'file-content' station_id=station.id pk=file.id %}" aria-label="{% trans 'Download' %}"><i class="icon-download"></i></a>
               {% else %}
-                {% trans "Unauthorized" %}
+                {% trans 'Unauthorized' %}
               {% endif %}
             </td>
+            <td class="station-column-blank"></td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
   {% else %}
-    <div class="alert alert-info" role="alert">{% trans "No data available" %}</div>
+    <div class="mt-4 alert alert-info" role="alert">{% trans 'No data available' %}</div>
   {% endif %}
 </div>

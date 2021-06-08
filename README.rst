@@ -2,9 +2,9 @@
 Enhydris - Web-based hydro/meteorological database
 ==================================================
 
-.. image:: https://travis-ci.org/openmeteo/enhydris.svg?branch=master
+.. image:: https://travis-ci.com/openmeteo/enhydris.svg?branch=master
     :alt: Build button
-    :target: https://travis-ci.org/openmeteo/enhydris
+    :target: https://travis-ci.com/openmeteo/enhydris
 
 .. image:: https://codecov.io/github/openmeteo/enhydris/coverage.svg?branch=master
     :alt: Coverage

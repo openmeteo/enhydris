@@ -1,6 +1,7 @@
 from datetime import timedelta, timezone
 from io import StringIO
 from itertools import islice
+from os.path import abspath
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -11,7 +12,6 @@ from django.db import IntegrityError, connection
 from django.db.models import FilteredRelation, Q
 from django.db.models.functions import Coalesce
 from django.db.models.signals import post_save
-from django.utils._os import abspathu
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
@@ -368,9 +368,16 @@ class Station(Gpoint):
 
 class VariableManager(TranslatableManager):
     def get_queryset(self):
-        langs = get_active_language_choices()
-        lang1 = langs[0]
-        lang2 = langs[1] if len(langs) > 1 else "nonexistent"
+        try:
+            langs = get_active_language_choices()
+            lang1 = langs[0]
+            lang2 = langs[1] if len(langs) > 1 else "nonexistent"
+        except ValueError:
+            lang1 = settings.LANGUAGE_CODE
+            try:
+                lang2 = settings.LANGUAGES[1][0]
+            except IndexError:
+                lang2 = "nonexistent"
         return (
             super()
             .get_queryset()
@@ -464,7 +471,7 @@ class TimeseriesStorage(FileSystemStorage):
     """
 
     def path(self, name):
-        self.location = abspathu(settings.ENHYDRIS_TIMESERIES_DATA_DIR)
+        self.location = abspath(settings.ENHYDRIS_TIMESERIES_DATA_DIR)
         return super().path(name)
 
 

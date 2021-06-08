@@ -1,0 +1,32 @@
+{% load i18n %}
+
+{% url "timeseries-data" station_id=timeseries.timeseries_group.gentity.id timeseries_group_id=timeseries.timeseries_group.id pk=timeseries.id as base_url %}
+
+<form class="form-download" method="get" action="{% url 'download_data' %}">
+  {% for hidden_field in download_data_form.hidden_fields %}
+    {{ hidden_field }}
+  {% endfor %}
+  <fieldset class="form-group-download">
+    <span>Select type:</span>
+    <ul class="form-list-download reset-list">
+      {% for pk, choice in download_data_form.timeseries_id.field.widget.choices %}
+        <li class="form-item-download">
+          <input id="id_{{ download_data_form.timeseries_id.name }}_{{ forloop.counter0 }}" type="{{ download_data_form.timeseries_id.field.widget.input_type }}" class="visually-hidden" name="{{ download_data_form.timeseries_id.name }}" value="{{ pk }}" {% if forloop.first %}checked{% endif %}>
+          <label for="id_{{ download_data_form.timeseries_id.name }}_{{ forloop.counter0 }}">{{ choice }}</label>
+        </li>
+      {% endfor %}
+    </ul>
+  </fieldset>
+  <fieldset class="form-group-download">
+    <span>Select format:</span>
+    <ul class="form-list-download reset-list">
+      {% for pk, choice in download_data_form.format.field.widget.choices %}
+        <li class="form-item-download">
+          <input id="id_{{ download_data_form.format.name }}_{{ forloop.counter0 }}" type="{{ download_data_form.format.field.widget.input_type }}" class="visually-hidden" name="{{ download_data_form.format.name }}" value="{{ pk }}" {% if forloop.first %}checked{% endif %}>
+          <label for="id_{{ download_data_form.format.name }}_{{ forloop.counter0 }}">{{ choice }}</label>
+        </li>
+      {% endfor %}
+    </ul>
+  </fieldset>
+  <button type="submit" class="btn form-btn-download">{% trans 'download' %}</button>
+</form>

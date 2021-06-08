@@ -32,7 +32,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "rest_auth",
-    "bootstrap3",
     # Registration
     "allauth",
     "allauth.account",
@@ -86,6 +85,8 @@ LOGIN_REDIRECT_URL = "/"
 ATOMIC_REQUESTS = True
 TEST_RUNNER = "django.test.runner.DiscoverRunner"
 USE_TZ = True
+
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 USE_L10N = True
 
