@@ -8,7 +8,6 @@
         <tr>
           <th class="station-column-id">{% trans 'ID' %}</th>
           <th class="station-column-desc">{% trans 'Description' %}</th>
-          <th class="station-column-date">{% trans 'Upload date' %}</th>
           <th class="station-column-download">{% trans 'Download' %}</th>
           <th class="station-column-blank"></th>
         </tr>
@@ -24,10 +23,6 @@
             <td class="station-column-desc">
               <span class="station-cell-title">{% trans 'Description' %}</span>
               <span>{{ file.descr }}</span>
-            </td>
-            <td class="station-column-date">
-              <span class="station-cell-title">{% trans 'Upload date' %}</span>
-              <span>{{ file.date|date:"SHORT_DATETIME_FORMAT" }}</span>
             </td>
             <td class="station-column-download">
               <span class="station-cell-title">{% trans 'Download' %}</span>
