@@ -31,7 +31,8 @@ Enhydris was funded by several organizations:
   Hydroscope_ project.
 * In 2013-2014 by the `TEI of Epirus`_ as part of the IRMA_ project.
 * In 2015 by GRNET_ as an open technology project.
-* In 2018-2021 by NTUA_ and ICCS_ as part of the OpenHi_ project.
+* In 2018-2021 by NTUA_ and ICCS_ as part of the OpenHi_ project,
+  funded by the EU-Greece_ Sectoral Structural framework "Antagonistikotita_".
 
 .. _ntua: http://www.ntua.gr/
 .. _itia: http://www.itia.ntua.gr/
@@ -42,3 +43,5 @@ Enhydris was funded by several organizations:
 .. _grnet: https://edet.gr/en
 .. _iccs: https://www.iccs.gr
 .. _openhi: https://openhi.net
+.. _eu-greece: https://www.espa.gr
+.. _antagonistikotita: http://www.antagonistikotita.gr/epanek_en/index.asp
