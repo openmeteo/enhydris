@@ -40,7 +40,10 @@ class TestTimeseriesMixin:
             remarks="This timeseries group rocks",
         )
         cls.timeseries = mommy.make(
-            models.Timeseries, timeseries_group=cls.timeseries_group, time_step="H"
+            models.Timeseries,
+            timeseries_group=cls.timeseries_group,
+            type=models.Timeseries.INITIAL,
+            time_step="H",
         )
         cls.timeseries.set_data(StringIO(data))
 

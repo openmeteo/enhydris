@@ -72,7 +72,9 @@ stable Enhydris version is 2.0). The procedure is this:
 
  13. Remove obsolete settings from the settings file.
 
- 14. Start the service
+ 14. Start the service.
+
+ 15. Create and start a celery service.
 
 Changes from 2.0
 ----------------
@@ -167,6 +169,20 @@ linear).
 
 .. timescaledb: https://www.timescale.com
 .. _old bug: https://github.com/openmeteo/htimeseries/issues/22
+
+Celery
+^^^^^^
+
+In 2.0, nothing was done asynchronously. In 3.0, the uploading of time
+series data through the site (not through the Web API) is performed
+asynchronously, i.e. the user receives a message that the time series
+data are about to be imported, and he is emailed when importing
+finishes.
+
+Therefore, a Celery service must be running on the server.
+
+Some add-on applications, like ``enhydris-synoptic`` and
+``enhydris-autoprocess``, also use Celery.
 
 Multilingual contents
 ^^^^^^^^^^^^^^^^^^^^^

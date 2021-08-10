@@ -11,3 +11,5 @@ django-parler>=2.2,<3
 django-parler-rest>=2,<3
 django-geowidgets>=0.1.1,<1
 django-nested-admin>=3.2,<4
+django-crequest
+celery>=5,<6

@@ -1,19 +1,21 @@
+import os
 from configparser import ParsingError
 from io import TextIOWrapper
 
 from django import forms
 from django.conf import settings
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db.models import Q, TextField
 from django.utils.translation import ugettext_lazy as _
 
 import nested_admin
 import pandas as pd
+from crequest.middleware import CrequestMiddleware
 from geowidgets import LatLonField
 from htimeseries import HTimeseries
 from rules.contrib.admin import ObjectPermissionsModelAdmin
 
-from enhydris import models
+from enhydris import models, tasks
 from enhydris.models import check_time_step
 
 
@@ -183,11 +185,33 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
         return result
 
     def _save_timeseries_data(self):
-        data = TextIOWrapper(self.cleaned_data["data"], encoding="utf-8", newline="\n")
-        if self.cleaned_data["replace_or_append"] == "APPEND":
-            self.instance.append_data(data)
-        else:
-            self.instance.set_data(data)
+        request = CrequestMiddleware.get_request()
+
+        # Create a hard link to the temporary uploaded file with the data
+        # so that it's not automatically deleted and can be used by the celery
+        # worker
+        tmpfilename = self.cleaned_data["data"].temporary_file_path()
+        datafilename = tmpfilename + ".1"
+        os.link(tmpfilename, datafilename)
+
+        tasks.save_timeseries_data.delay(
+            id=self.instance.id,
+            replace_or_append=self.cleaned_data["replace_or_append"],
+            datafilename=datafilename,
+            username=request.user.username,
+        )
+        messages.add_message(
+            request,
+            messages.INFO,
+            _(
+                'The data for the time series "{} - {} - {}" will be imported '
+                "soon. You will be notified by email when the importing finishes."
+            ).format(
+                self.instance.timeseries_group.gentity.name,
+                str(self.instance.timeseries_group),
+                str(self.instance),
+            ),
+        )
 
 
 class TimeseriesInlineFormSet(nested_admin.formsets.NestedInlineFormSet):
