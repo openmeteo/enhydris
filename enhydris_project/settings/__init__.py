@@ -88,8 +88,6 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-USE_L10N = True
-
 AUTHENTICATION_BACKENDS = (
     "rules.permissions.ObjectPermissionBackend",
     "django.contrib.auth.backends.ModelBackend",
