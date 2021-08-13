@@ -5,7 +5,7 @@ iso8601
 htimeseries>=3.1,<4
 pytz
 rules>=2.0
-dj-rest-auth[with_social]==2.1.7
+dj-rest-auth==2.1.7
 django-rest-captcha>=0.1.0,<1
 django-parler>=2.2,<3
 django-parler-rest>=2,<3

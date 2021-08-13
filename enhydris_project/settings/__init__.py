@@ -32,12 +32,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "dj_rest_auth",
-    # Registration
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
-    "dj_rest_auth.registration",
-    "rest_captcha",
     "enhydris",
     "enhydris.api",
     "django.contrib.admin",
@@ -113,17 +107,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
 }
-ACCOUNT_AUTHENTICATION_METHOD = "username"
-REST_AUTH_REGISTER_SERIALIZERS = {
-    "REGISTER_SERIALIZER": (
-        "enhydris.api.serializers_captcha.RegisterWithCaptchaSerializer"
-    )
-}
-OLD_PASSWORD_FIELD_ENABLED = True
 
 ENHYDRIS_REGISTRATION_OPEN = False
-ACCOUNT_EMAIL_REQUIRED = ENHYDRIS_REGISTRATION_OPEN
-ACCOUNT_EMAIL_VERIFICATION = ENHYDRIS_REGISTRATION_OPEN and "mandatory" or "optional"
 ENHYDRIS_USERS_CAN_ADD_CONTENT = False
 ENHYDRIS_OPEN_CONTENT = False
 
