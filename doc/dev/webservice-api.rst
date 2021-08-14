@@ -140,7 +140,7 @@ user can specify a new password. After succeeding in specifying a new
 password, he is redirected to ``/api/auth/password/reset/complete/``,
 which is a page that says "your password has been set". However these
 two aren't API endpoints (they're just the convenient defaults of
-``django-rest-auth``).
+``dj-rest-auth``).
 
 User profile management
 -----------------------
@@ -169,50 +169,6 @@ PUT or PATCH to the same endpoint::
 The response is a 200 with a similar content as the GET response (with
 the updated data), unless there is a problem, in which case there's a
 standard `error response`_.
-
-Registration
-------------
-
-Registration only works if :data:`ENHYDRIS_REGISTRATION_OPEN` is set.
-
-**Get a captcha** with POST at ``/auth/captcha/``::
-
-    curl -X POST https://openmeteo.org/api/captcha/
-
-Response::
-
-    {
-        "captcha_image": "large string encoded in base64",
-        "image_type": "image/png",
-        "image_decode": "base64",
-        "captcha_key": "9459d5ee-dec2-42c4-843f-f8e8761f8ab3"
-    }
-
-**Register a user** with POST at ``/auth/registration``::
-
-    curl -X POST \
-       -d "username=alice" -d "email=alice@example.com" \
-       -d "password1=topsecret" -d "password2=topsecret" \
-       -d "captcha_key=9459d5ee-dec2-42c4-843f-f8e8761f8ab3" \
-       -d "captcha_value=QLLL" \
-       https://openmeteo.org/api/auth/registration/
-
-If there are no errors (such as user already existing, captcha expired,
-etc.), this will return 201 (with content ``{"detail":"Verification
-e-mail sent."}``) and will send an email to the user which
-will contain a link in the following form::
-
-    https://HOST/confirm-email/SOME_VERIFICATION_KEY/
-
-This is not an API endpoint; it is handled by the front-end, which
-should **verify the user's email** with POST at
-``/auth/registration/verify-email/``::
-
-    curl -X POST -d "key=SOME_VERIFICATION_KEY" \
-        https://openmeteo.org/api/auth/registration/verify-email/
-
-After this runs successfully (and returns 200 with ``{"detail":"ok"}``,
-the user is allowed to login.
 
 Lookups
 =======

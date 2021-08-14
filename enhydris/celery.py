@@ -1,8 +1,16 @@
-# Enhydris on its own does not use Celery (and it's not listed in requirements.txt).
-# However, Celery is used by some add-on apps like enhydris-autoprocess and
+# Celery is used both by Enhydris and by some add-on apps like enhydris-autoprocess and
 # enhydris-synoptic. To simplify setup and use a single set of celery workers for all
-# such apps, we don't specify a celery "app" in the plugin; just a single celery app
-# here that autodiscovers all tasks.
+# such apps, "tasks.py" (of Enhydris or of the add-on) can import the celery "app" from
+# this file, like this:
+#
+#     from enhydris.celery import app
+#
+#     @app.task
+#     def mytask():
+#         ...
+#
+# The tasks in any add-on are autodiscovered by this "app". In addition, any exceptions
+# occurring during task execution are emailed to the ADMINS.
 
 import socket
 import textwrap

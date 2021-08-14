@@ -1,4 +1,5 @@
 import os
+import sys
 
 # Development settings (to be overridden in production settings.py)
 DEBUG = True
@@ -31,19 +32,19 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "rest_framework",
     "rest_framework.authtoken",
-    "rest_auth",
-    # Registration
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
-    "rest_auth.registration",
-    "rest_captcha",
+    "dj_rest_auth",
     "enhydris",
     "enhydris.api",
     "django.contrib.admin",
     "rules.apps.AutodiscoverRulesConfig",
     "parler",
     "nested_admin",
+    "crequest",
+    #
+    # Registration
+    "registration",
+    "captcha",
+    "bootstrap4",  # We only use this for the django-registration-redux templates
 ]
 
 MIDDLEWARE = [
@@ -55,6 +56,7 @@ MIDDLEWARE = [
     "django.middleware.gzip.GZipMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.contrib.flatpages.middleware.FlatpageFallbackMiddleware",
+    "crequest.middleware.CrequestMiddleware",
 ]
 
 APPEND_SLASH = True
@@ -86,9 +88,17 @@ ATOMIC_REQUESTS = True
 TEST_RUNNER = "django.test.runner.DiscoverRunner"
 USE_TZ = True
 
-DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+# By default, when uploading files, Django stores them in memory if they're small
+# and to a temporary file if they're large. But we want to always use a file, because
+# when the user uploads time series data we pass (a hard link to) the temporary file to
+# a celery worker so that the processing happens offline.
+# It would have been better to modify upload handlers for time series uploads only
+# (see "Modifying upload handlers on the fly" in the Django documentation), but at the
+# time of this writing this would be hard or impossible because that functionality is
+# currently using the Django admin.
+FILE_UPLOAD_HANDLERS = ["django.core.files.uploadhandler.TemporaryFileUploadHandler"]
 
-USE_L10N = True
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 AUTHENTICATION_BACKENDS = (
     "rules.permissions.ObjectPermissionBackend",
@@ -103,17 +113,14 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
 }
-ACCOUNT_AUTHENTICATION_METHOD = "username"
-REST_AUTH_REGISTER_SERIALIZERS = {
-    "REGISTER_SERIALIZER": (
-        "enhydris.api.serializers_captcha.RegisterWithCaptchaSerializer"
-    )
-}
-OLD_PASSWORD_FIELD_ENABLED = True
 
-ENHYDRIS_REGISTRATION_OPEN = False
-ACCOUNT_EMAIL_REQUIRED = ENHYDRIS_REGISTRATION_OPEN
-ACCOUNT_EMAIL_VERIFICATION = ENHYDRIS_REGISTRATION_OPEN and "mandatory" or "optional"
+ACCOUNT_ACTIVATION_DAYS = 1
+REGISTRATION_OPEN = False
+
+# For an explanation of the following, see
+# https://github.com/mbi/django-simple-captcha/issues/84
+CAPTCHA_TEST_MODE = len(sys.argv) > 1 and sys.argv[1] == "test"
+
 ENHYDRIS_USERS_CAN_ADD_CONTENT = False
 ENHYDRIS_OPEN_CONTENT = False
 

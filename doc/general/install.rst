@@ -124,8 +124,8 @@ Enhydris configuration directory::
 
 The above commands will also ask you to create a Enhydris superuser.
 
-Start Django
-============
+Start Django and Celery
+=======================
 
 Inside the Enhydris configuration directory, run the following
 command::
@@ -135,12 +135,18 @@ command::
 The above command will start the Django development server and set it
 to listen to port 8000.
 
+In addition, run the following to start Celery::
+
+    celery worker -A enhydris -l info --concurrency=1
+
 Production
 ==========
 
 To use Enhydris in production, you need to setup a web server such as
 apache. This is described in detail in `Deploying Django`_ and in
 https://djangodeployment.com/.
+
+You also need to start celery as a service.
 
 .. _deploying django: http://docs.djangoproject.com/en/3.2/howto/deployment/
 
@@ -164,16 +170,12 @@ These are the settings available to Enhydris, in addition to the
 
 .. _django settings: http://docs.djangoproject.com/en/3.2/ref/settings/
 
-.. data:: ENHYDRIS_REGISTRATION_OPEN
+.. data:: REGISTRATION_OPEN
 
    If ``True``, users can register, otherwise they have to be created
    by the administrator. The default is ``False``.
 
-   ``allauth``'s :data:`ACCOUNT_EMAIL_REQUIRED` must be set at the
-   same value as :data:`ENHYDRIS_REGISTRATION_OPEN`. In addition,
-   :data:`ACCOUNT_EMAIL_VERIFICATION` must be set to "mandatory" if
-   :data:`ENHYDRIS_REGISTRATION_OPEN` is ``True`` and "optional" if
-   ``False``.
+   (This setting is defined by ``django-registration-redux``.)
 
 .. data:: ENHYDRIS_USERS_CAN_ADD_CONTENT
 
@@ -190,8 +192,8 @@ These are the settings available to Enhydris, in addition to the
    data and station file (e.g. image) content. Otherwise, only logged on
    users can do so. Logged on users can always view everything.
 
-   When this setting is ``False``, ``ENHYDRIS_REGISTRATION_OPEN`` must
-   obviously also be set to ``False``.
+   When this setting is ``False``, ``REGISTRATION_OPEN`` must obviously
+   also be set to ``False``.
 
 .. data:: ENHYDRIS_MAP_BASE_LAYERS
 

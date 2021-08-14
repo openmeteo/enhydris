@@ -1,0 +1,11 @@
+{% extends "enhydris/base/main.html" %}
+{% load i18n %}
+{% load bootstrap4 %}
+
+{% block title %}{% trans "Logout" %}{% endblock %}
+{% block content %}
+<div class="container">
+  <h1>{% trans "Logout" %}</h1>
+  <p class="lead">{% trans "You are now logged out" %}.</p>
+</div>
+{% endblock %}

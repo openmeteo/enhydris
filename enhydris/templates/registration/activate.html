@@ -1,0 +1,15 @@
+{% extends "enhydris/base/main.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Account activation error" %}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row">
+	<h1>{% trans "Account activation error" %}</h1>
+	<div class="alert alert-danger col-md-9">
+	  <p>{% trans "The activation key is invalid or expired." %}</p>
+	</div>
+  </div>
+</div>
+{% endblock %}
+

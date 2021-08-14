@@ -8,14 +8,14 @@
         <a href="{% url 'station_detail' pk=object.id %}">{{ object.name }}</a>
       </h3>
       <p class="reset-text">
-        <b>Owner:</b>
+        <b>{% trans "Owner:" %}</b>
         <span>{{ object.owner|default_if_none:"" }}</span>
       </p>
 
       <div>
         {% if object.last_update %}
           <p class="reset-text">
-            <b>Last update:</b>
+            <b>{% trans "Last update:" %}</b>
             <span>{{ object.last_update|naturaltime|default_if_none:"" }}</span>
           </p>
         {% endif %}

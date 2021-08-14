@@ -1,0 +1,10 @@
+You are receiving this email because you have signed up for an account at {{ site.name }}.
+
+To activate your account, please visit the following page:
+
+http://{{ site.domain }}{% url 'registration_activate' activation_key %}
+
+This page will expire in {{ expiration_days }} day{{ expiration_days|pluralize }}.
+
+If you did not sign up for this account you do not need to take any further
+action -- you can simply delete this email.
