@@ -9,9 +9,6 @@ Release notes
 Version 3.0
 ===========
 
-As of March 2020, version 3.0 is in heavy development and it is not
-expected to become stable before late 2020.
-
 Upgrading
 ---------
 
