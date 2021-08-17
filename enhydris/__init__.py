@@ -1,7 +1,7 @@
 import importlib
 import os
 
-__version__ = "DEV"
+__version__ = "3.0.0"
 VERSION = __version__  # synonym
 
 
