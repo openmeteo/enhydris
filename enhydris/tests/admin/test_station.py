@@ -4,7 +4,9 @@ from locale import LC_CTYPE, getlocale, setlocale
 from unittest import mock
 
 from django.contrib.auth.models import Permission, User
+from django.contrib.messages import get_messages
 from django.contrib.messages.storage.cookie import CookieStorage
+from django.contrib.sites.models import Site
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.http import HttpRequest
 from django.test import TestCase, override_settings
@@ -254,6 +256,116 @@ class StationCreateSetsCreatorTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(models.Station.objects.first().creator, self.bob)
+
+
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(SITE_ID=1)
+class StationChangeSites(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.site1 = mommy.make(Site, id=1, domain="hello.com", name="hello")
+        cls.site2 = mommy.make(Site, id=2, domain="world.com", name="world")
+
+        cls.alice = User.objects.create_user(
+            username="alice", password="topsecret", is_staff=True, is_superuser=True
+        )
+        cls.bob = User.objects.create_user(
+            username="bob", password="topsecret", is_staff=True, is_superuser=False
+        )
+
+        cls.station = mommy.make(models.Station, creator=cls.bob, sites=[cls.site1])
+
+    def get_response(self):
+        return self.client.get(
+            "/admin/enhydris/station/{}/change/".format(self.station.id)
+        )
+
+    def test_normal_user_cannot_change_sites(self):
+        self.client.login(username="bob", password="topsecret")
+        response = self.get_response()
+        self.assertNotContains(response, "id_sites")
+
+    def test_administrator_can_change_sites(self):
+        self.client.login(username="alice", password="topsecret")
+        response = self.get_response()
+        self.assertContains(response, "id_sites")
+
+    def test_administrator_cannot_change_sites_when_there_is_only_one_site(self):
+        self.site2.delete()
+        self.client.login(username="alice", password="topsecret")
+        response = self.get_response()
+        self.assertNotContains(response, "id_sites")
+
+    def test_cannot_change_sites_when_creating(self):
+        self.client.login(username="alice", password="topsecret")
+        response = self.client.get("/admin/enhydris/station/add/")
+        self.assertNotContains(response, "id_sites")
+
+
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(SITE_ID=1)
+class StationListFromDifferentSites(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.site1 = mommy.make(Site, id=1, domain="hello.com", name="hello")
+        cls.site2 = mommy.make(Site, id=2, domain="world.com", name="world")
+
+        cls.alice = User.objects.create_user(
+            username="alice", password="topsecret", is_staff=True, is_superuser=True
+        )
+        cls.bob = User.objects.create_user(
+            username="bob", password="topsecret", is_staff=True, is_superuser=False
+        )
+
+        cls.station1 = mommy.make(
+            models.Station, id=42, name="hello station", creator=cls.bob
+        )
+        cls.station2 = mommy.make(
+            models.Station, id=43, name="world station", creator=cls.bob
+        )
+        cls.station2.sites.set({cls.site2})
+
+    def test_bob_can_view_station1_in_list(self):
+        self.client.login(username="bob", password="topsecret")
+        response = self.client.get("/admin/enhydris/station/")
+        self.assertContains(response, "hello station")
+
+    def test_bob_cannot_view_station2_in_list(self):
+        self.client.login(username="bob", password="topsecret")
+        response = self.client.get("/admin/enhydris/station/")
+        self.assertNotContains(response, "world station")
+
+    def test_alice_can_view_station2_in_list(self):
+        self.client.login(username="alice", password="topsecret")
+        response = self.client.get("/admin/enhydris/station/")
+        self.assertContains(response, "world station")
+
+    def test_bob_can_view_station1_detail(self):
+        self.client.login(username="bob", password="topsecret")
+        response = self.client.get("/admin/enhydris/station/42/change/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_bob_cannot_view_station2_detail(self):
+        self.client.login(username="bob", password="topsecret")
+        response = self.client.get("/admin/enhydris/station/43/change/")
+        self.assertEqual(response.status_code, 302)
+        msg = str(list(get_messages(response.wsgi_request))[0])
+        self.assertIn("Station with ID “43” doesn’t exist.", msg)
+
+    def test_alice_can_view_station2_detail(self):
+        self.client.login(username="alice", password="topsecret")
+        response = self.client.get("/admin/enhydris/station/43/change/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_alice_has_a_by_site_list_filter(self):
+        self.client.login(username="alice", password="topsecret")
+        response = self.client.get("/admin/enhydris/station/")
+        self.assertContains(response, "By Site")
+
+    def test_bob_does_not_have_a_by_site_list_filter(self):
+        self.client.login(username="bob", password="topsecret")
+        response = self.client.get("/admin/enhydris/station/")
+        self.assertNotContains(response, "By Site")
 
 
 class TestTimeseriesFormMixin(TestTimeseriesMixin):

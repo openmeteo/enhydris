@@ -5,9 +5,9 @@ from unittest import skipUnless
 
 import django
 from django.conf import settings
-from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.contrib.gis.geos import Point
+from django.contrib.sites.models import Site
 from django.core.management import call_command
 from django.test import TestCase, TransactionTestCase, override_settings
 
@@ -22,51 +22,27 @@ from enhydris.tests import TimeseriesDataMixin
 
 
 class StationListTestCase(TestCase):
-    def setUp(self):
-        mommy.make(
-            User,
-            username="admin",
-            password=make_password("topsecret"),
-            is_active=True,
-            is_superuser=True,
-            is_staff=True,
-        )
+    @staticmethod
+    def _create_station(name, x, y, srid=4326, original_srid=4326):
         mommy.make(
             Station,
-            name="Komboti",
-            geom=Point(x=21.06071, y=39.09518, srid=4326),
-            original_srid=4326,
+            name=name,
+            geom=Point(x=x, y=y, srid=srid),
+            original_srid=original_srid,
         )
-        mommy.make(
-            Station,
-            name="Agios Athanasios",
-            geom=Point(x=21.60121, y=39.22440, srid=4326),
-            original_srid=4326,
+
+    @classmethod
+    def setUpTestData(cls):
+        User.objects.create_user(
+            "admin", "topsecret", is_active=True, is_superuser=True, is_staff=True
         )
-        mommy.make(
-            Station,
-            name="Tharbad",
-            geom=Point(x=-176.48368, y=0.19377, srid=4326),
-            original_srid=4326,
-        )
-        mommy.make(
-            Station,
-            name="SRID Point, NoSRID Station",
-            geom=Point(x=-176.48368, y=0.19377, srid=4326),
-            original_srid=None,
-        )
-        mommy.make(
-            Station,
-            name="NoSRID Point, SRID Station",
-            geom=Point(x=-176.48368, y=0.19377, srid=None),
-            original_srid=4326,
-        )
-        mommy.make(
-            Station,
-            name="NoSRID Point, NoSRID Station",
-            geom=Point(x=-176.48368, y=0.19377, srid=None),
-            original_srid=None,
-        )
+        create_station = cls._create_station
+        create_station("Komboti", 21.06071, 39.09518)
+        create_station("Agios Athanasios", 21.60121, 39.22440)
+        create_station("Tharbad", -176.48368, 0.19377)
+        create_station("SRID Point, NoSRID Station", -176.48368, 0.19377, 4326, None)
+        create_station("NoSRID Point, SRID Station", -176.48368, 0.19377, None, 4326)
+        create_station("NoSRID Point, NoSRID Station", -176.48368, 0.19377, None, None)
 
     def test_station_list(self):
         response = self.client.get("/?q=t")
@@ -106,6 +82,26 @@ class StationListTestCase(TestCase):
         Station.objects.all().delete()
         response = self.client.get("/")
         self.assertContains(response, "enhydris.mapViewport = [1.1, 2.2, 3.3, 4.4]")
+
+
+@override_settings(SITE_ID=1)
+class StationListSitesTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        mommy.make(Site, id=1, domain="middleearth.com", name="Middle Earth")
+        site2 = mommy.make(Site, id=2, domain="realearth.com", name="Real Earth")
+        mommy.make(Station, name="Hobbiton")
+        mommy.make(Station, name="Rivendell")
+        komboti = mommy.make(Station, name="Komboti")
+        komboti.sites.set({site2})
+
+    def test_list_contains_hobbiton(self):
+        response = self.client.get("/?q=o")
+        self.assertContains(response, "Hobbiton")
+
+    def test_list_does_not_contain_komboti(self):
+        response = self.client.get("/?q=o")
+        self.assertNotContains(response, "Komboti")
 
 
 class StationDetailTestCase(TestCase, TimeseriesDataMixin):
@@ -203,6 +199,24 @@ class StationDetailPeriodOfOperationTestCase(TestCase):
         self._set_dates(None, None)
         response = self._get_response()
         self.assertNotContains(response, "operation")
+
+
+@override_settings(SITE_ID=1)
+class StationDetailSitesTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        mommy.make(Site, id=1, domain="middleearth.com", name="Middle Earth")
+        mommy.make(Site, id=2, domain="realearth.com", name="Real Earth")
+        mommy.make(Station, id=42, name="Hobbiton")
+
+    def test_hobbiton_detail(self):
+        response = self.client.get("/stations/42/")
+        self.assertEquals(response.status_code, 200)
+
+    @override_settings(SITE_ID=2)
+    def test_hobbiton_detail_unavailable_on_site_2(self):
+        response = self.client.get("/stations/42/")
+        self.assertEquals(response.status_code, 404)
 
 
 class TimeseriesDownloadButtonTestCase(TestCase, TimeseriesDataMixin):

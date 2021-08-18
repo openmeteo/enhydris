@@ -6,8 +6,45 @@ Release notes
 
 .. highlight:: bash
 
+Development
+===========
+
+Upgrading from 3.0
+------------------
+
+ 1. Make sure you are upgrading from 3.0
+ 2. Backup the database.
+ 3. Login as a superuser and go to the dashboard.
+ 4. Go to "Sites" and make sure they're set correctly.
+ 5. In the settings, make sure ``SITE_ID`` is set correctly.
+ 6. Update the database with ``python manage.py migrate``. This will put
+    all stations to the site specified with ``SITE_ID``, and will add
+    all users to the group whose name is the domain of the current site
+    (the group will be created automatically if it does not exist).
+ 7. If you have been using a single database to power many sites, then:
+     * In the settings, make sure :data:`ENHYDRIS_SITES_FOR_NEW_STATIONS`
+       is set correctly. Restart the server if necessary.
+     * Logon as a superuseri and go to the dashboard
+     * Go to each of the stations that used to be specified by
+       ``ENHYDRIS_SITE_STATION_FILTER`` and make sure the "Sites" field
+       is set correctly.
+     * If any users need to be able to log on to a different site from
+       the one where you performed the database update, go to each of
+       these users and put them in the appropriate groups.
+
+Changes from 3.0
+----------------
+
+- Functionality for serving many sites from a single database has been
+  added. Accordingly, the setting ``ENHYDRIS_SITE_STATION_FILTER`` has
+  been abolished and replaced with
+  :data:`ENHYDRIS_SITES_FOR_NEW_STATIONS`. For more information, see
+  :ref:`Managing domains <domains>`.
+
 Version 3.0
 ===========
+
+Released on 17 August 2021.
 
 Upgrading
 ---------

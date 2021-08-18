@@ -110,8 +110,6 @@ the default location::
 At some point, these commands will ask you for the password of the
 operating system user.
 
-Note:
-
 Initialize the database
 =========================
 
@@ -139,6 +137,26 @@ In addition, run the following to start Celery::
 
     celery worker -A enhydris -l info --concurrency=1
 
+Set the domain name
+===================
+
+You must setup the Django sites framework. Visit Enhydris through your
+browser, login as a superuser, go to the dashboard, and under "Sites"
+add a site (i.e. a domain) (or, if a site such as ``example.com`` is
+already there, replace it). After that, make sure ``SITE_ID`` in the
+settings has the appropriate id.
+
+There are several reasons this needs to be done:
+ 1. Some generated links, such as links in emails to users for
+    registration confirmation, may contain the domain.
+ 2. Users will not be able to log on unless registered with the domain,
+    and stations will only show if registered with the domain. For more
+    information about this, see :ref:`Managing domains <domains>`.
+
+If you modify an existing site (e.g. if you change ``example.com`` to
+something else), most likely you need to restart the Enhydris server for
+the changes to take effect.
+
 Production
 ==========
 
@@ -148,17 +166,65 @@ https://djangodeployment.com/.
 
 You also need to start celery as a service.
 
-.. _deploying django: http://docs.djangoproject.com/en/3.2/howto/deployment/
+.. _deploying django: https://docs.djangoproject.com/en/3.2/howto/deployment/
 
-Post-install configuration: domain name
-=======================================
+.. _domains:
 
-After you run Enhydris, logon as a superuser, visit the admin panel,
-go to ``Sites``, edit the default site, and enter your domain name
-there instead of ``example.com``. Emails to users for registration
-confirmation will contain links to that domain.  Restart the
-Enhydris (by restarting apache/gunicorn/whatever) after changing the
-domain name.
+Managing domains
+================
+
+Enhydris has functionality to power many sites (i.e. domains) from a
+single database. For this, it uses the Django sites framework.
+
+Each station has a ``sites`` attribute (a Django ``ManyToManyField``)
+with the sites in which the station should show. Normally this attribute
+is handled automatically and need not be touched, and in fact the
+relevant field does not normally show in the station edit form.  When a
+station is added to the system, it is automatically added to the current
+site (i.e. the one specified with ``SITE_ID``). In most cases, this is
+satisfactory.
+
+Sometimes we want a single database to power two sites, for example,
+openmeteo.org (id=1) and system.openhi.net (id=2). There are therefore
+two Enhydris instances, each with a different ``SITE_ID``, and each
+instance filters out stations that are not registered with that
+particular site (i.e. stations whose ``sites`` attribute does not
+contain the site of the Enhydris instance). In this case, when a station
+is created, it is automatically added only to the site of the Enhydris
+instance being used. Superusers, however, can add and remove existing
+stations to/from sites. This is done in the station form, which shows a
+"Sites" field—however the field is shown only for superusers, only when
+editing (not creating) a station, and only if there are at least two
+sites registered with the Django Sites framework.
+
+The setting :data:`ENHYDRIS_SITES_FOR_NEW_STATIONS` can modify this
+behaviour. In fact, when I said above that new stations are
+automatically added only to the site of the Enhydris instance being
+used, I was lying. The truth is that when a user uses openmeteo.org and
+creates a station, that station is indeed only added to openmeteo.org.
+But when a user uses system.openhi.net and adds a station, that station
+is added to both system.openhi.net and openmeteo.org.  In order to
+achieve this, these are the relevant settings for openmeteo.org::
+
+    SITE_ID = 1
+    ENHYDRIS_SITES_FOR_NEW_STATIONS = set()  # Redundant; it's the default
+
+And these are for system.openhi.net::
+
+    SITE_ID = 2
+    ENHYDRIS_SITES_FOR_NEW_STATIONS = {1}
+
+This usage of the sites framework affects not only stations but also
+users and logins. When a user is created, he is automatically added to a
+group whose name is the domain name of the current site (the group is
+created if it does not exist). Enhydris only allows a user to logon if
+he is a member of that group. Thus, the superuser can decide which users
+can log on to which sites.
+
+In the Django admin, when a normal user lists stations, only stations of
+the current site are listed. However, when a superuser lists stations,
+all stations are listed, and there is a list filter to only show those
+of a site.
 
 .. _enhydris_settings:
 
@@ -245,15 +311,15 @@ These are the settings available to Enhydris, in addition to the
    lat is in decimal degrees, positive for north/east, negative for
    west/south.
 
-.. data:: ENHYDRIS_SITE_STATION_FILTER
+.. data:: ENHYDRIS_SITES_FOR_NEW_STATIONS
 
-   This is a quick-and-dirty way to create a web site that only
-   displays a subset of an Enhydris database. For example, the
-   database of http://system.deucalionproject.gr/ is the same as that
-   of http://openmeteo.org/; however, the former only shows stations
-   relevant to the Deucalion project, because it has this setting::
+   A set of site (i.e. domain) ids of the Django sites framework. The
+   default is an empty set. It specifies to which sites (apart from the
+   current site) new stations will automatically be added to. New
+   stations are always added to the current site, regardless this
+   setting.
 
-      ENHYDRIS_SITE_STATION_FILTER = {'owner__id__exact': '9'}
+   For more information, see :ref:`Managing domains <domains>`.
 
 .. data:: ENHYDRIS_STATIONS_PER_PAGE
 

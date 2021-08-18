@@ -5,6 +5,7 @@ from io import TextIOWrapper
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
+from django.contrib.sites.models import Site
 from django.db.models import Q, TextField
 from django.utils.translation import ugettext_lazy as _
 
@@ -275,6 +276,24 @@ class TimeseriesGroupInline(InlinePermissionsMixin, nested_admin.NestedStackedIn
         css = {"all": ("css/extra_admin.css",)}
 
 
+class SiteFilter(admin.SimpleListFilter):
+    title = _("Site")
+
+    parameter_name = "site"
+
+    def lookups(self, request, model_admin):
+        if not request.user.is_superuser:
+            return ()
+        else:
+            return ((s.id, s.domain) for s in Site.objects.all())
+
+    def queryset(self, request, queryset):
+        if self.value() is None:
+            return queryset
+        else:
+            return queryset.filter(sites__id=self.value())
+
+
 @admin.register(models.Station)
 class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
     form = StationAdminForm
@@ -289,9 +308,13 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
     ]
     search_fields = ("id", "name", "code", "owner__ordering_string")
     list_display = ("name", "owner")
+    list_filter = (SiteFilter,)
 
     def get_queryset(self, request):
-        result = super().get_queryset(request)
+        if request.user.is_superuser:
+            result = super().get_queryset(request)
+        else:
+            result = models.Station.on_site
         if request.user.has_perm("enhydris.change_station"):
             return result
         elif settings.ENHYDRIS_USERS_CAN_ADD_CONTENT:
@@ -303,34 +326,42 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
             return result.none()
 
     def get_fieldsets(self, request, obj):
-        fieldsets = [
+        self._fieldsets = [
             (
                 _("General information"),
                 {
-                    "fields": (
+                    "fields": [
                         ("name", "code"),
                         "owner",
                         ("geom", "original_srid"),
                         "altitude",
                         "remarks",
                         ("start_date", "end_date"),
-                    ),
+                    ],
                 },
             ),
         ]
+        self._get_permissions_fields(request, obj)
+        self._get_sites_fields(request, obj)
+        return self._fieldsets
+
+    def _get_permissions_fields(self, request, obj):
         permissions_fields = []
         if request.user.has_perm("enhydris.change_station_creator", obj):
             permissions_fields.append("creator")
         if request.user.has_perm("enhydris.change_station_maintainers", obj):
             permissions_fields.append("maintainers")
         if permissions_fields:
-            fieldsets.append(
+            self._fieldsets.append(
                 (
                     _("Permissions"),
                     {"fields": permissions_fields, "classes": ("collapse",)},
                 )
             )
-        return fieldsets
+
+    def _get_sites_fields(self, request, obj):
+        if obj is not None and request.user.is_superuser and Site.objects.count() > 1:
+            self._fieldsets[0][1]["fields"].append("sites")
 
     def save_model(self, request, obj, form, change):
         if obj.creator is None:
