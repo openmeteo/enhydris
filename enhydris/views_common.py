@@ -31,11 +31,7 @@ class StationListViewMixin:
     """
 
     def _get_unsorted_undistinct_queryset(self, **kwargs):
-        queryset = models.Station.objects.all()
-
-        # Apply SITE_STATION_FILTER
-        if len(settings.ENHYDRIS_SITE_STATION_FILTER) > 0:
-            queryset = queryset.filter(**settings.ENHYDRIS_SITE_STATION_FILTER)
+        queryset = models.Station.on_site.all()
 
         # If a gentity_id query parameter is specified, ignore all the rest
         try:

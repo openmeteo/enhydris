@@ -4,14 +4,17 @@ from itertools import islice
 from os.path import abspath
 
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 from django.contrib.gis.db import models
+from django.contrib.sites.managers import CurrentSiteManager
+from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
 from django.db import IntegrityError, connection
 from django.db.models import FilteredRelation, Q
 from django.db.models.functions import Coalesce
 from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
@@ -45,6 +48,24 @@ def _parse_time_step(time_step):
     number = time_step[:first_nondigit_pos]
     unit = time_step[first_nondigit_pos:]
     return number, unit
+
+
+@receiver(post_save, sender=User)
+def add_current_site_group_to_new_users(sender, instance, created, **kwargs):
+    """Automatically give permissions on site to new users.
+
+    When a user is created, he is automatically put in a group whose name is the same as
+    the domain of the current django.contrib.sites.models.Site. The custom
+    authentication of Enhydris will then allow him to login on that site, but not on
+    other sites (unless an admin subsequently also adds him to more groups).
+    """
+    if created:
+        current_domain = Site.objects.get_current().domain
+        try:
+            group = Group.objects.get(name=current_domain)
+        except Group.DoesNotExist:
+            group = Group.objects.create(name=current_domain)
+        instance.groups.add(group)
 
 
 #
@@ -154,6 +175,7 @@ class Gentity(models.Model):
     code = models.CharField(max_length=50, blank=True, verbose_name=_("Code"))
     remarks = models.TextField(blank=True, verbose_name=_("Remarks"))
     geom = models.GeometryField()
+    sites = models.ManyToManyField(Site)
 
     class Meta:
         verbose_name_plural = "Gentities"
@@ -161,6 +183,14 @@ class Gentity(models.Model):
 
     def __str__(self):
         return self.name or self.code or str(self.id)
+
+    def save(self, *args, **kwargs):
+        inserting = self._state.adding
+        super().save(*args, **kwargs)
+        if inserting:
+            sites = settings.ENHYDRIS_SITES_FOR_NEW_STATIONS.copy()
+            sites.add(Site.objects.get_current())
+            self.sites.set(sites)
 
 
 class Gpoint(Gentity):
@@ -327,6 +357,8 @@ class Station(Gpoint):
         verbose_name=_("Maintainers"),
     )
 
+    objects = models.Manager()
+    on_site = CurrentSiteManager()
     f_dependencies = ["Gpoint"]
 
     class Meta:
