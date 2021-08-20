@@ -2,8 +2,9 @@ import datetime as dt
 from io import StringIO
 from unittest import mock
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 from django.contrib.gis.geos import MultiPolygon, Point, Polygon
+from django.contrib.sites.models import Site
 from django.db import IntegrityError
 from django.db.models.signals import post_save
 from django.test import TestCase, override_settings
@@ -16,6 +17,32 @@ from parler.utils.context import switch_language
 
 from enhydris import models
 from enhydris.tests import TimeseriesDataMixin
+
+
+class AddCurrentSiteGroupToNewUsersTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.site1 = mommy.make(Site, id=1, domain="hello.com", name="hello")
+        cls.site2 = mommy.make(Site, id=2, domain="world.com", name="world")
+
+    @override_settings(SITE_ID=2)
+    def test_creating_user_creates_group_and_puts_him_in_it(self):
+        user = User.objects.create_user(username="alice", password="topsecret")
+        self.assertTrue(user.groups.filter(name="world.com").exists())
+
+    @override_settings(SITE_ID=2)
+    def test_creating_user_puts_him_in_existing_group(self):
+        Group.objects.create(name="world.com")
+        user = User.objects.create_user(username="alice", password="topsecret")
+        self.assertTrue(user.groups.filter(name="world.com").exists())
+
+    @override_settings(SITE_ID=1)
+    def test_updating_user_does_not_touch_groups(self):
+        user = User.objects.create_user(username="alice", password="topsecret")
+        user.groups.all().delete()
+        user.is_staff = True
+        user.save()
+        self.assertFalse(user.groups.filter(name="world.com").exists())
 
 
 class TestTimeseriesMixin:
@@ -476,6 +503,55 @@ class StationLastUpdateTestCase(TestCase):
         station = models.Station.objects.get(id=self.station.id)
         with self.assertNumQueries(0):
             station.last_update_naive
+
+
+@override_settings(SITE_ID=4)
+class StationSitesTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.site3 = mommy.make(Site, id=3, domain="hello.com", name="hello")
+        cls.site4 = mommy.make(Site, id=4, domain="beautiful.com", name="beautiful")
+        cls.site5 = mommy.make(Site, id=5, domain="world.com", name="world")
+
+    def test_creating_station_puts_it_in_the_active_site(self):
+        station = models.Station(
+            owner=mommy.make(models.Organization),
+            geom=Point(x=21.06071, y=39.09518, srid=4326),
+        )
+        station.save()
+        self.assertEqual(
+            list(models.Station.objects.first().sites.values("id")), [{"id": 4}]
+        )
+
+    def test_updating_station_does_not_touch_its_sites(self):
+        # Create station and put it in site5
+        station = models.Station(
+            owner=mommy.make(models.Organization),
+            geom=Point(x=21.06071, y=39.09518, srid=4326),
+        )
+        station.save()
+        station.sites.set([Site.objects.get(id=5)])
+
+        # Update station
+        station.name = "hello"
+        station.save()
+
+        # Should still be in site5
+        self.assertEqual(
+            list(models.Station.objects.first().sites.values("id")), [{"id": 5}]
+        )
+
+    @override_settings(ENHYDRIS_SITES_FOR_NEW_STATIONS={5})
+    def test_creating_station_puts_it_in_sites_for_new_stations(self):
+        station = models.Station(
+            owner=mommy.make(models.Organization),
+            geom=Point(x=21.06071, y=39.09518, srid=4326),
+        )
+        station.save()
+        self.assertEqual(
+            list(models.Station.objects.first().sites.values("id")),
+            [{"id": 4}, {"id": 5}],
+        )
 
 
 class UnitOfMeasurementTestCase(TestCase):

@@ -42,6 +42,9 @@ class StationDetail(MapWithSingleStationBaseView):
     model = models.Station
     template_name = "enhydris/station_detail/main.html"
 
+    def get_queryset(self):
+        return models.Station.on_site.all()
+
 
 class StationEdit(RedirectView):
     def get_redirect_url(self, *args, **kwargs):

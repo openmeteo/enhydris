@@ -125,7 +125,7 @@ class GentityEventSerializer(serializers.ModelSerializer):
 class StationSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Station
-        exclude = ("creator", "maintainers")
+        exclude = ("creator", "maintainers", "sites")
 
     def validate_nested_many_serializer(self, value):
         try:

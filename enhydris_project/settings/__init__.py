@@ -102,7 +102,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 AUTHENTICATION_BACKENDS = (
     "rules.permissions.ObjectPermissionBackend",
-    "django.contrib.auth.backends.ModelBackend",
+    "enhydris.auth.AuthBackend",
 )
 
 REST_FRAMEWORK = {
@@ -152,7 +152,7 @@ ENHYDRIS_MAP_DEFAULT_VIEWPORT = (19.3, 34.75, 29.65, 41.8)
 ENHYDRIS_TIMESERIES_DATA_DIR = "timeseries_data"
 ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR = 200
 ENHYDRIS_TS_GRAPH_FINE_STEP_DENOMINATOR = 50
-ENHYDRIS_SITE_STATION_FILTER = {}
+ENHYDRIS_SITES_FOR_NEW_STATIONS = set()
 ENHYDRIS_CELERY_SEND_TASK_ERROR_EMAILS = True
 
 if os.environ.get("SELENIUM_BROWSER", False):

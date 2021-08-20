@@ -3,6 +3,7 @@ from zipfile import ZipFile
 
 from django.contrib.auth.models import Permission, User
 from django.contrib.gis.geos import Point
+from django.contrib.sites.models import Site
 from django.test.utils import override_settings
 from rest_framework.test import APITestCase
 
@@ -24,6 +25,43 @@ class StationListTestCase(APITestCase):
 
     def test_name(self):
         self.assertEqual(self.response.json()["results"][0]["name"], "Hobbiton")
+
+
+@override_settings(SITE_ID=1)
+class StationListSitesTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        mommy.make(Site, id=1, domain="middleearth.com", name="Middle Earth")
+        site2 = mommy.make(Site, id=2, domain="realearth.com", name="Real Earth")
+        mommy.make(models.Station, name="Hobbiton")
+        arta = mommy.make(models.Station, name="Arta")
+        arta.sites.set({site2})
+
+    def test_list_contains_hobbiton(self):
+        response = self.client.get("/api/stations/")
+        self.assertContains(response, "Hobbiton")
+
+    def test_list_does_not_contain_arta(self):
+        response = self.client.get("/api/stations/")
+        self.assertNotContains(response, "Arta")
+
+
+@override_settings(SITE_ID=1)
+class StationDetailSitesTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        mommy.make(Site, id=1, domain="middleearth.com", name="Middle Earth")
+        mommy.make(Site, id=2, domain="realearth.com", name="Real Earth")
+        mommy.make(models.Station, id=42, name="Hobbiton")
+
+    def test_hobbiton_detail(self):
+        response = self.client.get("/api/stations/42/")
+        self.assertEquals(response.status_code, 200)
+
+    @override_settings(SITE_ID=2)
+    def test_hobbiton_detail_unavailable_on_site2(self):
+        response = self.client.get("/api/stations/42/")
+        self.assertEquals(response.status_code, 404)
 
 
 class StationCreateTestCase(APITestCase):
