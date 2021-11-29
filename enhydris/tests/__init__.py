@@ -1,4 +1,5 @@
 import datetime as dt
+from io import StringIO
 
 from django.contrib.gis.geos import Point
 
@@ -8,6 +9,36 @@ from model_mommy import mommy
 from parler.utils.context import switch_language
 
 from enhydris import models
+
+
+class TestTimeseriesMixin:
+    @classmethod
+    def _create_test_timeseries(cls, data=""):
+        cls.station = mommy.make(
+            models.Station,
+            name="Celduin",
+            original_srid=2100,
+            geom=Point(x=21.06071, y=39.09518, srid=4326),
+            altitude=219,
+        )
+        cls.timeseries_group = mommy.make(
+            models.TimeseriesGroup,
+            name="Daily temperature",
+            gentity=cls.station,
+            unit_of_measurement__symbol="mm",
+            time_zone__code="IST",
+            time_zone__utc_offset=330,
+            variable__descr="Temperature",
+            precision=1,
+            remarks="This timeseries group rocks",
+        )
+        cls.timeseries = mommy.make(
+            models.Timeseries,
+            timeseries_group=cls.timeseries_group,
+            type=models.Timeseries.INITIAL,
+            time_step="H",
+        )
+        cls.timeseries.set_data(StringIO(data))
 
 
 class TimeseriesDataMixin:
