@@ -2,7 +2,9 @@ import datetime as dt
 from io import StringIO
 
 from django.contrib.gis.geos import Point
+from django.core.management import call_command
 
+import django_selenium_clean
 import pandas as pd
 from htimeseries import HTimeseries
 from model_mommy import mommy
@@ -74,3 +76,35 @@ class TimeseriesDataMixin:
             timeseries_group=self.timeseries_group,
         )
         self.timeseries.set_data(self.htimeseries.data)
+
+
+class SeleniumTestCase(django_selenium_clean.SeleniumTestCase):
+    """A change in SeleniumTestCase so that it succeeds in truncating.
+
+    SeleniumTestCase inherits LiveServerTestCase, which inherits TransactionTestCase.
+    In contrast to TestCase, which wraps tests in "atomic", TransactionTestCase
+    truncates the database in the end by calling the "flush" management command. In our
+    case, this fails with "ERROR: cannot truncate a table referenced in a foreign key
+    constraint". The reason is that TimeseriesRecord is unmanaged, so "flush" doesn't
+    truncate it, but "flush" truncates Timeseries, and TimeseriesRecord has a foreign
+    key to Timeseries.
+
+    To fix this, we override TransactionTestCase's _fixture_teardown(), ensuring it
+    executes TRUNCATE with CASCADE.
+
+    The same result might have been achieved by setting
+    TransactionTestCase.available_apps, but this is a private API that is subject to
+    change without notice, and, well, go figure.
+    """
+
+    def _fixture_teardown(self):
+        for db_name in self._databases_names(include_mirrors=False):
+            call_command(
+                "flush",
+                verbosity=0,
+                interactive=False,
+                database=db_name,
+                reset_sequences=False,
+                allow_cascade=True,
+                inhibit_post_migrate=False,
+            )

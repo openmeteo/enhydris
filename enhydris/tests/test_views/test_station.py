@@ -1,24 +1,20 @@
 import datetime as dt
-import re
 from time import sleep
 from unittest import skipUnless
 
-import django
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.gis.geos import Point
 from django.contrib.sites.models import Site
-from django.core.management import call_command
-from django.test import TestCase, TransactionTestCase, override_settings
+from django.test import TestCase, override_settings
 
-import django_selenium_clean
 from bs4 import BeautifulSoup
 from django_selenium_clean import PageElement
 from model_mommy import mommy
 from selenium.webdriver.common.by import By
 
-from enhydris.models import GentityFile, GentityImage, Organization, Station, Timeseries
-from enhydris.tests import TimeseriesDataMixin
+from enhydris.models import GentityFile, GentityImage, Organization, Station
+from enhydris.tests import SeleniumTestCase, TimeseriesDataMixin
 
 
 class StationListTestCase(TestCase):
@@ -219,39 +215,6 @@ class StationDetailSitesTestCase(TestCase):
         self.assertEquals(response.status_code, 404)
 
 
-class TimeseriesDownloadButtonTestCase(TestCase, TimeseriesDataMixin):
-    def setUp(self):
-        self.create_timeseries()
-        self.download_button = (
-            '<button type="submit" class="btn form-btn-download">download</button>'
-        )
-
-    def _get_response(self):
-        self.response = self.client.get(
-            f"/stations/{self.station.id}/timeseriesgroups/{self.timeseries_group.id}/"
-        )
-
-    @override_settings(ENHYDRIS_OPEN_CONTENT=True)
-    def test_contains_download_button_when_site_content_is_free(self):
-        self._get_response()
-        self.assertContains(self.response, self.download_button)
-
-    @override_settings(ENHYDRIS_OPEN_CONTENT=False)
-    def test_has_no_download_link_when_site_content_is_restricted(self):
-        self._get_response()
-        self.assertNotContains(self.response, self.download_button)
-
-    @override_settings(ENHYDRIS_OPEN_CONTENT=True)
-    def test_has_no_permission_denied_message_when_site_content_is_free(self):
-        self._get_response()
-        self.assertNotContains(self.response, "You don't have permission to download")
-
-    @override_settings(ENHYDRIS_OPEN_CONTENT=False)
-    def test_shows_permission_denied_message_when_site_content_is_restricted(self):
-        self._get_response()
-        self.assertContains(self.response, "You don't have permission to download")
-
-
 class GentityFileDownloadLinkTestCase(TestCase):
     def setUp(self):
         self.station = mommy.make(Station, name="Komboti")
@@ -290,57 +253,6 @@ class RedirectOldUrlsTestCase(TestCase):
         self.assertRedirects(
             r, "/stations/200348/", status_code=301, fetch_redirect_response=False
         )
-
-    def test_old_timeseries_url_redirects(self):
-        mommy.make(
-            Timeseries,
-            id=1169,
-            timeseries_group__id=100174,
-            timeseries_group__gentity__id=200348,
-        )
-        r = self.client.get("/timeseries/d/1169/")
-        self.assertRedirects(
-            r,
-            "/stations/200348/timeseriesgroups/100174/",
-            status_code=301,
-            fetch_redirect_response=False,
-        )
-
-    def test_old_timeseries_url_for_nonexistent_timeseries_returns_404(self):
-        r = self.client.get("/timeseries/d/1169/")
-        self.assertEqual(r.status_code, 404)
-
-
-class SeleniumTestCase(django_selenium_clean.SeleniumTestCase):
-    """A change in SeleniumTestCase so that it succeeds in truncating.
-
-    SeleniumTestCase inherits LiveServerTestCase, which inherits TransactionTestCase.
-    In contrast to TestCase, which wraps tests in "atomic", TransactionTestCase
-    truncates the database in the end by calling the "flush" management command. In our
-    case, this fails with "ERROR: cannot truncate a table referenced in a foreign key
-    constraint". The reason is that TimeseriesRecord is unmanaged, so "flush" doesn't
-    truncate it, but "flush" truncates Timeseries, and TimeseriesRecord has a foreign
-    key to Timeseries.
-
-    To fix this, we override TransactionTestCase's _fixture_teardown(), ensuring it
-    executes TRUNCATE with CASCADE.
-
-    The same result might have been achieved by setting
-    TransactionTestCase.available_apps, but this is a private API that is subject to
-    change without notice, and, well, go figure.
-    """
-
-    def _fixture_teardown(self):
-        for db_name in self._databases_names(include_mirrors=False):
-            call_command(
-                "flush",
-                verbosity=0,
-                interactive=False,
-                database=db_name,
-                reset_sequences=False,
-                allow_cascade=True,
-                inhibit_post_migrate=False,
-            )
 
 
 @skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
@@ -468,182 +380,3 @@ class ShowStationOnStationDetailMapTestCase(SeleniumTestCase):
             if result:
                 return result
         return 0
-
-
-@override_settings(ENHYDRIS_OPEN_CONTENT=True)
-class TimeseriesGroupDetailTestCase(TestCase, TimeseriesDataMixin):
-    def setUp(self):
-        self.create_timeseries()
-        self.response = self.client.get(
-            f"/stations/{self.station.id}/timeseriesgroups/{self.timeseries_group.id}/"
-        )
-
-    def test_timeseries_group_without_timeseries(self):
-        self.timeseries_group.timeseries_set.all().delete()
-        self.response = self.client.get(
-            f"/stations/{self.station.id}/timeseriesgroups/{self.timeseries_group.id}/"
-        )
-        self.assertNotContains(self.response, "form-item-download")
-        self.assertContains(self.response, "alert-info")  # "No data" message
-
-    def test_timeseries_group_with_timeseries(self):
-        self.assertContains(self.response, "form-item-download")
-        self.assertNotContains(self.response, "alert-info")  # "No data" message
-
-    def test_title(self):
-        self.assertContains(
-            self.response, "<title>Beauty — Komboti — Enhydris</title>", html=True
-        )
-
-    def test_heading(self):
-        self.assertContains(
-            self.response, "<h2>Beauty <span>(beauton)</span></h2>", html=True
-        )
-
-    def test_download_form(self):
-        self.assertContains(
-            self.response, '<label for="id_timeseries_id_0">Initial</label>', html=True
-        )
-
-
-class DownloadDataTestCase(TestCase, TimeseriesDataMixin):
-    def setUp(self):
-        self.create_timeseries()
-
-    def _make_request(self, station_id, timeseries_group_id, timeseries_id):
-        self.response = self.client.get(
-            f"/downloaddata/?station_id={station_id}"
-            f"&timeseries_group_id={timeseries_group_id}"
-            f"&timeseries_id={timeseries_id}&format=csv"
-        )
-
-    def test_redirects(self):
-        self._make_request(
-            self.station.id, self.timeseries_group.id, self.timeseries.id
-        )
-        self.assertRedirects(
-            self.response,
-            expected_url=(
-                f"/api/stations/{self.station.id}/timeseriesgroups"
-                f"/{self.timeseries_group.id}/timeseries/{self.timeseries.id}"
-                "/data/?fmt=csv"
-            ),
-            fetch_redirect_response=False,
-        )
-
-    def test_returns_404_on_total_garbage(self):
-        self.response = self.client.get("/downloaddata/?hello=world")
-        self.assertEqual(self.response.status_code, 404)
-
-    def test_returns_404_on_garbage_timeseries_group(self):
-        self.response = self.client.get(
-            "/downloaddata/?station_id=hello&timeseries_group_id=world"
-            "&timeseries_id=earth&format=CSV"
-        )
-        self.assertEqual(self.response.status_code, 404)
-
-    def test_returns_404_on_garbage_station(self):
-        self.response = self.client.get(
-            "/downloaddata/?station_id=hello&timeseries_group_id=50"
-            "&timeseries_id=earth&format=CSV"
-        )
-        self.assertEqual(self.response.status_code, 404)
-
-    def test_returns_404_on_no_data(self):
-        self.response = self.client.get("/downloaddata/")
-        self.assertEqual(self.response.status_code, 404)
-
-
-# NOTE: For an explanation of how captchas work in the tests, see CAPTCHA_TEST_MODE
-# in settings.py.
-class RegisterTestCase(TransactionTestCase):
-    available_apps = [
-        "django.contrib.auth",
-        "enhydris",
-        "registration",
-        "captcha",
-        "bootstrap4",
-    ]
-
-    @override_settings(REGISTRATION_OPEN=True)
-    def test_register(self):
-        # Submit registration form
-        response = self.client.post(
-            "/accounts/register/",
-            data={
-                "username": "alice",
-                "email": "alice@alice.com",
-                "password1": "topsecret",
-                "password2": "topsecret",
-                "tos": "on",
-                "captcha_0": "irrelevant",
-                "captcha_1": "PASSED",
-            },
-        )
-        self.assertEqual(response.status_code, 302)
-
-        # We shouldn't be able to login yet
-        response = self.client.post(
-            "/api/auth/login/", data={"username": "alice", "password": "topsecret"}
-        )
-        self.assertEqual(response.status_code, 400)
-
-        # Did I receive an email?
-        self.assertEqual(len(django.core.mail.outbox), 1)
-
-        # Get the key from the link in the email
-        m = re.search(r"http://([^/]+)(.*)", django.core.mail.outbox[0].body)
-        path = m.group(2)
-
-        # Submit it
-        response = self.client.get(path)
-        self.assertEqual(response.status_code, 302)
-
-        # We should now be able to login
-        response = self.client.post(
-            "/api/auth/login/", data={"username": "alice", "password": "topsecret"}
-        )
-        self.assertEqual(response.status_code, 200)
-
-    @override_settings(REGISTRATION_OPEN=True)
-    def test_wrong_captcha(self):
-        response = self.client.post(
-            "/accounts/register/",
-            data={
-                "username": "alice",
-                "email": "alice@alice.com",
-                "password1": "topsecret",
-                "password2": "topsecret",
-                "tos": "on",
-                "captcha_0": "irrelevant",
-                "captcha_1": "WRONG CAPTCHA",
-            },
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(django.core.mail.outbox), 0)
-
-    @override_settings(REGISTRATION_OPEN=False)
-    def test_registration_fails_when_registration_is_closed(self):
-        response = self.client.post(
-            "/accounts/register/",
-            data={
-                "username": "alice",
-                "email": "alice@alice.com",
-                "password1": "topsecret",
-                "password2": "topsecret",
-                "captcha_0": "irrelevant",
-                "captcha_1": "PASSED",
-            },
-        )
-        self.assertRedirects(response, expected_url="/accounts/register/closed/")
-        self.assertEqual(len(django.core.mail.outbox), 0)
-
-    @override_settings(REGISTRATION_OPEN=True)
-    def test_has_sign_up_link_when_registration_is_open(self):
-        response = self.client.get("/")
-        self.assertContains(response, "register")
-
-    @override_settings(REGISTRATION_OPEN=False)
-    def test_has_no_sign_up_link_when_registration_is_open(self):
-        response = self.client.get("/")
-        self.assertNotContains(response, "register")
