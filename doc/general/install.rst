@@ -17,7 +17,7 @@ PostgreSQL + PostGIS + TimescaleDB_
 GDAL                                                  1.9 [2]
 ===================================================== ============
 
-[1] Enhydris runs on Python 3.5 or later.  It does not run on Python 2.
+[1] Enhydris runs on Python 3.9 or later.  It does not run on Python 2.
 setuptools and pip are needed in order to install the rest of the Python
 modules.
 
