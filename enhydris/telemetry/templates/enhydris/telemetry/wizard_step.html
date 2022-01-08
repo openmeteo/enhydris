@@ -1,0 +1,31 @@
+{% extends "enhydris/base/main.html" %}
+{% load bootstrap4 %}
+{% load i18n %}
+
+
+{% block title %}
+  {% blocktrans with station_name=station.name %}{{ station_name }} — Telemetry (beta){% endblocktrans %}
+{% endblock %}
+
+
+{% block content %}
+  <div class="container">
+    <h1>
+     {% if seq == 1 %}
+       {% blocktrans with station_name=station.name step=step %}{{ station_name }}: Telemetry setup (beta) step 1{% endblocktrans %}
+     {% else %}
+       {% blocktrans with station_name=station.name step=step %}{{ station_name }}: Telemetry setup (beta) step {{ seq }} of {{ max_seq }}{% endblocktrans %}
+     {% endif %}
+    </h1>
+    <form enctype="multipart/form-data" method="post" role="form">
+      {% csrf_token %}
+      {% block form_content %}
+        {% bootstrap_form form %}
+      {% endblock %}
+      {% if seq > 1 %}
+        <a class="btn btn-primary" href="{% url "telemetry_wizard" station_id=station.id seq=prev_seq %}">{% trans "Previous" %}</a>
+      {% endif %}
+      <button class="btn btn-primary" type="submit">{% if seq == max_seq %}{% trans "Finish" %}{% else %}{% trans "Next" %}{% endif %}</button>
+    </form>
+  </div>
+{% endblock %}

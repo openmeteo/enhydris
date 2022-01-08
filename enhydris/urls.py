@@ -7,6 +7,7 @@ from registration.backends.default.views import RegistrationView
 from enhydris import views
 from enhydris.api import urls as enhydris_api_urls
 from enhydris.forms import MyRegistrationForm
+from enhydris.telemetry.urls import urlpatterns as enhydris_telemetry_urlpatterns
 
 admin.autodiscover()
 
@@ -37,6 +38,7 @@ urlpatterns = [
     ),
     path("timeseries/d/<int:pk>/", views.OldTimeseriesDetailRedirectView.as_view()),
     path("_nested_admin/", include("nested_admin.urls")),
+    *enhydris_telemetry_urlpatterns,
 ]
 
 # A view that does nothing, that will be used in some fake patterns below
