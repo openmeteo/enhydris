@@ -1,3 +1,6 @@
+import datetime as dt
+from unittest.mock import PropertyMock, patch
+
 from django.contrib.auth.models import User
 from django.utils import translation
 from rest_framework.test import APITestCase
@@ -10,6 +13,9 @@ from enhydris.api.serializers import (
     TimeseriesGroupSerializer,
     TimeseriesSerializer,
 )
+
+_eet = dt.timezone(offset=dt.timedelta(hours=2), name="EET")
+_adate = dt.datetime(2022, 1, 25, 12, 30, tzinfo=_eet)
 
 
 class StationSerializerTestCase(APITestCase):
@@ -31,6 +37,16 @@ class StationSerializerTestCase(APITestCase):
     def test_no_maintainers(self):
         # There shouldn't be information about maintainers, this is security information
         self.assertTrue("maintainers" not in self.serializer.data)
+
+    @patch("enhydris.models.Station.last_update", new_callable=PropertyMock)
+    def test_last_update_empty(self, m):
+        m.return_value = None
+        self.assertIsNone(self.serializer.data["last_update"], None)
+
+    @patch("enhydris.models.Station.last_update", new_callable=PropertyMock)
+    def test_last_update_nonempty(self, m):
+        m.return_value = _adate
+        self.assertEqual(self.serializer.data["last_update"], "2022-01-25T10:30:00Z")
 
 
 class TimeseriesGroupSerializerTestCase(APITestCase):

@@ -1,3 +1,5 @@
+import datetime as dt
+
 from django.utils import translation
 from rest_framework import serializers
 
@@ -123,6 +125,10 @@ class GentityEventSerializer(serializers.ModelSerializer):
 
 
 class StationSerializer(serializers.ModelSerializer):
+    last_update = serializers.DateTimeField(
+        read_only=True, default_timezone=dt.timezone.utc
+    )
+
     class Meta:
         model = models.Station
         exclude = ("creator", "maintainers", "sites")
