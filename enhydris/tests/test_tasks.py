@@ -8,7 +8,7 @@ from django.core import mail
 from django.test import TestCase, override_settings
 
 from enhydris import models, tasks
-from enhydris.tests.test_models import TestTimeseriesMixin
+from enhydris.tests import TestTimeseriesMixin
 
 
 class TestSaveTimeseriesDataMixin(TestTimeseriesMixin):

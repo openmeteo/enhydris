@@ -23,6 +23,7 @@ Developer documentation:
 
    dev/contributing
    dev/database
+   dev/telemetry
    dev/webservice-api
 
 Indices and tables

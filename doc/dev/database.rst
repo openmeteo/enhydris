@@ -386,7 +386,8 @@ Time series and related models
 
 .. class:: enhydris.models.Timeseries
 
-   Holds time series.
+   This model holds metadata for time series. The time series records
+   are stored in :class:`~enhydris.models.TimeseriesRecord`.
 
    .. attribute:: enhydris.models.Timeseries.timeseries_group
 
@@ -410,7 +411,7 @@ Time series and related models
 
    .. method:: enhydris.models.Timeseries.get_data(start_date=None, end_date=None)
 
-      Return the data of the file in a HTimeseries_ object. If
+      Return the data of the time series in a HTimeseries_ object. If
       *start_date* or *end_date* are specified, only this part of the
       data is returned.
 
@@ -437,6 +438,39 @@ Time series and related models
       Return the last record of the data file in CSV format, or an empty
       string if the time series contains no records.
 
+.. class:: enhydris.models.TimeseriesRecord
+
+   Stores time series records.
+
+   .. attribute:: timeseries
+      :type: ForeignKey
+
+      A foreign key to :class:`~enhydris.models.Timeseries`.
+
+   .. attribute:: timestamp
+      :type: DateTimeField
+
+      The time stamp of the record.
+
+   .. attribute:: value
+      :type: FloatField
+
+      The value of the record.
+
+   .. attribute:: flags
+      :type: CharField
+
+      Flags for the record.
+
+   .. method:: bulk_insert(timeseries: object, htimeseries: object) -> int
+      :classmethod:
+
+      Inserts all records of ``htimeseries`` (a HTimeseries_ object) in
+      :class:`~enhydris.models.TimeseriesRecord`. ``timeseries`` is the
+      :class:`~enhydris.models.Timeseries` to which these records refer.
+
+      Returns the number of records inserted (which should be the same
+      as the number of records in of ``htimeseries``).
 
 .. _htimeseries: https://github.com/openmeteo/htimeseries
 .. _text format: https://github.com/openmeteo/htimeseries#text-format

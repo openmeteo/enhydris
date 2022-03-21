@@ -18,7 +18,8 @@
           <h1>{{ station.name }}</h1>
           {% has_perm "enhydris.change_station" request.user station as can_edit_station %}
           {% if can_edit_station %}
-            <a class="btn btn-station-edit" href="{% url 'station_edit' pk=station.id%}"></a>
+            <a class="btn btn-icon btn-station-edit" href="{% url 'station_edit' pk=station.id%}"></a>
+            <a class="btn btn-icon btn-station-telemetry" href="{% url 'telemetry_wizard' station_id=station.id seq=1 %}"></a>
           {% endif %}
         </div>
         <div>

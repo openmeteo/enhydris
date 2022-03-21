@@ -1036,11 +1036,11 @@ h4.tab-no-data {
   overflow-y: auto;
 }
 
-.btn-station-edit {
+.btn-icon {
   position: relative;
 }
 
-.btn-station-edit::before {
+.btn-icon::before {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -1051,18 +1051,25 @@ h4.tab-no-data {
   margin-top: -10px;
   margin-left: -10px;
 
-  background-image: url("../images/icon-edit.svg");
   background-repeat: no-repeat;
   background-position: center center;
 }
 
-.btn-station-edit:hover {
+.btn-icon:hover {
   background-color: transparent;
   opacity: 0.7;
 }
 
-.btn-station-edit:active {
+.btn-icon:active {
   opacity: 0.5;
+}
+
+.btn-station-edit::before {
+  background-image: url("../images/icon-edit.svg");
+}
+
+.btn-station-telemetry::before {
+  background-image: url("../images/icon-router.svg");
 }
 
 @media (max-width: 768px) {
@@ -1079,7 +1086,7 @@ h4.tab-no-data {
     line-height: 19px;
   }
 
-  .btn-station-edit::before {
+  .btn-icon::before {
     width: 16px;
     height: 16px;
     margin-top: -8px;

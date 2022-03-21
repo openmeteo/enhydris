@@ -1,14 +1,12 @@
 {% if messages %}
   <div class="container-fluid">
-    <div class="alert alert-info alert-dismissible fade show" role="alert">
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-      <ul>
-        {% for message in messages %}
-          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
-      </ul>
-    </div>
+    {% for message in messages %}
+    <div class="alert {% if message.level == 10 %}alert-dark{% elif message.level == 20 %}alert-info{% elif message.level == 25 %}alert-success{% elif message.level == 30 %}alert-warning{% elif message.level == 40 %}alert-danger{% endif %} alert-dismissible fade show" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <p>{{ message }}</p>
+      </div>
+    {% endfor %}
   </div>
 {% endif %}

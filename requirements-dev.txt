@@ -1,6 +1,7 @@
 model-mommy>=1.6.0
 django-cors-headers
-sphinx
+sphinx>=4
 django-selenium-clean>=0.3.3,<0.4
 beautifulsoup4>=4.4
 celery>=4,<5
+freezegun>=1.1,<2

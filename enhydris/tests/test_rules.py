@@ -4,7 +4,7 @@ from django.test import TestCase, override_settings
 from model_mommy import mommy
 
 from enhydris import models
-from enhydris.tests.test_models import TestTimeseriesMixin
+from enhydris.tests import TestTimeseriesMixin
 
 
 class RulesTestCaseBase(TestCase, TestTimeseriesMixin):

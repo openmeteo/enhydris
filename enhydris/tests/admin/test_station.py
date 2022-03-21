@@ -16,8 +16,8 @@ from model_mommy import mommy
 
 from enhydris import models
 from enhydris.admin.station import TimeseriesInlineAdminForm
+from enhydris.tests import TestTimeseriesMixin
 from enhydris.tests.admin import get_formset_parameters
-from enhydris.tests.test_models import TestTimeseriesMixin
 
 
 class StationSearchTestCase(TestCase):

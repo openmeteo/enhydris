@@ -3,9 +3,9 @@ dist: bionic
 matrix:
   include:
 
-    - name: "Python 3.7 unit tests"
+    - name: "Python 3.9 unit tests"
       language: python
-      python: 3.7
+      python: 3.9
       node_js: "10"
       cache: pip
       addons:

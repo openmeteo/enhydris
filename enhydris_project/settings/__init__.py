@@ -34,17 +34,18 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "dj_rest_auth",
     "enhydris",
+    "enhydris.telemetry",
     "enhydris.api",
     "django.contrib.admin",
     "rules.apps.AutodiscoverRulesConfig",
     "parler",
     "nested_admin",
     "crequest",
+    "bootstrap4",
     #
     # Registration
     "registration",
     "captcha",
-    "bootstrap4",  # We only use this for the django-registration-redux templates
 ]
 
 MIDDLEWARE = [
@@ -154,6 +155,13 @@ ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR = 200
 ENHYDRIS_TS_GRAPH_FINE_STEP_DENOMINATOR = 50
 ENHYDRIS_SITES_FOR_NEW_STATIONS = set()
 ENHYDRIS_CELERY_SEND_TASK_ERROR_EMAILS = True
+
+CELERY_BEAT_SCHEDULE = {
+    "fetch-telemetry-data": {
+        "task": "enhydris.telemetry.tasks.fetch_all_telemetry_data",
+        "schedule": 60,
+    }
+}
 
 if os.environ.get("SELENIUM_BROWSER", False):
     from selenium import webdriver
