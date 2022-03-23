@@ -22,7 +22,7 @@ class TestSaveTimeseriesDataMixin(TestTimeseriesMixin):
         shutil.rmtree(self.tmpdir)
 
 
-class TimeseriesAppendTestCase(TestCase, TestSaveTimeseriesDataMixin):
+class TimeseriesAppendTestCase(TestSaveTimeseriesDataMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls._create_test_timeseries(data="2019-01-01 00:30,25,\n")
@@ -56,7 +56,7 @@ class TimeseriesAppendTestCase(TestCase, TestSaveTimeseriesDataMixin):
         )
 
 
-class TimeseriesReplaceTestCase(TestCase, TestSaveTimeseriesDataMixin):
+class TimeseriesReplaceTestCase(TestSaveTimeseriesDataMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls._create_test_timeseries(data="2019-01-01 00:30,25,\n")
@@ -90,7 +90,7 @@ class TimeseriesReplaceTestCase(TestCase, TestSaveTimeseriesDataMixin):
         )
 
 
-class TimeseriesPrecisionTestCase(TestCase, TestSaveTimeseriesDataMixin):
+class TimeseriesPrecisionTestCase(TestSaveTimeseriesDataMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls._create_test_timeseries(data="2019-01-01 00:30,25,\n")
@@ -134,7 +134,7 @@ class TimeseriesPrecisionTestCase(TestCase, TestSaveTimeseriesDataMixin):
         )
 
 
-class TimeseriesFileWithUnicodeHeadersTestCase(TestCase, TestSaveTimeseriesDataMixin):
+class TimeseriesFileWithUnicodeHeadersTestCase(TestSaveTimeseriesDataMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls._create_test_timeseries()
@@ -165,7 +165,7 @@ class TimeseriesFileWithUnicodeHeadersTestCase(TestCase, TestSaveTimeseriesDataM
         )
 
 
-class DeletesDataFileTestCase(TestCase, TestSaveTimeseriesDataMixin):
+class DeletesDataFileTestCase(TestSaveTimeseriesDataMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls._create_test_timeseries()
@@ -189,7 +189,7 @@ class DeletesDataFileTestCase(TestCase, TestSaveTimeseriesDataMixin):
         self.assertFalse(os.path.exists(self.datafilename))
 
 
-class NotificationTestCase(TestCase, TestSaveTimeseriesDataMixin):
+class NotificationTestCase(TestSaveTimeseriesDataMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls._create_test_timeseries()
@@ -235,7 +235,7 @@ class NotificationTestCase(TestCase, TestSaveTimeseriesDataMixin):
         )
 
 
-class FailureTestCase(TestCase, TestSaveTimeseriesDataMixin):
+class FailureTestCase(TestSaveTimeseriesDataMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls._create_test_timeseries()

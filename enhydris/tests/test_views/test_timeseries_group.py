@@ -28,7 +28,7 @@ class RedirectOldUrlsTestCase(TestCase):
 
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
-class TimeseriesGroupDetailTestCase(TestCase, TimeseriesDataMixin):
+class TimeseriesGroupDetailTestCase(TimeseriesDataMixin, TestCase):
     def setUp(self):
         self.create_timeseries()
         self.response = self.client.get(
