@@ -14,7 +14,7 @@ logger = get_task_logger(__name__)
 @app.task
 def fetch_all_telemetry_data():
     for telemetry in Telemetry.objects.all():
-        if True:
+        if telemetry.is_due:
             fetch_telemetry_data.delay(telemetry.id)
 
 
