@@ -64,7 +64,7 @@ class TelemetryWizardView(View):
         )
         Form = self.telemetry.wizard_steps[self.seq - 2]
         if self.request.method == "POST":
-            form = Form(self.request.POST, initial=configuration)
+            form = Form(self.request.POST)
             if form.is_valid():
                 configuration.update(form.cleaned_data)
                 self.request.session[

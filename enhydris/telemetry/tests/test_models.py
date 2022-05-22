@@ -5,7 +5,7 @@ from freezegun import freeze_time
 from model_mommy import mommy
 
 from enhydris.models import Station
-from enhydris.telemetry.models import Telemetry
+from enhydris.telemetry.models import Telemetry, fix_zone_name
 
 
 class TelemetryFetchValidatorsTestCase(TestCase):
@@ -91,3 +91,14 @@ class TelemetryIsDueTestCase(TestCase):
     @freeze_time("2021-11-30 22:05", tz_offset=0)
     def test_is_due_3(self):
         self._check(120, 5, True)
+
+
+class FixZoneNameTestCase(TestCase):
+    def test_gmt_plus(self):
+        self.assertEqual(fix_zone_name("Etc/GMT+200"), "UTC-200")
+
+    def test_gmt_minus(self):
+        self.assertEqual(fix_zone_name("Etc/GMT-300"), "UTC+300")
+
+    def test_other(self):
+        self.assertEqual(fix_zone_name("EEST"), "EEST")

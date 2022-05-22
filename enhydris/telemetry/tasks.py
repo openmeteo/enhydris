@@ -24,8 +24,10 @@ def fetch_telemetry_data(self, telemetry_id):
     lock_id = f"telemetry-{telemetry_id}"
     acquired_lock = cache.add(lock_id, self.app.oid, LOCK_TIMEOUT)
     if acquired_lock:
-        telemetry.fetch()
-        cache.delete(lock_id)
+        try:
+            telemetry.fetch()
+        finally:
+            cache.delete(lock_id)
     else:
         lock_owner = cache.get(lock_id)
         logger.error(

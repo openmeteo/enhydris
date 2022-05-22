@@ -116,8 +116,8 @@ class LoginDataForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         try:
-            email = cleaned_data["email"]
-            api_key = cleaned_data["api_key"]
+            email = cleaned_data.get("email")
+            api_key = cleaned_data.get("api_key")
             meteoview2_api_client = Meteoview2ApiClient(email, api_key)
             meteoview2_api_client.login()
         except requests.RequestException as e:
