@@ -6,7 +6,7 @@
     "eslint-config-airbnb": "^18.2.0",
     "eslint-plugin-import": "^2.22.0",
     "jest": "^26.4.2",
-    "moment": "^2.27.0"
+    "moment": "^2.29.4"
   },
   "scripts": {
     "lint": "eslint --ext .js --ignore-path .gitignore --ignore-pattern enhydris/static/js/vendor .",
