@@ -1,9 +1,11 @@
 from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import View
+
+from rules.contrib.views import PermissionRequiredMixin
 
 from enhydris.models import Station
 from enhydris.telemetry import drivers
@@ -11,12 +13,20 @@ from enhydris.telemetry.forms import CommonDataForm
 from enhydris.telemetry.models import Telemetry
 
 
-class TelemetryWizardView(View):
+class TelemetryWizardView(PermissionRequiredMixin, View):
+    permission_required = "enhydris.change_station"
+
+    def get_permission_object(self):
+        return self.station
+
     def dispatch(self, request, *, station_id, seq):
         self.request = request
         self.station_id = station_id
         self.seq = seq
         self.station = Station.objects.get(pk=self.station_id)
+
+        if not self.has_permission():
+            raise Http404
 
         if seq == 1:
             return self.dispatch_first_step()

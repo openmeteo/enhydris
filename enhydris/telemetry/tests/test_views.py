@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock, patch
 
+from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.test import Client, TestCase
 
@@ -15,12 +16,14 @@ from enhydris.telemetry.models import Telemetry
 class FirstStepGetTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.station = mommy.make(Station)
+        cls.user = User.objects.create_user(username="alice", password="topsecret")
+        cls.station = mommy.make(Station, creator=cls.user)
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.cclient = Client()
+        cls.cclient.login(username="alice", password="topsecret")
         cls.response = cls.cclient.get(f"/stations/{cls.station.id}/telemetry/1/")
         cls.soup = BeautifulSoup(cls.response.content, "html.parser")
 
@@ -57,7 +60,8 @@ class FirstStepGetTestCase(TestCase):
 class FirstStepGetWithAlreadyExistingTelemetryTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.station = mommy.make(Station)
+        cls.user = User.objects.create_user(username="alice", password="topsecret")
+        cls.station = mommy.make(Station, creator=cls.user)
         cls.telemetry = mommy.make(
             Telemetry,
             station=cls.station,
@@ -73,6 +77,7 @@ class FirstStepGetWithAlreadyExistingTelemetryTestCase(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.cclient = Client()
+        cls.cclient.login(username="alice", password="topsecret")
         cls.response = cls.cclient.get(f"/stations/{cls.station.id}/telemetry/1/")
         cls.soup = BeautifulSoup(cls.response.content, "html.parser")
 
@@ -127,12 +132,14 @@ class FirstStepGetWithAlreadyExistingTelemetryTestCase(TestCase):
 class FirstTestPostTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.station = mommy.make(Station)
+        cls.user = User.objects.create_user(username="alice", password="topsecret")
+        cls.station = mommy.make(Station, creator=cls.user)
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.cclient = Client()
+        cls.cclient.login(username="alice", password="topsecret")
         cls.response = cls.cclient.post(
             f"/stations/{cls.station.id}/telemetry/1/",
             {
@@ -169,12 +176,14 @@ class FirstTestPostTestCase(TestCase):
 class FirstTestPostErrorTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.station = mommy.make(Station)
+        cls.user = User.objects.create_user(username="alice", password="topsecret")
+        cls.station = mommy.make(Station, creator=cls.user)
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.cclient = Client()
+        cls.cclient.login(username="alice", password="topsecret")
         cls.response = cls.cclient.post(
             f"/stations/{cls.station.id}/telemetry/1/", {"hello": "world"}
         )
@@ -186,16 +195,19 @@ class FirstTestPostErrorTestCase(TestCase):
 class SecondStepRedirectTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.station = mommy.make(Station)
+        cls.user = User.objects.create_user(username="alice", password="topsecret")
+        cls.station = mommy.make(Station, creator=cls.user)
 
     def test_redirects(self):
         """Test that we are redirected to the first step if we don't come from there"""
+        self.client.login(username="alice", password="topsecret")
         response = self.client.get(f"/stations/{self.station.id}/telemetry/2/")
         expected_url = f"/stations/{self.station.id}/telemetry/1/"
         self.assertRedirects(response, expected_url)
 
     def test_no_redirects(self):
         """Test that we are not redirected if we come from the first step"""
+        self.client.login(username="alice", password="topsecret")
         self.client.post(
             f"/stations/{self.station.id}/telemetry/1/",
             {
@@ -213,12 +225,14 @@ class SecondStepRedirectTestCase(TestCase):
 class SecondStepGetMixin:
     @classmethod
     def setUpTestData(cls):
-        cls.station = mommy.make(Station)
+        cls.user = User.objects.create_user(username="alice", password="topsecret")
+        cls.station = mommy.make(Station, creator=cls.user)
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.cclient = Client()
+        cls.cclient.login(username="alice", password="topsecret")
         cls._post_step_1()
         cls._create_mock_form()
         cls._make_request_for_step_2()
@@ -309,12 +323,14 @@ class SecondStepGetWithNondefaultConfigurationTestCase(SecondStepGetMixin, TestC
 class SecondStepPostMixin:
     @classmethod
     def setUpTestData(cls):
-        cls.station = mommy.make(Station)
+        cls.user = User.objects.create_user(username="alice", password="topsecret")
+        cls.station = mommy.make(Station, creator=cls.user)
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.cclient = Client()
+        cls.cclient.login(username="alice", password="topsecret")
         cls._post_step_1()
         cls._post_step_2()
 
@@ -472,7 +488,8 @@ class FinalStepPostSuccessfulReplacesExistingTelemetryTestCase(
 class NextOrFinishButtonTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.station = mommy.make(Station)
+        cls.user = User.objects.create_user(username="alice", password="topsecret")
+        cls.station = mommy.make(Station, creator=cls.user)
         Telemetry.objects.create(
             station=cls.station,
             fetch_interval_minutes=10,
@@ -481,6 +498,7 @@ class NextOrFinishButtonTestCase(TestCase):
         )
 
     def setUp(self):
+        self.client.login(username="alice", password="topsecret")
         session = self.client.session
         session[f"telemetry_{self.station.id}_configuration"] = {
             "station_id": self.station.id,
@@ -512,3 +530,28 @@ class NextOrFinishButtonTestCase(TestCase):
         drivers["meteoview2"].wizard_steps = drivers["meteoview2"].wizard_steps[:1]
         button_text = self._get_button_text_for_step_2()
         self.assertEqual(button_text, "Finish")
+
+
+class PermissionsTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user("alice", password="topsecret")
+        cls.station = mommy.make(Station, creator=cls.user)
+
+    def test_telemetry_button_does_not_appear_when_not_logged_on(self):
+        response = self.client.get(f"/stations/{self.station.id}/")
+        self.assertNotContains(response, "btn-station-telemetry")
+
+    def test_telemetry_button_appears_when_correct_user_logged_on(self):
+        self.client.login(username="alice", password="topsecret")
+        response = self.client.get(f"/stations/{self.station.id}/")
+        self.assertContains(response, "btn-station-telemetry")
+
+    def test_telemetry_form_works_when_correct_user_logged_on(self):
+        self.client.login(username="alice", password="topsecret")
+        response = self.client.get(f"/stations/{self.station.id}/telemetry/1/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_telemetry_form_denies_when_not_logged_on(self):
+        response = self.client.get(f"/stations/{self.station.id}/telemetry/1/")
+        self.assertEqual(response.status_code, 404)
