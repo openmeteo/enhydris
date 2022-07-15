@@ -213,7 +213,7 @@ class TimeseriesGroupDefaultTimeseriesTestCase(TestCase):
             group.default_timeseries
 
 
-class TimeseriesGroupStartAndEndDateTestCase(TestCase, TimeseriesDataMixin):
+class TimeseriesGroupStartAndEndDateTestCase(TimeseriesDataMixin, TestCase):
     def setUp(self):
         self.create_timeseries()
 

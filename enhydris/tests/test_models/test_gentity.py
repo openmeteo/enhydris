@@ -7,6 +7,7 @@ from django.test import TestCase, override_settings
 from model_mommy import mommy
 
 from enhydris import models
+from enhydris.tests import ClearCacheMixin
 
 
 class GentityFileTestCase(TestCase):
@@ -194,7 +195,7 @@ class StationOriginalCoordinatesWithNullSridTestCase(TestCase):
         self.assertAlmostEqual(self.station.original_ordinate(), 39.09518)
 
 
-class StationLastUpdateTestCase(TestCase):
+class StationLastUpdateTestCase(ClearCacheMixin, TestCase):
     def setUp(self):
         self.station = mommy.make(models.Station)
         self.time_zone = mommy.make(models.TimeZone, code="EET", utc_offset=120)

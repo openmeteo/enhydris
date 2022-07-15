@@ -134,9 +134,9 @@ Telemetry API types
 -------------------
 
 Each API type is one Python file in the
-:file:`enhydris/telemetry/types`.  The Python file must contain a
-:class:`Telemetry` class with all required functionality to retrieve
-data from the API.
+:file:`enhydris/telemetry/types` directory.  The Python file must
+contain a :class:`Telemetry` class with all required functionality to
+retrieve data from the API.
 
 When it starts, Enhydris scans the :file:`enhydris/telemetry/types`
 directory and imports all Python files it contains.  The result of this
@@ -156,8 +156,8 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
    :class:`enhydris.telemetry.models.Telemetry` object, which becomes
    the :attr:`telemetry_model` attribute.
 
-   :class:`Telemetry` classes must define following attributes, methods
-   and properties:
+   :class:`Telemetry` classes must define the following attributes,
+   methods and properties:
 
    .. attribute:: name
       :type: string

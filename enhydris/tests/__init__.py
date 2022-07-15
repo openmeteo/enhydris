@@ -2,7 +2,9 @@ import datetime as dt
 from io import StringIO
 
 from django.contrib.gis.geos import Point
+from django.core.cache import cache
 from django.core.management import call_command
+from django.test.utils import override_settings
 
 import django_selenium_clean
 import pandas as pd
@@ -13,7 +15,25 @@ from parler.utils.context import switch_language
 from enhydris import models
 
 
-class TestTimeseriesMixin:
+class ClearCacheMixin:
+    @classmethod
+    def setUpClass(cls, *args, **kwargs):
+        super().setUpClass(*args, **kwargs)
+        cls.settings_overrider = override_settings(
+            CACHES={
+                "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}
+            }
+        )
+        cls.settings_overrider.__enter__()
+        cache.clear()
+
+    @classmethod
+    def tearDownClass(cls, *args, **kwargs):
+        cls.settings_overrider.__exit__(exc_type=None, exc_value=None, traceback=None)
+        super().tearDownClass(*args, **kwargs)
+
+
+class TestTimeseriesMixin(ClearCacheMixin):
     @classmethod
     def _create_test_timeseries(cls, data=""):
         cls.station = mommy.make(
@@ -43,7 +63,7 @@ class TestTimeseriesMixin:
         cls.timeseries.set_data(StringIO(data))
 
 
-class TimeseriesDataMixin:
+class TimeseriesDataMixin(ClearCacheMixin):
     def create_timeseries(self):
         self.htimeseries = HTimeseries()
         self.htimeseries.data = pd.DataFrame(

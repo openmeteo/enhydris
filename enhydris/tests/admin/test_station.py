@@ -409,7 +409,7 @@ class TestTimeseriesFormMixin(TestTimeseriesMixin):
 
 
 class TimeseriesInlineAdminFormRefusesToAppendIfNotInOrderTestCase(
-    TestCase, TestTimeseriesFormMixin
+    TestTimeseriesFormMixin, TestCase
 ):
     def setUp(self):
         self._setup_request_object()
@@ -433,7 +433,7 @@ class TimeseriesInlineAdminFormRefusesToAppendIfNotInOrderTestCase(
 
 
 class TimeseriesInlineAdminFormAcceptsAppendingIfInOrderTestCase(
-    TestCase, TestTimeseriesFormMixin
+    TestTimeseriesFormMixin, TestCase
 ):
     def setUp(self):
         self._create_test_timeseries(data="2019-01-01 00:30,25,\n")
@@ -444,7 +444,7 @@ class TimeseriesInlineAdminFormAcceptsAppendingIfInOrderTestCase(
 
 
 class TimeseriesInlineAdminFormAcceptsReplacingTestCase(
-    TestCase, TestTimeseriesFormMixin
+    TestTimeseriesFormMixin, TestCase
 ):
     def setUp(self):
         self._create_test_timeseries(data="2019-01-01 00:30,25,\n")
@@ -547,7 +547,7 @@ class TimeseriesUploadFileTestCase(TestCase, TimeseriesUploadFileMixin):
         )
 
 
-class TimeseriesUploadFileWithUnicodeHeadersTestCase(TestCase, TestTimeseriesFormMixin):
+class TimeseriesUploadFileWithUnicodeHeadersTestCase(TestTimeseriesFormMixin, TestCase):
     def setUp(self):
         self._create_test_timeseries()
         try:
@@ -565,7 +565,7 @@ class TimeseriesUploadFileWithUnicodeHeadersTestCase(TestCase, TestTimeseriesFor
         self.assertTrue(self.form.is_valid())
 
 
-class TimeseriesUploadInvalidFileTestCase(TestCase, TestTimeseriesFormMixin):
+class TimeseriesUploadInvalidFileTestCase(TestTimeseriesFormMixin, TestCase):
     def setUp(self):
         self._create_test_timeseries()
 
@@ -592,7 +592,7 @@ class TimeseriesUploadInvalidFileTestCase(TestCase, TestTimeseriesFormMixin):
         self.assertFalse(self.form.is_valid())
 
 
-class TimeseriesUploadAppendWithOverlapTestCase(TestCase, TestTimeseriesFormMixin):
+class TimeseriesUploadAppendWithOverlapTestCase(TestTimeseriesFormMixin, TestCase):
     def setUp(self):
         self._create_test_timeseries(data="2005-11-01 18:00,3,\n2019-01-01 00:30,25,\n")
 
@@ -604,7 +604,7 @@ class TimeseriesUploadAppendWithOverlapTestCase(TestCase, TestTimeseriesFormMixi
 
 
 class TimeseriesInlineAdminFormProcessWithoutFileTestCase(
-    TestCase, TestTimeseriesFormMixin
+    TestTimeseriesFormMixin, TestCase
 ):
     def setUp(self):
         self._setup_request_object()

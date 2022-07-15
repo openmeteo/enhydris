@@ -3,7 +3,7 @@ from django.test import TestCase, override_settings
 from enhydris.tests import TimeseriesDataMixin
 
 
-class TimeseriesDownloadButtonTestCase(TestCase, TimeseriesDataMixin):
+class TimeseriesDownloadButtonTestCase(TimeseriesDataMixin, TestCase):
     def setUp(self):
         self.create_timeseries()
         self.download_button = (
@@ -36,7 +36,7 @@ class TimeseriesDownloadButtonTestCase(TestCase, TimeseriesDataMixin):
         self.assertContains(self.response, "You don't have permission to download")
 
 
-class DownloadDataTestCase(TestCase, TimeseriesDataMixin):
+class DownloadDataTestCase(TimeseriesDataMixin, TestCase):
     def setUp(self):
         self.create_timeseries()
 

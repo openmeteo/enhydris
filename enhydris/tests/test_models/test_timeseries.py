@@ -2,16 +2,17 @@ import datetime as dt
 from io import StringIO
 from unittest import mock
 
+from django.core.cache import cache
 from django.db import IntegrityError
 from django.db.models.signals import post_save
-from django.test import TestCase, override_settings
+from django.test import TestCase
 
 import pandas as pd
 from htimeseries import HTimeseries
 from model_mommy import mommy
 
 from enhydris import models
-from enhydris.tests import TestTimeseriesMixin
+from enhydris.tests import ClearCacheMixin, TestTimeseriesMixin
 
 
 class TimeseriesTestCase(TestCase):
@@ -126,7 +127,7 @@ def make_timeseries(*, start_date, end_date, **kwargs):
     return result
 
 
-class TimeseriesDatesTestCase(TestCase):
+class TimeseriesDatesTestCase(ClearCacheMixin, TestCase):
     def setUp(self):
         self.timeseries = make_timeseries(
             timeseries_group__time_zone__utc_offset=120,
@@ -216,7 +217,7 @@ class TimeseriesDatesTestCase(TestCase):
             timeseries.end_date_naive
 
 
-class DataTestCase(TestCase, TestTimeseriesMixin):
+class DataTestCase(TestTimeseriesMixin, TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -283,7 +284,7 @@ class TimeseriesGetDataTestCase(DataTestCase):
         pd.testing.assert_frame_equal(self.data.data, self.expected_result)
 
 
-class TimeseriesGetDataWithNullTestCase(TestCase, TestTimeseriesMixin):
+class TimeseriesGetDataWithNullTestCase(TestTimeseriesMixin, TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -351,9 +352,6 @@ class TimeseriesGetDataWithStartAndEndDateTestCase(DataTestCase):
         self._check(end_index=1)
 
 
-@override_settings(
-    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
-)
 class TimeseriesGetDataCacheTestCase(DataTestCase):
     def test_cache(self):
         # Make sure we've accessed gpoint already, otherwise it screws up the number of
@@ -373,7 +371,7 @@ class TimeseriesGetDataCacheTestCase(DataTestCase):
         pd.testing.assert_frame_equal(data.data, self.expected_result)
 
 
-class TimeseriesSetDataTestCase(TestCase, TestTimeseriesMixin):
+class TimeseriesSetDataTestCase(TestTimeseriesMixin, TestCase):
     def setUp(self):
         self._create_test_timeseries()
 
@@ -437,7 +435,7 @@ class TimeseriesSetDataTestCase(TestCase, TestTimeseriesMixin):
         )
 
 
-class TimeseriesAppendDataTestCase(TestCase, TestTimeseriesMixin):
+class TimeseriesAppendDataTestCase(TestTimeseriesMixin, TestCase):
     def setUp(self):
         self._create_test_timeseries("2016-01-01 00:00,42,\n")
 
@@ -483,7 +481,7 @@ class TimeseriesAppendDataTestCase(TestCase, TestTimeseriesMixin):
         pd.testing.assert_frame_equal(self.timeseries.get_data().data, expected_result)
 
 
-class TimeseriesAppendDataToEmptyTimeseriesTestCase(TestCase, TestTimeseriesMixin):
+class TimeseriesAppendDataToEmptyTimeseriesTestCase(TestTimeseriesMixin, TestCase):
     def setUp(self):
         self._create_test_timeseries()
 
@@ -507,7 +505,7 @@ class TimeseriesAppendDataToEmptyTimeseriesTestCase(TestCase, TestTimeseriesMixi
         )
 
 
-class TimeseriesAppendErrorTestCase(TestCase, TestTimeseriesMixin):
+class TimeseriesAppendErrorTestCase(TestTimeseriesMixin, TestCase):
     def test_does_not_update_if_data_to_append_are_not_later(self):
         self._create_test_timeseries("2018-01-01 00:00,42,\n")
         with self.assertRaises(IntegrityError):
@@ -516,7 +514,7 @@ class TimeseriesAppendErrorTestCase(TestCase, TestTimeseriesMixin):
             )
 
 
-class TimeseriesGetLastRecordAsStringTestCase(TestCase, TestTimeseriesMixin):
+class TimeseriesGetLastRecordAsStringTestCase(TestTimeseriesMixin, TestCase):
     def test_when_record_exists(self):
         self._create_test_timeseries("2017-11-23 17:23,1,\n2018-11-25 01:00,2,\n")
         self.assertEqual(
@@ -545,7 +543,7 @@ class TimeseriesExecutesTriggersUponAddingRecordsTestCase(DataTestCase):
         self.trigger.assert_called()
 
 
-class TimeseriesRecordTestCase(TestCase, TestTimeseriesMixin):
+class TimeseriesRecordTestCase(TestTimeseriesMixin, TestCase):
     def test_str(self):
         self._create_test_timeseries("2017-11-23 17:23,3.14159,\n")
         record = models.TimeseriesRecord.objects.first()
@@ -559,7 +557,7 @@ class TimeseriesRecordTestCase(TestCase, TestTimeseriesMixin):
         self.assertEqual(str(record), "2017-11-23 17:23,,")
 
 
-class TimeseriesRecordBulkInsertTestCase(TestCase, TestTimeseriesMixin):
+class TimeseriesRecordBulkInsertTestCase(TestTimeseriesMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls._create_test_timeseries()
@@ -578,6 +576,7 @@ class TimeseriesRecordBulkInsertTestCase(TestCase, TestTimeseriesMixin):
 
 class TimeseriesDatesCacheInvalidationTestCase(TestCase):
     def setUp(self):
+        cache.clear()
         self.station = mommy.make(models.Station, name="Celduin")
         self.timeseries_group = mommy.make(models.TimeseriesGroup, gentity=self.station)
         self.timeseries = mommy.make(

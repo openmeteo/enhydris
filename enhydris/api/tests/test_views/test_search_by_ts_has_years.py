@@ -5,11 +5,14 @@ from rest_framework.test import APITestCase
 from model_mommy import mommy
 
 from enhydris import models
+from enhydris.tests import ClearCacheMixin
 
 from .test_search import SearchTestCaseBase
 
 
-class SearchWithYearExistingInOneStationTest(SearchTestCaseBase, APITestCase):
+class SearchWithYearExistingInOneStationTest(
+    ClearCacheMixin, SearchTestCaseBase, APITestCase
+):
     search_term = "ts_has_years:2005,2012,2016"
     search_result = "Tharbad"
 
