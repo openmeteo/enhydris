@@ -1,5 +1,10 @@
 import datetime as dt
+import os.path
+import subprocess
+import sys
 import zoneinfo
+from io import StringIO
+from traceback import print_tb
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -77,4 +82,75 @@ class Telemetry(models.Model):
         return current_offset % self.fetch_interval_minutes == self.fetch_offset_minutes
 
     def fetch(self):
-        enhydris.telemetry.drivers[self.type](self).fetch()
+        telemetry = enhydris.telemetry.drivers[self.type](self)
+        try:
+            telemetry.fetch()
+        except Exception:
+            TelemetryLogMessage.log(self)
+
+
+class TelemetryLogMessage(models.Model):
+    telemetry = models.ForeignKey(Telemetry, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    exception_name = models.CharField(max_length=50)
+    message = models.TextField()
+    traceback = models.TextField()
+    enhydris_version = models.TextField()
+    enhydris_commit_id = models.CharField(max_length=40)
+
+    class Meta:
+        ordering = ["telemetry", "-timestamp"]
+
+    @classmethod
+    def log(cls, telemetry):
+        """Logs the current exception."""
+        formatted_traceback = StringIO()
+        print_tb(sys.exc_info()[2], file=formatted_traceback)
+        cls.objects.create(
+            telemetry=telemetry,
+            exception_name=sys.exc_info()[0].__name__,
+            message=str(sys.exc_info()[1]),
+            traceback=formatted_traceback.getvalue(),
+            enhydris_version=enhydris.__version__,
+            enhydris_commit_id=cls.get_enhydris_commit_id_from_git(),
+        )
+
+    @classmethod
+    def get_enhydris_commit_id_from_git(cls):
+        try:
+            return cls._saved_commit_id
+        except AttributeError:
+            pass
+
+        etld = cls._get_enhydris_top_level_directory()
+        try:
+            cls._saved_commit_id = (
+                subprocess.run(
+                    ["git", "rev-parse", "HEAD"], capture_output=True, cwd=etld
+                )
+                .stdout.decode()
+                .strip()
+            )
+        except FileNotFoundError:  # Git is not installed
+            cls._saved_commit_id = ""
+
+        return cls._saved_commit_id
+
+    @classmethod
+    def _get_enhydris_top_level_directory(cls):
+        levels_deep = __name__.count(".")
+        dirname = os.path.dirname(__file__)
+        upstairs = levels_deep * [".."]
+        return os.path.join(dirname, *upstairs)
+
+    def get_full_message(self):
+        isotime = self.timestamp.replace(tzinfo=None).isoformat(
+            sep=" ", timespec="seconds"
+        )
+        return f"{isotime} {self.exception_name}: {self.message}"
+
+    def get_full_version(self):
+        if self.enhydris_commit_id:
+            return f"{self.enhydris_version} ({self.enhydris_commit_id[:10]})"
+        else:
+            return self.enhydris_version
