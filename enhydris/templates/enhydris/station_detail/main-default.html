@@ -20,6 +20,7 @@
           {% if can_edit_station %}
             <a class="btn btn-icon btn-station-edit" href="{% url 'station_edit' pk=station.id%}"></a>
             <a class="btn btn-icon btn-station-telemetry" href="{% url 'telemetry_wizard' station_id=station.id seq=1 %}"></a>
+            <a class="btn btn-icon btn-station-telemetry-logs" href="{% url 'telemetry_logs' station_id=station.id %}"></a>
           {% endif %}
         </div>
         <div>

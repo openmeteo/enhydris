@@ -5,13 +5,15 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import View
+from django.views.generic.detail import DetailView
+from django.views.generic.list import ListView
 
 from rules.contrib.views import PermissionRequiredMixin
 
 from enhydris.models import Station
 from enhydris.telemetry import drivers
 from enhydris.telemetry.forms import CommonDataForm
-from enhydris.telemetry.models import Telemetry
+from enhydris.telemetry.models import Telemetry, TelemetryLogMessage
 
 
 class TelemetryWizardView(PermissionRequiredMixin, View):
@@ -165,3 +167,36 @@ class WizardOtherStep(WizardStep):
             messages.add_message(self.request, messages.SUCCESS, msg)
             target = reverse("station_detail", kwargs={"pk": self.station.id})
         return HttpResponseRedirect(target)
+
+
+class TelemetryLogsView(PermissionRequiredMixin, ListView):
+    permission_required = "enhydris.change_station"
+    model = TelemetryLogMessage
+    template_name = "enhydris/telemetry/telemetrylogmessage_list.html"
+    paginate_by = 100
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.station = Station.objects.get(id=self.kwargs["station_id"])
+
+    def get_permission_object(self):
+        return self.station
+
+    def get_queryset(self):
+        result = super().get_queryset()
+        result = result.filter(telemetry__station=self.station)
+        return result
+
+    def get_context_data(self):
+        result = super().get_context_data()
+        result["station"] = self.station
+        return result
+
+
+class TelemetryLogDetailView(PermissionRequiredMixin, DetailView):
+    permission_required = "enhydris.change_station"
+    model = TelemetryLogMessage
+    template_name = "enhydris/telemetry/telemetrylogmessage_detail.html"
+
+    def get_permission_object(self):
+        return Station.objects.get(id=self.kwargs["station_id"])

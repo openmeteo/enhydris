@@ -1,0 +1,27 @@
+{% extends "enhydris/base/main.html" %}
+{% load bootstrap4 %}
+{% load i18n %}
+
+
+{% block title %}
+  {% blocktrans with station_name=station.name %}{{ station_name }} — Telemetry logs (beta){% endblocktrans %}
+{% endblock %}
+
+
+{% block content %}
+  <div class="container">
+    <h1>
+     {% blocktrans with station_name=station.name step=step %}{{ station_name }}: Telemetry logs{% endblocktrans %}
+    </h1>
+    <div class="list-group">
+      {% for item in object_list %}
+        <div class="list-group-item">
+          <a class="text-danger" href="{% url "telemetry_log_detail" station_id=station.id pk=item.id %}">{{ item.get_full_message }}</a>
+        </div>
+      {% empty %}
+        <p>No telemetry errors have been logged for this station.</p>
+      {% endfor %}
+    </div>
+    {% include "enhydris/station_list/page_navigation.html" %}
+  </div>
+{% endblock %}

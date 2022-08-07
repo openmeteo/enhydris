@@ -1072,6 +1072,10 @@ h4.tab-no-data {
   background-image: url("../images/icon-router.svg");
 }
 
+.btn-station-telemetry-logs::before {
+  background-image: url("../images/icon-printer.svg");
+}
+
 @media (max-width: 768px) {
   .station-info-group {
     margin-top: 20px;

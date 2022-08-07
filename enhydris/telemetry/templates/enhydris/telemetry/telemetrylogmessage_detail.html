@@ -1,0 +1,41 @@
+{% extends "enhydris/base/main.html" %}
+{% load bootstrap4 %}
+{% load tz %}
+{% load i18n %}
+
+
+{% block title %}
+  {% blocktrans with station_name=object.telemetry.station.name %}{{ station_name }} — Telemetry log detail (beta){% endblocktrans %}
+{% endblock %}
+
+
+{% block content %}
+  <div class="container">
+    <a id="back-button" class="btn btn-light" href="{% url "telemetry_logs" station_id=object.telemetry.station.id %}"><i class="bi bi-arrow-left"></i> {% trans "Back" %}</a>
+    <h1>
+      {% blocktrans with station_name=object.telemetry.station.name step=step %}{{ station_name }}: Telemetry log detail{% endblocktrans %}
+    </h1>
+    <p>
+      {% blocktrans with error_time=object.timestamp|utc|date:"Y-m-d H:i:s" %}
+        <strong>Error time:</strong> <code>{{ error_time }}</code>
+      {% endblocktrans %}
+    </p>
+    <p>
+      {% blocktrans with exception_name=object.exception_name %}
+        <strong>Error type:</strong> <code>{{ exception_name }}</code>
+      {% endblocktrans %}
+    </p>
+    <p>
+      {% blocktrans with error_message=object.message %}
+        <strong>Error message:</strong> <code>{{ error_message }}</code>
+      {% endblocktrans %}
+    </p>
+    <p>
+      {% blocktrans with enhydris_full_version=object.get_full_version %}
+        <strong>Enhydris version:</strong> <code>{{ enhydris_full_version }}</code>
+      {% endblocktrans %}
+    </p>
+    <p><strong>{% trans "Traceback:" %}</strong></p>
+    <pre>{{ object.traceback }}</pre>
+  </div>
+{% endblock %}
