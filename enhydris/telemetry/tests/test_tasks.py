@@ -13,7 +13,7 @@ from enhydris.telemetry.models import Telemetry
 class FetchTelemetryDataTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.telemetry = mommy.make(Telemetry, configuration={})
+        cls.telemetry = mommy.make(Telemetry)
 
     def test_adds_lock(self, mock_fetch, mock_cache):
         tasks.fetch_telemetry_data(self.telemetry.id)
@@ -54,8 +54,8 @@ class FetchTelemetryDataTestCase(TestCase):
 class FetchAllTelemetryDataTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.telemetry1 = mommy.make(Telemetry, configuration={})
-        cls.telemetry2 = mommy.make(Telemetry, configuration={})
+        cls.telemetry1 = mommy.make(Telemetry)
+        cls.telemetry2 = mommy.make(Telemetry)
 
     @patch("enhydris.telemetry.models.Telemetry.is_due", new_callable=PropertyMock)
     def test_calls_due_telemetry(self, mock_is_due, mock_fetch_telemetry_data):

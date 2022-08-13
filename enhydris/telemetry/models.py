@@ -10,8 +10,10 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+import iso8601
+
 import enhydris
-from enhydris.models import Station
+from enhydris.models import Station, Timeseries, TimeseriesGroup
 from enhydris.telemetry import drivers
 
 
@@ -33,7 +35,7 @@ class Telemetry(models.Model):
     station = models.OneToOneField(Station, on_delete=models.CASCADE)
     type = models.CharField(
         max_length=30,
-        choices=[(x, drivers[x].name) for x in drivers],
+        choices=sorted([(x, drivers[x].name) for x in drivers], key=lambda x: x[1]),
         verbose_name=_("Telemetry system type"),
         help_text=_(
             "The type of the system from which the data is to be fetched. "
@@ -73,7 +75,12 @@ class Telemetry(models.Model):
         verbose_name=_("Time zone for the fetch time offset"),
         help_text=_("The time zone to which the fetch time offset refers."),
     )
-    configuration = models.JSONField()
+    device_locator = models.CharField(max_length=200, blank=True)
+    username = models.CharField(max_length=200, blank=True)
+    password = models.CharField(max_length=200, blank=True)
+    remote_station_id = models.CharField(max_length=20, blank=True)
+
+    additional_config = models.JSONField(default=dict)
 
     @property
     def is_due(self):
@@ -82,11 +89,58 @@ class Telemetry(models.Model):
         return current_offset % self.fetch_interval_minutes == self.fetch_offset_minutes
 
     def fetch(self):
-        telemetry = enhydris.telemetry.drivers[self.type](self)
         try:
-            telemetry.fetch()
+            self._setup_api_client()
+            self._fetch_sensors()
         except Exception:
             TelemetryLogMessage.log(self)
+
+    def _setup_api_client(self):
+        self.api_client = enhydris.telemetry.drivers[self.type](self)
+        self.api_client.connect()
+
+    def _fetch_sensors(self):
+        for sensor in self.sensor_set.all():
+            self._fetch_sensor(sensor)
+
+    def _fetch_sensor(self, sensor):
+        timeseries, created = Timeseries.objects.get_or_create(
+            timeseries_group_id=sensor.timeseries_group_id, type=Timeseries.INITIAL
+        )
+        timeseries_end_date = timeseries.end_date
+        if timeseries_end_date is not None:
+            timeseries_end_date = timeseries_end_date.replace(tzinfo=None)
+        measurements = self.api_client.get_measurements(
+            sensor_id=sensor.sensor_id, timeseries_end_date=timeseries_end_date
+        )
+        measurements = self._cleanup_measurements(measurements)
+        timeseries.append_data(measurements)
+
+    def _cleanup_measurements(self, measurements):
+        result = StringIO()
+        prev_timestamp = dt.datetime(1, 1, 1, 0, 0)
+        measurements.seek(0)
+        for line in measurements:
+            cur_timestamp = iso8601.parse_date(line.split(",")[0])
+            cur_timestamp = cur_timestamp.replace(second=0, tzinfo=None)
+            if cur_timestamp == prev_timestamp:
+                continue
+            result.write(line)
+            prev_timestamp = cur_timestamp
+        result.seek(0)
+        return result
+
+
+class Sensor(models.Model):
+    telemetry = models.ForeignKey(Telemetry, on_delete=models.CASCADE)
+    sensor_id = models.CharField(max_length=20, blank=False)
+    timeseries_group = models.ForeignKey(TimeseriesGroup, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = [
+            ("telemetry", "sensor_id"),
+            ("telemetry", "timeseries_group"),
+        ]
 
 
 class TelemetryLogMessage(models.Model):

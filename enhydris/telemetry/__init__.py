@@ -11,5 +11,9 @@ drivers = {}
 
 for module_name in _modules:
     module = import_module(f".{module_name}", "enhydris.telemetry.types")
-    Telemetry = getattr(module, "Telemetry")
-    drivers[module_name] = Telemetry
+    TelemetryAPIClient = getattr(module, "TelemetryAPIClient")
+    drivers[module_name] = TelemetryAPIClient
+
+
+class TelemetryError(OSError):
+    pass

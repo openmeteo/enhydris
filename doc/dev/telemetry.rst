@@ -104,14 +104,38 @@ Models
 
       .. _tz database name: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
-   .. attribute:: configuration
+   .. attribute:: device_locator
+      :type: string
+
+      The address of the remote API. Depending on the API, this may be
+      the IP address, host name, or URL of the data collection device.
+      Some APIs don't have it at all, as the API is served by a given
+      location regardless of which station it is (e.g.
+      TheThingsNetwork). In such cases the attribute is left blank.
+
+   .. attribute:: username
+                  password
+      :type: string
+
+      The username and password with which Enhydris will log on to the
+      remote API. The password might actually be an API key, and the
+      username might be an email, or it could be absent.
+
+   .. attribute:: remote_station_id
+      :type: string
+
+      If the API supports a single station (for that user), this should
+      be blank. Some APIs provide access to many different stations;
+      in that case, this is the id with which the station can be
+      identified on the API (i.e. the :attr:`remote_station_id` on the
+      API corresponds to the :attr:`station` of Enhydris).
+
+   .. attribute:: additional_config
       :type: JSONField
 
-      Any additional configuration. The exact contents depend on the API
-      :attr:`~enhydris.telemetry.models.Telemetry.type`. However,
-      :attr:`configuration` contains (among other things) a
-      ``timeseries`` key, which is a list. See
-      :attr:`Telemetry.wizard_steps` for more information.
+      If the specific telemetry type needs any additional configuration
+      (e.g. serial interface parameters), it is stored in this
+      attribute.
 
    .. property:: is_due
       :type: Boolean
@@ -125,8 +149,31 @@ Models
    .. method:: fetch() -> None
 
       Connects to the API, fetches the data, and inserts them to
-      :class:`~enhydris.models.TimeseriesRecord`. Essentially this
-      merely calls :meth:`Telemetry.fetch`.
+      :class:`~enhydris.models.TimeseriesRecord`.
+
+.. class:: enhydris.telemetry.models.Sensor
+
+   Each record in that model represents a sensor in the API, and also
+   holds the time series group to which the sensor corresponds, i.e. the
+   time series group to which the data from the sensor are to be
+   uploaded. If a sensor is to be ignored, then no row must exist in
+   this table.
+
+   .. attribute:: telemetry
+      :type: ForeignKey
+
+      A foreign key to :class:`~enhydris.telemetry.models.Telemetry`.
+
+   .. attribute:: sensor_id
+      :type: string
+
+      An id with which the sensor can be identified in the API.
+
+   .. attribute:: timeseries_group_id
+      :type: string
+
+      A foreign key to :class:`~enhydris.models.TimeseriesGroup`.
+
 
 .. _telemetry_api_types:
 
@@ -135,8 +182,8 @@ Telemetry API types
 
 Each API type is one Python file in the
 :file:`enhydris/telemetry/types` directory.  The Python file must
-contain a :class:`Telemetry` class with all required functionality to
-retrieve data from the API.
+contain a :class:`TelemetryAPIClient` class with all required
+functionality to retrieve data from the API.
 
 When it starts, Enhydris scans the :file:`enhydris/telemetry/types`
 directory and imports all Python files it contains.  The result of this
@@ -144,19 +191,20 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
 
 .. data:: enhydris.telemetry.drivers
 
-   A dictionary that contains all :class:`Telemetry` classes imported
-   from the :file:`enhydris/telemetry/types` directory. Each dictionary
-   item maps the telemetry type's slug (the base name of the Python
-   file) to the :class:`Telemetry` class.
+   A dictionary that contains all :class:`TelemetryAPIClient` classes
+   imported from the :file:`enhydris/telemetry/types` directory. Each
+   dictionary item maps the telemetry type's slug (the base name of the
+   Python file) to the :class:`TelemetryAPIClient` class.
 
-.. class:: Telemetry(telemetry_model)
+.. class:: TelemetryAPIClient(telemetry)
 
-   Should inherit from :class:`enhydris.telemetry.TelemetryBase`. The
-   base class :func:`__init__` method initializes the object with a
-   :class:`enhydris.telemetry.models.Telemetry` object, which becomes
-   the :attr:`telemetry_model` attribute.
+   Should inherit from
+   :class:`enhydris.telemetry.TelemetryAPIClientBase`. The base class
+   :func:`__init__` method initializes the object with a
+   :class:`~enhydris.telemetry.models.Telemetry` object, which becomes
+   the :attr:`telemetry` attribute.
 
-   :class:`Telemetry` classes must define the following attributes,
+   :class:`TelemetryAPIClient` classes must define the following attributes,
    methods and properties:
 
    .. attribute:: name
@@ -166,23 +214,109 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
       MeteoView2``. This is what is stored in
       :attr:`enhydris.telemetry.models.Telemetry.type`.
 
-   .. attribute:: wizard_steps
-      :type: list
+   .. attribute:: device_locator_label
+                  device_locator_help_text
+      :type: string
 
-      When the user wants to configure telemetry for a station, we show
-      him a wizard. The first step essentially asks what type of
-      telemetric system there is for the station at hand, i.e. asks the
-      user to select a value for
-      :attr:`enhydris.telemetry.models.Telemetry.type`.  The wizard then
-      continues with steps that are specific to the chosen telemetry
-      type.  :attr:`wizard_steps`, a class attribute, is a list of
-      :class:`django.forms.Form` subclasses, containing the forms for
-      these steps. These forms are instantiated with the configuration
-      specified so far as their ``initial`` parameter, and the
-      configuration is updated with the ``cleaned_data`` once the form
-      is posted.
+      The label and help that appears in the wizard for
+      :attr:`~enhydris.telemetry.models.Telemetry.device_locator` when
+      the user is configuring telemetry; if absent, "Device URL" is
+      used for the label and nothing is shown as help.
 
-   .. method:: fetch() -> None
+   .. attribute:: username_label
+      :type: string
 
-      Connects to the API, fetches the data, and inserts them to
-      :class:`~enhydris.models.TimeseriesRecord`.
+      The label that appears in the wizard for
+      :attr:`~enhydris.telemetry.models.Telemetry.username` when the
+      user is configuring telemetry; if absent, "Username" is used. For
+      example, it can be "Email".
+
+   .. attribute:: password_label
+      :type: string
+
+      The string that appears in the wizard for
+      :attr:`~enhydris.telemetry.models.Telemetry.password` when the
+      user is configuring telemetry; if absent, "Password" is used. For
+      example, it can be "API key".
+
+   .. attribute:: hide_device_locator
+      :type: boolean
+
+      The default is :const:`False`. Set it to :const:`True` if that
+      particular driver shouldn't show the device locator (i.e. the URL
+      or hostname or IP address of the device) in the connection data
+      form. This is useful for APIs that are served from a well-known
+      location for all stations, such as Metrica MeteoView2 or
+      TheThingsNetwork.
+
+   .. method:: connect() -> None
+
+      Initiates connection to the API and logs on. Should raise
+      :class:`TelemetryError` if something goes wrong.
+
+   .. method:: get_stations() -> dict
+
+      Retrieves and returns pairs of station ids and station names from
+      the API.  When the telemetry configuration wizard is shown to the
+      user, at some point the user is asked which of the stations
+      offered by the API corresponds to the Enhydris station; the
+      stations offered by the API is what is returned by this method. If
+      the API offers a single station, this method can be omitted (the
+      base method returns :const:`None`).
+
+      The station id is what is stored in
+      :attr:`~enhydris.telemetry.models.Telemetry.remote_station_id`;
+      the station name is what is shown to the user in the wizard.
+
+      The method must raise :class:`TelemetryError` if something goes
+      wrong.
+
+   .. method:: get_sensors() -> dict
+
+      Retrieves and returns pairs of sensor ids and sensor names from
+      the API.  When the telemetry configuration wizard is shown to the
+      user, at some point the user is asked which Enhydris time series
+      group corresponds to each sensor of the API; the sensors available
+      on the API is what is returned by this method.
+
+      The sensor id is what is stored in
+      :attr:`~enhydris.telemetry.models.Sensor.sensor_id`; the sensor
+      name is what is shown to the user in the wizard.
+
+      The method must raise :class:`TelemetryError` if something goes
+      wrong.
+
+   .. method:: get_measurements(sensor_id, enhydris_timeseries_end_date) -> StringIO
+
+      Reads data records for the sensor specified, starting with the
+      first record whose timestamp is greater than
+      ``enhydris_timeseries_end_date``, and returns them in `text
+      format`_.
+
+      ``enhydris_timeseries_end_date`` is either None (meaning get all
+      measurements since the beginning) or a naive datetime.
+
+      In order to avoid loading the server too much, this should not
+      return more than a reasonable number of records, such as half a
+      year or 20000 records. In the initial uploading of a backlog of
+      records, it will thus take a few successive data fetches to bring
+      the Enhydris time series up to date, but this is usually not a
+      problem.
+
+      Enhydris can't currently handle more than one records with
+      timestamps within the same minute. However it's OK for this method
+      to return such records; the caller will ignore all except for the
+      first one.
+
+      The method must raise :class:`TelemetryError` if something goes
+      wrong.
+
+      .. _text format: https://github.com/openmeteo/htimeseries/#text-format
+
+Exceptions
+----------
+
+.. class:: enhydris.telemetry.TelemetryError
+
+   Telemetry API clients raise this exception if something goes wrong when
+   connecting to the API. It derives from :class:`OSError`.

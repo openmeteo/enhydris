@@ -16,7 +16,7 @@ class TelemetryLogViewTestCase(TestCase):
         cls.user = User.objects.create_user("alice", password="topsecret")
         cls.station = mommy.make(Station, name="great station", creator=cls.user)
         cls.station2 = mommy.make(Station, name="another station", creator=cls.user)
-        cls.telemetry = mommy.make(Telemetry, station=cls.station, configuration={})
+        cls.telemetry = mommy.make(Telemetry, station=cls.station)
         cls.telemetry_log = mommy.make(
             TelemetryLogMessage,
             telemetry=cls.telemetry,
@@ -110,7 +110,6 @@ class PermissionsTestCase(TestCase):
         cls.telemetry_log_message = mommy.make(
             TelemetryLogMessage,
             telemetry__station=cls.station,
-            telemetry__configuration={},
         )
 
     def test_telemetry_logs_are_visible_when_correct_user_logged_on(self):
