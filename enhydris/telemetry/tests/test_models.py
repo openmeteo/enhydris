@@ -1,8 +1,10 @@
 import datetime as dt
 import errno
+import json
 import os
 import subprocess
-from unittest.mock import patch
+from io import StringIO
+from unittest.mock import MagicMock, patch
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -11,7 +13,7 @@ from freezegun import freeze_time
 from model_mommy import mommy
 
 import enhydris
-from enhydris.models import Station
+from enhydris.models import Station, Timeseries, TimeseriesGroup
 from enhydris.telemetry.models import Telemetry, TelemetryLogMessage, fix_zone_name
 
 
@@ -25,7 +27,7 @@ class TelemetryFetchValidatorsTestCase(TestCase):
             fetch_interval_minutes=10,
             fetch_offset_minutes=10,
             fetch_offset_time_zone="Europe/Athens",
-            configuration="{}",
+            additional_config="{}",
         )
 
     def setUp(self):
@@ -75,7 +77,7 @@ class TelemetryIsDueTestCase(TestCase):
             fetch_interval_minutes=10,
             fetch_offset_minutes=10,
             fetch_offset_time_zone="Europe/Athens",
-            configuration="{}",
+            additional_config="{}",
         )
 
     def _check(self, fetch_interval_minutes, fetch_offset_minutes, expected_result):
@@ -111,10 +113,252 @@ class FixZoneNameTestCase(TestCase):
         self.assertEqual(fix_zone_name("EEST"), "EEST")
 
 
+class TelemetryFetchTestCaseBase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.station = mommy.make(Station)
+        cls.timeseries_group = mommy.make(
+            TimeseriesGroup,
+            id=42,
+            gentity=cls.station,
+            variable__descr="Temperature",
+            time_zone__code="EET",
+            time_zone__utc_offset=200,
+            precision=1,
+        )
+        cls.telemetry = mommy.make(
+            Telemetry,
+            station=cls.station,
+            type="meteoview2",
+            data_time_zone="Europe/Athens",
+            fetch_interval_minutes=10,
+            fetch_offset_minutes=2,
+            fetch_offset_time_zone="Asia/Vladivostok",
+            username="someemail@email.com",
+            password="topsecret",
+            remote_station_id="42a",
+            additional_config={},
+        )
+        cls.telemetry.sensor_set.create(
+            sensor_id="257", timeseries_group=cls.timeseries_group
+        )
+
+
+class TelemetryFetchTestCase(TelemetryFetchTestCaseBase):
+    # We could mock a TelemetryAPIClient here, but we choose to create a lower level
+    # mock object, i.e. requests.request, and use an unmocked meteoview2 api client.
+    # However, the functionality we check here is of models.py and not of the
+    # meteoview2 api client, which is presumed to work correctly (and the specifics
+    # of which are tested elsewhere).
+
+    def setUp(self):
+        self.mock_request = self._get_mock_request()
+        self.telemetry.fetch()
+
+    def _get_mock_request(self):
+        patcher = patch("enhydris.telemetry.types.meteoview2.requests.request")
+        mock_request = patcher.start()
+        self.addCleanup(patcher.stop)
+        mock_request.side_effect = [
+            MagicMock(  # Response for login
+                **{"json.return_value": {"code": "200", "token": "topsecretapitoken"}}
+            ),
+            MagicMock(  # Response for measurements
+                **{
+                    "json.return_value": {
+                        "code": "200",
+                        "measurements": [
+                            {
+                                "total_values": 1,
+                                "values": [
+                                    {
+                                        "year": "1990",
+                                        "month": "0",
+                                        "day": "1",
+                                        "hour": "0",
+                                        "minute": "0",
+                                        "mvalue": "42",
+                                    }
+                                ],
+                            }
+                        ],
+                    }
+                }
+            ),
+        ]
+        return mock_request
+
+    def test_logs_on(self):
+        login_request = self.mock_request.mock_calls[0]
+        self.assertEqual(
+            login_request.args, ("POST", "https://meteoview2.gr/api/token")
+        )
+        self.assertEqual(
+            login_request.kwargs,
+            {
+                "headers": {"content-type": "application/json"},
+                "data": json.dumps(
+                    {"email": "someemail@email.com", "key": "topsecret"}
+                ),
+            },
+        )
+
+    def test_fetches_sensor_257(self):
+        fetch_request = self.mock_request.mock_calls[1]
+        self.assertEqual(
+            fetch_request.args, ("POST", "https://meteoview2.gr/api/measurements")
+        )
+        self.assertEqual(
+            fetch_request.kwargs["data"],
+            json.dumps(
+                {
+                    "sensor": ["257"],
+                    "datefrom": "1990-01-01",
+                    "timefrom": "00:00",
+                    "dateto": "1990-06-30",
+                }
+            ),
+        )
+
+    def test_appends_data_to_database(self):
+        timeseries = Timeseries.objects.get(
+            timeseries_group=self.timeseries_group, type=Timeseries.INITIAL
+        )
+        data = StringIO()
+        timeseries.get_data().write(data)
+        self.assertEqual(data.getvalue().strip(), "1990-01-01 00:00,42.0,")
+
+
+class TelemetryFetchIgnoresTimeZoneTestCase(TelemetryFetchTestCaseBase):
+    """Test that timeseries_end_date is always naive
+
+    When records already exist in the timeseries before calling fetch(), the
+    timeseries_end_date specified in get_measurement() is determined from the
+    latest of these records. However, storage of timestamps in the database is
+    always aware, so we need to convert it to naive before calling
+    get_measurement(). This TestCases checks that this is done.
+
+    Unfortunately, at the time of this writing, if this test fails, the error
+    message is not easy to understand, because fetch() catches all exceptions and
+    records them in the TelemetryLog.  So while debugging things related to this
+    test it's a good idea to temporarily modify fetch() to raise exceptions.
+    """
+
+    def setUp(self):
+        timeseries = Timeseries(
+            timeseries_group_id=self.timeseries_group.id, type=Timeseries.INITIAL
+        )
+        timeseries.save()
+        timeseries.append_data(StringIO("2022-06-14 08:00,42.1,\n"))
+
+    @patch("enhydris.telemetry.types.meteoview2.requests.request")
+    def test_ignores_time_zone(self, mock_request):
+        self._set_mock_request_return_values(mock_request)
+        self.telemetry.fetch()
+        self.assertEqual(
+            mock_request.call_args.kwargs,
+            {
+                "headers": {
+                    "content-type": "application/json",
+                    "Authorization": "Bearer topsecretapitoken",
+                },
+                "data": json.dumps(
+                    {
+                        "sensor": ["257"],
+                        "datefrom": "2022-06-14",
+                        "timefrom": "08:01",
+                        "dateto": "2022-12-11",
+                    }
+                ),
+            },
+        )
+
+    def _set_mock_request_return_values(self, mock_request):
+        mock_request.side_effect = [
+            MagicMock(  # Response for login
+                **{"json.return_value": {"code": "200", "token": "topsecretapitoken"}}
+            ),
+            MagicMock(  # Response for measurements
+                **{"json.return_value": "irrelevant"}
+            ),
+        ]
+
+
+@patch("enhydris.telemetry.types.meteoview2.requests.request")
+class TelemetryFetchDealsWithTooCloseTimestampsTestCase(TelemetryFetchTestCaseBase):
+    """Test successive timestamps less than one minute apart
+
+    Enhydris can't handle the case where two timestamps differ in seconds
+    only; therefore if such a thing happens we ignore the second timestamp.
+
+    Unfortunately, at the time of this writing, if this test fails, the error
+    message is not easy to understand, because fetch() catches all exceptions and
+    records them in the TelemetryLog.  So while debugging things related to this
+    test it's a good idea to temporarily modify fetch() to raise exceptions.
+    """
+
+    def test_return_value(self, mock_request):
+        self._set_request_result(mock_request)
+        self.telemetry.fetch()
+        result = StringIO()
+        self.timeseries_group.default_timeseries.get_data().write(result)
+        self.assertEqual(
+            result.getvalue(),
+            "2021-12-14 08:10,1.4,\r\n" "2021-12-14 08:20,1.4,\r\n",
+        )
+
+    def _set_request_result(self, mock_request):
+        mock_request.side_effect = [
+            MagicMock(  # Response for login
+                **{"json.return_value": {"code": "200", "token": "topsecretapitoken"}}
+            ),
+            MagicMock(  # Response for measurements
+                **{
+                    "json.return_value": {
+                        "code": "200",
+                        "measurements": [
+                            {
+                                "total_values": 3,
+                                "values": [
+                                    {
+                                        "year": "2021",
+                                        "month": "11",
+                                        "day": "14",
+                                        "hour": "08",
+                                        "minute": "10",
+                                        "second": "07",
+                                        "mvalue": "1.42",
+                                    },
+                                    {
+                                        "year": "2021",
+                                        "month": "11",
+                                        "day": "14",
+                                        "hour": "08",
+                                        "minute": "10",
+                                        "second": "37",
+                                        "mvalue": "1.47",
+                                    },
+                                    {
+                                        "year": "2021",
+                                        "month": "11",
+                                        "day": "14",
+                                        "hour": "08",
+                                        "minute": "20",
+                                        "mvalue": "1.43",
+                                    },
+                                ],
+                            }
+                        ],
+                    }
+                }
+            ),
+        ]
+
+
 class TelemetryLogMessageTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.telemetry = mommy.make(Telemetry, configuration={})
+        cls.telemetry = mommy.make(Telemetry, additional_config={})
 
     def setUp(self):
         try:
@@ -240,9 +484,9 @@ class TelemetryLogMessageGetEnhydrisCommitIdFromGitTestCase(TestCase):
 class TelemetryFetchErrorTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.telemetry = mommy.make(Telemetry, type="meteoview2", configuration={})
+        cls.telemetry = mommy.make(Telemetry, type="meteoview2", additional_config={})
 
-    @patch("enhydris.telemetry.types.meteoview2.Telemetry.fetch")
+    @patch("enhydris.telemetry.models.Telemetry._setup_api_client")
     def test_logs_error_on_fetch_error(self, m):
         m.side_effect = KeyError("foo")
         self.telemetry.fetch()

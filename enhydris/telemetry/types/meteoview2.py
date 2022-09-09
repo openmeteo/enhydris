@@ -2,29 +2,28 @@ import datetime as dt
 import json
 from io import StringIO
 
-from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 import requests
 
-from enhydris.telemetry.types import TelemetryBase
+from enhydris.telemetry.types import TelemetryAPIClientBase
 
 
-class ErrorResponse(requests.HTTPError):
-    pass
+class TelemetryAPIClient(TelemetryAPIClientBase):
+    name = "Metrica MeteoView2"
+    username_label = _("Email")
+    password_label = _("API key")
+    hide_device_locator = True
 
-
-class Meteoview2ApiClient:
-    def __init__(self, email, key):
-        self.email = email
-        self.key = key
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.api_url = "https://meteoview2.gr/api/"
 
-    def login(self):
+    def connect(self):
         data = self.make_request(
             "POST",
             f"{self.api_url}token",
-            data={"email": self.email, "key": self.key},
+            data={"email": self.telemetry.username, "key": self.telemetry.password},
         )
         self.token = data["token"]
 
@@ -34,23 +33,23 @@ class Meteoview2ApiClient:
             f"{self.api_url}stations",
             headers={"Authorization": f"Bearer {self.token}"},
         )
-        return data["stations"]
+        return {v["code"]: v["title"] for k, v in data["stations"].items()}
 
-    def get_sensors(self, station_code):
+    def get_sensors(self):
         data = self.make_request(
             "POST",
             f"{self.api_url}sensors",
             headers={"Authorization": f"Bearer {self.token}"},
-            data={"station_code": station_code},
+            data={"station_code": self.telemetry.remote_station_id},
         )
-        return data["sensors"]
+        return {s["id"]: s["title"] for s in data["sensors"]}
 
     def get_measurements(self, sensor_id, timeseries_end_date):
         start_date = self._get_start_date(sensor_id, timeseries_end_date)
         end_date = start_date + dt.timedelta(days=180)
         data = None
         now = dt.datetime.now() + dt.timedelta(days=1)
-        while start_date.replace(tzinfo=None) < now:
+        while start_date < now:
             data = self.make_request(
                 "POST",
                 f"{self.api_url}measurements",
@@ -69,7 +68,6 @@ class Meteoview2ApiClient:
         if not data or data["measurements"][0]["total_values"] == 0:
             return StringIO("")
         result = ""
-        prev_timestamp = None
         for r in data["measurements"][0]["values"]:
             year = int(r["year"])
             month = int(r["month"]) + 1
@@ -77,11 +75,6 @@ class Meteoview2ApiClient:
             hour = int(r["hour"])
             minute = int(r["minute"])
             timestamp = dt.datetime(year, month, day, hour, minute, 0)
-            if timestamp == prev_timestamp:
-                # We have two timestamps possibly differing in seconds only. Enhydris
-                # can't handle that.
-                continue
-            prev_timestamp = timestamp
             result += f'{timestamp.isoformat()},{r["mvalue"]},\n'
         return StringIO(result)
 
@@ -93,123 +86,20 @@ class Meteoview2ApiClient:
         return start_date
 
     def make_request(self, method, url, *args, **kwargs):
+        from enhydris.telemetry import TelemetryError
+
         if "data" in kwargs:
             kwargs.setdefault("headers", {})
             kwargs["headers"]["content-type"] = "application/json"
             kwargs["data"] = json.dumps(kwargs["data"])
         response = requests.request(method, url, *args, **kwargs)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.RequestException as e:
+            raise TelemetryError(str(e))
         data = response.json()
         if "code" not in data:
-            raise ErrorResponse('Missing "code"', response=response)
+            raise TelemetryError('Missing "code"')
         if int(data["code"]) != 200:
-            raise ErrorResponse(
-                f'{data["code"]} {data.get("message", "")}', response=response
-            )
+            raise TelemetryError(f'{data["code"]} {data.get("message", "")}')
         return data
-
-
-class LoginDataForm(forms.Form):
-    email = forms.EmailField()
-    api_key = forms.CharField()
-
-    def clean(self):
-        cleaned_data = super().clean()
-        try:
-            email = cleaned_data.get("email")
-            api_key = cleaned_data.get("api_key")
-            meteoview2_api_client = Meteoview2ApiClient(email, api_key)
-            meteoview2_api_client.login()
-        except requests.RequestException as e:
-            s = str(e)
-            error_message = _("Could not login to meteoview; the error was: %s") % s
-            raise forms.ValidationError(error_message)
-        return cleaned_data
-
-
-class ChooseStationForm(forms.Form):
-    station = forms.ChoiceField()
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        meteoview2_api_client = Meteoview2ApiClient(
-            self.initial["email"], self.initial["api_key"]
-        )
-        meteoview2_api_client.login()
-        stations = meteoview2_api_client.get_stations()
-        choices = []
-        for key in stations:
-            station = stations[key]
-            code = station["code"]
-            title = station["title"]
-            choices.append((code, f"{title} ({code})"))
-        self.fields["station"].choices = choices
-
-
-class ChooseSensorForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        from enhydris import models
-
-        super().__init__(*args, **kwargs)
-        configuration = kwargs["initial"]
-        station_id = configuration["station_id"]
-        station_code = configuration["station"]
-        meteoview2_api_client = Meteoview2ApiClient(
-            configuration["email"], configuration["api_key"]
-        )
-        meteoview2_api_client.login()
-        sensors = meteoview2_api_client.get_sensors(station_code)
-        station = models.Station.objects.get(pk=station_id)
-        timeseries_groups = station.timeseriesgroup_set
-        choices = [("", _("Ignore this sensor"))]
-        choices.extend(
-            [(tg.id, f"{tg.name} ({tg.id})") for tg in timeseries_groups.all()]
-        )
-        for sensor in sensors:
-            sensor_id = sensor["id"]
-            title = sensor["title"]
-            self.fields[f"sensor_{sensor_id}"] = forms.ChoiceField(
-                label=_(
-                    "To which Enhydris time series does sensor "
-                    '"{title}" ({sensor_id}) correspond?'
-                ).format(title=title, sensor_id=sensor_id),
-                choices=choices,
-                required=False,
-            )
-
-
-class Telemetry(TelemetryBase):
-    name = "Metrica MeteoView2"
-    wizard_steps = [LoginDataForm, ChooseStationForm, ChooseSensorForm]
-
-    def fetch(self):
-        self._setup_api_client()
-        self._fetch_sensors()
-
-    def _setup_api_client(self):
-        configuration = self.telemetry_model.configuration
-        email = configuration["email"]
-        api_key = configuration["api_key"]
-        self.meteoview2_api_client = Meteoview2ApiClient(email, api_key)
-        self.meteoview2_api_client.login()
-
-    def _fetch_sensors(self):
-        configuration = self.telemetry_model.configuration
-        for key in configuration:
-            if not key.startswith("sensor_"):
-                continue
-            sensor_id = key.partition("_")[2]
-            if configuration[key]:
-                timeseries_group_id = int(configuration[key])
-                self._fetch_sensor(sensor_id, timeseries_group_id)
-
-    def _fetch_sensor(self, sensor_id, timeseries_group_id):
-        from enhydris.models import Timeseries
-
-        timeseries, created = Timeseries.objects.get_or_create(
-            timeseries_group_id=timeseries_group_id, type=Timeseries.INITIAL
-        )
-        measurements = self.meteoview2_api_client.get_measurements(
-            sensor_id=sensor_id, timeseries_end_date=timeseries.end_date
-        )
-        timeseries.append_data(measurements)

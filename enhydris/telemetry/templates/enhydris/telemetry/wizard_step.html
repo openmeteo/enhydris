@@ -11,11 +11,7 @@
 {% block content %}
   <div class="container">
     <h1>
-     {% if seq == 1 %}
-       {% blocktrans with station_name=station.name step=step %}{{ station_name }}: Telemetry setup (beta) step 1{% endblocktrans %}
-     {% else %}
-       {% blocktrans with station_name=station.name step=step %}{{ station_name }}: Telemetry setup (beta) step {{ seq }} of {{ max_seq }}{% endblocktrans %}
-     {% endif %}
+      {% blocktrans with station_name=station.name step=step %}{{ station_name }}: Telemetry setup (beta) step {{ seq }} of {{ max_seq }}{% endblocktrans %}
     </h1>
     <form enctype="multipart/form-data" method="post" role="form">
       {% csrf_token %}

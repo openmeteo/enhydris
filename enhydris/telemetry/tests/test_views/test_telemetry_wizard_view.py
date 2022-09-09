@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.http import HttpResponse
@@ -9,11 +9,42 @@ from bs4 import BeautifulSoup
 from model_mommy import mommy
 
 from enhydris.models import Station
-from enhydris.telemetry import drivers
+from enhydris.telemetry.forms import ConnectionDataForm
 from enhydris.telemetry.models import Telemetry
+from enhydris.telemetry.views import TelemetryWizardView
 
 
-class FirstStepGetTestCase(TestCase):
+class RedirectToFirstStepTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(username="alice", password="topsecret")
+        cls.station = mommy.make(Station, creator=cls.user)
+
+    def test_redirects(self):
+        """Test that we are redirected to the first step if we don't come from there"""
+        self.client.login(username="alice", password="topsecret")
+        response = self.client.get(f"/stations/{self.station.id}/telemetry/2/")
+        expected_url = f"/stations/{self.station.id}/telemetry/1/"
+        self.assertRedirects(response, expected_url)
+
+    def test_no_redirects(self):
+        """Test that we are not redirected if we come from the first step"""
+        self.client.login(username="alice", password="topsecret")
+        self.client.post(
+            f"/stations/{self.station.id}/telemetry/1/",
+            {
+                "type": "meteoview2",
+                "data_time_zone": "Europe/Athens",
+                "fetch_interval_minutes": "10",
+                "fetch_offset_minutes": "2",
+                "fetch_offset_time_zone": "Europe/Kiev",
+            },
+        )
+        response = self.client.get(f"/stations/{self.station.id}/telemetry/2/")
+        self.assertEqual(response.status_code, 200)
+
+
+class CopyTelemetryDataFromDatabaseToSessionTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
@@ -57,7 +88,7 @@ class FirstStepGetTestCase(TestCase):
         self.assertEqual(option_empty.get("selected"), "")
 
 
-class FirstStepGetWithAlreadyExistingTelemetryTestCase(TestCase):
+class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
@@ -70,7 +101,7 @@ class FirstStepGetWithAlreadyExistingTelemetryTestCase(TestCase):
             fetch_interval_minutes=10,
             fetch_offset_minutes=2,
             fetch_offset_time_zone="Asia/Vladivostok",
-            configuration="{'hello':'world'}",
+            additional_config="{}",
         )
 
     @classmethod
@@ -125,11 +156,19 @@ class FirstStepGetWithAlreadyExistingTelemetryTestCase(TestCase):
         self.assertEqual(option_asia_vladivostok.get("selected"), "")
 
     def test_configuration_is_in_the_session(self):
-        itemkey = f"telemetry_{self.station.id}_configuration"
-        self.assertEqual(self.cclient.session[itemkey], "{'hello':'world'}")
+        itemkey = f"telemetry_{self.station.id}"
+        expected = {
+            "type": "meteoview2",
+            "data_time_zone": "Europe/Athens",
+            "fetch_interval_minutes": 10,
+            "fetch_offset_minutes": 2,
+            "fetch_offset_time_zone": "Asia/Vladivostok",
+            "additional_config": "{}",
+        }
+        self.assertEqual(self.cclient.session[itemkey], expected)
 
 
-class FirstTestPostTestCase(TestCase):
+class FirstStepPostTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
@@ -152,7 +191,7 @@ class FirstTestPostTestCase(TestCase):
         )
 
     def _session(self, key):
-        return self.cclient.session[f"telemetry_{self.station.id}_{key}"]
+        return self.cclient.session[f"telemetry_{self.station.id}"][key]
 
     def test_status_code(self):
         self.assertEqual(self.response.status_code, 302)
@@ -164,16 +203,16 @@ class FirstTestPostTestCase(TestCase):
         self.assertEqual(self._session("data_time_zone"), "Europe/Athens")
 
     def test_fetch_interval_minutes(self):
-        self.assertEqual(self._session("fetch_interval_minutes"), "10")
+        self.assertEqual(self._session("fetch_interval_minutes"), 10)
 
     def test_fetch_offset_minutes(self):
-        self.assertEqual(self._session("fetch_offset_minutes"), "2")
+        self.assertEqual(self._session("fetch_offset_minutes"), 2)
 
     def test_fetch_offset_time_zone(self):
         self.assertEqual(self._session("fetch_offset_time_zone"), "Europe/Kiev")
 
 
-class FirstTestPostErrorTestCase(TestCase):
+class FirstStepPostErrorTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
@@ -192,37 +231,11 @@ class FirstTestPostErrorTestCase(TestCase):
         self.assertEqual(self.response.status_code, 200)
 
 
-class SecondStepRedirectTestCase(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
-
-    def test_redirects(self):
-        """Test that we are redirected to the first step if we don't come from there"""
-        self.client.login(username="alice", password="topsecret")
-        response = self.client.get(f"/stations/{self.station.id}/telemetry/2/")
-        expected_url = f"/stations/{self.station.id}/telemetry/1/"
-        self.assertRedirects(response, expected_url)
-
-    def test_no_redirects(self):
-        """Test that we are not redirected if we come from the first step"""
-        self.client.login(username="alice", password="topsecret")
-        self.client.post(
-            f"/stations/{self.station.id}/telemetry/1/",
-            {
-                "type": "meteoview2",
-                "data_time_zone": "Europe/Athens",
-                "fetch_interval_minutes": "10",
-                "fetch_offset_minutes": "2",
-                "fetch_offset_time_zone": "Europe/Kiev",
-            },
-        )
-        response = self.client.get(f"/stations/{self.station.id}/telemetry/2/")
-        self.assertEqual(response.status_code, 200)
-
-
 class SecondStepGetMixin:
+    # Note: we use the "meteoview2" driver (otherwise we'd need to mock or create a
+    # dummy driver for testing), but we only test the functionality of telemetry.views
+    # here, not the functionality of meteoview2 (this is to be tested elsewhere).
+
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
@@ -234,7 +247,6 @@ class SecondStepGetMixin:
         cls.cclient = Client()
         cls.cclient.login(username="alice", password="topsecret")
         cls._post_step_1()
-        cls._create_mock_form()
         cls._make_request_for_step_2()
 
     @classmethod
@@ -251,43 +263,26 @@ class SecondStepGetMixin:
         )
 
     @classmethod
-    def _create_mock_form(cls):
-        # mock_Form mocks the Form class, whereas mock_form mocks the object
-        # instantiated by that class.
-        cls.mock_form = MagicMock()
-        cls.mock_Form = MagicMock(return_value=cls.mock_form)
-        cls.saved_form = drivers["meteoview2"].wizard_steps[0]
-        drivers["meteoview2"].wizard_steps[0] = cls.mock_Form
-
-    @classmethod
-    def tearDownClass(cls):
-        drivers["meteoview2"].wizard_steps[0] = cls.saved_form
-        super().tearDownClass()
-
-
-class SecondStepGetTestCase(SecondStepGetMixin, TestCase):
-    @classmethod
     def _make_request_for_step_2(cls):
         p1 = patch("enhydris.telemetry.views.render", return_value=HttpResponse("hi"))
         with p1 as mock_render:
             cls.mock_render = mock_render
             cls.response = cls.cclient.get(f"/stations/{cls.station.id}/telemetry/2/")
 
-    # Note: we use the "meteoview2" driver (otherwise we'd need to mock or create a
-    # dummy driver for testing), but we only test the functionality of telemetry.views
-    # here, not the functionality of meteoview2 (this is to be tested elsewhere).
-    def test_called_render(self):
-        self.mock_render.assert_called_once()
-
     @property
     def _template_context(self):
         return self.mock_render.call_args.args[2]
+
+
+class SecondStepGetTestCase(SecondStepGetMixin, TestCase):
+    def test_called_render(self):
+        self.mock_render.assert_called_once()
 
     def test_render_context_station(self):
         self.assertEqual(self._template_context["station"].id, self.station.id)
 
     def test_render_context_form(self):
-        self.assertEqual(self._template_context["form"], self.mock_form)
+        self.assertEqual(self._template_context["form"].__class__, ConnectionDataForm)
 
     def test_render_context_seq(self):
         self.assertEqual(self._template_context["seq"], 2)
@@ -299,7 +294,7 @@ class SecondStepGetTestCase(SecondStepGetMixin, TestCase):
         self.assertEqual(self._template_context["max_seq"], 4)
 
     def test_form_created_with_the_correct_configuration(self):
-        self.mock_Form.assert_called_once_with(initial={"station_id": self.station.id})
+        self.assertEqual(self._template_context["form"].initial["type"], "meteoview2")
 
 
 class SecondStepGetWithNondefaultConfigurationTestCase(SecondStepGetMixin, TestCase):
@@ -309,15 +304,12 @@ class SecondStepGetWithNondefaultConfigurationTestCase(SecondStepGetMixin, TestC
     @classmethod
     def _make_request_for_step_2(cls):
         session = cls.cclient.session
-        session[f"telemetry_{cls.station.id}_configuration"] = {"hello": "world"}
+        session[f"telemetry_{cls.station.id}"] = {"type": "addupi"}
         session.save()
-
-        p1 = patch("enhydris.telemetry.views.render", return_value=HttpResponse("hi"))
-        with p1:
-            cls.response = cls.cclient.get(f"/stations/{cls.station.id}/telemetry/2/")
+        super()._make_request_for_step_2()
 
     def test_form_created_with_the_correct_configuration(self):
-        self.mock_Form.assert_called_once_with(initial={"hello": "world"})
+        self.assertEqual(self._template_context["form"].initial["type"], "addupi")
 
 
 class SecondStepPostMixin:
@@ -363,7 +355,11 @@ class SecondStepPostWithErrorTestCase(SecondStepPostMixin, TestCase):
     def _post_step_2(cls):
         p1 = patch(
             "enhydris.telemetry.types.meteoview2.requests.request",
-            side_effect=requests.RequestException("error"),
+            **{
+                "return_value.raise_for_status.side_effect": requests.RequestException(
+                    "error"
+                )
+            },
         )
         with p1:
             cls.response = cls.cclient.post(
@@ -389,8 +385,8 @@ class SecondStepPostSuccessfulMixin(SecondStepPostMixin):
             cls.response = cls.cclient.post(
                 f"/stations/{cls.station.id}/telemetry/2/",
                 data={
-                    "email": "someemail@email.com",
-                    "api_key": "topsecret",
+                    "username": "someemail@email.com",
+                    "password": "topsecret",
                 },
             )
 
@@ -405,11 +401,17 @@ class SecondStepPostSuccessfulTestCase(SecondStepPostSuccessfulMixin, TestCase):
 
     def test_updated_configuration(self):
         self.assertEqual(
-            self.cclient.session[f"telemetry_{self.station.id}_configuration"],
+            self.cclient.session[f"telemetry_{self.station.id}"],
             {
-                "station_id": self.station.id,
-                "email": "someemail@email.com",
-                "api_key": "topsecret",
+                "type": "meteoview2",
+                "data_time_zone": "Europe/Athens",
+                "fetch_interval_minutes": 10,
+                "fetch_offset_minutes": 2,
+                "fetch_offset_time_zone": "Europe/Kiev",
+                "username": "someemail@email.com",
+                "password": "topsecret",
+                "device_locator": "",
+                "additional_config": {},
             },
         )
 
@@ -419,27 +421,20 @@ class FinalStepPostSuccessfulMixin(SecondStepPostSuccessfulMixin):
     # to fool the system into thinking it's the final step.
     @classmethod
     def setUpClass(cls):
-        cls.saved_steps = drivers["meteoview2"].wizard_steps
-        drivers["meteoview2"].wizard_steps = drivers["meteoview2"].wizard_steps[:1]
+        cls.saved_forms = TelemetryWizardView.forms
+        TelemetryWizardView.forms = TelemetryWizardView.forms[:2]
         super().setUpClass()
 
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
-        drivers["meteoview2"].wizard_steps = cls.saved_steps
+        TelemetryWizardView.forms = cls.saved_forms
 
 
 class FinalStepPostSuccessfulTestCase(FinalStepPostSuccessfulMixin, TestCase):
     def test_saves_stuff_in_database(self):
         telemetry = Telemetry.objects.get(station=self.station)
-        self.assertEqual(
-            telemetry.configuration,
-            {
-                "station_id": self.station.id,
-                "email": "someemail@email.com",
-                "api_key": "topsecret",
-            },
-        )
+        self.assertEqual(telemetry.username, "someemail@email.com")
 
     def test_redirects_to_station_page(self):
         self.assertRedirects(
@@ -464,19 +459,12 @@ class FinalStepPostSuccessfulReplacesExistingTelemetryTestCase(
             station=cls.station,
             fetch_interval_minutes=10,
             fetch_offset_minutes=0,
-            configuration={},
+            additional_config={},
         )
 
     def test_replaces_stuff_in_database(self):
         telemetry = Telemetry.objects.get(station=self.station)
-        self.assertEqual(
-            telemetry.configuration,
-            {
-                "station_id": self.station.id,
-                "email": "someemail@email.com",
-                "api_key": "topsecret",
-            },
-        )
+        self.assertEqual(telemetry.username, "someemail@email.com")
 
 
 @patch(
@@ -494,28 +482,28 @@ class NextOrFinishButtonTestCase(TestCase):
             station=cls.station,
             fetch_interval_minutes=10,
             fetch_offset_minutes=0,
-            configuration={},
+            additional_config={},
         )
 
     def setUp(self):
         self.client.login(username="alice", password="topsecret")
         session = self.client.session
-        session[f"telemetry_{self.station.id}_configuration"] = {
+        session[f"telemetry_{self.station.id}"] = {
             "station_id": self.station.id,
-            "email": "someemail@somewhere.com",
-            "api_key": "topsecret",
+            "username": "someemail@somewhere.com",
+            "password": "topsecret",
+            "type": "meteoview2",
+            "data_time_zone": "Europe/Athens",
+            "fetch_interval_minutes": "10",
+            "fetch_offset_minutes": "2",
+            "fetch_offset_time_zone": "Europe/Kiev",
         }
-        session[f"telemetry_{self.station.id}_type"] = "meteoview2"
-        session[f"telemetry_{self.station.id}_data_time_zone"] = "Europe/Athens"
-        session[f"telemetry_{self.station.id}_fetch_interval_minutes"] = "10"
-        session[f"telemetry_{self.station.id}_fetch_offset_minutes"] = "2"
-        session[f"telemetry_{self.station.id}_fetch_offset_time_zone"] = "Europe/Kiev"
         session.save()
 
-        self.saved_wizard_steps = drivers["meteoview2"].wizard_steps
+        self.saved_forms = TelemetryWizardView.forms
 
     def tearDown(self):
-        drivers["meteoview2"].wizard_steps = self.saved_wizard_steps
+        TelemetryWizardView.forms = self.saved_forms
 
     def _get_button_text_for_step_2(self):
         response = self.client.get(f"/stations/{self.station.id}/telemetry/2/")
@@ -527,7 +515,7 @@ class NextOrFinishButtonTestCase(TestCase):
         self.assertEqual(button_text, "Next")
 
     def test_button_says_finish_in_final_step(self, m):
-        drivers["meteoview2"].wizard_steps = drivers["meteoview2"].wizard_steps[:1]
+        TelemetryWizardView.forms = TelemetryWizardView.forms[:2]
         button_text = self._get_button_text_for_step_2()
         self.assertEqual(button_text, "Finish")
 
