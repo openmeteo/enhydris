@@ -13,8 +13,8 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
     name = "Adcon addUPI"
     device_locator_label = _("Gateway or addVANTAGE server URL")
     device_locator_help_text = _(
-        'Use "https://hostname:port" or "https://hostname". If unspecified, the port '
-        "defaults to 80. You can use http instead of https, but it is not recommended."
+        'Use "https://hostname:port" or "https://hostname". You can use http instead '
+        "of https, but it is not recommended."
     )
 
     def connect(self):
