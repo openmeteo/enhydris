@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 08:48-0500\n"
+"POT-Creation-Date: 2022-09-09 07:31-0500\n"
 "PO-Revision-Date: 2011-11-24 14:33+0200\n"
 "Last-Translator: Antonis Christofides <anthony@itia.ntua.gr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -475,11 +475,24 @@ msgstr "Η χρονοσειρά \"{}\" εισήχθη επιτυχώς"
 msgid "Importing time series \"{}\" failed"
 msgstr "Η εισαγωγή της χρονοσειράς \"{}\" απέτυχε"
 
-#: enhydris/telemetry/models.py:37
+#: enhydris/telemetry/forms.py:90
+msgid "Ignore this sensor"
+msgstr "Να αγνοηθεί αυτός ο αισθητήρας"
+
+#: enhydris/telemetry/forms.py:97
+#, python-brace-format
+msgid ""
+"To which Enhydris time series does sensor \"{sensor_name}\" ({sensor_id}) "
+"correspond?"
+msgstr ""
+"Σε ποια χρονοσειρά της Ενυδρίδας αντιστοιχεί ο αισθητήρας "
+"\"{sensor_name}\" ({sensor_id});"
+
+#: enhydris/telemetry/models.py:39
 msgid "Telemetry system type"
 msgstr "Τύπος τηλεμετρικού συστήματος"
 
-#: enhydris/telemetry/models.py:39
+#: enhydris/telemetry/models.py:41
 msgid ""
 "The type of the system from which the data is to be fetched. If unlisted, it "
 "might mean that it is currently unsupported."
@@ -488,11 +501,11 @@ msgstr ""
 "αναφέρεται στον κατάλογο, αυτό συνήθως σημαίνει ότι προς το παρόν δεν "
 "υποστηρίζεται."
 
-#: enhydris/telemetry/models.py:47
+#: enhydris/telemetry/models.py:49
 msgid "Time zone of the timestamps (useful only for DST switches)"
 msgstr "Ζώνη ώρας των χρονοσφραγίδων (χρήσιμο μόνο για αλλαγές σε θερινή ώρα)"
 
-#: enhydris/telemetry/models.py:49
+#: enhydris/telemetry/models.py:51
 msgid ""
 "If the station switches to Daylight Saving Time, enter the time zone here. "
 "This is only used in order to know when the DST switches occur. The "
@@ -504,20 +517,20 @@ msgstr ""
 "ώρα. Η χρονοσφραγίδα, αφού μετατραπεί σε χειμερινή ώρα, αποθηκεύεται όπως "
 "είναι. Αν ο σταθμός δεν αλλάζει σε θερινή ώρα, αφήστε το πεδίο κενό."
 
-#: enhydris/telemetry/models.py:57
+#: enhydris/telemetry/models.py:59
 msgid "Fetch interval (how often to fetch data), in minutes"
 msgstr "Διάστημα λήψης (πόσο συχνά να λαμβάνονται δεδομένα), σε λεπτά"
 
-#: enhydris/telemetry/models.py:58
+#: enhydris/telemetry/models.py:60
 msgid "E.g. 60 to fetch data every 60 minutes, 1440 for once a day"
 msgstr ""
 "Π.χ. 60 για να λαμβάνονται δεδομένα κάθε 60 λεπτά, 1440 για άπαξ ημερησίως"
 
-#: enhydris/telemetry/models.py:62
+#: enhydris/telemetry/models.py:64
 msgid "Fetch time offset, in minutes"
 msgstr "Καθυστέρηση λήψης, σε λεπτά"
 
-#: enhydris/telemetry/models.py:64
+#: enhydris/telemetry/models.py:66
 msgid ""
 "If the fetch interval is 10 and the offset is 2, then data will be fetched "
 "at :02, :12, :22, etc. If the fetch interval is 1440 and the offset is 125, "
@@ -529,11 +542,11 @@ msgstr ""
 "καθυστέρηση είναι 125, τότε τα δεδομένα θα λαμβάνονται κάθε μέρα στις 02:05 "
 "π.μ. Γενικά η καθυστέρηση λογίζεται από τα μεσάνυχτα."
 
-#: enhydris/telemetry/models.py:73
+#: enhydris/telemetry/models.py:75
 msgid "Time zone for the fetch time offset"
 msgstr "Ζώνη ώρας για την καθυστέρηση λήψης"
 
-#: enhydris/telemetry/models.py:74
+#: enhydris/telemetry/models.py:76
 msgid "The time zone to which the fetch time offset refers."
 msgstr "Η ζώνη ώρας στην οποία αναφέρεται η καθυστέρηση λήψης."
 
@@ -614,52 +627,61 @@ msgstr "%(station_name)s — Μηνύματα λάθους τηλεμετρία�
 msgid "%(station_name)s — Telemetry (beta)"
 msgstr "%(station_name)s — Τηλεμετρία (beta)"
 
-#: enhydris/telemetry/templates/enhydris/telemetry/wizard_step.html:15
-#, python-format
-msgid "%(station_name)s: Telemetry setup (beta) step 1"
-msgstr "%(station_name)s: Καθορισμός τηλεμετρίας (beta) βήμα 1"
-
-#: enhydris/telemetry/templates/enhydris/telemetry/wizard_step.html:17
+#: enhydris/telemetry/templates/enhydris/telemetry/wizard_step.html:14
 #, python-format
 msgid "%(station_name)s: Telemetry setup (beta) step %(seq)s of %(max_seq)s"
 msgstr ""
 "%(station_name)s: Καθορισμός τηλεμετρίας (beta) βήμα %(seq)s από %(max_seq)s"
 
-#: enhydris/telemetry/templates/enhydris/telemetry/wizard_step.html:26
+#: enhydris/telemetry/templates/enhydris/telemetry/wizard_step.html:22
 #: enhydris/templates/enhydris/station_list/page_navigation.html:7
 #: enhydris/templates/enhydris/station_list/page_navigation.html:13
 msgid "Previous"
 msgstr "Προηγούμενη"
 
-#: enhydris/telemetry/templates/enhydris/telemetry/wizard_step.html:28
+#: enhydris/telemetry/templates/enhydris/telemetry/wizard_step.html:24
 msgid "Finish"
 msgstr "Τέλος"
 
-#: enhydris/telemetry/templates/enhydris/telemetry/wizard_step.html:28
+#: enhydris/telemetry/templates/enhydris/telemetry/wizard_step.html:24
 #: enhydris/templates/enhydris/station_list/page_navigation.html:31
 #: enhydris/templates/enhydris/station_list/page_navigation.html:38
 msgid "Next"
 msgstr "Επόμενη"
 
-#: enhydris/telemetry/types/meteoview2.py:125
-#, python-format
-msgid "Could not login to meteoview; the error was: %s"
-msgstr "Δεν είναι δυνατή η είσοδος στο meteoview· το μήνυμα λάθους ήταν: %s"
-
-#: enhydris/telemetry/types/meteoview2.py:164
-msgid "Ignore this sensor"
-msgstr "Να αγνοηθεί αυτός ο αισθητήρας"
-
-#: enhydris/telemetry/types/meteoview2.py:173
-#, python-brace-format
-msgid ""
-"To which Enhydris time series does sensor \"{title}\" ({sensor_id}) "
-"correspond?"
+#: enhydris/telemetry/types/__init__.py:5
+msgid "URL"
 msgstr ""
-"Σε ποια χρονοσειρά της Ενυδρίδας αντιστοιχεί ο αισθητήρας "
-"\"{title}\" ({sensor_id});"
 
-#: enhydris/telemetry/views.py:166
+#: enhydris/telemetry/types/__init__.py:8
+msgid "Username"
+msgstr "Χρήστης"
+
+#: enhydris/telemetry/types/__init__.py:9
+msgid "Password"
+msgstr "Password"
+
+#: enhydris/telemetry/types/addupi.py:14
+msgid "Gateway or addVANTAGE server URL"
+msgstr "URL για τον Adcon Gateway ή τον addVANTAGE server"
+
+#: enhydris/telemetry/types/addupi.py:16
+msgid ""
+"Use \"https://hostname:port\" or \"https://hostname\". You can use http "
+"instead of https, but it is not recommended."
+msgstr ""
+"Χρησιμοποιήστε τη μορφή \"https://hostname:port\" ή \"https://hostname\". "
+"Μπορείτε να χρησιμοποιήσετε http αντί για https, αλλά δεν συνιστάται."
+
+#: enhydris/telemetry/types/meteoview2.py:14
+msgid "Email"
+msgstr ""
+
+#: enhydris/telemetry/types/meteoview2.py:15
+msgid "API key"
+msgstr ""
+
+#: enhydris/telemetry/views.py:118
 msgid "Telemetry has been configured"
 msgstr "Η τηλεμετρία ορίστηκε"
 
@@ -1050,6 +1072,14 @@ msgstr "Εγγραφή"
 #, python-brace-format
 msgid "Method \"{method}\" not allowed."
 msgstr "Η μέθοδος \"{method}\" δεν επιτρέπεται."
+
+#, python-format
+#~ msgid "%(station_name)s: Telemetry setup (beta) step 1"
+#~ msgstr "%(station_name)s: Καθορισμός τηλεμετρίας (beta) βήμα 1"
+
+#, python-format
+#~ msgid "Could not login to meteoview; the error was: %s"
+#~ msgstr "Δεν είναι δυνατή η είσοδος στο meteoview· το μήνυμα λάθους ήταν: %s"
 
 #~ msgid "Invalid or expired captcha key"
 #~ msgstr "Λανθασμένο ή ληγμένο κλειδί για το captcha"
