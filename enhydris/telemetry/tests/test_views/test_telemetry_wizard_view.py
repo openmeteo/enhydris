@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.http import HttpResponse
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 
 import requests
 from bs4 import BeautifulSoup
@@ -14,6 +14,7 @@ from enhydris.telemetry.models import Telemetry
 from enhydris.telemetry.views import TelemetryWizardView
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class RedirectToFirstStepTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -44,6 +45,7 @@ class RedirectToFirstStepTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class CopyTelemetryDataFromDatabaseToSessionTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -88,6 +90,7 @@ class CopyTelemetryDataFromDatabaseToSessionTestCase(TestCase):
         self.assertEqual(option_empty.get("selected"), "")
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -168,6 +171,7 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
         self.assertEqual(self.cclient.session[itemkey], expected)
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class FirstStepPostTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -212,6 +216,7 @@ class FirstStepPostTestCase(TestCase):
         self.assertEqual(self._session("fetch_offset_time_zone"), "Europe/Kiev")
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class FirstStepPostErrorTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -274,6 +279,7 @@ class SecondStepGetMixin:
         return self.mock_render.call_args.args[2]
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class SecondStepGetTestCase(SecondStepGetMixin, TestCase):
     def test_called_render(self):
         self.mock_render.assert_called_once()
@@ -297,6 +303,7 @@ class SecondStepGetTestCase(SecondStepGetMixin, TestCase):
         self.assertEqual(self._template_context["form"].initial["type"], "meteoview2")
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class SecondStepGetWithNondefaultConfigurationTestCase(SecondStepGetMixin, TestCase):
     # This is essentially the same as
     # SecondStepGetTestCase.test_form_created_with_the_correct_configuration, except
@@ -350,6 +357,7 @@ class MockResponse(requests.Response):
         return self.json_result
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class SecondStepPostWithErrorTestCase(SecondStepPostMixin, TestCase):
     @classmethod
     def _post_step_2(cls):
@@ -391,6 +399,7 @@ class SecondStepPostSuccessfulMixin(SecondStepPostMixin):
             )
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class SecondStepPostSuccessfulTestCase(SecondStepPostSuccessfulMixin, TestCase):
     def test_redirects_to_next_step(self):
         self.assertRedirects(
@@ -431,6 +440,7 @@ class FinalStepPostSuccessfulMixin(SecondStepPostSuccessfulMixin):
         TelemetryWizardView.forms = cls.saved_forms
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class FinalStepPostSuccessfulTestCase(FinalStepPostSuccessfulMixin, TestCase):
     def test_saves_stuff_in_database(self):
         telemetry = Telemetry.objects.get(station=self.station)
@@ -448,6 +458,7 @@ class FinalStepPostSuccessfulTestCase(FinalStepPostSuccessfulMixin, TestCase):
         self.assertContains(final_response, "Telemetry has been configured")
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class FinalStepPostSuccessfulReplacesExistingTelemetryTestCase(
     FinalStepPostSuccessfulMixin, TestCase
 ):
@@ -467,6 +478,7 @@ class FinalStepPostSuccessfulReplacesExistingTelemetryTestCase(
         self.assertEqual(telemetry.username, "someemail@email.com")
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 @patch(
     "enhydris.telemetry.types.meteoview2.requests.request",
     return_value=MockResponse(
@@ -520,6 +532,7 @@ class NextOrFinishButtonTestCase(TestCase):
         self.assertEqual(button_text, "Finish")
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class PermissionsTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
