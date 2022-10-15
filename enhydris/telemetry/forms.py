@@ -17,10 +17,10 @@ class EssentialDataForm(FormBase, forms.ModelForm):
         model = Telemetry
         fields = [
             "type",
-            "data_time_zone",
+            "data_timezone",
             "fetch_interval_minutes",
             "fetch_offset_minutes",
-            "fetch_offset_time_zone",
+            "fetch_offset_timezone",
         ]
 
 

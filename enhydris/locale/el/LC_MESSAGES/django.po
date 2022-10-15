@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-09 07:31-0500\n"
+"POT-Creation-Date: 2022-10-23 08:00-0500\n"
 "PO-Revision-Date: 2011-11-24 14:33+0200\n"
 "Last-Translator: Antonis Christofides <anthony@itia.ntua.gr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,7 +23,7 @@ msgstr "Πίνακας ελέγχου"
 msgid "Object category"
 msgstr ""
 
-#: enhydris/admin/garea.py:36 enhydris/models/gentity.py:116
+#: enhydris/admin/garea.py:36 enhydris/models/gentity.py:156
 msgid "File"
 msgstr "Αρχείο"
 
@@ -46,7 +46,7 @@ msgstr ""
 msgid "Replaced {} existing objects in category {} with {} new objects"
 msgstr ""
 
-#: enhydris/admin/station.py:26 enhydris/models/gentity.py:18
+#: enhydris/admin/station.py:26 enhydris/models/gentity.py:48
 msgid "Code"
 msgstr "Κωδικός"
 
@@ -65,7 +65,7 @@ msgstr "Συντεταγμένες"
 msgid "Longitude and latitude in decimal degrees"
 msgstr "Γεωγραφικό μήκος και πλάτος σε μοίρες με δεκαδικά"
 
-#: enhydris/admin/station.py:37 enhydris/models/gentity.py:41
+#: enhydris/admin/station.py:37 enhydris/models/gentity.py:81
 msgid "Original SRID"
 msgstr "Αρχικό SRID"
 
@@ -84,24 +84,48 @@ msgid "Data file"
 msgstr "Αρχείο δεδομένων"
 
 #: enhydris/admin/station.py:113
+msgid "Time zone"
+msgstr "Ζώνη ώρας"
+
+#: enhydris/admin/station.py:117
+msgid ""
+"The timestamps of the time series are stored in UTC in the database. In "
+"order to convert them to UTC, we need to know their time zone. If the time "
+"zone is specified in the uploaded file, that one is used; otherwise, the "
+"time zone specified here is used."
+msgstr ""
+"Οι χρονοσφραγίδες των χρονοσειρών αποθηκεύονται σε UTC. Για να μετατραπούν "
+"σωστά, πρέπει να ξέρουμε τη ζώνη ώρας στην οποία αναφέρονται. Θα "
+"χρησιμοποιηθεί τυχόν ζώνη ώρας που ορίζεται στο αρχείο, και αν δεν ορίζεται "
+"τότε θα χρησιμοποιηθεί αυτή που ορίζεται εδώ."
+
+#: enhydris/admin/station.py:124
 msgid "What to do"
 msgstr "Τρόπος εισαγωγής"
 
-#: enhydris/admin/station.py:117
+#: enhydris/admin/station.py:128
 msgid "Append this file's data to the already existing"
 msgstr "Πρόσθεση των δεδομένων αυτού του αρχείου στο τέλος των υπαρχόντων"
 
-#: enhydris/admin/station.py:120
+#: enhydris/admin/station.py:131
 msgid "Discard any already existing data and replace them with this file"
 msgstr "Διαγραφή όλων των δεδομένων και αντικατάστασή τους με αυτό το αρχείο"
 
-#: enhydris/admin/station.py:164
+#: enhydris/admin/station.py:176
 msgid "The file does not seem to be a valid UTF-8 file: "
 msgstr ""
 "Αυτό δεν φαίνεται να είναι έγκυρο έγκυρο αρχείο, ή η κωδικοποίησή του δεν "
 "είναι UTF-8: "
 
-#: enhydris/admin/station.py:177
+#: enhydris/admin/station.py:186
+msgid ""
+"The file you attempted to upload does not specify a time zone. Please "
+"specify the time zone of the timestamps."
+msgstr ""
+"Το αρχείο που προσπαθήσατε να ανεβάσετε δεν ορίζει ζώνη ώρας. Παρακαλώ "
+"ορίστε τη ζώνη ώρας των χρονοσφραγίδων."
+
+#: enhydris/admin/station.py:201
 msgid ""
 "Can't append; the first record of the time series to append is earlier than "
 "the last record of the existing time series."
@@ -109,7 +133,7 @@ msgstr ""
 "Δεν είναι δυνατή η πρόσθεση δεδομένων στο τέλος, γιατί η πρώτη εγγραφή του "
 "αρχείου προηγείται της τελευταίας εγγραφής της υπάρχουσας χρονοσειράς."
 
-#: enhydris/admin/station.py:208
+#: enhydris/admin/station.py:233
 msgid ""
 "The data for the time series \"{} - {} - {}\" will be imported soon. You "
 "will be notified by email when the importing finishes."
@@ -117,23 +141,23 @@ msgstr ""
 "Τα δεδομένα της χρονοσειράς \"{} - {} - {}\" θα εισαχθούν σύντομα. Θα "
 "ειδοποιηθείτε με email όταν ολοκληρωθεί η εισαγωγή."
 
-#: enhydris/admin/station.py:236
+#: enhydris/admin/station.py:261
 msgid "There can be only one {} time series in each time series group."
 msgstr "Μπορεί να υπάρχει μόνο μία {} χρονοσειρά σε κάθε ομάδα χρονοσειρών."
 
-#: enhydris/admin/station.py:260
+#: enhydris/admin/station.py:285
 msgid "Metadata"
 msgstr "Μεταδεδομένα"
 
-#: enhydris/admin/station.py:280
+#: enhydris/admin/station.py:304
 msgid "Site"
-msgstr ""
+msgstr "Ιστότοπος"
 
-#: enhydris/admin/station.py:331
+#: enhydris/admin/station.py:355
 msgid "General information"
 msgstr "Γενικές πληροφορίες"
 
-#: enhydris/admin/station.py:357
+#: enhydris/admin/station.py:382
 msgid "Permissions"
 msgstr "Δικαιώματα πρόσβασης"
 
@@ -149,144 +173,157 @@ msgstr "Μέχρι 150 χαρακτήρες. Γράμματα, αριθμοί κ
 msgid "Latest HTS"
 msgstr "Πιο πρόσφατη HTS"
 
-#: enhydris/models/base.py:8 enhydris/models/gentity.py:92
-#: enhydris/models/gentity.py:112 enhydris/models/timeseries_group.py:54
+#: enhydris/models/base.py:8 enhydris/models/gentity.py:132
+#: enhydris/models/gentity.py:152 enhydris/models/timeseries_group.py:52
 #: enhydris/templates/enhydris/station_detail/tabs/gentity_files.html:10
 #: enhydris/templates/enhydris/station_detail/tabs/gentity_files.html:24
 msgid "Description"
 msgstr "Περιγραφή"
 
-#: enhydris/models/gentity.py:17 enhydris/models/lentity.py:65
-#: enhydris/models/timeseries_group.py:132
-#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:9
-#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:26
+#: enhydris/models/gentity.py:47 enhydris/models/lentity.py:65
+#: enhydris/models/timeseries_group.py:106
+#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:10
+#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:27
 #: enhydris/templates/enhydris/station_list/header.html:11
 msgid "Name"
 msgstr "Όνομα"
 
-#: enhydris/models/gentity.py:19 enhydris/models/gentity.py:93
-#: enhydris/models/gentity.py:113 enhydris/models/lentity.py:26
-#: enhydris/models/timeseries_group.py:152
+#: enhydris/models/gentity.py:49 enhydris/models/gentity.py:133
+#: enhydris/models/gentity.py:153 enhydris/models/lentity.py:26
+#: enhydris/models/timeseries_group.py:123
 msgid "Remarks"
 msgstr "Παρατηρήσεις"
 
-#: enhydris/models/gentity.py:43
+#: enhydris/models/gentity.py:54
+msgid "Display time zone"
+msgstr "Ζώνη ώρας για προβολή"
+
+#: enhydris/models/gentity.py:56
+msgid ""
+"Time series timestamps are always stored in UTC. Select the time zone for "
+"displaying timestamps of time series referring to this object."
+msgstr ""
+"Οι χρονοσφραγίδες των χρονοσειρών αποθηκεύονται σε UTC. Επιλέξτε τη ζώνη "
+"ώρας για προβολή χρονοσφραγίδων των χρονοσειρών που αναφέρονται σ' αυτό "
+"το αντικείμενο."
+
+#: enhydris/models/gentity.py:83
 msgid "Altitude"
 msgstr "Υψόμετρο"
 
-#: enhydris/models/gentity.py:63
+#: enhydris/models/gentity.py:103
 msgid "Area category"
 msgstr "Κατηγορία περιοχών"
 
-#: enhydris/models/gentity.py:64
+#: enhydris/models/gentity.py:104
 msgid "Area categories"
 msgstr "Κατηγορίες περιοχών"
 
-#: enhydris/models/gentity.py:69
+#: enhydris/models/gentity.py:109
 msgid "Category"
 msgstr "Κατηγορία"
 
-#: enhydris/models/gentity.py:74
+#: enhydris/models/gentity.py:114
 msgid "Area"
 msgstr "Περιοχή"
 
-#: enhydris/models/gentity.py:75
+#: enhydris/models/gentity.py:115
 msgid "Areas"
 msgstr "Περιοχές"
 
-#: enhydris/models/gentity.py:90 enhydris/models/gentity.py:110
-#: enhydris/models/gentity.py:133
+#: enhydris/models/gentity.py:130 enhydris/models/gentity.py:150
+#: enhydris/models/gentity.py:173
 #: enhydris/templates/enhydris/station_detail/tabs/gentity_events.html:9
 #: enhydris/templates/enhydris/station_detail/tabs/gentity_events.html:23
 msgid "Date"
 msgstr "Ημερομηνία"
 
-#: enhydris/models/gentity.py:91 enhydris/models/gentity.py:111
+#: enhydris/models/gentity.py:131 enhydris/models/gentity.py:151
 msgid "Content"
 msgstr "Περιεχόμενο"
 
-#: enhydris/models/gentity.py:94
+#: enhydris/models/gentity.py:134
 msgid "Featured"
 msgstr "Σε πρώτο πλάνο"
 
-#: enhydris/models/gentity.py:97
+#: enhydris/models/gentity.py:137
 msgid "Image"
 msgstr "Εικόνα"
 
-#: enhydris/models/gentity.py:98
+#: enhydris/models/gentity.py:138
 msgid "Images"
 msgstr "Εικόνες"
 
-#: enhydris/models/gentity.py:117
+#: enhydris/models/gentity.py:157
 #: enhydris/templates/enhydris/station_detail/main-default.html:64
 msgid "Files"
 msgstr "Αρχεία"
 
-#: enhydris/models/gentity.py:126
+#: enhydris/models/gentity.py:166
 msgid "Log entry type"
 msgstr "Τύπος ημερολογιακών καταχωρήσεων"
 
-#: enhydris/models/gentity.py:127
+#: enhydris/models/gentity.py:167
 msgid "Log entry types"
 msgstr "Τύποι ημερολογιακών καταχωρήσεων"
 
-#: enhydris/models/gentity.py:135 enhydris/models/timeseries.py:75
+#: enhydris/models/gentity.py:175 enhydris/models/timeseries.py:76
 #: enhydris/templates/enhydris/station_detail/tabs/gentity_events.html:10
 #: enhydris/templates/enhydris/station_detail/tabs/gentity_events.html:27
 msgid "Type"
 msgstr "Τύπος"
 
-#: enhydris/models/gentity.py:137
+#: enhydris/models/gentity.py:177
 #: enhydris/templates/enhydris/station_detail/tabs/gentity_events.html:11
 #: enhydris/templates/enhydris/station_detail/tabs/gentity_events.html:31
 msgid "User"
 msgstr "Χρήστης"
 
-#: enhydris/models/gentity.py:138
+#: enhydris/models/gentity.py:178
 msgid "Report"
 msgstr "Έκθεση"
 
-#: enhydris/models/gentity.py:141
+#: enhydris/models/gentity.py:181
 msgid "Log entry"
 msgstr "Καταχώριση στο ημερολόγιο"
 
-#: enhydris/models/gentity.py:142
+#: enhydris/models/gentity.py:182
 msgid "Log entries"
 msgstr "Ημερολόγιο"
 
-#: enhydris/models/gentity.py:161
+#: enhydris/models/gentity.py:201
 msgctxt "Entity that owns the station"
 msgid "Owner"
 msgstr "Ιδιοκτήτης"
 
-#: enhydris/models/gentity.py:166
+#: enhydris/models/gentity.py:206
 msgctxt "Station start date"
 msgid "Start date"
 msgstr "Έναρξη λειτουργίας"
 
-#: enhydris/models/gentity.py:171
+#: enhydris/models/gentity.py:211
 msgctxt "Station end date"
 msgid "End date"
 msgstr "Οριστική παύση λειτουργίας"
 
-#: enhydris/models/gentity.py:173
+#: enhydris/models/gentity.py:213
 msgid "Overseer"
 msgstr "Παρατηρητής"
 
-#: enhydris/models/gentity.py:183
+#: enhydris/models/gentity.py:223
 msgctxt "User who has full permissions on station"
 msgid "Administrator"
 msgstr "Αρμόδιος"
 
-#: enhydris/models/gentity.py:190
+#: enhydris/models/gentity.py:230
 msgid "Maintainers"
 msgstr "Συναρμόδιοι"
 
-#: enhydris/models/gentity.py:198
+#: enhydris/models/gentity.py:238
 msgid "Station"
 msgstr "Σταθμός"
 
-#: enhydris/models/gentity.py:199
+#: enhydris/models/gentity.py:239
 #: enhydris/templates/enhydris/base/main_with_map-default.html:25
 #: enhydris/templates/enhydris/station_list/main-default.html:11
 msgid "Stations"
@@ -324,23 +361,23 @@ msgstr "Ακρωνύμιο"
 msgid "Organization"
 msgstr "Οργανισμός"
 
-#: enhydris/models/timeseries.py:67
+#: enhydris/models/timeseries.py:68
 msgid "Initial"
 msgstr "Αρχική"
 
-#: enhydris/models/timeseries.py:68
+#: enhydris/models/timeseries.py:69
 msgid "Checked"
 msgstr "Ελεγμένη"
 
-#: enhydris/models/timeseries.py:69
+#: enhydris/models/timeseries.py:70
 msgid "Regularized"
 msgstr "Κανονικοποιημένη"
 
-#: enhydris/models/timeseries.py:70
+#: enhydris/models/timeseries.py:71
 msgid "Aggregated"
 msgstr "Συναθροισμένη"
 
-#: enhydris/models/timeseries.py:81
+#: enhydris/models/timeseries.py:82
 msgid ""
 "E.g. \"10min\", \"H\" (hourly), \"D\" (daily), \"M\" (monthly), \"Y"
 "\" (yearly). More specifically, it's an optional number plus a unit, with no "
@@ -352,76 +389,63 @@ msgstr ""
 "μεταξύ τους. Οι διαθέσιμες μονάδες είναι min, H, D, M, Y. Αφήστε το κενό αν "
 "η χρονοσειρά είναι ακανόνιστη."
 
-#: enhydris/models/timeseries.py:86
+#: enhydris/models/timeseries.py:87
 msgid "Time step"
 msgstr "Βήμα"
 
-#: enhydris/models/timeseries.py:90
+#: enhydris/models/timeseries.py:91
 msgctxt "Singular"
 msgid "Time series"
 msgstr "Χρονοσειρά"
 
-#: enhydris/models/timeseries.py:91
+#: enhydris/models/timeseries.py:92
 msgctxt "Plural"
 msgid "Time series"
 msgstr "Χρονοσειρές"
 
-#: enhydris/models/timeseries.py:334
+#: enhydris/models/timeseries.py:311
 msgid "Timestamp"
 msgstr "Χρονοσφραγίδα"
 
-#: enhydris/models/timeseries.py:335
+#: enhydris/models/timeseries.py:312
 msgid "Value"
 msgstr "Τιμή"
 
-#: enhydris/models/timeseries.py:336
+#: enhydris/models/timeseries.py:313
 msgid "Flags"
 msgstr "Σημαίες"
 
-#: enhydris/models/timeseries.py:339
+#: enhydris/models/timeseries.py:316
 msgid "Time series record"
 msgstr "Εγγραφή χρονοσειράς"
 
-#: enhydris/models/timeseries.py:340
+#: enhydris/models/timeseries.py:317
 msgid "Time series records"
 msgstr "Εγγραφές χρονοσειράς"
 
-#: enhydris/models/timeseries_group.py:61
-#: enhydris/models/timeseries_group.py:116
+#: enhydris/models/timeseries_group.py:59
+#: enhydris/models/timeseries_group.py:90
 msgid "Variable"
 msgstr "Μεταβλητή"
 
-#: enhydris/models/timeseries_group.py:62
+#: enhydris/models/timeseries_group.py:60
 msgid "Variables"
 msgstr "Μεταβλητές"
 
-#: enhydris/models/timeseries_group.py:74
+#: enhydris/models/timeseries_group.py:72
 msgid "Symbol"
 msgstr "Σύμβολο"
 
-#: enhydris/models/timeseries_group.py:83
-#: enhydris/models/timeseries_group.py:121
+#: enhydris/models/timeseries_group.py:81
+#: enhydris/models/timeseries_group.py:95
 msgid "Unit of measurement"
 msgstr "Μονάδα μέτρησης"
 
-#: enhydris/models/timeseries_group.py:84
+#: enhydris/models/timeseries_group.py:82
 msgid "Units of measurement"
 msgstr "Μονάδες μέτρησης"
 
-#: enhydris/models/timeseries_group.py:91
-msgid "UTC offset"
-msgstr "Απόκλιση από UTC"
-
-#: enhydris/models/timeseries_group.py:107
-#: enhydris/models/timeseries_group.py:150
-msgid "Time zone"
-msgstr "Χρονική ζώνη"
-
-#: enhydris/models/timeseries_group.py:108
-msgid "Time zones"
-msgstr "Χρονικές ζώνες"
-
-#: enhydris/models/timeseries_group.py:127
+#: enhydris/models/timeseries_group.py:101
 msgid ""
 "In most cases, you want to leave this blank, and the name of the time series "
 "group will be the name of the variable, such as \"Temperature\". However, if "
@@ -433,11 +457,11 @@ msgstr ""
 "έχετε δύο ομάδες με την ίδια μεταβλητή (π.χ. αν έχετε δύο αισθητήρες "
 "θερμοκρασίας στον ίδιο σταθμό), ορίστε ένα όνομα για να τις ξεχωρίζετε."
 
-#: enhydris/models/timeseries_group.py:135
+#: enhydris/models/timeseries_group.py:109
 msgid "Hidden"
 msgstr "Κρυμμένη"
 
-#: enhydris/models/timeseries_group.py:139
+#: enhydris/models/timeseries_group.py:113
 msgid ""
 "The number of decimal digits to which the values of the time series will be "
 "rounded. It's usually positive, but it can be zero or negative; for example, "
@@ -455,23 +479,23 @@ msgstr ""
 "στρογγυλοποίηση των τιμών όταν πραγματοποιείται ανάκτηση της χρονοσειράς· η "
 "αποθήκευση γίνεται πάντα με όλα τα δεκαδικά ψηφία που παρέχονται."
 
-#: enhydris/models/timeseries_group.py:147
+#: enhydris/models/timeseries_group.py:121
 msgid "Precision"
 msgstr "Ακρίβεια"
 
-#: enhydris/models/timeseries_group.py:169
+#: enhydris/models/timeseries_group.py:140
 msgid "Time series group"
 msgstr "Ομάδα χρονοσειρών"
 
-#: enhydris/models/timeseries_group.py:170
+#: enhydris/models/timeseries_group.py:141
 msgid "Time series groups"
 msgstr "Ομάδες χρονοσειρών"
 
-#: enhydris/tasks.py:33
+#: enhydris/tasks.py:38
 msgid "Time series \"{}\" was imported successfully"
 msgstr "Η χρονοσειρά \"{}\" εισήχθη επιτυχώς"
 
-#: enhydris/tasks.py:39
+#: enhydris/tasks.py:44
 msgid "Importing time series \"{}\" failed"
 msgstr "Η εισαγωγή της χρονοσειράς \"{}\" απέτυχε"
 
@@ -789,48 +813,44 @@ msgstr ""
 "            </li>\n"
 "          "
 
-#: enhydris/templates/enhydris/station_detail/dates.html:5
-#, python-format
+#: enhydris/templates/enhydris/station_detail/dates.html:7
 msgid ""
 "\n"
-"      <p><b>Period of operation:</b> %(start_date)s - %(end_date)s</p>\n"
-"    "
+"        <p><b>Period of operation:</b> %(start_date)s - %(end_date)s</p>\n"
+"      "
 msgstr ""
 "\n"
 "<p><b>Περίοδος λειτουργίας:</b> %(start_date)s - %(end_date)s</p>\n"
 "    "
 
-#: enhydris/templates/enhydris/station_detail/dates.html:9
-#, python-format
+#: enhydris/templates/enhydris/station_detail/dates.html:11
 msgid ""
 "\n"
-"      <p><b>Start of operation:</b> %(start_date)s</p>\n"
-"    "
+"        <p><b>Start of operation:</b> %(start_date)s</p>\n"
+"      "
 msgstr ""
 "\n"
 "      <p><b>Έναρξη λειτουργίας:</b> %(start_date)s</p>\n"
 "    "
 
-#: enhydris/templates/enhydris/station_detail/dates.html:13
-#, python-format
+#: enhydris/templates/enhydris/station_detail/dates.html:15
 msgid ""
 "\n"
-"      <p><b>End of operation:</b> %(end_date)s</p>\n"
-"    "
+"        <p><b>End of operation:</b> %(end_date)s</p>\n"
+"      "
 msgstr ""
 "\n"
 "      <p><b>Διακοπή λειτουργίας:</b> %(end_date)s</p>\n"
 "      "
 
-#: enhydris/templates/enhydris/station_detail/dates.html:19
-#, python-format
+#: enhydris/templates/enhydris/station_detail/dates.html:21
 msgid ""
 "\n"
-"      <p><b>Last update:</b> %(last_update_naive)s</p>\n"
-"    "
+"        <p><b>Last update:</b> %(last_update)s (%(offset)s)</p>\n"
+"      "
 msgstr ""
 "\n"
-"      <p><b>Τελευταία ενημέρωση:</b> %(last_update_naive)s</p>\n"
+"      <p><b>Τελευταία ενημέρωση:</b> %(last_update)s (%(offset)s)</p>\n"
 "      "
 
 #: enhydris/templates/enhydris/station_detail/main-default.html:30
@@ -879,8 +899,8 @@ msgstr ""
 #: enhydris/templates/enhydris/station_detail/tabs/gentity_events.html:19
 #: enhydris/templates/enhydris/station_detail/tabs/gentity_files.html:9
 #: enhydris/templates/enhydris/station_detail/tabs/gentity_files.html:20
-#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:8
-#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:22
+#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:9
+#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:23
 msgid "ID"
 msgstr "ID"
 
@@ -907,17 +927,17 @@ msgstr "Λήψη"
 msgid "Unauthorized"
 msgstr "Δεν έχετε δικαίωμα λήψης"
 
-#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:10
-#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:30
+#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:11
+#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:31
 msgid "Start date"
 msgstr "Ημερομηνία έναρξης"
 
-#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:11
-#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:38
+#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:12
+#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:41
 msgid "End date"
 msgstr "Ημερομηνία λήξης"
 
-#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:53
+#: enhydris/templates/enhydris/station_detail/tabs/timeseries_groups.html:58
 msgid "No data exist"
 msgstr "Δεν υπάρχουν δεδομένα"
 
@@ -1072,17 +1092,3 @@ msgstr "Εγγραφή"
 #, python-brace-format
 msgid "Method \"{method}\" not allowed."
 msgstr "Η μέθοδος \"{method}\" δεν επιτρέπεται."
-
-#, python-format
-#~ msgid "%(station_name)s: Telemetry setup (beta) step 1"
-#~ msgstr "%(station_name)s: Καθορισμός τηλεμετρίας (beta) βήμα 1"
-
-#, python-format
-#~ msgid "Could not login to meteoview; the error was: %s"
-#~ msgstr "Δεν είναι δυνατή η είσοδος στο meteoview· το μήνυμα λάθους ήταν: %s"
-
-#~ msgid "Invalid or expired captcha key"
-#~ msgstr "Λανθασμένο ή ληγμένο κλειδί για το captcha"
-
-#~ msgid "Invalid captcha value"
-#~ msgstr "Λανθασμένη τιμή captcha"

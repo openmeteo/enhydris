@@ -35,10 +35,10 @@ class RedirectToFirstStepTestCase(TestCase):
             f"/stations/{self.station.id}/telemetry/1/",
             {
                 "type": "meteoview2",
-                "data_time_zone": "Europe/Athens",
+                "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": "10",
                 "fetch_offset_minutes": "2",
-                "fetch_offset_time_zone": "Europe/Kiev",
+                "fetch_offset_timezone": "Europe/Kiev",
             },
         )
         response = self.client.get(f"/stations/{self.station.id}/telemetry/2/")
@@ -71,8 +71,8 @@ class CopyTelemetryDataFromDatabaseToSessionTestCase(TestCase):
         option_empty = self.soup.find(id="id_type").find("option", value="meteoview2")
         self.assertIsNone(option_empty.get("selected"))
 
-    def test_default_data_time_zone_is_empty(self):
-        option_empty = self.soup.find(id="id_data_time_zone").find("option", value="")
+    def test_default_data_timezone_is_empty(self):
+        option_empty = self.soup.find(id="id_data_timezone").find("option", value="")
         self.assertEqual(option_empty.get("selected"), "")
 
     def test_default_fetch_interval_minutes_is_empty(self):
@@ -83,8 +83,8 @@ class CopyTelemetryDataFromDatabaseToSessionTestCase(TestCase):
         fetch_offset_minutes = self.soup.find(id="id_fetch_offset_minutes")
         self.assertIsNone(fetch_offset_minutes.get("value"))
 
-    def test_default_fetch_offset_time_zone_is_empty(self):
-        option_empty = self.soup.find(id="id_fetch_offset_time_zone").find(
+    def test_default_fetch_offset_timezone_is_empty(self):
+        option_empty = self.soup.find(id="id_fetch_offset_timezone").find(
             "option", value=""
         )
         self.assertEqual(option_empty.get("selected"), "")
@@ -100,10 +100,10 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
             Telemetry,
             station=cls.station,
             type="meteoview2",
-            data_time_zone="Europe/Athens",
+            data_timezone="Europe/Athens",
             fetch_interval_minutes=10,
             fetch_offset_minutes=2,
-            fetch_offset_time_zone="Asia/Vladivostok",
+            fetch_offset_timezone="Asia/Vladivostok",
             additional_config="{}",
         )
 
@@ -128,12 +128,12 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
         )
         self.assertEqual(option_meteoview2.get("selected"), "")
 
-    def test_empty_data_time_zone_is_not_selected(self):
-        option_empty = self.soup.find(id="id_data_time_zone").find("option", value="")
+    def test_empty_data_timezone_is_not_selected(self):
+        option_empty = self.soup.find(id="id_data_timezone").find("option", value="")
         self.assertIsNone(option_empty.get("selected"))
 
-    def test_default_data_time_zone_is_meteoview2(self):
-        option_europe_athens = self.soup.find(id="id_data_time_zone").find(
+    def test_default_data_timezone_is_meteoview2(self):
+        option_europe_athens = self.soup.find(id="id_data_timezone").find(
             "option", value="Europe/Athens"
         )
         self.assertEqual(option_europe_athens.get("selected"), "")
@@ -146,14 +146,14 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
         fetch_offset_minutes = self.soup.find(id="id_fetch_offset_minutes")
         self.assertEqual(fetch_offset_minutes["value"], "2")
 
-    def test_empty_fetch_offset_time_zone_is_not_selected(self):
-        option_empty = self.soup.find(id="id_fetch_offset_time_zone").find(
+    def test_empty_fetch_offset_timezone_is_not_selected(self):
+        option_empty = self.soup.find(id="id_fetch_offset_timezone").find(
             "option", value=""
         )
         self.assertIsNone(option_empty.get("selected"))
 
-    def test_default_fetch_offset_time_zone_is_meteoview2(self):
-        option_asia_vladivostok = self.soup.find(id="id_fetch_offset_time_zone").find(
+    def test_default_fetch_offset_timezone_is_meteoview2(self):
+        option_asia_vladivostok = self.soup.find(id="id_fetch_offset_timezone").find(
             "option", value="Asia/Vladivostok"
         )
         self.assertEqual(option_asia_vladivostok.get("selected"), "")
@@ -162,10 +162,10 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
         itemkey = f"telemetry_{self.station.id}"
         expected = {
             "type": "meteoview2",
-            "data_time_zone": "Europe/Athens",
+            "data_timezone": "Europe/Athens",
             "fetch_interval_minutes": 10,
             "fetch_offset_minutes": 2,
-            "fetch_offset_time_zone": "Asia/Vladivostok",
+            "fetch_offset_timezone": "Asia/Vladivostok",
             "additional_config": "{}",
         }
         self.assertEqual(self.cclient.session[itemkey], expected)
@@ -187,10 +187,10 @@ class FirstStepPostTestCase(TestCase):
             f"/stations/{cls.station.id}/telemetry/1/",
             {
                 "type": "meteoview2",
-                "data_time_zone": "Europe/Athens",
+                "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": "10",
                 "fetch_offset_minutes": "2",
-                "fetch_offset_time_zone": "Europe/Kiev",
+                "fetch_offset_timezone": "Europe/Kiev",
             },
         )
 
@@ -203,8 +203,8 @@ class FirstStepPostTestCase(TestCase):
     def test_type(self):
         self.assertEqual(self._session("type"), "meteoview2")
 
-    def test_data_time_zone(self):
-        self.assertEqual(self._session("data_time_zone"), "Europe/Athens")
+    def test_data_timezone(self):
+        self.assertEqual(self._session("data_timezone"), "Europe/Athens")
 
     def test_fetch_interval_minutes(self):
         self.assertEqual(self._session("fetch_interval_minutes"), 10)
@@ -212,8 +212,8 @@ class FirstStepPostTestCase(TestCase):
     def test_fetch_offset_minutes(self):
         self.assertEqual(self._session("fetch_offset_minutes"), 2)
 
-    def test_fetch_offset_time_zone(self):
-        self.assertEqual(self._session("fetch_offset_time_zone"), "Europe/Kiev")
+    def test_fetch_offset_timezone(self):
+        self.assertEqual(self._session("fetch_offset_timezone"), "Europe/Kiev")
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
@@ -260,10 +260,10 @@ class SecondStepGetMixin:
             f"/stations/{cls.station.id}/telemetry/1/",
             {
                 "type": "meteoview2",
-                "data_time_zone": "Europe/Athens",
+                "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": "10",
                 "fetch_offset_minutes": "2",
-                "fetch_offset_time_zone": "Europe/Kiev",
+                "fetch_offset_timezone": "Europe/Kiev",
             },
         )
 
@@ -339,10 +339,10 @@ class SecondStepPostMixin:
             f"/stations/{cls.station.id}/telemetry/1/",
             {
                 "type": "meteoview2",
-                "data_time_zone": "Europe/Athens",
+                "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": "10",
                 "fetch_offset_minutes": "2",
-                "fetch_offset_time_zone": "Europe/Kiev",
+                "fetch_offset_timezone": "Europe/Kiev",
             },
         )
 
@@ -413,10 +413,10 @@ class SecondStepPostSuccessfulTestCase(SecondStepPostSuccessfulMixin, TestCase):
             self.cclient.session[f"telemetry_{self.station.id}"],
             {
                 "type": "meteoview2",
-                "data_time_zone": "Europe/Athens",
+                "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": 10,
                 "fetch_offset_minutes": 2,
-                "fetch_offset_time_zone": "Europe/Kiev",
+                "fetch_offset_timezone": "Europe/Kiev",
                 "username": "someemail@email.com",
                 "password": "topsecret",
                 "device_locator": "",
@@ -505,10 +505,10 @@ class NextOrFinishButtonTestCase(TestCase):
             "username": "someemail@somewhere.com",
             "password": "topsecret",
             "type": "meteoview2",
-            "data_time_zone": "Europe/Athens",
+            "data_timezone": "Europe/Athens",
             "fetch_interval_minutes": "10",
             "fetch_offset_minutes": "2",
-            "fetch_offset_time_zone": "Europe/Kiev",
+            "fetch_offset_timezone": "Europe/Kiev",
         }
         session.save()
 

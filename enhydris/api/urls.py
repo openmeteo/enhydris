@@ -48,7 +48,6 @@ router.register(urlstart + r"timeseries", views.TimeseriesViewSet, "old-timeseri
 router.register("gareas", views.GareaViewSet)
 router.register("organizations", views.OrganizationViewSet)
 router.register("persons", views.PersonViewSet)
-router.register("timezones", views.TimeZoneViewSet)
 router.register("eventtypes", views.EventTypeViewSet)
 router.register("variables", views.VariableViewSet)
 router.register("units", views.UnitOfMeasurementViewSet)

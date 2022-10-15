@@ -1,9 +1,12 @@
 {% load i18n %}
+{% load tz %}
 
 <div class="station-timeseries-main">
   <h2>{{ object.get_name }} <span>({{ object.unit_of_measurement }})</span></h2>
-  {% if  object.start_date_naive %}
-    <p>{{ object.start_date_naive|date:"Y/m/d H:i" }} &mdash; {{ object.end_date_naive|date:"Y/m/d H:i" }} / {{ object.time_zone }}</p>
+  {% if  object.start_date %}
+    {% localtime off %}
+      <p>{{ object.start_date|date:"SHORT_DATETIME_FORMAT" }} &mdash; {{ object.end_date|date:"SHORT_DATETIME_FORMAT" }} {{ object.end_date|date:"(O)" }}</p>
+    {% endlocaltime %}
   {% endif %}
 </div>
 

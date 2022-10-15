@@ -1,6 +1,8 @@
+import datetime as dt
 from io import StringIO
 from itertools import islice
 from os.path import abspath
+from zoneinfo import ZoneInfo
 
 from django.conf import settings
 from django.contrib.gis.db import models
@@ -114,7 +116,7 @@ class Timeseries(models.Model):
         def get_start_date():
             try:
                 return self.timeseriesrecord_set.earliest().timestamp.astimezone(
-                    self.timeseries_group.time_zone.as_tzinfo
+                    ZoneInfo(self.timeseries_group.gentity.display_timezone)
                 )
             except TimeseriesRecord.DoesNotExist:
                 return None
@@ -126,46 +128,14 @@ class Timeseries(models.Model):
         def get_end_date():
             try:
                 return self.timeseriesrecord_set.latest().timestamp.astimezone(
-                    self.timeseries_group.time_zone.as_tzinfo
+                    ZoneInfo(self.timeseries_group.gentity.display_timezone)
                 )
             except TimeseriesRecord.DoesNotExist:
                 return None
 
         return cache.get_or_set(f"timeseries_end_date_{self.id}", get_end_date)
 
-    @property
-    def start_date_naive(self):
-        def get_start_date_naive():
-            try:
-                return (
-                    self.timeseriesrecord_set.earliest()
-                    .timestamp.astimezone(self.timeseries_group.time_zone.as_tzinfo)
-                    .replace(tzinfo=None)
-                )
-            except TimeseriesRecord.DoesNotExist:
-                return None
-
-        return cache.get_or_set(
-            f"timeseries_start_date_naive_{self.id}", get_start_date_naive
-        )
-
-    @property
-    def end_date_naive(self):
-        def get_end_date_naive():
-            try:
-                return (
-                    self.timeseriesrecord_set.latest()
-                    .timestamp.astimezone(self.timeseries_group.time_zone.as_tzinfo)
-                    .replace(tzinfo=None)
-                )
-            except TimeseriesRecord.DoesNotExist:
-                return None
-
-        return cache.get_or_set(
-            f"timeseries_end_date_naive_{self.id}", get_end_date_naive
-        )
-
-    def _set_extra_timeseries_properties(self, ahtimeseries):
+    def _set_extra_timeseries_properties(self, ahtimeseries, timezone):
         if self.timeseries_group.gentity.geom:
             location = {
                 "abscissa": self.timeseries_group.gentity.gpoint.original_abscissa(),
@@ -178,12 +148,7 @@ class Timeseries(models.Model):
         ahtimeseries.time_step = self.time_step
         ahtimeseries.unit = self.timeseries_group.unit_of_measurement.symbol
         ahtimeseries.title = self.timeseries_group.get_name()
-        sign = -1 if self.timeseries_group.time_zone.utc_offset < 0 else 1
-        ahtimeseries.timezone = "{} (UTC{:+03d}{:02d})".format(
-            self.timeseries_group.time_zone.code,
-            abs(self.timeseries_group.time_zone.utc_offset) // 60 * sign,
-            abs(self.timeseries_group.time_zone.utc_offset) % 60,
-        )
+        ahtimeseries.timezone = self._format_timezone(timezone)
         ahtimeseries.variable = self.timeseries_group.variable.descr
         ahtimeseries.precision = self.timeseries_group.precision
         ahtimeseries.location = location
@@ -191,28 +156,38 @@ class Timeseries(models.Model):
             f"{self.timeseries_group.gentity.name}\n\n{self.timeseries_group.remarks}"
         )
 
-    def get_data(self, start_date=None, end_date=None):
+    def _format_timezone(self, timezone):
+        offset = self._get_timezone_offset(timezone)
+        return f"{timezone} (UTC{offset})"
+
+    def _get_timezone_offset(self, timezone):
+        assert timezone == "UTC" or (
+            timezone.startswith("Etc/GMT") and len(timezone) in (7, 9, 10)
+        )
+        if timezone in ("Etc/GMT", "UTC"):
+            return "+0000"
+        sign = "-" if timezone[7] == "+" else "+"
+        if len(timezone) == 9:
+            return f"{sign}0{timezone[8]}00"
+        else:
+            return f"{sign}{timezone[8:]}00"
+
+    def get_data(self, start_date=None, end_date=None, timezone=None):
         data = cache.get_or_set(f"timeseries_data_{self.id}", self._get_all_data_as_pd)
-        if start_date:
-            start_date = start_date.astimezone(
-                self.timeseries_group.time_zone.as_tzinfo
-            )
-            start_date = start_date.replace(tzinfo=None)
-        if end_date:
-            end_date = end_date.astimezone(self.timeseries_group.time_zone.as_tzinfo)
-            end_date = end_date.replace(tzinfo=None)
+        timezone = timezone or self.timeseries_group.gentity.display_timezone
         data = data.loc[start_date:end_date]
+        if not data.empty:
+            data.index = data.index.tz_convert(timezone)
         result = HTimeseries(data)
-        self._set_extra_timeseries_properties(result)
+        self._set_extra_timeseries_properties(result, timezone)
         return result
 
     def _get_all_data_as_pd(self):
-        tzoffsetstring = self._get_tzoffsetstring_for_pg()
         with connection.cursor() as cursor:
             cursor.execute(
                 """
                 SELECT STRING_AGG(
-                    TO_CHAR(timestamp at time zone %s, 'YYYY-MM-DD HH24:MI')
+                    TO_CHAR(timestamp AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:MI')
                         || ','
                         || CASE WHEN value is NULL THEN DOUBLE PRECISION 'NaN'
                            ELSE value END
@@ -224,25 +199,18 @@ class Timeseries(models.Model):
                 FROM enhydris_timeseriesrecord
                 WHERE timeseries_id=%s;
                 """,
-                [tzoffsetstring, self.id],
+                [self.id],
             )
-            return HTimeseries(StringIO(cursor.fetchone()[0])).data
+            return HTimeseries(
+                StringIO(cursor.fetchone()[0]), default_tzinfo=dt.timezone.utc
+            ).data
 
-    def _get_tzoffsetstring_for_pg(self):
-        # In tz offset supplied to PostgreSQL, use + for west of Greenwich because of
-        # POSIX madness.
-        tzoffsetstring = self.timeseries_group.time_zone.offset_string
-        sign = "-" if tzoffsetstring[0] == "+" else "+"
-        hours = tzoffsetstring[1:3]
-        minutes = tzoffsetstring[3:]
-        return f"{sign}{hours}:{minutes}"
-
-    def set_data(self, data):
+    def set_data(self, data, default_timezone=None):
         self.timeseriesrecord_set.all().delete()
-        return self.append_data(data)
+        return self.append_data(data, default_timezone)
 
-    def append_data(self, data):
-        ahtimeseries = self._get_htimeseries_from_data(data)
+    def append_data(self, data, default_timezone=None):
+        ahtimeseries = self._get_htimeseries_from_data(data, default_timezone)
         self._check_new_data_is_newer(ahtimeseries)
         result = TimeseriesRecord.bulk_insert(self, ahtimeseries)
         self.save()
@@ -252,24 +220,25 @@ class Timeseries(models.Model):
         if not len(ahtimeseries.data):
             return 0
         new_data_start_date = ahtimeseries.data.index[0]
-        if self.end_date is not None and self.end_date_naive >= new_data_start_date:
+        if self.end_date is not None and self.end_date >= new_data_start_date:
             raise IntegrityError(
                 (
                     "Cannot append time series: "
                     "its first record ({}) has a date earlier than the last "
                     "record ({}) of the timeseries to append to."
-                ).format(new_data_start_date, self.end_date_naive)
+                ).format(new_data_start_date, self.end_date)
             )
 
-    def _get_htimeseries_from_data(self, data):
+    def _get_htimeseries_from_data(self, data, default_timezone):
+        default_tzinfo = default_timezone and ZoneInfo(default_timezone) or None
         if isinstance(data, HTimeseries):
             return data
         else:
-            return HTimeseries(data)
+            return HTimeseries(data, default_tzinfo=default_tzinfo)
 
-    def get_last_record_as_string(self):
+    def get_last_record_as_string(self, timezone=None):
         try:
-            return str(self.timeseriesrecord_set.latest())
+            return self.timeseriesrecord_set.latest().__str__(timezone=timezone)
         except TimeseriesRecord.DoesNotExist:
             return ""
 
@@ -286,27 +255,20 @@ class Timeseries(models.Model):
 
         Invalidate cached values of:
          - timeseries_data from `get_data` method
-         - last_update, last_update_naive of related `Station` model instance.
-         - start_date, start_date_naive, end_date, end_date_naive of
-            the related `TimeSeriesGroup` model instance.
-         - start_date`, start_date_naive, end_date, end_date_naive of
-           the current `Timeseries` model instance.
+         - last_update of related `Station` model instance.
+         - start_date, end_date, of the related `TimeSeriesGroup` model instance.
+         - start_date`, end_date of the current `Timeseries` model instance.
         """
         cached_property_names = [
             f"timeseries_data_{self.id}",
             f"timeseries_start_date_{self.id}",
             f"timeseries_end_date_{self.id}",
-            f"timeseries_start_date_naive_{self.id}",
-            f"timeseries_end_date_naive_{self.id}",
             f"timeseries_group_start_date_{self.timeseries_group.id}",
             f"timeseries_group_end_date_{self.timeseries_group.id}",
-            f"timeseries_group_start_date_naive_{self.timeseries_group.id}",
-            f"timeseries_group_end_date_naive_{self.timeseries_group.id}",
         ]
         if self.related_station:
             cached_property_names += [
                 f"station_last_update_{self.related_station.id}",
-                f"station_last_update_naive_{self.related_station.id}",
             ]
         cache.delete_many(cached_property_names)
 
@@ -343,11 +305,10 @@ class TimeseriesRecord(models.Model):
 
     @classmethod
     def bulk_insert(cls, timeseries, htimeseries):
-        tzinfo = timeseries.timeseries_group.time_zone.as_tzinfo
         record_generator = (
             TimeseriesRecord(
                 timeseries_id=timeseries.id,
-                timestamp=t.Index.to_pydatetime().replace(tzinfo=tzinfo),
+                timestamp=t.Index,
                 value=None if np.isnan(t.value) else t.value,
                 flags=t.flags,
             )
@@ -363,8 +324,10 @@ class TimeseriesRecord(models.Model):
             count += len(batch)
         return count
 
-    def __str__(self):
-        tzinfo = self.timeseries.timeseries_group.time_zone.as_tzinfo
+    def __str__(self, timezone=None):
+        if timezone is None:
+            timezone = self.timeseries.timeseries_group.gentity.display_timezone
+        tzinfo = ZoneInfo(timezone)
         precision = self.timeseries.timeseries_group.precision
         datestr = self.timestamp.astimezone(tzinfo).strftime("%Y-%m-%d %H:%M")
         value = "" if self.value is None else f"{self.value:.{precision}f}"

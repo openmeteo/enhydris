@@ -3,6 +3,7 @@ import mimetypes
 import os
 from io import StringIO
 from wsgiref.util import FileWrapper
+from zoneinfo import ZoneInfo
 
 from django.db import IntegrityError
 from django.db.models import Prefetch
@@ -48,7 +49,7 @@ class StationViewSet(StationListViewMixin, ModelViewSet):
                 Prefetch(
                     "timeseriesgroup_set",
                     queryset=models.TimeseriesGroup.objects.select_related(
-                        "variable", "unit_of_measurement", "time_zone"
+                        "variable", "unit_of_measurement"
                     )
                     .prefetch_related("timeseries_set")
                     .order_by("variable__id"),
@@ -74,11 +75,6 @@ class OrganizationViewSet(ReadOnlyModelViewSet):
 class PersonViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.PersonSerializer
     queryset = models.Person.objects.all()
-
-
-class TimeZoneViewSet(ReadOnlyModelViewSet):
-    serializer_class = serializers.TimeZoneSerializer
-    queryset = models.TimeZone.objects.all()
 
 
 class EventTypeViewSet(ReadOnlyModelViewSet):
@@ -252,7 +248,8 @@ class TimeseriesViewSet(ModelViewSet):
         ts = get_object_or_404(models.Timeseries, pk=pk)
         self.check_object_permissions(request, ts)
         response = HttpResponse(content_type="text/plain")
-        response.write(ts.get_last_record_as_string())
+        timezone_param = request.GET.get("timezone", None)
+        response.write(ts.get_last_record_as_string(timezone=timezone_param))
         return response
 
     @action(detail=True, methods=["get"])
@@ -304,7 +301,7 @@ class TimeseriesViewSet(ModelViewSet):
         }
 
     def _get_date_bounds(self, request, timeseries):
-        tz = timeseries.timeseries_group.time_zone.as_tzinfo
+        tz = ZoneInfo(timeseries.timeseries_group.gentity.display_timezone)
         start_date = request.GET.get("start_date")
         end_date = request.GET.get("end_date")
         start_date = self._get_date_from_string(start_date, tz)
@@ -316,6 +313,7 @@ class TimeseriesViewSet(ModelViewSet):
         self.check_object_permissions(request, timeseries)
         start_date, end_date = self._get_date_bounds(request, timeseries)
         fmt_param = request.GET.get("fmt", "csv").lower()
+        timezone_param = request.GET.get("timezone", None)
 
         if fmt_param == "hts":
             fmt = HTimeseries.FILE
@@ -337,7 +335,9 @@ class TimeseriesViewSet(ModelViewSet):
             pk, extension
         )
         if request.method == "GET":
-            ahtimeseries = timeseries.get_data(start_date=start_date, end_date=end_date)
+            ahtimeseries = timeseries.get_data(
+                start_date=start_date, end_date=end_date, timezone=timezone_param
+            )
             ahtimeseries.write(response, format=fmt, version=version)
         return response
 
@@ -345,9 +345,12 @@ class TimeseriesViewSet(ModelViewSet):
         try:
             atimeseries = get_object_or_404(models.Timeseries, pk=int(pk))
             self.check_object_permissions(request, atimeseries)
-            atimeseries.append_data(StringIO(request.data["timeseries_records"]))
+            atimeseries.append_data(
+                StringIO(request.data["timeseries_records"]),
+                default_timezone=request.data["timezone"],
+            )
             return HttpResponse(status=status.HTTP_204_NO_CONTENT)
-        except (IntegrityError, iso8601.ParseError, ValueError) as e:
+        except (IntegrityError, iso8601.ParseError, ValueError, KeyError) as e:
             return HttpResponse(
                 status=status.HTTP_400_BAD_REQUEST,
                 content=str(e),

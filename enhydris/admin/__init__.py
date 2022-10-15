@@ -45,8 +45,3 @@ class VariableAdmin(TranslatableAdmin):
 @admin.register(models.UnitOfMeasurement)
 class UnitOfMeasurementAdmin(admin.ModelAdmin):
     list_display = [f.name for f in models.UnitOfMeasurement._meta.fields]
-
-
-@admin.register(models.TimeZone)
-class TimeZoneAdmin(admin.ModelAdmin):
-    list_display = [f.name for f in models.TimeZone._meta.fields]

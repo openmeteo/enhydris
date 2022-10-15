@@ -72,7 +72,6 @@ The response will be 200 with the following content::
       "gentity": 1334,
       "variable": 1,
       "unit_of_measurement": 7,
-      "time_zone": 1,
       "time_step": "10min"
     }
 
@@ -207,8 +206,7 @@ Exactly the same applies to ``eventtypes`` and ``variables``.
 
 Besides these there are several other lookups for which the response is
 similar but may have additional information. These are
-``organizations``, ``persons``, ``timezones``, ``filetypes`` and
-``units``.
+``organizations``, ``persons``, ``filetypes`` and ``units``.
 
 Response format for ``organizations``::
 
@@ -230,15 +228,6 @@ Response format for ``persons``::
         "first_name": "Antonis",
         "middle_names": "Michael",
         "initials": "A. C.",
-    }
-
-Response format for ``timezones``::
-
-    {
-        "id": 9,
-        "last_modified": "2011-06-28T16:42:34.760676Z",
-        "code": "EST",
-        "utc_offset": -300
     }
 
 Response format for ``filetypes``::
@@ -448,7 +437,6 @@ Response::
        "gentity": 1403,
        "variable": 5683,
        "unit_of_measurement": 14,
-       "time_zone": 1
    }
 
 List time series groups
@@ -581,6 +569,13 @@ Example of response::
     1998-12-10 17:10,5.6,
     ...
 
+You can specify the **time zone** of the timestamps with the ``timezone``
+parameter::
+
+    curl https://openmeteo.org/api/stations/1334/timeseriesgroup/232/timeseries/10659/data/?timezone=UTC
+
+Appropriate values for ``timezone`` are from the Olson database.
+
 Instead of CSV, you can **get HTS** by specifying the parameter
 ``fmt=hts``::
 
@@ -593,7 +588,7 @@ Response::
     Comment=NTUA University Campus of Zografou
     Comment=
     Comment=Type: Raw data
-    Timezone=EET (UTC+0200)
+    Timezone=Etc/GMT-2 (UTC+0200)
     Time_step=10,0
     Variable=Mean temperature
     Precision=1
@@ -618,6 +613,7 @@ Response::
 
     curl -X POST -H "Authorization: token OAUTH-TOKEN" \
         -d $'timeseries_records=2018-12-19T11:50,25.0,\n2018-12-19T12:00,25.1,\n' \
+        -d 'timezone=Etc/GMT-2' \
         https://openmeteo.org/api/stations/1334/timeseriesgroups/235/timeseries/10659/data/
 
 (The ``$'...'`` is a bash idiom that does nothing more than escape the
@@ -790,13 +786,13 @@ the response code is 400 and the content has an error message for each
 problematic field. For example::
 
     curl -v -X POST -H "Authorization: token OAUTH-TOKEN" \
-    -d "gentity=1334" -d "variable=1234" -d "unit_of_measurement=1" \
+    -d "gentity=1334" -d "variable=1234" \
     https://openmeteo.org/api/stations/1334/timeseries/
 
 Response::
 
     {
-      "time_zone": [
+      "unit_of_measurement": [
         "This field is required."
       ],
       "variable": [

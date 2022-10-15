@@ -42,7 +42,7 @@ class Telemetry(models.Model):
             "If unlisted, it might mean that it is currently unsupported."
         ),
     )
-    data_time_zone = models.CharField(
+    data_timezone = models.CharField(
         max_length=35,
         blank=True,
         choices=timezone_choices,
@@ -69,7 +69,7 @@ class Telemetry(models.Model):
             "The offset generally counts from midnight."
         ),
     )
-    fetch_offset_time_zone = models.CharField(
+    fetch_offset_timezone = models.CharField(
         max_length=35,
         choices=timezone_choices,
         verbose_name=_("Time zone for the fetch time offset"),
@@ -84,7 +84,7 @@ class Telemetry(models.Model):
 
     @property
     def is_due(self):
-        now = dt.datetime.now(tz=zoneinfo.ZoneInfo(self.fetch_offset_time_zone))
+        now = dt.datetime.now(tz=zoneinfo.ZoneInfo(self.fetch_offset_timezone))
         current_offset = now.minute + now.hour * 60
         return current_offset % self.fetch_interval_minutes == self.fetch_offset_minutes
 
@@ -114,7 +114,7 @@ class Telemetry(models.Model):
             sensor_id=sensor.sensor_id, timeseries_end_date=timeseries_end_date
         )
         measurements = self._cleanup_measurements(measurements)
-        timeseries.append_data(measurements)
+        timeseries.append_data(measurements, default_timezone=self.data_timezone)
 
     def _cleanup_measurements(self, measurements):
         result = StringIO()

@@ -143,6 +143,19 @@ implemented by using Django's `multi-table inheritance`_.
 
       .. _geometryfield: https://docs.djangoproject.com/en/2.1/ref/contrib/gis/model-api/#geometryfield
 
+   .. attribute:: enhydris.models.Gentity.display_timezone
+
+      Timestamps of time series records are stored in UTC. This
+      attribute specifies the time zone to which timestamps are
+      converted before displaying or downloading time series. It is a
+      string holding a key from the Olson time zone list. Currently only
+      time zones starting with ``Etc/GMT`` are supported.
+
+      Although the storage format of the time zone is ``Etc/GMT[±XX]``,
+      it is displayed differently on the admin (and elsewhere).
+      ``Etc/GMT`` is displayed as ``UTC``; ``Etc/GMT-2`` (2 hours
+      **east** of UTC) is displayed as ``UTC+0200``; and so on.
+
 .. class:: enhydris.models.Gpoint(Gentity)
 
    .. attribute:: enhydris.models.Gpoint.original_srid
@@ -283,27 +296,6 @@ Time series and related models
 
       A many-to-many relationship to :class:`~enhydris.models.Variable`.
 
-.. class:: enhydris.models.TimeZone
-
-   This model stores time zones.
-
-   .. attribute:: enhydris.models.TimeZone.code
-
-      The code name of the time zone, such as CET or UTC.
-
-   .. attribute:: enhydris.models.TimeZone.utc_offset
-
-      A number, in minutes, with the offset of the time zone from UTC.
-      For example, CET has a utc_offset of 60, whereas CDT is -300.
-      This model only stores time zones with a constant utc offset, and
-      not time zones with variable offsets. For example, we don't store
-      CT (North American Central Time), because this is different in
-      summer and in winter; instead, we store CST (Central Standard
-      Time) and CDT (Central Daylight Time), which are the two
-      occurrences of CT. The time stamps of a given time series may not
-      observe summer time; they must always have the same utc offset
-      throught the time series.
-
 .. class:: enhydris.models.TimeseriesGroup
 
    The time series a station holds are organized in groups. Each group
@@ -349,11 +341,6 @@ Time series and related models
       series, in number of decimal digits. It can be negative; for
       example, a precision of -2 indicates that the values are accurate
       to the hundred, ex. 100, 200 etc.
-
-   .. attribute:: enhydris.models.TimeseriesGroup.time_zone
-
-      The :class:`~enhydris.models.TimeZone` in which the time series'
-      timestamps are.
 
    .. attribute:: enhydris.models.TimeseriesGroup.remarks
 
@@ -409,13 +396,17 @@ Time series and related models
 
       .. _pandas "frequency" string: https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#dateoffset-objects
 
-   .. method:: enhydris.models.Timeseries.get_data(start_date=None, end_date=None)
+   .. method:: enhydris.models.Timeseries.get_data(start_date=None, end_date=None, timezone=None)
 
       Return the data of the time series in a HTimeseries_ object. If
       *start_date* or *end_date* are specified, only this part of the
       data is returned.
 
-   .. method:: enhydris.models.Timeseries.set_data(data)
+      The timestamps are converted to the specified timezone.  If
+      unspecified, :attr:`~enhydris.models.Gentity.display_timezone` is
+      used.
+
+   .. method:: enhydris.models.Timeseries.set_data(data, default_timezone=None)
 
       Replace all of the time series with *data*, which must be one of
       the following:
@@ -423,20 +414,30 @@ Time series and related models
        * A Pandas DataFrame
        * A HTimeseries_ object
        * A filelike object containing time series data in `text format`_
-         or `file format`_. If it is in file format, the header is
-         ignored.
+         or `file format`_.
 
-   .. method:: enhydris.models.Timeseries.append_data(data)
+       *default_timezone* is a string from the Olson time zone database. It
+       specifies the time zone of the timestamps. If it is const:`None`, then
+       *data* must specify a time zone; either it must be a HTimeseries_
+       object or it must be a filelike object with time series data in
+       `file format`_ containing a ``timezone`` header.
+
+       If *default_timezone* is specified and *data* also specifies the time
+       zone in one of these ways, *default_timezone* is ignored.
+
+   .. method:: enhydris.models.Timeseries.append_data(data, default_timezone=None)
 
       Same as :meth:`~enhydris.models.Timeseries.set_data`, except that
       the data is appended to the already existing data. Raises
       ``ValueError`` if the new data is not more recent than the old
       data.
 
-   .. method:: enhydris.models.Timeseries.get_last_record_as_string()
+   .. method:: enhydris.models.Timeseries.get_last_record_as_string(timezone=None)
 
       Return the last record of the data file in CSV format, or an empty
-      string if the time series contains no records.
+      string if the time series contains no records. If ``timezone`` is
+      specified, the date in the file is in that time zone, otherwise in the
+      :attr:`enhydris.models.Station.default_timezone`.
 
 .. class:: enhydris.models.TimeseriesRecord
 

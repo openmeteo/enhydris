@@ -13,15 +13,17 @@ Upgrading from 3.0
 ------------------
 
  1. Make sure you are upgrading from 3.0
- 2. Backup the database.
- 3. Login as a superuser and go to the dashboard.
- 4. Go to "Sites" and make sure they're set correctly.
- 5. In the settings, make sure ``SITE_ID`` is set correctly.
- 6. Update the database with ``python manage.py migrate``. This will put
+ 2. Fix any time zone errors, as described in the appropriate section
+    below.
+ 3. Backup the database.
+ 4. Login as a superuser and go to the dashboard.
+ 5. Go to "Sites" and make sure they're set correctly.
+ 6. In the settings, make sure ``SITE_ID`` is set correctly.
+ 7. Update the database with ``python manage.py migrate``. This will put
     all stations to the site specified with ``SITE_ID``, and will add
     all users to the group whose name is the domain of the current site
     (the group will be created automatically if it does not exist).
- 7. If you have been using a single database to power many sites, then:
+ 8. If you have been using a single database to power many sites, then:
      * In the settings, make sure :data:`ENHYDRIS_SITES_FOR_NEW_STATIONS`
        is set correctly. Restart the server if necessary.
      * Logon as a superuseri and go to the dashboard
@@ -35,11 +37,62 @@ Upgrading from 3.0
 Changes from 3.0
 ----------------
 
-- Functionality for serving many sites from a single database has been
-  added. Accordingly, the setting ``ENHYDRIS_SITE_STATION_FILTER`` has
-  been abolished and replaced with
-  :data:`ENHYDRIS_SITES_FOR_NEW_STATIONS`. For more information, see
-  :ref:`Managing domains <domains>`.
+Many sites
+^^^^^^^^^^
+
+Functionality for serving many sites from a single database has been
+added. Accordingly, the setting ``ENHYDRIS_SITE_STATION_FILTER`` has
+been abolished and replaced with
+:data:`ENHYDRIS_SITES_FOR_NEW_STATIONS`. For more information, see
+:ref:`Managing domains <domains>`.
+
+Time zones
+^^^^^^^^^^
+
+Enhydris 3.0 has a serious bug.
+:class:`~enhydris.models.TimeseriesGroup` has a
+:attr:`~enhydris.models.TimeseriesGroup.time_zone` attribute. When a
+time series is being uploaded through the Django admin or through the
+Enhydris API, the timestamps are naive and are considered to be in the
+timeseries group's time zone, and are converted to UTC for storage.
+Conversely, when a time series is being retrieved (e.g. downloaded), the
+timestamps are converted to the timeseries group's time zone.
+
+While this behaviour looks reasonable, it is not what was intended.
+:attr:`enhydris.models.TimeseriesGroup.time_zone` was intended to be
+informational. The intention was that naive timestamps would be stored
+naively, and that if you stored ``2022-10-10 19:30``, then if you
+retrieved it it would be ``2022-10-10 19:30``. But this is not how it
+works. Timestamps are stored not naively but in UTC. If the group's time
+zone is ``EET`` and you store that timestamp and then you change the
+group's time zone to ``CET`` and you retrieve the timestamp again,
+you'll get ``18:30`` instead. If you have an automatically updated time
+series with time zone ``MSK`` and one day you see it and say "hey,
+that's wrong!" and you change it to ``CET``, it will continue to update
+the data but now the dates will mean something different.
+
+In order to fix these problems, the
+:attr:`enhydris.models.TimeseriesGroup.time_zone` attribute has been
+abolished. Attribute :attr:`enhydris.models.Gentity.display_timezone`
+has been added, which only affects how timestamps are displayed (or
+downloaded). When storing a time series (though the admin or the API),
+the time zone of the timestamps has to be explicitly specified.
+
+In order to upgrade from 3.0, first you need to inspect all your
+time series groups with respect to the time zone specified. If for some
+time series groups the time zone is wrong (but the timestamps appear to
+be correct when downloading the time series), then you need to fix it in
+this way for each time series group that has the problem:
+
+1. Download all time series of the group.
+2. Fix the time zone of the group.
+3. Upload all the downloaded time series back to Enhydris, discarding
+   existing data.
+
+If you discover errors after upgrading, fixing them is similar:
+
+1. Download the time series that have the problem.
+2. Upload the time series, specifying an appropriate time zone.
 
 Version 3.0
 ===========

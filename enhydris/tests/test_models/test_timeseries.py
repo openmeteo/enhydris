@@ -1,6 +1,7 @@
 import datetime as dt
 from io import StringIO
 from unittest import mock
+from zoneinfo import ZoneInfo
 
 from django.core.cache import cache
 from django.db import IntegrityError
@@ -130,10 +131,10 @@ def make_timeseries(*, start_date, end_date, **kwargs):
 class TimeseriesDatesTestCase(ClearCacheMixin, TestCase):
     def setUp(self):
         self.timeseries = make_timeseries(
-            timeseries_group__time_zone__utc_offset=120,
             timeseries_group__precision=2,
             start_date=dt.datetime(2018, 11, 15, 16, 0, tzinfo=dt.timezone.utc),
             end_date=dt.datetime(2018, 11, 17, 23, 0, tzinfo=dt.timezone.utc),
+            timeseries_group__gentity__display_timezone="Etc/GMT-2",
         )
 
     def test_start_date(self):
@@ -145,15 +146,12 @@ class TimeseriesDatesTestCase(ClearCacheMixin, TestCase):
                 15,
                 18,
                 0,
-                tzinfo=self.timeseries.timeseries_group.time_zone.as_tzinfo,
+                tzinfo=ZoneInfo("Etc/GMT-2"),
             ),
         )
 
     def test_start_date_tzinfo(self):
-        self.assertEqual(
-            self.timeseries.start_date.tzinfo,
-            self.timeseries.timeseries_group.time_zone.as_tzinfo,
-        )
+        self.assertEqual(self.timeseries.start_date.tzinfo, ZoneInfo("Etc/GMT-2"))
 
     def test_start_date_cache(self):
         with self.assertNumQueries(1):
@@ -172,15 +170,12 @@ class TimeseriesDatesTestCase(ClearCacheMixin, TestCase):
                 18,
                 1,
                 0,
-                tzinfo=self.timeseries.timeseries_group.time_zone.as_tzinfo,
+                tzinfo=ZoneInfo("Etc/GMT-2"),
             ),
         )
 
     def test_end_date_tzinfo(self):
-        self.assertEqual(
-            self.timeseries.end_date.tzinfo,
-            self.timeseries.timeseries_group.time_zone.as_tzinfo,
-        )
+        self.assertEqual(self.timeseries.end_date.tzinfo, ZoneInfo("Etc/GMT-2"))
 
     def test_end_date_cache(self):
         with self.assertNumQueries(1):
@@ -190,42 +185,20 @@ class TimeseriesDatesTestCase(ClearCacheMixin, TestCase):
         with self.assertNumQueries(0):
             timeseries.end_date
 
-    def test_start_date_naive(self):
-        self.assertEqual(
-            self.timeseries.start_date_naive, dt.datetime(2018, 11, 15, 18, 0)
-        )
-
-    def test_start_date_naive_cache(self):
-        with self.assertNumQueries(1):
-            self.timeseries.start_date_naive
-
-        timeseries = models.Timeseries.objects.get(id=self.timeseries.id)
-        with self.assertNumQueries(0):
-            timeseries.start_date_naive
-
-    def test_end_date_naive(self):
-        self.assertEqual(
-            self.timeseries.end_date_naive, dt.datetime(2018, 11, 18, 1, 0)
-        )
-
-    def test_end_date_naive_cache(self):
-        with self.assertNumQueries(1):
-            self.timeseries.end_date_naive
-
-        timeseries = models.Timeseries.objects.get(id=self.timeseries.id)
-        with self.assertNumQueries(0):
-            timeseries.end_date_naive
-
 
 class DataTestCase(TestTimeseriesMixin, TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls._create_test_timeseries("2017-11-23 17:23,1,\n2018-11-25 01:00,2,\n")
+        tzinfo = ZoneInfo("Etc/GMT-2")
         cls.expected_result = pd.DataFrame(
             data={"value": [1.0, 2.0], "flags": ["", ""]},
             columns=["value", "flags"],
-            index=[dt.datetime(2017, 11, 23, 17, 23), dt.datetime(2018, 11, 25, 1, 0)],
+            index=[
+                dt.datetime(2017, 11, 23, 17, 23, tzinfo=tzinfo),
+                dt.datetime(2018, 11, 25, 1, 0, tzinfo=tzinfo),
+            ],
         )
         cls.expected_result.index.name = "date"
 
@@ -258,13 +231,26 @@ class TimeseriesGetDataTestCase(DataTestCase):
         self.assertEqual(self.data.title, "Daily temperature")
 
     def test_timezone(self):
-        self.assertEqual(self.data.timezone, "IST (UTC+0530)")
+        self.assertEqual(self.data.timezone, "Etc/GMT-2 (UTC+0200)")
 
     def test_negative_timezone(self):
-        self.timeseries.timeseries_group.time_zone.code = "NST"
-        self.timeseries.timeseries_group.time_zone.utc_offset = -210
+        self.timeseries.timeseries_group.gentity.display_timezone = "Etc/GMT+2"
         data = self.timeseries.get_data()
-        self.assertEqual(data.timezone, "NST (UTC-0330)")
+        self.assertEqual(data.timezone, "Etc/GMT+2 (UTC-0200)")
+
+    def test_timezone_with_large_offset(self):
+        self.timeseries.timeseries_group.gentity.display_timezone = "Etc/GMT-10"
+        data = self.timeseries.get_data()
+        self.assertEqual(data.timezone, "Etc/GMT-10 (UTC+1000)")
+
+    def test_timezone_etc_gmt(self):
+        self.timeseries.timeseries_group.gentity.display_timezone = "Etc/GMT"
+        data = self.timeseries.get_data()
+        self.assertEqual(data.timezone, "Etc/GMT (UTC+0000)")
+
+    def test_timezone_utc(self):
+        data = self.timeseries.get_data(timezone="UTC")
+        self.assertEqual(data.timezone, "UTC (UTC+0000)")
 
     def test_variable(self):
         self.assertEqual(self.data.variable, "Temperature")
@@ -284,15 +270,42 @@ class TimeseriesGetDataTestCase(DataTestCase):
         pd.testing.assert_frame_equal(self.data.data, self.expected_result)
 
 
+class TimeseriesGetDataInDifferentTimezoneTestCase(DataTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.data = cls.timeseries.get_data(timezone="Etc/GMT")
+
+    def test_data(self):
+        tzinfo = ZoneInfo("Etc/GMT")
+        expected_result = pd.DataFrame(
+            data={"value": [1.0, 2.0], "flags": ["", ""]},
+            columns=["value", "flags"],
+            index=[
+                dt.datetime(2017, 11, 23, 15, 23, tzinfo=tzinfo),
+                dt.datetime(2018, 11, 24, 23, 0, tzinfo=tzinfo),
+            ],
+        )
+        expected_result.index.name = "date"
+        pd.testing.assert_frame_equal(self.data.data, expected_result)
+
+    def test_metadata(self):
+        self.assertEqual(self.data.timezone, "Etc/GMT (UTC+0000)")
+
+
 class TimeseriesGetDataWithNullTestCase(TestTimeseriesMixin, TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls._create_test_timeseries("2017-11-23 17:23,,\n2018-11-25 01:00,2,\n")
+        tzinfo = ZoneInfo("Etc/GMT-2")
         cls.expected_result = pd.DataFrame(
             data={"value": [float("NaN"), 2.0], "flags": ["", ""]},
             columns=["value", "flags"],
-            index=[dt.datetime(2017, 11, 23, 17, 23), dt.datetime(2018, 11, 25, 1, 0)],
+            index=[
+                dt.datetime(2017, 11, 23, 17, 23, tzinfo=tzinfo),
+                dt.datetime(2018, 11, 25, 1, 0, tzinfo=tzinfo),
+            ],
         )
         cls.expected_result.index.name = "date"
         cls.data = cls.timeseries.get_data()
@@ -301,53 +314,62 @@ class TimeseriesGetDataWithNullTestCase(TestTimeseriesMixin, TestCase):
         pd.testing.assert_frame_equal(self.data.data, self.expected_result)
 
 
+class TimeseriesGetDataEmptyTestCase(TestTimeseriesMixin, TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls._create_test_timeseries("")
+        cls.data = cls.timeseries.get_data()
+
+    def test_data(self):
+        self.assertTrue(self.data.data.empty)
+
+
 class TimeseriesGetDataWithStartAndEndDateTestCase(DataTestCase):
     def _check(self, start_index=None, end_index=None):
         """Check self.htimeseries.data against the initial timeseries sliced from
         start_index to end_index.
         """
+        tzinfo = ZoneInfo("Etc/GMT-2")
         full_result = pd.DataFrame(
             data={"value": [1.0, 2.0], "flags": ["", ""]},
             columns=["value", "flags"],
-            index=[dt.datetime(2017, 11, 23, 17, 23), dt.datetime(2018, 11, 25, 1, 0)],
+            index=[
+                dt.datetime(2017, 11, 23, 17, 23, tzinfo=tzinfo),
+                dt.datetime(2018, 11, 25, 1, 0, tzinfo=tzinfo),
+            ],
         )
         full_result.index.name = "date"
         expected_result = full_result.iloc[start_index:end_index]
         pd.testing.assert_frame_equal(self.ahtimeseries.data, expected_result)
 
     def test_with_start_date_just_before_start_of_timeseries(self):
-        tzinfo = self.timeseries.timeseries_group.time_zone.as_tzinfo
-        start_date = dt.datetime(2017, 11, 23, 17, 22, tzinfo=tzinfo)
+        start_date = dt.datetime(2017, 11, 23, 17, 22, tzinfo=ZoneInfo("Etc/GMT-2"))
         self.ahtimeseries = self.timeseries.get_data(start_date=start_date)
         self._check()
 
     def test_with_start_date_on_start_of_timeseries(self):
-        tzinfo = self.timeseries.timeseries_group.time_zone.as_tzinfo
-        start_date = dt.datetime(2017, 11, 23, 17, 23, tzinfo=tzinfo)
+        start_date = dt.datetime(2017, 11, 23, 17, 23, tzinfo=ZoneInfo("Etc/GMT-2"))
         self.ahtimeseries = self.timeseries.get_data(start_date=start_date)
         self._check()
 
     def test_with_start_date_just_after_start_of_timeseries(self):
-        tzinfo = self.timeseries.timeseries_group.time_zone.as_tzinfo
-        start_date = dt.datetime(2017, 11, 23, 17, 24, tzinfo=tzinfo)
+        start_date = dt.datetime(2017, 11, 23, 17, 24, tzinfo=ZoneInfo("Etc/GMT-2"))
         self.ahtimeseries = self.timeseries.get_data(start_date=start_date)
         self._check(start_index=1)
 
     def test_with_end_date_just_after_end_of_timeseries(self):
-        tzinfo = self.timeseries.timeseries_group.time_zone.as_tzinfo
-        end_date = dt.datetime(2018, 11, 25, 1, 1, tzinfo=tzinfo)
+        end_date = dt.datetime(2018, 11, 25, 1, 1, tzinfo=ZoneInfo("Etc/GMT-2"))
         self.ahtimeseries = self.timeseries.get_data(end_date=end_date)
         self._check()
 
     def test_with_end_date_on_end_of_timeseries(self):
-        tzinfo = self.timeseries.timeseries_group.time_zone.as_tzinfo
-        end_date = dt.datetime(2018, 11, 25, 1, 0, tzinfo=tzinfo)
+        end_date = dt.datetime(2018, 11, 25, 1, 0, tzinfo=ZoneInfo("Etc/GMT-2"))
         self.ahtimeseries = self.timeseries.get_data(end_date=end_date)
         self._check()
 
     def test_with_end_date_just_before_end_of_timeseries(self):
-        tzinfo = self.timeseries.timeseries_group.time_zone.as_tzinfo
-        end_date = dt.datetime(2018, 11, 25, 0, 59, tzinfo=tzinfo)
+        end_date = dt.datetime(2018, 11, 25, 0, 59, tzinfo=ZoneInfo("Etc/GMT-2"))
         self.ahtimeseries = self.timeseries.get_data(end_date=end_date)
         self._check(end_index=1)
 
@@ -377,7 +399,8 @@ class TimeseriesSetDataTestCase(TestTimeseriesMixin, TestCase):
 
     def test_call_with_file_object(self):
         self.returned_length = self.timeseries.set_data(
-            StringIO("2017-11-23 17:23,1,\n" "2018-11-25 01:00,2,\n")
+            StringIO("2017-11-23 17:23,1,\n" "2018-11-25 01:00,2,\n"),
+            default_timezone="Etc/GMT-2",
         )
         self._check_results()
 
@@ -387,47 +410,38 @@ class TimeseriesSetDataTestCase(TestTimeseriesMixin, TestCase):
 
     def test_call_with_htimeseries(self):
         self.returned_length = self.timeseries.set_data(
-            HTimeseries(self._get_dataframe())
+            HTimeseries(self._get_dataframe()), default_timezone="Etc/GMT-2"
         )
         self._check_results()
 
     def _get_dataframe(self):
+        tzinfo = ZoneInfo("Etc/GMT-2")
         result = pd.DataFrame(
             data={"value": [1.0, 2.0], "flags": ["", ""]},
             columns=["value", "flags"],
-            index=[dt.datetime(2017, 11, 23, 17, 23), dt.datetime(2018, 11, 25, 1, 0)],
+            index=[
+                dt.datetime(2017, 11, 23, 17, 23, tzinfo=tzinfo),
+                dt.datetime(2018, 11, 25, 1, 0, tzinfo=tzinfo),
+            ],
         )
         result.index.name = "date"
         return result
 
     def _check_results(self):
+        tzinfo = ZoneInfo("Etc/GMT-2")
         self.assertEqual(self.returned_length, 2)
         self.assertEqual(
             list(self.timeseries.timeseriesrecord_set.values()),
             [
                 {
                     "timeseries_id": self.timeseries.id,
-                    "timestamp": dt.datetime(
-                        2017,
-                        11,
-                        23,
-                        17,
-                        23,
-                        tzinfo=models.TimeZone(code="IST", utc_offset=330).as_tzinfo,
-                    ),
+                    "timestamp": dt.datetime(2017, 11, 23, 17, 23, tzinfo=tzinfo),
                     "value": 1.0,
                     "flags": "",
                 },
                 {
                     "timeseries_id": self.timeseries.id,
-                    "timestamp": dt.datetime(
-                        2018,
-                        11,
-                        25,
-                        1,
-                        0,
-                        tzinfo=models.TimeZone(code="IST", utc_offset=330).as_tzinfo,
-                    ),
+                    "timestamp": dt.datetime(2018, 11, 25, 1, 0, tzinfo=tzinfo),
                     "value": 2.0,
                     "flags": "",
                 },
@@ -441,40 +455,48 @@ class TimeseriesAppendDataTestCase(TestTimeseriesMixin, TestCase):
 
     def test_call_with_file_object(self):
         returned_length = self.timeseries.append_data(
-            StringIO("2017-11-23 17:23,1,\n" "2018-11-25 01:00,2,\n")
+            StringIO("2017-11-23 17:23,1,\n" "2018-11-25 01:00,2,\n"),
+            default_timezone="Etc/GMT-2",
         )
         self.assertEqual(returned_length, 2)
         self._assert_wrote_data()
 
     def test_call_with_dataframe(self):
-        returned_length = self.timeseries.append_data(self._get_dataframe())
+        returned_length = self.timeseries.append_data(
+            self._get_dataframe(), default_timezone="Etc/GMT-2"
+        )
         self.assertEqual(returned_length, 2)
         self._assert_wrote_data()
 
     def test_call_with_htimeseries(self):
         returned_length = self.timeseries.append_data(
-            HTimeseries(self._get_dataframe())
+            HTimeseries(self._get_dataframe()), default_timezone="Etc/GMT-2"
         )
         self.assertEqual(returned_length, 2)
         self._assert_wrote_data()
 
     def _get_dataframe(self):
+        tzinfo = ZoneInfo("Etc/GMT-2")
         result = pd.DataFrame(
             data={"value": [1.0, 2.0], "flags": ["", ""]},
             columns=["value", "flags"],
-            index=[dt.datetime(2017, 11, 23, 17, 23), dt.datetime(2018, 11, 25, 1, 0)],
+            index=[
+                dt.datetime(2017, 11, 23, 17, 23, tzinfo=tzinfo),
+                dt.datetime(2018, 11, 25, 1, 0, tzinfo=tzinfo),
+            ],
         )
         result.index.name = "date"
         return result
 
     def _assert_wrote_data(self):
+        tzinfo = ZoneInfo("Etc/GMT-2")
         expected_result = pd.DataFrame(
             data={"value": [42.0, 1.0, 2.0], "flags": ["", "", ""]},
             columns=["value", "flags"],
             index=[
-                dt.datetime(2016, 1, 1, 0, 0),
-                dt.datetime(2017, 11, 23, 17, 23),
-                dt.datetime(2018, 11, 25, 1, 0),
+                dt.datetime(2016, 1, 1, 0, 0, tzinfo=tzinfo),
+                dt.datetime(2017, 11, 23, 17, 23, tzinfo=tzinfo),
+                dt.datetime(2018, 11, 25, 1, 0, tzinfo=tzinfo),
             ],
         )
         expected_result.index.name = "date"
@@ -486,15 +508,21 @@ class TimeseriesAppendDataToEmptyTimeseriesTestCase(TestTimeseriesMixin, TestCas
         self._create_test_timeseries()
 
     def test_call_with_dataframe(self):
-        returned_length = self.timeseries.append_data(self._get_dataframe())
+        returned_length = self.timeseries.append_data(
+            self._get_dataframe(), default_timezone="Etc/GMT-2"
+        )
         self.assertEqual(returned_length, 2)
         self._assert_wrote_data()
 
     def _get_dataframe(self):
+        tzinfo = ZoneInfo("Etc/GMT-2")
         result = pd.DataFrame(
             data={"value": [1.0, 2.0], "flags": ["", ""]},
             columns=["value", "flags"],
-            index=[dt.datetime(2017, 11, 23, 17, 23), dt.datetime(2018, 11, 25, 1, 0)],
+            index=[
+                dt.datetime(2017, 11, 23, 17, 23, tzinfo=tzinfo),
+                dt.datetime(2018, 11, 25, 1, 0, tzinfo=tzinfo),
+            ],
         )
         result.index.name = "date"
         return result
@@ -510,7 +538,8 @@ class TimeseriesAppendErrorTestCase(TestTimeseriesMixin, TestCase):
         self._create_test_timeseries("2018-01-01 00:00,42,\n")
         with self.assertRaises(IntegrityError):
             self.timeseries.append_data(
-                StringIO("2017-11-23 17:23,1,\n2018-11-25 01:00,2,\n")
+                StringIO("2017-11-23 17:23,1,\n2018-11-25 01:00,2,\n"),
+                default_timezone="Etc/GMT-2",
             )
 
 
@@ -525,6 +554,13 @@ class TimeseriesGetLastRecordAsStringTestCase(TestTimeseriesMixin, TestCase):
         self._create_test_timeseries()
         self.assertEqual(self.timeseries.get_last_record_as_string(), "")
 
+    def test_with_timezone(self):
+        self._create_test_timeseries("2017-11-23 17:23,1,\n2018-11-25 01:00,2,\n")
+        self.assertEqual(
+            self.timeseries.get_last_record_as_string(timezone="Etc/GMT-5"),
+            "2018-11-25 04:00,2.0,",
+        )
+
 
 class TimeseriesExecutesTriggersUponAddingRecordsTestCase(DataTestCase):
     def setUp(self):
@@ -535,11 +571,15 @@ class TimeseriesExecutesTriggersUponAddingRecordsTestCase(DataTestCase):
         post_save.disconnect(self.trigger, sender="enhydris.Timeseries")
 
     def test_calls_trigger_upon_setting_data(self):
-        self.timeseries.set_data(StringIO("2020-10-26 09:34,18,\n"))
+        self.timeseries.set_data(
+            StringIO("2020-10-26 09:34,18,\n"), default_timezone="Etc/GMT-2"
+        )
         self.trigger.assert_called()
 
     def test_calls_trigger_upon_appending_data(self):
-        self.timeseries.append_data(StringIO("2020-10-26 09:34,18,\n"))
+        self.timeseries.append_data(
+            StringIO("2020-10-26 09:34,18,\n"), default_timezone="Etc/GMT-2"
+        )
         self.trigger.assert_called()
 
 
@@ -556,13 +596,20 @@ class TimeseriesRecordTestCase(TestTimeseriesMixin, TestCase):
         record.save()
         self.assertEqual(str(record), "2017-11-23 17:23,,")
 
+    def test_str_with_timezone(self):
+        self._create_test_timeseries("2017-11-23 17:23,3.14,\n")
+        record = models.TimeseriesRecord.objects.first()
+        record.save()
+        self.assertEqual(record.__str__(timezone="Etc/GMT-5"), "2017-11-23 20:23,3.1,")
+
 
 class TimeseriesRecordBulkInsertTestCase(TestTimeseriesMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls._create_test_timeseries()
         ahtimeseries = HTimeseries(
-            StringIO("2020-09-08 20:00,15.7,,\n2020-09-08 21:00,,\n")
+            StringIO("2020-09-08 20:00,15.7,,\n2020-09-08 21:00,,\n"),
+            default_tzinfo=ZoneInfo("Etc/GMT-2"),
         )
         models.TimeseriesRecord.bulk_insert(cls.timeseries, ahtimeseries)
         cls.timeseries_records = models.TimeseriesRecord.objects.all()
@@ -594,15 +641,6 @@ class TimeseriesDatesCacheInvalidationTestCase(TestCase):
         with self.assertNumQueries(2):
             self.station.last_update
 
-    def test_station_last_update_naive_cache_invalidation(self):
-        with self.assertNumQueries(2):
-            self.station.last_update_naive
-
-        # Check cache invalidation
-        self.timeseries.save()
-        with self.assertNumQueries(2):
-            self.station.last_update_naive
-
     def test_timeseries_group_start_date_cache_invalidation(self):
         self.timeseries_group.default_timeseries
         with self.assertNumQueries(1):
@@ -613,19 +651,6 @@ class TimeseriesDatesCacheInvalidationTestCase(TestCase):
         self.timeseries_group.default_timeseries
         with self.assertNumQueries(1):
             self.timeseries_group.start_date
-
-    def test_timeseries_group_start_date_naive_cache_invalidation(self):
-        # Make sure to retrieve the `default_timeseries` first.
-        self.timeseries_group.default_timeseries
-
-        with self.assertNumQueries(1):
-            self.timeseries_group.start_date_naive
-
-        # Check cache invalidation
-        self.timeseries.save()
-        self.timeseries_group.default_timeseries
-        with self.assertNumQueries(1):
-            self.timeseries_group.start_date_naive
 
     def test_timeseries_group_end_date_cache_invalidation(self):
         # Make sure to retrieve the `default_timeseries` first.
@@ -640,19 +665,6 @@ class TimeseriesDatesCacheInvalidationTestCase(TestCase):
         with self.assertNumQueries(1):
             self.timeseries_group.end_date
 
-    def test_timeseries_group_end_date_naive_cache_invalidation(self):
-        # Make sure to retrieve the `default_timeseries` first.
-        self.timeseries_group.default_timeseries
-
-        with self.assertNumQueries(1):
-            self.timeseries_group.end_date_naive
-
-        # Check cache invalidation
-        self.timeseries.save()
-        self.timeseries_group.default_timeseries
-        with self.assertNumQueries(1):
-            self.timeseries_group.end_date_naive
-
     def test_timeseries_start_date_cache_invalidation(self):
         with self.assertNumQueries(1):
             self.timeseries.start_date
@@ -662,15 +674,6 @@ class TimeseriesDatesCacheInvalidationTestCase(TestCase):
         with self.assertNumQueries(1):
             self.timeseries.start_date
 
-    def test_timeseries_start_date_naive_cache_invalidation(self):
-        with self.assertNumQueries(1):
-            self.timeseries.start_date_naive
-
-        # Check cache invalidation
-        self.timeseries.save()
-        with self.assertNumQueries(1):
-            self.timeseries.start_date_naive
-
     def test_timeseries_end_date_cache_invalidation(self):
         with self.assertNumQueries(1):
             self.timeseries.end_date
@@ -679,12 +682,3 @@ class TimeseriesDatesCacheInvalidationTestCase(TestCase):
         self.timeseries.save()
         with self.assertNumQueries(1):
             self.timeseries.end_date
-
-    def test_timeseries_end_date_naive_cache_invalidation(self):
-        with self.assertNumQueries(1):
-            self.timeseries.end_date_naive
-
-        # Check cache invalidation
-        self.timeseries.save()
-        with self.assertNumQueries(1):
-            self.timeseries.end_date_naive

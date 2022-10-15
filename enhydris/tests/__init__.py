@@ -1,5 +1,6 @@
 import datetime as dt
 from io import StringIO
+from zoneinfo import ZoneInfo
 
 from django.contrib.gis.geos import Point
 from django.core.cache import cache
@@ -42,14 +43,13 @@ class TestTimeseriesMixin(ClearCacheMixin):
             original_srid=2100,
             geom=Point(x=21.06071, y=39.09518, srid=4326),
             altitude=219,
+            display_timezone="Etc/GMT-2",
         )
         cls.timeseries_group = mommy.make(
             models.TimeseriesGroup,
             name="Daily temperature",
             gentity=cls.station,
             unit_of_measurement__symbol="mm",
-            time_zone__code="IST",
-            time_zone__utc_offset=330,
             variable__descr="Temperature",
             precision=1,
             remarks="This timeseries group rocks",
@@ -60,42 +60,47 @@ class TestTimeseriesMixin(ClearCacheMixin):
             type=models.Timeseries.INITIAL,
             time_step="H",
         )
-        cls.timeseries.set_data(StringIO(data))
+        cls.timeseries.set_data(StringIO(data), default_timezone="Etc/GMT-2")
 
 
 class TimeseriesDataMixin(ClearCacheMixin):
-    def create_timeseries(self):
-        self.htimeseries = HTimeseries()
-        self.htimeseries.data = pd.DataFrame(
-            index=[dt.datetime(2017, 11, 23, 17, 23), dt.datetime(2018, 11, 25, 1, 0)],
+    @classmethod
+    def create_timeseries(cls):
+        cls.timezone = "Etc/GMT-2"
+        cls.tzinfo = ZoneInfo(cls.timezone)
+        cls.htimeseries = HTimeseries()
+        cls.htimeseries.data = pd.DataFrame(
+            index=[
+                dt.datetime(2017, 11, 23, 17, 23, tzinfo=cls.tzinfo),
+                dt.datetime(2018, 11, 25, 1, 0, tzinfo=cls.tzinfo),
+            ],
             data={"value": [1.0, 2.0], "flags": ["", ""]},
             columns=["value", "flags"],
         )
-        self.station = mommy.make(
+        cls.station = mommy.make(
             models.Station,
             name="Komboti",
             geom=Point(x=21.00000, y=39.00000, srid=4326),
             original_srid=4326,
+            display_timezone=cls.timezone,
         )
-        self.time_zone = mommy.make(models.TimeZone, code="EET", utc_offset=120)
-        self.variable = models.Variable()
-        with switch_language(self.variable, "en"):
-            self.variable.descr = "Beauty"
-            self.variable.save()
-        self.timeseries_group = mommy.make(
+        cls.variable = models.Variable()
+        with switch_language(cls.variable, "en"):
+            cls.variable.descr = "Beauty"
+            cls.variable.save()
+        cls.timeseries_group = mommy.make(
             models.TimeseriesGroup,
-            gentity=self.station,
-            time_zone=self.time_zone,
+            gentity=cls.station,
             precision=2,
-            variable=self.variable,
+            variable=cls.variable,
             unit_of_measurement__symbol="beauton",
         )
-        self.timeseries = mommy.make(
+        cls.timeseries = mommy.make(
             models.Timeseries,
             type=models.Timeseries.INITIAL,
-            timeseries_group=self.timeseries_group,
+            timeseries_group=cls.timeseries_group,
         )
-        self.timeseries.set_data(self.htimeseries.data)
+        cls.timeseries.set_data(cls.htimeseries.data, default_timezone=cls.timezone)
 
 
 class SeleniumTestCase(django_selenium_clean.SeleniumTestCase):
