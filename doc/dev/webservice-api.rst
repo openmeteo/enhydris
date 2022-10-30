@@ -472,6 +472,38 @@ The result is a `paginated list`_ of time series groups::
         ]
     }
 
+Create, update or delete time series groups
+-------------------------------------------
+
+DELETE a time series group::
+
+    curl -X DELETE -H "Authorization: token OAUTH-TOKEN" \
+        https://openmeteo.org/api/stations/1334/timeseriesgroups/851/
+
+The response is normally 204 (no content) or 404.
+
+POST to create a time series group::
+
+    curl -X POST -H "Authorization: token OAUTH-TOKEN" \
+        -d "name=My time series group" -d "gentity=1334" \
+        -d "variable=5" -d "unit_of_measurement=3" \
+        -d "precision=2" \
+        https://openmeteo.org/api/stations/1334/timeseriesgroups/
+
+The response is a 201 with a similar content as the GET detail response
+(with the new data), unless there is a problem, in which case there's a
+standard `error response`_.
+
+PUT or PATCH a time series group::
+
+    curl -X PATCH -H "Authorization: token OAUTH-TOKEN" \
+        -d "precision=1" \
+        https://openmeteo.org/api/stations/1334/timeseriesgroups/851/
+
+The response is a 200 with a similar content as the GET detail response
+(with the updated data), unless there is a problem, in which case
+there's a standard `error response`_.
+
 Time series
 ===========
 

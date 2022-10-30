@@ -57,14 +57,14 @@ class CommonTests:
     def test_user_with_model_permissions_can_change_timeseries_group(self):
         self.assertTrue(
             self.charlie.has_perm(
-                "enhydris.change_timeseries_group", self.timeseries_group
+                "enhydris.change_timeseriesgroup", self.timeseries_group
             )
         )
 
     def test_user_with_model_permissions_can_delete_timeseries_group(self):
         self.assertTrue(
             self.charlie.has_perm(
-                "enhydris.change_timeseries_group", self.timeseries_group
+                "enhydris.delete_timeseriesgroup", self.timeseries_group
             )
         )
 
@@ -87,14 +87,14 @@ class CommonTests:
     def test_user_without_permissions_cannot_change_timeseries_group(self):
         self.assertFalse(
             self.david.has_perm(
-                "enhydris.change_timeseries_group", self.timeseries_group
+                "enhydris.change_timeseriesgroup", self.timeseries_group
             )
         )
 
     def test_user_without_permissions_cannot_delete_timeseries_group(self):
         self.assertFalse(
             self.david.has_perm(
-                "enhydris.change_timeseries_group", self.timeseries_group
+                "enhydris.delete_timeseriesgroup", self.timeseries_group
             )
         )
 
@@ -120,14 +120,14 @@ class RulesTestCaseWhenUsersCanAddContent(RulesTestCaseBase, CommonTests):
     def test_creator_can_change_timeseries_group(self):
         self.assertTrue(
             self.alice.has_perm(
-                "enhydris.change_timeseries_group", self.timeseries_group
+                "enhydris.change_timeseriesgroup", self.timeseries_group
             )
         )
 
     def test_creator_can_delete_timeseries_group(self):
         self.assertTrue(
             self.alice.has_perm(
-                "enhydris.delete_timeseries_group", self.timeseries_group
+                "enhydris.delete_timeseriesgroup", self.timeseries_group
             )
         )
 
@@ -149,12 +149,12 @@ class RulesTestCaseWhenUsersCanAddContent(RulesTestCaseBase, CommonTests):
 
     def test_maintainer_can_change_timeseries_group(self):
         self.assertTrue(
-            self.bob.has_perm("enhydris.change_timeseries_group", self.timeseries_group)
+            self.bob.has_perm("enhydris.change_timeseriesgroup", self.timeseries_group)
         )
 
     def test_maintainer_can_delete_timeseries_group(self):
         self.assertTrue(
-            self.bob.has_perm("enhydris.delete_timeseries_group", self.timeseries_group)
+            self.bob.has_perm("enhydris.delete_timeseriesgroup", self.timeseries_group)
         )
 
     def test_maintainer_can_change_timeseries(self):
@@ -179,14 +179,14 @@ class RulesTestCaseWhenUsersCannotAddContent(RulesTestCaseBase, CommonTests):
     def test_creator_is_irrelevant_for_change_timeseries_group(self):
         self.assertFalse(
             self.alice.has_perm(
-                "enhydris.change_timeseries_group", self.timeseries_group
+                "enhydris.change_timeseriesgroup", self.timeseries_group
             )
         )
 
     def test_creator_is_irrelevant_for_delete_timeseries_group(self):
         self.assertFalse(
             self.alice.has_perm(
-                "enhydris.delete_timeseries_group", self.timeseries_group
+                "enhydris.delete_timeseriesgroup", self.timeseries_group
             )
         )
 
@@ -208,12 +208,12 @@ class RulesTestCaseWhenUsersCannotAddContent(RulesTestCaseBase, CommonTests):
 
     def test_maintainer_is_irrelevant_for_change_timeseries_group(self):
         self.assertFalse(
-            self.bob.has_perm("enhydris.change_timeseries_group", self.timeseries_group)
+            self.bob.has_perm("enhydris.change_timeseriesgroup", self.timeseries_group)
         )
 
     def test_maintainer_is_irrelevant_for_delete_timeseries_group(self):
         self.assertFalse(
-            self.bob.has_perm("enhydris.delete_timeseries_group", self.timeseries_group)
+            self.bob.has_perm("enhydris.delete_timeseriesgroup", self.timeseries_group)
         )
 
     def test_maintainer_is_irrelevant_for_change_timeseries(self):

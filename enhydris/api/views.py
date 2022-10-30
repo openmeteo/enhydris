@@ -138,13 +138,41 @@ class GentityFileViewSet(ReadOnlyModelViewSet):
         return response
 
 
-class TimeseriesGroupViewSet(ReadOnlyModelViewSet):
+class TimeseriesGroupViewSet(ModelViewSet):
     serializer_class = serializers.TimeseriesGroupSerializer
+    permission_classes = [permissions.CanEditOrReadOnly]
 
     def get_queryset(self):
         return models.TimeseriesGroup.objects.filter(
             gentity_id=self.kwargs["station_id"]
         )
+
+    def create(self, request, *args, **kwargs):
+        """Redefine create, checking permissions and gentity_id.
+
+        Django-rest-framework does not do object-level permission when
+        creating a new object, so we have to completely customize the create
+        method. In addition, we check that the gentity_id specified in the data
+        is the same as the station_id in the URL.
+        """
+        # Get the data
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check permissions
+        station = get_object_or_404(models.Station, id=self.kwargs["station_id"])
+        if not request.user.is_authenticated:
+            return Response("Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
+        if not request.user.has_perm("enhydris.change_station", station):
+            return Response("Forbidden", status=status.HTTP_403_FORBIDDEN)
+
+        # Check whether the station id in the url and in the posted data are consistent
+        if str(serializer.data["gentity"]) != self.kwargs["station_id"]:
+            return Response("Wrong gentity_id", status=status.HTTP_400_BAD_REQUEST)
+
+        # All checks passed, call inherited method to do the actual work.
+        return super().create(request, *args, **kwargs)
 
 
 class TimeseriesViewSet(ModelViewSet):
