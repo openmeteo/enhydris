@@ -251,6 +251,7 @@ class StationCreateSetsCreatorTestCase(TestCase):
                 "owner": self.serial_killers_sa.id,
                 "geom_0": "20.94565",
                 "geom_1": "39.12102",
+                "display_timezone": "Etc/GMT-2",
                 **get_formset_parameters(self.client, "/admin/enhydris/station/add/"),
             },
         )
@@ -369,11 +370,14 @@ class StationListFromDifferentSites(TestCase):
 
 
 class TestTimeseriesFormMixin(TestTimeseriesMixin):
-    def _create_timeseries_inline_admin_form(self, replace_or_append, file_contents=""):
+    def _create_timeseries_inline_admin_form(
+        self, replace_or_append, file_contents="", default_timezone="Etc/GMT-2"
+    ):
         self.data = {
             "replace_or_append": replace_or_append,
             "timeseries_group": self.timeseries_group.id,
             "type": models.Timeseries.INITIAL,
+            "default_timezone": default_timezone,
         }
         if file_contents:
             self.files = {
@@ -443,6 +447,46 @@ class TimeseriesInlineAdminFormAcceptsAppendingIfInOrderTestCase(
         self.assertTrue(self.form.is_valid())
 
 
+class TimeseriesInlineAdminFormRefusesToUploadIfNoTimezoneTestCase(
+    TestTimeseriesFormMixin, TestCase
+):
+    def setUp(self):
+        self._setup_request_object()
+        self._create_test_timeseries(data="2005-11-01 18:00,3,\n2019-01-01 00:30,25,\n")
+        self._create_timeseries_inline_admin_form(
+            replace_or_append="REPLACE",
+            file_contents=b"2005-12-01 18:35,7,\n2019-04-09 13:36,0,\n",
+            default_timezone="",
+        )
+
+    def tearDown(self):
+        self._teardown_request_object()
+
+    def test_form_is_not_valid(self):
+        self.assertFalse(self.form.is_valid())
+
+    def test_form_errors(self):
+        self.assertIn(
+            "The file you attempted to upload does not specify a time zone.",
+            self.form.errors["__all__"][0],
+        )
+
+
+class TimeseriesInlineAdminFormAcceptsUploadIfTimezoneInFileTestCase(
+    TestTimeseriesFormMixin, TestCase
+):
+    def setUp(self):
+        self._create_test_timeseries(data="2005-11-01 18:00,3,\n")
+        self._create_timeseries_inline_admin_form(
+            replace_or_append="REPLACE",
+            file_contents=b"Timezone=Etc/GMT-2 (UTC+0200)\n\n2005-12-01 18:35,7,\n",
+            default_timezone="",
+        )
+
+    def test_form_is_valid(self):
+        self.assertTrue(self.form.is_valid())
+
+
 class TimeseriesInlineAdminFormAcceptsReplacingTestCase(
     TestTimeseriesFormMixin, TestCase
 ):
@@ -463,6 +507,7 @@ class TimeseriesUploadFileMixin:
             "owner": models.Organization.objects.create(name="Serial killers SA").id,
             "geom_0": "20.94565",
             "geom_1": "39.12102",
+            "display_timezone": "Etc/GMT-2",
             **get_formset_parameters(self.client, "/admin/enhydris/station/add/"),
             "timeseriesgroup_set-TOTAL_FORMS": "1",
             "timeseriesgroup_set-INITIAL_FORMS": "0",
@@ -473,13 +518,11 @@ class TimeseriesUploadFileMixin:
                 models.UnitOfMeasurement
             ).id,
             "timeseriesgroup_set-0-precision": 2,
-            "timeseriesgroup_set-0-time_zone": mommy.make(
-                models.TimeZone, code="EET", utc_offset=120
-            ).id,
             "timeseriesgroup_set-0-timeseries_set-TOTAL_FORMS": "1",
             "timeseriesgroup_set-0-timeseries_set-INITIAL_FORMS": "0",
             "timeseriesgroup_set-0-timeseries_set-0-type": "100",
             "timeseriesgroup_set-0-timeseries_set-0-replace_or_append": "APPEND",
+            "timeseriesgroup_set-0-timeseries_set-0-default_timezone": "Etc/GMT-2",
         }
 
 
@@ -637,6 +680,7 @@ class TimeseriesInlineFormSetTestCase(TestCase):
             "owner": models.Organization.objects.create(name="Serial killers SA").id,
             "geom_0": "20.94565",
             "geom_1": "39.12102",
+            "display_timezone": "Etc/GMT-2",
             **get_formset_parameters(self.client, "/admin/enhydris/station/add/"),
             "timeseriesgroup_set-TOTAL_FORMS": "1",
             "timeseriesgroup_set-INITIAL_FORMS": "0",
@@ -647,9 +691,6 @@ class TimeseriesInlineFormSetTestCase(TestCase):
                 models.UnitOfMeasurement
             ).id,
             "timeseriesgroup_set-0-precision": 2,
-            "timeseriesgroup_set-0-time_zone": mommy.make(
-                models.TimeZone, code="EET", utc_offset=120
-            ).id,
             "timeseriesgroup_set-0-timeseries_set-INITIAL_FORMS": "0",
         }
 
@@ -660,9 +701,11 @@ class TimeseriesInlineFormSetTestCase(TestCase):
             "timeseriesgroup_set-0-timeseries_set-0-type": "100",
             "timeseriesgroup_set-0-timeseries_set-0-time_step": "10min",
             "timeseriesgroup_set-0-timeseries_set-0-replace_or_append": "APPEND",
+            "timeseriesgroup_set-0-timeseries_set-0-default_timezone": "Etc/GMT-2",
             "timeseriesgroup_set-0-timeseries_set-1-type": "100",
             "timeseriesgroup_set-0-timeseries_set-1-time_step": "10min",
             "timeseriesgroup_set-0-timeseries_set-1-replace_or_append": "APPEND",
+            "timeseriesgroup_set-0-timeseries_set-1-default_timezone": "Etc/GMT-2",
         }
         response = self.client.post("/admin/enhydris/station/add/", data)
         self.assertContains(response, "must be unique")
@@ -674,12 +717,15 @@ class TimeseriesInlineFormSetTestCase(TestCase):
             "timeseriesgroup_set-0-timeseries_set-0-type": "100",
             "timeseriesgroup_set-0-timeseries_set-0-time_step": "10min",
             "timeseriesgroup_set-0-timeseries_set-0-replace_or_append": "APPEND",
+            "timeseriesgroup_set-0-timeseries_set-0-default_timezone": "Etc/GMT-2",
             "timeseriesgroup_set-0-timeseries_set-1-type": "100",
             "timeseriesgroup_set-0-timeseries_set-1-time_step": "20min",
             "timeseriesgroup_set-0-timeseries_set-1-replace_or_append": "APPEND",
+            "timeseriesgroup_set-0-timeseries_set-1-default_timezone": "Etc/GMT-2",
             "timeseriesgroup_set-0-timeseries_set-2-type": "200",
             "timeseriesgroup_set-0-timeseries_set-2-time_step": "10min",
             "timeseriesgroup_set-0-timeseries_set-2-replace_or_append": "APPEND",
+            "timeseriesgroup_set-0-timeseries_set-2-default_timezone": "Etc/GMT-2",
         }
         response = self.client.post("/admin/enhydris/station/add/", data)
         self.assertContains(response, "only one initial time series")
@@ -691,12 +737,15 @@ class TimeseriesInlineFormSetTestCase(TestCase):
             "timeseriesgroup_set-0-timeseries_set-0-type": "100",
             "timeseriesgroup_set-0-timeseries_set-0-time_step": "10min",
             "timeseriesgroup_set-0-timeseries_set-0-replace_or_append": "APPEND",
+            "timeseriesgroup_set-0-timeseries_set-0-default_timezone": "Etc/GMT-2",
             "timeseriesgroup_set-0-timeseries_set-1-type": "200",
             "timeseriesgroup_set-0-timeseries_set-1-time_step": "10min",
             "timeseriesgroup_set-0-timeseries_set-1-replace_or_append": "APPEND",
+            "timeseriesgroup_set-0-timeseries_set-1-default_timezone": "Etc/GMT-2",
             "timeseriesgroup_set-0-timeseries_set-2-type": "200",
             "timeseriesgroup_set-0-timeseries_set-2-time_step": "20min",
             "timeseriesgroup_set-0-timeseries_set-2-replace_or_append": "APPEND",
+            "timeseriesgroup_set-0-timeseries_set-2-default_timezone": "Etc/GMT-2",
         }
         response = self.client.post("/admin/enhydris/station/add/", data)
         self.assertContains(response, "only one checked time series")
@@ -708,12 +757,15 @@ class TimeseriesInlineFormSetTestCase(TestCase):
             "timeseriesgroup_set-0-timeseries_set-0-type": "100",
             "timeseriesgroup_set-0-timeseries_set-0-time_step": "10min",
             "timeseriesgroup_set-0-timeseries_set-0-replace_or_append": "APPEND",
+            "timeseriesgroup_set-0-timeseries_set-0-default_timezone": "Etc/GMT-2",
             "timeseriesgroup_set-0-timeseries_set-1-type": "300",
             "timeseriesgroup_set-0-timeseries_set-1-time_step": "10min",
             "timeseriesgroup_set-0-timeseries_set-1-replace_or_append": "APPEND",
+            "timeseriesgroup_set-0-timeseries_set-1-default_timezone": "Etc/GMT-2",
             "timeseriesgroup_set-0-timeseries_set-2-type": "300",
             "timeseriesgroup_set-0-timeseries_set-2-time_step": "20min",
             "timeseriesgroup_set-0-timeseries_set-2-replace_or_append": "APPEND",
+            "timeseriesgroup_set-0-timeseries_set-2-default_timezone": "Etc/GMT-2",
         }
         response = self.client.post("/admin/enhydris/station/add/", data)
         self.assertContains(response, "only one regularized time series")
@@ -725,6 +777,7 @@ class TimeseriesInlineFormSetTestCase(TestCase):
             "timeseriesgroup_set-0-timeseries_set-0-type": "",
             "timeseriesgroup_set-0-timeseries_set-0-time_step": "",
             "timeseriesgroup_set-0-timeseries_set-0-replace_or_append": "APPEND",
+            "timeseriesgroup_set-0-timeseries_set-0-default_timezone": "",
         }
         response = self.client.post("/admin/enhydris/station/add/", data)
         self.assertEqual(response.status_code, 302)

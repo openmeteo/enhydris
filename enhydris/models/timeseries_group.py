@@ -1,5 +1,3 @@
-from datetime import timedelta, timezone
-
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.cache import cache
@@ -85,30 +83,6 @@ class UnitOfMeasurement(Lookup):
         ordering = ["symbol"]
 
 
-class TimeZone(models.Model):
-    last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    code = models.CharField(max_length=50)
-    utc_offset = models.SmallIntegerField(verbose_name=_("UTC offset"))
-
-    @property
-    def as_tzinfo(self):
-        return timezone(timedelta(minutes=self.utc_offset), self.code)
-
-    def __str__(self):
-        return f"{self.code} (UTC{self.offset_string})"
-
-    @property
-    def offset_string(self):
-        hours = (abs(self.utc_offset) // 60) * (-1 if self.utc_offset < 0 else 1)
-        minutes = abs(self.utc_offset % 60)
-        return f"{hours:+03}{minutes:02}"
-
-    class Meta:
-        verbose_name = _("Time zone")
-        verbose_name_plural = _("Time zones")
-        ordering = ("utc_offset",)
-
-
 class TimeseriesGroup(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
     gentity = models.ForeignKey(Gentity, on_delete=models.CASCADE)
@@ -145,9 +119,6 @@ class TimeseriesGroup(models.Model):
             "values are always stored with all the decimal digits provided."
         ),
         verbose_name=_("Precision"),
-    )
-    time_zone = models.ForeignKey(
-        TimeZone, on_delete=models.CASCADE, verbose_name=_("Time zone")
     )
     remarks = models.TextField(blank=True, verbose_name=_("Remarks"))
 
@@ -207,25 +178,3 @@ class TimeseriesGroup(models.Model):
                 return self.default_timeseries.end_date
 
         return cache.get_or_set(f"timeseries_group_end_date_{self.id}", get_end_date)
-
-    @property
-    def start_date_naive(self):
-        result = self.start_date
-
-        def get_start_date_naive():
-            if result is not None:
-                return result.replace(tzinfo=None)
-
-        return cache.get_or_set(
-            f"timeseries_start_date_naive_{self.id}", get_start_date_naive
-        )
-
-    @property
-    def end_date_naive(self):
-        result = self.end_date
-
-        def get_end_date():
-            if result is not None:
-                return result.replace(tzinfo=None)
-
-        return cache.get_or_set(f"timeseries_end_date_naive_{self.id}", get_end_date)

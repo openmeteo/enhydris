@@ -7,8 +7,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
         "NAME": "openmeteo",
-        "USER": "postgres",
-        "PASSWORD": "",
+        "USER": "runner",
+        "PASSWORD": "topsecret",
         "HOST": "localhost",
         "PORT": 5432,
     }
@@ -27,7 +27,7 @@ headless = ChromeOptions()
 headless.add_argument("--headless")
 
 SELENIUM_WEBDRIVERS = {
-    "headless": {
+    "default": {
         "callable": webdriver.Chrome,
         "args": [],
         "kwargs": {"options": headless},

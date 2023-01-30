@@ -14,7 +14,7 @@ from enhydris.api.serializers import (
     TimeseriesSerializer,
 )
 
-_eet = dt.timezone(offset=dt.timedelta(hours=2), name="EET")
+_eet = dt.timezone(offset=dt.timedelta(hours=2), name="Etc/GMT-2")
 _adate = dt.datetime(2022, 1, 25, 12, 30, tzinfo=_eet)
 
 

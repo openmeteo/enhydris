@@ -34,44 +34,26 @@ Models
       MeteoView2``.  See :ref:`telemetry_api_types` for more
       information.
 
-   .. attribute:: data_time_zone
+   .. attribute:: data_timezone
       :type: CharField
 
-      Enhydris has the requirement that all time stamps in
-      :class:`~enhydris.models.TimeseriesRecord` must be stored in the
-      same offset from UTC, i.e. without switching to Daylight Saving
-      Time (DST). This offset is specified by
-      :attr:`enhydris.models.TimeseriesGroup.time_zone`.
+      The time zone of the data, like ``Europe/Athens`` or ``Etc/GMT``.
+      Enhydris converts the timestamps from this time zone to UTC in
+      order to store them.
 
-      It is recommended that data loggers also do not switch to DST.
-      However, if they do, Enhydris can convert their time stamps as
-      needed. If, for example,
-      :attr:`~enhydris.telemetry.models.Telemetry.data_time_zone` is set
-      to ``Europe/Athens``, then any DST offset will be removed before
-      storing in :class:`~enhydris.models.TimeseriesRecord`.
-
-      :attr:`~enhydris.telemetry.models.Telemetry.data_time_zone` is
-      used only in order to know when the DST switches occur. The
-      timestamp, after removing any DST, is entered as is. There is no
-      conversion from
-      :attr:`~enhydris.telemetry.models.Telemetry.data_time_zone` to
-      :attr:`enhydris.models.TimeseriesGroup.time_zone`. Therefore,
-      whether
-      :attr:`~enhydris.telemetry.models.Telemetry.data_time_zone` is
-      ``Europe/Athens`` or ``Europe/Berlin``, the effect will be exactly
-      the same, since Athens and Berlin (as of 2021) switch to DST in
-      exactly the same dates.
-
-      Enhydris assumes that the time change occurs exactly when it is
-      supposed to occur, not a few hours earlier or later. For the
-      switch towards DST, things are simple. For the switch from DST to
-      winter time, things are more complicated, because there's an hour
-      that appears twice.  If the ambiguous hour occurs twice, Enhydris
-      will usually do the correct thing; it will consider that the
-      second occurence is after the switch and the first is before the
-      switch. If according to the system's clock the switch hasn't
-      occurred yet, any references to the ambiguous hour are considered
-      to have occurred before the switch.
+      To avoid ambiguity, it is recommended that stations do not switch
+      to DST.  However, if :attr:`data_timezone` is a time zone that
+      switches to DST, Enhydris will handle it accordingly.  It assumes
+      that the time change occurs exactly when it is supposed to occur,
+      not a few hours earlier or later. For the switch towards DST,
+      things are simple. For the switch from DST to winter time, things
+      are more complicated, because there's an hour that appears twice.
+      If the ambiguous hour occurs twice, Enhydris will usually do the
+      correct thing; it will consider that the second occurence is after
+      the switch and the first is before the switch. If according to the
+      system's clock the switch hasn't occurred yet, any references to
+      the ambiguous hour are considered to have occurred before the
+      switch.
 
    .. attribute:: fetch_interval_minutes
       :type: PositiveSmallIntegerField
@@ -95,7 +77,7 @@ Models
       :attr:`~enhydris.telemetry.models.Telemetry.fetch_offset_minutes`
       counts from midnight.
 
-   .. attribute:: fetch_offset_time_zone
+   .. attribute:: fetch_offset_timezone
       :type: CharField
 
       The time zone to which
@@ -143,7 +125,7 @@ Models
       :const:`True` if according to
       :attr:`~enhydris.telemetry.models.Telemetry.fetch_interval_minutes`,
       :attr:`~enhydris.telemetry.models.Telemetry.fetch_offset_minutes`,
-      :attr:`~enhydris.telemetry.models.Telemetry.fetch_offset_time_zone`
+      :attr:`~enhydris.telemetry.models.Telemetry.fetch_offset_timezone`
       and the current system time it's time to fetch data.
 
    .. method:: fetch() -> None
@@ -294,7 +276,7 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
       format`_.
 
       ``enhydris_timeseries_end_date`` is either None (meaning get all
-      measurements since the beginning) or a naive datetime.
+      measurements since the beginning) or a datetime.
 
       In order to avoid loading the server too much, this should not
       return more than a reasonable number of records, such as half a

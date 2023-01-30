@@ -1,4 +1,5 @@
 import datetime as dt
+from zoneinfo import ZoneInfo
 
 from django.contrib.gis.geos import MultiPolygon, Point, Polygon
 from django.contrib.sites.models import Site
@@ -197,12 +198,11 @@ class StationOriginalCoordinatesWithNullSridTestCase(TestCase):
 
 class StationLastUpdateTestCase(ClearCacheMixin, TestCase):
     def setUp(self):
-        self.station = mommy.make(models.Station)
-        self.time_zone = mommy.make(models.TimeZone, code="EET", utc_offset=120)
+        timezone = ZoneInfo("Etc/GMT-2")
+        self.station = mommy.make(models.Station, display_timezone=timezone)
         self.timeseries_group = mommy.make(
             models.TimeseriesGroup,
             gentity=self.station,
-            time_zone=self.time_zone,
             variable__descr="irrelevant",
             precision=2,
         )
@@ -227,28 +227,6 @@ class StationLastUpdateTestCase(ClearCacheMixin, TestCase):
             timeseries.timeseriesrecord_set.create(
                 timestamp=end_date_utc, value=0, flags=""
             )
-
-    def test_last_update_naive_when_all_timeseries_have_end_date(self):
-        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.INITIAL)
-        self._create_timeseries(2019, 7, 23, 5, 10, type=models.Timeseries.CHECKED)
-        self.assertEqual(
-            self.station.last_update_naive, dt.datetime(2019, 7, 24, 13, 26)
-        )
-
-    def test_last_update_naive_when_one_timeseries_has_no_data(self):
-        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.INITIAL)
-        self._create_timeseries(type=models.Timeseries.CHECKED)
-        self.assertEqual(
-            self.station.last_update_naive, dt.datetime(2019, 7, 24, 13, 26)
-        )
-
-    def test_last_update_naive_when_all_timeseries_has_no_data(self):
-        self._create_timeseries(type=models.Timeseries.INITIAL)
-        self._create_timeseries(type=models.Timeseries.CHECKED)
-        self.assertIsNone(self.station.last_update_naive)
-
-    def test_last_update_naive_when_no_timeseries(self):
-        self.assertIsNone(self.station.last_update_naive)
 
     def test_last_update(self):
         self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.INITIAL)
@@ -275,25 +253,6 @@ class StationLastUpdateTestCase(ClearCacheMixin, TestCase):
         station = models.Station.objects.get(id=self.station.id)
         with self.assertNumQueries(0):
             station.last_update
-
-    def test_last_update_naive_cace_when_atleast_one_timeseries_has_end_date(self):
-        # Since it's not possible to cache `None` values, ensure to create
-        # at least one timeseries with an end date value.
-        self._create_timeseries(2019, 7, 24, 11, 26, type=models.Timeseries.INITIAL)
-
-        # Make sure to fetch the `end_date` value of the timeseries
-        timeseries = models.Timeseries.objects.filter(
-            timeseries_group__gentity_id=self.station.id
-        )
-        for t in timeseries:
-            t.end_date
-
-        with self.assertNumQueries(1):
-            self.station.last_update_naive
-
-        station = models.Station.objects.get(id=self.station.id)
-        with self.assertNumQueries(0):
-            station.last_update_naive
 
 
 @override_settings(SITE_ID=4)

@@ -2,6 +2,7 @@ import datetime as dt
 import os.path
 import shutil
 import tempfile
+from zoneinfo import ZoneInfo
 
 from django.contrib.auth.models import User
 from django.core import mail
@@ -37,6 +38,7 @@ class TimeseriesAppendTestCase(TestSaveTimeseriesDataMixin, TestCase):
             replace_or_append="APPEND",
             datafilename=self.datafilename,
             username="alice",
+            default_timezone="Etc/GMT-2",
         )
 
     def tearDown(self):
@@ -47,12 +49,14 @@ class TimeseriesAppendTestCase(TestSaveTimeseriesDataMixin, TestCase):
 
     def test_first_record(self):
         self.assertEqual(
-            self.timeseries.get_data().data.index[0], dt.datetime(2019, 1, 1, 0, 30)
+            self.timeseries.get_data().data.index[0],
+            dt.datetime(2019, 1, 1, 0, 30, tzinfo=ZoneInfo("Etc/GMT-2")),
         )
 
     def test_second_record(self):
         self.assertEqual(
-            self.timeseries.get_data().data.index[1], dt.datetime(2019, 4, 9, 13, 36)
+            self.timeseries.get_data().data.index[1],
+            dt.datetime(2019, 4, 9, 13, 36, tzinfo=ZoneInfo("Etc/GMT-2")),
         )
 
 
@@ -71,6 +75,7 @@ class TimeseriesReplaceTestCase(TestSaveTimeseriesDataMixin, TestCase):
             replace_or_append="REPLACE",
             datafilename=self.datafilename,
             username="alice",
+            default_timezone="Etc/GMT-2",
         )
 
     def tearDown(self):
@@ -81,12 +86,14 @@ class TimeseriesReplaceTestCase(TestSaveTimeseriesDataMixin, TestCase):
 
     def test_first_record(self):
         self.assertEqual(
-            self.timeseries.get_data().data.index[0], dt.datetime(2005, 12, 1, 18, 35)
+            self.timeseries.get_data().data.index[0],
+            dt.datetime(2005, 12, 1, 18, 35, tzinfo=ZoneInfo("Etc/GMT-2")),
         )
 
     def test_second_record(self):
         self.assertEqual(
-            self.timeseries.get_data().data.index[1], dt.datetime(2019, 4, 9, 13, 36)
+            self.timeseries.get_data().data.index[1],
+            dt.datetime(2019, 4, 9, 13, 36, tzinfo=ZoneInfo("Etc/GMT-2")),
         )
 
 
@@ -105,6 +112,7 @@ class TimeseriesPrecisionTestCase(TestSaveTimeseriesDataMixin, TestCase):
             replace_or_append="REPLACE",
             datafilename=self.datafilename,
             username="alice",
+            default_timezone="Etc/GMT-2",
         )
 
     def tearDown(self):
@@ -127,6 +135,7 @@ class TimeseriesPrecisionTestCase(TestSaveTimeseriesDataMixin, TestCase):
             replace_or_append="APPEND",
             datafilename=self.datafilename,
             username="alice",
+            default_timezone="Etc/GMT-2",
         )
         self.assertAlmostEqual(
             models.Timeseries.objects.first().timeseriesrecord_set.last().value,
@@ -151,6 +160,7 @@ class TimeseriesFileWithUnicodeHeadersTestCase(TestSaveTimeseriesDataMixin, Test
             replace_or_append="REPLACE",
             datafilename=self.datafilename,
             username="alice",
+            default_timezone="Etc/GMT-2",
         )
 
     def tearDown(self):
@@ -161,7 +171,8 @@ class TimeseriesFileWithUnicodeHeadersTestCase(TestSaveTimeseriesDataMixin, Test
 
     def test_first_record(self):
         self.assertEqual(
-            self.timeseries.get_data().data.index[0], dt.datetime(2019, 4, 9, 13, 36)
+            self.timeseries.get_data().data.index[0],
+            dt.datetime(2019, 4, 9, 13, 36, tzinfo=ZoneInfo("Etc/GMT-2")),
         )
 
 
@@ -180,6 +191,7 @@ class DeletesDataFileTestCase(TestSaveTimeseriesDataMixin, TestCase):
             replace_or_append="REPLACE",
             datafilename=self.datafilename,
             username="alice",
+            default_timezone="Etc/GMT-2",
         )
 
     def tearDown(self):
@@ -206,6 +218,7 @@ class NotificationTestCase(TestSaveTimeseriesDataMixin, TestCase):
             replace_or_append="REPLACE",
             datafilename=self.datafilename,
             username="alice",
+            default_timezone="Etc/GMT-2",
         )
 
     def tearDown(self):
@@ -252,6 +265,7 @@ class FailureTestCase(TestSaveTimeseriesDataMixin, TestCase):
             replace_or_append="REPLACE",
             datafilename="/nonexistent_file",
             username="alice",
+            default_timezone="Etc/GMT-2",
         )
         std.on_failure()
 

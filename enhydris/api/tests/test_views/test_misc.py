@@ -32,15 +32,6 @@ class PersonTestCase(APITestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class TimeZoneTestCase(APITestCase):
-    def setUp(self):
-        self.time_zone = mommy.make(models.TimeZone)
-
-    def test_get_time_zone(self):
-        r = self.client.get("/api/timezones/{}/".format(self.time_zone.id))
-        self.assertEqual(r.status_code, 200)
-
-
 class EventTypeTestCase(APITestCase):
     def setUp(self):
         self.event_type = mommy.make(models.EventType)

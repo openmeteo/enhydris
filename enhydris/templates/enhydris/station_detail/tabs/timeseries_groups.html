@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load tz %}
 
 <div id="timeseries_groups" class="tab-pane fade show active" role="tabpanel" aria-labelledby="timeseries_groups">
   {% if station.timeseriesgroup_set.count %}
@@ -29,16 +30,20 @@
                 <td class="station-column-date">
                   <span class="station-cell-title">{% trans 'Start date' %}</span>
                   <span>
-                    {% if tg.start_date_naive and tg.end_date_naive %}
-                      {{ tg.start_date_naive|date:"Y/m/d H:i"  }}
+                    {% if tg.start_date and tg.end_date %}
+                      {% localtime off %}
+                        {{ tg.start_date|date:"SHORT_DATETIME_FORMAT" }}
+                      {% endlocaltime %}
                     {% endif %}
                   </span>
                 </td>
                 <td class="station-column-date">
                   <span class="station-cell-title">{% trans 'End date' %}</span>
                   <span>
-                    {% if tg.start_date_naive and tg.end_date_naive %}
-                      {{ tg.end_date_naive|date:"Y/m/d H:i" }}
+                    {% if tg.start_date and tg.end_date %}
+                      {% localtime off %}
+                        {{ tg.end_date|date:"SHORT_DATETIME_FORMAT" }} {{ tg.end_date|date:"(O)" }}
+                      {% endlocaltime %}
                     {% endif %}
                   </span>
                 </td>

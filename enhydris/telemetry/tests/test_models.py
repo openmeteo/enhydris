@@ -26,7 +26,7 @@ class TelemetryFetchValidatorsTestCase(TestCase):
             type="meteoview2",
             fetch_interval_minutes=10,
             fetch_offset_minutes=10,
-            fetch_offset_time_zone="Europe/Athens",
+            fetch_offset_timezone="Europe/Athens",
             additional_config="{}",
         )
 
@@ -76,7 +76,7 @@ class TelemetryIsDueTestCase(TestCase):
             type="meteoview2",
             fetch_interval_minutes=10,
             fetch_offset_minutes=10,
-            fetch_offset_time_zone="Europe/Athens",
+            fetch_offset_timezone="Europe/Athens",
             additional_config="{}",
         )
 
@@ -116,24 +116,22 @@ class FixZoneNameTestCase(TestCase):
 class TelemetryFetchTestCaseBase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.station = mommy.make(Station)
+        cls.station = mommy.make(Station, display_timezone="Etc/GMT-2")
         cls.timeseries_group = mommy.make(
             TimeseriesGroup,
             id=42,
             gentity=cls.station,
             variable__descr="Temperature",
-            time_zone__code="EET",
-            time_zone__utc_offset=200,
             precision=1,
         )
         cls.telemetry = mommy.make(
             Telemetry,
             station=cls.station,
             type="meteoview2",
-            data_time_zone="Europe/Athens",
+            data_timezone="Europe/Athens",
             fetch_interval_minutes=10,
             fetch_offset_minutes=2,
-            fetch_offset_time_zone="Asia/Vladivostok",
+            fetch_offset_timezone="Asia/Vladivostok",
             username="someemail@email.com",
             password="topsecret",
             remote_station_id="42a",
@@ -249,10 +247,12 @@ class TelemetryFetchIgnoresTimeZoneTestCase(TelemetryFetchTestCaseBase):
             timeseries_group_id=self.timeseries_group.id, type=Timeseries.INITIAL
         )
         timeseries.save()
-        timeseries.append_data(StringIO("2022-06-14 08:00,42.1,\n"))
+        timeseries.append_data(
+            StringIO("2022-06-14 08:00,42.1,\n"), default_timezone="Etc/GMT-2"
+        )
 
     @patch("enhydris.telemetry.types.meteoview2.requests.request")
-    def test_ignores_time_zone(self, mock_request):
+    def test_ignores_timezone(self, mock_request):
         self._set_mock_request_return_values(mock_request)
         self.telemetry.fetch()
         self.assertEqual(

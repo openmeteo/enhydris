@@ -44,7 +44,6 @@ _timeseries_list_csv_headers = [
     "Unit",
     "Name",
     "Precision",
-    "Time zone",
     "Time step",
     "Remarks",
 ]
@@ -59,7 +58,6 @@ def _timeseries_group_csv(tg):
         tg.unit_of_measurement.symbol,
         tg.name,
         tg.precision,
-        tg.time_zone.code,
         time_step,
     ]
 

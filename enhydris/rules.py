@@ -126,8 +126,8 @@ rules.add_perm("enhydris.change_station", can_edit_station)
 rules.add_perm("enhydris.delete_station", can_delete_station)
 
 rules.add_perm("enhydris.add_timeseries_group", can_touch_timeseries_group)
-rules.add_perm("enhydris.change_timeseries_group", can_touch_timeseries_group)
-rules.add_perm("enhydris.delete_timeseries_group", can_touch_timeseries_group)
+rules.add_perm("enhydris.change_timeseriesgroup", can_touch_timeseries_group)
+rules.add_perm("enhydris.delete_timeseriesgroup", can_touch_timeseries_group)
 
 rules.add_perm("enhydris.add_timeseries", can_touch_timeseries)
 rules.add_perm("enhydris.change_timeseries", can_touch_timeseries)

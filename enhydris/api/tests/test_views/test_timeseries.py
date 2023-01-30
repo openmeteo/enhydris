@@ -2,6 +2,7 @@ import datetime as dt
 import json
 from io import StringIO
 from unittest.mock import patch
+from zoneinfo import ZoneInfo
 
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
@@ -38,11 +39,10 @@ class Tsdata404TestCase(APITestCase):
 @patch("enhydris.models.Timeseries.get_data", return_value=HTimeseries())
 class TsdataGetPermissionsTestCase(APITestCase):
     def setUp(self):
-        station = mommy.make(models.Station)
+        station = mommy.make(models.Station, display_timezone="Etc/GMT-2")
         timeseries_group = mommy.make(
             models.TimeseriesGroup,
             gentity=station,
-            time_zone__utc_offset=120,
             precision=2,
         )
         timeseries = mommy.make(models.Timeseries, timeseries_group=timeseries_group)
@@ -64,26 +64,37 @@ class TsdataGetPermissionsTestCase(APITestCase):
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class GetDataTestCase(APITestCase, TimeseriesDataMixin):
-    def setUp(self):
-        self.create_timeseries()
-        p = patch("enhydris.models.Timeseries.get_data", return_value=self.htimeseries)
-        with p:
-            self.response = self.client.get(
-                f"/api/stations/{self.station.id}/timeseriesgroups/"
-                f"{self.timeseries_group.id}/timeseries/{self.timeseries.id}/data/"
-            )
+    @classmethod
+    def setUpTestData(cls):
+        cls.create_timeseries()
+
+    def _get_response(self, urlsuffix=""):
+        return self.client.get(
+            f"/api/stations/{self.station.id}/timeseriesgroups/"
+            f"{self.timeseries_group.id}/timeseries/{self.timeseries.id}/data/"
+            f"{urlsuffix}"
+        )
 
     def test_status_code(self):
-        self.assertEqual(self.response.status_code, 200)
+        response = self._get_response()
+        self.assertEqual(response.status_code, 200)
 
     def test_content_type(self):
-        self.assertEqual(self.response["Content-Type"], "text/csv; charset=utf-8")
+        response = self._get_response()
+        self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
 
     def test_response_content(self):
-        self.assertTrue(
-            self.response.content.decode().endswith(
-                "2017-11-23 17:23,1.000000,\r\n2018-11-25 01:00,2.000000,\r\n"
-            )
+        response = self._get_response()
+        self.assertEqual(
+            response.content.decode(),
+            "2017-11-23 17:23,1.00,\r\n2018-11-25 01:00,2.00,\r\n",
+        )
+
+    def test_response_content_in_other_timezone(self):
+        response = self._get_response(urlsuffix="?timezone=UTC")
+        self.assertEqual(
+            response.content.decode(),
+            "2017-11-23 15:23,1.00,\r\n2018-11-24 23:00,2.00,\r\n",
         )
 
 
@@ -176,9 +187,10 @@ class TsdataPostTestCase(APITestCase):
             f"/api/stations/{station.id}/timeseriesgroups/{timeseries_group.id}"
             f"/timeseries/{timeseries.id}/data/",
             data={
+                "timezone": "Etc/GMT-2",
                 "timeseries_records": (
                     "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
-                )
+                ),
             },
         )
 
@@ -190,8 +202,13 @@ class TsdataPostTestCase(APITestCase):
 
     def test_called_append_data_with_correct_data(self):
         self.assertEqual(
-            self.mock_append_data.call_args[0][0].getvalue(),
+            self.mock_append_data.call_args.args[0].getvalue(),
             "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
+        )
+
+    def test_called_append_data_with_correct_timezone(self):
+        self.assertEqual(
+            self.mock_append_data.call_args.kwargs["default_timezone"], "Etc/GMT-2"
         )
 
 
@@ -213,9 +230,10 @@ class TsdataPostAuthorizationTestCase(APITestCase):
             f"/api/stations/{self.station.id}/timeseriesgroups"
             f"/{self.timeseries_group.id}/timeseries/{self.timeseries.id}/data/",
             data={
+                "timezone": "Etc/GMT-2",
                 "timeseries_records": (
                     "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
-                )
+                ),
             },
         )
 
@@ -266,19 +284,17 @@ class TsdataPostDuplicateTimestampsTestCase(APITestCase):
     def setUp(self):
         user = mommy.make(User, username="admin", is_superuser=True)
         station = mommy.make(models.Station)
-        tz = mommy.make(models.TimeZone, code="EET", utc_offset=120)
-        timeseries_group = mommy.make(
-            models.TimeseriesGroup, gentity=station, time_zone=tz
-        )
+        timeseries_group = mommy.make(models.TimeseriesGroup, gentity=station)
         timeseries = mommy.make(models.Timeseries, timeseries_group=timeseries_group)
         self.client.force_authenticate(user=user)
         self.response = self.client.post(
             f"/api/stations/{station.id}/timeseriesgroups/{timeseries_group.id}"
             f"/timeseries/{timeseries.id}/data/",
             data={
+                "timezone": "Etc/GMT-2",
                 "timeseries_records": (
                     "2018-11-23 17:23,1.000000,\r\n2018-11-23 17:23,2.000000,\r\n"
-                )
+                ),
             },
         )
 
@@ -293,10 +309,9 @@ class TsdataPostDuplicateTimestampsTestCase(APITestCase):
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class TsdataStartAndEndDateTestCase(APITestCase):
     def setUp(self):
-        self.tz = mommy.make(models.TimeZone, code="EET", utc_offset=120)
         self.station = mommy.make(models.Station)
         self.timeseries_group = mommy.make(
-            models.TimeseriesGroup, gentity=self.station, time_zone=self.tz, precision=2
+            models.TimeseriesGroup, gentity=self.station, precision=2
         )
         self.timeseries = mommy.make(
             models.Timeseries, timeseries_group=self.timeseries_group
@@ -313,8 +328,9 @@ class TsdataStartAndEndDateTestCase(APITestCase):
     def test_called_get_data_with_proper_start_date(self, m):
         self._make_request("start_date=2005-08-23T19:54")
         m.assert_called_once_with(
-            start_date=dt.datetime(2005, 8, 23, 19, 54, tzinfo=self.tz.as_tzinfo),
+            start_date=dt.datetime(2005, 8, 23, 19, 54, tzinfo=ZoneInfo("Etc/GMT")),
             end_date=None,
+            timezone=None,
         )
 
     @patch("enhydris.models.Timeseries.get_data")
@@ -322,15 +338,17 @@ class TsdataStartAndEndDateTestCase(APITestCase):
         self._make_request("end_date=2005-08-23T19:54")
         m.assert_called_once_with(
             start_date=None,
-            end_date=dt.datetime(2005, 8, 23, 19, 54, tzinfo=self.tz.as_tzinfo),
+            end_date=dt.datetime(2005, 8, 23, 19, 54, tzinfo=ZoneInfo("Etc/GMT")),
+            timezone=None,
         )
 
     @patch("enhydris.models.Timeseries.get_data")
     def test_called_get_data_with_very_early_start_date(self, m):
         self._make_request("start_date=0001-01-01T00:01")
         m.assert_called_once_with(
-            start_date=dt.datetime(1680, 1, 1, 0, 0, tzinfo=self.tz.as_tzinfo),
+            start_date=dt.datetime(1680, 1, 1, 0, 0, tzinfo=ZoneInfo("Etc/GMT")),
             end_date=None,
+            timezone=None,
         )
 
     @patch("enhydris.models.Timeseries.get_data")
@@ -338,17 +356,17 @@ class TsdataStartAndEndDateTestCase(APITestCase):
         self._make_request("end_date=3999-01-01T00:01")
         m.assert_called_once_with(
             start_date=None,
-            end_date=dt.datetime(2260, 1, 1, 0, 0, tzinfo=self.tz.as_tzinfo),
+            end_date=dt.datetime(2260, 1, 1, 0, 0, tzinfo=ZoneInfo("Etc/GMT")),
+            timezone=None,
         )
 
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class TsdataInvalidStartOrEndDateTestCase(APITestCase):
     def setUp(self):
-        self.tz = mommy.make(models.TimeZone, code="EET", utc_offset=120)
         self.station = mommy.make(models.Station)
         self.timeseries_group = mommy.make(
-            models.TimeseriesGroup, gentity=self.station, time_zone=self.tz, precision=2
+            models.TimeseriesGroup, gentity=self.station, precision=2
         )
         self.timeseries = mommy.make(
             models.Timeseries, timeseries_group=self.timeseries_group
@@ -364,22 +382,20 @@ class TsdataInvalidStartOrEndDateTestCase(APITestCase):
     @patch("enhydris.models.Timeseries.get_data")
     def test_invalid_start_date(self, m):
         self._make_request("?start_date=hello")
-        m.assert_called_once_with(start_date=None, end_date=None)
+        m.assert_called_once_with(start_date=None, end_date=None, timezone=None)
 
     @patch("enhydris.models.Timeseries.get_data")
     def test_invalid_end_date(self, m):
         self._make_request("?end_date=hello")
-        m.assert_called_once_with(start_date=None, end_date=None)
+        m.assert_called_once_with(start_date=None, end_date=None, timezone=None)
 
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class TsdataHeadTestCase(APITestCase):
     def setUp(self):
         self.station = mommy.make(models.Station)
-        self.tz = mommy.make(models.TimeZone, code="EET", utc_offset=120)
         self.timeseries_group = mommy.make(
             models.TimeseriesGroup,
-            time_zone=self.tz,
             gentity=self.station,
             variable__descr="irrelevant",
             precision=2,
@@ -387,7 +403,9 @@ class TsdataHeadTestCase(APITestCase):
         self.timeseries = mommy.make(
             models.Timeseries, timeseries_group=self.timeseries_group
         )
-        self.timeseries.set_data(StringIO("2018-12-09 13:10,20,\n"))
+        self.timeseries.set_data(
+            StringIO("2018-12-09 13:10,20,\n"), default_timezone="Etc/GMT"
+        )
 
     def _get_url(self):
         return (
@@ -407,28 +425,44 @@ class TsdataHeadTestCase(APITestCase):
 @override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class TimeseriesBottomTestCase(APITestCase):
     def setUp(self):
-        station = mommy.make(models.Station)
-        timeseries_group = mommy.make(
+        self.station = mommy.make(models.Station, display_timezone="Etc/GMT-2")
+        self.timeseries_group = mommy.make(
             models.TimeseriesGroup,
-            gentity=station,
-            time_zone__utc_offset=120,
+            gentity=self.station,
             precision=2,
         )
-        timeseries = mommy.make(models.Timeseries, timeseries_group=timeseries_group)
-        timeseries.set_data(StringIO("2018-12-09 13:10,20,\n"))
+        self.timeseries = mommy.make(
+            models.Timeseries, timeseries_group=self.timeseries_group
+        )
+        self.timeseries.set_data(
+            StringIO("2018-12-09 13:10,20,\n"), default_timezone="Etc/GMT-2"
+        )
+
+    def _get_response(self, timezone=None):
+        params = None
+        if timezone:
+            params = {"timezone": timezone}
         self.response = self.client.get(
-            f"/api/stations/{station.id}/timeseriesgroups/{timeseries_group.id}/"
-            f"timeseries/{timeseries.id}/bottom/"
+            f"/api/stations/{self.station.id}/timeseriesgroups/"
+            f"{self.timeseries_group.id}/timeseries/{self.timeseries.id}/bottom/",
+            data=params,
         )
 
     def test_status_code(self):
+        self._get_response()
         self.assertEqual(self.response.status_code, 200)
 
     def test_content_type(self):
+        self._get_response()
         self.assertEqual(self.response["Content-Type"], "text/plain")
 
     def test_response_content(self):
+        self._get_response()
         self.assertEqual(self.response.content.decode(), "2018-12-09 13:10,20.00,")
+
+    def test_response_content_with_timezone(self):
+        self._get_response(timezone="Etc/GMT-5")
+        self.assertEqual(self.response.content.decode(), "2018-12-09 16:10,20.00,")
 
 
 @override_settings(ENHYDRIS_OPEN_CONTENT=False)
@@ -438,11 +472,12 @@ class TimeseriesBottomPermissionsTestCase(APITestCase):
         timeseries_group = mommy.make(
             models.TimeseriesGroup,
             gentity=station,
-            time_zone__utc_offset=120,
             precision=2,
         )
         timeseries = mommy.make(models.Timeseries, timeseries_group=timeseries_group)
-        timeseries.set_data(StringIO("2018-12-09 13:10,20,\n"))
+        timeseries.set_data(
+            StringIO("2018-12-09 13:10,20,\n"), default_timezone="Etc/GMT-2"
+        )
         self.url = (
             f"/api/stations/{station.id}/timeseriesgroups/{timeseries_group.id}/"
             f"timeseries/{timeseries.id}/bottom/"
@@ -465,7 +500,6 @@ class TimeseriesPostTestCase(APITestCase):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
         self.user2 = mommy.make(User, is_active=True, is_superuser=False)
         self.variable = mommy.make(models.Variable, descr="Temperature")
-        self.time_zone = mommy.make(models.TimeZone)
         self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
         self.station = mommy.make(models.Station, creator=self.user1)
         self.timeseries_group = mommy.make(models.TimeseriesGroup, gentity=self.station)
@@ -511,7 +545,6 @@ class TimeseriesPostWithWrongStationOrTimeseriesGroupTestCase(APITestCase):
     def setUp(self):
         self.user = mommy.make(User, is_active=True, is_superuser=False)
         self.variable = mommy.make(models.Variable, descr="Temperature")
-        self.time_zone = mommy.make(models.TimeZone)
         self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
         self.station1 = mommy.make(models.Station, creator=self.user)
         self.timeseries_group_1_1 = mommy.make(
@@ -535,7 +568,6 @@ class TimeseriesPostWithWrongStationOrTimeseriesGroupTestCase(APITestCase):
                 "timeseries_group": kwargs["timeseries_group_for_data"].id,
                 "type": "Initial",
                 "variable": self.variable.id,
-                "time_zone": self.time_zone.id,
                 "unit_of_measurement": self.unit_of_measurement.id,
                 "precision": 2,
                 "time_step": "",
@@ -572,7 +604,6 @@ class TimeseriesPostWithWrongTimeseriesTypeTestCase(APITestCase):
     def setUp(self):
         self.user = mommy.make(User, is_active=True, is_superuser=False)
         self.variable = mommy.make(models.Variable, descr="Temperature")
-        self.time_zone = mommy.make(models.TimeZone)
         self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
         self.station = mommy.make(models.Station, creator=self.user)
         self.timeseries_group = mommy.make(models.TimeseriesGroup, gentity=self.station)
@@ -587,7 +618,6 @@ class TimeseriesPostWithWrongTimeseriesTypeTestCase(APITestCase):
                 "timeseries_group": self.timeseries_group.id,
                 "type": type,
                 "variable": self.variable.id,
-                "time_zone": self.time_zone.id,
                 "unit_of_measurement": self.unit_of_measurement.id,
                 "precision": 2,
                 "time_step": "",
@@ -659,9 +689,7 @@ class TimeseriesChartDateBoundsTestCase(APITestCase, TimeseriesDataMixin):
         response = self.client.get(self.url + "?start_date=2012-03-01T00:00")
         self.assertEqual(response.status_code, 200)
         mock.assert_called_once_with(
-            start_date=dt.datetime(
-                2012, 3, 1, 0, 0, tzinfo=self.timeseries_group.time_zone.as_tzinfo
-            ),
+            start_date=dt.datetime(2012, 3, 1, 0, 0, tzinfo=ZoneInfo(self.timezone)),
             end_date=None,
         )
 
@@ -670,9 +698,7 @@ class TimeseriesChartDateBoundsTestCase(APITestCase, TimeseriesDataMixin):
         self.assertEqual(response.status_code, 200)
         mock.assert_called_once_with(
             start_date=None,
-            end_date=dt.datetime(
-                2012, 3, 1, 0, 0, tzinfo=self.timeseries_group.time_zone.as_tzinfo
-            ),
+            end_date=dt.datetime(2012, 3, 1, 0, 0, tzinfo=ZoneInfo(self.timezone)),
         )
 
     def test_start_and_end_date_filters(self, mock, _):
@@ -681,12 +707,8 @@ class TimeseriesChartDateBoundsTestCase(APITestCase, TimeseriesDataMixin):
         )
         self.assertEqual(response.status_code, 200)
         mock.assert_called_once_with(
-            start_date=dt.datetime(
-                2012, 3, 1, 0, 0, tzinfo=self.timeseries_group.time_zone.as_tzinfo
-            ),
-            end_date=dt.datetime(
-                2017, 3, 1, 0, 0, tzinfo=self.timeseries_group.time_zone.as_tzinfo
-            ),
+            start_date=dt.datetime(2012, 3, 1, 0, 0, tzinfo=ZoneInfo(self.timezone)),
+            end_date=dt.datetime(2017, 3, 1, 0, 0, tzinfo=ZoneInfo(self.timezone)),
         )
 
 

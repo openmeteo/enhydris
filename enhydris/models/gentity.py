@@ -11,6 +11,36 @@ from django.utils.translation import pgettext_lazy
 from .base import Lookup
 from .lentity import Lentity
 
+DISPLAY_TIMEZONE_CHOICES = [
+    ("Etc/GMT", "UTC"),
+    ("Etc/GMT+1", "UTC-1"),
+    ("Etc/GMT+2", "UTC-2"),
+    ("Etc/GMT+3", "UTC-3"),
+    ("Etc/GMT+4", "UTC-4"),
+    ("Etc/GMT+5", "UTC-5"),
+    ("Etc/GMT+6", "UTC-6"),
+    ("Etc/GMT+7", "UTC-7"),
+    ("Etc/GMT+8", "UTC-8"),
+    ("Etc/GMT+9", "UTC-9"),
+    ("Etc/GMT+10", "UTC-10"),
+    ("Etc/GMT+11", "UTC-11"),
+    ("Etc/GMT+12", "UTC-12"),
+    ("Etc/GMT-1", "UTC+1"),
+    ("Etc/GMT-2", "UTC+2"),
+    ("Etc/GMT-3", "UTC+3"),
+    ("Etc/GMT-4", "UTC+4"),
+    ("Etc/GMT-5", "UTC+5"),
+    ("Etc/GMT-6", "UTC+6"),
+    ("Etc/GMT-7", "UTC+7"),
+    ("Etc/GMT-8", "UTC+8"),
+    ("Etc/GMT-9", "UTC+9"),
+    ("Etc/GMT-10", "UTC+10"),
+    ("Etc/GMT-11", "UTC+11"),
+    ("Etc/GMT-12", "UTC+12"),
+    ("Etc/GMT-13", "UTC+13"),
+    ("Etc/GMT-14", "UTC+14"),
+]
+
 
 class Gentity(models.Model):
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
@@ -18,6 +48,16 @@ class Gentity(models.Model):
     code = models.CharField(max_length=50, blank=True, verbose_name=_("Code"))
     remarks = models.TextField(blank=True, verbose_name=_("Remarks"))
     geom = models.GeometryField()
+    display_timezone = models.CharField(
+        max_length=50,
+        default="Etc/GMT",
+        verbose_name=_("Display time zone"),
+        help_text=_(
+            "Time series timestamps are always stored in UTC. Select the time zone for "
+            "displaying timestamps of time series referring to this object."
+        ),
+        choices=DISPLAY_TIMEZONE_CHOICES,
+    )
     sites = models.ManyToManyField(Site)
 
     class Meta:
@@ -197,18 +237,6 @@ class Station(Gpoint):
     class Meta:
         verbose_name = _("Station")
         verbose_name_plural = _("Stations")
-
-    @property
-    def last_update_naive(self):
-        def get_last_update_naive():
-            result = self.last_update
-            if result is not None:
-                result = result.replace(tzinfo=None)
-            return result
-
-        return cache.get_or_set(
-            f"station_last_update_naive_{self.id}", get_last_update_naive
-        )
 
     @property
     def last_update(self):

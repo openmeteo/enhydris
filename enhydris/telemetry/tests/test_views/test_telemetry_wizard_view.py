@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.http import HttpResponse
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 
 import requests
 from bs4 import BeautifulSoup
@@ -14,6 +14,7 @@ from enhydris.telemetry.models import Telemetry
 from enhydris.telemetry.views import TelemetryWizardView
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class RedirectToFirstStepTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -34,16 +35,17 @@ class RedirectToFirstStepTestCase(TestCase):
             f"/stations/{self.station.id}/telemetry/1/",
             {
                 "type": "meteoview2",
-                "data_time_zone": "Europe/Athens",
+                "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": "10",
                 "fetch_offset_minutes": "2",
-                "fetch_offset_time_zone": "Europe/Kiev",
+                "fetch_offset_timezone": "Europe/Kiev",
             },
         )
         response = self.client.get(f"/stations/{self.station.id}/telemetry/2/")
         self.assertEqual(response.status_code, 200)
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class CopyTelemetryDataFromDatabaseToSessionTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -69,8 +71,8 @@ class CopyTelemetryDataFromDatabaseToSessionTestCase(TestCase):
         option_empty = self.soup.find(id="id_type").find("option", value="meteoview2")
         self.assertIsNone(option_empty.get("selected"))
 
-    def test_default_data_time_zone_is_empty(self):
-        option_empty = self.soup.find(id="id_data_time_zone").find("option", value="")
+    def test_default_data_timezone_is_empty(self):
+        option_empty = self.soup.find(id="id_data_timezone").find("option", value="")
         self.assertEqual(option_empty.get("selected"), "")
 
     def test_default_fetch_interval_minutes_is_empty(self):
@@ -81,13 +83,14 @@ class CopyTelemetryDataFromDatabaseToSessionTestCase(TestCase):
         fetch_offset_minutes = self.soup.find(id="id_fetch_offset_minutes")
         self.assertIsNone(fetch_offset_minutes.get("value"))
 
-    def test_default_fetch_offset_time_zone_is_empty(self):
-        option_empty = self.soup.find(id="id_fetch_offset_time_zone").find(
+    def test_default_fetch_offset_timezone_is_empty(self):
+        option_empty = self.soup.find(id="id_fetch_offset_timezone").find(
             "option", value=""
         )
         self.assertEqual(option_empty.get("selected"), "")
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -97,10 +100,10 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
             Telemetry,
             station=cls.station,
             type="meteoview2",
-            data_time_zone="Europe/Athens",
+            data_timezone="Europe/Athens",
             fetch_interval_minutes=10,
             fetch_offset_minutes=2,
-            fetch_offset_time_zone="Asia/Vladivostok",
+            fetch_offset_timezone="Asia/Vladivostok",
             additional_config="{}",
         )
 
@@ -125,12 +128,12 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
         )
         self.assertEqual(option_meteoview2.get("selected"), "")
 
-    def test_empty_data_time_zone_is_not_selected(self):
-        option_empty = self.soup.find(id="id_data_time_zone").find("option", value="")
+    def test_empty_data_timezone_is_not_selected(self):
+        option_empty = self.soup.find(id="id_data_timezone").find("option", value="")
         self.assertIsNone(option_empty.get("selected"))
 
-    def test_default_data_time_zone_is_meteoview2(self):
-        option_europe_athens = self.soup.find(id="id_data_time_zone").find(
+    def test_default_data_timezone_is_meteoview2(self):
+        option_europe_athens = self.soup.find(id="id_data_timezone").find(
             "option", value="Europe/Athens"
         )
         self.assertEqual(option_europe_athens.get("selected"), "")
@@ -143,14 +146,14 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
         fetch_offset_minutes = self.soup.find(id="id_fetch_offset_minutes")
         self.assertEqual(fetch_offset_minutes["value"], "2")
 
-    def test_empty_fetch_offset_time_zone_is_not_selected(self):
-        option_empty = self.soup.find(id="id_fetch_offset_time_zone").find(
+    def test_empty_fetch_offset_timezone_is_not_selected(self):
+        option_empty = self.soup.find(id="id_fetch_offset_timezone").find(
             "option", value=""
         )
         self.assertIsNone(option_empty.get("selected"))
 
-    def test_default_fetch_offset_time_zone_is_meteoview2(self):
-        option_asia_vladivostok = self.soup.find(id="id_fetch_offset_time_zone").find(
+    def test_default_fetch_offset_timezone_is_meteoview2(self):
+        option_asia_vladivostok = self.soup.find(id="id_fetch_offset_timezone").find(
             "option", value="Asia/Vladivostok"
         )
         self.assertEqual(option_asia_vladivostok.get("selected"), "")
@@ -159,15 +162,16 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
         itemkey = f"telemetry_{self.station.id}"
         expected = {
             "type": "meteoview2",
-            "data_time_zone": "Europe/Athens",
+            "data_timezone": "Europe/Athens",
             "fetch_interval_minutes": 10,
             "fetch_offset_minutes": 2,
-            "fetch_offset_time_zone": "Asia/Vladivostok",
+            "fetch_offset_timezone": "Asia/Vladivostok",
             "additional_config": "{}",
         }
         self.assertEqual(self.cclient.session[itemkey], expected)
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class FirstStepPostTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -183,10 +187,10 @@ class FirstStepPostTestCase(TestCase):
             f"/stations/{cls.station.id}/telemetry/1/",
             {
                 "type": "meteoview2",
-                "data_time_zone": "Europe/Athens",
+                "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": "10",
                 "fetch_offset_minutes": "2",
-                "fetch_offset_time_zone": "Europe/Kiev",
+                "fetch_offset_timezone": "Europe/Kiev",
             },
         )
 
@@ -199,8 +203,8 @@ class FirstStepPostTestCase(TestCase):
     def test_type(self):
         self.assertEqual(self._session("type"), "meteoview2")
 
-    def test_data_time_zone(self):
-        self.assertEqual(self._session("data_time_zone"), "Europe/Athens")
+    def test_data_timezone(self):
+        self.assertEqual(self._session("data_timezone"), "Europe/Athens")
 
     def test_fetch_interval_minutes(self):
         self.assertEqual(self._session("fetch_interval_minutes"), 10)
@@ -208,10 +212,11 @@ class FirstStepPostTestCase(TestCase):
     def test_fetch_offset_minutes(self):
         self.assertEqual(self._session("fetch_offset_minutes"), 2)
 
-    def test_fetch_offset_time_zone(self):
-        self.assertEqual(self._session("fetch_offset_time_zone"), "Europe/Kiev")
+    def test_fetch_offset_timezone(self):
+        self.assertEqual(self._session("fetch_offset_timezone"), "Europe/Kiev")
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class FirstStepPostErrorTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -255,10 +260,10 @@ class SecondStepGetMixin:
             f"/stations/{cls.station.id}/telemetry/1/",
             {
                 "type": "meteoview2",
-                "data_time_zone": "Europe/Athens",
+                "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": "10",
                 "fetch_offset_minutes": "2",
-                "fetch_offset_time_zone": "Europe/Kiev",
+                "fetch_offset_timezone": "Europe/Kiev",
             },
         )
 
@@ -274,6 +279,7 @@ class SecondStepGetMixin:
         return self.mock_render.call_args.args[2]
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class SecondStepGetTestCase(SecondStepGetMixin, TestCase):
     def test_called_render(self):
         self.mock_render.assert_called_once()
@@ -297,6 +303,7 @@ class SecondStepGetTestCase(SecondStepGetMixin, TestCase):
         self.assertEqual(self._template_context["form"].initial["type"], "meteoview2")
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class SecondStepGetWithNondefaultConfigurationTestCase(SecondStepGetMixin, TestCase):
     # This is essentially the same as
     # SecondStepGetTestCase.test_form_created_with_the_correct_configuration, except
@@ -332,10 +339,10 @@ class SecondStepPostMixin:
             f"/stations/{cls.station.id}/telemetry/1/",
             {
                 "type": "meteoview2",
-                "data_time_zone": "Europe/Athens",
+                "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": "10",
                 "fetch_offset_minutes": "2",
-                "fetch_offset_time_zone": "Europe/Kiev",
+                "fetch_offset_timezone": "Europe/Kiev",
             },
         )
 
@@ -350,6 +357,7 @@ class MockResponse(requests.Response):
         return self.json_result
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class SecondStepPostWithErrorTestCase(SecondStepPostMixin, TestCase):
     @classmethod
     def _post_step_2(cls):
@@ -391,6 +399,7 @@ class SecondStepPostSuccessfulMixin(SecondStepPostMixin):
             )
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class SecondStepPostSuccessfulTestCase(SecondStepPostSuccessfulMixin, TestCase):
     def test_redirects_to_next_step(self):
         self.assertRedirects(
@@ -404,10 +413,10 @@ class SecondStepPostSuccessfulTestCase(SecondStepPostSuccessfulMixin, TestCase):
             self.cclient.session[f"telemetry_{self.station.id}"],
             {
                 "type": "meteoview2",
-                "data_time_zone": "Europe/Athens",
+                "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": 10,
                 "fetch_offset_minutes": 2,
-                "fetch_offset_time_zone": "Europe/Kiev",
+                "fetch_offset_timezone": "Europe/Kiev",
                 "username": "someemail@email.com",
                 "password": "topsecret",
                 "device_locator": "",
@@ -431,6 +440,7 @@ class FinalStepPostSuccessfulMixin(SecondStepPostSuccessfulMixin):
         TelemetryWizardView.forms = cls.saved_forms
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class FinalStepPostSuccessfulTestCase(FinalStepPostSuccessfulMixin, TestCase):
     def test_saves_stuff_in_database(self):
         telemetry = Telemetry.objects.get(station=self.station)
@@ -448,6 +458,7 @@ class FinalStepPostSuccessfulTestCase(FinalStepPostSuccessfulMixin, TestCase):
         self.assertContains(final_response, "Telemetry has been configured")
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class FinalStepPostSuccessfulReplacesExistingTelemetryTestCase(
     FinalStepPostSuccessfulMixin, TestCase
 ):
@@ -467,6 +478,7 @@ class FinalStepPostSuccessfulReplacesExistingTelemetryTestCase(
         self.assertEqual(telemetry.username, "someemail@email.com")
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 @patch(
     "enhydris.telemetry.types.meteoview2.requests.request",
     return_value=MockResponse(
@@ -493,10 +505,10 @@ class NextOrFinishButtonTestCase(TestCase):
             "username": "someemail@somewhere.com",
             "password": "topsecret",
             "type": "meteoview2",
-            "data_time_zone": "Europe/Athens",
+            "data_timezone": "Europe/Athens",
             "fetch_interval_minutes": "10",
             "fetch_offset_minutes": "2",
-            "fetch_offset_time_zone": "Europe/Kiev",
+            "fetch_offset_timezone": "Europe/Kiev",
         }
         session.save()
 
@@ -520,6 +532,7 @@ class NextOrFinishButtonTestCase(TestCase):
         self.assertEqual(button_text, "Finish")
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class PermissionsTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):

@@ -185,7 +185,6 @@ class StationDetailPeriodOfOperationTestCase(TestCase):
         response = self._get_response()
         self.assertContains(response, "<b>Start of operation:</b> 26/07/2019")
 
-    @override_settings(LANGUAGE_CODE="en")
     def test_when_only_end_date(self):
         self._set_dates(None, dt.datetime(2019, 7, 27))
         response = self._get_response()

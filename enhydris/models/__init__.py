@@ -1,5 +1,6 @@
 from . import auth  # NOQA; this file must be run but there's nothing to export from it
 from .gentity import (
+    DISPLAY_TIMEZONE_CHOICES,
     EventType,
     Garea,
     GareaCategory,
@@ -12,9 +13,10 @@ from .gentity import (
 )
 from .lentity import Lentity, Organization, Person
 from .timeseries import Timeseries, TimeseriesRecord, TimeseriesStorage, check_time_step
-from .timeseries_group import TimeseriesGroup, TimeZone, UnitOfMeasurement, Variable
+from .timeseries_group import TimeseriesGroup, UnitOfMeasurement, Variable
 
 __all__ = (
+    "DISPLAY_TIMEZONE_CHOICES",
     "EventType",
     "Garea",
     "GareaCategory",
@@ -31,7 +33,6 @@ __all__ = (
     "TimeseriesRecord",
     "TimeseriesStorage",
     "check_time_step",
-    "TimeZone",
     "TimeseriesGroup",
     "Variable",
     "UnitOfMeasurement",

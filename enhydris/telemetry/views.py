@@ -73,10 +73,10 @@ class TelemetryWizardView(PermissionRequiredMixin, View):
     def copy_telemetry_data_from_database_to_session(self):
         default_data = {
             "type": None,
-            "data_time_zone": None,
+            "data_timezone": None,
             "fetch_interval_minutes": None,
             "fetch_offset_minutes": None,
-            "fetch_offset_time_zone": None,
+            "fetch_offset_timezone": None,
             "additional_config": {},
         }
         key = f"telemetry_{self.station.id}"

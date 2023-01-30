@@ -1,23 +1,26 @@
 {% load i18n %}
+{% load tz %}
 
 <div class="station-info-group">
-  {% if station.start_date and station.end_date %}
-    {% blocktrans with start_date=station.start_date|date:"SHORT_DATE_FORMAT" end_date=station.end_date|date:"SHORT_DATE_FORMAT" %}
-      <p><b>Period of operation:</b> {{start_date}} - {{end_date}}</p>
-    {% endblocktrans %}
-  {% elif station.start_date %}
-    {% blocktrans with start_date=station.start_date|date:"SHORT_DATE_FORMAT" %}
-      <p><b>Start of operation:</b> {{start_date}}</p>
-    {% endblocktrans %}
-  {% elif station.end_date %}
-    {% blocktrans with end_date=station.end_date|date:"SHORT_DATE_FORMAT" %}
-      <p><b>End of operation:</b> {{end_date}}</p>
-    {% endblocktrans %}
-  {% endif %}
+  {% localtime off %}
+    {% if station.start_date and station.end_date %}
+      {% blocktrans with start_date=station.start_date|date:"SHORT_DATE_FORMAT" end_date=station.end_date|date:"SHORT_DATE_FORMAT" %}
+        <p><b>Period of operation:</b> {{start_date}} - {{end_date}}</p>
+      {% endblocktrans %}
+    {% elif station.start_date %}
+      {% blocktrans with start_date=station.start_date|date:"SHORT_DATE_FORMAT" %}
+        <p><b>Start of operation:</b> {{start_date}}</p>
+      {% endblocktrans %}
+    {% elif station.end_date %}
+      {% blocktrans with end_date=station.end_date|date:"SHORT_DATE_FORMAT" %}
+        <p><b>End of operation:</b> {{end_date}}</p>
+      {% endblocktrans %}
+    {% endif %}
 
-  {% if station.last_update_naive %}
-    {% blocktrans with last_update_naive=station.last_update_naive|date:"SHORT_DATETIME_FORMAT" %}
-      <p><b>Last update:</b> {{last_update_naive}}</p>
-    {% endblocktrans %}
-  {% endif %}
+    {% if station.last_update %}
+      {% blocktrans with last_update=station.last_update|date:"SHORT_DATETIME_FORMAT" offset=station.last_update|date:"O" %}
+        <p><b>Last update:</b> {{last_update}} ({{offset}})</p>
+      {% endblocktrans %}
+    {% endif %}
+  {% endlocaltime %}
 </div>

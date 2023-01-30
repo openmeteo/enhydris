@@ -1,5 +1,6 @@
 import datetime as dt
 from io import StringIO
+from zoneinfo import ZoneInfo
 
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
@@ -106,34 +107,6 @@ class UnitOfMeasurementTestCase(TestCase):
         self.assertEqual(str(unit), str(unit.id))
 
 
-class TimeZoneTestCase(TestCase):
-    def test_create(self):
-        time_zone = models.TimeZone(code="EET", utc_offset=120)
-        time_zone.save()
-        self.assertEqual(models.TimeZone.objects.first().code, "EET")
-
-    def test_update(self):
-        mommy.make(models.TimeZone)
-        time_zone = models.TimeZone.objects.first()
-        time_zone.code = "EET"
-        time_zone.save()
-        self.assertEqual(models.TimeZone.objects.first().code, "EET")
-
-    def test_delete(self):
-        mommy.make(models.TimeZone)
-        time_zone = models.TimeZone.objects.first()
-        time_zone.delete()
-        self.assertEqual(models.TimeZone.objects.count(), 0)
-
-    def test_str(self):
-        time_zone = mommy.make(models.TimeZone, code="EET", utc_offset=120)
-        self.assertEqual(str(time_zone), "EET (UTC+0200)")
-
-    def test_as_tzinfo(self):
-        time_zone = mommy.make(models.TimeZone, code="EET", utc_offset=120)
-        self.assertEqual(time_zone.as_tzinfo, dt.timezone(dt.timedelta(hours=2), "EET"))
-
-
 class TimeseriesGroupGetNameTestCase(TestCase):
     def setUp(self):
         self.timeseries_group = mommy.make(
@@ -220,7 +193,7 @@ class TimeseriesGroupStartAndEndDateTestCase(TimeseriesDataMixin, TestCase):
     def test_start_date(self):
         self.assertEqual(
             self.timeseries_group.start_date,
-            dt.datetime(2017, 11, 23, 17, 23, tzinfo=self.time_zone.as_tzinfo),
+            dt.datetime(2017, 11, 23, 17, 23, tzinfo=ZoneInfo(self.timezone)),
         )
 
     def test_start_date_cache(self):
@@ -239,7 +212,7 @@ class TimeseriesGroupStartAndEndDateTestCase(TimeseriesDataMixin, TestCase):
     def test_end_date(self):
         self.assertEqual(
             self.timeseries_group.end_date,
-            dt.datetime(2018, 11, 25, 1, 0, tzinfo=self.time_zone.as_tzinfo),
+            dt.datetime(2018, 11, 25, 1, 0, tzinfo=ZoneInfo(self.timezone)),
         )
 
     def test_end_date_cache(self):
@@ -270,44 +243,6 @@ class TimeseriesGroupStartAndEndDateTestCase(TimeseriesDataMixin, TestCase):
     def test_end_date_when_timeseries_does_not_exist(self):
         self.timeseries.delete()
         self.assertIsNone(self.timeseries_group.end_date)
-
-    def test_start_date_naive(self):
-        self.assertEqual(
-            self.timeseries_group.start_date_naive, dt.datetime(2017, 11, 23, 17, 23)
-        )
-
-    def test_start_date_naive_cache(self):
-        # Make sure to have access to the `start_date` first
-        self.timeseries_group.start_date
-
-        timeseries_group = models.TimeseriesGroup.objects.get(
-            id=self.timeseries_group.id
-        )
-        with self.assertNumQueries(0):
-            timeseries_group.start_date_naive
-
-    def test_end_date_naive(self):
-        self.assertEqual(
-            self.timeseries_group.end_date_naive, dt.datetime(2018, 11, 25, 1, 0)
-        )
-
-    def test_end_date_naive_cache(self):
-        # Make sure to have access to the `end_date` first
-        self.timeseries_group.end_date
-
-        timeseries_group = models.TimeseriesGroup.objects.get(
-            id=self.timeseries_group.id
-        )
-        with self.assertNumQueries(0):
-            timeseries_group.end_date_naive
-
-    def test_start_date_naive_when_timeseries_is_empty(self):
-        self.timeseries.set_data(StringIO(""))
-        self.assertIsNone(self.timeseries_group.start_date_naive)
-
-    def test_end_date_naive_when_timeseries_is_empty(self):
-        self.timeseries.set_data(StringIO(""))
-        self.assertIsNone(self.timeseries_group.end_date_naive)
 
 
 class TimestepTestCase(TestCase):

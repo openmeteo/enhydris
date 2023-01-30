@@ -86,12 +86,6 @@ class PersonSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class TimeZoneSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.TimeZone
-        fields = "__all__"
-
-
 class EventTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.EventType

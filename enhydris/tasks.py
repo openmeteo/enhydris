@@ -13,19 +13,24 @@ from enhydris.models import Timeseries
 
 
 class SaveTimeseriesData(celery.Task):
-    def read_arguments(self, *, id, replace_or_append, datafilename, username):
+    def read_arguments(
+        self, *, id, replace_or_append, datafilename, username, default_timezone
+    ):
         self.timeseries = Timeseries.objects.get(id=id)
         self.replace_or_append = replace_or_append
         self.datafilename = datafilename
         self.user = User.objects.get(username=username)
+        self.default_timezone = default_timezone
 
     def import_timeseries(self):
         try:
             with open(self.datafilename, newline="\n") as f:
                 if self.replace_or_append == "APPEND":
-                    self.timeseries.append_data(f)
+                    self.timeseries.append_data(
+                        f, default_timezone=self.default_timezone
+                    )
                 else:
-                    self.timeseries.set_data(f)
+                    self.timeseries.set_data(f, default_timezone=self.default_timezone)
         finally:
             os.unlink(self.datafilename)
 

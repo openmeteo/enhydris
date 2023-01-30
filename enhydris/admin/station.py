@@ -1,6 +1,7 @@
 import os
 from configparser import ParsingError
 from io import TextIOWrapper
+from zoneinfo import ZoneInfo
 
 from django import forms
 from django.conf import settings
@@ -109,6 +110,17 @@ class GentityEventInline(InlinePermissionsMixin, nested_admin.NestedStackedInlin
 
 class TimeseriesInlineAdminForm(forms.ModelForm):
     data = forms.FileField(label=_("Data file"), required=False)
+    default_timezone = forms.ChoiceField(
+        label=_("Time zone"),
+        required=False,
+        choices=[("", "--------")] + models.DISPLAY_TIMEZONE_CHOICES,
+        help_text=_(
+            "The timestamps of the time series are stored in UTC in the database. In "
+            "order to convert them to UTC, we need to know their time zone. If the "
+            "time zone is specified in the uploaded file, that one is used; otherwise, "
+            "the time zone specified here is used."
+        ),
+    )
     replace_or_append = forms.ChoiceField(
         label=_("What to do"),
         required=False,
@@ -157,11 +169,20 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
         return result
 
     def _read_timeseries_from_stream(self, stream):
+        tz = self.cleaned_data["default_timezone"]
+        default_tzinfo = tz and ZoneInfo(tz) or None
         try:
-            return HTimeseries(stream)
+            return HTimeseries(stream, default_tzinfo=default_tzinfo)
         except UnicodeDecodeError as e:
             raise forms.ValidationError(
                 _("The file does not seem to be a valid UTF-8 file: " + str(e))
+            )
+        except TypeError:
+            raise forms.ValidationError(
+                _(
+                    "The file you attempted to upload does not specify a time zone. "
+                    "Please specify the time zone of the timestamps."
+                )
             )
 
     def _we_are_appending_data(self, ahtimeseries):
@@ -171,7 +192,7 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
         return data_exists and submitted_data_exists and user_wants_to_append
 
     def _check_timeseries_for_appending(self, ahtimeseries):
-        if self.instance.end_date.replace(tzinfo=None) >= ahtimeseries.data.index.min():
+        if self.instance.end_date >= ahtimeseries.data.index.min():
             raise forms.ValidationError(
                 _(
                     "Can't append; the first record of the time series to append is "
@@ -200,6 +221,7 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
             replace_or_append=self.cleaned_data["replace_or_append"],
             datafilename=datafilename,
             username=request.user.username,
+            default_timezone=self.cleaned_data["default_timezone"],
         )
         messages.add_message(
             request,
@@ -246,7 +268,7 @@ class TimeseriesInline(InlinePermissionsMixin, nested_admin.NestedStackedInline)
     extra = 1
     fields = (
         ("type", "time_step"),
-        ("data", "replace_or_append"),
+        ("data", "default_timezone", "replace_or_append"),
     )
 
 
@@ -263,7 +285,6 @@ class TimeseriesGroupInline(InlinePermissionsMixin, nested_admin.NestedStackedIn
                     "name",
                     ("variable", "unit_of_measurement"),
                     "precision",
-                    "time_zone",
                     "hidden",
                     "remarks",
                 ),
@@ -337,6 +358,7 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
                         "altitude",
                         "remarks",
                         ("start_date", "end_date"),
+                        "display_timezone",
                     ],
                 },
             ),

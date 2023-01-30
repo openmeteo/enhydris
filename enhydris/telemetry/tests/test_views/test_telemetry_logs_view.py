@@ -1,7 +1,7 @@
 import datetime as dt
 
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from bs4 import BeautifulSoup
 from model_mommy import mommy
@@ -31,6 +31,7 @@ class TelemetryLogViewTestCase(TestCase):
         cls.telemetry_log.save()
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class TelemetryLogListViewTestCase(TelemetryLogViewTestCase):
     def setUp(self):
         self.client.login(username="alice", password="topsecret")
@@ -53,6 +54,7 @@ class TelemetryLogListViewTestCase(TelemetryLogViewTestCase):
         self.assertNotContains(self.response, "No telemetry errors have been logged")
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class TelemetryLogListViewNoLogsTestCase(TelemetryLogViewTestCase):
     def setUp(self):
         self.client.login(username="alice", password="topsecret")
@@ -68,6 +70,7 @@ class TelemetryLogListViewNoLogsTestCase(TelemetryLogViewTestCase):
         )
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class TelemetryLogDetailViewTestCase(TelemetryLogViewTestCase):
     def setUp(self):
         self.client.login(username="alice", password="topsecret")
@@ -102,6 +105,7 @@ class TelemetryLogDetailViewTestCase(TelemetryLogViewTestCase):
         self.assertEqual(target, f"/stations/{station_id}/telemetry/logs/")
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class PermissionsTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):

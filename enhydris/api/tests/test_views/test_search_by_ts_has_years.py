@@ -37,9 +37,8 @@ class SearchWithYearExistingInOneStationTest(
             models.Timeseries,
             timeseries_group__gentity=station,
             timeseries_group__variable__descr=variable_descr,
-            timeseries_group__time_zone__utc_offset=120,
         )
-        result.set_data(StringIO(datastr))
+        result.set_data(StringIO(datastr), default_timezone="Etc/GMT-2")
         return result
 
 

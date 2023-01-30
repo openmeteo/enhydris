@@ -2,9 +2,9 @@
 Enhydris - Web-based hydro/meteorological database
 ==================================================
 
-.. image:: https://travis-ci.com/openmeteo/enhydris.svg?branch=master
+.. image:: https://github.com/openmeteo/enhydris/actions/workflows/run-tests-automatically.yml/badge.svg
     :alt: Build button
-    :target: https://travis-ci.com/openmeteo/enhydris
+    :target: https://github.com/openmeteo/enhydris/actions/workflows/run-tests-automatically.yml
 
 .. image:: https://codecov.io/github/openmeteo/enhydris/coverage.svg?branch=master
     :alt: Coverage
