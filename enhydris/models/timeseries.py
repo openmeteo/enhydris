@@ -60,6 +60,10 @@ class TimeseriesStorage(FileSystemStorage):
         return super().path(name)
 
 
+class DataNotInCache(Exception):
+    pass
+
+
 class Timeseries(models.Model):
     INITIAL = 100
     CHECKED = 200
@@ -173,16 +177,32 @@ class Timeseries(models.Model):
             return f"{sign}{timezone[8:]}00"
 
     def get_data(self, start_date=None, end_date=None, timezone=None):
-        data = cache.get_or_set(f"timeseries_data_{self.id}", self._get_all_data_as_pd)
+        start_date = start_date or dt.datetime(1678, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
+        end_date = end_date or dt.datetime(2261, 12, 31, 23, 59, tzinfo=dt.timezone.utc)
+        try:
+            data = self._get_data_from_cache(start_date, end_date)
+        except DataNotInCache:
+            data = self._retrieve_and_cache_data(start_date, end_date)
         timezone = timezone or self.timeseries_group.gentity.display_timezone
-        data = data.loc[start_date:end_date]
         if not data.empty:
             data.index = data.index.tz_convert(timezone)
         result = HTimeseries(data)
         self._set_extra_timeseries_properties(result, timezone)
         return result
 
-    def _get_all_data_as_pd(self):
+    def _get_data_from_cache(self, start_date, end_date):
+        data = cache.get(f"timeseries_data_{self.id}")
+        if data is None:
+            raise DataNotInCache()
+        if self.start_date is None:
+            return data  # Data should be empty in that case; just return it
+        start_date = max(start_date, self.start_date).astimezone(data.index.tzinfo)
+        end_date = min(end_date, self.end_date).astimezone(data.index.tzinfo)
+        if data.index.min() > start_date or data.index.max() < end_date:
+            raise DataNotInCache()
+        return data.loc[start_date:end_date]
+
+    def _retrieve_and_cache_data(self, start_date, end_date):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -197,13 +217,14 @@ class Timeseries(models.Model):
                     ORDER BY timestamp
                 ) || E'\n'
                 FROM enhydris_timeseriesrecord
-                WHERE timeseries_id=%s;
+                WHERE timeseries_id=%s AND timestamp >= %s AND timestamp <= %s
                 """,
-                [self.id],
+                [self.id, start_date, end_date],
             )
-            return HTimeseries(
-                StringIO(cursor.fetchone()[0]), default_tzinfo=dt.timezone.utc
-            ).data
+            result_string = StringIO(cursor.fetchone()[0])
+        data = HTimeseries(result_string, default_tzinfo=dt.timezone.utc).data
+        cache.set(f"timeseries_data_{self.id}", data)
+        return data
 
     def set_data(self, data, default_timezone=None):
         self.timeseriesrecord_set.all().delete()

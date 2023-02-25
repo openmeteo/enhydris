@@ -375,21 +375,76 @@ class TimeseriesGetDataWithStartAndEndDateTestCase(DataTestCase):
 
 
 class TimeseriesGetDataCacheTestCase(DataTestCase):
-    def test_cache(self):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.original_expected_result = cls.expected_result
+
+    def setUp(self):
+        cache.clear()
+
         # Make sure we've accessed gpoint already, otherwise it screws up the number of
         # queries later
         self.timeseries.timeseries_group.gentity.gpoint.altitude
 
-        self._get_data_and_check_num_queries(1)
-        self._get_data_and_check_num_queries(0)
+        # Ensure we've cached start_date and end_date
+        self.timeseries.start_date
+        self.timeseries.end_date
+
+    def test_cache(self):
+        self.expected_result = self.original_expected_result
+
+        self._get_data_and_check_num_queries(1, start_date=None, end_date=None)
+        self._get_data_and_check_num_queries(0, start_date=None, end_date=None)
 
         # Check cache invalidation
         self.timeseries.save()
-        self._get_data_and_check_num_queries(1)
+        self._get_data_and_check_num_queries(1, start_date=None, end_date=None)
 
-    def _get_data_and_check_num_queries(self, num_queries):
+    def test_refetches_if_does_not_include_everything_from_start_date(self):
+        start_date_1 = dt.datetime(2017, 12, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
+        self.expected_result = self.original_expected_result.iloc[1:]
+        self._get_data_and_check_num_queries(1, start_date=start_date_1, end_date=None)
+
+        start_date_2 = dt.datetime(2017, 11, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
+        self.expected_result = self.original_expected_result
+        self._get_data_and_check_num_queries(1, start_date=start_date_2, end_date=None)
+
+        # Try again with start_date_1; this time we should have everything in cache
+        self.expected_result = self.original_expected_result.iloc[1:]
+        self._get_data_and_check_num_queries(0, start_date=start_date_1, end_date=None)
+
+    def test_refetches_if_does_not_include_everything_to_end_date(self):
+        end_date_1 = dt.datetime(2018, 10, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
+        self.expected_result = self.original_expected_result.iloc[:-1]
+        self._get_data_and_check_num_queries(1, start_date=None, end_date=end_date_1)
+
+        end_date_2 = dt.datetime(2018, 12, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
+        self.expected_result = self.original_expected_result
+        self._get_data_and_check_num_queries(1, start_date=None, end_date=end_date_2)
+
+        # Try again with end_date_1; this time we should have everything in cache
+        self.expected_result = self.original_expected_result.iloc[:-1]
+        self._get_data_and_check_num_queries(0, start_date=None, end_date=end_date_1)
+
+    def test_with_empty_data(self):
+        empty = HTimeseries().data
+        self.timeseries.set_data(empty)
+
+        try:
+            self.timeseries.get_data()  # This will cache the empty result
+            self.timeseries.get_data()  # This should return the cached empty result
+            # No further tests. We aren't so interested in whether it will use the
+            # cached result but on whether it will show an error because of attempting
+            # to make a comparison like start_date > some_value, where start_date is
+            # None. Since we reached this point, it didn't attempt to do anything like
+            # this.
+        finally:
+            self.timeseries.set_data(self.original_expected_result)
+
+    def _get_data_and_check_num_queries(self, num_queries, *, start_date, end_date):
         with self.assertNumQueries(num_queries):
-            data = self.timeseries.get_data()
+            data = self.timeseries.get_data(start_date=start_date, end_date=end_date)
         pd.testing.assert_frame_equal(data.data, self.expected_result)
 
 
