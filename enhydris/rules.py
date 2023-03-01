@@ -105,6 +105,11 @@ def model_backend_can_edit_timeseries(user, obj):
     return ModelBackend().has_perm(user, "enhydris.change_timeseries")
 
 
+@rules.predicate
+def is_public_timeseries(_, obj):
+    return obj.public
+
+
 can_add_station = (users_can_add_content & is_active) | model_backend_can_add_station
 can_edit_station = model_backend_can_edit_station | (
     users_can_add_content
@@ -143,5 +148,11 @@ rules.add_perm(
     & (model_backend_can_edit_station | is_new_object | is_station_creator),
 )
 
-rules.add_perm("enhydris.view_timeseries_data", open_content | is_active)
+rules.add_perm(
+    "enhydris.view_timeseries_data",
+    is_public_timeseries
+    | open_content
+    | (is_active & is_object_station_creator)
+    | (is_active & is_object_station_maintainer)
+)
 rules.add_perm("enhydris.view_gentityfile_content", open_content | is_active)

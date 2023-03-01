@@ -2,7 +2,7 @@
 {% load rules %}
 
 <div class="station-download">
-  {% has_perm "enhydris.view_timeseries_data" request.user timeseries as can_view_timeseries_data %}
+  {% has_perm "enhydris.view_timeseries_data" request.user object as can_view_timeseries_data %}
   {% if can_view_timeseries_data %}
   <div>
     {% if object.timeseries_set.exists %}

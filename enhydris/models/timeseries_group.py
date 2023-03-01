@@ -108,6 +108,10 @@ class TimeseriesGroup(models.Model):
     hidden = models.BooleanField(
         null=False, blank=False, default=False, verbose_name=_("Hidden")
     )
+    public = models.BooleanField(
+        default=False,
+        help_text=_("Timeseries is available for public viewing and downloading data.")
+    )
     precision = models.SmallIntegerField(
         help_text=_(
             "The number of decimal digits to which the values of the time series "

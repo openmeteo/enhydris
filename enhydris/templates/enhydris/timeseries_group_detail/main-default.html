@@ -1,6 +1,7 @@
 {% extends "enhydris/base/main_with_map.html" %}
 {% load static %}
 {% load i18n %}
+{% load rules %}
 
 {% block title %}
   {{ object.get_name }} — {{ object.gentity }} — {{ block.super }}
@@ -34,18 +35,24 @@
       <div class="station-info-main">
         <div class="station-timeseries-wrapper">
           <section class="station-timeseries">
-
             {% include "enhydris/timeseries_group_detail/details_table.html" %}
             {% include "enhydris/timeseries_group_detail/download.html" %}
           </section>
         </div>
 
         <div class="station-chart-wrapper">
-          {% if object.timeseries_set.exists %}
-            {% include "enhydris/timeseries_group_detail/chart.html" %}
+          {% has_perm "enhydris.view_timeseries_data" request.user object as can_view_timeseries_data %}
+          {% if can_view_timeseries_data %}
+            {% if object.timeseries_set.exists %}
+              {% include "enhydris/timeseries_group_detail/chart.html" %}
+            {% else %}
+              <div class="alert alert-info" role="alert">
+                {% trans "This time series group has no data yet." %}
+              </div>
+            {% endif %}
           {% else %}
             <div class="alert alert-info" role="alert">
-              {% trans "This time series group has no data yet." %}
+              {% trans "You don't have permission to view the data." %}
             </div>
           {% endif %}
         </div>
