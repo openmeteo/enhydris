@@ -192,7 +192,7 @@ class Timeseries(models.Model):
 
     def _get_data_from_cache(self, start_date, end_date):
         data = cache.get(f"timeseries_data_{self.id}")
-        if data is None:
+        if data is None or data.empty:
             raise DataNotInCache()
         if self.start_date is None:
             return data  # Data should be empty in that case; just return it
