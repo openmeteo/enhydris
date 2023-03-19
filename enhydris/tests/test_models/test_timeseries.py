@@ -447,6 +447,20 @@ class TimeseriesGetDataCacheTestCase(DataTestCase):
             data = self.timeseries.get_data(start_date=start_date, end_date=end_date)
         pd.testing.assert_frame_equal(data.data, self.expected_result)
 
+    def test_cached_empty_dataframe(self):
+        """Test the case where an empty dataframe was previously cached"""
+
+        cache.clear()
+
+        # Get (and thus cache) the time series, starting from a timestamp more recent
+        # than the end date (that is, cache an empty dataframe).
+        start_date = self.timeseries.end_date + dt.timedelta(minutes=1)
+        self.timeseries.get_data(start_date=start_date)
+
+        # Then ensure that getting the time series works
+        data = self.timeseries.get_data(start_date=self.timeseries.end_date)
+        self.assertEqual(len(data.data), 1)
+
 
 class TimeseriesSetDataTestCase(TestTimeseriesMixin, TestCase):
     def setUp(self):
