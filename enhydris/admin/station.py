@@ -268,6 +268,7 @@ class TimeseriesInline(InlinePermissionsMixin, nested_admin.NestedStackedInline)
     extra = 1
     fields = (
         ("type", "time_step"),
+        "publicly_available",
         ("data", "default_timezone", "replace_or_append"),
     )
 
@@ -373,6 +374,8 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
             permissions_fields.append("creator")
         if request.user.has_perm("enhydris.change_station_maintainers", obj):
             permissions_fields.append("maintainers")
+        if settings.ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS:
+            permissions_fields.append("timeseries_data_viewers")
         if permissions_fields:
             self._fieldsets.append(
                 (

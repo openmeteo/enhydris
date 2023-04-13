@@ -229,6 +229,13 @@ class Station(Gpoint):
         related_name="maintaining_stations",
         verbose_name=_("Maintainers"),
     )
+    timeseries_data_viewers = models.ManyToManyField(
+        User,
+        blank=True,
+        related_name="viewing_stations",
+        verbose_name=_("Time series data viewers"),
+        help_text=_("Users with permission to view time series data"),
+    )
 
     objects = models.Manager()
     on_site = CurrentSiteManager()

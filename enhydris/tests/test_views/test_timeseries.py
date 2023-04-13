@@ -1,11 +1,10 @@
-from django.test import TestCase, override_settings
+from django.test import TestCase
 
 from enhydris.tests import TimeseriesDataMixin
 
 
 class TimeseriesDownloadButtonTestCase(TimeseriesDataMixin, TestCase):
     def setUp(self):
-        self.create_timeseries()
         self.download_button = (
             '<button type="submit" class="btn form-btn-download">download</button>'
         )
@@ -15,30 +14,30 @@ class TimeseriesDownloadButtonTestCase(TimeseriesDataMixin, TestCase):
             f"/stations/{self.station.id}/timeseriesgroups/{self.timeseries_group.id}/"
         )
 
-    @override_settings(ENHYDRIS_OPEN_CONTENT=True)
-    def test_contains_download_button_when_site_content_is_free(self):
+    def test_contains_download_button_when_timeseries_data_is_available(self):
+        self.create_timeseries(publicly_available=True)
         self._get_response()
         self.assertContains(self.response, self.download_button)
 
-    @override_settings(ENHYDRIS_OPEN_CONTENT=False)
-    def test_has_no_download_link_when_site_content_is_restricted(self):
+    def test_has_no_download_link_when_timeseries_data_is_not_available(self):
+        self.create_timeseries(publicly_available=False)
         self._get_response()
         self.assertNotContains(self.response, self.download_button)
 
-    @override_settings(ENHYDRIS_OPEN_CONTENT=True)
-    def test_has_no_permission_denied_message_when_site_content_is_free(self):
+    def test_has_no_unavailability_message_when_timeseries_data_is_available(self):
+        self.create_timeseries(publicly_available=True)
         self._get_response()
-        self.assertNotContains(self.response, "You don't have permission to download")
+        self.assertNotContains(self.response, "No data is available for downloading")
 
-    @override_settings(ENHYDRIS_OPEN_CONTENT=False)
-    def test_shows_permission_denied_message_when_site_content_is_restricted(self):
+    def test_shows_unavailability_message_when_timeseries_data_is_unavailable(self):
+        self.create_timeseries(publicly_available=False)
         self._get_response()
-        self.assertContains(self.response, "You don't have permission to download")
+        self.assertContains(self.response, "No data is available for downloading")
 
 
 class DownloadDataTestCase(TimeseriesDataMixin, TestCase):
     def setUp(self):
-        self.create_timeseries()
+        self.create_timeseries(publicly_available=True)
 
     def _make_request(self, station_id, timeseries_group_id, timeseries_id):
         self.response = self.client.get(

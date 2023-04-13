@@ -64,6 +64,10 @@ class DataNotInCache(Exception):
     pass
 
 
+def get_default_publicly_available():
+    return settings.ENHYDRIS_DEFAULT_PUBLICLY_AVAILABLE
+
+
 class Timeseries(models.Model):
     INITIAL = 100
     CHECKED = 200
@@ -75,6 +79,7 @@ class Timeseries(models.Model):
         (REGULARIZED, _("Regularized")),
         (AGGREGATED, _("Aggregated")),
     )
+
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
     timeseries_group = models.ForeignKey(TimeseriesGroup, on_delete=models.CASCADE)
     type = models.PositiveSmallIntegerField(
@@ -90,6 +95,14 @@ class Timeseries(models.Model):
             "series is irregular."
         ),
         verbose_name=_("Time step"),
+    )
+    publicly_available = models.BooleanField(
+        default=get_default_publicly_available,
+        verbose_name=_("Publicly available"),
+        help_text=_(
+            "Whether users who have not logged on have permission to download the time "
+            "series data."
+        ),
     )
 
     class Meta:

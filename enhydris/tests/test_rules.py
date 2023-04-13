@@ -1,9 +1,6 @@
 from django.contrib.auth.models import AnonymousUser, Permission, User
 from django.test import TestCase, override_settings
 
-from model_mommy import mommy
-
-from enhydris import models
 from enhydris.tests import TestTimeseriesMixin
 
 
@@ -227,74 +224,79 @@ class RulesTestCaseWhenUsersCannotAddContent(RulesTestCaseBase, CommonTests):
         )
 
 
-class ContentRulesTestCaseBase(TestCase, TestTimeseriesMixin):
+class ContentRulesTestCase(TestCase, TestTimeseriesMixin):
     """Test case base for time series data and file content."""
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpTestData(cls):
+        super().setUpTestData()
         cls.alice = User.objects.create_user(username="alice")
         cls.bob = User.objects.create_user(username="bob")
         cls.charlie = User.objects.create_user(username="charlie")
         cls.david = User.objects.create_user(username="david")
         cls.anonymous = AnonymousUser()
 
-        cls._create_test_timeseries()
-        cls.gentityfile = mommy.make(models.GentityFile, gentity=cls.station)
+    def _setup_test_stuff(self, publicly_available=None):
+        kwargs = {}
+        if publicly_available is not None:
+            kwargs["publicly_available"] = publicly_available
+        self._create_test_timeseries(**kwargs)
 
         po = Permission.objects
-        cls.charlie.user_permissions.add(
-            po.get(content_type__app_label="enhydris", codename="view_station")
-        )
-        cls.charlie.user_permissions.add(
-            po.get(content_type__app_label="enhydris", codename="change_station")
-        )
-        cls.charlie.user_permissions.add(
-            po.get(content_type__app_label="enhydris", codename="delete_station")
-        )
-        cls.charlie.user_permissions.add(
-            po.get(content_type__app_label="enhydris", codename="change_timeseries")
-        )
-        cls.charlie.user_permissions.add(
-            po.get(content_type__app_label="enhydris", codename="delete_timeseries")
-        )
+        addprm = self.charlie.user_permissions.add
+        addprm(po.get(content_type__app_label="enhydris", codename="view_station"))
+        addprm(po.get(content_type__app_label="enhydris", codename="change_station"))
+        addprm(po.get(content_type__app_label="enhydris", codename="delete_station"))
+        addprm(po.get(content_type__app_label="enhydris", codename="change_timeseries"))
+        addprm(po.get(content_type__app_label="enhydris", codename="delete_timeseries"))
 
-
-@override_settings(ENHYDRIS_OPEN_CONTENT=True)
-class ContentRulesWhenContentIsOpenTestCase(ContentRulesTestCaseBase):
-    def test_anonymous_can_download_timeseries(self):
+    def test_anonymous_can_download_publicly_available_timeseries(self):
+        self._setup_test_stuff(publicly_available=True)
         self.assertTrue(
             self.anonymous.has_perm("enhydris.view_timeseries_data", self.timeseries)
         )
 
-    def test_anonymous_can_download_gentity_file(self):
-        self.assertTrue(
-            self.anonymous.has_perm(
-                "enhydris.view_gentityfile_content", self.timeseries
-            )
-        )
-
-
-@override_settings(ENHYDRIS_OPEN_CONTENT=False)
-class ContentRulesWhenContentIsNotOpen(ContentRulesTestCaseBase):
-    def test_anonymous_cannot_download_timeseries(self):
+    def test_anonymous_cannot_download_publicly_unavailable_timeseries(self):
+        self._setup_test_stuff(publicly_available=False)
         self.assertFalse(
             self.anonymous.has_perm("enhydris.view_timeseries_data", self.timeseries)
         )
 
-    def test_anonymous_cannot_download_gentity_file(self):
+    @override_settings(ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS=True)
+    def test_users_cannot_download_timeseries_when_data_viewers_is_enabled(self):
+        self._setup_test_stuff(publicly_available=False)
         self.assertFalse(
-            self.anonymous.has_perm(
-                "enhydris.view_gentityfile_content", self.timeseries
-            )
+            self.david.has_perm("enhydris.view_timeseries_data", self.timeseries)
         )
 
-    def test_logged_on_can_download_timeseries(self):
+    @override_settings(ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS=True)
+    def test_creator_can_download_timeseries_when_data_viewers_is_enabled(self):
+        self._setup_test_stuff(publicly_available=False)
+        self.station.creator = self.david
+        self.station.save()
         self.assertTrue(
             self.david.has_perm("enhydris.view_timeseries_data", self.timeseries)
         )
 
-    def test_logged_on_can_download_gentity_file(self):
+    @override_settings(ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS=True)
+    def test_maintainer_can_download_timeseries_when_data_viewers_is_enabled(self):
+        self._setup_test_stuff(publicly_available=False)
+        self.station.maintainers.add(self.david)
         self.assertTrue(
-            self.david.has_perm("enhydris.view_gentityfile_content", self.timeseries)
+            self.david.has_perm("enhydris.view_timeseries_data", self.timeseries)
+        )
+
+    @override_settings(ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS=True)
+    def test_viewer_can_download_timeseries_when_data_viewers_is_enabled(self):
+        self._setup_test_stuff(publicly_available=False)
+        self.station.timeseries_data_viewers.add(self.david)
+        self.assertTrue(
+            self.david.has_perm("enhydris.view_timeseries_data", self.timeseries)
+        )
+
+    @override_settings(ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS=False)
+    def test_logged_on_can_download_nonpublic_timeseries_when_viewers_disabled(self):
+        self._setup_test_stuff(publicly_available=False)
+        self.assertTrue(
+            self.david.has_perm("enhydris.view_timeseries_data", self.timeseries)
         )

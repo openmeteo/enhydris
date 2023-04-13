@@ -19,20 +19,27 @@ Upgrading from 3.0
  4. Login as a superuser and go to the dashboard.
  5. Go to "Sites" and make sure they're set correctly.
  6. In the settings, make sure ``SITE_ID`` is set correctly.
- 7. Update the database with ``python manage.py migrate``. This will put
+ 7. In the settings, remove setting `ENHYDRIS_OPEN_CONTENT` and instead
+    set :data:`ENHYDRIS_DEFAULT_PUBLICLY_AVAILABLE` and
+    :data:`ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS`.  Note that, during
+    migration, the new :attr:`publicly_available` attribute will be set
+    on existing time series to the value of
+    :data:`ENHYDRIS_DEFAULT_PUBLICLY_AVAILABLE`.
+ 8. Update the database with ``python manage.py migrate``. This will put
     all stations to the site specified with ``SITE_ID``, and will add
     all users to the group whose name is the domain of the current site
     (the group will be created automatically if it does not exist).
- 8. If you have been using a single database to power many sites, then:
+ 9. If you have been using a single database to power many sites, then:
      * In the settings, make sure :data:`ENHYDRIS_SITES_FOR_NEW_STATIONS`
        is set correctly. Restart the server if necessary.
-     * Logon as a superuseri and go to the dashboard
+     * Logon as a superuser and go to the dashboard
      * Go to each of the stations that used to be specified by
        ``ENHYDRIS_SITE_STATION_FILTER`` and make sure the "Sites" field
        is set correctly.
      * If any users need to be able to log on to a different site from
        the one where you performed the database update, go to each of
        these users and put them in the appropriate groups.
+10. Restart the server.
 
 Changes from 3.0
 ----------------
@@ -93,6 +100,18 @@ If you discover errors after upgrading, fixing them is similar:
 
 1. Download the time series that have the problem.
 2. Upload the time series, specifying an appropriate time zone.
+
+Permissions
+^^^^^^^^^^^
+
+Several things have been changed in the permissions model. Setting
+``ENHYDRIS_OPEN_CONTENT`` has been abolished and replaced with the new
+settings :data:`ENHYDRIS_DEFAULT_PUBLICLY_AVAILABLE` and
+:data:`ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS`. These two settings
+together can do much more than what ``ENHYDRIS_OPEN_CONTENT`` did.
+Another important difference is that these new settings apply only
+to time series data, not to gentity files, so gentity files are now
+always publicly available.
 
 Version 3.0
 ===========

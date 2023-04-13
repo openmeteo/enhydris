@@ -269,7 +269,7 @@ Station and its related models
 
    .. attribute:: enhydris.models.Station.overseer
 
-      The overseers is the person responsible for the meteorological
+      The overseer is the person responsible for the meteorological
       station in the past. In the case of manual (not automatic)
       stations, this means the weather observers.  This is a simple text
       field.
@@ -393,6 +393,11 @@ Time series and related models
       :attr:`~enhydris.models.Timeseries.time_step` is empty. Otherwise,
       it contains an appropriate time step as a `pandas "frequency"
       string`_, e.g.  "10min", "H", "M", "Y".
+
+   .. attribute:: enhydris.models.Timeseries.publicly_available
+
+      Specifies whether anonymous users can download the time series
+      data.
 
       .. _pandas "frequency" string: https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#dateoffset-objects
 

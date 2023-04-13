@@ -26,13 +26,3 @@ class CanAccessTimeseriesData(permissions.BasePermission):
             return request.user.has_perm(
                 "enhydris.change_station", obj.timeseries_group.gentity.gpoint.station
             )
-
-
-class CanAccessGentityFileContent(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return request.user.has_perm("enhydris.view_gentityfile_content", obj)
-        else:
-            return request.user.has_perm(
-                "enhydris.change_station", obj.gentity.gpoint.station
-            )
