@@ -35,25 +35,36 @@ class Tsdata404TestCase(APITestCase):
         self.assertEqual(response.status_code, 404)
 
 
-@override_settings(ENHYDRIS_OPEN_CONTENT=False)
 @patch("enhydris.models.Timeseries.get_data", return_value=HTimeseries())
+@override_settings(ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS=False)
 class TsdataGetPermissionsTestCase(APITestCase):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         station = mommy.make(models.Station, display_timezone="Etc/GMT-2")
         timeseries_group = mommy.make(
             models.TimeseriesGroup,
             gentity=station,
             precision=2,
         )
-        timeseries = mommy.make(models.Timeseries, timeseries_group=timeseries_group)
-        self.url = (
+        cls.timeseries = mommy.make(
+            models.Timeseries,
+            timeseries_group=timeseries_group,
+            publicly_available=False,
+        )
+        cls.url = (
             f"/api/stations/{station.id}/timeseriesgroups/{timeseries_group.id}/"
-            f"timeseries/{timeseries.id}/data/"
+            f"timeseries/{cls.timeseries.id}/data/"
         )
 
-    def test_anonymous_user_is_denied(self, m):
+    def test_anonymous_user_is_denied_by_default(self, m):
         self.response = self.client.get(self.url)
         self.assertEqual(self.response.status_code, 401)
+
+    def test_anonymous_user_is_accepted_if_publicly_available_is_true(self, m):
+        self.timeseries.publicly_available = True
+        self.timeseries.save()
+        self.response = self.client.get(self.url)
+        self.assertEqual(self.response.status_code, 200)
 
     def test_logged_on_user_is_ok(self, m):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
@@ -62,11 +73,10 @@ class TsdataGetPermissionsTestCase(APITestCase):
         self.assertEqual(self.response.status_code, 200)
 
 
-@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class GetDataTestCase(APITestCase, TimeseriesDataMixin):
     @classmethod
     def setUpTestData(cls):
-        cls.create_timeseries()
+        cls.create_timeseries(publicly_available=True)
 
     def _get_response(self, urlsuffix=""):
         return self.client.get(
@@ -98,11 +108,10 @@ class GetDataTestCase(APITestCase, TimeseriesDataMixin):
         )
 
 
-@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class GetDataInVariousFormatsTestCase(APITestCase, TimeseriesDataMixin):
     def setUp(self):
         super().setUp()
-        self.create_timeseries()
+        self.create_timeseries(publicly_available=True)
         self.get_data_patch = patch(
             "enhydris.models.Timeseries.get_data", return_value=self.htimeseries
         )
@@ -306,7 +315,6 @@ class TsdataPostDuplicateTimestampsTestCase(APITestCase):
         )
 
 
-@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class TsdataStartAndEndDateTestCase(APITestCase):
     def setUp(self):
         self.station = mommy.make(models.Station)
@@ -314,7 +322,9 @@ class TsdataStartAndEndDateTestCase(APITestCase):
             models.TimeseriesGroup, gentity=self.station, precision=2
         )
         self.timeseries = mommy.make(
-            models.Timeseries, timeseries_group=self.timeseries_group
+            models.Timeseries,
+            timeseries_group=self.timeseries_group,
+            publicly_available=True,
         )
 
     def _make_request(self, query_string):
@@ -361,7 +371,6 @@ class TsdataStartAndEndDateTestCase(APITestCase):
         )
 
 
-@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class TsdataInvalidStartOrEndDateTestCase(APITestCase):
     def setUp(self):
         self.station = mommy.make(models.Station)
@@ -369,7 +378,9 @@ class TsdataInvalidStartOrEndDateTestCase(APITestCase):
             models.TimeseriesGroup, gentity=self.station, precision=2
         )
         self.timeseries = mommy.make(
-            models.Timeseries, timeseries_group=self.timeseries_group
+            models.Timeseries,
+            timeseries_group=self.timeseries_group,
+            publicly_available=True,
         )
 
     def _make_request(self, query_string):
@@ -390,7 +401,6 @@ class TsdataInvalidStartOrEndDateTestCase(APITestCase):
         m.assert_called_once_with(start_date=None, end_date=None, timezone=None)
 
 
-@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class TsdataHeadTestCase(APITestCase):
     def setUp(self):
         self.station = mommy.make(models.Station)
@@ -401,7 +411,9 @@ class TsdataHeadTestCase(APITestCase):
             precision=2,
         )
         self.timeseries = mommy.make(
-            models.Timeseries, timeseries_group=self.timeseries_group
+            models.Timeseries,
+            timeseries_group=self.timeseries_group,
+            publicly_available=True,
         )
         self.timeseries.set_data(
             StringIO("2018-12-09 13:10,20,\n"), default_timezone="Etc/GMT"
@@ -422,7 +434,6 @@ class TsdataHeadTestCase(APITestCase):
         self.assertNotContains(response, "2018-12-09 13:10,")
 
 
-@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class TimeseriesBottomTestCase(APITestCase):
     def setUp(self):
         self.station = mommy.make(models.Station, display_timezone="Etc/GMT-2")
@@ -432,7 +443,9 @@ class TimeseriesBottomTestCase(APITestCase):
             precision=2,
         )
         self.timeseries = mommy.make(
-            models.Timeseries, timeseries_group=self.timeseries_group
+            models.Timeseries,
+            timeseries_group=self.timeseries_group,
+            publicly_available=True,
         )
         self.timeseries.set_data(
             StringIO("2018-12-09 13:10,20,\n"), default_timezone="Etc/GMT-2"
@@ -465,7 +478,7 @@ class TimeseriesBottomTestCase(APITestCase):
         self.assertEqual(self.response.content.decode(), "2018-12-09 16:10,20.00,")
 
 
-@override_settings(ENHYDRIS_OPEN_CONTENT=False)
+@override_settings(ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS=False)
 class TimeseriesBottomPermissionsTestCase(APITestCase):
     def setUp(self):
         station = mommy.make(models.Station)
@@ -474,7 +487,11 @@ class TimeseriesBottomPermissionsTestCase(APITestCase):
             gentity=station,
             precision=2,
         )
-        timeseries = mommy.make(models.Timeseries, timeseries_group=timeseries_group)
+        timeseries = mommy.make(
+            models.Timeseries,
+            timeseries_group=timeseries_group,
+            publicly_available=False,
+        )
         timeseries.set_data(
             StringIO("2018-12-09 13:10,20,\n"), default_timezone="Etc/GMT-2"
         )
@@ -667,14 +684,13 @@ class TimeseriesDeleteTestCase(APITestCase):
         self.assertEqual(response.status_code, 204)
 
 
-@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 @patch("enhydris.api.views.TimeseriesViewSet._get_stats_for_all_intervals")
 @patch("enhydris.models.Timeseries.get_data")
 class TimeseriesChartDateBoundsTestCase(APITestCase, TimeseriesDataMixin):
     def setUp(self):
         # "_get_sampled_data_to_plot" is mocked to avoid executing the actual logic of
         # comparisons in the view, which would compare mocks, raising an exception
-        self.create_timeseries()
+        self.create_timeseries(publicly_available=True)
         self.url = (
             f"/api/stations/{self.station.id}/timeseriesgroups"
             f"/{self.timeseries_group.id}/timeseries/{self.timeseries.id}/chart/"
@@ -740,42 +756,40 @@ class TimeseriesChartTestMixin:
         }
 
 
-@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 @patch("enhydris.api.views.TimeseriesViewSet.CHART_MAX_INTERVALS", new=20)
 @patch("enhydris.models.Timeseries.get_data")
+@override_settings(ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS=False)
 class TimeseriesChartTestCase(
     APITestCase, TimeseriesDataMixin, TimeseriesChartTestMixin
 ):
-    def create_timeseries(self):
+    def _create_timeseries(self, publicly_available=None):
         # Create the timeseries so that we have 5 entries, one per year
-        super().create_timeseries()
+        super().create_timeseries(publicly_available=publicly_available)
         self.htimeseries.data = pd.DataFrame(
             index=[dt.datetime(year, 1, 1) for year in range(2010, 2015)],
             data={"value": [year for year in range(2010, 2015)], "flags": [""] * 5},
             columns=["value", "flags"],
         )
-
-    def setUp(self):
-        self.create_timeseries()
         self.url = (
             f"/api/stations/{self.station.id}/timeseriesgroups"
             f"/{self.timeseries_group.id}/timeseries/{self.timeseries.id}/chart/"
         )
 
-    @override_settings(ENHYDRIS_OPEN_CONTENT=False)
     def test_unauthenticated_user_denied(self, mock):
+        self._create_timeseries(publicly_available=False)
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 401)
 
-    @override_settings(ENHYDRIS_OPEN_CONTENT=False)
     def test_authenticated_user_allowed(self, mock):
+        self._create_timeseries(publicly_available=False)
         self.client.force_authenticate(user=mommy.make(User, is_active=True))
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
 
     def test_all_values_returned(self, mock):
+        self._create_timeseries(publicly_available=True)
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         expected = [
@@ -788,6 +802,7 @@ class TimeseriesChartTestCase(
         self._assertChartResponse(response, expected)
 
     def test_null_values_are_dropped(self, mock):
+        self._create_timeseries(publicly_available=True)
         self.htimeseries.data.loc["2010-01-01", "value"] = np.nan
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
@@ -800,14 +815,13 @@ class TimeseriesChartTestCase(
         self._assertChartResponse(response, expected)
 
 
-@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 @patch("enhydris.api.views.TimeseriesViewSet.CHART_MAX_INTERVALS", new=3)
 @patch("enhydris.models.Timeseries.get_data")
 class TimeseriesChartValuesTestCase(
     APITestCase, TimeseriesDataMixin, TimeseriesChartTestMixin
 ):
     def setUp(self):
-        self.create_timeseries()
+        self.create_timeseries(publicly_available=True)
         self.htimeseries.data = pd.DataFrame(
             index=[dt.datetime(year, 1, 1) for year in range(2010, 2021)],
             data={"value": [year for year in range(2010, 2021)], "flags": [""] * 11},

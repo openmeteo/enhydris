@@ -229,6 +229,25 @@ class StationPermsTestCaseWhenUsersCannotAddCont(StationPermsTestCaseBase, Commo
         self.assertNotContains(response, "Maintainers")
 
 
+class TimeseriesDataViewersTestCase(StationPermsTestCaseBase):
+    def _get_response(self):
+        return self.client.get(f"/admin/enhydris/station/{self.azanulbizar.id}/change/")
+
+    @override_settings(ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS=True)
+    def test_station_detail_shows_timeseries_data_viewers_if_enabled(self):
+        self.client.login(username="alice", password="topsecret")
+        response = self._get_response()
+        assert response.status_code == 200
+        self.assertContains(response, "Time series data viewers")
+
+    @override_settings(ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS=False)
+    def test_station_detail_does_not_show_timeseries_data_viewers_if_disabled(self):
+        self.client.login(username="alice", password="topsecret")
+        response = self._get_response()
+        assert response.status_code == 200
+        self.assertNotContains(response, "Time series data viewers")
+
+
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 class StationCreateSetsCreatorTestCase(TestCase):
     def setUp(self):

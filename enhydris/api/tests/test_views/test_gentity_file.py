@@ -1,8 +1,6 @@
 from unittest.mock import MagicMock, mock_open, patch
 
-from django.contrib.auth.models import User
 from django.db.models.fields.files import FieldFile
-from django.test.utils import override_settings
 from rest_framework.test import APITestCase
 
 from model_mommy import mommy
@@ -50,7 +48,6 @@ class GentityFileTestCase(APITestCase):
         self.assertEqual(r.status_code, 404)
 
 
-@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class GentityFileContentTestCase(APITestCase):
     def setUp(self):
         # Mocking. We mock several things in Django and Python so that:
@@ -85,35 +82,6 @@ class GentityFileContentTestCase(APITestCase):
         self.assertEqual(self.response["Content-Type"], "image/jpeg")
 
 
-@override_settings(ENHYDRIS_OPEN_CONTENT=False)
-@patch("enhydris.api.views.open", mock_open(read_data="ABCDEF"))
-@patch("os.path.getsize", return_value=6)
-class GentityFileContentPermissionsTestCase(APITestCase):
-    def setUp(self):
-        self.station = mommy.make(models.Station)
-        self.gentity_file = mommy.make(models.GentityFile, gentity=self.station)
-        self.url = "/api/stations/{}/files/{}/content/".format(
-            self.station.id, self.gentity_file.id
-        )
-        self.saved_fieldfile_file = FieldFile.file
-        self.filemock = MagicMock(**{"return_value.name": "some_image.jpg"})
-        FieldFile.file = property(self.filemock, MagicMock(), MagicMock())
-
-    def tearDown(self):
-        FieldFile.file = self.saved_fieldfile_file
-
-    def test_anonymous_user_is_denied(self, m):
-        self.response = self.client.get(self.url)
-        self.assertEqual(self.response.status_code, 401)
-
-    def test_logged_on_user_is_ok(self, m):
-        self.user1 = mommy.make(User, is_active=True, is_superuser=False)
-        self.client.force_authenticate(user=self.user1)
-        self.response = self.client.get(self.url)
-        self.assertEqual(self.response.status_code, 200)
-
-
-@override_settings(ENHYDRIS_OPEN_CONTENT=True)
 class GentityFileContentWithoutFileTestCase(APITestCase):
     def setUp(self):
         # Mommy creates a GentityFile without an associated file, so the

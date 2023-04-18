@@ -102,20 +102,12 @@ class GentityEventViewSet(ReadOnlyModelViewSet):
 class GentityFileViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.GentityFileSerializer
 
-    def get_permissions(self):
-        if self.action == "content":
-            pc = [permissions.CanAccessGentityFileContent]
-        else:
-            pc = [permissions.CanEditOrReadOnly]
-        return [x() for x in pc]
-
     def get_queryset(self):
         return models.GentityFile.objects.filter(gentity_id=self.kwargs["station_id"])
 
     @action(detail=True, methods=["get"])
     def content(self, request, pk=None, *, station_id):
         gfile = self.get_object()
-        self.check_object_permissions(request, gfile)
         try:
             gfile_content_file = gfile.content.file
             filename = gfile_content_file.name

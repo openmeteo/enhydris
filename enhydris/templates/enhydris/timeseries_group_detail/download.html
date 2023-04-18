@@ -2,18 +2,15 @@
 {% load rules %}
 
 <div class="station-download">
-  {% has_perm "enhydris.view_timeseries_data" request.user timeseries as can_view_timeseries_data %}
-  {% if can_view_timeseries_data %}
-  <div>
-    {% if object.timeseries_set.exists %}
+  {% if timeseries_set %}
+    <div>
       <p><b>Download data</b></p>
       <p></p>
       {% include "enhydris/timeseries_group_detail/download_button.html" %}
-    {% endif %}
-  </div>
+    </div>
   {% else %}
     <div class="mt-4 alert alert-info" role="alert">
-      {% trans "You don't have permission to download the data." %}
+      {% trans "No data is available for downloading." %}
     </div>
   {% endif %}
 </div>
