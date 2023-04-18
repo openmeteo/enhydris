@@ -273,7 +273,7 @@ These are the settings available to Enhydris, in addition to the
    anonymous user there's a
    :attr:`enhydris.models.Timeseries.publicly_available` attribute for
    each individual time series; see also
-   :data:`ENHYDRIS_DEFAULT_PUBLICLY_AVAILABLE). Note that if you want
+   :data:`ENHYDRIS_DEFAULT_PUBLICLY_AVAILABLE`). Note that if you want
    all logged on users to have such permission, but the general public
    not to, you must also make sure that :data:`REGISTRATION_OPEN` is
    ``False``.
