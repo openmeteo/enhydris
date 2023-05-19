@@ -19,3 +19,5 @@ enhydris-autoprocess
 enhydris_autoprocess
 enhydris-synoptic
 enhydris_synoptic
+.DS_STORE
+.idea/
