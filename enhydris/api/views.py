@@ -167,6 +167,7 @@ class TimeseriesViewSet(ModelViewSet):
     CHART_MAX_INTERVALS = 200
     queryset = models.Timeseries.objects.all()
     serializer_class = serializers.TimeseriesSerializer
+    lookup_value_regex = "\d+"
 
     def get_permissions(self):
         if self.action in ("data", "bottom", "chart"):
@@ -237,7 +238,7 @@ class TimeseriesViewSet(ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def bottom(self, request, pk=None, *, station_id, timeseries_group_id=None):
-        ts = get_object_or_404(models.Timeseries, pk=pk)
+        ts = get_object_or_404(models.Timeseries, pk=int(pk))
         self.check_object_permissions(request, ts)
         response = HttpResponse(content_type="text/plain")
         timezone_param = request.GET.get("timezone", None)
@@ -246,7 +247,7 @@ class TimeseriesViewSet(ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def chart(self, request, pk=None, *, station_id, timeseries_group_id=None):
-        timeseries = get_object_or_404(models.Timeseries, pk=pk)
+        timeseries = get_object_or_404(models.Timeseries, pk=int(pk))
         self.check_object_permissions(request, timeseries)
         serializer = serializers.TimeseriesRecordChartSerializer(
             self._get_chart_data(request, timeseries), many=True
