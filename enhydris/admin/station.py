@@ -331,6 +331,13 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
     search_fields = ("id", "name", "code", "owner__ordering_string")
     list_display = ("name", "owner")
     list_filter = (SiteFilter,)
+    delete_confirmation_template = "admin/enhydris/station/delete_confirmation.html"
+    delete_selected_confirmation_template = (
+        "admin/enhydris/station/delete_selected_confirmation.html"
+    )
+
+    def get_deleted_objects(self, objs, request):
+        return [], {}, set(), []
 
     def get_queryset(self, request):
         if request.user.is_superuser:
