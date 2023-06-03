@@ -334,7 +334,7 @@ class ShowOnlySearchedForStationsOnMapTestCase(SeleniumTestCase):
         self.markers.wait_until_exists()
         for i in range(6):
             sleep(0.5)
-            result = len(self.markers.find_elements_by_tag_name("img"))
+            result = len(self.markers.find_elements(By.TAG_NAME, "img"))
             if result:
                 return result
 
@@ -369,7 +369,7 @@ class ShowStationOnStationDetailMapTestCase(SeleniumTestCase):
         self.markers.wait_until_exists()
         for i in range(6):
             sleep(0.5)
-            result = len(self.markers.find_elements_by_tag_name("img"))
+            result = len(self.markers.find_elements(By.TAG_NAME, "img"))
             if result:
                 return result
         return 0
