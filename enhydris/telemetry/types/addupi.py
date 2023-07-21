@@ -41,8 +41,6 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
         return {x.attrib["id"]: x.attrib["name"] for x in sensors}
 
     def get_measurements(self, sensor_id, timeseries_end_date):
-        from enhydris.telemetry import TelemetryError
-
         if timeseries_end_date is None:
             timeseries_end_date = dt.datetime(1990, 1, 1)
         xmlroot = self._make_request(
@@ -59,18 +57,35 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
                 timestamp = prev_timestamp + dt.timedelta(seconds=int(timestamp))
             else:
                 timestamp = dt.datetime.strptime(timestamp, "%Y%m%dT%H:%M:%S")
-            s = record.attrib["s"]
-            if s != "0":
-                raise TelemetryError(
-                    f"The record with timestamp {timestamp} has a non zero s "
-                    f'attribute (s="{s}"). This is probably normal, however it is '
-                    "currently not supported by the Enhydris addupi driver. Please "
-                    "ask for the driver to be fixed."
-                )
-            prev_timestamp = timestamp
             value = float(record.text)
-            result += f"{timestamp.isoformat()},{value},\n"
+            flags = self._get_flags(record, timestamp)
+            result += f"{timestamp.isoformat()},{value},{flags}\n"
+            prev_timestamp = timestamp
         return StringIO(result)
+
+    def _get_flags(self, record, timestamp):
+        s = self._get_s_attribute(record, timestamp)
+        if s in (1, 2):
+            return "INVALID"
+        if s < 0:
+            return "MISSING"
+        return ""
+
+    def _get_s_attribute(self, record, timestamp):
+        try:
+            s = None
+            s = record.attrib["s"]
+            si = int(s)
+            if si < -99 or si > 2:
+                raise ValueError()
+            return si
+        except (KeyError, ValueError):
+            from enhydris.telemetry import TelemetryError
+
+            raise TelemetryError(
+                f"The record with timestamp {timestamp} has an invalid status "
+                f'value (s="{s}")'
+            )
 
     def _make_request(self, query_string):
         from enhydris.telemetry import TelemetryError
