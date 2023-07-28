@@ -10,6 +10,7 @@ from enhydris.telemetry.forms import (
     ChooseSensorForm,
     ChooseStationForm,
     ConnectionDataForm,
+    EssentialDataForm,
 )
 
 TestTelemetryAPIClient = MagicMock()
@@ -109,6 +110,34 @@ class ConnectionDataFormHideDeviceLocatorTestCase(TestCase):
         self.assertEqual(
             form.fields["device_locator"].widget.__class__.__name__, "TextInput"
         )
+
+
+class EssentialDataFormTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.username = "enhydris"
+        cls.password = "enhydris_123"
+        cls.form_args = {
+            "username": cls.username,
+            "password": cls.password,
+            "device_locator": "",
+            "type": "addupi",
+        }
+        cls.form_kwargs = {
+            "driver": TestTelemetryAPIClient,
+            "station": "irrelevant",
+        }
+
+    def test_fields_disabled_for_addupi(self):
+        form = EssentialDataForm(data=self.form_args, **self.form_kwargs)
+        self.assertTrue("disabled" in form.fields["data_timezone"].widget.attrs)
+        self.assertTrue(form.fields["data_timezone"].widget.attrs["disabled"])
+
+    def test_fields_enabled_for_other_types(self):
+        self.form_args["type"] = "MeteoView2"
+        form = EssentialDataForm(data=self.form_args, **self.form_kwargs)
+        self.assertFalse(form.fields["data_timezone"].disabled)
 
 
 class ChooseStationFormTestCase(TestCase):
