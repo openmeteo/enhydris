@@ -154,7 +154,7 @@ class GetMeasurementsTestCase(LoggedOnTestCaseBase):
         # 1655193600 is 2022-06-14T08:00 in seconds from the epoch
         mock_requests_get.assert_called_once_with(
             "http://1.2.3.4/addUPI?function=getdata&id=8231&df=time_t"
-            "&date=1655193600&slots=20000&session-id=topsecretsessionid",
+            "&date=1655193600&slots=10000&session-id=topsecretsessionid",
             verify=False,
         )
 
@@ -178,7 +178,7 @@ class GetMeasurementsTestCase(LoggedOnTestCaseBase):
         self.telemetry_api_client.get_measurements(8231, None)
         mock_requests_get.assert_called_once_with(
             "http://1.2.3.4/addUPI?function=getdata&id=8231&df=time_t"
-            "&date=631152000&slots=20000&session-id=topsecretsessionid",
+            "&date=631152000&slots=10000&session-id=topsecretsessionid",
             verify=False,
         )
 

@@ -48,7 +48,7 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
             f"&id={sensor_id}"
             f"&df=time_t"
             f"&date={int(timeseries_end_date.timestamp())}"
-            "&slots=20000"
+            "&slots=10000"
         )
         result = ""
         prev_timestamp = None
