@@ -106,6 +106,10 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
                 # However, the encoding is correctly specified in the XML itself, and
                 # if ElementTree.fromstring() is fed the undecoded response.content,
                 # it reads it correctly.
-                return ElementTree.fromstring(response.content)
+                xmlroot = ElementTree.fromstring(response.content)
+                error = xmlroot.find("error")
+                if error is not None:
+                    raise requests.RequestException(error.attrib["msg"])
+                return xmlroot
             except requests.RequestException as e:
                 raise TelemetryError(str(e))
