@@ -61,6 +61,11 @@ def is_object_station_maintainer(user, obj):
 
 
 @rules.predicate
+def is_object_station_timeseries_data_viewer(user, obj):
+    return user in get_object_station(obj).timeseries_data_viewers.all()
+
+
+@rules.predicate
 def is_superuser(user, obj):
     return user.is_superuser
 
@@ -81,8 +86,13 @@ def users_can_add_content(user, obj):
 
 
 @rules.predicate
-def open_content(user, obj):
-    return settings.ENHYDRIS_OPEN_CONTENT
+def timeseries_data_viewers_enabled(user, obj):
+    return settings.ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS
+
+
+@rules.predicate
+def timeseries_is_publicly_available(user, timeseries):
+    return timeseries.publicly_available
 
 
 @rules.predicate
@@ -143,5 +153,16 @@ rules.add_perm(
     & (model_backend_can_edit_station | is_new_object | is_station_creator),
 )
 
-rules.add_perm("enhydris.view_timeseries_data", open_content | is_active)
-rules.add_perm("enhydris.view_gentityfile_content", open_content | is_active)
+rules.add_perm(
+    "enhydris.view_timeseries_data",
+    timeseries_is_publicly_available
+    | (
+        is_active
+        & (
+            ~timeseries_data_viewers_enabled
+            | is_object_station_creator
+            | is_object_station_maintainer
+            | is_object_station_timeseries_data_viewer
+        )
+    ),
+)

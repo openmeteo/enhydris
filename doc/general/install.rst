@@ -1,4 +1,4 @@
-.. _install:
+. _install:
 
 ==============================
 Installation and configuration
@@ -250,16 +250,41 @@ These are the settings available to Enhydris, in addition to the
    set to ``False`` (the default), only privileged users are allowed to
    add/edit/remove data from the db.
 
-   See also :data:`ENHYDRIS_OPEN_CONTENT`.
+   See also :data:`ENHYDRIS_DEFAULT_PUBLICLY_AVAILABLE` and
+   :data:`ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS`.
 
-.. data:: ENHYDRIS_OPEN_CONTENT
+.. data:: ENHYDRIS_DEFAULT_PUBLICLY_AVAILABLE
 
-   If set to ``True``, users who haven't logged on can view timeseries
-   data and station file (e.g. image) content. Otherwise, only logged on
-   users can do so. Logged on users can always view everything.
+   Time series have a
+   :attr:`enhydris.models.Timeseries.publicly_available` attribute which
+   specifies whether anonymous users can download the time series data.
+   If the attribute is ``False``, only logged on users have this
+   permission (and, again, this depends on
+   :data:`ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS`). The setting
+   specifies the default value for the attribute, that is, whether by
+   default the related checkbox in the form is checked or not. The
+   default for the setting is ``True``, but it is recommended to
+   explicitly set it.
 
-   When this setting is ``False``, ``REGISTRATION_OPEN`` must obviously
-   also be set to ``False``.
+.. data:: ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS
+
+   If this is ``False`` (the default), all logged on users have
+   permission to download the time series data for all time series (for
+   anonymous user there's a
+   :attr:`enhydris.models.Timeseries.publicly_available` attribute for
+   each individual time series; see also
+   :data:`ENHYDRIS_DEFAULT_PUBLICLY_AVAILABLE`). Note that if you want
+   all logged on users to have such permission, but the general public
+   not to, you must also make sure that :data:`REGISTRATION_OPEN` is
+   ``False``.
+
+   If :data:`ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS` is ``True``,
+   logged on users can only view time series data for which they have
+   specifically been given permission. By default, only the station
+   owner and maintainers have such access, but they can specify which
+   other users also have access. Permission to view time series data
+   applies to all time series of a station. Individual time series can
+   again be marked as publicly available.
 
 .. data:: ENHYDRIS_MAP_BASE_LAYERS
 

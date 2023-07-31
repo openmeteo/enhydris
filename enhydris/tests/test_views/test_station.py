@@ -222,15 +222,9 @@ class GentityFileDownloadLinkTestCase(TestCase):
             '<a href="/api/stations/{}/files/{}/content/" aria-label="Download">'
         ).format(self.station.id, self.gentityfile.id)
 
-    @override_settings(ENHYDRIS_OPEN_CONTENT=True)
-    def test_contains_download_link_when_site_content_is_free(self):
+    def test_contains_download_link(self):
         response = self.client.get("/stations/{}/".format(self.station.id))
         self.assertContains(response, self.link)
-
-    @override_settings(ENHYDRIS_OPEN_CONTENT=False)
-    def test_has_no_download_link_when_site_content_is_restricted(self):
-        response = self.client.get("/stations/{}/".format(self.station.id))
-        self.assertNotContains(response, self.link)
 
 
 class StationEditRedirectTestCase(TestCase):
@@ -340,7 +334,7 @@ class ShowOnlySearchedForStationsOnMapTestCase(SeleniumTestCase):
         self.markers.wait_until_exists()
         for i in range(6):
             sleep(0.5)
-            result = len(self.markers.find_elements_by_tag_name("img"))
+            result = len(self.markers.find_elements(By.TAG_NAME, "img"))
             if result:
                 return result
 
@@ -375,7 +369,7 @@ class ShowStationOnStationDetailMapTestCase(SeleniumTestCase):
         self.markers.wait_until_exists()
         for i in range(6):
             sleep(0.5)
-            result = len(self.markers.find_elements_by_tag_name("img"))
+            result = len(self.markers.find_elements(By.TAG_NAME, "img"))
             if result:
                 return result
         return 0

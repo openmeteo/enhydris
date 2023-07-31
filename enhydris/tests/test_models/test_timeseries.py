@@ -9,11 +9,20 @@ from django.db.models.signals import post_save
 from django.test import TestCase
 
 import pandas as pd
+import pytz
 from htimeseries import HTimeseries
 from model_mommy import mommy
 
 from enhydris import models
 from enhydris.tests import ClearCacheMixin, TestTimeseriesMixin
+
+
+def get_tzinfo(tzname):
+    # We use pytz rather than zoneinfo here, because apparently pandas still
+    # occasionally uses pytz, and in this case it has used pytz, and in some Python
+    # versions the comparison of whether the two time zones are identical fails if
+    # one is pytz and the other is zoneinfo, even if they are the same timezone.
+    return pytz.timezone(tzname)
 
 
 class TimeseriesTestCase(TestCase):
@@ -191,7 +200,7 @@ class DataTestCase(TestTimeseriesMixin, TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls._create_test_timeseries("2017-11-23 17:23,1,\n2018-11-25 01:00,2,\n")
-        tzinfo = ZoneInfo("Etc/GMT-2")
+        tzinfo = get_tzinfo("Etc/GMT-2")
         cls.expected_result = pd.DataFrame(
             data={"value": [1.0, 2.0], "flags": ["", ""]},
             columns=["value", "flags"],
@@ -277,7 +286,7 @@ class TimeseriesGetDataInDifferentTimezoneTestCase(DataTestCase):
         cls.data = cls.timeseries.get_data(timezone="Etc/GMT")
 
     def test_data(self):
-        tzinfo = ZoneInfo("Etc/GMT")
+        tzinfo = get_tzinfo("Etc/GMT")
         expected_result = pd.DataFrame(
             data={"value": [1.0, 2.0], "flags": ["", ""]},
             columns=["value", "flags"],
@@ -298,7 +307,7 @@ class TimeseriesGetDataWithNullTestCase(TestTimeseriesMixin, TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls._create_test_timeseries("2017-11-23 17:23,,\n2018-11-25 01:00,2,\n")
-        tzinfo = ZoneInfo("Etc/GMT-2")
+        tzinfo = get_tzinfo("Etc/GMT-2")
         cls.expected_result = pd.DataFrame(
             data={"value": [float("NaN"), 2.0], "flags": ["", ""]},
             columns=["value", "flags"],
@@ -330,7 +339,7 @@ class TimeseriesGetDataWithStartAndEndDateTestCase(DataTestCase):
         """Check self.htimeseries.data against the initial timeseries sliced from
         start_index to end_index.
         """
-        tzinfo = ZoneInfo("Etc/GMT-2")
+        tzinfo = get_tzinfo("Etc/GMT-2")
         full_result = pd.DataFrame(
             data={"value": [1.0, 2.0], "flags": ["", ""]},
             columns=["value", "flags"],
@@ -558,7 +567,7 @@ class TimeseriesAppendDataTestCase(TestTimeseriesMixin, TestCase):
         return result
 
     def _assert_wrote_data(self):
-        tzinfo = ZoneInfo("Etc/GMT-2")
+        tzinfo = get_tzinfo("Etc/GMT-2")
         expected_result = pd.DataFrame(
             data={"value": [42.0, 1.0, 2.0], "flags": ["", "", ""]},
             columns=["value", "flags"],
@@ -584,7 +593,7 @@ class TimeseriesAppendDataToEmptyTimeseriesTestCase(TestTimeseriesMixin, TestCas
         self._assert_wrote_data()
 
     def _get_dataframe(self):
-        tzinfo = ZoneInfo("Etc/GMT-2")
+        tzinfo = get_tzinfo("Etc/GMT-2")
         result = pd.DataFrame(
             data={"value": [1.0, 2.0], "flags": ["", ""]},
             columns=["value", "flags"],

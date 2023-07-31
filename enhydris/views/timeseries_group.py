@@ -16,7 +16,15 @@ class TimeseriesGroupDetail(MapWithSingleStationBaseView):
         context["download_data_form"] = forms.DownloadDataForm(
             timeseries_group=self.object
         )
+        context["timeseries_set"] = self._get_timeseries_set()
         return context
+
+    def _get_timeseries_set(self):
+        result = []
+        for timeseries in self.object.timeseries_set.all():
+            if self.request.user.has_perm("enhydris.view_timeseries_data", timeseries):
+                result.append(timeseries)
+        return result
 
 
 class OldTimeseriesDetailRedirectView(RedirectView):

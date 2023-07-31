@@ -1,0 +1,28 @@
+{% extends "admin/delete_selected_confirmation.html" %}
+{% load i18n l10n %}
+{% block content %}
+    {% if perms_lacking %}
+        <p>{% blocktranslate %}Deleting the selected {{ objects_name }} would result in deleting related objects, but
+            your account doesn't have permission to delete the following types of objects:{% endblocktranslate %}</p>
+        <ul>{{ perms_lacking|unordered_list }}</ul>
+    {% elif protected %}
+        <p>{% blocktranslate %}Deleting the selected {{ objects_name }} would require deleting the following protected
+            related objects:{% endblocktranslate %}</p>
+        <ul>{{ protected|unordered_list }}</ul>
+    {% else %}
+        <p>{% blocktranslate %}Are you sure you want to delete the selected {{ objects_name }}? All objects related to
+            the {{ objects_name }}, including images, events and time series, will also be
+            deleted.{% endblocktranslate %}</p>
+        <form method="post">{% csrf_token %}
+            <div>
+                {% for obj in queryset %}
+                    <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}">
+                {% endfor %}
+                <input type="hidden" name="action" value="delete_selected">
+                <input type="hidden" name="post" value="yes">
+                <input type="submit" value="{% translate 'Yes, I’m sure' %}">
+                <a href="#" class="button cancel-link">{% translate "No, take me back" %}</a>
+            </div>
+        </form>
+    {% endif %}
+{% endblock content %}

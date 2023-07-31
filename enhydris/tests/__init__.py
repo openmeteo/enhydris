@@ -36,7 +36,7 @@ class ClearCacheMixin:
 
 class TestTimeseriesMixin(ClearCacheMixin):
     @classmethod
-    def _create_test_timeseries(cls, data=""):
+    def _create_test_timeseries(cls, data="", publicly_available=None):
         cls.station = mommy.make(
             models.Station,
             name="Celduin",
@@ -54,18 +54,22 @@ class TestTimeseriesMixin(ClearCacheMixin):
             precision=1,
             remarks="This timeseries group rocks",
         )
+        more_kwargs = {}
+        if publicly_available is not None:
+            more_kwargs["publicly_available"] = publicly_available
         cls.timeseries = mommy.make(
             models.Timeseries,
             timeseries_group=cls.timeseries_group,
             type=models.Timeseries.INITIAL,
             time_step="H",
+            **more_kwargs,
         )
         cls.timeseries.set_data(StringIO(data), default_timezone="Etc/GMT-2")
 
 
 class TimeseriesDataMixin(ClearCacheMixin):
     @classmethod
-    def create_timeseries(cls):
+    def create_timeseries(cls, publicly_available=None):
         cls.timezone = "Etc/GMT-2"
         cls.tzinfo = ZoneInfo(cls.timezone)
         cls.htimeseries = HTimeseries()
@@ -95,10 +99,14 @@ class TimeseriesDataMixin(ClearCacheMixin):
             variable=cls.variable,
             unit_of_measurement__symbol="beauton",
         )
+        more_kwargs = {}
+        if publicly_available is not None:
+            more_kwargs["publicly_available"] = publicly_available
         cls.timeseries = mommy.make(
             models.Timeseries,
             type=models.Timeseries.INITIAL,
             timeseries_group=cls.timeseries_group,
+            **more_kwargs,
         )
         cls.timeseries.set_data(cls.htimeseries.data, default_timezone=cls.timezone)
 
