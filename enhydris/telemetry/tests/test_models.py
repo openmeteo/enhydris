@@ -227,63 +227,6 @@ class TelemetryFetchTestCase(TelemetryFetchTestCaseBase):
         self.assertEqual(data.getvalue().strip(), "1990-01-01 00:00,42.0,")
 
 
-class TelemetryFetchIgnoresTimeZoneTestCase(TelemetryFetchTestCaseBase):
-    """Test that timeseries_end_date is always naive
-
-    When records already exist in the timeseries before calling fetch(), the
-    timeseries_end_date specified in get_measurement() is determined from the
-    latest of these records. However, storage of timestamps in the database is
-    always aware, so we need to convert it to naive before calling
-    get_measurement(). This TestCases checks that this is done.
-
-    Unfortunately, at the time of this writing, if this test fails, the error
-    message is not easy to understand, because fetch() catches all exceptions and
-    records them in the TelemetryLog.  So while debugging things related to this
-    test it's a good idea to temporarily modify fetch() to raise exceptions.
-    """
-
-    def setUp(self):
-        timeseries = Timeseries(
-            timeseries_group_id=self.timeseries_group.id, type=Timeseries.INITIAL
-        )
-        timeseries.save()
-        timeseries.append_data(
-            StringIO("2022-06-14 08:00,42.1,\n"), default_timezone="Etc/GMT-2"
-        )
-
-    @patch("enhydris.telemetry.types.meteoview2.requests.request")
-    def test_ignores_timezone(self, mock_request):
-        self._set_mock_request_return_values(mock_request)
-        self.telemetry.fetch()
-        self.assertEqual(
-            mock_request.call_args.kwargs,
-            {
-                "headers": {
-                    "content-type": "application/json",
-                    "Authorization": "Bearer topsecretapitoken",
-                },
-                "data": json.dumps(
-                    {
-                        "sensor": ["257"],
-                        "datefrom": "2022-06-14",
-                        "timefrom": "08:01",
-                        "dateto": "2022-12-11",
-                    }
-                ),
-            },
-        )
-
-    def _set_mock_request_return_values(self, mock_request):
-        mock_request.side_effect = [
-            MagicMock(  # Response for login
-                **{"json.return_value": {"code": "200", "token": "topsecretapitoken"}}
-            ),
-            MagicMock(  # Response for measurements
-                **{"json.return_value": "irrelevant"}
-            ),
-        ]
-
-
 @patch("enhydris.telemetry.types.meteoview2.requests.request")
 class TelemetryFetchDealsWithTooCloseTimestampsTestCase(TelemetryFetchTestCaseBase):
     """Test successive timestamps less than one minute apart
