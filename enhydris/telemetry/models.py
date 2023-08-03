@@ -46,13 +46,8 @@ class Telemetry(models.Model):
         max_length=35,
         blank=True,
         choices=timezone_choices,
-        verbose_name=_("Time zone of the timestamps (useful only for DST switches)"),
-        help_text=_(
-            "If the station switches to Daylight Saving Time, enter the time zone "
-            "here. This is only used in order to know when the DST switches occur. "
-            "The timestamp, after converting to winter time, is entered as is. If "
-            "the station does not switch to DST, leave this field empty."
-        ),
+        verbose_name=_("Time zone of the timestamps"),
+        help_text=_('The time zone of the data, like "Europe/Athens" or "Etc/GMT".'),
     )
     fetch_interval_minutes = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(10), MaxValueValidator(1440)],
@@ -108,8 +103,6 @@ class Telemetry(models.Model):
             timeseries_group_id=sensor.timeseries_group_id, type=Timeseries.INITIAL
         )
         timeseries_end_date = timeseries.end_date
-        if timeseries_end_date is not None:
-            timeseries_end_date = timeseries_end_date.replace(tzinfo=None)
         measurements = self.api_client.get_measurements(
             sensor_id=sensor.sensor_id, timeseries_end_date=timeseries_end_date
         )
