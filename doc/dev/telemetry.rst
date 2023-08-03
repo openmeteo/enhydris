@@ -276,7 +276,7 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
       format`_.
 
       ``enhydris_timeseries_end_date`` is either None (meaning get all
-      measurements since the beginning) or a datetime.
+      measurements since the beginning) or an aware datetime.
 
       In order to avoid loading the server too much, this should not
       return more than a reasonable number of records, such as half a
