@@ -76,7 +76,6 @@ class TelemetryWizardView(PermissionRequiredMixin, View):
             "data_timezone": None,
             "fetch_interval_minutes": None,
             "fetch_offset_minutes": None,
-            "fetch_offset_timezone": None,
             "additional_config": {},
         }
         key = f"telemetry_{self.station.id}"

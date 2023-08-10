@@ -26,7 +26,6 @@ class TelemetryFetchValidatorsTestCase(TestCase):
             type="meteoview2",
             fetch_interval_minutes=10,
             fetch_offset_minutes=10,
-            fetch_offset_timezone="Europe/Athens",
             additional_config="{}",
         )
 
@@ -76,7 +75,6 @@ class TelemetryIsDueTestCase(TestCase):
             type="meteoview2",
             fetch_interval_minutes=10,
             fetch_offset_minutes=10,
-            fetch_offset_timezone="Europe/Athens",
             additional_config="{}",
         )
 
@@ -85,11 +83,11 @@ class TelemetryIsDueTestCase(TestCase):
         self.telemetry.fetch_offset_minutes = fetch_offset_minutes
         self.assertEqual(self.telemetry.is_due, expected_result)
 
-    @freeze_time("2021-11-30 02:05", tz_offset=0)
+    @freeze_time("2021-11-30 00:05", tz_offset=0)
     def test_not_due(self):
         self._check(1440, 125, False)
 
-    @freeze_time("2021-11-30 00:05", tz_offset=0)
+    @freeze_time("2021-11-30 02:05", tz_offset=0)
     def test_is_due_1(self):
         self._check(1440, 125, True)
 
@@ -131,7 +129,6 @@ class TelemetryFetchTestCaseBase(TestCase):
             data_timezone="Europe/Athens",
             fetch_interval_minutes=10,
             fetch_offset_minutes=2,
-            fetch_offset_timezone="Asia/Vladivostok",
             username="someemail@email.com",
             password="topsecret",
             remote_station_id="42a",
