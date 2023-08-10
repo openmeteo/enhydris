@@ -20,7 +20,6 @@ class EssentialDataForm(FormBase, forms.ModelForm):
             "data_timezone",
             "fetch_interval_minutes",
             "fetch_offset_minutes",
-            "fetch_offset_timezone",
         ]
 
     def __init__(self, *args, **kwargs):

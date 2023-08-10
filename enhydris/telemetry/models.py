@@ -64,12 +64,6 @@ class Telemetry(models.Model):
             "The offset generally counts from midnight."
         ),
     )
-    fetch_offset_timezone = models.CharField(
-        max_length=35,
-        choices=timezone_choices,
-        verbose_name=_("Time zone for the fetch time offset"),
-        help_text=_("The time zone to which the fetch time offset refers."),
-    )
     device_locator = models.CharField(max_length=200, blank=True)
     username = models.CharField(max_length=200, blank=True)
     password = models.CharField(max_length=200, blank=True)
@@ -79,7 +73,7 @@ class Telemetry(models.Model):
 
     @property
     def is_due(self):
-        now = dt.datetime.now(tz=zoneinfo.ZoneInfo(self.fetch_offset_timezone))
+        now = dt.datetime.now(tz=dt.timezone.utc)
         current_offset = now.minute + now.hour * 60
         return current_offset % self.fetch_interval_minutes == self.fetch_offset_minutes
 
