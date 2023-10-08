@@ -4,6 +4,7 @@ from io import StringIO
 
 from django.utils.translation import ugettext_lazy as _
 
+import pytz
 import requests
 
 from enhydris.telemetry.types import TelemetryAPIClientBase
@@ -29,7 +30,7 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
 
     def get_stations(self):
         data = self.make_request(
-            "GET",
+            "POST",
             f"{self.api_url}stations",
             headers={"Authorization": f"Bearer {self.token}"},
         )
@@ -74,7 +75,10 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
             day = int(r["day"])
             hour = int(r["hour"])
             minute = int(r["minute"])
-            timestamp = dt.datetime(year, month, day, hour, minute, 0)
+            athens_timezone = pytz.timezone("Europe/Athens")
+            timestamp = dt.datetime(
+                year, month, day, hour, minute, 0, tzinfo=athens_timezone
+            ).astimezone(pytz.utc)
             result += f'{timestamp.isoformat()},{r["mvalue"]},\n'
         return StringIO(result)
 

@@ -224,7 +224,7 @@ class TelemetryFetchTestCase(TelemetryFetchTestCaseBase):
         )
         data = StringIO()
         timeseries.get_data().write(data)
-        self.assertEqual(data.getvalue().strip(), "1990-01-01 00:00,42.0,")
+        self.assertEqual(data.getvalue().strip(), "1989-12-31 22:25,42.0,")
 
 
 @patch("enhydris.telemetry.types.meteoview2.requests.request")
@@ -246,8 +246,7 @@ class TelemetryFetchDealsWithTooCloseTimestampsTestCase(TelemetryFetchTestCaseBa
         result = StringIO()
         self.timeseries_group.default_timeseries.get_data().write(result)
         self.assertEqual(
-            result.getvalue(),
-            "2021-12-14 08:10,1.4,\r\n" "2021-12-14 08:20,1.4,\r\n",
+            result.getvalue(), "2021-12-14 06:35,1.4,\r\n2021-12-14 06:45,1.4,\r\n"
         )
 
     def _set_request_result(self, mock_request):
@@ -325,8 +324,7 @@ class TelemetryLogMessageTestCase(TestCase):
 
     def test_message(self):
         self.assertEqual(
-            TelemetryLogMessage.objects.first().message,
-            "[Errno 104] Connection reset",
+            TelemetryLogMessage.objects.first().message, "[Errno 104] Connection reset"
         )
 
     def test_traceback(self):

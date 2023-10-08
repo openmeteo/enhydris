@@ -91,7 +91,7 @@ class GetStationsTestCase(LoggedOnTestCaseBase):
         self._set_successful_request_result(mock_request)
         self.telemetry_api_client.get_stations()
         mock_request.assert_called_once_with(
-            "GET",
+            "POST",
             "https://meteoview2.gr/api/stations",
             headers={"Authorization": "Bearer topsecretapitoken"},
         )
@@ -162,8 +162,7 @@ class TelemetryFetchIgnoresTimeZoneTestCase(TelemetryFetchTestCaseBase):
 
     def setUp(self):
         timeseries = Timeseries(
-            timeseries_group_id=self.timeseries_group.id,
-            type=Timeseries.INITIAL,
+            timeseries_group_id=self.timeseries_group.id, type=Timeseries.INITIAL
         )
         timeseries.save()
         timeseries.append_data(
@@ -233,7 +232,8 @@ class GetMeasurementsTestCase(LoggedOnTestCaseBase):
         existing_end_date = dt.datetime(2022, 6, 14, 8, 0)
         result = self.telemetry_api_client.get_measurements(8231, existing_end_date)
         self.assertEqual(
-            result.getvalue(), "2022-06-14T08:10:00,1.42,\n2022-06-14T08:20:00,1.43,\n"
+            result.getvalue(),
+            "2022-06-14T06:35:00+00:00,1.42,\n2022-06-14T06:45:00+00:00,1.43,\n",
         )
 
     def test_request_when_no_start_date(self, mock_request):
@@ -317,15 +317,13 @@ class GetMeasurementsTwoRequestsTestCase(LoggedOnTestCaseBase):
         existing_end_date = dt.datetime(2021, 6, 14, 8, 0)
         result = self.telemetry_api_client.get_measurements(8231, existing_end_date)
         self.assertEqual(
-            result.getvalue(), "2021-12-14T08:10:00,1.42,\n2021-12-14T08:20:00,1.43,\n"
+            result.getvalue(),
+            "2021-12-14T06:35:00+00:00,1.42,\n2021-12-14T06:45:00+00:00,1.43,\n",
         )
 
     def _set_successful_request_result(self, mock_request):
         mock_request.return_value.json.side_effect = [
-            {
-                "code": "200",
-                "measurements": [{"total_values": 0}],
-            },
+            {"code": "200", "measurements": [{"total_values": 0}]},
             {
                 "code": "200",
                 "measurements": [
