@@ -17,21 +17,17 @@ class EssentialDataForm(FormBase, forms.ModelForm):
         model = Telemetry
         fields = [
             "type",
-            "data_timezone",
             "fetch_interval_minutes",
             "fetch_offset_minutes",
             "fetch_offset_timezone",
         ]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        telemetry_system_type = self.data.get("type")
-        if telemetry_system_type == "addupi":
-            self.fields["data_timezone"].widget.attrs["disabled"] = True
-            self.fields["data_timezone"].required = False
 
+class ConnectionDataForm(FormBase, forms.ModelForm):
+    class Meta:
+        model = Telemetry
+        fields = ["data_timezone"]
 
-class ConnectionDataForm(FormBase):
     device_locator = forms.CharField(required=False)
     username = forms.CharField()
     password = forms.CharField()
@@ -44,14 +40,23 @@ class ConnectionDataForm(FormBase):
         self.fields["device_locator"].help_text = self.driver.device_locator_help_text
         if self.driver.hide_device_locator:
             self.fields["device_locator"].widget = forms.HiddenInput()
+        if not self.driver.hide_device_locator:
+            self.fields["data_timezone"].widget = forms.HiddenInput()
+            self.fields["data_timezone"].required = False
 
     def clean(self):
         cleaned_data = super().clean()
         try:
+            data_timezone = cleaned_data.get("data_timezone")
             user = cleaned_data.get("username")
             passwd = cleaned_data.get("password")
             loc = cleaned_data.get("device_locator")
-            telemetry = Telemetry(username=user, password=passwd, device_locator=loc)
+            telemetry = Telemetry(
+                data_timezone=data_timezone,
+                username=user,
+                password=passwd,
+                device_locator=loc,
+            )
             api_client = self.driver(telemetry)
             api_client.connect()
         except TelemetryError as e:
