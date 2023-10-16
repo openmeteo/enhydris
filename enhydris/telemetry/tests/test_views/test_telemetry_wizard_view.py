@@ -38,6 +38,10 @@ class RedirectToFirstStepTestCase(TestCase):
                 "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": "10",
                 "fetch_offset_minutes": "2",
+                "fetch_offset_timezone": "Europe/Kiev",
+                "username": "someemail@email.com",
+                "device_locator": "https://1.2.3.4",
+                "remote_station_id": "12",
             },
         )
         response = self.client.get(f"/stations/{self.station.id}/telemetry/2/")
@@ -97,6 +101,9 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
             fetch_interval_minutes=10,
             fetch_offset_minutes=2,
             additional_config="{}",
+            username="someemail@email.com",
+            device_locator="https://1.2.3.4",
+            remote_station_id="12",
         )
 
     @classmethod
@@ -146,6 +153,9 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
             "fetch_interval_minutes": 10,
             "fetch_offset_minutes": 2,
             "additional_config": "{}",
+            "username": "someemail@email.com",
+            "device_locator": "https://1.2.3.4",
+            "remote_station_id": "12",
         }
         self.assertEqual(self.cclient.session[itemkey], expected)
 
@@ -169,6 +179,10 @@ class FirstStepPostTestCase(TestCase):
                 "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": "10",
                 "fetch_offset_minutes": "2",
+                "fetch_offset_timezone": "Europe/Kiev",
+                "username": "someemail@email.com",
+                "device_locator": "https://1.2.3.4",
+                "remote_station_id": "12",
             },
         )
 
@@ -181,14 +195,20 @@ class FirstStepPostTestCase(TestCase):
     def test_type(self):
         self.assertEqual(self._session("type"), "meteoview2")
 
-    def test_data_timezone(self):
-        self.assertEqual(self._session("data_timezone"), "Europe/Athens")
-
     def test_fetch_interval_minutes(self):
         self.assertEqual(self._session("fetch_interval_minutes"), 10)
 
     def test_fetch_offset_minutes(self):
         self.assertEqual(self._session("fetch_offset_minutes"), 2)
+
+    def test_user_name(self):
+        self.assertEqual(self._session("username"), None)
+
+    def test_device_locator(self):
+        self.assertEqual(self._session("device_locator"), None)
+
+    def test_remote_station_id(self):
+        self.assertEqual(self._session("remote_station_id"), "0")
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
@@ -238,6 +258,9 @@ class SecondStepGetMixin:
                 "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": "10",
                 "fetch_offset_minutes": "2",
+                "fetch_offset_timezone": "Europe/Kiev",
+                "username": "someemail@email.com",
+                "device_locator": "https://1.2.3.4",
             },
         )
 
@@ -285,12 +308,26 @@ class SecondStepGetWithNondefaultConfigurationTestCase(SecondStepGetMixin, TestC
     @classmethod
     def _make_request_for_step_2(cls):
         session = cls.cclient.session
-        session[f"telemetry_{cls.station.id}"] = {"type": "addupi"}
+        session[f"telemetry_{cls.station.id}"] = {
+            "type": "addupi",
+            "device_locator": "https://1.2.3.4",
+            "username": "someemail@email.com",
+        }
         session.save()
         super()._make_request_for_step_2()
 
     def test_form_created_with_the_correct_configuration(self):
         self.assertEqual(self._template_context["form"].initial["type"], "addupi")
+
+    def test_form_created_with_the_correct_configration_username(self):
+        self.assertEqual(
+            self._template_context["form"].initial["username"], "someemail@email.com"
+        )
+
+    def test_form_created_with_the_correct_configration_device_locator(self):
+        self.assertEqual(
+            self._template_context["form"].initial["device_locator"], "https://1.2.3.4"
+        )
 
 
 class SecondStepPostMixin:
@@ -313,7 +350,6 @@ class SecondStepPostMixin:
             f"/stations/{cls.station.id}/telemetry/1/",
             {
                 "type": "meteoview2",
-                "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": "10",
                 "fetch_offset_minutes": "2",
             },
@@ -344,8 +380,7 @@ class SecondStepPostWithErrorTestCase(SecondStepPostMixin, TestCase):
         )
         with p1:
             cls.response = cls.cclient.post(
-                f"/stations/{cls.station.id}/telemetry/2/",
-                data={"invalid": "data"},
+                f"/stations/{cls.station.id}/telemetry/2/", data={"invalid": "data"}
             )
 
     def test_status_code(self):
@@ -366,6 +401,7 @@ class SecondStepPostSuccessfulMixin(SecondStepPostMixin):
             cls.response = cls.cclient.post(
                 f"/stations/{cls.station.id}/telemetry/2/",
                 data={
+                    "data_timezone": "Europe/Athens",
                     "username": "someemail@email.com",
                     "password": "topsecret",
                 },
@@ -386,11 +422,12 @@ class SecondStepPostSuccessfulTestCase(SecondStepPostSuccessfulMixin, TestCase):
             self.cclient.session[f"telemetry_{self.station.id}"],
             {
                 "type": "meteoview2",
-                "data_timezone": "Europe/Athens",
+                "data_timezone": "",
                 "fetch_interval_minutes": 10,
                 "fetch_offset_minutes": 2,
                 "username": "someemail@email.com",
                 "password": "topsecret",
+                "remote_station_id": "0",
                 "device_locator": "",
                 "additional_config": {},
             },
@@ -467,6 +504,8 @@ class NextOrFinishButtonTestCase(TestCase):
             fetch_interval_minutes=10,
             fetch_offset_minutes=0,
             additional_config={},
+            device_locator="https://1.2.3.4",
+            username="someemail@email.com",
         )
 
     def setUp(self):
@@ -480,6 +519,8 @@ class NextOrFinishButtonTestCase(TestCase):
             "data_timezone": "Europe/Athens",
             "fetch_interval_minutes": "10",
             "fetch_offset_minutes": "2",
+            "fetch_offset_timezone": "Europe/Kiev",
+            "device_locator": "https://1.2.3.4",
         }
         session.save()
 

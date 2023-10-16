@@ -32,6 +32,7 @@ class TelemetryWizardView(PermissionRequiredMixin, View):
         return self.station
 
     def dispatch(self, request, *, station_id, seq):
+
         self.request = request
         self.station = Station.objects.get(pk=station_id)
         self.seq = seq
@@ -77,16 +78,23 @@ class TelemetryWizardView(PermissionRequiredMixin, View):
             "fetch_interval_minutes": None,
             "fetch_offset_minutes": None,
             "additional_config": {},
+            "username": None,
+            "device_locator": None,
+            "remote_station_id": "0",
         }
         key = f"telemetry_{self.station.id}"
         try:
             telemetry = Telemetry.objects.get(station=self.station)
+            sensors_data = Sensor.objects.filter(telemetry=telemetry)
+            data_set = {var: getattr(telemetry, var) for var in default_data}
+            for sensor_data in sensors_data:
+                data_set.update(
+                    {f"sensor_{sensor_data.sensor_id}": sensor_data.timeseries_group.id}
+                )
         except Telemetry.DoesNotExist:
             self.request.session[key] = default_data
             return
-        self.request.session[key] = {
-            var: getattr(telemetry, var) for var in default_data
-        }
+        self.request.session[key] = data_set
 
     def _check_permission(self):
         if not self.has_permission():
