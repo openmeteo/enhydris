@@ -93,6 +93,9 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
             fetch_interval_minutes=10,
             fetch_offset_minutes=2,
             additional_config="{}",
+            username="someemail@email.com",
+            device_locator="https://1.2.3.4",
+            remote_station_id="12",
         )
 
     @classmethod
@@ -132,6 +135,9 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
             "fetch_interval_minutes": 10,
             "fetch_offset_minutes": 2,
             "additional_config": "{}",
+            "username": "someemail@email.com",
+            "device_locator": "https://1.2.3.4",
+            "remote_station_id": "12",
         }
         self.assertEqual(self.cclient.session[itemkey], expected)
 
@@ -217,7 +223,6 @@ class SecondStepGetMixin:
             f"/stations/{cls.station.id}/telemetry/1/",
             {
                 "type": "meteoview2",
-                "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": "10",
                 "fetch_offset_minutes": "2",
             },
@@ -267,12 +272,26 @@ class SecondStepGetWithNondefaultConfigurationTestCase(SecondStepGetMixin, TestC
     @classmethod
     def _make_request_for_step_2(cls):
         session = cls.cclient.session
-        session[f"telemetry_{cls.station.id}"] = {"type": "addupi"}
+        session[f"telemetry_{cls.station.id}"] = {
+            "type": "addupi",
+            "device_locator": "https://1.2.3.4",
+            "username": "someemail@email.com",
+        }
         session.save()
         super()._make_request_for_step_2()
 
-    def test_form_created_with_the_correct_configuration(self):
+    def test_form_created_with_correct_type(self):
         self.assertEqual(self._template_context["form"].initial["type"], "addupi")
+
+    def test_form_created_with_correct_username(self):
+        self.assertEqual(
+            self._template_context["form"].initial["username"], "someemail@email.com"
+        )
+
+    def test_form_created_with_correct_device_locator(self):
+        self.assertEqual(
+            self._template_context["form"].initial["device_locator"], "https://1.2.3.4"
+        )
 
 
 class SecondStepPostMixin:
@@ -295,7 +314,6 @@ class SecondStepPostMixin:
             f"/stations/{cls.station.id}/telemetry/1/",
             {
                 "type": "meteoview2",
-                "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": "10",
                 "fetch_offset_minutes": "2",
             },
@@ -348,6 +366,7 @@ class SecondStepPostSuccessfulMixin(SecondStepPostMixin):
             cls.response = cls.cclient.post(
                 f"/stations/{cls.station.id}/telemetry/2/",
                 data={
+                    "data_timezone": "Europe/Athens",
                     "username": "someemail@email.com",
                     "password": "topsecret",
                     "data_timezone": "Europe/Athens",
@@ -374,6 +393,7 @@ class SecondStepPostSuccessfulTestCase(SecondStepPostSuccessfulMixin, TestCase):
                 "fetch_offset_minutes": 2,
                 "username": "someemail@email.com",
                 "password": "topsecret",
+                "remote_station_id": "",
                 "device_locator": "",
                 "additional_config": {},
             },
