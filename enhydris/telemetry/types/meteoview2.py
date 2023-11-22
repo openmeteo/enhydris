@@ -29,7 +29,7 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
 
     def get_stations(self):
         data = self.make_request(
-            "GET",
+            "POST",
             f"{self.api_url}stations",
             headers={"Authorization": f"Bearer {self.token}"},
         )
