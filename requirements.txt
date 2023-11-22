@@ -2,7 +2,7 @@ Django>=3.2,<4
 djangorestframework>=3.9,<4
 gdal>=1.6
 iso8601
-htimeseries>=4,<5
+htimeseries>=5,<6
 pytz
 rules>=2.0
 dj-rest-auth==2.1.7

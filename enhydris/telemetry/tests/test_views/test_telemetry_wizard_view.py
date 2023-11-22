@@ -70,10 +70,6 @@ class CopyTelemetryDataFromDatabaseToSessionTestCase(TestCase):
         option_empty = self.soup.find(id="id_type").find("option", value="meteoview2")
         self.assertIsNone(option_empty.get("selected"))
 
-    def test_default_data_timezone_is_empty(self):
-        option_empty = self.soup.find(id="id_data_timezone").find("option", value="")
-        self.assertEqual(option_empty.get("selected"), "")
-
     def test_default_fetch_interval_minutes_is_empty(self):
         fetch_interval_minutes = self.soup.find(id="id_fetch_interval_minutes")
         self.assertIsNone(fetch_interval_minutes.get("value"))
@@ -120,16 +116,6 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
         )
         self.assertEqual(option_meteoview2.get("selected"), "")
 
-    def test_empty_data_timezone_is_not_selected(self):
-        option_empty = self.soup.find(id="id_data_timezone").find("option", value="")
-        self.assertIsNone(option_empty.get("selected"))
-
-    def test_default_data_timezone_is_meteoview2(self):
-        option_europe_athens = self.soup.find(id="id_data_timezone").find(
-            "option", value="Europe/Athens"
-        )
-        self.assertEqual(option_europe_athens.get("selected"), "")
-
     def test_default_fetch_interval_minutes_is_10(self):
         fetch_interval_minutes = self.soup.find(id="id_fetch_interval_minutes")
         self.assertEqual(fetch_interval_minutes["value"], "10")
@@ -166,7 +152,6 @@ class FirstStepPostTestCase(TestCase):
             f"/stations/{cls.station.id}/telemetry/1/",
             {
                 "type": "meteoview2",
-                "data_timezone": "Europe/Athens",
                 "fetch_interval_minutes": "10",
                 "fetch_offset_minutes": "2",
             },
@@ -180,9 +165,6 @@ class FirstStepPostTestCase(TestCase):
 
     def test_type(self):
         self.assertEqual(self._session("type"), "meteoview2")
-
-    def test_data_timezone(self):
-        self.assertEqual(self._session("data_timezone"), "Europe/Athens")
 
     def test_fetch_interval_minutes(self):
         self.assertEqual(self._session("fetch_interval_minutes"), 10)
@@ -368,6 +350,7 @@ class SecondStepPostSuccessfulMixin(SecondStepPostMixin):
                 data={
                     "username": "someemail@email.com",
                     "password": "topsecret",
+                    "data_timezone": "Europe/Athens",
                 },
             )
 

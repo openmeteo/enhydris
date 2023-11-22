@@ -24,22 +24,4 @@
       <button class="btn btn-primary" type="submit">{% if seq == max_seq %}{% trans "Finish" %}{% else %}{% trans "Next" %}{% endif %}</button>
     </form>
   </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const typeField = document.getElementById('id_type');
-
-            function handleTypeFieldChange() {
-                const selectedType = typeField.value;
-                if (selectedType === 'addupi') {
-                    document.getElementById('id_data_timezone').parentNode.style.display = 'none';
-                    document.getElementById('id_data_timezone').value = 'UTC';
-                } else {
-                    document.getElementById('id_data_timezone').parentNode.style.display = 'block';
-                }
-            }
-
-            handleTypeFieldChange();
-            typeField.addEventListener('change', handleTypeFieldChange);
-        });
-    </script>
 {% endblock %}

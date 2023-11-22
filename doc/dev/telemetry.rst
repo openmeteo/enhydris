@@ -221,6 +221,15 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
       location for all stations, such as Metrica MeteoView2 or
       TheThingsNetwork.
 
+   .. attribute:: hide_data_timezone
+      :type: boolean
+
+      The default is :const:`False`. Set it to :const:`True` if that
+      particular driver shouldn't show the device locator (i.e. the URL
+      or hostname or IP address of the device) in the data form. This is
+      useful for APIs that are known to always provide timestamps in a
+      given time zone.
+
    .. method:: connect() -> None
 
       Initiates connection to the API and logs on. Should raise
