@@ -91,7 +91,7 @@ class GetStationsTestCase(LoggedOnTestCaseBase):
         self._set_successful_request_result(mock_request)
         self.telemetry_api_client.get_stations()
         mock_request.assert_called_once_with(
-            "GET",
+            "POST",
             "https://meteoview2.gr/api/stations",
             headers={"Authorization": "Bearer topsecretapitoken"},
         )

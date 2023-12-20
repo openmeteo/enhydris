@@ -2,7 +2,7 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 from enhydris.telemetry import TelemetryError
-from enhydris.telemetry.models import Telemetry
+from enhydris.telemetry.models import Telemetry, timezone_choices
 
 
 class FormBase(forms.Form):
@@ -17,22 +17,14 @@ class EssentialDataForm(FormBase, forms.ModelForm):
         model = Telemetry
         fields = [
             "type",
-            "data_timezone",
             "fetch_interval_minutes",
             "fetch_offset_minutes",
-            "fetch_offset_timezone",
         ]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        telemetry_system_type = self.data.get("type")
-        if telemetry_system_type == "addupi":
-            self.fields["data_timezone"].widget.attrs["disabled"] = True
-            self.fields["data_timezone"].required = False
 
 
 class ConnectionDataForm(FormBase):
     device_locator = forms.CharField(required=False)
+    data_timezone = forms.ChoiceField(choices=timezone_choices)
     username = forms.CharField()
     password = forms.CharField()
 
@@ -44,14 +36,18 @@ class ConnectionDataForm(FormBase):
         self.fields["device_locator"].help_text = self.driver.device_locator_help_text
         if self.driver.hide_device_locator:
             self.fields["device_locator"].widget = forms.HiddenInput()
+        if self.driver.hide_data_timezone:
+            self.fields["data_timezone"].widget = forms.HiddenInput()
+            self.fields["data_timezone"].required = False
 
     def clean(self):
         cleaned_data = super().clean()
         try:
-            user = cleaned_data.get("username")
-            passwd = cleaned_data.get("password")
-            loc = cleaned_data.get("device_locator")
-            telemetry = Telemetry(username=user, password=passwd, device_locator=loc)
+            telemetry = Telemetry(
+                username=cleaned_data.get("username"),
+                password=cleaned_data.get("password"),
+                device_locator=cleaned_data.get("device_locator"),
+            )
             api_client = self.driver(telemetry)
             api_client.connect()
         except TelemetryError as e:

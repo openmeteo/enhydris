@@ -16,6 +16,7 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
         'Use "https://hostname:port" or "https://hostname". You can use http instead '
         "of https, but it is not recommended."
     )
+    hide_data_timezone = True
 
     def connect(self):
         u = self.telemetry.username

@@ -10,7 +10,6 @@ from enhydris.telemetry.forms import (
     ChooseSensorForm,
     ChooseStationForm,
     ConnectionDataForm,
-    EssentialDataForm,
 )
 
 TestTelemetryAPIClient = MagicMock()
@@ -77,7 +76,7 @@ class ConnectionDataFormTestCase(TestCase):
         self.assertEqual(self.form.fields["device_locator"].help_text, "Do it!")
 
 
-class ConnectionDataFormHideDeviceLocatorTestCase(TestCase):
+class ConnectionDataFormHideStuffTestCase(TestCase):
     @classmethod
     def setUpClass(self):
         super().setUpClass()
@@ -93,8 +92,10 @@ class ConnectionDataFormHideDeviceLocatorTestCase(TestCase):
 
     def setUp(self):
         self.saved_hide_device_locator = TestTelemetryAPIClient.hide_device_locator
+        self.saved_hide_data_timezone = TestTelemetryAPIClient.hide_data_timezone
 
     def tearDown(self):
+        TestTelemetryAPIClient.hide_data_timezone = self.saved_hide_data_timezone
         TestTelemetryAPIClient.hide_device_locator = self.saved_hide_device_locator
 
     def test_device_locator_hidden(self):
@@ -111,33 +112,17 @@ class ConnectionDataFormHideDeviceLocatorTestCase(TestCase):
             form.fields["device_locator"].widget.__class__.__name__, "TextInput"
         )
 
+    def test_data_timezone_hidden(self):
+        TestTelemetryAPIClient.hide_data_timezone = True
+        form = ConnectionDataForm(*self.form_args, **self.form_kwargs)
+        widget_class_name = form.fields["data_timezone"].widget.__class__.__name__
+        self.assertEqual(widget_class_name, "HiddenInput")
 
-class EssentialDataFormTestCase(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.username = "enhydris"
-        cls.password = "enhydris_123"
-        cls.form_args = {
-            "username": cls.username,
-            "password": cls.password,
-            "device_locator": "",
-            "type": "addupi",
-        }
-        cls.form_kwargs = {
-            "driver": TestTelemetryAPIClient,
-            "station": "irrelevant",
-        }
-
-    def test_fields_disabled_for_addupi(self):
-        form = EssentialDataForm(data=self.form_args, **self.form_kwargs)
-        self.assertTrue("disabled" in form.fields["data_timezone"].widget.attrs)
-        self.assertTrue(form.fields["data_timezone"].widget.attrs["disabled"])
-
-    def test_fields_enabled_for_other_types(self):
-        self.form_args["type"] = "MeteoView2"
-        form = EssentialDataForm(data=self.form_args, **self.form_kwargs)
-        self.assertFalse(form.fields["data_timezone"].disabled)
+    def test_data_timezone_not_hidden(self):
+        TestTelemetryAPIClient.hide_data_timezone = False
+        form = ConnectionDataForm(*self.form_args, **self.form_kwargs)
+        widget_class_name = form.fields["data_timezone"].widget.__class__.__name__
+        self.assertEqual(widget_class_name, "Select")
 
 
 class ChooseStationFormTestCase(TestCase):

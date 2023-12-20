@@ -75,16 +75,7 @@ Models
       is 125, then data will be fetched every day at 02:05 in the
       morning. Generally
       :attr:`~enhydris.telemetry.models.Telemetry.fetch_offset_minutes`
-      counts from midnight.
-
-   .. attribute:: fetch_offset_timezone
-      :type: CharField
-
-      The time zone to which
-      :attr:`~enhydris.telemetry.models.Telemetry.fetch_offset_minutes`
-      refers; a `tz database name`_ such as ``Europe/Athens``.
-
-      .. _tz database name: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      counts from midnight UTC.
 
    .. attribute:: device_locator
       :type: string
@@ -125,7 +116,6 @@ Models
       :const:`True` if according to
       :attr:`~enhydris.telemetry.models.Telemetry.fetch_interval_minutes`,
       :attr:`~enhydris.telemetry.models.Telemetry.fetch_offset_minutes`,
-      :attr:`~enhydris.telemetry.models.Telemetry.fetch_offset_timezone`
       and the current system time it's time to fetch data.
 
    .. method:: fetch() -> None
@@ -230,6 +220,15 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
       form. This is useful for APIs that are served from a well-known
       location for all stations, such as Metrica MeteoView2 or
       TheThingsNetwork.
+
+   .. attribute:: hide_data_timezone
+      :type: boolean
+
+      The default is :const:`False`. Set it to :const:`True` if that
+      particular driver shouldn't show the device locator (i.e. the URL
+      or hostname or IP address of the device) in the data form. This is
+      useful for APIs that are known to always provide timestamps in a
+      given time zone.
 
    .. method:: connect() -> None
 
