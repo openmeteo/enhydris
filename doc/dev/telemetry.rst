@@ -230,6 +230,9 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
       useful for APIs that are known to always provide timestamps in a
       given time zone.
 
+      If :const:`True`, the timestamps in the return value of
+      :meth:`get_measurements` must be in UTC.
+
    .. method:: connect() -> None
 
       Initiates connection to the API and logs on. Should raise
