@@ -12,33 +12,33 @@ Development
 Upgrading from 3.0
 ------------------
 
- 1. Make sure you are upgrading from 3.0
- 2. Fix any time zone errors, as described in the appropriate section
-    below.
- 3. Backup the database.
- 4. Login as a superuser and go to the dashboard.
- 5. Go to "Sites" and make sure they're set correctly.
- 6. In the settings, make sure ``SITE_ID`` is set correctly.
- 7. In the settings, remove setting `ENHYDRIS_OPEN_CONTENT` and instead
-    set :data:`ENHYDRIS_DEFAULT_PUBLICLY_AVAILABLE` and
-    :data:`ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS`.  Note that, during
-    migration, the new :attr:`publicly_available` attribute will be set
-    on existing time series to the value of
-    :data:`ENHYDRIS_DEFAULT_PUBLICLY_AVAILABLE`.
- 8. Update the database with ``python manage.py migrate``. This will put
-    all stations to the site specified with ``SITE_ID``, and will add
-    all users to the group whose name is the domain of the current site
-    (the group will be created automatically if it does not exist).
- 9. If you have been using a single database to power many sites, then:
-     * In the settings, make sure :data:`ENHYDRIS_SITES_FOR_NEW_STATIONS`
-       is set correctly. Restart the server if necessary.
-     * Logon as a superuser and go to the dashboard
-     * Go to each of the stations that used to be specified by
-       ``ENHYDRIS_SITE_STATION_FILTER`` and make sure the "Sites" field
-       is set correctly.
-     * If any users need to be able to log on to a different site from
-       the one where you performed the database update, go to each of
-       these users and put them in the appropriate groups.
+1. Make sure you are upgrading from 3.0
+2. Fix any time zone errors, as described in the appropriate section
+   below.
+3. Backup the database.
+4. Login as a superuser and go to the dashboard.
+5. Go to "Sites" and make sure they're set correctly.
+6. In the settings, make sure ``SITE_ID`` is set correctly.
+7. In the settings, remove setting `ENHYDRIS_OPEN_CONTENT` and instead
+   set :data:`ENHYDRIS_DEFAULT_PUBLICLY_AVAILABLE` and
+   :data:`ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS`.  Note that, during
+   migration, the new :attr:`publicly_available` attribute will be set
+   on existing time series to the value of
+   :data:`ENHYDRIS_DEFAULT_PUBLICLY_AVAILABLE`.
+8. Update the database with ``python manage.py migrate``. This will put
+   all stations to the site specified with ``SITE_ID``, and will add
+   all users to the group whose name is the domain of the current site
+   (the group will be created automatically if it does not exist).
+9. If you have been using a single database to power many sites, then:
+    * In the settings, make sure :data:`ENHYDRIS_SITES_FOR_NEW_STATIONS`
+      is set correctly. Restart the server if necessary.
+    * Logon as a superuser and go to the dashboard
+    * Go to each of the stations that used to be specified by
+      ``ENHYDRIS_SITE_STATION_FILTER`` and make sure the "Sites" field
+      is set correctly.
+    * If any users need to be able to log on to a different site from
+      the one where you performed the database update, go to each of
+      these users and put them in the appropriate groups.
 10. Restart the server.
 
 Changes from 3.0

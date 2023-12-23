@@ -44,7 +44,7 @@ class Telemetry(models.Model):
     )
     data_timezone = models.CharField(
         max_length=35,
-        blank=True,
+        default="UTC",
         choices=timezone_choices,
         verbose_name=_("Time zone of the timestamps"),
         help_text=_('The time zone of the data, like "Europe/Athens" or "Etc/GMT".'),
