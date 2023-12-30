@@ -118,6 +118,11 @@ class ConnectionDataFormHideStuffTestCase(TestCase):
         widget_class_name = form.fields["data_timezone"].widget.__class__.__name__
         self.assertEqual(widget_class_name, "HiddenInput")
 
+    def test_data_timezone_hidden_value(self):
+        TestTelemetryAPIClient.hide_data_timezone = True
+        form = ConnectionDataForm(*self.form_args, **self.form_kwargs)
+        self.assertEqual(form.fields["data_timezone"].widget.attrs["value"], "UTC")
+
     def test_data_timezone_not_hidden(self):
         TestTelemetryAPIClient.hide_data_timezone = False
         form = ConnectionDataForm(*self.form_args, **self.form_kwargs)

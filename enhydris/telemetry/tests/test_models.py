@@ -7,6 +7,7 @@ from io import StringIO
 from unittest.mock import MagicMock, patch
 
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.test import TestCase
 
 from freezegun import freeze_time
@@ -15,6 +16,19 @@ from model_mommy import mommy
 import enhydris
 from enhydris.models import Station, Timeseries, TimeseriesGroup
 from enhydris.telemetry.models import Telemetry, TelemetryLogMessage, fix_zone_name
+
+
+class TelemetryTestCase(TestCase):
+    def test_cannot_save_wrong_data_timezone(self):
+        with self.assertRaisesRegex(IntegrityError, "'' is not a valid time zone"):
+            Telemetry.objects.create(
+                station=mommy.make(Station),
+                type="meteoview2",
+                fetch_interval_minutes=10,
+                fetch_offset_minutes=2,
+                additional_config="{}",
+                data_timezone="",
+            )
 
 
 class TelemetryFetchValidatorsTestCase(TestCase):
