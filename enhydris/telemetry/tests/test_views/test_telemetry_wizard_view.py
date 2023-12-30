@@ -369,7 +369,6 @@ class SecondStepPostSuccessfulMixin(SecondStepPostMixin):
                     "data_timezone": "Europe/Athens",
                     "username": "someemail@email.com",
                     "password": "topsecret",
-                    "data_timezone": "Europe/Athens",
                 },
             )
 

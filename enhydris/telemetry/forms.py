@@ -37,7 +37,9 @@ class ConnectionDataForm(FormBase):
         if self.driver.hide_device_locator:
             self.fields["device_locator"].widget = forms.HiddenInput()
         if self.driver.hide_data_timezone:
-            self.fields["data_timezone"].widget = forms.HiddenInput()
+            self.fields["data_timezone"].widget = forms.HiddenInput(
+                attrs={"value": "UTC"}
+            )
             self.fields["data_timezone"].required = False
 
     def clean(self):

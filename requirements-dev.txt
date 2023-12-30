@@ -3,6 +3,5 @@ django-cors-headers
 sphinx>=4
 django-selenium-clean>=1,<2
 beautifulsoup4>=4.4
-celery>=4,<5
 freezegun>=1.1,<2
 parameterized>=0.9.0,<1

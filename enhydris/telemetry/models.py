@@ -7,7 +7,7 @@ from io import StringIO
 from traceback import print_tb
 
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import IntegrityError, models
 from django.utils.translation import ugettext_lazy as _
 
 import iso8601
@@ -116,6 +116,14 @@ class Telemetry(models.Model):
             prev_timestamp = cur_timestamp
         result.seek(0)
         return result
+
+    def _check_data_timezone(self):
+        if self.data_timezone not in [choice[0] for choice in timezone_choices]:
+            raise IntegrityError(f"'{self.data_timezone}' is not a valid time zone")
+
+    def save(self, *args, **kwargs):
+        self._check_data_timezone()
+        super().save(*args, **kwargs)
 
 
 class Sensor(models.Model):
