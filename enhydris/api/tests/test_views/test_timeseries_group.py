@@ -7,6 +7,7 @@ from model_mommy import mommy
 from enhydris import models
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesGroupListTestCase(APITestCase):
     def setUp(self):
         self.station = mommy.make(models.Station, name="Hobbiton")
@@ -28,6 +29,7 @@ class TimeseriesGroupListTestCase(APITestCase):
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesGroupPostTestCase(APITestCase):
     def setUp(self):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)

@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, mock_open, patch
 
 from django.db.models.fields.files import FieldFile
+from django.test import override_settings
 from rest_framework.test import APITestCase
 
 from model_mommy import mommy
@@ -8,6 +9,7 @@ from model_mommy import mommy
 from enhydris import models
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class GentityFileTestCase(APITestCase):
     def setUp(self):
         self.station = mommy.make(models.Station)
@@ -48,6 +50,7 @@ class GentityFileTestCase(APITestCase):
         self.assertEqual(r.status_code, 404)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class GentityFileContentTestCase(APITestCase):
     def setUp(self):
         # Mocking. We mock several things in Django and Python so that:
@@ -82,6 +85,7 @@ class GentityFileContentTestCase(APITestCase):
         self.assertEqual(self.response["Content-Type"], "image/jpeg")
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class GentityFileContentWithoutFileTestCase(APITestCase):
     def setUp(self):
         # Mommy creates a GentityFile without an associated file, so the

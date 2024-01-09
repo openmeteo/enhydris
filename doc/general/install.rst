@@ -236,6 +236,22 @@ These are the settings available to Enhydris, in addition to the
 
 .. _django settings: http://docs.djangoproject.com/en/3.2/ref/settings/
 
+Authentication settings
+-----------------------
+
+.. data:: ENHYDRIS_REQUIRE_AUTHENTICATION
+
+   If ``True``, users must be logged on to do anything, such as view a
+   list of stations. All API views except for login will return 401, and
+   all non-API views except for login will redirect to the login page.
+   In that case, :attr:`enhydris.models.Timeseries.publicly_available`
+   and :data:`ENHYDRIS_DEFAULT_PUBLICLY_AVAILABLE` will obviously not
+   have any effect. :data:`REGISTRATION_OPEN` will also not work
+   (because the registration page will also redirect to the login page),
+   but it should be kept at ``False``.
+
+   The default for ``ENHYDRIS_REQUIRE_AUTHENTICATION`` is ``False``.
+
 .. data:: REGISTRATION_OPEN
 
    If ``True``, users can register, otherwise they have to be created
@@ -270,7 +286,7 @@ These are the settings available to Enhydris, in addition to the
 
    If this is ``False`` (the default), all logged on users have
    permission to download the time series data for all time series (for
-   anonymous user there's a
+   anonymous users there's a
    :attr:`enhydris.models.Timeseries.publicly_available` attribute for
    each individual time series; see also
    :data:`ENHYDRIS_DEFAULT_PUBLICLY_AVAILABLE`). Note that if you want
@@ -285,6 +301,9 @@ These are the settings available to Enhydris, in addition to the
    other users also have access. Permission to view time series data
    applies to all time series of a station. Individual time series can
    again be marked as publicly available.
+
+Map settings
+------------
 
 .. data:: ENHYDRIS_MAP_BASE_LAYERS
 
@@ -317,7 +336,7 @@ These are the settings available to Enhydris, in addition to the
 .. data:: ENHYDRIS_MAP_DEFAULT_BASE_LAYER
 
    The name of the base layer that is visible by default; it must be a key in
-   data:`ENHYDRIS_MAP_BASE_LAYERS`. The default is "Open Street Map".
+   :data:`ENHYDRIS_MAP_BASE_LAYERS`. The default is "Open Street Map".
 
 .. data:: ENHYDRIS_MAP_MIN_VIEWPORT_SIZE
 
@@ -335,6 +354,9 @@ These are the settings available to Enhydris, in addition to the
    anything.  Format is (minlon, minlat, maxlon, maxlat) where lon and
    lat is in decimal degrees, positive for north/east, negative for
    west/south.
+
+Miscellaneous settings
+----------------------
 
 .. data:: ENHYDRIS_SITES_FOR_NEW_STATIONS
 

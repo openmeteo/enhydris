@@ -55,6 +55,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.middleware.gzip.GZipMiddleware",
+    "enhydris.middleware.GlobalLoginRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.contrib.flatpages.middleware.FlatpageFallbackMiddleware",
     "crequest.middleware.CrequestMiddleware",
@@ -122,6 +123,7 @@ REGISTRATION_OPEN = False
 # https://github.com/mbi/django-simple-captcha/issues/84
 CAPTCHA_TEST_MODE = len(sys.argv) > 1 and sys.argv[1] == "test"
 
+ENHYDRIS_AUTHENTICATION_REQUIRED = False
 ENHYDRIS_USERS_CAN_ADD_CONTENT = False
 ENHYDRIS_DEFAULT_PUBLICLY_AVAILABLE = True
 ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS = False

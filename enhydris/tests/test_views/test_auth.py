@@ -6,6 +6,7 @@ from django.test import TransactionTestCase, override_settings
 
 # NOTE: For an explanation of how captchas work in the tests, see CAPTCHA_TEST_MODE
 # in settings.py.
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class RegisterTestCase(TransactionTestCase):
     available_apps = [
         "django.contrib.auth",

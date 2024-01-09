@@ -15,6 +15,7 @@ from enhydris.telemetry.views import TelemetryWizardView
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class RedirectToFirstStepTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -45,6 +46,7 @@ class RedirectToFirstStepTestCase(TestCase):
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class CopyTelemetryDataFromDatabaseToSessionTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -80,6 +82,7 @@ class CopyTelemetryDataFromDatabaseToSessionTestCase(TestCase):
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -143,6 +146,7 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class FirstStepPostTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -180,6 +184,7 @@ class FirstStepPostTestCase(TestCase):
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class FirstStepPostErrorTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -265,6 +270,7 @@ class SecondStepGetTestCase(SecondStepGetMixin, TestCase):
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class SecondStepGetWithNondefaultConfigurationTestCase(SecondStepGetMixin, TestCase):
     # This is essentially the same as
     # SecondStepGetTestCase.test_form_created_with_the_correct_configuration, except
@@ -331,6 +337,7 @@ class MockResponse(requests.Response):
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class SecondStepPostWithErrorTestCase(SecondStepPostMixin, TestCase):
     @classmethod
     def _post_step_2(cls):
@@ -415,6 +422,7 @@ class FinalStepPostSuccessfulMixin(SecondStepPostSuccessfulMixin):
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class FinalStepPostSuccessfulTestCase(FinalStepPostSuccessfulMixin, TestCase):
     def test_saves_stuff_in_database(self):
         telemetry = Telemetry.objects.get(station=self.station)
@@ -453,6 +461,7 @@ class FinalStepPostSuccessfulReplacesExistingTelemetryTestCase(
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 @patch(
     "enhydris.telemetry.types.meteoview2.requests.request",
     return_value=MockResponse(
@@ -506,6 +515,7 @@ class NextOrFinishButtonTestCase(TestCase):
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class PermissionsTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):

@@ -1,3 +1,4 @@
+from django.test import override_settings
 from rest_framework.test import APITestCase
 
 from model_mommy import mommy
@@ -5,6 +6,7 @@ from model_mommy import mommy
 from enhydris import models
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class GareaTestCase(APITestCase):
     def setUp(self):
         self.garea = mommy.make(models.Garea)
@@ -14,6 +16,7 @@ class GareaTestCase(APITestCase):
         self.assertEqual(r.status_code, 200)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class OrganizationTestCase(APITestCase):
     def setUp(self):
         self.organization = mommy.make(models.Organization)
@@ -23,6 +26,7 @@ class OrganizationTestCase(APITestCase):
         self.assertEqual(r.status_code, 200)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class PersonTestCase(APITestCase):
     def setUp(self):
         self.person = mommy.make(models.Person)
@@ -32,6 +36,7 @@ class PersonTestCase(APITestCase):
         self.assertEqual(r.status_code, 200)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class EventTypeTestCase(APITestCase):
     def setUp(self):
         self.event_type = mommy.make(models.EventType)
@@ -41,6 +46,7 @@ class EventTypeTestCase(APITestCase):
         self.assertEqual(r.status_code, 200)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class VariableTestCase(APITestCase):
     def setUp(self):
         self.variable = mommy.make(models.Variable, descr="Temperature")
@@ -50,6 +56,7 @@ class VariableTestCase(APITestCase):
         self.assertEqual(r.status_code, 200)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class UnitOfMeasurementTestCase(APITestCase):
     def setUp(self):
         self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
@@ -59,6 +66,7 @@ class UnitOfMeasurementTestCase(APITestCase):
         self.assertEqual(r.status_code, 200)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class GentityEventTestCase(APITestCase):
     # We have extensively tested GentityFile, which is practically the same code,
     # so we test this briefly.

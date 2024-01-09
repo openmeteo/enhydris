@@ -1,8 +1,9 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from enhydris.tests import TimeseriesDataMixin
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesDownloadButtonTestCase(TimeseriesDataMixin, TestCase):
     def setUp(self):
         self.download_button = (
@@ -35,6 +36,7 @@ class TimeseriesDownloadButtonTestCase(TimeseriesDataMixin, TestCase):
         self.assertContains(self.response, "No data is available for downloading")
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class DownloadDataTestCase(TimeseriesDataMixin, TestCase):
     def setUp(self):
         self.create_timeseries(publicly_available=True)
