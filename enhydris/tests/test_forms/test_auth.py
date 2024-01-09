@@ -4,6 +4,7 @@ from enhydris.forms import MyRegistrationForm
 
 
 @override_settings(REGISTRATION_OPEN=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class RegistrationFormTestCase(TestCase):
     def test_registration_form_submission(self):
         post_data = {"usename": "bob", "password": "topsecret"}

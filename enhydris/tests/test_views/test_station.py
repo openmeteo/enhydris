@@ -17,6 +17,7 @@ from enhydris.models import GentityFile, GentityImage, Organization, Station
 from enhydris.tests import SeleniumTestCase, TimeseriesDataMixin
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationListTestCase(TestCase):
     @staticmethod
     def _create_station(name, x, y, srid=4326, original_srid=4326):
@@ -81,6 +82,7 @@ class StationListTestCase(TestCase):
 
 
 @override_settings(SITE_ID=1)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationListSitesTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -100,6 +102,7 @@ class StationListSitesTestCase(TestCase):
         self.assertNotContains(response, "Komboti")
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationDetailTestCase(TestCase, TimeseriesDataMixin):
     def setUp(self):
         self.create_timeseries()
@@ -119,6 +122,7 @@ class StationDetailTestCase(TestCase, TimeseriesDataMixin):
 
 
 @override_settings(MEDIA_URL="/media/")
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationDetailImagesTestCase(TestCase):
     def setUp(self):
         self.station = mommy.make(Station)
@@ -154,6 +158,7 @@ class StationDetailImagesTestCase(TestCase):
 
 
 @override_settings(LANGUAGE_CODE="en-gb", LANGUAGES={"en-gb": "English"})
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationDetailPeriodOfOperationTestCase(TestCase):
     def setUp(self):
         self.station = mommy.make(
@@ -197,6 +202,7 @@ class StationDetailPeriodOfOperationTestCase(TestCase):
 
 
 @override_settings(SITE_ID=1)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationDetailSitesTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -214,6 +220,7 @@ class StationDetailSitesTestCase(TestCase):
         self.assertEquals(response.status_code, 404)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class GentityFileDownloadLinkTestCase(TestCase):
     def setUp(self):
         self.station = mommy.make(Station, name="Komboti")
@@ -227,6 +234,7 @@ class GentityFileDownloadLinkTestCase(TestCase):
         self.assertContains(response, self.link)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationEditRedirectTestCase(TestCase):
     def setUp(self):
         self.response = self.client.get("/stations/42/edit/")
@@ -240,6 +248,7 @@ class StationEditRedirectTestCase(TestCase):
         )
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class RedirectOldUrlsTestCase(TestCase):
     def test_old_stations_url_redirects(self):
         r = self.client.get("/stations/d/200348/")
@@ -249,6 +258,7 @@ class RedirectOldUrlsTestCase(TestCase):
 
 
 @skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
 
     button_limit_to_map = PageElement(By.ID, "limit-to-map")
@@ -300,6 +310,7 @@ class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
 
 
 @skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class ShowOnlySearchedForStationsOnMapTestCase(SeleniumTestCase):
 
     markers = PageElement(By.CSS_SELECTOR, ".leaflet-marker-pane")
@@ -340,6 +351,7 @@ class ShowOnlySearchedForStationsOnMapTestCase(SeleniumTestCase):
 
 
 @skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class ShowStationOnStationDetailMapTestCase(SeleniumTestCase):
 
     markers = PageElement(By.CSS_SELECTOR, ".leaflet-marker-pane")

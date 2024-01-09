@@ -12,6 +12,7 @@ from model_mommy import mommy
 from enhydris import models
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationListTestCase(APITestCase):
     def setUp(self):
         self.station = mommy.make(models.Station, name="Hobbiton")
@@ -28,6 +29,7 @@ class StationListTestCase(APITestCase):
 
 
 @override_settings(SITE_ID=1)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationListSitesTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -47,6 +49,7 @@ class StationListSitesTestCase(APITestCase):
 
 
 @override_settings(SITE_ID=1)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationDetailSitesTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -64,6 +67,7 @@ class StationDetailSitesTestCase(APITestCase):
         self.assertEquals(response.status_code, 404)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationCreateTestCase(APITestCase):
     def setUp(self):
         self.user = mommy.make(User, is_active=True, is_superuser=False)
@@ -111,6 +115,7 @@ class StationCreateTestCase(APITestCase):
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationUpdateAndDeleteTestCase(APITestCase):
     def setUp(self):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
@@ -181,6 +186,7 @@ class StationUpdateAndDeleteTestCase(APITestCase):
         self.assertEqual(response.status_code, 204, response.content)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationCsvTestCase(APITestCase):
     def setUp(self):
         self._create_stations()
