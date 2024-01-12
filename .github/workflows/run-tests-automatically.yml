@@ -26,6 +26,8 @@ jobs:
         node-version: '10'
     - name: Set up Chrome
       uses: browser-actions/setup-chrome@latest
+    - name: Set up chromedriver
+      uses: nanasess/setup-chromedriver@v2
     - name: Install Dependencies
       run: |
         echo "deb https://packagecloud.io/timescale/timescaledb/ubuntu/ $(lsb_release -c -s) main" | sudo tee /etc/apt/sources.list.d/timescaledb.list
@@ -40,8 +42,6 @@ jobs:
         python -m pip install --upgrade pip 'setuptools<58'  # See https://stackoverflow.com/questions/69123406
         CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install 'gdal==3.4.1'
         pip install 'psycopg2>=2.8,<2.9' codecov coverage isort flake8 'black>=22.8,<23'
-        wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/`google-chrome --version|awk '{ print $3 }'`/linux64/chromedriver-linux64.zip
-        sudo unzip chromedriver-linux64.zip -d /usr/local/bin
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
         npm install
