@@ -8,6 +8,7 @@ timeseries_data
 enhydris.db
 enhydris_project/settings/local.py
 enhydris_project/settings/urls.py
+enhydris_project/settings/docker_*.py
 
 # Selenium log files
 *driver.log
