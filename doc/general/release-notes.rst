@@ -116,6 +116,12 @@ always publicly available.
 In addition, setting :data:`ENHYDRIS_AUTHENTICATION_REQUIRED` has been
 added and can make Enhydris fully closed.
 
+Map marker customization
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Setting :data:`ENHYDRIS_MAP_MARKERS` has been added to distinguish
+between different station types.
+
 Version 3.0
 ===========
 

@@ -355,6 +355,39 @@ Map settings
    lat is in decimal degrees, positive for north/east, negative for
    west/south.
 
+.. data:: ENHYDRIS_MAP_MARKERS
+
+   The map can show different station types with different markers. For
+   example::
+
+      ENHYDRIS_MAP_MARKERS = {
+          "1": {
+              "iconUrl": "leaf-green.png",
+              "shadowUrl": "leaf-shadow.png",
+              "iconSize": [38, 95],
+              "shadowSize": [50, 64],
+              "iconAnchor": [22, 94],
+              "shadowAnchor": [4, 62],
+              "popupAnchor": [-3, -76],
+          },
+          "2": {
+              # ...
+          },
+      }
+
+   In this example, stations whose type id is 2 will be shown with
+   "leaf-green.png" and so on. Any station whose type id is not in the
+   included ids will be shown with Leaflet's default marker. The value
+   of each ``ENHYDRIS_MAP_MARKERS`` item is a dictionary that will be
+   passed to `L.icon()`_. (See also `Markers with Custom Icons`_.) The
+   URLs, if relative, are relative to :data:`STATIC_URL`.
+
+   The default is ``{}``, that is, show the default Leaflet marker for
+   everything.
+
+   .. _L.icon(): https://leafletjs.com/reference.html#icon
+   .. _markers with custom icons: https://leafletjs.com/examples/custom-icons/
+
 Miscellaneous settings
 ----------------------
 
