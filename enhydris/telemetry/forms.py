@@ -50,8 +50,8 @@ class ConnectionDataForm(FormBase):
                 password=cleaned_data.get("password"),
                 device_locator=cleaned_data.get("device_locator"),
             )
-            api_client = self.driver(telemetry)
-            api_client.connect()
+            with self.driver(telemetry):
+                pass  # Just testing that connection does not raise error
         except TelemetryError as e:
             raise forms.ValidationError(str(e))
         return cleaned_data
@@ -66,9 +66,8 @@ class ChooseStationForm(FormBase):
         passwd = self.initial["password"]
         loc = self.initial["device_locator"]
         telemetry = Telemetry(username=user, password=passwd, device_locator=loc)
-        api_client = self.driver(telemetry)
-        api_client.connect()
-        stations = api_client.get_stations()
+        with self.driver(telemetry) as api_client:
+            stations = api_client.get_stations()
         choices = []
         for key, value in stations.items():
             choices.append((key, f"{value} ({key})"))
@@ -87,9 +86,8 @@ class ChooseSensorForm(FormBase):
             station=self.station,
             remote_station_id=self.initial["remote_station_id"],
         )
-        api_client = self.driver(telemetry)
-        api_client.connect()
-        sensors = api_client.get_sensors()
+        with self.driver(telemetry) as api_client:
+            sensors = api_client.get_sensors()
         station = models.Station.objects.get(pk=self.station.id)
         timeseries_groups = station.timeseriesgroup_set
         choices = [("", _("Ignore this sensor"))]
