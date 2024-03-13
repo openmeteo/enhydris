@@ -16,6 +16,7 @@ from django.test.utils import override_settings
 from rest_framework.test import APITestCase
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class AuthTestCase(APITestCase):
     def setUp(self):
         User = get_user_model()

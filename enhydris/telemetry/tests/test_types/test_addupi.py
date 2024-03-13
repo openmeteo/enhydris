@@ -70,6 +70,35 @@ class ConnectTestCase(TelemetryAPIClientTestCaseBase):
         )
 
 
+@patch("enhydris.telemetry.types.addupi.requests.get")
+class DisconnectTestCase(TelemetryAPIClientTestCaseBase):
+    def setUp(self):
+        super().setUp()
+        self.telemetry_api_client.session_id = "mysessionid"
+
+    def test_makes_request(self, mock_requests_get):
+        self._set_request_result(mock_requests_get)
+        self.telemetry_api_client.disconnect()
+        mock_requests_get.assert_called_once_with(
+            "http://1.2.3.4/addUPI?function=logout&session-id=mysessionid",
+            verify=False,
+        )
+
+    def test_resets_session_id(self, mock_requests_get):
+        self._set_request_result(mock_requests_get)
+        self.telemetry_api_client.disconnect()
+        self.assertFalse(hasattr(self.telemetry_api_client, "session_id"))
+
+    def test_does_not_make_request_if_no_session_id(self, mock_requests_get):
+        self._set_request_result(mock_requests_get)
+        del self.telemetry_api_client.session_id
+        self.telemetry_api_client.disconnect()
+        mock_requests_get.assert_not_called()
+
+    def _set_request_result(self, mock_requests_get):
+        mock_requests_get.return_value.__enter__.return_value.content = b"<ok></ok>"
+
+
 class LoggedOnTestCaseBase(TelemetryAPIClientTestCaseBase):
     def setUp(self):
         super().setUp()

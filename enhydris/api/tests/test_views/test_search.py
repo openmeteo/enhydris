@@ -29,7 +29,8 @@ class SearchTestCaseBase(ABC):
 
     def setUp(self):
         self._create_models()
-        self.response = self.client.get("/api/stations/", {"q": self.search_term})
+        with override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False):
+            self.response = self.client.get("/api/stations/", {"q": self.search_term})
 
     @abstractmethod
     def _create_models(self):

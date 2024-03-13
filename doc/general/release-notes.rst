@@ -113,6 +113,9 @@ Another important difference is that these new settings apply only
 to time series data, not to gentity files, so gentity files are now
 always publicly available.
 
+In addition, setting :data:`ENHYDRIS_AUTHENTICATION_REQUIRED` has been
+added and can make Enhydris fully closed.
+
 Version 3.0
 ===========
 

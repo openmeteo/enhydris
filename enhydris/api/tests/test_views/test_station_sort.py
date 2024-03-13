@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+from django.test import override_settings
 from rest_framework.test import APITestCase
 
 from model_mommy import mommy
@@ -7,6 +8,7 @@ from model_mommy import mommy
 from enhydris import models
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationSortDefaultTestCase(APITestCase):
     def setUp(self):
         mommy.make(models.Station, name="Rivendell")
@@ -23,6 +25,7 @@ class StationSortDefaultTestCase(APITestCase):
         self.assertEqual(self.response.json()["results"][0]["name"], "Hobbiton")
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationSortByReverseNameTestCase(APITestCase):
     def setUp(self):
         mommy.make(models.Station, name="Rivendell")
@@ -39,6 +42,7 @@ class StationSortByReverseNameTestCase(APITestCase):
         self.assertEqual(self.response.json()["results"][0]["name"], "Rivendell")
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 @patch(
     "django.db.models.query.QuerySet.order_by",
     return_value=models.Station.objects.none(),

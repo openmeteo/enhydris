@@ -11,3 +11,16 @@ class TelemetryAPIClientBase:
 
     def __init__(self, telemetry):
         self.telemetry = telemetry
+
+    def __enter__(self):
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.disconnect()
+
+    def connect(self):
+        pass
+
+    def disconnect(self):
+        pass

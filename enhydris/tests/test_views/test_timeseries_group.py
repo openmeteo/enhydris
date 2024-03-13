@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from model_mommy import mommy
 
@@ -6,6 +6,7 @@ from enhydris.models import Timeseries
 from enhydris.tests import TimeseriesDataMixin
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class RedirectOldUrlsTestCase(TestCase):
     def test_old_timeseries_url_redirects(self):
         mommy.make(
@@ -27,6 +28,7 @@ class RedirectOldUrlsTestCase(TestCase):
         self.assertEqual(r.status_code, 404)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesGroupDetailTestCase(TimeseriesDataMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
