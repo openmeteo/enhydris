@@ -24,6 +24,11 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
         xmlroot = self._make_request(f"function=login&user={u}&passwd={p}")
         self.session_id = xmlroot.find("result/string").text
 
+    def disconnect(self):
+        if hasattr(self, "session_id"):
+            self._make_request("function=logout")
+            del self.session_id
+
     def get_stations(self):
         xmlroot = self._make_request("function=getconfig")
         result = {}
