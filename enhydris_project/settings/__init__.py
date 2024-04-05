@@ -113,6 +113,9 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PERMISSION_CLASSES": (
+        "enhydris.api.permissions.SatisfiesAuthenticationRequiredSetting",
+    ),
     "PAGE_SIZE": 20,
 }
 

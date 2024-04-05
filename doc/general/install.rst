@@ -239,7 +239,7 @@ These are the settings available to Enhydris, in addition to the
 Authentication settings
 -----------------------
 
-.. data:: ENHYDRIS_REQUIRE_AUTHENTICATION
+.. data:: ENHYDRIS_AUTHENTICATION_REQUIRED
 
    If ``True``, users must be logged on to do anything, such as view a
    list of stations. All API views except for login will return 401, and
@@ -250,7 +250,7 @@ Authentication settings
    (because the registration page will also redirect to the login page),
    but it should be kept at ``False``.
 
-   The default for ``ENHYDRIS_REQUIRE_AUTHENTICATION`` is ``False``.
+   The default for ``ENHYDRIS_AUTHENTICATION_REQUIRED`` is ``False``.
 
 .. data:: REGISTRATION_OPEN
 

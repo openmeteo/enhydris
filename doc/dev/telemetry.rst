@@ -234,9 +234,20 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
       :meth:`get_measurements` must be in UTC.
 
    .. method:: connect() -> None
+               disconnect() -> None
 
-      Initiates connection to the API and logs on. Should raise
-      :class:`TelemetryError` if something goes wrong.
+      :meth:`connect` initiates connection to the API and logs on. It should
+      raise :class:`TelemetryError` if something goes wrong. In some cases
+      nothing needs to be done for connection (e.g. in the case of an HTTP API
+      the key to which is a token that is passed to all requests).
+
+      :meth:`disconnect` performs any required cleanup. In many cases no such
+      cleanup is required. In some cases it is needed to logout, or a
+      connection established by :meth:`connect` might need to be closed.
+
+      Leave :meth:`connect` and :meth:`disconnect` unspecified if nothing needs
+      to be done for connection or disconnection; the inherited methods do
+      nothing.
 
    .. method:: get_stations() -> dict
 

@@ -31,8 +31,7 @@ class GlobalLoginRequiredMiddleware:
         allowed_views = [
             settings.LOGIN_URL,
             "/accounts/password/reset/",
-            "/api/auth/login/",
-            "/api/auth/password/reset/",
+            "/api/",
         ]
         is_allowed_view = any([request.path.startswith(x) for x in allowed_views])
         if not is_allowed_view:

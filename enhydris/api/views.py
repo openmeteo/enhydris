@@ -29,10 +29,11 @@ class StationViewSet(StationListViewMixin, ModelViewSet):
     serializer_class = serializers.StationSerializer
 
     def get_permissions(self):
+        pc = [permissions.SatisfiesAuthenticationRequiredSetting]
         if self.action == "create":
-            pc = [permissions.CanCreateStation]
+            pc.append(permissions.CanCreateStation)
         else:
-            pc = [permissions.CanEditOrReadOnly]
+            pc.append(permissions.CanEditOrReadOnly)
         return [x() for x in pc]
 
     def list(self, request):
@@ -128,7 +129,10 @@ class GentityFileViewSet(ReadOnlyModelViewSet):
 
 class TimeseriesGroupViewSet(ModelViewSet):
     serializer_class = serializers.TimeseriesGroupSerializer
-    permission_classes = [permissions.CanEditOrReadOnly]
+    permission_classes = [
+        permissions.SatisfiesAuthenticationRequiredSetting,
+        permissions.CanEditOrReadOnly,
+    ]
 
     def get_queryset(self):
         return models.TimeseriesGroup.objects.filter(
@@ -170,10 +174,11 @@ class TimeseriesViewSet(ModelViewSet):
     lookup_value_regex = r"\d+"
 
     def get_permissions(self):
+        pc = [permissions.SatisfiesAuthenticationRequiredSetting]
         if self.action in ("data", "bottom", "chart"):
-            pc = [permissions.CanAccessTimeseriesData]
+            pc.append(permissions.CanAccessTimeseriesData)
         else:
-            pc = [permissions.CanEditOrReadOnly]
+            pc.append(permissions.CanEditOrReadOnly)
         return [x() for x in pc]
 
     def get_queryset(self):

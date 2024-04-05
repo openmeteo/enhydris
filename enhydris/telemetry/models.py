@@ -80,13 +80,13 @@ class Telemetry(models.Model):
     def fetch(self):
         try:
             self._setup_api_client()
-            self._fetch_sensors()
+            with self.api_client:
+                self._fetch_sensors()
         except Exception:
             TelemetryLogMessage.log(self)
 
     def _setup_api_client(self):
         self.api_client = enhydris.telemetry.drivers[self.type](self)
-        self.api_client.connect()
 
     def _fetch_sensors(self):
         for sensor in self.sensor_set.all():
