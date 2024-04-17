@@ -576,6 +576,13 @@ parameter::
 
 Appropriate values for ``timezone`` are from the Olson database.
 
+You can specify which part of the time series to get with the
+``start_date`` and ``end_date`` parameters. These are ISO8601 strings
+which may contain a time zone. If they do not contain a time zone, the
+:attr:`~enhydris.models.gentity.display_timezone` is assumed. (The
+``timezone`` parameter indicated above affects only the time zone of the
+returned timestamps.)
+
 Instead of CSV, you can **get HTS** by specifying the parameter
 ``fmt=hts``::
 
