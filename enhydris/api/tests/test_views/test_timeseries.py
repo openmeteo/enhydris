@@ -18,6 +18,7 @@ from enhydris import models
 from enhydris.tests import TimeseriesDataMixin
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class Tsdata404TestCase(APITestCase):
     def setUp(self):
         self.station = mommy.make(models.Station)
@@ -37,6 +38,7 @@ class Tsdata404TestCase(APITestCase):
 
 @patch("enhydris.models.Timeseries.get_data", return_value=HTimeseries())
 @override_settings(ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS=False)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataGetPermissionsTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -73,6 +75,7 @@ class TsdataGetPermissionsTestCase(APITestCase):
         self.assertEqual(self.response.status_code, 200)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class GetDataTestCase(APITestCase, TimeseriesDataMixin):
     @classmethod
     def setUpTestData(cls):
@@ -100,6 +103,10 @@ class GetDataTestCase(APITestCase, TimeseriesDataMixin):
             "2017-11-23 17:23,1.00,\r\n2018-11-25 01:00,2.00,\r\n",
         )
 
+    def test_request_with_start_date(self):
+        response = self._get_response(urlsuffix="?start_date=2017-11-23T17:24")
+        self.assertEqual(response.content.decode(), "2018-11-25 01:00,2.00,\r\n")
+
     def test_response_content_in_other_timezone(self):
         response = self._get_response(urlsuffix="?timezone=UTC")
         self.assertEqual(
@@ -108,6 +115,7 @@ class GetDataTestCase(APITestCase, TimeseriesDataMixin):
         )
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class GetDataInVariousFormatsTestCase(APITestCase, TimeseriesDataMixin):
     def setUp(self):
         super().setUp()
@@ -181,6 +189,7 @@ class GetDataInVariousFormatsTestCase(APITestCase, TimeseriesDataMixin):
         )
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataPostTestCase(APITestCase):
     @patch("enhydris.models.Timeseries.append_data")
     def setUp(self, m):
@@ -222,6 +231,7 @@ class TsdataPostTestCase(APITestCase):
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataPostAuthorizationTestCase(APITestCase):
     def setUp(self):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
@@ -261,6 +271,7 @@ class TsdataPostAuthorizationTestCase(APITestCase):
         self.assertEqual(self._post_tsdata().status_code, 204)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataPostGarbageTestCase(APITestCase):
     @patch("enhydris.models.Timeseries.append_data", side_effect=iso8601.ParseError)
     def setUp(self, m):
@@ -289,6 +300,7 @@ class TsdataPostGarbageTestCase(APITestCase):
         self.assertEqual(self.response.status_code, 400)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataPostDuplicateTimestampsTestCase(APITestCase):
     def setUp(self):
         user = mommy.make(User, username="admin", is_superuser=True)
@@ -315,6 +327,7 @@ class TsdataPostDuplicateTimestampsTestCase(APITestCase):
         )
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataStartAndEndDateTestCase(APITestCase):
     def setUp(self):
         self.station = mommy.make(models.Station)
@@ -371,6 +384,7 @@ class TsdataStartAndEndDateTestCase(APITestCase):
         )
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataInvalidStartOrEndDateTestCase(APITestCase):
     def setUp(self):
         self.station = mommy.make(models.Station)
@@ -401,6 +415,7 @@ class TsdataInvalidStartOrEndDateTestCase(APITestCase):
         m.assert_called_once_with(start_date=None, end_date=None, timezone=None)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataHeadTestCase(APITestCase):
     def setUp(self):
         self.station = mommy.make(models.Station)
@@ -434,6 +449,7 @@ class TsdataHeadTestCase(APITestCase):
         self.assertNotContains(response, "2018-12-09 13:10,")
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesBottomTestCase(APITestCase):
     def setUp(self):
         self.station = mommy.make(models.Station, display_timezone="Etc/GMT-2")
@@ -479,6 +495,7 @@ class TimeseriesBottomTestCase(APITestCase):
 
 
 @override_settings(ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS=False)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesBottomPermissionsTestCase(APITestCase):
     def setUp(self):
         station = mommy.make(models.Station)
@@ -512,6 +529,7 @@ class TimeseriesBottomPermissionsTestCase(APITestCase):
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesPostTestCase(APITestCase):
     def setUp(self):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
@@ -558,6 +576,7 @@ class TimeseriesPostTestCase(APITestCase):
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesPostWithWrongStationOrTimeseriesGroupTestCase(APITestCase):
     def setUp(self):
         self.user = mommy.make(User, is_active=True, is_superuser=False)
@@ -617,6 +636,7 @@ class TimeseriesPostWithWrongStationOrTimeseriesGroupTestCase(APITestCase):
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesPostWithWrongTimeseriesTypeTestCase(APITestCase):
     def setUp(self):
         self.user = mommy.make(User, is_active=True, is_superuser=False)
@@ -651,6 +671,7 @@ class TimeseriesPostWithWrongTimeseriesTypeTestCase(APITestCase):
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesDeleteTestCase(APITestCase):
     def setUp(self):
         self.user1 = mommy.make(User, is_active=True, is_superuser=False)
@@ -684,6 +705,7 @@ class TimeseriesDeleteTestCase(APITestCase):
         self.assertEqual(response.status_code, 204)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 @patch("enhydris.api.views.TimeseriesViewSet._get_stats_for_all_intervals")
 @patch("enhydris.models.Timeseries.get_data")
 class TimeseriesChartDateBoundsTestCase(APITestCase, TimeseriesDataMixin):
@@ -756,6 +778,7 @@ class TimeseriesChartTestMixin:
         }
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 @patch("enhydris.api.views.TimeseriesViewSet.CHART_MAX_INTERVALS", new=20)
 @patch("enhydris.models.Timeseries.get_data")
 @override_settings(ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS=False)
@@ -815,6 +838,7 @@ class TimeseriesChartTestCase(
         self._assertChartResponse(response, expected)
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 @patch("enhydris.api.views.TimeseriesViewSet.CHART_MAX_INTERVALS", new=3)
 @patch("enhydris.models.Timeseries.get_data")
 class TimeseriesChartValuesTestCase(

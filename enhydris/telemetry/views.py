@@ -76,8 +76,10 @@ class TelemetryWizardView(PermissionRequiredMixin, View):
             "data_timezone": None,
             "fetch_interval_minutes": None,
             "fetch_offset_minutes": None,
-            "fetch_offset_timezone": None,
             "additional_config": {},
+            "username": None,
+            "device_locator": None,
+            "remote_station_id": "",
         }
         key = f"telemetry_{self.station.id}"
         try:
@@ -86,7 +88,11 @@ class TelemetryWizardView(PermissionRequiredMixin, View):
             self.request.session[key] = default_data
             return
         self.request.session[key] = {
-            var: getattr(telemetry, var) for var in default_data
+            **{var: getattr(telemetry, var) for var in default_data},
+            **{
+                f"sensor_{sensor.sensor_id}": sensor.timeseries_group.id
+                for sensor in Sensor.objects.filter(telemetry=telemetry)
+            },
         }
 
     def _check_permission(self):

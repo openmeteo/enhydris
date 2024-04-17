@@ -11,18 +11,32 @@ from enhydris.telemetry.forms import (
     ChooseStationForm,
     ConnectionDataForm,
 )
+from enhydris.telemetry.types import TelemetryAPIClientBase
 
-TestTelemetryAPIClient = MagicMock()
-TestTelemetryAPIClient.username_label = "Email"
-TestTelemetryAPIClient.password_label = "API key"
-TestTelemetryAPIClient.device_locator_label = "URI"
-TestTelemetryAPIClient.device_locator_help_text = "Do it!"
-TestTelemetryAPIClient.hide_device_locator = False
+
+class TestTelemetryAPIClient(TelemetryAPIClientBase):
+    username_label = "Email"
+    password_label = "API key"
+    device_locator_label = "URI"
+    device_locator_help_text = "Do it!"
+    hide_data_timezone = True
+    hide_device_locator = False
+
+    __init__ = MagicMock(return_value=None)
+    connect = MagicMock()
+    disconnect = MagicMock()
+    get_stations = MagicMock()
+    get_sensors = MagicMock()
+
+    @classmethod
+    def reset_mocks(cls):
+        for x in ("__init__", "connect", "disconnect", "get_stations", "get_sensors"):
+            getattr(cls, x).reset_mock()
 
 
 class ConnectionDataFormTestCase(TestCase):
     def setUp(self):
-        TestTelemetryAPIClient.reset_mock()
+        TestTelemetryAPIClient.reset_mocks()
         username = "hello@world.com"
         password = "topsecret"
         loc = "http://1.2.3.4"
@@ -34,33 +48,37 @@ class ConnectionDataFormTestCase(TestCase):
 
     def test_connects(self):
         self.form.is_valid()
-        TestTelemetryAPIClient.return_value.connect.assert_called_once()
+        TestTelemetryAPIClient.connect.assert_called_once()
+
+    def test_disconnects(self):
+        self.form.is_valid()
+        TestTelemetryAPIClient.disconnect.assert_called_once()
 
     def test_uses_username(self):
         self.form.is_valid()
-        telemetry = TestTelemetryAPIClient.call_args.args[0]
+        telemetry = TestTelemetryAPIClient.__init__.call_args.args[0]
         self.assertEqual(telemetry.username, "hello@world.com")
 
     def test_uses_password(self):
         self.form.is_valid()
-        telemetry = TestTelemetryAPIClient.call_args.args[0]
+        telemetry = TestTelemetryAPIClient.__init__.call_args.args[0]
         self.assertEqual(telemetry.password, "topsecret")
 
     def test_uses_device_locator(self):
         self.form.is_valid()
-        telemetry = TestTelemetryAPIClient.call_args.args[0]
+        telemetry = TestTelemetryAPIClient.__init__.call_args.args[0]
         self.assertEqual(telemetry.device_locator, "http://1.2.3.4")
 
     def test_valid(self):
-        TestTelemetryAPIClient.return_value.connect.side_effect = None
+        TestTelemetryAPIClient.connect.side_effect = None
         self.assertTrue(self.form.is_valid())
 
     def test_invalid(self):
-        TestTelemetryAPIClient.return_value.connect.side_effect = TelemetryError("hi")
+        TestTelemetryAPIClient.connect.side_effect = TelemetryError("hi")
         self.assertFalse(self.form.is_valid())
 
     def test_error_message(self):
-        TestTelemetryAPIClient.return_value.connect.side_effect = TelemetryError("hi")
+        TestTelemetryAPIClient.connect.side_effect = TelemetryError("hi")
         self.assertEqual(self.form.errors["__all__"][0], "hi")
 
     def test_username_label_is_overriden(self):
@@ -76,7 +94,7 @@ class ConnectionDataFormTestCase(TestCase):
         self.assertEqual(self.form.fields["device_locator"].help_text, "Do it!")
 
 
-class ConnectionDataFormHideDeviceLocatorTestCase(TestCase):
+class ConnectionDataFormHideStuffTestCase(TestCase):
     @classmethod
     def setUpClass(self):
         super().setUpClass()
@@ -92,8 +110,10 @@ class ConnectionDataFormHideDeviceLocatorTestCase(TestCase):
 
     def setUp(self):
         self.saved_hide_device_locator = TestTelemetryAPIClient.hide_device_locator
+        self.saved_hide_data_timezone = TestTelemetryAPIClient.hide_data_timezone
 
     def tearDown(self):
+        TestTelemetryAPIClient.hide_data_timezone = self.saved_hide_data_timezone
         TestTelemetryAPIClient.hide_device_locator = self.saved_hide_device_locator
 
     def test_device_locator_hidden(self):
@@ -110,10 +130,27 @@ class ConnectionDataFormHideDeviceLocatorTestCase(TestCase):
             form.fields["device_locator"].widget.__class__.__name__, "TextInput"
         )
 
+    def test_data_timezone_hidden(self):
+        TestTelemetryAPIClient.hide_data_timezone = True
+        form = ConnectionDataForm(*self.form_args, **self.form_kwargs)
+        widget_class_name = form.fields["data_timezone"].widget.__class__.__name__
+        self.assertEqual(widget_class_name, "HiddenInput")
+
+    def test_data_timezone_hidden_value(self):
+        TestTelemetryAPIClient.hide_data_timezone = True
+        form = ConnectionDataForm(*self.form_args, **self.form_kwargs)
+        self.assertEqual(form.fields["data_timezone"].widget.attrs["value"], "UTC")
+
+    def test_data_timezone_not_hidden(self):
+        TestTelemetryAPIClient.hide_data_timezone = False
+        form = ConnectionDataForm(*self.form_args, **self.form_kwargs)
+        widget_class_name = form.fields["data_timezone"].widget.__class__.__name__
+        self.assertEqual(widget_class_name, "Select")
+
 
 class ChooseStationFormTestCase(TestCase):
     def setUp(self):
-        TestTelemetryAPIClient.reset_mock()
+        TestTelemetryAPIClient.reset_mocks()
         self._setup_mock_get_stations()
         self.form = ChooseStationForm(
             initial={
@@ -126,26 +163,30 @@ class ChooseStationFormTestCase(TestCase):
         )
 
     def _setup_mock_get_stations(self):
-        TestTelemetryAPIClient.return_value.get_stations.return_value = {
+        TestTelemetryAPIClient.get_stations.return_value = {
             "148A": "Hobbiton station",
             "149C": "Rivendell station",
         }
 
     def test_uses_username(self):
-        telemetry = TestTelemetryAPIClient.call_args.args[0]
+        telemetry = TestTelemetryAPIClient.__init__.call_args.args[0]
         self.assertEqual(telemetry.username, "hello@world.com")
 
     def test_uses_password(self):
-        telemetry = TestTelemetryAPIClient.call_args.args[0]
+        telemetry = TestTelemetryAPIClient.__init__.call_args.args[0]
         self.assertEqual(telemetry.password, "topsecretapikey")
 
     def test_uses_device_locator(self):
-        telemetry = TestTelemetryAPIClient.call_args.args[0]
+        telemetry = TestTelemetryAPIClient.__init__.call_args.args[0]
         self.assertEqual(telemetry.device_locator, "http://1.2.3.4")
 
     def test_calls_connect(self):
         self.form.is_valid()
-        TestTelemetryAPIClient.return_value.connect.assert_called_once()
+        TestTelemetryAPIClient.connect.assert_called_once()
+
+    def test_calls_disconnect(self):
+        self.form.is_valid()
+        TestTelemetryAPIClient.disconnect.assert_called_once()
 
     def test_populated_choices(self):
         self.assertEqual(
@@ -163,7 +204,7 @@ class ChooseSensorFormTestCase(TestCase):
         cls.tsg3 = mommy.make(TimeseriesGroup, gentity=cls.station, name="hello3")
 
     def setUp(self):
-        TestTelemetryAPIClient.reset_mock()
+        TestTelemetryAPIClient.reset_mocks()
         self._setup_mock_get_sensors()
         self.form = ChooseSensorForm(
             initial={
@@ -178,29 +219,33 @@ class ChooseSensorFormTestCase(TestCase):
         )
 
     def _setup_mock_get_sensors(self):
-        TestTelemetryAPIClient.return_value.get_sensors.return_value = {
+        TestTelemetryAPIClient.get_sensors.return_value = {
             "251": "Temperature sensor",
             "362": "Humidity sensor",
         }
 
     def test_calls_connect(self):
         self.form.is_valid()
-        TestTelemetryAPIClient.return_value.connect.assert_called_once()
+        TestTelemetryAPIClient.connect.assert_called_once()
+
+    def test_calls_disconnect(self):
+        self.form.is_valid()
+        TestTelemetryAPIClient.disconnect.assert_called_once()
 
     def test_uses_username(self):
-        telemetry = TestTelemetryAPIClient.call_args.args[0]
+        telemetry = TestTelemetryAPIClient.__init__.call_args.args[0]
         self.assertEqual(telemetry.username, "hello@world.com")
 
     def test_uses_password(self):
-        telemetry = TestTelemetryAPIClient.call_args.args[0]
+        telemetry = TestTelemetryAPIClient.__init__.call_args.args[0]
         self.assertEqual(telemetry.password, "topsecretapikey")
 
     def test_uses_device_locator(self):
-        telemetry = TestTelemetryAPIClient.call_args.args[0]
+        telemetry = TestTelemetryAPIClient.__init__.call_args.args[0]
         self.assertEqual(telemetry.device_locator, "http://1.2.3.4")
 
     def test_uses_appropriate_remote_station_id(self):
-        telemetry = TestTelemetryAPIClient.call_args.args[0]
+        telemetry = TestTelemetryAPIClient.__init__.call_args.args[0]
         self.assertEqual(telemetry.remote_station_id, "169C")
 
     def test_created_two_fields(self):

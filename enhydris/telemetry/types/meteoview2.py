@@ -29,7 +29,7 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
 
     def get_stations(self):
         data = self.make_request(
-            "GET",
+            "POST",
             f"{self.api_url}stations",
             headers={"Authorization": f"Bearer {self.token}"},
         )
@@ -80,6 +80,7 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
 
     def _get_start_date(self, sensor_id, timeseries_end_date):
         if timeseries_end_date is not None:
+            timeseries_end_date = timeseries_end_date.replace(tzinfo=None)
             start_date = timeseries_end_date + dt.timedelta(minutes=1)
         else:
             start_date = dt.datetime(1990, 1, 1)

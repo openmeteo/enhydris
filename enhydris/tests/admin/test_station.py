@@ -609,8 +609,9 @@ class TimeseriesUploadFileTestCase(TestCase, TimeseriesUploadFileMixin):
         )
 
 
-class TimeseriesUploadFileWithUnicodeHeadersTestCase(TestTimeseriesFormMixin, TestCase):
-    def setUp(self):
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+class TimeseriesUploadFileSpecialCasesTestCase(TestTimeseriesFormMixin, TestCase):
+    def test_upload_file_with_unicode_headers(self):
         self._create_test_timeseries()
         try:
             # We check that the file is read without problem even if the locale
@@ -622,8 +623,11 @@ class TimeseriesUploadFileWithUnicodeHeadersTestCase(TestTimeseriesFormMixin, Te
             )
         finally:
             setlocale(LC_CTYPE, saved_locale)
+        self.assertTrue(self.form.is_valid())
 
-    def test_form_is_valid(self):
+    def test_upload_file_with_only_date(self):
+        self._create_test_timeseries()
+        self._create_timeseries_inline_admin_form("REPLACE", b"2020-01-28 18:28\n")
         self.assertTrue(self.form.is_valid())
 
 
@@ -641,10 +645,6 @@ class TimeseriesUploadInvalidFileTestCase(TestTimeseriesFormMixin, TestCase):
 
     def test_file_not_ending_in_line_feed(self):
         self._create_timeseries_inline_admin_form("REPLACE", b"2020-01-28 18:28,7,")
-        self.assertFalse(self.form.is_valid())
-
-    def test_file_not_having_enough_columns(self):
-        self._create_timeseries_inline_admin_form("REPLACE", b"2020-01-28 18:28\n")
         self.assertFalse(self.form.is_valid())
 
     def test_file_with_multiple_timestamps(self):

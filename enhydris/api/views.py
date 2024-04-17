@@ -29,10 +29,11 @@ class StationViewSet(StationListViewMixin, ModelViewSet):
     serializer_class = serializers.StationSerializer
 
     def get_permissions(self):
+        pc = [permissions.SatisfiesAuthenticationRequiredSetting]
         if self.action == "create":
-            pc = [permissions.CanCreateStation]
+            pc.append(permissions.CanCreateStation)
         else:
-            pc = [permissions.CanEditOrReadOnly]
+            pc.append(permissions.CanEditOrReadOnly)
         return [x() for x in pc]
 
     def list(self, request):
@@ -128,7 +129,10 @@ class GentityFileViewSet(ReadOnlyModelViewSet):
 
 class TimeseriesGroupViewSet(ModelViewSet):
     serializer_class = serializers.TimeseriesGroupSerializer
-    permission_classes = [permissions.CanEditOrReadOnly]
+    permission_classes = [
+        permissions.SatisfiesAuthenticationRequiredSetting,
+        permissions.CanEditOrReadOnly,
+    ]
 
     def get_queryset(self):
         return models.TimeseriesGroup.objects.filter(
@@ -167,12 +171,14 @@ class TimeseriesViewSet(ModelViewSet):
     CHART_MAX_INTERVALS = 200
     queryset = models.Timeseries.objects.all()
     serializer_class = serializers.TimeseriesSerializer
+    lookup_value_regex = r"\d+"
 
     def get_permissions(self):
+        pc = [permissions.SatisfiesAuthenticationRequiredSetting]
         if self.action in ("data", "bottom", "chart"):
-            pc = [permissions.CanAccessTimeseriesData]
+            pc.append(permissions.CanAccessTimeseriesData)
         else:
-            pc = [permissions.CanEditOrReadOnly]
+            pc.append(permissions.CanEditOrReadOnly)
         return [x() for x in pc]
 
     def get_queryset(self):
@@ -237,7 +243,7 @@ class TimeseriesViewSet(ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def bottom(self, request, pk=None, *, station_id, timeseries_group_id=None):
-        ts = get_object_or_404(models.Timeseries, pk=pk)
+        ts = get_object_or_404(models.Timeseries, pk=int(pk))
         self.check_object_permissions(request, ts)
         response = HttpResponse(content_type="text/plain")
         timezone_param = request.GET.get("timezone", None)
@@ -246,7 +252,7 @@ class TimeseriesViewSet(ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def chart(self, request, pk=None, *, station_id, timeseries_group_id=None):
-        timeseries = get_object_or_404(models.Timeseries, pk=pk)
+        timeseries = get_object_or_404(models.Timeseries, pk=int(pk))
         self.check_object_permissions(request, timeseries)
         serializer = serializers.TimeseriesRecordChartSerializer(
             self._get_chart_data(request, timeseries), many=True

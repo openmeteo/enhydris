@@ -3,6 +3,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from freezegun import freeze_time
+from parameterized import parameterized
 from requests import Timeout
 
 from enhydris.telemetry import TelemetryError
@@ -67,6 +68,35 @@ class ConnectTestCase(TelemetryAPIClientTestCaseBase):
         mock_requests_get.return_value.__enter__.return_value.content = (
             b"<response><result><string>topsecretsessionid</string></result></response>"
         )
+
+
+@patch("enhydris.telemetry.types.addupi.requests.get")
+class DisconnectTestCase(TelemetryAPIClientTestCaseBase):
+    def setUp(self):
+        super().setUp()
+        self.telemetry_api_client.session_id = "mysessionid"
+
+    def test_makes_request(self, mock_requests_get):
+        self._set_request_result(mock_requests_get)
+        self.telemetry_api_client.disconnect()
+        mock_requests_get.assert_called_once_with(
+            "http://1.2.3.4/addUPI?function=logout&session-id=mysessionid",
+            verify=False,
+        )
+
+    def test_resets_session_id(self, mock_requests_get):
+        self._set_request_result(mock_requests_get)
+        self.telemetry_api_client.disconnect()
+        self.assertFalse(hasattr(self.telemetry_api_client, "session_id"))
+
+    def test_does_not_make_request_if_no_session_id(self, mock_requests_get):
+        self._set_request_result(mock_requests_get)
+        del self.telemetry_api_client.session_id
+        self.telemetry_api_client.disconnect()
+        mock_requests_get.assert_not_called()
+
+    def _set_request_result(self, mock_requests_get):
+        mock_requests_get.return_value.__enter__.return_value.content = b"<ok></ok>"
 
 
 class LoggedOnTestCaseBase(TelemetryAPIClientTestCaseBase):
@@ -148,11 +178,12 @@ class GetSensorsTestCase(LoggedOnTestCaseBase):
 class GetMeasurementsTestCase(LoggedOnTestCaseBase):
     def test_makes_request(self, mock_requests_get):
         self._set_successful_request_result(mock_requests_get)
-        existing_end_date = dt.datetime(2022, 6, 14, 8, 0)
+        existing_end_date = dt.datetime(2022, 6, 14, 8, 0, tzinfo=dt.timezone.utc)
         self.telemetry_api_client.get_measurements(8231, existing_end_date)
+        # 1655193600 is 2022-06-14T08:00 in seconds from the epoch
         mock_requests_get.assert_called_once_with(
-            "http://1.2.3.4/addUPI?function=getdata&id=8231"
-            "&date=2022-06-14T08:00:00&slots=20000&session-id=topsecretsessionid",
+            "http://1.2.3.4/addUPI?function=getdata&id=8231&df=time_t"
+            "&date=1655193600&slots=10000&session-id=topsecretsessionid",
             verify=False,
         )
 
@@ -168,38 +199,74 @@ class GetMeasurementsTestCase(LoggedOnTestCaseBase):
         """Test request when no start date
 
         get_measurements() can be called with timeseries_end_date=None. In that case, it
-        should assume a start date of 1 Jan 1990. (In that case the API wouldn't respond
-        with what we mock it to respond with, i.e. values in 2022, but this doesn't
-        affect the unit test.)
+        should assume a start date of 1 Jan 1990 (or 631152000 in time_t). (In that case
+        the API wouldn't respond with what we mock it to respond with, i.e. values in
+        2022, but this doesn't affect the unit test.)
         """
         self._set_successful_request_result(mock_requests_get)
         self.telemetry_api_client.get_measurements(8231, None)
         mock_requests_get.assert_called_once_with(
-            "http://1.2.3.4/addUPI?function=getdata&id=8231"
-            "&date=1990-01-01T00:00:00&slots=20000&session-id=topsecretsessionid",
+            "http://1.2.3.4/addUPI?function=getdata&id=8231&df=time_t"
+            "&date=631152000&slots=10000&session-id=topsecretsessionid",
             verify=False,
         )
-
-    def test_raises_when_s_attribute_is_nonzero(self, mock_requests_get):
-        self._set_nonzero_s_request_result(mock_requests_get)
-        with self.assertRaisesRegex(TelemetryError, "not supported"):
-            self.telemetry_api_client.get_measurements(8231, None)
 
     def _set_successful_request_result(self, mock_requests_get):
         mock_requests_get.return_value.__enter__.return_value.content = (
             "<response>"
             "    <node>"
-            "        <v t='20220614T08:10:00' s='0'>1.42</v>"
+            "        <v t='1655194200' s='0'>1.42</v>"
             "        <v t='+600' s='0'>1.43</v>"
             "    </node>"
             "</response>"
         ).encode()
 
-    def _set_nonzero_s_request_result(self, mock_requests_get):
+
+@patch("enhydris.telemetry.types.addupi.requests.get")
+@freeze_time("2022-06-14 08:35")
+class ReturnedStatusTestCase(LoggedOnTestCaseBase):
+    @parameterized.expand(
+        [
+            (3, 'invalid status value .s="3".'),
+            (-100, 'invalid status value .s="-100".'),
+            ("hello", 'invalid status value .s="hello".'),
+        ]
+    )
+    def test_error_handling(self, mock_requests_get, s, error_msg):
+        self._set_s_request_result(s, mock_requests_get)
+        with self.assertRaisesRegex(TelemetryError, error_msg):
+            self.telemetry_api_client.get_measurements(8231, None)
+
+    @parameterized.expand(
+        [
+            (0, ""),
+            (1, "INVALID"),
+            (2, "INVALID"),
+            (-99, "MISSING"),
+            (-1, "MISSING"),
+        ]
+    )
+    def test_flag(self, mock_requests_get, s, flag):
+        self._set_s_request_result(s, mock_requests_get)
+        result = self.telemetry_api_client.get_measurements(8231, None)
+        self.assertEqual(result.getvalue(), f"2022-06-14T08:10:00,1.42,{flag}\n")
+
+    def _set_s_request_result(self, s, mock_requests_get):
         mock_requests_get.return_value.__enter__.return_value.content = (
             "<response>"
             "    <node>"
-            "        <v t='20220614T08:10:00' s='1'>1.42</v>"
+            f"        <v t='1655194200' s='{s}'>1.42</v>"
             "    </node>"
             "</response>"
         ).encode()
+
+    def test_s_attribute_missing(self, mock_requests_get):
+        mock_requests_get.return_value.__enter__.return_value.content = (
+            "<response>"
+            "    <node>"
+            "        <v t='1655194200'>1.42</v>"
+            "    </node>"
+            "</response>"
+        ).encode()
+        with self.assertRaisesRegex(TelemetryError, 'invalid status value .s="None".'):
+            self.telemetry_api_client.get_measurements(8231, None)

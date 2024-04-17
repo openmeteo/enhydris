@@ -1,4 +1,12 @@
+from django.conf import settings
 from rest_framework import permissions
+
+
+class SatisfiesAuthenticationRequiredSetting(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return (
+            not settings.ENHYDRIS_AUTHENTICATION_REQUIRED
+        ) or request.user.is_authenticated
 
 
 class CanEditOrReadOnly(permissions.BasePermission):

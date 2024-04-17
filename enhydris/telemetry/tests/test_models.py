@@ -7,6 +7,7 @@ from io import StringIO
 from unittest.mock import MagicMock, patch
 
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.test import TestCase
 
 from freezegun import freeze_time
@@ -15,6 +16,19 @@ from model_mommy import mommy
 import enhydris
 from enhydris.models import Station, Timeseries, TimeseriesGroup
 from enhydris.telemetry.models import Telemetry, TelemetryLogMessage, fix_zone_name
+
+
+class TelemetryTestCase(TestCase):
+    def test_cannot_save_wrong_data_timezone(self):
+        with self.assertRaisesRegex(IntegrityError, "'' is not a valid time zone"):
+            Telemetry.objects.create(
+                station=mommy.make(Station),
+                type="meteoview2",
+                fetch_interval_minutes=10,
+                fetch_offset_minutes=2,
+                additional_config="{}",
+                data_timezone="",
+            )
 
 
 class TelemetryFetchValidatorsTestCase(TestCase):
@@ -26,7 +40,6 @@ class TelemetryFetchValidatorsTestCase(TestCase):
             type="meteoview2",
             fetch_interval_minutes=10,
             fetch_offset_minutes=10,
-            fetch_offset_timezone="Europe/Athens",
             additional_config="{}",
         )
 
@@ -76,7 +89,6 @@ class TelemetryIsDueTestCase(TestCase):
             type="meteoview2",
             fetch_interval_minutes=10,
             fetch_offset_minutes=10,
-            fetch_offset_timezone="Europe/Athens",
             additional_config="{}",
         )
 
@@ -85,11 +97,11 @@ class TelemetryIsDueTestCase(TestCase):
         self.telemetry.fetch_offset_minutes = fetch_offset_minutes
         self.assertEqual(self.telemetry.is_due, expected_result)
 
-    @freeze_time("2021-11-30 02:05", tz_offset=0)
+    @freeze_time("2021-11-30 00:05", tz_offset=0)
     def test_not_due(self):
         self._check(1440, 125, False)
 
-    @freeze_time("2021-11-30 00:05", tz_offset=0)
+    @freeze_time("2021-11-30 02:05", tz_offset=0)
     def test_is_due_1(self):
         self._check(1440, 125, True)
 
@@ -131,7 +143,6 @@ class TelemetryFetchTestCaseBase(TestCase):
             data_timezone="Europe/Athens",
             fetch_interval_minutes=10,
             fetch_offset_minutes=2,
-            fetch_offset_timezone="Asia/Vladivostok",
             username="someemail@email.com",
             password="topsecret",
             remote_station_id="42a",
@@ -225,63 +236,6 @@ class TelemetryFetchTestCase(TelemetryFetchTestCaseBase):
         data = StringIO()
         timeseries.get_data().write(data)
         self.assertEqual(data.getvalue().strip(), "1990-01-01 00:00,42.0,")
-
-
-class TelemetryFetchIgnoresTimeZoneTestCase(TelemetryFetchTestCaseBase):
-    """Test that timeseries_end_date is always naive
-
-    When records already exist in the timeseries before calling fetch(), the
-    timeseries_end_date specified in get_measurement() is determined from the
-    latest of these records. However, storage of timestamps in the database is
-    always aware, so we need to convert it to naive before calling
-    get_measurement(). This TestCases checks that this is done.
-
-    Unfortunately, at the time of this writing, if this test fails, the error
-    message is not easy to understand, because fetch() catches all exceptions and
-    records them in the TelemetryLog.  So while debugging things related to this
-    test it's a good idea to temporarily modify fetch() to raise exceptions.
-    """
-
-    def setUp(self):
-        timeseries = Timeseries(
-            timeseries_group_id=self.timeseries_group.id, type=Timeseries.INITIAL
-        )
-        timeseries.save()
-        timeseries.append_data(
-            StringIO("2022-06-14 08:00,42.1,\n"), default_timezone="Etc/GMT-2"
-        )
-
-    @patch("enhydris.telemetry.types.meteoview2.requests.request")
-    def test_ignores_timezone(self, mock_request):
-        self._set_mock_request_return_values(mock_request)
-        self.telemetry.fetch()
-        self.assertEqual(
-            mock_request.call_args.kwargs,
-            {
-                "headers": {
-                    "content-type": "application/json",
-                    "Authorization": "Bearer topsecretapitoken",
-                },
-                "data": json.dumps(
-                    {
-                        "sensor": ["257"],
-                        "datefrom": "2022-06-14",
-                        "timefrom": "08:01",
-                        "dateto": "2022-12-11",
-                    }
-                ),
-            },
-        )
-
-    def _set_mock_request_return_values(self, mock_request):
-        mock_request.side_effect = [
-            MagicMock(  # Response for login
-                **{"json.return_value": {"code": "200", "token": "topsecretapitoken"}}
-            ),
-            MagicMock(  # Response for measurements
-                **{"json.return_value": "irrelevant"}
-            ),
-        ]
 
 
 @patch("enhydris.telemetry.types.meteoview2.requests.request")

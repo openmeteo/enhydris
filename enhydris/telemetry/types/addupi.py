@@ -16,12 +16,18 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
         'Use "https://hostname:port" or "https://hostname". You can use http instead '
         "of https, but it is not recommended."
     )
+    hide_data_timezone = True
 
     def connect(self):
         u = self.telemetry.username
         p = self.telemetry.password
         xmlroot = self._make_request(f"function=login&user={u}&passwd={p}")
         self.session_id = xmlroot.find("result/string").text
+
+    def disconnect(self):
+        if hasattr(self, "session_id"):
+            self._make_request("function=logout")
+            del self.session_id
 
     def get_stations(self):
         xmlroot = self._make_request("function=getconfig")
@@ -41,15 +47,14 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
         return {x.attrib["id"]: x.attrib["name"] for x in sensors}
 
     def get_measurements(self, sensor_id, timeseries_end_date):
-        from enhydris.telemetry import TelemetryError
-
         if timeseries_end_date is None:
-            timeseries_end_date = dt.datetime(1990, 1, 1)
+            timeseries_end_date = dt.datetime(1990, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
         xmlroot = self._make_request(
             "function=getdata"
             f"&id={sensor_id}"
-            f"&date={timeseries_end_date.isoformat()}"
-            "&slots=20000"
+            f"&df=time_t"
+            f"&date={int(timeseries_end_date.timestamp())}"
+            "&slots=10000"
         )
         result = ""
         prev_timestamp = None
@@ -58,19 +63,38 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
             if timestamp.startswith("+"):
                 timestamp = prev_timestamp + dt.timedelta(seconds=int(timestamp))
             else:
-                timestamp = dt.datetime.strptime(timestamp, "%Y%m%dT%H:%M:%S")
-            s = record.attrib["s"]
-            if s != "0":
-                raise TelemetryError(
-                    f"The record with timestamp {timestamp} has a non zero s "
-                    f'attribute (s="{s}"). This is probably normal, however it is '
-                    "currently not supported by the Enhydris addupi driver. Please "
-                    "ask for the driver to be fixed."
-                )
-            prev_timestamp = timestamp
+                timestamp = dt.datetime.fromtimestamp(
+                    int(timestamp), dt.timezone.utc
+                ).replace(tzinfo=None)
             value = float(record.text)
-            result += f"{timestamp.isoformat()},{value},\n"
+            flags = self._get_flags(record, timestamp)
+            result += f"{timestamp.isoformat()},{value},{flags}\n"
+            prev_timestamp = timestamp
         return StringIO(result)
+
+    def _get_flags(self, record, timestamp):
+        s = self._get_s_attribute(record, timestamp)
+        if s in (1, 2):
+            return "INVALID"
+        if s < 0:
+            return "MISSING"
+        return ""
+
+    def _get_s_attribute(self, record, timestamp):
+        try:
+            s = None
+            s = record.attrib["s"]
+            si = int(s)
+            if si < -99 or si > 2:
+                raise ValueError()
+            return si
+        except (KeyError, ValueError):
+            from enhydris.telemetry import TelemetryError
+
+            raise TelemetryError(
+                f"The record with timestamp {timestamp} has an invalid status "
+                f'value (s="{s}")'
+            )
 
     def _make_request(self, query_string):
         from enhydris.telemetry import TelemetryError
@@ -88,6 +112,10 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
                 # However, the encoding is correctly specified in the XML itself, and
                 # if ElementTree.fromstring() is fed the undecoded response.content,
                 # it reads it correctly.
-                return ElementTree.fromstring(response.content)
+                xmlroot = ElementTree.fromstring(response.content)
+                error = xmlroot.find("error")
+                if error is not None:
+                    raise requests.RequestException(error.attrib["msg"])
+                return xmlroot
             except requests.RequestException as e:
                 raise TelemetryError(str(e))

@@ -75,16 +75,7 @@ Models
       is 125, then data will be fetched every day at 02:05 in the
       morning. Generally
       :attr:`~enhydris.telemetry.models.Telemetry.fetch_offset_minutes`
-      counts from midnight.
-
-   .. attribute:: fetch_offset_timezone
-      :type: CharField
-
-      The time zone to which
-      :attr:`~enhydris.telemetry.models.Telemetry.fetch_offset_minutes`
-      refers; a `tz database name`_ such as ``Europe/Athens``.
-
-      .. _tz database name: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      counts from midnight UTC.
 
    .. attribute:: device_locator
       :type: string
@@ -125,7 +116,6 @@ Models
       :const:`True` if according to
       :attr:`~enhydris.telemetry.models.Telemetry.fetch_interval_minutes`,
       :attr:`~enhydris.telemetry.models.Telemetry.fetch_offset_minutes`,
-      :attr:`~enhydris.telemetry.models.Telemetry.fetch_offset_timezone`
       and the current system time it's time to fetch data.
 
    .. method:: fetch() -> None
@@ -231,10 +221,33 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
       location for all stations, such as Metrica MeteoView2 or
       TheThingsNetwork.
 
-   .. method:: connect() -> None
+   .. attribute:: hide_data_timezone
+      :type: boolean
 
-      Initiates connection to the API and logs on. Should raise
-      :class:`TelemetryError` if something goes wrong.
+      The default is :const:`False`. Set it to :const:`True` if that
+      particular driver shouldn't show the device locator (i.e. the URL
+      or hostname or IP address of the device) in the data form. This is
+      useful for APIs that are known to always provide timestamps in a
+      given time zone.
+
+      If :const:`True`, the timestamps in the return value of
+      :meth:`get_measurements` must be in UTC.
+
+   .. method:: connect() -> None
+               disconnect() -> None
+
+      :meth:`connect` initiates connection to the API and logs on. It should
+      raise :class:`TelemetryError` if something goes wrong. In some cases
+      nothing needs to be done for connection (e.g. in the case of an HTTP API
+      the key to which is a token that is passed to all requests).
+
+      :meth:`disconnect` performs any required cleanup. In many cases no such
+      cleanup is required. In some cases it is needed to logout, or a
+      connection established by :meth:`connect` might need to be closed.
+
+      Leave :meth:`connect` and :meth:`disconnect` unspecified if nothing needs
+      to be done for connection or disconnection; the inherited methods do
+      nothing.
 
    .. method:: get_stations() -> dict
 
@@ -276,7 +289,7 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
       format`_.
 
       ``enhydris_timeseries_end_date`` is either None (meaning get all
-      measurements since the beginning) or a datetime.
+      measurements since the beginning) or an aware datetime.
 
       In order to avoid loading the server too much, this should not
       return more than a reasonable number of records, such as half a

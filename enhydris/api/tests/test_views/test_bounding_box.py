@@ -7,6 +7,7 @@ from model_mommy import mommy
 from enhydris import models
 
 
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class SimpleBoundingBoxTestCase(APITestCase):
     def setUp(self):
         mommy.make(
@@ -36,6 +37,7 @@ class SimpleBoundingBoxTestCase(APITestCase):
 
 
 @override_settings(ENHYDRIS_MAP_DEFAULT_VIEWPORT=(1.0, 2.0, 3.0, 4.0))
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class DefaultBoundingBoxTestCase(APITestCase):
     def setUp(self):
         response = self.client.get("/api/stations/")
@@ -55,6 +57,7 @@ class DefaultBoundingBoxTestCase(APITestCase):
 
 
 @override_settings(ENHYDRIS_MAP_MIN_VIEWPORT_SIZE=1.0)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TooSmallBoundingBoxTestCase(APITestCase):
     def setUp(self):
         mommy.make(

@@ -7,7 +7,7 @@ from io import StringIO
 from traceback import print_tb
 
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import IntegrityError, models
 from django.utils.translation import ugettext_lazy as _
 
 import iso8601
@@ -44,15 +44,10 @@ class Telemetry(models.Model):
     )
     data_timezone = models.CharField(
         max_length=35,
-        blank=True,
+        default="UTC",
         choices=timezone_choices,
-        verbose_name=_("Time zone of the timestamps (useful only for DST switches)"),
-        help_text=_(
-            "If the station switches to Daylight Saving Time, enter the time zone "
-            "here. This is only used in order to know when the DST switches occur. "
-            "The timestamp, after converting to winter time, is entered as is. If "
-            "the station does not switch to DST, leave this field empty."
-        ),
+        verbose_name=_("Time zone of the timestamps"),
+        help_text=_('The time zone of the data, like "Europe/Athens" or "Etc/GMT".'),
     )
     fetch_interval_minutes = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(10), MaxValueValidator(1440)],
@@ -69,12 +64,6 @@ class Telemetry(models.Model):
             "The offset generally counts from midnight."
         ),
     )
-    fetch_offset_timezone = models.CharField(
-        max_length=35,
-        choices=timezone_choices,
-        verbose_name=_("Time zone for the fetch time offset"),
-        help_text=_("The time zone to which the fetch time offset refers."),
-    )
     device_locator = models.CharField(max_length=200, blank=True)
     username = models.CharField(max_length=200, blank=True)
     password = models.CharField(max_length=200, blank=True)
@@ -84,20 +73,20 @@ class Telemetry(models.Model):
 
     @property
     def is_due(self):
-        now = dt.datetime.now(tz=zoneinfo.ZoneInfo(self.fetch_offset_timezone))
+        now = dt.datetime.now(tz=dt.timezone.utc)
         current_offset = now.minute + now.hour * 60
         return current_offset % self.fetch_interval_minutes == self.fetch_offset_minutes
 
     def fetch(self):
         try:
             self._setup_api_client()
-            self._fetch_sensors()
+            with self.api_client:
+                self._fetch_sensors()
         except Exception:
             TelemetryLogMessage.log(self)
 
     def _setup_api_client(self):
         self.api_client = enhydris.telemetry.drivers[self.type](self)
-        self.api_client.connect()
 
     def _fetch_sensors(self):
         for sensor in self.sensor_set.all():
@@ -108,8 +97,6 @@ class Telemetry(models.Model):
             timeseries_group_id=sensor.timeseries_group_id, type=Timeseries.INITIAL
         )
         timeseries_end_date = timeseries.end_date
-        if timeseries_end_date is not None:
-            timeseries_end_date = timeseries_end_date.replace(tzinfo=None)
         measurements = self.api_client.get_measurements(
             sensor_id=sensor.sensor_id, timeseries_end_date=timeseries_end_date
         )
@@ -129,6 +116,14 @@ class Telemetry(models.Model):
             prev_timestamp = cur_timestamp
         result.seek(0)
         return result
+
+    def _check_data_timezone(self):
+        if self.data_timezone not in [choice[0] for choice in timezone_choices]:
+            raise IntegrityError(f"'{self.data_timezone}' is not a valid time zone")
+
+    def save(self, *args, **kwargs):
+        self._check_data_timezone()
+        super().save(*args, **kwargs)
 
 
 class Sensor(models.Model):

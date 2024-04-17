@@ -9,7 +9,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         python-version: ["3.9", "3.10"]
@@ -26,23 +26,22 @@ jobs:
         node-version: '10'
     - name: Set up Chrome
       uses: browser-actions/setup-chrome@latest
+    - name: Set up chromedriver
+      uses: nanasess/setup-chromedriver@v2
     - name: Install Dependencies
       run: |
-        sudo apt-get purge -y postgresql-14 postgresql-client-14
-        sudo add-apt-repository -y ppa:timescale/timescaledb-ppa
+        echo "deb https://packagecloud.io/timescale/timescaledb/ubuntu/ $(lsb_release -c -s) main" | sudo tee /etc/apt/sources.list.d/timescaledb.list
+        wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | sudo apt-key add -
         sudo apt-get update
-        sudo apt-get install -y postgresql-10 gdal-bin libgdal-dev postgresql-10-postgis-2.4 timescaledb-postgresql-10
-        sudo bash -c "echo \"shared_preload_libraries = 'timescaledb'\" >>/etc/postgresql/10/main/postgresql.conf"
+        sudo apt-get install -y gdal-bin libgdal-dev postgresql-14-postgis-3 timescaledb-2-postgresql-14
+        sudo bash -c "echo \"shared_preload_libraries = 'timescaledb'\" >>/etc/postgresql/14/main/postgresql.conf"
         sudo service postgresql restart
         sudo -u postgres psql -U postgres -c "create extension postgis"
         sudo -u postgres psql -U postgres -c "create user runner password 'topsecret' superuser"
         sudo -u postgres psql -U postgres -c "create database openmeteo owner runner"
         python -m pip install --upgrade pip 'setuptools<58'  # See https://stackoverflow.com/questions/69123406
-        CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install 'gdal==2.2.3'
-        pip install 'psycopg2>=2.8,<2.9' codecov coverage isort flake8 black
-        wget -O chromedriver_version https://chromedriver.storage.googleapis.com/LATEST_RELEASE_`google-chrome --version|awk '{ print $3 }'|awk -F. '{ print $1 }'`
-        wget https://chromedriver.storage.googleapis.com/`cat chromedriver_version`/chromedriver_linux64.zip
-        sudo unzip chromedriver_linux64.zip -d /usr/local/bin
+        CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal pip install 'gdal==3.4.1'
+        pip install 'psycopg2>=2.8,<2.9' codecov coverage isort flake8 'black>=22.8,<23'
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
         npm install

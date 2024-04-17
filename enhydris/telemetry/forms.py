@@ -2,7 +2,7 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 from enhydris.telemetry import TelemetryError
-from enhydris.telemetry.models import Telemetry
+from enhydris.telemetry.models import Telemetry, timezone_choices
 
 
 class FormBase(forms.Form):
@@ -17,15 +17,14 @@ class EssentialDataForm(FormBase, forms.ModelForm):
         model = Telemetry
         fields = [
             "type",
-            "data_timezone",
             "fetch_interval_minutes",
             "fetch_offset_minutes",
-            "fetch_offset_timezone",
         ]
 
 
 class ConnectionDataForm(FormBase):
     device_locator = forms.CharField(required=False)
+    data_timezone = forms.ChoiceField(choices=timezone_choices)
     username = forms.CharField()
     password = forms.CharField()
 
@@ -37,16 +36,22 @@ class ConnectionDataForm(FormBase):
         self.fields["device_locator"].help_text = self.driver.device_locator_help_text
         if self.driver.hide_device_locator:
             self.fields["device_locator"].widget = forms.HiddenInput()
+        if self.driver.hide_data_timezone:
+            self.fields["data_timezone"].widget = forms.HiddenInput(
+                attrs={"value": "UTC"}
+            )
+            self.fields["data_timezone"].required = False
 
     def clean(self):
         cleaned_data = super().clean()
         try:
-            user = cleaned_data.get("username")
-            passwd = cleaned_data.get("password")
-            loc = cleaned_data.get("device_locator")
-            telemetry = Telemetry(username=user, password=passwd, device_locator=loc)
-            api_client = self.driver(telemetry)
-            api_client.connect()
+            telemetry = Telemetry(
+                username=cleaned_data.get("username"),
+                password=cleaned_data.get("password"),
+                device_locator=cleaned_data.get("device_locator"),
+            )
+            with self.driver(telemetry):
+                pass  # Just testing that connection does not raise error
         except TelemetryError as e:
             raise forms.ValidationError(str(e))
         return cleaned_data
@@ -61,9 +66,8 @@ class ChooseStationForm(FormBase):
         passwd = self.initial["password"]
         loc = self.initial["device_locator"]
         telemetry = Telemetry(username=user, password=passwd, device_locator=loc)
-        api_client = self.driver(telemetry)
-        api_client.connect()
-        stations = api_client.get_stations()
+        with self.driver(telemetry) as api_client:
+            stations = api_client.get_stations()
         choices = []
         for key, value in stations.items():
             choices.append((key, f"{value} ({key})"))
@@ -82,9 +86,8 @@ class ChooseSensorForm(FormBase):
             station=self.station,
             remote_station_id=self.initial["remote_station_id"],
         )
-        api_client = self.driver(telemetry)
-        api_client.connect()
-        sensors = api_client.get_sensors()
+        with self.driver(telemetry) as api_client:
+            sensors = api_client.get_sensors()
         station = models.Station.objects.get(pk=self.station.id)
         timeseries_groups = station.timeseriesgroup_set
         choices = [("", _("Ignore this sensor"))]
