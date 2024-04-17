@@ -103,6 +103,10 @@ class GetDataTestCase(APITestCase, TimeseriesDataMixin):
             "2017-11-23 17:23,1.00,\r\n2018-11-25 01:00,2.00,\r\n",
         )
 
+    def test_request_with_start_date(self):
+        response = self._get_response(urlsuffix="?start_date=2017-11-23T17:24")
+        self.assertEqual(response.content.decode(), "2018-11-25 01:00,2.00,\r\n")
+
     def test_response_content_in_other_timezone(self):
         response = self._get_response(urlsuffix="?timezone=UTC")
         self.assertEqual(
