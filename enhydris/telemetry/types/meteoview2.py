@@ -13,11 +13,19 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
     name = "Metrica MeteoView2"
     username_label = _("Email")
     password_label = _("API key")
-    hide_device_locator = True
+    device_locator_label = _("Meteoview API URL")
+    device_locator_help = _(
+        "If this is left blank, https://meteoview2.gr/api/ will be used."
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.api_url = "https://meteoview2.gr/api/"
+        if not self.telemetry.device_locator:
+            self.api_url = "https://meteoview2.gr/api/"
+        else:
+            self.api_url = self.telemetry.device_locator
+            if not self.api_url.endswith("/"):
+                self.api_url += "/"
 
     def connect(self):
         data = self.make_request(

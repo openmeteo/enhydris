@@ -218,8 +218,7 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
       particular driver shouldn't show the device locator (i.e. the URL
       or hostname or IP address of the device) in the connection data
       form. This is useful for APIs that are served from a well-known
-      location for all stations, such as Metrica MeteoView2 or
-      TheThingsNetwork.
+      location for all stations, such as TheThingsNetwork.
 
    .. attribute:: hide_data_timezone
       :type: boolean
