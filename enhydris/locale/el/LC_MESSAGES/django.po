@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-17 08:22-0500\n"
+"POT-Creation-Date: 2024-06-07 05:29-0500\n"
 "PO-Revision-Date: 2011-11-24 14:33+0200\n"
 "Last-Translator: Antonis Christofides <anthony@itia.ntua.gr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -153,11 +153,11 @@ msgstr "Μεταδεδομένα"
 msgid "Site"
 msgstr "Ιστότοπος"
 
-#: enhydris/admin/station.py:353
+#: enhydris/admin/station.py:360
 msgid "General information"
 msgstr "Γενικές πληροφορίες"
 
-#: enhydris/admin/station.py:382
+#: enhydris/admin/station.py:389
 msgid "Permissions"
 msgstr "Δικαιώματα πρόσβασης"
 
@@ -387,9 +387,9 @@ msgstr "Συναθροισμένη"
 
 #: enhydris/models/timeseries.py:92
 msgid ""
-"E.g. \"10min\", \"H\" (hourly), \"D\" (daily), \"M\" (monthly), \"Y"
-"\" (yearly). More specifically, it's an optional number plus a unit, with no "
-"space in between. The units available are min, H, D, M, Y. Leave empty if "
+"E.g. \"10min\", \"H\" (hourly), \"D\" (daily), \"M\" (monthly), "
+"\"Y\" (yearly). More specifically, it's an optional number plus a unit, with "
+"no space in between. The units available are min, H, D, M, Y. Leave empty if "
 "the time series is irregular."
 msgstr ""
 "Π.χ. «10min», «H» (ωριαία), «D» (ημερήσια), «M» (μηνιαία), «Y» (ετήσια). Πιο "
@@ -519,11 +519,11 @@ msgstr "Η χρονοσειρά \"{}\" εισήχθη επιτυχώς"
 msgid "Importing time series \"{}\" failed"
 msgstr "Η εισαγωγή της χρονοσειράς \"{}\" απέτυχε"
 
-#: enhydris/telemetry/forms.py:90
+#: enhydris/telemetry/forms.py:93
 msgid "Ignore this sensor"
 msgstr "Να αγνοηθεί αυτός ο αισθητήρας"
 
-#: enhydris/telemetry/forms.py:97
+#: enhydris/telemetry/forms.py:100
 #, python-brace-format
 msgid ""
 "To which Enhydris time series does sensor \"{sensor_name}\" ({sensor_id}) "
@@ -546,35 +546,29 @@ msgstr ""
 "υποστηρίζεται."
 
 #: enhydris/telemetry/models.py:49
-msgid "Time zone of the timestamps (useful only for DST switches)"
-msgstr "Ζώνη ώρας των χρονοσφραγίδων (χρήσιμο μόνο για αλλαγές σε θερινή ώρα)"
+#, fuzzy
+#| msgid "Time zone for the fetch time offset"
+msgid "Time zone of the timestamps"
+msgstr "Ζώνη ώρας για την καθυστέρηση λήψης"
 
-#: enhydris/telemetry/models.py:51
-msgid ""
-"If the station switches to Daylight Saving Time, enter the time zone here. "
-"This is only used in order to know when the DST switches occur. The "
-"timestamp, after converting to winter time, is entered as is. If the station "
-"does not switch to DST, leave this field empty."
+#: enhydris/telemetry/models.py:50
+msgid "The time zone of the data, like \"Europe/Athens\" or \"Etc/GMT\"."
 msgstr ""
-"Αν ο σταθμός αλλάζει σε θερινή ώρα, προσδιορίστε τη ζώνη ώρας εδώ. Αυτό "
-"χρησιμοποιείται μόνο για να γνωρίζουμε πότε γίνονται οι αλλαγές σε θερινή "
-"ώρα. Η χρονοσφραγίδα, αφού μετατραπεί σε χειμερινή ώρα, αποθηκεύεται όπως "
-"είναι. Αν ο σταθμός δεν αλλάζει σε θερινή ώρα, αφήστε το πεδίο κενό."
 
-#: enhydris/telemetry/models.py:59
+#: enhydris/telemetry/models.py:54
 msgid "Fetch interval (how often to fetch data), in minutes"
 msgstr "Διάστημα λήψης (πόσο συχνά να λαμβάνονται δεδομένα), σε λεπτά"
 
-#: enhydris/telemetry/models.py:60
+#: enhydris/telemetry/models.py:55
 msgid "E.g. 60 to fetch data every 60 minutes, 1440 for once a day"
 msgstr ""
 "Π.χ. 60 για να λαμβάνονται δεδομένα κάθε 60 λεπτά, 1440 για άπαξ ημερησίως"
 
-#: enhydris/telemetry/models.py:64
+#: enhydris/telemetry/models.py:59
 msgid "Fetch time offset, in minutes"
 msgstr "Καθυστέρηση λήψης, σε λεπτά"
 
-#: enhydris/telemetry/models.py:66
+#: enhydris/telemetry/models.py:61
 msgid ""
 "If the fetch interval is 10 and the offset is 2, then data will be fetched "
 "at :02, :12, :22, etc. If the fetch interval is 1440 and the offset is 125, "
@@ -585,14 +579,6 @@ msgstr ""
 "λαμβάνονται στις :02, :12, :22 κλπ. Αν το διάστημα λήψης είναι 1440 και η "
 "καθυστέρηση είναι 125, τότε τα δεδομένα θα λαμβάνονται κάθε μέρα στις 02:05 "
 "π.μ. Γενικά η καθυστέρηση λογίζεται από τα μεσάνυχτα."
-
-#: enhydris/telemetry/models.py:75
-msgid "Time zone for the fetch time offset"
-msgstr "Ζώνη ώρας για την καθυστέρηση λήψης"
-
-#: enhydris/telemetry/models.py:76
-msgid "The time zone to which the fetch time offset refers."
-msgstr "Η ζώνη ώρας στην οποία αναφέρεται η καθυστέρηση λήψης."
 
 #: enhydris/telemetry/templates/enhydris/telemetry/telemetrylogmessage_detail.html:8
 #, python-format
@@ -697,11 +683,11 @@ msgstr "Επόμενη"
 msgid "URL"
 msgstr ""
 
-#: enhydris/telemetry/types/__init__.py:8
+#: enhydris/telemetry/types/__init__.py:9
 msgid "Username"
 msgstr "Χρήστης"
 
-#: enhydris/telemetry/types/__init__.py:9
+#: enhydris/telemetry/types/__init__.py:10
 msgid "Password"
 msgstr "Password"
 
@@ -725,7 +711,15 @@ msgstr ""
 msgid "API key"
 msgstr ""
 
-#: enhydris/telemetry/views.py:118
+#: enhydris/telemetry/types/meteoview2.py:16
+msgid "Meteoview API URL"
+msgstr ""
+
+#: enhydris/telemetry/types/meteoview2.py:18
+msgid "If this is left blank, https://meteoview2.gr/api/ will be used."
+msgstr "Αν το αφήσετε κενό, θα χρησιμοποιηθεί η τιμή https://meteoview2.gr/api/."
+
+#: enhydris/telemetry/views.py:124
 msgid "Telemetry has been configured"
 msgstr "Η τηλεμετρία ορίστηκε"
 
@@ -735,6 +729,69 @@ msgstr ""
 
 #: enhydris/templates/admin/enhydris/garea/change_list.html:5
 msgid "Upload shapefile"
+msgstr ""
+
+#: enhydris/templates/admin/enhydris/station/delete_confirmation.html:6
+#, python-format
+msgid ""
+"Deleting the %(object_name)s '%(escaped_object)s'\n"
+"                would result in deleting related objects, but your account "
+"doesn't have permission to delete the\n"
+"                following types of objects:"
+msgstr ""
+
+#: enhydris/templates/admin/enhydris/station/delete_confirmation.html:13
+#, python-format
+msgid ""
+"Deleting the %(object_name)s '%(escaped_object)s'\n"
+"                would require deleting the following protected related "
+"objects:"
+msgstr ""
+
+#: enhydris/templates/admin/enhydris/station/delete_confirmation.html:19
+#, python-format
+msgid ""
+"Are you sure you want to delete the %(object_name)s \"\n"
+"                %(escaped_object)s\"? All objects related to the "
+"%(object_name)s, including images, events and time\n"
+"                series, will also be deleted."
+msgstr ""
+
+#: enhydris/templates/admin/enhydris/station/delete_confirmation.html:27
+#: enhydris/templates/admin/enhydris/station/delete_selected_confirmation.html:23
+msgid "Yes, I’m sure"
+msgstr ""
+
+#: enhydris/templates/admin/enhydris/station/delete_confirmation.html:28
+#: enhydris/templates/admin/enhydris/station/delete_selected_confirmation.html:24
+msgid "No, take me back"
+msgstr ""
+
+#: enhydris/templates/admin/enhydris/station/delete_selected_confirmation.html:5
+#, python-format
+msgid ""
+"Deleting the selected %(objects_name)s would result in deleting related "
+"objects, but\n"
+"            your account doesn't have permission to delete the following "
+"types of objects:"
+msgstr ""
+
+#: enhydris/templates/admin/enhydris/station/delete_selected_confirmation.html:9
+#, python-format
+msgid ""
+"Deleting the selected %(objects_name)s would require deleting the following "
+"protected\n"
+"            related objects:"
+msgstr ""
+
+#: enhydris/templates/admin/enhydris/station/delete_selected_confirmation.html:13
+#, python-format
+msgid ""
+"Are you sure you want to delete the selected %(objects_name)s? All objects "
+"related to\n"
+"            the %(objects_name)s, including images, events and time series, "
+"will also be\n"
+"            deleted."
 msgstr ""
 
 #: enhydris/templates/enhydris/base/default.html:7
@@ -1112,6 +1169,24 @@ msgstr "Εγγραφή"
 #, python-brace-format
 msgid "Method \"{method}\" not allowed."
 msgstr "Η μέθοδος \"{method}\" δεν επιτρέπεται."
+
+#~ msgid "Time zone of the timestamps (useful only for DST switches)"
+#~ msgstr ""
+#~ "Ζώνη ώρας των χρονοσφραγίδων (χρήσιμο μόνο για αλλαγές σε θερινή ώρα)"
+
+#~ msgid ""
+#~ "If the station switches to Daylight Saving Time, enter the time zone "
+#~ "here. This is only used in order to know when the DST switches occur. The "
+#~ "timestamp, after converting to winter time, is entered as is. If the "
+#~ "station does not switch to DST, leave this field empty."
+#~ msgstr ""
+#~ "Αν ο σταθμός αλλάζει σε θερινή ώρα, προσδιορίστε τη ζώνη ώρας εδώ. Αυτό "
+#~ "χρησιμοποιείται μόνο για να γνωρίζουμε πότε γίνονται οι αλλαγές σε θερινή "
+#~ "ώρα. Η χρονοσφραγίδα, αφού μετατραπεί σε χειμερινή ώρα, αποθηκεύεται όπως "
+#~ "είναι. Αν ο σταθμός δεν αλλάζει σε θερινή ώρα, αφήστε το πεδίο κενό."
+
+#~ msgid "The time zone to which the fetch time offset refers."
+#~ msgstr "Η ζώνη ώρας στην οποία αναφέρεται η καθυστέρηση λήψης."
 
 #~ msgid "Unauthorized"
 #~ msgstr "Δεν έχετε δικαίωμα λήψης"

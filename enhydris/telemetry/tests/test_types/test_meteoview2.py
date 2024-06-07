@@ -14,6 +14,29 @@ from enhydris.telemetry.tests.test_models import TelemetryFetchTestCaseBase
 from enhydris.telemetry.types.meteoview2 import TelemetryAPIClient
 
 
+class ApiUrlTestCase(TestCase):
+    def setUp(self):
+        self.telemetry = Telemetry(
+            username="myemail@somewhere.com",
+            password="topsecretapikey",
+            remote_station_id=823,
+        )
+
+    def test_default_api_url(self):
+        telemetry_api_client = TelemetryAPIClient(self.telemetry)
+        self.assertEqual(telemetry_api_client.api_url, "https://meteoview2.gr/api/")
+
+    def test_non_default_api_url(self):
+        self.telemetry.device_locator = "http://somewhere.com/api/"
+        telemetry_api_client = TelemetryAPIClient(self.telemetry)
+        self.assertEqual(telemetry_api_client.api_url, "http://somewhere.com/api/")
+
+    def test_trailing_slash_added_automatically(self):
+        self.telemetry.device_locator = "http://somewhere.com/api"
+        telemetry_api_client = TelemetryAPIClient(self.telemetry)
+        self.assertEqual(telemetry_api_client.api_url, "http://somewhere.com/api/")
+
+
 class TelemetryAPIClientAttributesTestCase(TestCase):
     def test_name(self):
         self.assertEqual(TelemetryAPIClient.name, "Metrica MeteoView2")
