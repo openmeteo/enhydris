@@ -209,6 +209,7 @@ class TelemetryFetchTestCase(TelemetryFetchTestCaseBase):
                 "data": json.dumps(
                     {"email": "someemail@email.com", "key": "topsecret"}
                 ),
+                "verify": False,
             },
         )
 

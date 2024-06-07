@@ -101,10 +101,10 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
             kwargs.setdefault("headers", {})
             kwargs["headers"]["content-type"] = "application/json"
             kwargs["data"] = json.dumps(kwargs["data"])
-        response = requests.request(method, url, *args, **kwargs)
         try:
+            response = requests.request(method, url, verify=False, *args, **kwargs)
             response.raise_for_status()
-        except requests.RequestException as e:
+        except (requests.exceptions.SSLError, requests.RequestException) as e:
             raise TelemetryError(str(e))
         data = response.json()
         if "code" not in data:
