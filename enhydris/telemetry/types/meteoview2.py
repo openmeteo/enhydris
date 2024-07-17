@@ -1,6 +1,7 @@
 import datetime as dt
 import json
 from io import StringIO
+from zoneinfo import ZoneInfo
 
 from django.utils.translation import ugettext_lazy as _
 
@@ -88,7 +89,9 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
 
     def _get_start_date(self, sensor_id, timeseries_end_date):
         if timeseries_end_date is not None:
-            timeseries_end_date = timeseries_end_date.replace(tzinfo=None)
+            timeseries_end_date = timeseries_end_date.astimezone(
+                ZoneInfo(self.telemetry.data_timezone)
+            ).replace(tzinfo=None)
             start_date = timeseries_end_date + dt.timedelta(minutes=1)
         else:
             start_date = dt.datetime(1990, 1, 1)
@@ -101,10 +104,10 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
             kwargs.setdefault("headers", {})
             kwargs["headers"]["content-type"] = "application/json"
             kwargs["data"] = json.dumps(kwargs["data"])
-        response = requests.request(method, url, *args, **kwargs)
         try:
+            response = requests.request(method, url, verify=False, *args, **kwargs)
             response.raise_for_status()
-        except requests.RequestException as e:
+        except (requests.exceptions.SSLError, requests.RequestException) as e:
             raise TelemetryError(str(e))
         data = response.json()
         if "code" not in data:

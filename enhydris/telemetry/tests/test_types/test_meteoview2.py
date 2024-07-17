@@ -4,8 +4,8 @@ from io import StringIO
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+import requests
 from freezegun import freeze_time
-from requests import Timeout
 
 from enhydris.models import Timeseries
 from enhydris.telemetry import TelemetryError
@@ -48,6 +48,7 @@ class TelemetryAPIClientTestCaseBase(TestCase):
             username="myemail@somewhere.com",
             password="topsecretapikey",
             remote_station_id=823,
+            data_timezone="UTC",
         )
         self.telemetry_api_client = TelemetryAPIClient(telemetry)
 
@@ -55,7 +56,7 @@ class TelemetryAPIClientTestCaseBase(TestCase):
 @patch("enhydris.telemetry.types.meteoview2.requests.request")
 class MakeRequestTestCase(TelemetryAPIClientTestCaseBase):
     def test_raises_on_bad_status_code(self, mock_request):
-        mock_request.return_value.raise_for_status.side_effect = Timeout
+        mock_request.return_value.raise_for_status.side_effect = requests.Timeout
         with self.assertRaises(TelemetryError):
             self.telemetry_api_client.make_request("GET", "/")
 
@@ -66,6 +67,11 @@ class MakeRequestTestCase(TelemetryAPIClientTestCaseBase):
 
     def test_raises_when_code_is_not_200(self, mock_request):
         mock_request.return_value.json.return_value = {"code": "404"}
+        with self.assertRaises(TelemetryError):
+            self.telemetry_api_client.make_request("GET", "/")
+
+    def test_raises_on_ssl_error(self, mock_request):
+        mock_request.side_effect = requests.exceptions.SSLError
         with self.assertRaises(TelemetryError):
             self.telemetry_api_client.make_request("GET", "/")
 
@@ -88,6 +94,7 @@ class ConnectTestCase(TelemetryAPIClientTestCaseBase):
             data=json.dumps(
                 {"email": "myemail@somewhere.com", "key": "topsecretapikey"}
             ),
+            verify=False,
         )
 
     def test_sets_token(self, mock_request):
@@ -117,6 +124,7 @@ class GetStationsTestCase(LoggedOnTestCaseBase):
             "POST",
             "https://meteoview2.gr/api/stations",
             headers={"Authorization": "Bearer topsecretapitoken"},
+            verify=False,
         )
 
     def test_returns_stations(self, mock_request):
@@ -149,6 +157,7 @@ class GetSensorsTestCase(LoggedOnTestCaseBase):
                 "Authorization": "Bearer topsecretapitoken",
             },
             data=json.dumps({"station_code": 823}),
+            verify=False,
         )
 
     def test_returns_sensors(self, mock_request):
@@ -192,7 +201,7 @@ class TelemetryFetchIgnoresTimeZoneTestCase(TelemetryFetchTestCaseBase):
         timeseries.append_data(
             StringIO("2022-06-14 08:00,42.1,\n"), default_timezone="Etc/GMT"
         )
-        self.telemetry.data_timezone = "Etc/GMT-2"
+        self.telemetry.data_timezone = "Europe/Athens"
 
     @patch("enhydris.telemetry.types.meteoview2.requests.request")
     def test_ignores_timezone(self, mock_request):
@@ -209,10 +218,11 @@ class TelemetryFetchIgnoresTimeZoneTestCase(TelemetryFetchTestCaseBase):
                     {
                         "sensor": ["257"],
                         "datefrom": "2022-06-14",
-                        "timefrom": "10:01",
+                        "timefrom": "11:01",
                         "dateto": "2022-12-11",
                     }
                 ),
+                "verify": False,
             },
         )
 
@@ -231,8 +241,9 @@ class TelemetryFetchIgnoresTimeZoneTestCase(TelemetryFetchTestCaseBase):
 @freeze_time("2022-06-14 08:35")
 class GetMeasurementsTestCase(LoggedOnTestCaseBase):
     def test_makes_request(self, mock_request):
+        self.telemetry_api_client.telemetry.data_timezone = "Europe/Athens"
         self._set_successful_request_result(mock_request)
-        existing_end_date = dt.datetime(2022, 6, 14, 8, 0)
+        existing_end_date = dt.datetime(2022, 6, 14, 8, 0, tzinfo=dt.timezone.utc)
         self.telemetry_api_client.get_measurements(8231, existing_end_date)
         mock_request.assert_called_once_with(
             "POST",
@@ -245,10 +256,11 @@ class GetMeasurementsTestCase(LoggedOnTestCaseBase):
                 {
                     "sensor": [8231],
                     "datefrom": "2022-06-14",
-                    "timefrom": "08:01",
+                    "timefrom": "11:01",
                     "dateto": "2022-12-11",
                 }
             ),
+            verify=False,
         )
 
     def test_return_value(self, mock_request):
@@ -284,6 +296,7 @@ class GetMeasurementsTestCase(LoggedOnTestCaseBase):
                     "dateto": "1990-06-30",
                 }
             ),
+            verify=False,
         )
 
     def _set_successful_request_result(self, mock_request):
