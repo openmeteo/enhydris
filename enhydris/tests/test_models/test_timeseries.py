@@ -279,6 +279,33 @@ class TimeseriesGetDataTestCase(DataTestCase):
         pd.testing.assert_frame_equal(self.data.data, self.expected_result)
 
 
+class TimeseriesGetDataWithCloseTimestampsTestCase(DataTestCase):
+    """Test get_data when two timestamps are within the same minute.
+
+    While having successive timestamps within the same minute, such as 18:42:00 and
+    18:42:10, is not yet fully supported, sometimes the database has such cases
+    (primarily because of telemetric system bugs). We test that get_data can handle
+    them.
+    """
+
+    def setUp(self):
+        tzinfo = get_tzinfo("Etc/GMT")
+        self.data = pd.DataFrame(
+            data={"value": [1.0, 2.0], "flags": ["", ""]},
+            columns=["value", "flags"],
+            index=[
+                dt.datetime(2024, 7, 17, 18, 42, 0, tzinfo=tzinfo),
+                dt.datetime(2024, 7, 17, 18, 42, 10, tzinfo=tzinfo),
+            ],
+        )
+        self.data.index.name = "date"
+        self.timeseries.set_data(self.data)
+
+    def test_get_data(self):
+        data = self.timeseries.get_data(timezone="Etc/GMT")
+        pd.testing.assert_frame_equal(data.data, self.data)
+
+
 class TimeseriesGetDataInDifferentTimezoneTestCase(DataTestCase):
     @classmethod
     def setUpClass(cls):

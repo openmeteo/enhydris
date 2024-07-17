@@ -220,7 +220,7 @@ class Timeseries(models.Model):
             cursor.execute(
                 """
                 SELECT STRING_AGG(
-                    TO_CHAR(timestamp AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:MI')
+                    TO_CHAR(timestamp AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:MI:SS')
                         || ','
                         || CASE WHEN value is NULL THEN DOUBLE PRECISION 'NaN'
                            ELSE value END
