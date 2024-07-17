@@ -48,6 +48,7 @@ class TelemetryAPIClientTestCaseBase(TestCase):
             username="myemail@somewhere.com",
             password="topsecretapikey",
             remote_station_id=823,
+            data_timezone="UTC",
         )
         self.telemetry_api_client = TelemetryAPIClient(telemetry)
 
@@ -200,7 +201,7 @@ class TelemetryFetchIgnoresTimeZoneTestCase(TelemetryFetchTestCaseBase):
         timeseries.append_data(
             StringIO("2022-06-14 08:00,42.1,\n"), default_timezone="Etc/GMT"
         )
-        self.telemetry.data_timezone = "Etc/GMT-2"
+        self.telemetry.data_timezone = "Europe/Athens"
 
     @patch("enhydris.telemetry.types.meteoview2.requests.request")
     def test_ignores_timezone(self, mock_request):
@@ -217,7 +218,7 @@ class TelemetryFetchIgnoresTimeZoneTestCase(TelemetryFetchTestCaseBase):
                     {
                         "sensor": ["257"],
                         "datefrom": "2022-06-14",
-                        "timefrom": "10:01",
+                        "timefrom": "11:01",
                         "dateto": "2022-12-11",
                     }
                 ),
@@ -240,8 +241,9 @@ class TelemetryFetchIgnoresTimeZoneTestCase(TelemetryFetchTestCaseBase):
 @freeze_time("2022-06-14 08:35")
 class GetMeasurementsTestCase(LoggedOnTestCaseBase):
     def test_makes_request(self, mock_request):
+        self.telemetry_api_client.telemetry.data_timezone = "Europe/Athens"
         self._set_successful_request_result(mock_request)
-        existing_end_date = dt.datetime(2022, 6, 14, 8, 0)
+        existing_end_date = dt.datetime(2022, 6, 14, 8, 0, tzinfo=dt.timezone.utc)
         self.telemetry_api_client.get_measurements(8231, existing_end_date)
         mock_request.assert_called_once_with(
             "POST",
@@ -254,7 +256,7 @@ class GetMeasurementsTestCase(LoggedOnTestCaseBase):
                 {
                     "sensor": [8231],
                     "datefrom": "2022-06-14",
-                    "timefrom": "08:01",
+                    "timefrom": "11:01",
                     "dateto": "2022-12-11",
                 }
             ),
