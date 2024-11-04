@@ -96,6 +96,17 @@ class Timeseries(models.Model):
         ),
         verbose_name=_("Time step"),
     )
+    name = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        help_text=_(
+            "You can leave this empty, unless you have many time series for this group "
+            "with the same type and time step (for example, if you have a time series "
+            "aggregated on the mean and another aggregated on the max value)."
+        ),
+        verbose_name=_("Name"),
+    )
     publicly_available = models.BooleanField(
         default=get_default_publicly_available,
         verbose_name=_("Publicly available"),
@@ -109,7 +120,7 @@ class Timeseries(models.Model):
         verbose_name = pgettext_lazy("Singular", "Time series")
         verbose_name_plural = pgettext_lazy("Plural", "Time series")
         ordering = ("type",)
-        unique_together = ["timeseries_group", "type", "time_step"]
+        unique_together = ["timeseries_group", "type", "time_step", "name"]
         constraints = [
             models.UniqueConstraint(
                 fields=["timeseries_group"],
@@ -316,10 +327,13 @@ class Timeseries(models.Model):
         cache.delete_many(cached_property_names)
 
     def __str__(self):
-        result = self.get_type_display()
+        type = self.get_type_display()
+        explanation = ""
         if self.type == self.AGGREGATED:
-            result = f"{result} ({self.time_step})"
-        return result
+            explanation = f" ({self.time_step} {self.name})"
+        elif self.name:
+            explanation = f" ({self.name})"
+        return f"{type}{explanation}"
 
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         check_time_step(self.time_step)

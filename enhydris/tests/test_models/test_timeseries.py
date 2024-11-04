@@ -60,20 +60,32 @@ class TimeseriesTestCase(TestCase):
     def test_str_regularized(self):
         self._test_str(type=models.Timeseries.REGULARIZED, result="Regularized")
 
-    def test_str_aggregated(self):
-        self._test_str(type=models.Timeseries.AGGREGATED, result="Aggregated (H)")
+    def test_str_with_name(self):
+        self._test_str(
+            type=models.Timeseries.INITIAL,
+            name="hello",
+            result="Initial (hello)",
+        )
 
-    def _make_timeseries(self, timeseries_group, type):
+    def test_str_aggregated(self):
+        self._test_str(
+            type=models.Timeseries.AGGREGATED,
+            name="Mean",
+            result="Aggregated (H Mean)",
+        )
+
+    def _make_timeseries(self, timeseries_group, type, name=""):
         return mommy.make(
             models.Timeseries,
             timeseries_group=timeseries_group,
             type=type,
             time_step="H",
+            name=name,
         )
 
-    def _test_str(self, type, result):
+    def _test_str(self, type, result, name=""):
         timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
-        timeseries = self._make_timeseries(timeseries_group, type)
+        timeseries = self._make_timeseries(timeseries_group, type, name=name)
         self.assertEqual(str(timeseries), result)
 
     def test_only_one_initial_per_group(self):

@@ -394,6 +394,16 @@ Time series and related models
       it contains an appropriate time step as a `pandas "frequency"
       string`_, e.g.  "10min", "H", "M", "Y".
 
+   .. attribute:: enhydris.models.Timeseries.name
+
+      A name for the time series. Very often this is not needed and can
+      be left empty—the name of the time series group and the
+      :attr:`type` and :attr:`time_step` of the time series suffice.
+      Sometimes, however, there may be different time series with the
+      same :attr:`type` and :attr:`time_step`; for example, an
+      aggregated time series with the mean and another one with the max
+      value.
+
    .. attribute:: enhydris.models.Timeseries.publicly_available
 
       Specifies whether anonymous users can download the time series

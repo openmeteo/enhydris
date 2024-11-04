@@ -267,7 +267,7 @@ class TimeseriesInline(InlinePermissionsMixin, nested_admin.NestedStackedInline)
     classes = ("collapse",)
     extra = 1
     fields = (
-        ("type", "time_step"),
+        ("type", "time_step", "name"),
         "publicly_available",
         ("data", "default_timezone", "replace_or_append"),
     )
