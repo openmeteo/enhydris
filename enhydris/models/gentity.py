@@ -250,7 +250,9 @@ class Station(Gpoint):
         def get_last_update():
             from .timeseries import Timeseries
 
-            timeseries = Timeseries.objects.filter(timeseries_group__gentity_id=self.id)
+            timeseries = Timeseries.objects.filter(
+                timeseries_group__gentity_id=self.id
+            ).select_related("timeseries_group__gentity")
             result = None
             for t in timeseries:
                 t_end_date = t.end_date

@@ -7,8 +7,10 @@ from zoneinfo import ZoneInfo
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import FileSystemStorage
 from django.db import IntegrityError, connection
+from django.db.models import Max, Min
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
@@ -58,10 +60,6 @@ class TimeseriesStorage(FileSystemStorage):
     def path(self, name):
         self.location = abspath(settings.ENHYDRIS_TIMESERIES_DATA_DIR)
         return super().path(name)
-
-
-class DataNotInCache(Exception):
-    pass
 
 
 def get_default_publicly_available():
@@ -128,29 +126,17 @@ class Timeseries(models.Model):
             ),
         ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.cache = TimeseriesCache(self)
+
     @property
     def start_date(self):
-        def get_start_date():
-            try:
-                return self.timeseriesrecord_set.earliest().timestamp.astimezone(
-                    ZoneInfo(self.timeseries_group.gentity.display_timezone)
-                )
-            except TimeseriesRecord.DoesNotExist:
-                return None
-
-        return cache.get_or_set(f"timeseries_start_date_{self.id}", get_start_date)
+        return self.cache.start_date
 
     @property
     def end_date(self):
-        def get_end_date():
-            try:
-                return self.timeseriesrecord_set.latest().timestamp.astimezone(
-                    ZoneInfo(self.timeseries_group.gentity.display_timezone)
-                )
-            except TimeseriesRecord.DoesNotExist:
-                return None
-
-        return cache.get_or_set(f"timeseries_end_date_{self.id}", get_end_date)
+        return self.cache.end_date
 
     def _set_extra_timeseries_properties(self, ahtimeseries, timezone):
         if self.timeseries_group.gentity.geom:
@@ -192,10 +178,7 @@ class Timeseries(models.Model):
     def get_data(self, start_date=None, end_date=None, timezone=None):
         start_date = start_date or dt.datetime(1678, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
         end_date = end_date or dt.datetime(2261, 12, 31, 23, 59, tzinfo=dt.timezone.utc)
-        try:
-            data = self._get_data_from_cache(start_date, end_date)
-        except DataNotInCache:
-            data = self._retrieve_and_cache_data(start_date, end_date)
+        data = self.cache.get_data(start_date, end_date)
         timezone = timezone or self.timeseries_group.gentity.display_timezone
         if not data.empty:
             data.index = data.index.tz_convert(timezone)
@@ -203,44 +186,9 @@ class Timeseries(models.Model):
         self._set_extra_timeseries_properties(result, timezone)
         return result
 
-    def _get_data_from_cache(self, start_date, end_date):
-        data = cache.get(f"timeseries_data_{self.id}")
-        if data is None or data.empty:
-            raise DataNotInCache()
-        if self.start_date is None:
-            return data  # Data should be empty in that case; just return it
-        start_date = max(start_date, self.start_date).astimezone(data.index.tzinfo)
-        end_date = min(end_date, self.end_date).astimezone(data.index.tzinfo)
-        if data.index.min() > start_date or data.index.max() < end_date:
-            raise DataNotInCache()
-        return data.loc[start_date:end_date]
-
-    def _retrieve_and_cache_data(self, start_date, end_date):
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT STRING_AGG(
-                    TO_CHAR(timestamp AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:MI:SS')
-                        || ','
-                        || CASE WHEN value is NULL THEN DOUBLE PRECISION 'NaN'
-                           ELSE value END
-                        || ','
-                        || flags,
-                    E'\n'
-                    ORDER BY timestamp
-                ) || E'\n'
-                FROM enhydris_timeseriesrecord
-                WHERE timeseries_id=%s AND timestamp >= %s AND timestamp <= %s
-                """,
-                [self.id, start_date, end_date],
-            )
-            result_string = StringIO(cursor.fetchone()[0])
-        data = HTimeseries(result_string, default_tzinfo=dt.timezone.utc).data
-        cache.set(f"timeseries_data_{self.id}", data)
-        return data
-
     def set_data(self, data, default_timezone=None):
         self.timeseriesrecord_set.all().delete()
+        self.cache.invalidate()
         return self.append_data(data, default_timezone)
 
     def append_data(self, data, default_timezone=None):
@@ -283,29 +231,6 @@ class Timeseries(models.Model):
         except Station.DoesNotExist:
             return None
 
-    def _invalidate_cached_data(self):
-        """
-        Invalidate cached data for related model instances.
-
-        Invalidate cached values of:
-         - timeseries_data from `get_data` method
-         - last_update of related `Station` model instance.
-         - start_date, end_date, of the related `TimeSeriesGroup` model instance.
-         - start_date`, end_date of the current `Timeseries` model instance.
-        """
-        cached_property_names = [
-            f"timeseries_data_{self.id}",
-            f"timeseries_start_date_{self.id}",
-            f"timeseries_end_date_{self.id}",
-            f"timeseries_group_start_date_{self.timeseries_group.id}",
-            f"timeseries_group_end_date_{self.timeseries_group.id}",
-        ]
-        if self.related_station:
-            cached_property_names += [
-                f"station_last_update_{self.related_station.id}",
-            ]
-        cache.delete_many(cached_property_names)
-
     def __str__(self):
         result = self.get_type_display()
         if self.type == self.AGGREGATED:
@@ -315,7 +240,125 @@ class Timeseries(models.Model):
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         check_time_step(self.time_step)
         super(Timeseries, self).save(force_insert, force_update, *args, **kwargs)
-        self._invalidate_cached_data()
+        self.cache.invalidate()
+
+
+class TimeseriesCache:
+    def __init__(self, timeseries):
+        self.timeseries = timeseries
+        self.data = None
+
+    @property
+    def start_date(self):
+        self._ensure_data_are_cached()
+        return self.data["start_date"]
+
+    @property
+    def end_date(self):
+        self._ensure_data_are_cached()
+        return self.data["end_date"]
+
+    @property
+    def cache_key(self):
+        return f"timeseries_{self.timeseries.id}"
+
+    def _ensure_data_are_cached(self, start_date=None, end_date=None):
+        assert (start_date is None and end_date is None) or (
+            start_date is not None and end_date is not None
+        )
+        cache_modified = False
+
+        self.data = cache.get(self.cache_key)
+
+        if not self.data:
+            self.data = self._get_dates_from_database()
+            cache_modified = True
+
+        if self.data["start_date"] and start_date is not None:
+            cache_modified = self._ensure_records_are_fetched(start_date, end_date)
+
+        if cache_modified:
+            cache.set(self.cache_key, self.data)
+
+    def _get_dates_from_database(self):
+        try:
+            display_timezone = self.timeseries.timeseries_group.gentity.display_timezone
+        except ObjectDoesNotExist:
+            display_timezone = "UTC"
+        zoneinfo = ZoneInfo(display_timezone)
+        result = self.timeseries.timeseriesrecord_set.aggregate(
+            start_date=Min("timestamp"), end_date=Max("timestamp")
+        )
+        if result["start_date"]:
+            result = {x: result[x].astimezone(zoneinfo) for x in result}
+        result["records"] = HTimeseries().data
+        return result
+
+    def get_data(self, start_date, end_date):
+        self._ensure_data_are_cached(start_date, end_date)
+        tzinfo = self.data["records"].index.tzinfo
+        start_date = start_date.astimezone(tzinfo)
+        end_date = end_date.astimezone(tzinfo)
+        return self.data["records"].loc[start_date:end_date]
+
+    def _ensure_records_are_fetched(self, start_date, end_date):
+        records = self.data["records"]
+        tzinfo = records.index.tzinfo
+        start_date = max(start_date, self.data["start_date"]).astimezone(tzinfo)
+        end_date = min(end_date, self.data["end_date"]).astimezone(tzinfo)
+        records_exist = self.data["start_date"] is not None
+        must_fetch_from_database = records_exist and (
+            len(records) == 0
+            or records.index.min() > start_date
+            or records.index.max() < end_date
+        )
+        if must_fetch_from_database:
+            self.data["records"] = self._get_records_from_database(start_date, end_date)
+            return True
+        return False
+
+    def _get_records_from_database(self, start_date, end_date):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT STRING_AGG(
+                    TO_CHAR(timestamp AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:MI:SS')
+                        || ','
+                        || CASE WHEN value is NULL THEN DOUBLE PRECISION 'NaN'
+                           ELSE value END
+                        || ','
+                        || flags,
+                    E'\n'
+                    ORDER BY timestamp
+                ) || E'\n'
+                FROM enhydris_timeseriesrecord
+                WHERE timeseries_id=%s AND timestamp >= %s AND timestamp <= %s
+                """,
+                [self.timeseries.id, start_date, end_date],
+            )
+            result_string = StringIO(cursor.fetchone()[0])
+        return HTimeseries(result_string, default_tzinfo=dt.timezone.utc).data
+
+    def invalidate(self):
+        """
+        Invalidate cached data for related model instances.
+
+        Invalidate cached values of:
+         - timeseries (start_date, end_date and data)
+         - last_update of related `Station` model instance.
+         - start_date, end_date, of the related `TimeSeriesGroup` model instance.
+        """
+        cached_property_names = [
+            self.cache_key,
+            f"timeseries_group_start_date_{self.timeseries.timeseries_group.id}",
+            f"timeseries_group_end_date_{self.timeseries.timeseries_group.id}",
+        ]
+        if self.timeseries.related_station:
+            cached_property_names += [
+                f"station_last_update_{self.timeseries.related_station.id}",
+            ]
+        cache.delete_many(cached_property_names)
+        self.data = None
 
 
 class TimeseriesRecord(models.Model):

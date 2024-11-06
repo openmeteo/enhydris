@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 
 from django.contrib.auth.models import User
 from django.core import mail
+from django.core.cache import cache
 from django.test import TestCase, override_settings
 
 from enhydris import models, tasks
@@ -33,6 +34,7 @@ class TimeseriesAppendTestCase(TestSaveTimeseriesDataMixin, TestCase):
 
     def setUp(self):
         self._prepare_data_file(data=b"2019-04-09 13:36,0,\n")
+        cache.clear()
         tasks.save_timeseries_data(
             id=self.timeseries.id,
             replace_or_append="APPEND",

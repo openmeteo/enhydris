@@ -423,24 +423,20 @@ class TimeseriesGetDataCacheTestCase(DataTestCase):
         # queries later
         self.timeseries.timeseries_group.gentity.gpoint.altitude
 
-        # Ensure we've cached start_date and end_date
-        self.timeseries.start_date
-        self.timeseries.end_date
-
     def test_cache(self):
         self.expected_result = self.original_expected_result
 
-        self._get_data_and_check_num_queries(1, start_date=None, end_date=None)
+        self._get_data_and_check_num_queries(2, start_date=None, end_date=None)
         self._get_data_and_check_num_queries(0, start_date=None, end_date=None)
 
         # Check cache invalidation
         self.timeseries.save()
-        self._get_data_and_check_num_queries(1, start_date=None, end_date=None)
+        self._get_data_and_check_num_queries(2, start_date=None, end_date=None)
 
     def test_refetches_if_does_not_include_everything_from_start_date(self):
         start_date_1 = dt.datetime(2017, 12, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
         self.expected_result = self.original_expected_result.iloc[1:]
-        self._get_data_and_check_num_queries(1, start_date=start_date_1, end_date=None)
+        self._get_data_and_check_num_queries(2, start_date=start_date_1, end_date=None)
 
         start_date_2 = dt.datetime(2017, 11, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
         self.expected_result = self.original_expected_result
@@ -453,7 +449,7 @@ class TimeseriesGetDataCacheTestCase(DataTestCase):
     def test_refetches_if_does_not_include_everything_to_end_date(self):
         end_date_1 = dt.datetime(2018, 10, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
         self.expected_result = self.original_expected_result.iloc[:-1]
-        self._get_data_and_check_num_queries(1, start_date=None, end_date=end_date_1)
+        self._get_data_and_check_num_queries(2, start_date=None, end_date=end_date_1)
 
         end_date_2 = dt.datetime(2018, 12, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
         self.expected_result = self.original_expected_result
@@ -758,7 +754,7 @@ class TimeseriesDatesCacheInvalidationTestCase(TestCase):
             self.timeseries_group.start_date
 
     def test_timeseries_group_end_date_cache_invalidation(self):
-        # Make sure to retrieve the `default_timeseries` first.
+        # Retrieve the default timeseries before counting the rest of the queries
         self.timeseries_group.default_timeseries
 
         with self.assertNumQueries(1):
