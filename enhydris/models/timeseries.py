@@ -209,8 +209,17 @@ class Timeseries(models.Model):
             raise DataNotInCache()
         if self.start_date is None:
             return data  # Data should be empty in that case; just return it
-        start_date = max(start_date, self.start_date).astimezone(data.index.tzinfo)
-        end_date = min(end_date, self.end_date).astimezone(data.index.tzinfo)
+        try:
+            start_date = max(start_date, self.start_date).astimezone(data.index.tzinfo)
+            end_date = min(end_date, self.end_date).astimezone(data.index.tzinfo)
+        except TypeError:
+            # A TypeError will occur if self.start_date or self.end_date above is none.
+            # This should normally not happen, because self.start_date had already
+            # been checked immediately before, and self.end_date is not none whenever
+            # self.start_date is not none. However there's a race condition where
+            # another thread or process could have updated the time series (and
+            # invalidated the cache) in between these statements.
+            raise DataNotInCache()
         if data.index.min() > start_date or data.index.max() < end_date:
             raise DataNotInCache()
         return data.loc[start_date:end_date]

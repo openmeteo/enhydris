@@ -497,6 +497,25 @@ class TimeseriesGetDataCacheTestCase(DataTestCase):
         data = self.timeseries.get_data(start_date=self.timeseries.end_date)
         self.assertEqual(len(data.data), 1)
 
+    @mock.patch("enhydris.models.timeseries.Timeseries._invalidate_cached_data")
+    def test_race_condition(self, m):
+        # Populate cache
+        self._get_data_and_check_num_queries(1, start_date=None, end_date=None)
+
+        # Pretend there's a race condition. We delete the time series data, but
+        # because we've mocked _invalidate_cached_data, the cache will not be deleted.
+        # However, we manually delete the cached end date. This simulates the case
+        # where another thread or process deletes the data (and invalidates the
+        # cache) between examining the start date and end date.
+        self.timeseries.set_data(HTimeseries())
+        cache.delete(f"timeseries_end_date_{self.timeseries.id}")
+
+        # Try getting the data again and see that it works. There are two queries now;
+        # one is for the end date.
+        with self.assertNumQueries(2):
+            data = self.timeseries.get_data(start_date=None, end_date=None)
+        self.assertEqual(len(data.data), 0)
+
 
 class TimeseriesSetDataTestCase(TestTimeseriesMixin, TestCase):
     def setUp(self):
