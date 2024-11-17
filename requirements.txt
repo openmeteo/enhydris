@@ -1,4 +1,4 @@
-Django>=3.2,<4
+Django>=4.2,<5
 djangorestframework>=3.9,<4
 gdal>=1.6
 iso8601
@@ -11,7 +11,7 @@ django-rest-captcha>=0.1.0,<1
 django-parler>=2.2,<3
 django-parler-rest>=2,<3
 django-geowidgets>=0.1.1,<1
-django-nested-admin>=3.2,<4
+django-nested-admin>=4.1,<5
 django-crequest
 celery>=5.2.2,<6
 django-registration-redux>=2.9,<3

@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.sites.models import Site
 from django.db.models import Q, TextField
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 import nested_admin
 import pandas as pd

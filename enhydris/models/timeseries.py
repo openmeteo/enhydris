@@ -146,7 +146,10 @@ class Timeseries(models.Model):
                 return self.timeseriesrecord_set.earliest().timestamp.astimezone(
                     ZoneInfo(self.timeseries_group.gentity.display_timezone)
                 )
-            except TimeseriesRecord.DoesNotExist:
+            except (TimeseriesRecord.DoesNotExist, ValueError):
+                # The ValueError above is for the case where the Timeseries object does
+                # not have a primary key yet (has not been saved), which causes a
+                # problem in Django>=4.
                 return None
 
         return cache.get_or_set(f"timeseries_start_date_{self.id}", get_start_date)
@@ -158,7 +161,10 @@ class Timeseries(models.Model):
                 return self.timeseriesrecord_set.latest().timestamp.astimezone(
                     ZoneInfo(self.timeseries_group.gentity.display_timezone)
                 )
-            except TimeseriesRecord.DoesNotExist:
+            except (TimeseriesRecord.DoesNotExist, ValueError):
+                # The ValueError above is for the case where the Timeseries object does
+                # not have a primary key yet (has not been saved), which causes a
+                # problem in Django>=4.
                 return None
 
         return cache.get_or_set(f"timeseries_end_date_{self.id}", get_end_date)
