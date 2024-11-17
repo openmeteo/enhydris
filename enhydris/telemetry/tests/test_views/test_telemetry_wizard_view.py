@@ -8,7 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 from model_mommy import mommy
 
-from enhydris.models import Station
+from enhydris.models import Station, TimeseriesGroup
 from enhydris.telemetry.forms import ConnectionDataForm
 from enhydris.telemetry.models import Telemetry
 from enhydris.telemetry.views import TelemetryWizardView
@@ -407,6 +407,17 @@ class SecondStepPostSuccessfulTestCase(SecondStepPostSuccessfulMixin, TestCase):
 
 
 class FinalStepPostSuccessfulMixin(SecondStepPostSuccessfulMixin):
+    @classmethod
+    def _post_step_4(cls):
+        p1 = patch(
+            "enhydris.telemetry.types.meteoview2.requests.request",
+            return_value=MockResponse(json_result={"code": 200, "token": "hello"}),
+        )
+        with p1:
+            cls.response = cls.cclient.post(
+                f"/stations/{cls.station.id}/telemetry/4/", data={}
+            )
+
     # We use the same request as second step, but we meddle with the number of steps
     # to fool the system into thinking it's the final step.
     @classmethod
@@ -458,6 +469,53 @@ class FinalStepPostSuccessfulReplacesExistingTelemetryTestCase(
     def test_replaces_stuff_in_database(self):
         telemetry = Telemetry.objects.get(station=self.station)
         self.assertEqual(telemetry.username, "someemail@email.com")
+
+
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
+class FinalStepDuplicateTimeseriesTestCase(SecondStepPostSuccessfulMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.tg1 = mommy.make(TimeseriesGroup, id=518, gentity=cls.station)
+
+    def setUp(self):
+        # We submit two sensors mapped to the same time series, which is not allowed.
+        self.response = self._post_step_4()
+
+    def test_status_code(self):
+        # The result should be 200 (i.e. error in the form) as opposed to 302
+        # (successful submission) or 500 (error because of primary key violation).
+        self.assertEqual(self.response.status_code, 200)
+
+    def test_error_message(self):
+        self.assertContains(
+            self.response,
+            "A given time series may be specified for only one sensor",
+        )
+
+    @patch(
+        "enhydris.telemetry.types.meteoview2.requests.request",
+        return_value=MockResponse(
+            json_result={
+                "code": 200,
+                "token": "hello",
+                "sensors": [
+                    {"id": "1234", "title": "Beautymeter"},
+                    {"id": "4321", "title": "Acmemeter"},
+                ],
+            },
+        ),
+    )
+    def _post_step_4(self, m):
+        return self.cclient.post(
+            f"/stations/{self.station.id}/telemetry/4/",
+            {
+                "type": "meteoview2",
+                "sensor_1234": 518,
+                "sensor_4321": 518,
+            },
+        )
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
