@@ -49,6 +49,14 @@ class FetchTelemetryDataTestCase(TestCase):
         tasks.fetch_telemetry_data(self.telemetry.id)
         mock_logger.error.assert_called_once()
 
+    def test_deleted_telemetry(self, mock_fetch, mock_cache):
+        # Sometimes a telemetry may get deleted between queuing the fetching of
+        # data and actually starting executing it. We test that in that case there's
+        # no exception and the fetching is merely ignored.
+        telemetry_id = self.telemetry.id
+        self.telemetry.delete()
+        tasks.fetch_telemetry_data(telemetry_id)  # Should not raise exception
+
 
 @patch("enhydris.telemetry.tasks.fetch_telemetry_data.delay")
 class FetchAllTelemetryDataTestCase(TestCase):
