@@ -8,6 +8,7 @@ we have the configuration setup correctly.
 Since we use Token authentication, "login" doesn't really login; it only provides
 the token for a user, creating it if it does not already exist.
 """
+
 import re
 
 import django
