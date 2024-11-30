@@ -15,6 +15,8 @@ from osgeo import ogr, osr
 from enhydris import models
 from enhydris.admin.garea import GareaAdmin, MissingAttribute
 
+osr.UseExceptions()
+
 
 class GareaChangeListTestCase(TestCase):
     def setUp(self):
@@ -147,7 +149,8 @@ class ProcessUploadedShapefileTestCaseBase(TestCase):
         for item in self.entities:
             feature = ogr.Feature(layer.GetLayerDefn())
             for attrname in item:
-                feature.SetField(attrname, item[attrname])
+                if attrname != "wkt":
+                    feature.SetField(attrname, item[attrname])
             entity = ogr.CreateGeometryFromWkt(item["wkt"])
             feature.SetGeometry(entity)
             layer.CreateFeature(feature)

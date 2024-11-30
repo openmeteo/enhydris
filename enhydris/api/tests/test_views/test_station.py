@@ -59,12 +59,12 @@ class StationDetailSitesTestCase(APITestCase):
 
     def test_hobbiton_detail(self):
         response = self.client.get("/api/stations/42/")
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     @override_settings(SITE_ID=2)
     def test_hobbiton_detail_unavailable_on_site2(self):
         response = self.client.get("/api/stations/42/")
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
 
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
