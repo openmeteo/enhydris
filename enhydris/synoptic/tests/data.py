@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.contrib.sites.models import Site
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris.models import Station, Timeseries, TimeseriesGroup, Variable
 from enhydris.synoptic.models import (
@@ -29,20 +29,20 @@ class TestData:
     def _create_stations(self):
         site_id = settings.SITE_ID
         if not Site.objects.filter(id=site_id).exists():
-            mommy.make(Site, id=site_id, domain="example.com", name="example.com")
-        self.station_komboti = mommy.make(
+            baker.make(Site, id=site_id, domain="example.com", name="example.com")
+        self.station_komboti = baker.make(
             Station,
             name="Komboti",
             geom=Point(x=21.06071, y=39.09518, srid=4326),
             display_timezone="Etc/GMT-2",
         )
-        self.station_agios = mommy.make(
+        self.station_agios = baker.make(
             Station,
             name="Άγιος Αθανάσιος",
             geom=Point(x=20.87591, y=39.14904, srid=4326),
             display_timezone="Etc/GMT-2",
         )
-        self.station_arta = mommy.make(
+        self.station_arta = baker.make(
             Station,
             name="Arta",
             geom=Point(x=20.97527, y=39.15104, srid=4326),
@@ -50,7 +50,7 @@ class TestData:
         )
 
     def _create_synoptic_group(self):
-        self.sg1 = mommy.make(
+        self.sg1 = baker.make(
             SynopticGroup,
             slug="mygroup",
             fresh_time_limit=dt.timedelta(minutes=60),
@@ -58,13 +58,13 @@ class TestData:
         )
 
     def _create_synoptic_group_stations(self):
-        self.sgs_komboti = mommy.make(
+        self.sgs_komboti = baker.make(
             SynopticGroupStation,
             synoptic_group=self.sg1,
             station=self.station_komboti,
             order=1,
         )
-        self.sgs_agios = mommy.make(
+        self.sgs_agios = baker.make(
             SynopticGroupStation,
             synoptic_group=self.sg1,
             station=self.station_agios,
@@ -73,7 +73,7 @@ class TestData:
 
         # We fail to create synoptic time series for the following station, but we
         # have it in the group, to verify it will be ignored.
-        self.sgs_arta = mommy.make(
+        self.sgs_arta = baker.make(
             SynopticGroupStation,
             synoptic_group=self.sg1,
             station=self.station_arta,
@@ -81,17 +81,17 @@ class TestData:
         )
 
     def _create_variables(self):
-        self.var_rain = mommy.make(Variable, descr="Rain")
-        self.var_temperature = mommy.make(Variable, descr="Temperature")
-        self.var_wind_speed = mommy.make(Variable, descr="Wind speed")
-        self.var_wind_gust = mommy.make(Variable, descr="Wind gust")
+        self.var_rain = baker.make(Variable, descr="Rain")
+        self.var_temperature = baker.make(Variable, descr="Temperature")
+        self.var_wind_speed = baker.make(Variable, descr="Wind speed")
+        self.var_wind_gust = baker.make(Variable, descr="Wind gust")
 
     def _create_timeseries_groups(self):
         self._create_timeseries_groups_for_komboti()
         self._create_timeseries_groups_for_agios()
 
     def _create_timeseries_groups_for_komboti(self):
-        self.tsg_komboti_rain = mommy.make(
+        self.tsg_komboti_rain = baker.make(
             TimeseriesGroup,
             gentity=self.station_komboti,
             variable=self.var_rain,
@@ -99,7 +99,7 @@ class TestData:
             precision=0,
             unit_of_measurement__symbol="mm",
         )
-        self.tsg_komboti_temperature = mommy.make(
+        self.tsg_komboti_temperature = baker.make(
             TimeseriesGroup,
             gentity=self.station_komboti,
             variable=self.var_temperature,
@@ -107,7 +107,7 @@ class TestData:
             precision=0,
             unit_of_measurement__symbol="°C",
         )
-        self.tsg_komboti_wind_speed = mommy.make(
+        self.tsg_komboti_wind_speed = baker.make(
             TimeseriesGroup,
             gentity=self.station_komboti,
             variable=self.var_wind_speed,
@@ -115,7 +115,7 @@ class TestData:
             precision=1,
             unit_of_measurement__symbol="m/s",
         )
-        self.tsg_komboti_wind_gust = mommy.make(
+        self.tsg_komboti_wind_gust = baker.make(
             TimeseriesGroup,
             gentity=self.station_komboti,
             variable=self.var_wind_gust,
@@ -125,7 +125,7 @@ class TestData:
         )
 
     def _create_timeseries_groups_for_agios(self):
-        self.tsg_agios_rain = mommy.make(
+        self.tsg_agios_rain = baker.make(
             TimeseriesGroup,
             gentity=self.station_agios,
             variable=self.var_rain,
@@ -133,7 +133,7 @@ class TestData:
             precision=1,
             unit_of_measurement__symbol="mm",
         )
-        self.tsg_agios_temperature = mommy.make(
+        self.tsg_agios_temperature = baker.make(
             TimeseriesGroup,
             gentity=self.station_agios,
             variable=self.var_temperature,
@@ -141,7 +141,7 @@ class TestData:
             precision=1,
             unit_of_measurement__symbol="°C",
         )
-        self.tsg_agios_wind_speed = mommy.make(
+        self.tsg_agios_wind_speed = baker.make(
             TimeseriesGroup,
             gentity=self.station_agios,
             variable=self.var_wind_speed,
@@ -155,19 +155,19 @@ class TestData:
         self._create_synoptic_timeseries_groups_for_agios()
 
     def _create_synoptic_timeseries_groups_for_komboti(self):
-        self.stsg1_1 = mommy.make(
+        self.stsg1_1 = baker.make(
             SynopticTimeseriesGroup,
             synoptic_group_station=self.sgs_komboti,
             timeseries_group=self.tsg_komboti_rain,
             order=1,
         )
-        self.stsg1_2 = mommy.make(
+        self.stsg1_2 = baker.make(
             SynopticTimeseriesGroup,
             synoptic_group_station=self.sgs_komboti,
             timeseries_group=self.tsg_komboti_temperature,
             order=2,
         )
-        self.stsg1_3 = mommy.make(
+        self.stsg1_3 = baker.make(
             SynopticTimeseriesGroup,
             synoptic_group_station=self.sgs_komboti,
             timeseries_group=self.tsg_komboti_wind_speed,
@@ -175,7 +175,7 @@ class TestData:
             subtitle="speed",
             order=3,
         )
-        self.stsg1_4 = mommy.make(
+        self.stsg1_4 = baker.make(
             SynopticTimeseriesGroup,
             synoptic_group_station=self.sgs_komboti,
             timeseries_group=self.tsg_komboti_wind_gust,
@@ -186,19 +186,19 @@ class TestData:
         )
 
     def _create_synoptic_timeseries_groups_for_agios(self):
-        self.stsg2_1 = mommy.make(
+        self.stsg2_1 = baker.make(
             SynopticTimeseriesGroup,
             synoptic_group_station=self.sgs_agios,
             timeseries_group=self.tsg_agios_rain,
             order=1,
         )
-        self.stsg2_2 = mommy.make(
+        self.stsg2_2 = baker.make(
             SynopticTimeseriesGroup,
             synoptic_group_station=self.sgs_agios,
             timeseries_group=self.tsg_agios_temperature,
             order=2,
         )
-        self.stsg2_3 = mommy.make(
+        self.stsg2_3 = baker.make(
             SynopticTimeseriesGroup,
             synoptic_group_station=self.sgs_agios,
             timeseries_group=self.tsg_agios_wind_speed,
@@ -215,7 +215,7 @@ class TestData:
         self._create_timeseries_for_agios_wind_speed()
 
     def _create_timeseries_object(self, timeseries_group):
-        mommy.make(
+        baker.make(
             Timeseries, timeseries_group=timeseries_group, type=Timeseries.INITIAL
         )
 

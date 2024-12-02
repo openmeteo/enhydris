@@ -7,7 +7,7 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from freezegun import freeze_time
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris.models import Station, Timeseries, TimeseriesGroup
 from enhydris.synoptic.models import (
@@ -32,59 +32,59 @@ class SynopticGroupTestCase(TestCase):
         self.assertEqual(SynopticGroup.objects.first().slug, "world")
 
     def test_update(self):
-        mommy.make(SynopticGroup, slug="hello")
+        baker.make(SynopticGroup, slug="hello")
         sg = SynopticGroup.objects.first()
         sg.name = "hello world"
         sg.save()
         self.assertEqual(SynopticGroup.objects.first().name, "hello world")
 
     def test_delete(self):
-        mommy.make(SynopticGroup)
+        baker.make(SynopticGroup)
         sg = SynopticGroup.objects.first()
         sg.delete()
         self.assertFalse(SynopticGroup.objects.exists())
 
     def test_str(self):
-        sg = mommy.make(SynopticGroup, name="hello world")
+        sg = baker.make(SynopticGroup, name="hello world")
         self.assertEqual(str(sg), "hello world")
 
 
 class SynopticGroupStationTestCase(TestCase):
     def test_create(self):
-        sg = mommy.make(SynopticGroup)
-        station = mommy.make(Station)
+        sg = baker.make(SynopticGroup)
+        station = baker.make(Station)
         sgs = SynopticGroupStation(synoptic_group=sg, order=1, station=station)
         sgs.save()
         self.assertEqual(SynopticGroupStation.objects.first().order, 1)
 
     def test_update(self):
-        mommy.make(SynopticGroupStation, order=1)
+        baker.make(SynopticGroupStation, order=1)
         sgs = SynopticGroupStation.objects.first()
         sgs.order = 2
         sgs.save()
         self.assertEqual(SynopticGroupStation.objects.first().order, 2)
 
     def test_delete(self):
-        mommy.make(SynopticGroupStation)
+        baker.make(SynopticGroupStation)
         sgs = SynopticGroupStation.objects.first()
         sgs.delete()
         self.assertFalse(SynopticGroupStation.objects.exists())
 
     def test_str(self):
-        sgs = mommy.make(SynopticGroupStation, station__name="hello")
+        sgs = baker.make(SynopticGroupStation, station__name="hello")
         self.assertEqual(str(sgs), "hello")
 
 
 class SynopticGroupStationCheckIntegrityTestCase(TestCase):
     def setUp(self):
-        self.station_komboti = mommy.make(Station, name="Komboti")
-        self.timeseries_group_rain = mommy.make(
+        self.station_komboti = baker.make(Station, name="Komboti")
+        self.timeseries_group_rain = baker.make(
             TimeseriesGroup, gentity=self.station_komboti, name="Rain"
         )
-        self.timeseries_group_temperature1 = mommy.make(
+        self.timeseries_group_temperature1 = baker.make(
             TimeseriesGroup, gentity=self.station_komboti, name="Temperature"
         )
-        self.timeseries_group_temperature2 = mommy.make(
+        self.timeseries_group_temperature2 = baker.make(
             TimeseriesGroup, gentity=self.station_komboti, name="Temperature"
         )
 
@@ -178,14 +178,14 @@ class SynopticGroupStationSynopticTimeseriesGroupTestCase(ClearCacheMixin, TestC
 
 class FreshnessTestCase(ClearCacheMixin, TestCase):
     def setUp(self):
-        self.stg = mommy.make(
+        self.stg = baker.make(
             SynopticTimeseriesGroup,
             synoptic_group_station__synoptic_group__fresh_time_limit=dt.timedelta(
                 minutes=60
             ),
             timeseries_group__gentity__display_timezone="Etc/GMT-2",
         )
-        mommy.make(
+        baker.make(
             Timeseries,
             timeseries_group=self.stg.timeseries_group,
             type=Timeseries.INITIAL,
@@ -214,8 +214,8 @@ class FreshnessTestCase(ClearCacheMixin, TestCase):
 
 class SynopticTimeseriesGroupTestCase(TestCase):
     def test_create(self):
-        sgs = mommy.make(SynopticGroupStation)
-        timeseries_group = mommy.make(TimeseriesGroup)
+        sgs = baker.make(SynopticGroupStation)
+        timeseries_group = baker.make(TimeseriesGroup)
         stg = SynopticTimeseriesGroup(
             synoptic_group_station=sgs,
             timeseries_group=timeseries_group,
@@ -226,20 +226,20 @@ class SynopticTimeseriesGroupTestCase(TestCase):
         self.assertEqual(SynopticTimeseriesGroup.objects.first().title, "hello")
 
     def test_update(self):
-        mommy.make(SynopticTimeseriesGroup)
+        baker.make(SynopticTimeseriesGroup)
         stg = SynopticTimeseriesGroup.objects.first()
         stg.title = "hello"
         stg.save()
         self.assertEqual(SynopticTimeseriesGroup.objects.first().title, "hello")
 
     def test_delete(self):
-        mommy.make(SynopticTimeseriesGroup)
+        baker.make(SynopticTimeseriesGroup)
         stg = SynopticTimeseriesGroup.objects.first()
         stg.delete()
         self.assertFalse(SynopticTimeseriesGroup.objects.exists())
 
     def test_str_when_subtitle_is_empty(self):
-        stg = mommy.make(
+        stg = baker.make(
             SynopticTimeseriesGroup,
             synoptic_group_station__station__name="mystation",
             title="mysynoptictimeseriesgroup",
@@ -249,7 +249,7 @@ class SynopticTimeseriesGroupTestCase(TestCase):
         self.assertEqual(str(stg), "mystation - mysynoptictimeseriesgroup")
 
     def test_str_when_subtitle_is_specified(self):
-        stg = mommy.make(
+        stg = baker.make(
             SynopticTimeseriesGroup,
             synoptic_group_station__station__name="mystation",
             title="mysynoptictimeseriesgroup",
@@ -259,7 +259,7 @@ class SynopticTimeseriesGroupTestCase(TestCase):
         self.assertEqual(str(stg), "mystation - mysynoptictimeseriesgroup (mysubtitle)")
 
     def test_str_when_title_is_unspecified(self):
-        stg = mommy.make(
+        stg = baker.make(
             SynopticTimeseriesGroup,
             synoptic_group_station__station__name="mystation",
             title="",

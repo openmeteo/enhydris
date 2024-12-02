@@ -1,6 +1,6 @@
 from rest_framework.test import APITestCase
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris import models
 
@@ -12,14 +12,14 @@ class SearchByOwnerTestCase(SearchTestCaseBase, APITestCase):
     search_result = "Hobbiton"
 
     def _create_models(self):
-        owner1 = mommy.make(models.Organization, name="The Assassination Bureau, Ltd")
-        owner2 = mommy.make(models.Organization, name="Société d'assassins")
-        owner3 = mommy.make(models.Person, first_name="Joe", last_name="User")
-        owner4 = mommy.make(models.Person, first_name="André", last_name="Béart")
-        mommy.make(models.Station, owner=owner1, name="Hobbiton")
-        mommy.make(models.Station, owner=owner2, name="Rivendell")
-        mommy.make(models.Station, owner=owner3, name="Bree")
-        mommy.make(models.Station, owner=owner4, name="Fornost")
+        owner1 = baker.make(models.Organization, name="The Assassination Bureau, Ltd")
+        owner2 = baker.make(models.Organization, name="Société d'assassins")
+        owner3 = baker.make(models.Person, first_name="Joe", last_name="User")
+        owner4 = baker.make(models.Person, first_name="André", last_name="Béart")
+        baker.make(models.Station, owner=owner1, name="Hobbiton")
+        baker.make(models.Station, owner=owner2, name="Rivendell")
+        baker.make(models.Station, owner=owner3, name="Bree")
+        baker.make(models.Station, owner=owner4, name="Fornost")
 
 
 class SearchByOwnerFirstNameTestCase(SearchByOwnerTestCase):

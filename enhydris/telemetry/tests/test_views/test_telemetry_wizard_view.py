@@ -6,7 +6,7 @@ from django.test import Client, TestCase, override_settings
 
 import requests
 from bs4 import BeautifulSoup
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris.models import Station, TimeseriesGroup
 from enhydris.telemetry.forms import ConnectionDataForm
@@ -20,7 +20,7 @@ class RedirectToFirstStepTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
+        cls.station = baker.make(Station, creator=cls.user)
 
     def test_redirects(self):
         """Test that we are redirected to the first step if we don't come from there"""
@@ -51,7 +51,7 @@ class CopyTelemetryDataFromDatabaseToSessionTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
+        cls.station = baker.make(Station, creator=cls.user)
 
     @classmethod
     def setUpClass(cls):
@@ -87,8 +87,8 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
-        cls.telemetry = mommy.make(
+        cls.station = baker.make(Station, creator=cls.user)
+        cls.telemetry = baker.make(
             Telemetry,
             station=cls.station,
             type="meteoview2",
@@ -151,7 +151,7 @@ class FirstStepPostTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
+        cls.station = baker.make(Station, creator=cls.user)
 
     @classmethod
     def setUpClass(cls):
@@ -189,7 +189,7 @@ class FirstStepPostErrorTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
+        cls.station = baker.make(Station, creator=cls.user)
 
     @classmethod
     def setUpClass(cls):
@@ -212,7 +212,7 @@ class SecondStepGetMixin:
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
+        cls.station = baker.make(Station, creator=cls.user)
 
     @classmethod
     def setUpClass(cls):
@@ -304,7 +304,7 @@ class SecondStepPostMixin:
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
+        cls.station = baker.make(Station, creator=cls.user)
 
     @classmethod
     def setUpClass(cls):
@@ -477,7 +477,7 @@ class FinalStepDuplicateTimeseriesTestCase(SecondStepPostSuccessfulMixin, TestCa
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.tg1 = mommy.make(TimeseriesGroup, id=518, gentity=cls.station)
+        cls.tg1 = baker.make(TimeseriesGroup, id=518, gentity=cls.station)
 
     def setUp(self):
         # We submit two sensors mapped to the same time series, which is not allowed.
@@ -530,7 +530,7 @@ class NextOrFinishButtonTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
+        cls.station = baker.make(Station, creator=cls.user)
         Telemetry.objects.create(
             station=cls.station,
             fetch_interval_minutes=10,
@@ -578,7 +578,7 @@ class PermissionsTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user("alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
+        cls.station = baker.make(Station, creator=cls.user)
 
     def test_telemetry_button_does_not_appear_when_not_logged_on(self):
         response = self.client.get(f"/stations/{self.station.id}/")

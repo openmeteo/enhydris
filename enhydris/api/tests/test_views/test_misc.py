@@ -1,7 +1,7 @@
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris import models
 
@@ -9,7 +9,7 @@ from enhydris import models
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class GareaTestCase(APITestCase):
     def setUp(self):
-        self.garea = mommy.make(models.Garea)
+        self.garea = baker.make(models.Garea)
 
     def test_get_garea(self):
         r = self.client.get("/api/gareas/{}/".format(self.garea.id))
@@ -19,7 +19,7 @@ class GareaTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class OrganizationTestCase(APITestCase):
     def setUp(self):
-        self.organization = mommy.make(models.Organization)
+        self.organization = baker.make(models.Organization)
 
     def test_get_organization(self):
         r = self.client.get("/api/organizations/{}/".format(self.organization.id))
@@ -29,7 +29,7 @@ class OrganizationTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class PersonTestCase(APITestCase):
     def setUp(self):
-        self.person = mommy.make(models.Person)
+        self.person = baker.make(models.Person)
 
     def test_get_person(self):
         r = self.client.get("/api/persons/{}/".format(self.person.id))
@@ -39,7 +39,7 @@ class PersonTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class EventTypeTestCase(APITestCase):
     def setUp(self):
-        self.event_type = mommy.make(models.EventType)
+        self.event_type = baker.make(models.EventType)
 
     def test_get_event_type(self):
         r = self.client.get("/api/eventtypes/{}/".format(self.event_type.id))
@@ -49,7 +49,7 @@ class EventTypeTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class VariableTestCase(APITestCase):
     def setUp(self):
-        self.variable = mommy.make(models.Variable, descr="Temperature")
+        self.variable = baker.make(models.Variable, descr="Temperature")
 
     def test_get_variable(self):
         r = self.client.get("/api/variables/{}/".format(self.variable.id))
@@ -59,7 +59,7 @@ class VariableTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class UnitOfMeasurementTestCase(APITestCase):
     def setUp(self):
-        self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
+        self.unit_of_measurement = baker.make(models.UnitOfMeasurement)
 
     def test_get_unit_of_measurement(self):
         r = self.client.get("/api/units/{}/".format(self.unit_of_measurement.id))
@@ -71,8 +71,8 @@ class GentityEventTestCase(APITestCase):
     # We have extensively tested GentityFile, which is practically the same code,
     # so we test this briefly.
     def setUp(self):
-        self.station = mommy.make(models.Station)
-        self.gentity_file = mommy.make(models.GentityEvent, gentity=self.station)
+        self.station = baker.make(models.Station)
+        self.gentity_file = baker.make(models.GentityEvent, gentity=self.station)
 
     def test_list_status_code(self):
         r = self.client.get("/api/stations/{}/events/".format(self.station.id))

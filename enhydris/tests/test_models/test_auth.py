@@ -2,14 +2,14 @@ from django.contrib.auth.models import Group, User
 from django.contrib.sites.models import Site
 from django.test import TestCase, override_settings
 
-from model_mommy import mommy
+from model_bakery import baker
 
 
 class AddCurrentSiteGroupToNewUsersTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.site1 = mommy.make(Site, id=1, domain="hello.com", name="hello")
-        cls.site2 = mommy.make(Site, id=2, domain="world.com", name="world")
+        cls.site1 = baker.make(Site, id=1, domain="hello.com", name="hello")
+        cls.site2 = baker.make(Site, id=2, domain="world.com", name="world")
 
     @override_settings(SITE_ID=2)
     def test_creating_user_creates_group_and_puts_him_in_it(self):

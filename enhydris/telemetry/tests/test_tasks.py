@@ -2,7 +2,7 @@ from unittest.mock import PropertyMock, patch
 
 from django.test import TestCase
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris.telemetry import tasks
 from enhydris.telemetry.models import Telemetry
@@ -13,7 +13,7 @@ from enhydris.telemetry.models import Telemetry
 class FetchTelemetryDataTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.telemetry = mommy.make(Telemetry)
+        cls.telemetry = baker.make(Telemetry)
 
     def test_adds_lock(self, mock_fetch, mock_cache):
         tasks.fetch_telemetry_data(self.telemetry.id)
@@ -62,8 +62,8 @@ class FetchTelemetryDataTestCase(TestCase):
 class FetchAllTelemetryDataTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.telemetry1 = mommy.make(Telemetry)
-        cls.telemetry2 = mommy.make(Telemetry)
+        cls.telemetry1 = baker.make(Telemetry)
+        cls.telemetry2 = baker.make(Telemetry)
 
     @patch("enhydris.telemetry.models.Telemetry.is_due", new_callable=PropertyMock)
     def test_calls_due_telemetry(self, mock_is_due, mock_fetch_telemetry_data):

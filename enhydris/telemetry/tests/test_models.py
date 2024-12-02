@@ -11,7 +11,7 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from freezegun import freeze_time
-from model_mommy import mommy
+from model_bakery import baker
 
 import enhydris
 from enhydris.models import Station, Timeseries, TimeseriesGroup
@@ -22,7 +22,7 @@ class TelemetryTestCase(TestCase):
     def test_cannot_save_wrong_data_timezone(self):
         with self.assertRaisesRegex(IntegrityError, "'' is not a valid time zone"):
             Telemetry.objects.create(
-                station=mommy.make(Station),
+                station=baker.make(Station),
                 type="meteoview2",
                 fetch_interval_minutes=10,
                 fetch_offset_minutes=2,
@@ -36,7 +36,7 @@ class TelemetryFetchValidatorsTestCase(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.telemetry = Telemetry(
-            station=mommy.make(Station),
+            station=baker.make(Station),
             type="meteoview2",
             fetch_interval_minutes=10,
             fetch_offset_minutes=10,
@@ -85,7 +85,7 @@ class TelemetryIsDueTestCase(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.telemetry = Telemetry(
-            station=mommy.make(Station),
+            station=baker.make(Station),
             type="meteoview2",
             fetch_interval_minutes=10,
             fetch_offset_minutes=10,
@@ -128,15 +128,15 @@ class FixZoneNameTestCase(TestCase):
 class TelemetryFetchTestCaseBase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.station = mommy.make(Station, display_timezone="Etc/GMT-2")
-        cls.timeseries_group = mommy.make(
+        cls.station = baker.make(Station, display_timezone="Etc/GMT-2")
+        cls.timeseries_group = baker.make(
             TimeseriesGroup,
             id=42,
             gentity=cls.station,
             variable__descr="Temperature",
             precision=1,
         )
-        cls.telemetry = mommy.make(
+        cls.telemetry = baker.make(
             Telemetry,
             station=cls.station,
             type="meteoview2",
@@ -313,7 +313,7 @@ class TelemetryFetchDealsWithTooCloseTimestampsTestCase(TelemetryFetchTestCaseBa
 class TelemetryLogMessageTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.telemetry = mommy.make(Telemetry, additional_config={})
+        cls.telemetry = baker.make(Telemetry, additional_config={})
 
     def setUp(self):
         try:
@@ -439,7 +439,7 @@ class TelemetryLogMessageGetEnhydrisCommitIdFromGitTestCase(TestCase):
 class TelemetryFetchErrorTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.telemetry = mommy.make(Telemetry, type="meteoview2", additional_config={})
+        cls.telemetry = baker.make(Telemetry, type="meteoview2", additional_config={})
 
     @patch("enhydris.telemetry.models.Telemetry._setup_api_client")
     def test_logs_error_on_fetch_error(self, m):
