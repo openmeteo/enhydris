@@ -65,7 +65,6 @@ MIDDLEWARE = [
 ]
 
 APPEND_SLASH = True
-USE_L10N = True
 
 TEMPLATES = [
     {
