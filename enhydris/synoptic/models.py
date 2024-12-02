@@ -392,7 +392,7 @@ class SynopticTimeseriesGroup(models.Model):
         return result
 
     # Rate-of-change check stuff
-    # This code has been largely copied from enhydris_autoprocess.models.  For that
+    # This code has been largely copied from enhydris.autoprocess.models.  For that
     # matter, it has not been unit tested.  We should do something to not have this
     # duplication.
     symmetric_rocc = models.BooleanField(

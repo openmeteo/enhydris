@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "enhydris.telemetry",
     "enhydris.api",
     "enhydris.synoptic",
+    "enhydris.autoprocess",
     "django.contrib.admin",
     "rules.apps.AutodiscoverRulesConfig",
     "parler",

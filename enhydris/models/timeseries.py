@@ -29,7 +29,7 @@ def check_time_step(time_step):
 
 def _check_nonempty_time_step(time_step):
     number, unit = _parse_time_step(time_step)
-    if unit not in ("min", "H", "D", "M", "Y"):
+    if unit not in ("min", "H", "D", "M", "Y", "h"):
         raise ValueError('"{}" is not a valid time step'.format(time_step))
 
 

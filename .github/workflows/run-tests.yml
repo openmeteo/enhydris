@@ -60,7 +60,7 @@ jobs:
         flake8 --max-line-length=88 .
         isort --check-only --diff --profile=black .
         npm run lint
-        coverage run --include="./*" --omit="*/tests/*","*/tests.py","*/migrations/*","./enhydris_project/*" manage.py test -v2
+        coverage run --include="./*" --omit="*/tests/*","*/tests.py","*/migrations/*","./enhydris_project/*","*.pyx" manage.py test -v2
         coverage json
         npm run test
 

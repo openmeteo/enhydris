@@ -15,5 +15,3 @@ enhydris_project/settings/urls.py
 # enhydris add-ons which may be linked or checked out in the current directory
 enhydris-openhigis
 enhydris_openhigis
-enhydris-autoprocess
-enhydris_autoprocess
