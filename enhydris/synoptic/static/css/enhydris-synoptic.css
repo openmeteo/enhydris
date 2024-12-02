@@ -1,0 +1,50 @@
+/* UTILS */
+
+.leaflet-div-icon {
+  padding-left: 5px;
+
+  border: none;
+  opacity: 75%;
+}
+
+.date {
+  font-size: x-small;
+}
+
+.old {
+  color: red;
+}
+
+.recent {
+  color: green;
+}
+
+.high {
+  color: red;
+}
+
+.low {
+  color: red;
+}
+
+/* MAP */
+
+#timezone-info {
+  position: absolute;
+  bottom: -10px;
+  left: 120px;
+  z-index: 1000;
+
+  padding-left: 5px;
+  padding-right: 5px;
+
+  background-color: white;
+  opacity: 70%;
+}
+
+/* GROUP STATION */
+
+div#content {
+  margin: 0 auto;
+  max-width: 45em;
+}

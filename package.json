@@ -10,7 +10,7 @@
     "moment": "^2.29.4"
   },
   "scripts": {
-    "lint": "eslint --ext .js --ignore-path .gitignore --ignore-pattern enhydris/static/js/vendor .",
+    "lint": "eslint --ext .js --ignore-path .gitignore --ignore-pattern **/vendor .",
     "test": "jest"
   },
   "jest": {

@@ -1,9 +1,6 @@
 Django>=4.2,<5
 djangorestframework>=3.9,<4
-gdal>=1.6
 iso8601
-htimeseries>=7,<8
-numpy<2  # This is because pandas<2 (required by htimeseries<8) has the insufficient "numpy>1.x" when it should also have "<2"
 pytz
 rules>=2.0
 dj-rest-auth==2.1.7
@@ -19,3 +16,5 @@ django-simple-captcha>=0.5.14,<1
 django-bootstrap4>=2,<4
 requests>=2.25,<3
 defusedxml>=0.7.1,<1
+pthelma[all]>=1.1,<2
+matplotlib>=3,<3.7
