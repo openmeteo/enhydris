@@ -6,6 +6,39 @@ Release notes
 
 .. highlight:: bash
 
+Development
+===========
+
+Changes from 4.0
+----------------
+
+* Apps ``enhydris-synoptic`` and ``enhydris-autoprocess``, which were
+  third-party, have been included in Enhydris as ``enhydris.synoptic``
+  and ``enhydris.autoprocess``.
+* Instead of having a dependency on ``htimeseries`` (and possibly other
+  modules such as ``haggregate``), we now depend on ``pthelma``, which
+  has all these modules packaged together.
+* Pthelma uses the new pandas time step ("frequency") specifiers, such
+  as ``h`` instead of ``H``.
+
+Upgrading from 4.0
+------------------
+
+If you were not using synoptic and autoprocess, you need to make sure
+that they are removed from ``INSTALLED_APPS`` (in the new version they
+are included by default).
+
+Ensure that you do not have the old ``enhydris-synoptic`` and
+``enhydris-autoprocess`` installed. Also ensure your virtualenv does not
+contain any packages, such as ``htimeseries``, that conflict with
+``pthelma`` (it's better to remove it entirely and recreate it).
+
+Connect to the database (e.g. with ``./manage.py dbshell``) and run
+these commands::
+
+   UPDATE django_migrations SET app='autoprocess' WHERE app='enhydris_autoprocess';
+   UPDATE django_migrations SET app='synoptic' WHERE app='enhydris_synoptic';
+
 Version 4.0
 ===========
 
