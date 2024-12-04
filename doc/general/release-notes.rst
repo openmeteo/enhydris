@@ -6,8 +6,10 @@ Release notes
 
 .. highlight:: bash
 
-Development
+Version 4.0
 ===========
+
+Released in 4 December 2024.
 
 Upgrading from 3.0
 ------------------
