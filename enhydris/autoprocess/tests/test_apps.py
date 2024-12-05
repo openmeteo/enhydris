@@ -1,5 +1,6 @@
 from unittest import mock
 
+from django.contrib.gis.geos import Point
 from django.db import transaction
 from django.test import TransactionTestCase
 
@@ -16,8 +17,12 @@ class EnqueueAutoProcessTestCase(TransactionTestCase):
     # without truncating enhydris_timeseriesrecord at the same time.
     available_apps = ["django.contrib.sites", "enhydris", "enhydris.autoprocess"]
 
-    def setUp(self):
-        self.station = baker.make(Station)
+    # Creating autoprocesses triggers tasks, so we patch some things in order to not
+    # pollute the celery queue while testing.
+    @mock.patch("enhydris.autoprocess.models.tasks.execute_auto_process")
+    @mock.patch("enhydris.autoprocess.apps.execute_auto_process")
+    def setUp(self, m1, m2):
+        self.station = baker.make(Station, geom=Point(x=21.06, y=39.09, srid=4326))
         self.auto_process = baker.make(
             Checks,
             timeseries_group__gentity=self.station,
