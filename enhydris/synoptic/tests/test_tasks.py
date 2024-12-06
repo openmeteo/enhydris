@@ -225,18 +225,11 @@ class EarlyWarningTestMixin:
         self.data.stsg1_2.save()
 
 
-@skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
-@override_settings(
-    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
-    SITE_ID=1,
-    ENHYDRIS_SITES_FOR_NEW_STATIONS=set(),
-)
-class MapTestCase(SeleniumTestCase, EarlyWarningTestMixin):
-
-    komboti_div_icon = PageElement(
-        By.XPATH,
-        '//div[contains(@class, "leaflet-div-icon") and .//a/text()="Komboti"]',
+class MapTestCaseMixin(EarlyWarningTestMixin):
+    komboti_div_icon_xpath = (
+        '//div[contains(@class, "leaflet-div-icon") and .//a/text()="Komboti"]'
     )
+    komboti_div_icon = PageElement(By.XPATH, komboti_div_icon_xpath)
     layer_control = PageElement(By.XPATH, '//a[@class="leaflet-control-layers-toggle"]')
     layer_control_rain = PageElement(
         By.XPATH,
@@ -277,90 +270,120 @@ class MapTestCase(SeleniumTestCase, EarlyWarningTestMixin):
         this_dir = os.path.dirname(os.path.abspath(__file__))
         parent_dir = os.path.dirname(this_dir)
         static_dir = os.path.join(parent_dir, "static")
-        self.synoptic_root = os.path.join(static_dir, "synoptic")
-        if os.path.exists(self.synoptic_root):
-            raise Exception(
-                (
-                    "Directory {} exists; cowardly refusing to remove it. Delete it "
-                    "before running the unit tests."
-                ).format(self.synoptic_root)
-            )
+        self.synoptic_root = tempfile.mkdtemp(
+            prefix=os.path.join(static_dir, "synoptic")
+        )
         self.saved_synoptic_root = settings.ENHYDRIS_SYNOPTIC_ROOT
+        self.saved_synoptic_url = settings.ENHYDRIS_SYNOPTIC_URL
         settings.ENHYDRIS_SYNOPTIC_ROOT = self.synoptic_root
+        settings.ENHYDRIS_SYNOPTIC_URL = (
+            f"{self.live_server_url}/static/{os.path.basename(self.synoptic_root)}/"
+        )
 
     def _teardown_synoptic_root(self):
+        settings.ENHYDRIS_SYNOPTIC_URL = self.saved_synoptic_url
         settings.ENHYDRIS_SYNOPTIC_ROOT = self.saved_synoptic_root
         shutil.rmtree(self.synoptic_root)
 
-    @freeze_time("2015-10-22 14:20:01")
-    def test_outdated_date_shows_red(self):
+    def _get_synoptic_page(self):
         create_static_files()
         self.selenium.get(
-            "{}/static/synoptic/{}/index.html".format(
-                self.live_server_url, self.data.sg1.slug
-            )
+            f"{settings.ENHYDRIS_SYNOPTIC_URL}{self.data.sg1.slug}/index.html"
         )
-        self.komboti_div_icon.wait_until_is_displayed()
+
+
+@skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
+    SITE_ID=1,
+    ENHYDRIS_SITES_FOR_NEW_STATIONS=set(),
+)
+class OutdatedDateRedTestCase(MapTestCaseMixin, SeleniumTestCase):
+
+    @freeze_time("2015-10-22 14:20:01")
+    def test_outdated_date_shows_red(self):
+        self._get_synoptic_page()
+        self.komboti_div_icon.wait_until_is_displayed(1)
         date = self.komboti_div_icon.find_element(By.TAG_NAME, "span")
         self.assertEqual(date.get_attribute("class"), "date old")
 
+
+@skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
+    SITE_ID=1,
+    ENHYDRIS_SITES_FOR_NEW_STATIONS=set(),
+)
+class UpToDateGreenTestCase(MapTestCaseMixin, SeleniumTestCase):
     @freeze_time("2015-10-22 14:19:59")
     def test_up_to_date_date_shows_green(self):
-        create_static_files()
-        self.selenium.get(
-            "{}/static/synoptic/{}/index.html".format(
-                self.live_server_url, self.data.sg1.slug
-            )
-        )
+        self._get_synoptic_page()
         self.komboti_div_icon.wait_until_is_displayed()
         date = self.komboti_div_icon.find_element(By.TAG_NAME, "span")
         self.assertEqual(date.get_attribute("class"), "date recent")
 
+
+@skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
+    SITE_ID=1,
+    ENHYDRIS_SITES_FOR_NEW_STATIONS=set(),
+)
+class DateFormatTestCase(MapTestCaseMixin, SeleniumTestCase):
     @freeze_time("2015-10-22 14:19:59")
     def test_date_format(self):
-        create_static_files()
-        self.selenium.get(
-            "{}/static/synoptic/{}/index.html".format(
-                self.live_server_url, self.data.sg1.slug
-            )
-        )
+        self._get_synoptic_page()
         self.komboti_div_icon.wait_until_is_displayed()
         date = self.komboti_div_icon.find_element(By.TAG_NAME, "span")
         self.assertEqual(date.text, "22 Oct 2015 14:20")
 
+
+@skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
+    SITE_ID=1,
+    ENHYDRIS_SITES_FOR_NEW_STATIONS=set(),
+)
+class ValueStatusTestCase(MapTestCaseMixin, SeleniumTestCase):
     def test_value_status(self):
         self._set_limits(low_temperature=17.1, high_gust=4)
-        create_static_files()
-        self.selenium.get(
-            "{}/static/synoptic/{}/index.html".format(
-                self.live_server_url, self.data.sg1.slug
-            )
-        )
+        self._get_synoptic_page()
         self.layer_control.wait_until_is_displayed()
         self.layer_control.click()
         self.layer_control_rain.wait_until_is_displayed()
 
         # Rain should be ok
         self.layer_control_rain.click()
-        value = self.komboti_div_icon.find_elements(By.TAG_NAME, "span")[1]
-        self.assertEqual(value.get_attribute("class"), "value ok")
+        xpath = f'{self.komboti_div_icon_xpath}//span[contains(@class, "value ok")]'
+        value_element = PageElement(By.XPATH, xpath)
+        value_element.wait_until_exists()
+        self.assertEqual(value_element.get_attribute("class"), "value ok")
 
         # Wind gust should be high
         self.layer_control_wind_gust.click()
-        value = self.komboti_div_icon.find_elements(By.TAG_NAME, "span")[1]
-        self.assertEqual(value.get_attribute("class"), "value high")
+        xpath = f'{self.komboti_div_icon_xpath}//span[contains(@class, "value high")]'
+        value_element = PageElement(By.XPATH, xpath)
+        value_element.wait_until_exists()
+        self.assertEqual(value_element.get_attribute("class"), "value high")
 
         # Temperature should be low
         self.layer_control_temperature.click()
-        value = self.komboti_div_icon.find_elements(By.TAG_NAME, "span")[1]
-        self.assertEqual(value.get_attribute("class"), "value low")
+        xpath = f'{self.komboti_div_icon_xpath}//span[contains(@class, "value low")]'
+        value_element = PageElement(By.XPATH, xpath)
+        value_element.wait_until_exists()
+        self.assertEqual(value_element.get_attribute("class"), "value low")
 
-    @override_settings(ENHYDRIS_SYNOPTIC_STATION_LINK_TARGET="/hello{station.id}world")
+
+@skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}},
+    SITE_ID=1,
+    ENHYDRIS_SITES_FOR_NEW_STATIONS=set(),
+    ENHYDRIS_SYNOPTIC_STATION_LINK_TARGET="/hello{station.id}world",
+)
+class StationLinkTargetTestCase(MapTestCaseMixin, SeleniumTestCase):
     def test_station_link_target(self):
-        create_static_files()
-        self.selenium.get(
-            f"{self.live_server_url}/static/synoptic/{self.data.sg1.slug}/index.html"
-        )
+        self._get_synoptic_page()
         self.komboti_div_icon.wait_until_is_displayed()
         a_element = self.komboti_div_icon.find_element(By.TAG_NAME, "a")
         href = a_element.get_attribute("href")
