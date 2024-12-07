@@ -310,6 +310,7 @@ class TelemetryFetchDealsWithTooCloseTimestampsTestCase(TelemetryFetchTestCaseBa
         ]
 
 
+@freeze_time("2024-12-07 17:46:00", tz_offset=0)
 class TelemetryLogMessageTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
