@@ -1,11 +1,15 @@
+import copy
 import datetime as dt
+import logging
 from io import StringIO
 from zoneinfo import ZoneInfo
 
+from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.cache import cache
 from django.core.management import call_command
 from django.test.utils import override_settings
+from django.utils.log import DEFAULT_LOGGING, configure_logging
 
 import django_selenium_clean
 import pandas as pd
@@ -141,3 +145,27 @@ class SeleniumTestCase(django_selenium_clean.SeleniumTestCase):
                 allow_cascade=True,
                 inhibit_post_migrate=False,
             )
+
+
+class OverrideLoggingMixin:
+    def tearDown(self):
+        super().tearDown()
+        self._revert_logging_config()
+
+    def _override_logging_config(self):
+        """Override logging.
+
+        We need to do this to avoid the test output being polluted with log messages.
+        We can't just @override_settings, we also need to call configure_logging().
+        """
+        log_config = copy.deepcopy(DEFAULT_LOGGING)
+        log_config["handlers"]["console"]["class"] = "logging.NullHandler"
+        log_config["loggers"]["root"] = {"handlers": ["console"]}
+        self.saved_root_handlers = logging.getLogger().root.handlers
+        configure_logging(settings.LOGGING_CONFIG, log_config)
+
+    def _revert_logging_config(self):
+        if hasattr(self, "saved_root_handlers"):
+            log_config = copy.deepcopy(DEFAULT_LOGGING)
+            log_config["loggers"]["root"] = {"handlers": self.saved_root_handlers}
+            configure_logging(settings.LOGGING_CONFIG, log_config)

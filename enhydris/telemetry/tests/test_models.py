@@ -16,6 +16,7 @@ from model_bakery import baker
 import enhydris
 from enhydris.models import Station, Timeseries, TimeseriesGroup
 from enhydris.telemetry.models import Telemetry, TelemetryLogMessage, fix_zone_name
+from enhydris.tests import OverrideLoggingMixin
 
 
 class TelemetryTestCase(TestCase):
@@ -311,12 +312,13 @@ class TelemetryFetchDealsWithTooCloseTimestampsTestCase(TelemetryFetchTestCaseBa
 
 
 @freeze_time("2024-12-07 17:46:00", tz_offset=0)
-class TelemetryLogMessageTestCase(TestCase):
+class TelemetryLogMessageTestCase(OverrideLoggingMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.telemetry = baker.make(Telemetry, additional_config={})
 
     def setUp(self):
+        self._override_logging_config()
         try:
             raise OSError(errno.ECONNRESET, "Connection reset")
         except ConnectionResetError:
@@ -437,13 +439,23 @@ class TelemetryLogMessageGetEnhydrisCommitIdFromGitTestCase(TestCase):
         m.assert_called_once()
 
 
-class TelemetryFetchErrorTestCase(TestCase):
+class TelemetryFetchErrorTestCase(OverrideLoggingMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.telemetry = baker.make(Telemetry, type="meteoview2", additional_config={})
 
     @patch("enhydris.telemetry.models.Telemetry._setup_api_client")
-    def test_logs_error_on_fetch_error(self, m):
+    def _execute_fetch_with_error(self, m):
         m.side_effect = KeyError("foo")
         self.telemetry.fetch()
+
+    def test_logs_error_in_database(self):
+        self._override_logging_config()
+        self._execute_fetch_with_error()
         self.assertEqual(TelemetryLogMessage.objects.count(), 1)
+
+    def test_logs_error_to_log(self):
+        with self.assertLogs("telemetry", level="DEBUG") as cm:
+            self._execute_fetch_with_error()
+        self.assertRegex(cm.output[0], "^ERROR:telemetry:[0-9-: ]+KeyError: 'foo'$")
+        self.assertRegex(cm.output[1], "KeyError: 'foo'")
