@@ -348,13 +348,14 @@ class Timeseries(models.Model):
 
 
 class TimeseriesRecord(models.Model):
-    # Ugly primary key hack.
+    # Ugly primary key hack - FIX ME in Django 5.2.
     # Django does not allow composite primary keys, whereas timescaledb can't work
     # without them. Our composite primary key in this case is (timeseries, timestamp).
     # What we do is set managed=False, so that Django won't create the table itself;
     # we create it with migrations.RunSQL(). We also set "primary_key=True" in one of
     # the fields. While technically this is wrong, it fools Django into not expecting
-    # an "id" field to exist, and it doesn't affect querying functionality.
+    # an "id" field to exist, and it doesn't affect querying functionality (except in
+    # one case in autoprocess.models.Aggregation._get_start_date(), see comment there).
     timeseries = models.ForeignKey(Timeseries, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(primary_key=True, verbose_name=_("Timestamp"))
     value = models.FloatField(blank=True, null=True, verbose_name=_("Value"))

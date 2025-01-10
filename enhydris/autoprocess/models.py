@@ -463,6 +463,27 @@ class Aggregation(AutoProcess):
         self._check_resulting_timestamp_offset()
         super().save(force_insert, force_update, *args, **kwargs)
 
+    def _get_start_date(self):
+        if self._last_target_timeseries_record_needs_recalculation():
+            # NOTE:
+            #   Running ...latest().delete() won't work. Maybe because currently
+            #   TimeseriesRecord has some primary key hacks.
+            adate = self.target_timeseries.timeseriesrecord_set.latest().timestamp
+            self.target_timeseries.timeseriesrecord_set.filter(timestamp=adate).delete()
+            self.target_timeseries.save()
+        return super()._get_start_date()
+
+    def _last_target_timeseries_record_needs_recalculation(self):
+        # No recalculation needed if it didn't have the "MISSING" flag.
+        if "MISS" not in self.target_timeseries.get_last_record_as_string():
+            return False
+
+        # Technically we should examine the number of missing values (given in the flag)
+        # and whether more data has become available for that date. But this would be
+        # quite complicated so we won't do it. The worst that can happen is that the
+        # last aggregated record gets unnecessarily recalculated for a few times.
+        return True
+
     def _check_resulting_timestamp_offset(self):
         if not self.resulting_timestamp_offset:
             return
@@ -489,7 +510,7 @@ class Aggregation(AutoProcess):
             logging.getLogger("enhydris.autoprocess").error(str(e))
             return HTimeseries()
         aggregated = self._aggregate_time_series(regularized)
-        return self._trim_last_record_if_not_complete(aggregated)
+        return aggregated
 
     def _regularize_time_series(self, source_htimeseries):
         mode = self.method == "mean" and RM.INSTANTANEOUS or RM.INTERVAL
@@ -509,6 +530,7 @@ class Aggregation(AutoProcess):
             self.method,
             min_count=min_count,
             target_timestamp_offset=self.resulting_timestamp_offset or None,
+            missing_flag="MISSING{}",
         )
 
     def _get_source_step(self, source_htimeseries):
@@ -523,26 +545,4 @@ class Aggregation(AutoProcess):
     def _divide_target_step_by_source_step(self, source_step, target_step):
         return int(
             pd.Timedelta(target_step) / pd.tseries.frequencies.to_offset(source_step)
-        )
-
-    def _trim_last_record_if_not_complete(self, ahtimeseries):
-        # If the very last record of the time series has the "MISS" flag, it means it
-        # was derived with one or more missing values in the source.  We don't want to
-        # leave such a record at the end of the target time series, or it won't be
-        # re-calculated when more data becomes available, because processing begins at
-        # the record following the last existing one.
-        if self._last_target_record_needs_trimming(ahtimeseries):
-            ahtimeseries.data = ahtimeseries.data[:-1]
-        return ahtimeseries
-
-    def _last_target_record_needs_trimming(self, ahtimeseries):
-        if len(ahtimeseries.data.index) == 0:
-            return False
-        last_target_record = ahtimeseries.data.iloc[-1]
-        last_target_record_date = last_target_record.name + pd.Timedelta(
-            self.resulting_timestamp_offset
-        )
-        return (
-            "MISS" in last_target_record["flags"]
-            and self.source_end_date < last_target_record_date
         )

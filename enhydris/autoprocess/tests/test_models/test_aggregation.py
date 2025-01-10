@@ -2,7 +2,7 @@ import datetime as dt
 from unittest import mock
 
 from django.db import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 import numpy as np
 import pandas as pd
@@ -10,8 +10,9 @@ from haggregate import RegularizationMode as RM
 from htimeseries import HTimeseries
 from model_bakery import baker
 
-from enhydris.autoprocess.models import Aggregation
+from enhydris.autoprocess.models import Aggregation, AutoProcess
 from enhydris.models import Station, Timeseries, TimeseriesGroup, Variable
+from enhydris.tests.test_models.test_timeseries import get_tzinfo
 
 
 class AggregationTestCase(TestCase):
@@ -197,7 +198,7 @@ class AggregationProcessTimeseriesTestCase(TestCase):
     )
 
     expected_result_for_max_missing_one = pd.DataFrame(
-        data={"value": [56.0, 157.0], "flags": ["", "MISS"]},
+        data={"value": [56.0, 157.0], "flags": ["", "MISSING1"]},
         columns=["value", "flags"],
         index=[
             dt.datetime(2019, 5, 21, 10, 59, tzinfo=dt.timezone.utc),
@@ -206,12 +207,16 @@ class AggregationProcessTimeseriesTestCase(TestCase):
     )
 
     expected_result_for_max_missing_five = pd.DataFrame(
-        data={"value": [2.0, 56.0, 157.0], "flags": ["MISS", "", "MISS"]},
+        data={
+            "value": [2.0, 56.0, 157.0, 202.0],
+            "flags": ["MISSING5", "", "MISSING1", "MISSING2"],
+        },
         columns=["value", "flags"],
         index=[
             dt.datetime(2019, 5, 21, 9, 59, tzinfo=dt.timezone.utc),
             dt.datetime(2019, 5, 21, 10, 59, tzinfo=dt.timezone.utc),
             dt.datetime(2019, 5, 21, 11, 59, tzinfo=dt.timezone.utc),
+            dt.datetime(2019, 5, 21, 12, 59, tzinfo=dt.timezone.utc),
         ],
     )
 
@@ -352,3 +357,116 @@ class AggregationRegularizationModeTestCase(TestCase):
         self.aggregation.method = "max"
         self.aggregation.process_timeseries()
         self.assertEqual(mock_regularize.call_args.kwargs["mode"], RM.INTERVAL)
+
+
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+)
+class AggregationRecalculatesLastValueIfNeededTestCase(TestCase):
+    """
+    This test case uses this source time series:
+        2019-05-21 17:00:00+02:00    0.0
+        2019-05-21 17:10:00+02:00    1.0
+        2019-05-21 17:20:00+02:00    2.0
+        2019-05-21 17:30:00+02:00    3.0
+        2019-05-21 17:40:00+02:00    4.0
+        2019-05-21 17:50:00+02:00    5.0
+        2019-05-21 18:00:00+02:00    6.0
+        2019-05-21 18:10:00+02:00    7.0
+        2019-05-21 18:20:00+02:00    8.0
+        2019-05-21 18:30:00+02:00    9.0
+        2019-05-21 18:40:00+02:00   10.0
+
+    It makes aggregation to hourly, and the last aggregated record (19:00) has two
+    missing values in the source time series, and therefore the MISSING2 flag.
+    Subsequently these two records are added:
+        2019-05-21 18:50:00+02:00   11.0
+        2019-05-21 19:00:00+02:00   12.0
+
+    Then aggregation is repeated, and it is verified that the aggregated record at
+    19:00 is recalculated as needed.
+    """
+
+    def setUp(self):
+        station = baker.make(Station, name="Hobbiton", display_timezone="Etc/GMT-2")
+        timeseries_group = baker.make(
+            TimeseriesGroup,
+            gentity=station,
+            variable__descr="h",
+            precision=0,
+        )
+        source_timeseries = baker.make(
+            Timeseries,
+            timeseries_group=timeseries_group,
+            type=Timeseries.CHECKED,
+            time_step="10min",
+        )
+        start_date = dt.datetime(2019, 5, 21, 17, 0, tzinfo=get_tzinfo("Etc/GMT-2"))
+        index = [start_date + dt.timedelta(minutes=i) for i in range(0, 110, 10)]
+        values = [float(x) for x in range(11)]
+        flags = [""] * 11
+        source_timeseries.set_data(
+            pd.DataFrame(
+                data={"value": values, "flags": flags},
+                columns=["value", "flags"],
+                index=index,
+            )
+        )
+        aggregation = Aggregation(
+            timeseries_group=timeseries_group,
+            target_time_step="1h",
+            method="sum",
+            max_missing=2,
+            resulting_timestamp_offset="",
+        )
+        super(AutoProcess, aggregation).save()  # Avoid triggering a celery task
+        self.aggregation_id = aggregation.id
+
+    def test_initial_target_timeseries(self):
+        aggregation = Aggregation.objects.get(id=self.aggregation_id)
+        aggregation.execute()
+        actual_data = aggregation.target_timeseries.get_data().data
+        expected_data = pd.DataFrame(
+            data={"value": [21.0, 34.0], "flags": ["", "MISSING2"]},
+            columns=["value", "flags"],
+            index=[
+                dt.datetime(2019, 5, 21, 18, 0, tzinfo=get_tzinfo("Etc/GMT-2")),
+                dt.datetime(2019, 5, 21, 19, 0, tzinfo=get_tzinfo("Etc/GMT-2")),
+            ],
+        )
+        expected_data.index.name = "date"
+        pd.testing.assert_frame_equal(actual_data, expected_data)
+
+    def test_updated_target_timeseries(self):
+        Aggregation.objects.get(id=self.aggregation_id).execute()
+
+        self._extend_source_timeseries()
+        aggregation = Aggregation.objects.get(id=self.aggregation_id)
+        aggregation.execute()
+
+        ahtimeseries = aggregation.target_timeseries.get_data()
+        expected_data = pd.DataFrame(
+            data={"value": [21.0, 57.0], "flags": ["", ""]},
+            columns=["value", "flags"],
+            index=[
+                dt.datetime(2019, 5, 21, 18, 0, tzinfo=get_tzinfo("Etc/GMT-2")),
+                dt.datetime(2019, 5, 21, 19, 0, tzinfo=get_tzinfo("Etc/GMT-2")),
+            ],
+        )
+        expected_data.index.name = "date"
+        pd.testing.assert_frame_equal(ahtimeseries.data, expected_data)
+
+    def _extend_source_timeseries(self):
+        aggregation = Aggregation.objects.get(id=self.aggregation_id)
+        source_timeseries = aggregation.source_timeseries
+        new_values = [11.0, 12.0]
+        new_flags = ["", ""]
+        end_date = source_timeseries.end_date
+        delta = dt.timedelta
+        new_dates = [end_date + delta(minutes=10), end_date + delta(minutes=20)]
+        new_data = pd.DataFrame(
+            data={"value": new_values, "flags": new_flags},
+            columns=["value", "flags"],
+            index=new_dates,
+        )
+        source_timeseries.append_data(new_data)
