@@ -28,7 +28,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("autoprocess", "0103_verbose_names"),
-        ("enhydris", "0116_timeseries_name"),
     ]
 
     operations = [

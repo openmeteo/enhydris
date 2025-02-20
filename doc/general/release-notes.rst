@@ -24,20 +24,20 @@ Changes from 4.0
 Upgrading from 4.0
 ------------------
 
-If you were not using synoptic and autoprocess, you need to make sure
-that they are removed from ``INSTALLED_APPS`` (in the new version they
-are included by default).
+IMPORTANT: If you use synoptic and/or autoprocess, there is no going
+back after you run the migrations. If you do try to revert to a state
+earlier than Enhydris 0118, your synoptic and autoprocess tables will be
+deleted. (If you don't use synoptic or autoprocess they will still be
+deleted in that case, but it's not a problem since there won't be any
+useful information in them.)
 
 Ensure that you do not have the old ``enhydris-synoptic`` and
 ``enhydris-autoprocess`` installed. Also ensure your virtualenv does not
 contain any packages, such as ``htimeseries``, that conflict with
 ``pthelma`` (it's better to remove it entirely and recreate it).
 
-Connect to the database (e.g. with ``./manage.py dbshell``) and run
-these commands::
-
-   UPDATE django_migrations SET app='autoprocess' WHERE app='enhydris_autoprocess';
-   UPDATE django_migrations SET app='synoptic' WHERE app='enhydris_synoptic';
+Other than that, you can upgrade simply by running ``./manage.py
+migrate``.
 
 Version 4.0
 ===========

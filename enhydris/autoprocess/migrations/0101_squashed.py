@@ -9,8 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("enhydris", "0037_timeseries_groups"),
-        ("enhydris", "0011_gentity_event_user_optional"),
+        ("enhydris", "0118_aggregate_and_synoptic"),
     ]
 
     operations = [

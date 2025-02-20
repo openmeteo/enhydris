@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("enhydris", "0114_delete_timezone_model"),
+        ("enhydris", "0118_aggregate_and_synoptic"),
     ]
 
     operations = [
