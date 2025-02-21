@@ -2,6 +2,7 @@
 
    Unit tested mostly in the API tests.
 """
+
 from django.conf import settings
 from django.contrib.gis.db.models import Extent
 from django.contrib.gis.geos import Polygon

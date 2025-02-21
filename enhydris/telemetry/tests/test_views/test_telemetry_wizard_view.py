@@ -6,9 +6,9 @@ from django.test import Client, TestCase, override_settings
 
 import requests
 from bs4 import BeautifulSoup
-from model_mommy import mommy
+from model_bakery import baker
 
-from enhydris.models import Station
+from enhydris.models import Station, TimeseriesGroup
 from enhydris.telemetry.forms import ConnectionDataForm
 from enhydris.telemetry.models import Telemetry
 from enhydris.telemetry.views import TelemetryWizardView
@@ -20,7 +20,7 @@ class RedirectToFirstStepTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
+        cls.station = baker.make(Station, creator=cls.user)
 
     def test_redirects(self):
         """Test that we are redirected to the first step if we don't come from there"""
@@ -51,7 +51,7 @@ class CopyTelemetryDataFromDatabaseToSessionTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
+        cls.station = baker.make(Station, creator=cls.user)
 
     @classmethod
     def setUpClass(cls):
@@ -87,8 +87,8 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
-        cls.telemetry = mommy.make(
+        cls.station = baker.make(Station, creator=cls.user)
+        cls.telemetry = baker.make(
             Telemetry,
             station=cls.station,
             type="meteoview2",
@@ -151,7 +151,7 @@ class FirstStepPostTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
+        cls.station = baker.make(Station, creator=cls.user)
 
     @classmethod
     def setUpClass(cls):
@@ -189,7 +189,7 @@ class FirstStepPostErrorTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
+        cls.station = baker.make(Station, creator=cls.user)
 
     @classmethod
     def setUpClass(cls):
@@ -212,7 +212,7 @@ class SecondStepGetMixin:
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
+        cls.station = baker.make(Station, creator=cls.user)
 
     @classmethod
     def setUpClass(cls):
@@ -304,7 +304,7 @@ class SecondStepPostMixin:
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
+        cls.station = baker.make(Station, creator=cls.user)
 
     @classmethod
     def setUpClass(cls):
@@ -407,6 +407,17 @@ class SecondStepPostSuccessfulTestCase(SecondStepPostSuccessfulMixin, TestCase):
 
 
 class FinalStepPostSuccessfulMixin(SecondStepPostSuccessfulMixin):
+    @classmethod
+    def _post_step_4(cls):
+        p1 = patch(
+            "enhydris.telemetry.types.meteoview2.requests.request",
+            return_value=MockResponse(json_result={"code": 200, "token": "hello"}),
+        )
+        with p1:
+            cls.response = cls.cclient.post(
+                f"/stations/{cls.station.id}/telemetry/4/", data={}
+            )
+
     # We use the same request as second step, but we meddle with the number of steps
     # to fool the system into thinking it's the final step.
     @classmethod
@@ -462,6 +473,53 @@ class FinalStepPostSuccessfulReplacesExistingTelemetryTestCase(
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
+class FinalStepDuplicateTimeseriesTestCase(SecondStepPostSuccessfulMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.tg1 = baker.make(TimeseriesGroup, id=518, gentity=cls.station)
+
+    def setUp(self):
+        # We submit two sensors mapped to the same time series, which is not allowed.
+        self.response = self._post_step_4()
+
+    def test_status_code(self):
+        # The result should be 200 (i.e. error in the form) as opposed to 302
+        # (successful submission) or 500 (error because of primary key violation).
+        self.assertEqual(self.response.status_code, 200)
+
+    def test_error_message(self):
+        self.assertContains(
+            self.response,
+            "A given time series may be specified for only one sensor",
+        )
+
+    @patch(
+        "enhydris.telemetry.types.meteoview2.requests.request",
+        return_value=MockResponse(
+            json_result={
+                "code": 200,
+                "token": "hello",
+                "sensors": [
+                    {"id": "1234", "title": "Beautymeter"},
+                    {"id": "4321", "title": "Acmemeter"},
+                ],
+            },
+        ),
+    )
+    def _post_step_4(self, m):
+        return self.cclient.post(
+            f"/stations/{self.station.id}/telemetry/4/",
+            {
+                "type": "meteoview2",
+                "sensor_1234": 518,
+                "sensor_4321": 518,
+            },
+        )
+
+
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 @patch(
     "enhydris.telemetry.types.meteoview2.requests.request",
     return_value=MockResponse(
@@ -472,7 +530,7 @@ class NextOrFinishButtonTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
+        cls.station = baker.make(Station, creator=cls.user)
         Telemetry.objects.create(
             station=cls.station,
             fetch_interval_minutes=10,
@@ -520,7 +578,7 @@ class PermissionsTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user("alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
+        cls.station = baker.make(Station, creator=cls.user)
 
     def test_telemetry_button_does_not_appear_when_not_logged_on(self):
         response = self.client.get(f"/stations/{self.station.id}/")

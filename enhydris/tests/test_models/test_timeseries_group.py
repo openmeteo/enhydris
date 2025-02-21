@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
 from django.utils import translation
 
-from model_mommy import mommy
+from model_bakery import baker
 from parler.utils.context import switch_language
 
 from enhydris import models
@@ -20,14 +20,14 @@ class VariableTestCase(TestCase):
         self.assertEqual(models.Variable.objects.first().descr, "Temperature")
 
     def test_update(self):
-        mommy.make(models.Variable, descr="Irrelevant")
+        baker.make(models.Variable, descr="Irrelevant")
         gact = models.Variable.objects.first()
         gact.descr = "Temperature"
         gact.save()
         self.assertEqual(models.Variable.objects.first().descr, "Temperature")
 
     def test_delete(self):
-        mommy.make(models.Variable, descr="Temperature")
+        baker.make(models.Variable, descr="Temperature")
         gact = models.Variable.objects.first()
         gact.delete()
         self.assertEqual(models.Variable.objects.count(), 0)
@@ -39,7 +39,7 @@ class VariableTestCase(TestCase):
             self.assertEqual(str(gact), "Θερμοκρασία")
 
     def test_manager_includes_objects_with_missing_translations(self):
-        variable = mommy.make(models.Variable, descr="hello")
+        variable = baker.make(models.Variable, descr="hello")
         self.assertEqual(str(variable), "hello")
         with switch_language(variable, "el"):
             models.Variable.objects.get(id=variable.id)  # Shouldn't raise anything
@@ -58,7 +58,7 @@ class VariableTestCase(TestCase):
             )
 
     def _create_variable(self, english_name, greek_name):
-        mommy.make(models.Variable, descr=english_name)
+        baker.make(models.Variable, descr=english_name)
         variable = models.Variable.objects.get(translations__descr=english_name)
         variable.translations.create(language_code="el", descr=greek_name)
         return variable
@@ -90,7 +90,7 @@ class VariableTestCase(TestCase):
             username="alice", password="topsecret", is_active=True, is_staff=True
         )
         self.client.login(username="alice", password="topsecret")
-        mommy.make(models.Variable, descr="pH")
+        baker.make(models.Variable, descr="pH")
         response = self.client.get(
             "/admin/enhydris/station/add/", HTTP_ACCEPT_LANGUAGE="el"
         )
@@ -99,17 +99,17 @@ class VariableTestCase(TestCase):
 
 class UnitOfMeasurementTestCase(TestCase):
     def test_str(self):
-        unit = mommy.make(models.UnitOfMeasurement, symbol="mm")
+        unit = baker.make(models.UnitOfMeasurement, symbol="mm")
         self.assertEqual(str(unit), "mm")
 
     def test_str_when_symbol_is_empty(self):
-        unit = mommy.make(models.UnitOfMeasurement, symbol="")
+        unit = baker.make(models.UnitOfMeasurement, symbol="")
         self.assertEqual(str(unit), str(unit.id))
 
 
 class TimeseriesGroupGetNameTestCase(TestCase):
     def setUp(self):
-        self.timeseries_group = mommy.make(
+        self.timeseries_group = baker.make(
             models.TimeseriesGroup, variable__descr="Temperature", name=""
         )
 
@@ -131,7 +131,7 @@ class TimeseriesGroupGetNameTestCase(TestCase):
 
 class TimeseriesGroupDefaultTimeseriesTestCase(TestCase):
     def setUp(self):
-        self.timeseries_group = mommy.make(
+        self.timeseries_group = baker.make(
             models.TimeseriesGroup, variable__descr="Temperature", name=""
         )
         self.initial_timeseries = self._make_timeseries(models.Timeseries.INITIAL)
@@ -141,7 +141,7 @@ class TimeseriesGroupDefaultTimeseriesTestCase(TestCase):
         )
 
     def _make_timeseries(self, type):
-        return mommy.make(
+        return baker.make(
             models.Timeseries, timeseries_group=self.timeseries_group, type=type
         )
 
@@ -247,7 +247,7 @@ class TimeseriesGroupStartAndEndDateTestCase(TimeseriesDataMixin, TestCase):
 
 class TimestepTestCase(TestCase):
     def setUp(self):
-        self.timeseries = mommy.make(models.Timeseries)
+        self.timeseries = baker.make(models.Timeseries)
 
     def set_time_step(self, time_step):
         self.timeseries.time_step = time_step

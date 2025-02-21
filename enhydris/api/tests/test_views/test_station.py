@@ -7,7 +7,7 @@ from django.contrib.sites.models import Site
 from django.test.utils import override_settings
 from rest_framework.test import APITestCase
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris import models
 
@@ -15,7 +15,7 @@ from enhydris import models
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationListTestCase(APITestCase):
     def setUp(self):
-        self.station = mommy.make(models.Station, name="Hobbiton")
+        self.station = baker.make(models.Station, name="Hobbiton")
         self.response = self.client.get("/api/stations/")
 
     def test_status_code(self):
@@ -33,10 +33,10 @@ class StationListTestCase(APITestCase):
 class StationListSitesTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        mommy.make(Site, id=1, domain="middleearth.com", name="Middle Earth")
-        site2 = mommy.make(Site, id=2, domain="realearth.com", name="Real Earth")
-        mommy.make(models.Station, name="Hobbiton")
-        arta = mommy.make(models.Station, name="Arta")
+        baker.make(Site, id=1, domain="middleearth.com", name="Middle Earth")
+        site2 = baker.make(Site, id=2, domain="realearth.com", name="Real Earth")
+        baker.make(models.Station, name="Hobbiton")
+        arta = baker.make(models.Station, name="Arta")
         arta.sites.set({site2})
 
     def test_list_contains_hobbiton(self):
@@ -53,27 +53,27 @@ class StationListSitesTestCase(APITestCase):
 class StationDetailSitesTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        mommy.make(Site, id=1, domain="middleearth.com", name="Middle Earth")
-        mommy.make(Site, id=2, domain="realearth.com", name="Real Earth")
-        mommy.make(models.Station, id=42, name="Hobbiton")
+        baker.make(Site, id=1, domain="middleearth.com", name="Middle Earth")
+        baker.make(Site, id=2, domain="realearth.com", name="Real Earth")
+        baker.make(models.Station, id=42, name="Hobbiton")
 
     def test_hobbiton_detail(self):
         response = self.client.get("/api/stations/42/")
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     @override_settings(SITE_ID=2)
     def test_hobbiton_detail_unavailable_on_site2(self):
         response = self.client.get("/api/stations/42/")
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
 
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationCreateTestCase(APITestCase):
     def setUp(self):
-        self.user = mommy.make(User, is_active=True, is_superuser=False)
-        self.variable = mommy.make(models.Variable)
-        self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
-        self.bilbo = mommy.make(models.Person, last_name="Baggins", first_name="Bilbo")
+        self.user = baker.make(User, is_active=True, is_superuser=False)
+        self.variable = baker.make(models.Variable)
+        self.unit_of_measurement = baker.make(models.UnitOfMeasurement)
+        self.bilbo = baker.make(models.Person, last_name="Baggins", first_name="Bilbo")
 
     def _create_station(self):
         return self.client.post(
@@ -118,12 +118,12 @@ class StationCreateTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationUpdateAndDeleteTestCase(APITestCase):
     def setUp(self):
-        self.user1 = mommy.make(User, is_active=True, is_superuser=False)
-        self.user2 = mommy.make(User, is_active=True, is_superuser=False)
-        self.variable = mommy.make(models.Variable)
-        self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
-        self.station = mommy.make(models.Station, creator=self.user1)
-        self.bilbo = mommy.make(models.Person, last_name="Baggins", first_name="Bilbo")
+        self.user1 = baker.make(User, is_active=True, is_superuser=False)
+        self.user2 = baker.make(User, is_active=True, is_superuser=False)
+        self.variable = baker.make(models.Variable)
+        self.unit_of_measurement = baker.make(models.UnitOfMeasurement)
+        self.station = baker.make(models.Station, creator=self.user1)
+        self.bilbo = baker.make(models.Person, last_name="Baggins", first_name="Bilbo")
 
     def _put_station(self):
         return self.client.put(
@@ -192,37 +192,37 @@ class StationCsvTestCase(APITestCase):
         self._create_stations()
 
     def _create_stations(self):
-        self.station_komboti = mommy.make(
+        self.station_komboti = baker.make(
             models.Station,
             name="Komboti",
             geom=Point(x=21.06071, y=39.09518, srid=4326),
             original_srid=4326,
         )
-        self.station_agios_athanasios = mommy.make(
+        self.station_agios_athanasios = baker.make(
             models.Station,
             name="Agios Athanasios",
             geom=Point(x=21.60121, y=39.22440, srid=4326),
             original_srid=4326,
         )
-        mommy.make(
+        baker.make(
             models.Station,
             name="Tharbad",
             geom=Point(x=-176.48368, y=0.19377, srid=4326),
             original_srid=4326,
         )
-        mommy.make(
+        baker.make(
             models.Station,
             name="SRID Point, NoSRID Station",
             geom=Point(x=-176.48368, y=0.19377, srid=4326),
             original_srid=None,
         )
-        mommy.make(
+        baker.make(
             models.Station,
             name="NoSRID Point, SRID Station",
             geom=Point(x=-176.48368, y=0.19377, srid=None),
             original_srid=4326,
         )
-        mommy.make(
+        baker.make(
             models.Station,
             name="NoSRID Point, NoSRID Station",
             geom=Point(x=-176.48368, y=0.19377, srid=None),
@@ -236,7 +236,7 @@ class StationCsvTestCase(APITestCase):
         self._create_timeseries_group(self.station_agios_athanasios, "Humidity")
 
     def _create_timeseries_group(self, station, variable_descr):
-        mommy.make(
+        baker.make(
             models.TimeseriesGroup, gentity=station, variable__descr=variable_descr
         )
 

@@ -2,7 +2,7 @@ from django.contrib.gis.geos import Point
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris import models
 
@@ -10,12 +10,12 @@ from enhydris import models
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class SimpleBoundingBoxTestCase(APITestCase):
     def setUp(self):
-        mommy.make(
+        baker.make(
             models.Station,
             geom=Point(x=21.06071, y=39.09518, srid=4326),
             original_srid=4326,
         )
-        mommy.make(
+        baker.make(
             models.Station,
             geom=Point(x=21.60121, y=39.22440, srid=4326),
             original_srid=4326,
@@ -60,12 +60,12 @@ class DefaultBoundingBoxTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TooSmallBoundingBoxTestCase(APITestCase):
     def setUp(self):
-        mommy.make(
+        baker.make(
             models.Station,
             geom=Point(x=21.06071, y=39.09518, srid=4326),
             original_srid=4326,
         )
-        mommy.make(
+        baker.make(
             models.Station,
             geom=Point(x=21.60121, y=39.22440, srid=4326),
             original_srid=4326,

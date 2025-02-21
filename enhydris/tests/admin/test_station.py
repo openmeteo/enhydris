@@ -12,7 +12,7 @@ from django.http import HttpRequest
 from django.test import TestCase, override_settings
 
 from crequest.middleware import CrequestMiddleware
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris import models
 from enhydris.admin.station import TimeseriesInlineAdminForm
@@ -25,8 +25,8 @@ class StationSearchTestCase(TestCase):
         self.alice = User.objects.create_user(
             username="alice", password="topsecret", is_staff=True, is_superuser=True
         )
-        mommy.make(models.Station, name="Hobbiton")
-        mommy.make(models.Station, name="Rivendell")
+        baker.make(models.Station, name="Hobbiton")
+        baker.make(models.Station, name="Rivendell")
 
     def test_search_returns_correct_result(self):
         self.client.login(username="alice", password="topsecret")
@@ -55,13 +55,13 @@ class StationPermsTestCaseBase(TestCase):
             username="elaine", password="topsecret", is_staff=True, is_superuser=False
         )
 
-        cls.azanulbizar = mommy.make(
+        cls.azanulbizar = baker.make(
             models.Station, name="Azanulbizar", creator=bob, maintainers=[]
         )
-        cls.barazinbar = mommy.make(
+        cls.barazinbar = baker.make(
             models.Station, name="Barazinbar", creator=bob, maintainers=[charlie]
         )
-        cls.calenardhon = mommy.make(
+        cls.calenardhon = baker.make(
             models.Station, name="Calenardhon", creator=alice, maintainers=[]
         )
 
@@ -283,8 +283,8 @@ class StationCreateSetsCreatorTestCase(TestCase):
 class StationChangeSites(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.site1 = mommy.make(Site, id=1, domain="hello.com", name="hello")
-        cls.site2 = mommy.make(Site, id=2, domain="world.com", name="world")
+        cls.site1 = baker.make(Site, id=1, domain="hello.com", name="hello")
+        cls.site2 = baker.make(Site, id=2, domain="world.com", name="world")
 
         cls.alice = User.objects.create_user(
             username="alice", password="topsecret", is_staff=True, is_superuser=True
@@ -293,7 +293,7 @@ class StationChangeSites(TestCase):
             username="bob", password="topsecret", is_staff=True, is_superuser=False
         )
 
-        cls.station = mommy.make(models.Station, creator=cls.bob, sites=[cls.site1])
+        cls.station = baker.make(models.Station, creator=cls.bob, sites=[cls.site1])
 
     def get_response(self):
         return self.client.get(
@@ -327,8 +327,8 @@ class StationChangeSites(TestCase):
 class StationListFromDifferentSites(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.site1 = mommy.make(Site, id=1, domain="hello.com", name="hello")
-        cls.site2 = mommy.make(Site, id=2, domain="world.com", name="world")
+        cls.site1 = baker.make(Site, id=1, domain="hello.com", name="hello")
+        cls.site2 = baker.make(Site, id=2, domain="world.com", name="world")
 
         cls.alice = User.objects.create_user(
             username="alice", password="topsecret", is_staff=True, is_superuser=True
@@ -337,10 +337,10 @@ class StationListFromDifferentSites(TestCase):
             username="bob", password="topsecret", is_staff=True, is_superuser=False
         )
 
-        cls.station1 = mommy.make(
+        cls.station1 = baker.make(
             models.Station, id=42, name="hello station", creator=cls.bob
         )
-        cls.station2 = mommy.make(
+        cls.station2 = baker.make(
             models.Station, id=43, name="world station", creator=cls.bob
         )
         cls.station2.sites.set({cls.site2})
@@ -530,10 +530,10 @@ class TimeseriesUploadFileMixin:
             **get_formset_parameters(self.client, "/admin/enhydris/station/add/"),
             "timeseriesgroup_set-TOTAL_FORMS": "1",
             "timeseriesgroup_set-INITIAL_FORMS": "0",
-            "timeseriesgroup_set-0-variable": mommy.make(
+            "timeseriesgroup_set-0-variable": baker.make(
                 models.Variable, descr="myvar"
             ).id,
-            "timeseriesgroup_set-0-unit_of_measurement": mommy.make(
+            "timeseriesgroup_set-0-unit_of_measurement": baker.make(
                 models.UnitOfMeasurement
             ).id,
             "timeseriesgroup_set-0-precision": 2,
@@ -703,10 +703,10 @@ class TimeseriesInlineFormSetTestCase(TestCase):
             **get_formset_parameters(self.client, "/admin/enhydris/station/add/"),
             "timeseriesgroup_set-TOTAL_FORMS": "1",
             "timeseriesgroup_set-INITIAL_FORMS": "0",
-            "timeseriesgroup_set-0-variable": mommy.make(
+            "timeseriesgroup_set-0-variable": baker.make(
                 models.Variable, descr="myvar"
             ).id,
-            "timeseriesgroup_set-0-unit_of_measurement": mommy.make(
+            "timeseriesgroup_set-0-unit_of_measurement": baker.make(
                 models.UnitOfMeasurement
             ).id,
             "timeseriesgroup_set-0-precision": 2,

@@ -11,18 +11,19 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from freezegun import freeze_time
-from model_mommy import mommy
+from model_bakery import baker
 
 import enhydris
 from enhydris.models import Station, Timeseries, TimeseriesGroup
 from enhydris.telemetry.models import Telemetry, TelemetryLogMessage, fix_zone_name
+from enhydris.tests import OverrideLoggingMixin
 
 
 class TelemetryTestCase(TestCase):
     def test_cannot_save_wrong_data_timezone(self):
         with self.assertRaisesRegex(IntegrityError, "'' is not a valid time zone"):
             Telemetry.objects.create(
-                station=mommy.make(Station),
+                station=baker.make(Station),
                 type="meteoview2",
                 fetch_interval_minutes=10,
                 fetch_offset_minutes=2,
@@ -36,7 +37,7 @@ class TelemetryFetchValidatorsTestCase(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.telemetry = Telemetry(
-            station=mommy.make(Station),
+            station=baker.make(Station),
             type="meteoview2",
             fetch_interval_minutes=10,
             fetch_offset_minutes=10,
@@ -85,7 +86,7 @@ class TelemetryIsDueTestCase(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.telemetry = Telemetry(
-            station=mommy.make(Station),
+            station=baker.make(Station),
             type="meteoview2",
             fetch_interval_minutes=10,
             fetch_offset_minutes=10,
@@ -128,15 +129,15 @@ class FixZoneNameTestCase(TestCase):
 class TelemetryFetchTestCaseBase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.station = mommy.make(Station, display_timezone="Etc/GMT-2")
-        cls.timeseries_group = mommy.make(
+        cls.station = baker.make(Station, display_timezone="Etc/GMT-2")
+        cls.timeseries_group = baker.make(
             TimeseriesGroup,
             id=42,
             gentity=cls.station,
             variable__descr="Temperature",
             precision=1,
         )
-        cls.telemetry = mommy.make(
+        cls.telemetry = baker.make(
             Telemetry,
             station=cls.station,
             type="meteoview2",
@@ -209,6 +210,7 @@ class TelemetryFetchTestCase(TelemetryFetchTestCaseBase):
                 "data": json.dumps(
                     {"email": "someemail@email.com", "key": "topsecret"}
                 ),
+                "verify": False,
             },
         )
 
@@ -309,12 +311,14 @@ class TelemetryFetchDealsWithTooCloseTimestampsTestCase(TelemetryFetchTestCaseBa
         ]
 
 
-class TelemetryLogMessageTestCase(TestCase):
+@freeze_time("2024-12-07 17:46:00", tz_offset=0)
+class TelemetryLogMessageTestCase(OverrideLoggingMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.telemetry = mommy.make(Telemetry, additional_config={})
+        cls.telemetry = baker.make(Telemetry, additional_config={})
 
     def setUp(self):
+        self._override_logging_config()
         try:
             raise OSError(errno.ECONNRESET, "Connection reset")
         except ConnectionResetError:
@@ -435,13 +439,23 @@ class TelemetryLogMessageGetEnhydrisCommitIdFromGitTestCase(TestCase):
         m.assert_called_once()
 
 
-class TelemetryFetchErrorTestCase(TestCase):
+class TelemetryFetchErrorTestCase(OverrideLoggingMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.telemetry = mommy.make(Telemetry, type="meteoview2", additional_config={})
+        cls.telemetry = baker.make(Telemetry, type="meteoview2", additional_config={})
 
     @patch("enhydris.telemetry.models.Telemetry._setup_api_client")
-    def test_logs_error_on_fetch_error(self, m):
+    def _execute_fetch_with_error(self, m):
         m.side_effect = KeyError("foo")
         self.telemetry.fetch()
+
+    def test_logs_error_in_database(self):
+        self._override_logging_config()
+        self._execute_fetch_with_error()
         self.assertEqual(TelemetryLogMessage.objects.count(), 1)
+
+    def test_logs_error_to_log(self):
+        with self.assertLogs("telemetry", level="DEBUG") as cm:
+            self._execute_fetch_with_error()
+        self.assertRegex(cm.output[0], "^ERROR:telemetry:[0-9-: ]+KeyError: 'foo'$")
+        self.assertRegex(cm.output[1], "KeyError: 'foo'")

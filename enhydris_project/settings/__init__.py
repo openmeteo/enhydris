@@ -1,6 +1,8 @@
 import os
 import sys
 
+from celery.schedules import crontab
+
 # Development settings (to be overridden in production settings.py)
 DEBUG = True
 SECRET_KEY = "topsecret"
@@ -15,7 +17,7 @@ DATABASES = {
     }
 }
 SITE_ID = 1
-STATIC_URL = "/static/"
+STATIC_URL = "static/"
 
 ROOT_URLCONF = "enhydris.urls"
 
@@ -36,6 +38,8 @@ INSTALLED_APPS = [
     "enhydris",
     "enhydris.telemetry",
     "enhydris.api",
+    "enhydris.synoptic",
+    "enhydris.autoprocess",
     "django.contrib.admin",
     "rules.apps.AutodiscoverRulesConfig",
     "parler",
@@ -62,7 +66,6 @@ MIDDLEWARE = [
 ]
 
 APPEND_SLASH = True
-USE_L10N = True
 
 TEMPLATES = [
     {
@@ -162,11 +165,18 @@ ENHYDRIS_TS_GRAPH_FINE_STEP_DENOMINATOR = 50
 ENHYDRIS_SITES_FOR_NEW_STATIONS = set()
 ENHYDRIS_CELERY_SEND_TASK_ERROR_EMAILS = True
 
+ENHYDRIS_SYNOPTIC_URL = "/synoptic"
+ENHYDRIS_SYNOPTIC_ROOT = "/tmp/enhydris-synoptic-root"
+
 CELERY_BEAT_SCHEDULE = {
     "fetch-telemetry-data": {
         "task": "enhydris.telemetry.tasks.fetch_all_telemetry_data",
         "schedule": 60,
-    }
+    },
+    "do-synoptic": {
+        "task": "enhydris.synoptic.tasks.create_static_files",
+        "schedule": crontab(minute="2-52/10"),
+    },
 }
 
 if os.environ.get("SELENIUM_BROWSER", False):

@@ -1,8 +1,9 @@
 import datetime as dt
 import json
 from io import StringIO
+from zoneinfo import ZoneInfo
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 import requests
 
@@ -13,11 +14,19 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
     name = "Metrica MeteoView2"
     username_label = _("Email")
     password_label = _("API key")
-    hide_device_locator = True
+    device_locator_label = _("Meteoview API URL")
+    device_locator_help = _(
+        "If this is left blank, https://meteoview2.gr/api/ will be used."
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.api_url = "https://meteoview2.gr/api/"
+        if not self.telemetry.device_locator:
+            self.api_url = "https://meteoview2.gr/api/"
+        else:
+            self.api_url = self.telemetry.device_locator
+            if not self.api_url.endswith("/"):
+                self.api_url += "/"
 
     def connect(self):
         data = self.make_request(
@@ -80,7 +89,9 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
 
     def _get_start_date(self, sensor_id, timeseries_end_date):
         if timeseries_end_date is not None:
-            timeseries_end_date = timeseries_end_date.replace(tzinfo=None)
+            timeseries_end_date = timeseries_end_date.astimezone(
+                ZoneInfo(self.telemetry.data_timezone)
+            ).replace(tzinfo=None)
             start_date = timeseries_end_date + dt.timedelta(minutes=1)
         else:
             start_date = dt.datetime(1990, 1, 1)
@@ -93,10 +104,10 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
             kwargs.setdefault("headers", {})
             kwargs["headers"]["content-type"] = "application/json"
             kwargs["data"] = json.dumps(kwargs["data"])
-        response = requests.request(method, url, *args, **kwargs)
         try:
+            response = requests.request(method, url, verify=False, *args, **kwargs)
             response.raise_for_status()
-        except requests.RequestException as e:
+        except (requests.exceptions.SSLError, requests.RequestException) as e:
             raise TelemetryError(str(e))
         data = response.json()
         if "code" not in data:

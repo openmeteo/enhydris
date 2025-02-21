@@ -1,16 +1,20 @@
+import copy
 import datetime as dt
+import logging
 from io import StringIO
 from zoneinfo import ZoneInfo
 
+from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.cache import cache
 from django.core.management import call_command
 from django.test.utils import override_settings
+from django.utils.log import DEFAULT_LOGGING, configure_logging
 
 import django_selenium_clean
 import pandas as pd
 from htimeseries import HTimeseries
-from model_mommy import mommy
+from model_bakery import baker
 from parler.utils.context import switch_language
 
 from enhydris import models
@@ -37,7 +41,7 @@ class ClearCacheMixin:
 class TestTimeseriesMixin(ClearCacheMixin):
     @classmethod
     def _create_test_timeseries(cls, data="", publicly_available=None):
-        cls.station = mommy.make(
+        cls.station = baker.make(
             models.Station,
             name="Celduin",
             original_srid=2100,
@@ -45,7 +49,7 @@ class TestTimeseriesMixin(ClearCacheMixin):
             altitude=219,
             display_timezone="Etc/GMT-2",
         )
-        cls.timeseries_group = mommy.make(
+        cls.timeseries_group = baker.make(
             models.TimeseriesGroup,
             name="Daily temperature",
             gentity=cls.station,
@@ -57,7 +61,7 @@ class TestTimeseriesMixin(ClearCacheMixin):
         more_kwargs = {}
         if publicly_available is not None:
             more_kwargs["publicly_available"] = publicly_available
-        cls.timeseries = mommy.make(
+        cls.timeseries = baker.make(
             models.Timeseries,
             timeseries_group=cls.timeseries_group,
             type=models.Timeseries.INITIAL,
@@ -81,7 +85,7 @@ class TimeseriesDataMixin(ClearCacheMixin):
             data={"value": [1.0, 2.0], "flags": ["", ""]},
             columns=["value", "flags"],
         )
-        cls.station = mommy.make(
+        cls.station = baker.make(
             models.Station,
             name="Komboti",
             geom=Point(x=21.00000, y=39.00000, srid=4326),
@@ -92,7 +96,7 @@ class TimeseriesDataMixin(ClearCacheMixin):
         with switch_language(cls.variable, "en"):
             cls.variable.descr = "Beauty"
             cls.variable.save()
-        cls.timeseries_group = mommy.make(
+        cls.timeseries_group = baker.make(
             models.TimeseriesGroup,
             gentity=cls.station,
             precision=2,
@@ -102,7 +106,7 @@ class TimeseriesDataMixin(ClearCacheMixin):
         more_kwargs = {}
         if publicly_available is not None:
             more_kwargs["publicly_available"] = publicly_available
-        cls.timeseries = mommy.make(
+        cls.timeseries = baker.make(
             models.Timeseries,
             type=models.Timeseries.INITIAL,
             timeseries_group=cls.timeseries_group,
@@ -141,3 +145,27 @@ class SeleniumTestCase(django_selenium_clean.SeleniumTestCase):
                 allow_cascade=True,
                 inhibit_post_migrate=False,
             )
+
+
+class OverrideLoggingMixin:
+    def tearDown(self):
+        super().tearDown()
+        self._revert_logging_config()
+
+    def _override_logging_config(self):
+        """Override logging.
+
+        We need to do this to avoid the test output being polluted with log messages.
+        We can't just @override_settings, we also need to call configure_logging().
+        """
+        log_config = copy.deepcopy(DEFAULT_LOGGING)
+        log_config["handlers"]["console"]["class"] = "logging.NullHandler"
+        log_config["loggers"]["root"] = {"handlers": ["console"]}
+        self.saved_root_handlers = logging.getLogger().root.handlers
+        configure_logging(settings.LOGGING_CONFIG, log_config)
+
+    def _revert_logging_config(self):
+        if hasattr(self, "saved_root_handlers"):
+            log_config = copy.deepcopy(DEFAULT_LOGGING)
+            log_config["loggers"]["root"] = {"handlers": self.saved_root_handlers}
+            configure_logging(settings.LOGGING_CONFIG, log_config)

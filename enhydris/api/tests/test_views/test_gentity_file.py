@@ -4,7 +4,7 @@ from django.db.models.fields.files import FieldFile
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris import models
 
@@ -12,12 +12,12 @@ from enhydris import models
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class GentityFileTestCase(APITestCase):
     def setUp(self):
-        self.station = mommy.make(models.Station)
-        self.gentity_file = mommy.make(
+        self.station = baker.make(models.Station)
+        self.gentity_file = baker.make(
             models.GentityFile, gentity=self.station, descr="hello"
         )
-        self.station2 = mommy.make(models.Station)
-        self.gentity_file2 = mommy.make(models.GentityFile, gentity=self.station2)
+        self.station2 = baker.make(models.Station)
+        self.gentity_file2 = baker.make(models.GentityFile, gentity=self.station2)
 
     def test_list_status_code(self):
         r = self.client.get("/api/stations/{}/files/".format(self.station.id))
@@ -63,8 +63,8 @@ class GentityFileContentTestCase(APITestCase):
         patch1 = patch("enhydris.api.views.open", mock_open(read_data="ABCDEF"))
         patch2 = patch("os.path.getsize", return_value=6)
 
-        self.station = mommy.make(models.Station)
-        self.gentity_file = mommy.make(models.GentityFile, gentity=self.station)
+        self.station = baker.make(models.Station)
+        self.gentity_file = baker.make(models.GentityFile, gentity=self.station)
         with patch1, patch2:
             self.response = self.client.get(
                 "/api/stations/{}/files/{}/content/".format(
@@ -90,8 +90,8 @@ class GentityFileContentWithoutFileTestCase(APITestCase):
     def setUp(self):
         # Mommy creates a GentityFile without an associated file, so the
         # result should be 404
-        self.station = mommy.make(models.Station)
-        self.gentity_file = mommy.make(models.GentityFile, gentity=self.station)
+        self.station = baker.make(models.Station)
+        self.gentity_file = baker.make(models.GentityFile, gentity=self.station)
 
         self.response = self.client.get(
             "/api/stations/{}/files/{}/content/".format(
