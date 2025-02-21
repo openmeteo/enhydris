@@ -1,0 +1,38 @@
+{% extends "enhydris/synoptic/base.html" %}
+{% load i18n %}
+
+{% block title %}
+  {% blocktrans with name=object.station.name %}
+    Conditions at {{ name }}
+  {% endblocktrans %}
+{% endblock %}
+
+{% block content %}
+  {% block breadcrumbs %}
+    <nav aria-label="breadcrumbs">
+      <ol class="breadcrumb breadcrumbs-synoptic">
+        <li class="breadcrumb-item"><a href="../../">{% blocktrans with name=object.synoptic_group.name %}{{ name }} current conditions report{% endblocktrans %}</a></li>
+        {% url 'station_detail' object.station.id as station_page %}
+        <li class="breadcrumb-item active" aria-current="page"><a href="{{ station_page }}">{{ object.station.name }}</a></li>
+      </ol>
+    </nav>
+  {% endblock %}
+  <div class="container">
+    <div id="content">
+      <h1 class="mb-4">{% blocktrans with name=object.station.name %}Conditions at {{ name }}{% endblocktrans %}</h1>
+      <div class="card mb-3">
+        <div class="card-header">{% trans "Latest measurements" %}</div>
+        <div class="card-body">
+          {% include "enhydris/synoptic/groupstation-report.html" %}
+        </div>
+      </div>
+      <div class="text-center charts">
+        {% for synoptic_timeseries_group in object.synoptictimeseriesgroup_set.primary %}
+          <h2>{{ synoptic_timeseries_group.get_title }}</h2>
+          <img src="../../../chart/{{ synoptic_timeseries_group.id }}.png" alt="Chart">
+          <hr>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

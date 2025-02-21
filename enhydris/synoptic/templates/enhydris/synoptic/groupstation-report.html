@@ -1,0 +1,32 @@
+{% load i18n %}
+{% load tz %}
+
+{% if object.error %}
+  {% blocktrans %}
+    <div class="alert alert-warning" role="alert">Something's wrong with the data of this report. Check if the time series are all the same time step.</div>
+  {% endblocktrans %}
+{% else %}
+  {% localtime off %}
+    <dl class="row">
+      <dt class="col-sm-4 text-sm-right">{% trans "Last update" %}</dt>
+      <dd class="col-sm-8">{{ object.last_common_date_pretty }}</dd>
+      <dt class="col-sm-4 text-sm-right">&nbsp;</dt>
+      <dd class="col-sm-8"></dd>
+      {% for syntsg in object.synoptic_timeseries_groups %}
+        <dt class="col-sm-4 text-sm-right">
+          {{ syntsg.title|default:syntsg.timeseries_group.name }}
+          {% if syntsg.subtitle %}
+            ({{ syntsg.subtitle }})
+          {% endif %}
+        </dt>
+        {% with precision=syntsg.timeseries_group.precision|default:0 %}
+          <dd class="col-sm-8">
+            {% if not syntsg.value_is_null %}
+              {{ syntsg.value|floatformat:precision }} {{ syntsg.timeseries_group.unit_of_measurement.symbol }}
+            {% endif %}
+          </dd>
+        {% endwith %}
+      {% endfor %}
+    </dl>
+  {% endlocaltime %}
+{% endif %}

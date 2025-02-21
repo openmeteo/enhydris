@@ -355,6 +355,57 @@ Map settings
    lat is in decimal degrees, positive for north/east, negative for
    west/south.
 
+Synoptic settings
+-----------------
+
+``enhydris.synoptic`` is an included app that adds a page to Enhydris
+that shows current conditions in several stations.  It works by creating
+static files which are then served by the web server.
+:data:`ENHYDRIS_SYNOPTIC_ROOT` indicates where these files shall be
+stored. :data:`ENHYDRIS_SYNOPTIC_URL` is currently not used anywhere,
+but it's better to set it anyway; later versions might start to use it
+without warning.
+
+To use ``enhydris.synoptic``, configure your web server to serve
+:data:`ENHYDRIS_SYNOPTIC_ROOT` at :data:`ENHYDRIS_SYNOPTIC_URL`, then go
+to the admin and setup a view.  After celery generates the report, it
+will be available at ``ENHYDRIS_SYNOPTIC_URL + slug + '/'``, where
+``slug`` is the URL identifier given to the synoptic view.
+
+If you do not want to use it ``enhydris.synoptic``, remove it from
+``INSTALLED_APPS``, and remove the ``do-synoptic`` item from
+``CELERY_BEAT_SCHEDULE``.
+
+Note that it does not check permissions; any synoptic view created will
+be public, regardless whether the timeseries from which it is derived
+are marked top secret.
+
+.. data:: ENHYDRIS_SYNOPTIC_ROOT
+
+   The filesystem path where the generated files will be stored (see
+   above).
+
+.. data:: ENHYDRIS_SYNOPTIC_URL
+
+   The URL where the generated files will be served (see above).
+
+.. data:: ENHYDRIS_SYNOPTIC_STATION_LINK_TARGET
+
+   In the rectangles shown on the map, the station name is a link. This
+   is the link target. The default is ``station/{station.id}/`` (the
+   code will use ``.format()`` to replace ``{station.id}`` with the
+   station id).  This default link target leads to a page created by
+   enhydris-synoptic that has a short report about the station, and
+   charts for the last 24 hours. However, in some installations this is
+   undesirable, and it is preferred for the link to lead to the Enhydris
+   station page—in that case, set
+   :data:`ENHYDRIS_SYNOPTIC_STATION_LINK_TARGET` to
+   ``/stations/{station.id}/`` (if the synoptic domain name is different
+   from the main Enhydris domain name, you need to specify the full
+   URL).  (It would be better to use ``django.urls.reverse()`` here
+   instead of a hardwired URL, but it isn't easy to find a general
+   enough solution for all that.)
+
 Miscellaneous settings
 ----------------------
 

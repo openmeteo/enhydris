@@ -5,7 +5,7 @@ from django.contrib.gis.geos import MultiPolygon, Point, Polygon
 from django.contrib.sites.models import Site
 from django.test import TestCase, override_settings
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris import models
 from enhydris.tests import ClearCacheMixin
@@ -13,57 +13,57 @@ from enhydris.tests import ClearCacheMixin
 
 class GentityFileTestCase(TestCase):
     def test_create(self):
-        station = mommy.make(models.Station)
+        station = baker.make(models.Station)
         gentity_file = models.GentityFile(gentity=station, descr="North view")
         gentity_file.save()
         self.assertEqual(models.GentityFile.objects.first().descr, "North view")
 
     def test_update(self):
-        mommy.make(models.GentityFile)
+        baker.make(models.GentityFile)
         gentity_file = models.GentityFile.objects.first()
         gentity_file.descr = "North view"
         gentity_file.save()
         self.assertEqual(models.GentityFile.objects.first().descr, "North view")
 
     def test_delete(self):
-        mommy.make(models.GentityFile)
+        baker.make(models.GentityFile)
         gentity_file = models.GentityFile.objects.first()
         gentity_file.delete()
         self.assertEqual(models.GentityFile.objects.count(), 0)
 
     def test_str(self):
-        gentity_file = mommy.make(models.GentityFile, descr="North view")
+        gentity_file = baker.make(models.GentityFile, descr="North view")
         self.assertEqual(str(gentity_file), "North view")
 
     def test_related_station(self):
-        station = mommy.make(models.Station)
-        gentity_file = mommy.make(models.GentityFile, gentity=station)
+        station = baker.make(models.Station)
+        gentity_file = baker.make(models.GentityFile, gentity=station)
         self.assertEqual(gentity_file.related_station, station)
 
     def test_related_station_is_empty_when_gentity_is_not_station(self):
-        garea = mommy.make(models.Garea)
-        gentity_file = mommy.make(models.GentityFile, gentity=garea)
+        garea = baker.make(models.Garea)
+        gentity_file = baker.make(models.GentityFile, gentity=garea)
         self.assertIsNone(gentity_file.related_station)
 
 
 class GentityImageTestCase(TestCase):
     def test_str_desc(self):
-        image = mommy.make(models.GentityImage, descr="hello")
+        image = baker.make(models.GentityImage, descr="hello")
         self.assertEqual(str(image), "hello")
 
     def test_str_date(self):
-        image = mommy.make(models.GentityImage, descr="", date=dt.datetime(2021, 1, 22))
+        image = baker.make(models.GentityImage, descr="", date=dt.datetime(2021, 1, 22))
         self.assertEqual(str(image), "2021-01-22")
 
     def test_str_id(self):
-        image = mommy.make(models.GentityImage, descr="", date=None, id=85)
+        image = baker.make(models.GentityImage, descr="", date=None, id=85)
         self.assertEqual(str(image), "85")
 
 
 class GentityEventTestCase(TestCase):
     def test_create(self):
-        station = mommy.make(models.Station)
-        type = mommy.make(models.EventType)
+        station = baker.make(models.Station)
+        type = baker.make(models.EventType)
         gentity_event = models.GentityEvent(
             gentity=station,
             type=type,
@@ -75,38 +75,38 @@ class GentityEventTestCase(TestCase):
         self.assertEqual(models.GentityEvent.objects.first().report, "Station exploded")
 
     def test_update(self):
-        mommy.make(models.GentityEvent)
+        baker.make(models.GentityEvent)
         gentity_event = models.GentityEvent.objects.first()
         gentity_event.report = "Station exploded"
         gentity_event.save()
         self.assertEqual(models.GentityEvent.objects.first().report, "Station exploded")
 
     def test_delete(self):
-        mommy.make(models.GentityEvent)
+        baker.make(models.GentityEvent)
         gentity_event = models.GentityEvent.objects.first()
         gentity_event.delete()
         self.assertEqual(models.GentityEvent.objects.count(), 0)
 
     def test_str(self):
-        gentity_event = mommy.make(
+        gentity_event = baker.make(
             models.GentityEvent, date="2018-11-14", type__descr="Explosion"
         )
         self.assertEqual(str(gentity_event), "2018-11-14 Explosion")
 
     def test_related_station(self):
-        station = mommy.make(models.Station)
-        gentity_event = mommy.make(models.GentityEvent, gentity=station)
+        station = baker.make(models.Station)
+        gentity_event = baker.make(models.GentityEvent, gentity=station)
         self.assertEqual(gentity_event.related_station, station)
 
     def test_related_station_is_empty_when_gentity_is_not_station(self):
-        garea = mommy.make(models.Garea)
-        gentity_event = mommy.make(models.GentityEvent, gentity=garea)
+        garea = baker.make(models.Garea)
+        gentity_event = baker.make(models.GentityEvent, gentity=garea)
         self.assertIsNone(gentity_event.related_station)
 
 
 class GareaTestCase(TestCase):
     def test_create(self):
-        category = mommy.make(models.GareaCategory)
+        category = baker.make(models.GareaCategory)
         garea = models.Garea(
             name="Esgalduin",
             category=category,
@@ -116,26 +116,26 @@ class GareaTestCase(TestCase):
         self.assertEqual(models.Garea.objects.first().name, "Esgalduin")
 
     def test_update(self):
-        mommy.make(models.Garea)
+        baker.make(models.Garea)
         garea = models.Garea.objects.first()
         garea.name = "Esgalduin"
         garea.save()
         self.assertEqual(models.Garea.objects.first().name, "Esgalduin")
 
     def test_delete(self):
-        mommy.make(models.Garea)
+        baker.make(models.Garea)
         garea = models.Garea.objects.first()
         garea.delete()
         self.assertEqual(models.Garea.objects.count(), 0)
 
     def test_str(self):
-        garea = mommy.make(models.Garea, name="Esgalduin")
+        garea = baker.make(models.Garea, name="Esgalduin")
         self.assertEqual(str(garea), "Esgalduin")
 
 
 class StationTestCase(TestCase):
     def test_create(self):
-        person = mommy.make(models.Person)
+        person = baker.make(models.Person)
         station = models.Station(
             owner=person,
             name="Hobbiton",
@@ -145,26 +145,26 @@ class StationTestCase(TestCase):
         self.assertEqual(models.Station.objects.first().name, "Hobbiton")
 
     def test_update(self):
-        mommy.make(models.Station)
+        baker.make(models.Station)
         station = models.Station.objects.first()
         station.name = "Hobbiton"
         station.save()
         self.assertEqual(models.Station.objects.first().name, "Hobbiton")
 
     def test_delete(self):
-        mommy.make(models.Station)
+        baker.make(models.Station)
         station = models.Station.objects.first()
         station.delete()
         self.assertEqual(models.Station.objects.count(), 0)
 
     def test_str(self):
-        station = mommy.make(models.Station, name="Hobbiton")
+        station = baker.make(models.Station, name="Hobbiton")
         self.assertEqual(str(station), "Hobbiton")
 
 
 class StationOriginalCoordinatesTestCase(TestCase):
     def setUp(self):
-        mommy.make(
+        baker.make(
             models.Station,
             name="Komboti",
             geom=Point(x=21.06071, y=39.09518, srid=4326),
@@ -181,7 +181,7 @@ class StationOriginalCoordinatesTestCase(TestCase):
 
 class StationOriginalCoordinatesWithNullSridTestCase(TestCase):
     def setUp(self):
-        mommy.make(
+        baker.make(
             models.Station,
             name="Komboti",
             geom=Point(x=21.06071, y=39.09518, srid=4326),
@@ -199,8 +199,8 @@ class StationOriginalCoordinatesWithNullSridTestCase(TestCase):
 class StationLastUpdateTestCase(ClearCacheMixin, TestCase):
     def setUp(self):
         timezone = ZoneInfo("Etc/GMT-2")
-        self.station = mommy.make(models.Station, display_timezone=timezone)
-        self.timeseries_group = mommy.make(
+        self.station = baker.make(models.Station, display_timezone=timezone)
+        self.timeseries_group = baker.make(
             models.TimeseriesGroup,
             gentity=self.station,
             variable__descr="irrelevant",
@@ -220,7 +220,7 @@ class StationLastUpdateTestCase(ClearCacheMixin, TestCase):
             end_date_utc = dt.datetime(ye, mo, da, ho, mi, tzinfo=dt.timezone.utc)
         else:
             end_date_utc = None
-        timeseries = mommy.make(
+        timeseries = baker.make(
             models.Timeseries, timeseries_group=self.timeseries_group, type=type
         )
         if end_date_utc:
@@ -259,13 +259,13 @@ class StationLastUpdateTestCase(ClearCacheMixin, TestCase):
 class StationSitesTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.site3 = mommy.make(Site, id=3, domain="hello.com", name="hello")
-        cls.site4 = mommy.make(Site, id=4, domain="beautiful.com", name="beautiful")
-        cls.site5 = mommy.make(Site, id=5, domain="world.com", name="world")
+        cls.site3 = baker.make(Site, id=3, domain="hello.com", name="hello")
+        cls.site4 = baker.make(Site, id=4, domain="beautiful.com", name="beautiful")
+        cls.site5 = baker.make(Site, id=5, domain="world.com", name="world")
 
     def test_creating_station_puts_it_in_the_active_site(self):
         station = models.Station(
-            owner=mommy.make(models.Organization),
+            owner=baker.make(models.Organization),
             geom=Point(x=21.06071, y=39.09518, srid=4326),
         )
         station.save()
@@ -276,7 +276,7 @@ class StationSitesTestCase(TestCase):
     def test_updating_station_does_not_touch_its_sites(self):
         # Create station and put it in site5
         station = models.Station(
-            owner=mommy.make(models.Organization),
+            owner=baker.make(models.Organization),
             geom=Point(x=21.06071, y=39.09518, srid=4326),
         )
         station.save()
@@ -294,7 +294,7 @@ class StationSitesTestCase(TestCase):
     @override_settings(ENHYDRIS_SITES_FOR_NEW_STATIONS={5})
     def test_creating_station_puts_it_in_sites_for_new_stations(self):
         station = models.Station(
-            owner=mommy.make(models.Organization),
+            owner=baker.make(models.Organization),
             geom=Point(x=21.06071, y=39.09518, srid=4326),
         )
         station.save()

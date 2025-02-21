@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.sites.models import Site
 from django.db.models import Q, TextField
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 import nested_admin
 import pandas as pd
@@ -267,7 +267,7 @@ class TimeseriesInline(InlinePermissionsMixin, nested_admin.NestedStackedInline)
     classes = ("collapse",)
     extra = 1
     fields = (
-        ("type", "time_step"),
+        ("type", "time_step", "name"),
         "publicly_available",
         ("data", "default_timezone", "replace_or_append"),
     )

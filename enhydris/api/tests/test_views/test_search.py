@@ -5,7 +5,7 @@ from django.contrib.gis.geos import MultiPolygon, Point, Polygon
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
-from model_mommy import mommy
+from model_bakery import baker
 from parler.utils.context import switch_language
 
 from enhydris import models
@@ -62,8 +62,8 @@ class SearchByNameTestCase(SearchTestCaseBase, APITestCase):
     search_result = "Hobbiton"
 
     def _create_models(self):
-        mommy.make(models.Station, name="Hobbiton")
-        mommy.make(models.Station, name="Sélune")
+        baker.make(models.Station, name="Hobbiton")
+        baker.make(models.Station, name="Sélune")
 
 
 class SearchByNameWithAccentsTestCase(SearchByNameTestCase):
@@ -76,8 +76,8 @@ class SearchByShortNameTestCase(SearchTestCaseBase, APITestCase):
     search_result = "1"
 
     def _create_models(self):
-        mommy.make(models.Station, code="Hobbiton", name="1")
-        mommy.make(models.Station, code="Sélune", name="2")
+        baker.make(models.Station, code="Hobbiton", name="1")
+        baker.make(models.Station, code="Sélune", name="2")
 
 
 class SearchByShortNameWithAccentsTestCase(SearchByShortNameTestCase):
@@ -90,8 +90,8 @@ class SearchByRemarksTestCase(SearchTestCaseBase, APITestCase):
     search_result = "Hobbiton"
 
     def _create_models(self):
-        mommy.make(models.Station, remarks="Very important station", name="Hobbiton")
-        mommy.make(models.Station, remarks="Station très important", name="Rivendell")
+        baker.make(models.Station, remarks="Very important station", name="Hobbiton")
+        baker.make(models.Station, remarks="Station très important", name="Rivendell")
 
 
 class SearchByRemarksWithAccentsTestCase(SearchByRemarksTestCase):
@@ -114,8 +114,8 @@ class SearchByVariableTestCase(SearchTestCaseBase, APITestCase):
     search_result = "Hobbiton"
 
     def _create_models(self):
-        station1 = mommy.make(models.Station, name="Hobbiton")
-        station2 = mommy.make(models.Station, name="Mithlond")
+        station1 = baker.make(models.Station, name="Hobbiton")
+        station2 = baker.make(models.Station, name="Mithlond")
         self._create_timeseries(station1, "Rain", "Pluie")
         self._create_timeseries(station2, "Humidity", "Humidité")
 
@@ -126,7 +126,7 @@ class SearchByVariableTestCase(SearchTestCaseBase, APITestCase):
         with switch_language(variable, "fr"):
             variable.descr = var_fr
         variable.save()
-        mommy.make(
+        baker.make(
             models.Timeseries,
             timeseries_group__gentity=station,
             timeseries_group__variable=variable,
@@ -151,9 +151,9 @@ class SearchByTsOnlyTestCase(SearchTestCaseBase, APITestCase):
     search_result = "Hobbiton"
 
     def _create_models(self):
-        station1 = mommy.make(models.Station, name="Hobbiton")
-        mommy.make(models.TimeseriesGroup, gentity=station1)
-        mommy.make(models.Station, name="Mithlond")
+        station1 = baker.make(models.Station, name="Hobbiton")
+        baker.make(models.TimeseriesGroup, gentity=station1)
+        baker.make(models.Station, name="Mithlond")
 
 
 class SearchInTimeseriesGroupRemarksTestCase(SearchTestCaseBase, APITestCase):
@@ -161,14 +161,14 @@ class SearchInTimeseriesGroupRemarksTestCase(SearchTestCaseBase, APITestCase):
     search_result = "Mithlond"
 
     def _create_models(self):
-        station1 = mommy.make(models.Station, name="Hobbiton")
-        mommy.make(
+        station1 = baker.make(models.Station, name="Hobbiton")
+        baker.make(
             models.TimeseriesGroup,
             gentity=station1,
             remarks="Ce group de séries chronologiques est vraiment important",
         )
-        station2 = mommy.make(models.Station, name="Mithlond")
-        mommy.make(
+        station2 = baker.make(models.Station, name="Mithlond")
+        baker.make(
             models.TimeseriesGroup,
             gentity=station2,
             remarks="This time series group is really important",
@@ -187,10 +187,10 @@ class SearchByBboxTestCase(SearchTestCaseBase, APITestCase):
     search_result = "Komboti"
 
     def _create_models(self):
-        mommy.make(
+        baker.make(
             models.Station, geom=Point(x=21.0607, y=39.0952, srid=4326), name="Komboti"
         )
-        mommy.make(
+        baker.make(
             models.Station, geom=Point(x=20.7085, y=38.8336, srid=4326), name="Lefkada"
         )
 
@@ -200,14 +200,14 @@ class SearchByInTestCase(SearchTestCaseBase, APITestCase):
     search_result = "Sarn Ford"
 
     def _create_models(self):
-        mommy.make(
+        baker.make(
             models.Garea,
             geom=MultiPolygon(Polygon(((30, 20), (45, 40), (10, 40), (30, 20)))),
             name="Baranduin",
             code="ME07",
         )
-        mommy.make(models.Station, geom=Point(x=35, y=20), name="Sarn Ford")
-        mommy.make(models.Station, geom=Point(x=5, y=20), name="Mithlond")
+        baker.make(models.Station, geom=Point(x=35, y=20), name="Sarn Ford")
+        baker.make(models.Station, geom=Point(x=5, y=20), name="Mithlond")
 
 
 class SearchByInUsingCodeTestCase(SearchByInTestCase, APITestCase):

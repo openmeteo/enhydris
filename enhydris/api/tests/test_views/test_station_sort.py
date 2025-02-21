@@ -3,7 +3,7 @@ from unittest.mock import patch
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris import models
 
@@ -11,8 +11,8 @@ from enhydris import models
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationSortDefaultTestCase(APITestCase):
     def setUp(self):
-        mommy.make(models.Station, name="Rivendell")
-        mommy.make(models.Station, name="Hobbiton")
+        baker.make(models.Station, name="Rivendell")
+        baker.make(models.Station, name="Hobbiton")
         self.response = self.client.get("/api/stations/")
 
     def test_status_code(self):
@@ -28,8 +28,8 @@ class StationSortDefaultTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationSortByReverseNameTestCase(APITestCase):
     def setUp(self):
-        mommy.make(models.Station, name="Rivendell")
-        mommy.make(models.Station, name="Hobbiton")
+        baker.make(models.Station, name="Rivendell")
+        baker.make(models.Station, name="Hobbiton")
         self.response = self.client.get("/api/stations/?sort=-name")
 
     def test_status_code(self):

@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 from django.test import TestCase
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris.models import Station, TimeseriesGroup
 from enhydris.telemetry import TelemetryError
@@ -198,10 +198,10 @@ class ChooseStationFormTestCase(TestCase):
 class ChooseSensorFormTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.station = mommy.make(Station)
-        cls.tsg1 = mommy.make(TimeseriesGroup, gentity=cls.station, name="hello1")
-        cls.tsg2 = mommy.make(TimeseriesGroup, gentity=cls.station, name="hello2")
-        cls.tsg3 = mommy.make(TimeseriesGroup, gentity=cls.station, name="hello3")
+        cls.station = baker.make(Station)
+        cls.tsg1 = baker.make(TimeseriesGroup, gentity=cls.station, name="hello1")
+        cls.tsg2 = baker.make(TimeseriesGroup, gentity=cls.station, name="hello2")
+        cls.tsg3 = baker.make(TimeseriesGroup, gentity=cls.station, name="hello3")
 
     def setUp(self):
         TestTelemetryAPIClient.reset_mocks()

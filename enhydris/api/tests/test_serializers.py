@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.utils import translation
 from rest_framework.test import APITestCase
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris import models
 from enhydris.api.serializers import (
@@ -20,11 +20,11 @@ _adate = dt.datetime(2022, 1, 25, 12, 30, tzinfo=_eet)
 
 class StationSerializerTestCase(APITestCase):
     def setUp(self):
-        station = mommy.make(
+        station = baker.make(
             models.Station,
             name="hello",
             overseer="Bilbo Baggins",
-            maintainers=[mommy.make(User, username="Bilbo")],
+            maintainers=[baker.make(User, username="Bilbo")],
         )
         self.serializer = StationSerializer(station)
 
@@ -51,7 +51,7 @@ class StationSerializerTestCase(APITestCase):
 
 class TimeseriesGroupSerializerTestCase(APITestCase):
     def setUp(self):
-        timeseries_group = mommy.make(
+        timeseries_group = baker.make(
             models.TimeseriesGroup,
             name="My time series group",
         )
@@ -64,7 +64,7 @@ class TimeseriesGroupSerializerTestCase(APITestCase):
 class TimeseriesSerializerTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.timeseries_group = mommy.make(models.TimeseriesGroup)
+        cls.timeseries_group = baker.make(models.TimeseriesGroup)
 
     def test_type_serialization_for_initial(self):
         serializer = TimeseriesSerializer(models.Timeseries(type=100))
@@ -105,7 +105,7 @@ class TimeseriesSerializerTestCase(APITestCase):
 class TimeseriesSerializerUniqueTypeTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.timeseries_group = mommy.make(
+        cls.timeseries_group = baker.make(
             models.TimeseriesGroup,
             variable__descr="Temperature",
         )
@@ -124,7 +124,7 @@ class TimeseriesSerializerUniqueTypeTestCase(APITestCase):
 
     def _create_timeseries(self, type):
         """Create a time series of the specified type with empty time step."""
-        self.timeseries = mommy.make(
+        self.timeseries = baker.make(
             models.Timeseries,
             timeseries_group=self.timeseries_group,
             type=type,

@@ -29,7 +29,7 @@ def check_time_step(time_step):
 
 def _check_nonempty_time_step(time_step):
     number, unit = _parse_time_step(time_step)
-    if unit not in ("min", "H", "D", "M", "Y"):
+    if unit not in ("min", "H", "D", "M", "Y", "h"):
         raise ValueError('"{}" is not a valid time step'.format(time_step))
 
 
@@ -96,6 +96,17 @@ class Timeseries(models.Model):
         ),
         verbose_name=_("Time step"),
     )
+    name = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        help_text=_(
+            "You can leave this empty, unless you have many time series for this group "
+            "with the same type and time step (for example, if you have a time series "
+            "aggregated on the mean and another aggregated on the max value)."
+        ),
+        verbose_name=_("Name"),
+    )
     publicly_available = models.BooleanField(
         default=get_default_publicly_available,
         verbose_name=_("Publicly available"),
@@ -109,7 +120,7 @@ class Timeseries(models.Model):
         verbose_name = pgettext_lazy("Singular", "Time series")
         verbose_name_plural = pgettext_lazy("Plural", "Time series")
         ordering = ("type",)
-        unique_together = ["timeseries_group", "type", "time_step"]
+        unique_together = ["timeseries_group", "type", "time_step", "name"]
         constraints = [
             models.UniqueConstraint(
                 fields=["timeseries_group"],
@@ -135,7 +146,10 @@ class Timeseries(models.Model):
                 return self.timeseriesrecord_set.earliest().timestamp.astimezone(
                     ZoneInfo(self.timeseries_group.gentity.display_timezone)
                 )
-            except TimeseriesRecord.DoesNotExist:
+            except (TimeseriesRecord.DoesNotExist, ValueError):
+                # The ValueError above is for the case where the Timeseries object does
+                # not have a primary key yet (has not been saved), which causes a
+                # problem in Django>=4.
                 return None
 
         return cache.get_or_set(f"timeseries_start_date_{self.id}", get_start_date)
@@ -147,7 +161,10 @@ class Timeseries(models.Model):
                 return self.timeseriesrecord_set.latest().timestamp.astimezone(
                     ZoneInfo(self.timeseries_group.gentity.display_timezone)
                 )
-            except TimeseriesRecord.DoesNotExist:
+            except (TimeseriesRecord.DoesNotExist, ValueError):
+                # The ValueError above is for the case where the Timeseries object does
+                # not have a primary key yet (has not been saved), which causes a
+                # problem in Django>=4.
                 return None
 
         return cache.get_or_set(f"timeseries_end_date_{self.id}", get_end_date)
@@ -209,8 +226,17 @@ class Timeseries(models.Model):
             raise DataNotInCache()
         if self.start_date is None:
             return data  # Data should be empty in that case; just return it
-        start_date = max(start_date, self.start_date).astimezone(data.index.tzinfo)
-        end_date = min(end_date, self.end_date).astimezone(data.index.tzinfo)
+        try:
+            start_date = max(start_date, self.start_date).astimezone(data.index.tzinfo)
+            end_date = min(end_date, self.end_date).astimezone(data.index.tzinfo)
+        except TypeError:
+            # A TypeError will occur if self.start_date or self.end_date above is none.
+            # This should normally not happen, because self.start_date had already
+            # been checked immediately before, and self.end_date is not none whenever
+            # self.start_date is not none. However there's a race condition where
+            # another thread or process could have updated the time series (and
+            # invalidated the cache) in between these statements.
+            raise DataNotInCache()
         if data.index.min() > start_date or data.index.max() < end_date:
             raise DataNotInCache()
         return data.loc[start_date:end_date]
@@ -220,7 +246,7 @@ class Timeseries(models.Model):
             cursor.execute(
                 """
                 SELECT STRING_AGG(
-                    TO_CHAR(timestamp AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:MI')
+                    TO_CHAR(timestamp AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:MI:SS')
                         || ','
                         || CASE WHEN value is NULL THEN DOUBLE PRECISION 'NaN'
                            ELSE value END
@@ -307,10 +333,13 @@ class Timeseries(models.Model):
         cache.delete_many(cached_property_names)
 
     def __str__(self):
-        result = self.get_type_display()
+        type = self.get_type_display()
+        explanation = ""
         if self.type == self.AGGREGATED:
-            result = f"{result} ({self.time_step})"
-        return result
+            explanation = f" ({self.time_step} {self.name})"
+        elif self.name:
+            explanation = f" ({self.name})"
+        return f"{type}{explanation}"
 
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         check_time_step(self.time_step)
@@ -319,13 +348,14 @@ class Timeseries(models.Model):
 
 
 class TimeseriesRecord(models.Model):
-    # Ugly primary key hack.
+    # Ugly primary key hack - FIX ME in Django 5.2.
     # Django does not allow composite primary keys, whereas timescaledb can't work
     # without them. Our composite primary key in this case is (timeseries, timestamp).
     # What we do is set managed=False, so that Django won't create the table itself;
     # we create it with migrations.RunSQL(). We also set "primary_key=True" in one of
     # the fields. While technically this is wrong, it fools Django into not expecting
-    # an "id" field to exist, and it doesn't affect querying functionality.
+    # an "id" field to exist, and it doesn't affect querying functionality (except in
+    # one case in autoprocess.models.Aggregation._get_start_date(), see comment there).
     timeseries = models.ForeignKey(Timeseries, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(primary_key=True, verbose_name=_("Timestamp"))
     value = models.FloatField(blank=True, null=True, verbose_name=_("Value"))

@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris import models
 
@@ -10,8 +10,8 @@ from enhydris import models
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesGroupListTestCase(APITestCase):
     def setUp(self):
-        self.station = mommy.make(models.Station, name="Hobbiton")
-        self.timeseries_group = mommy.make(
+        self.station = baker.make(models.Station, name="Hobbiton")
+        self.timeseries_group = baker.make(
             models.TimeseriesGroup, name="Temperature", gentity=self.station
         )
         self.response = self.client.get(
@@ -32,13 +32,13 @@ class TimeseriesGroupListTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesGroupPostTestCase(APITestCase):
     def setUp(self):
-        self.user1 = mommy.make(User, is_active=True, is_superuser=False)
-        self.user2 = mommy.make(User, is_active=True, is_superuser=False)
-        self.variable = mommy.make(models.Variable, descr="Temperature")
-        self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
-        self.station = mommy.make(models.Station, creator=self.user1)
-        self.station2 = mommy.make(models.Station, creator=self.user1)
-        self.timeseries_group = mommy.make(models.TimeseriesGroup, gentity=self.station)
+        self.user1 = baker.make(User, is_active=True, is_superuser=False)
+        self.user2 = baker.make(User, is_active=True, is_superuser=False)
+        self.variable = baker.make(models.Variable, descr="Temperature")
+        self.unit_of_measurement = baker.make(models.UnitOfMeasurement)
+        self.station = baker.make(models.Station, creator=self.user1)
+        self.station2 = baker.make(models.Station, creator=self.user1)
+        self.timeseries_group = baker.make(models.TimeseriesGroup, gentity=self.station)
 
     def _create_timeseries_group(self, **kwargs):
         return self.client.post(

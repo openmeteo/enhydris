@@ -1,4 +1,5 @@
 import datetime as dt
+import logging
 import os.path
 import subprocess
 import sys
@@ -8,7 +9,7 @@ from traceback import print_tb
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import IntegrityError, models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 import iso8601
 
@@ -153,16 +154,35 @@ class TelemetryLogMessage(models.Model):
     @classmethod
     def log(cls, telemetry):
         """Logs the current exception."""
+        cls._exception_name = sys.exc_info()[0].__name__
+        cls._message = str(sys.exc_info()[1])
+        cls._traceback = cls._get_formatted_traceback(sys.exc_info()[2])
+        cls._enhydris_commit_id = cls.get_enhydris_commit_id_from_git()
+        cls._telemetry = telemetry
+
+        self = cls._log_to_db()
+        self._log_to_logger()
+
+    @staticmethod
+    def _get_formatted_traceback(traceback_info):
         formatted_traceback = StringIO()
-        print_tb(sys.exc_info()[2], file=formatted_traceback)
-        cls.objects.create(
-            telemetry=telemetry,
-            exception_name=sys.exc_info()[0].__name__,
-            message=str(sys.exc_info()[1]),
-            traceback=formatted_traceback.getvalue(),
+        print_tb(traceback_info, file=formatted_traceback)
+        return formatted_traceback.getvalue()
+
+    @classmethod
+    def _log_to_db(cls):
+        return cls.objects.create(
+            telemetry=cls._telemetry,
+            exception_name=cls._exception_name,
+            message=cls._message,
+            traceback=cls._traceback,
             enhydris_version=enhydris.__version__,
-            enhydris_commit_id=cls.get_enhydris_commit_id_from_git(),
+            enhydris_commit_id=cls._enhydris_commit_id,
         )
+
+    def _log_to_logger(self):
+        logging.getLogger("telemetry").error(self.get_full_message())
+        logging.getLogger("telemetry").debug(self.traceback + self.get_full_message())
 
     @classmethod
     def get_enhydris_commit_id_from_git(cls):

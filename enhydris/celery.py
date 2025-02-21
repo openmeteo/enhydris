@@ -1,7 +1,6 @@
-# Celery is used both by Enhydris and by some add-on apps like enhydris-autoprocess and
-# enhydris-synoptic. To simplify setup and use a single set of celery workers for all
-# such apps, "tasks.py" (of Enhydris or of the add-on) can import the celery "app" from
-# this file, like this:
+# Celery is used by Enhydris and can also be used by add-on apps.  To simplify setup and
+# use a single set of celery workers for all such apps, "tasks.py" (of Enhydris or of
+# the add-on) can import the celery "app" from this file, like this:
 #
 #     from enhydris.celery import app
 #

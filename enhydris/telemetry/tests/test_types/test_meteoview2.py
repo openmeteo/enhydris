@@ -12,6 +12,7 @@ from enhydris.telemetry import TelemetryError
 from enhydris.telemetry.models import Telemetry
 from enhydris.telemetry.tests.test_models import TelemetryFetchTestCaseBase
 from enhydris.telemetry.types.meteoview2 import TelemetryAPIClient
+from enhydris.tests import OverrideLoggingMixin
 
 
 class ApiUrlTestCase(TestCase):
@@ -178,7 +179,9 @@ class GetSensorsTestCase(LoggedOnTestCaseBase):
         }
 
 
-class TelemetryFetchIgnoresTimeZoneTestCase(TelemetryFetchTestCaseBase):
+class TelemetryFetchIgnoresTimeZoneTestCase(
+    OverrideLoggingMixin, TelemetryFetchTestCaseBase
+):
     """Test that timeseries_end_date is always naive
 
     When records already exist in the timeseries before calling fetch(), the
@@ -202,6 +205,7 @@ class TelemetryFetchIgnoresTimeZoneTestCase(TelemetryFetchTestCaseBase):
             StringIO("2022-06-14 08:00,42.1,\n"), default_timezone="Etc/GMT"
         )
         self.telemetry.data_timezone = "Europe/Athens"
+        self._override_logging_config()
 
     @patch("enhydris.telemetry.types.meteoview2.requests.request")
     def test_ignores_timezone(self, mock_request):

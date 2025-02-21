@@ -394,6 +394,16 @@ Time series and related models
       it contains an appropriate time step as a `pandas "frequency"
       string`_, e.g.  "10min", "H", "M", "Y".
 
+   .. attribute:: enhydris.models.Timeseries.name
+
+      A name for the time series. Very often this is not needed and can
+      be left empty—the name of the time series group and the
+      :attr:`type` and :attr:`time_step` of the time series suffice.
+      Sometimes, however, there may be different time series with the
+      same :attr:`type` and :attr:`time_step`; for example, an
+      aggregated time series with the mean and another one with the max
+      value.
+
    .. attribute:: enhydris.models.Timeseries.publicly_available
 
       Specifies whether anonymous users can download the time series
@@ -477,6 +487,90 @@ Time series and related models
 
       Returns the number of records inserted (which should be the same
       as the number of records in of ``htimeseries``).
+
+Autoprocess
+-----------
+
+``enhydris.autoprocess`` is an app that automatically processes time
+series to produce new time series. For example, it performs range
+checking, saving a new time series that is range checked.  The app is
+installed by default. If you don't need it, remove it from
+``INSTALLED_APPS``.  When it is installed, in the station page in the
+admin, under "Timeseries Groups", there are some additional options,
+like Range Check, Time Consistency Check, Curve Interpolations and
+Aggregations.
+
+You have a meteorological station called "Hobbiton". It measures
+temperature. Because of sensor, transmission, or other errors,
+sometimes the temperature is wrong—for example, 280 °C. What you want
+to do (and what this app does, among other things) is delete these
+measurements automatically as they come in. In this case, assuming
+that the low and high all-time temperature records in Hobbiton are -18
+and +38 °C, you might decide that anything below -25 or above +50 °C
+(the "hard" limits) is an error, whereas anything below -20 or above
++40 °C (the "soft" limits) is a suspect value. In that case, you
+configure ``enhydris.autoprocess`` with the soft and hard limits. Each
+time data is uploaded, an event is triggered, resulting in an
+asynchronous process processing the initial uploaded data, deleting the
+values outside the hard limits, flagging as suspect the values outside
+the soft limits, and saving the result to the "checked" time series of
+the time series group.
+
+(More specifically, ``enhydris.autoprocess`` uses the ``post_save``
+Django signal for :class:`enhydris.Timeseries` to trigger a Celery task
+that does the auto processing—see ``apps.py`` and ``tasks.py``.)
+
+Range checking is only one of the ways in which a time series can be
+auto-processed—there's also aggregation (e.g. deriving hourly from
+ten-minute time series) and curve interpolation (e.g. deriving discharge
+from stage, or estimating the air speed at a height of 2 m above ground
+when the wind sensor is at a different height). The name we use for all
+these together (i.e. checking, aggregation, interpolation) is "auto
+process". Technically, :class:`AutoProcess` is the super class and it
+has some subclasses such as :class:`Checks`, :class:`Aggregation` and
+:class:`CurveInterpolation`. These are implemented using Django's
+multi-table inheritance. (The checking subclass is called
+:class:`Checks` because there can be many checks—range checking, time
+consistency checking, etc; these are performed one after the other and
+they result in the "checked" time series.)
+
+.. class:: AutoProcess
+
+   .. attribute:: timeseries_group
+
+      The time series group to which this auto-process applies.
+
+   .. method:: execute()
+
+      Performs the auto-processing. It retrieves the new part of the
+      source time series (i.e. the part that starts after the last date
+      of the target time series) and calls the
+      :meth:`process_timeseries` method.
+
+   .. attribute:: source_timeseries
+
+      This is a property; the source time series of the time series
+      group for this auto-process. It depends on the kind of
+      auto-process: for :class:`Checks` it is the initial time series;
+      for :class:`Aggregation` and :class:`CurveInterpolation` it is the
+      checked time series if it exists, or the initial otherwise.  If no
+      suitable time series exists, it is created.
+
+   .. attribute:: target_timeseries
+
+      This is a property; the target time series of the time series
+      group for this auto-process. It depends on the kind of
+      auto-process: for :class:`Checks` it is the checked time series;
+      for :class:`Aggregation` it is the aggregated time series with the
+      target time step; for :class:`CurveInterpolation` it is the
+      initial time series of the target time series group
+      (:class:`CurveInterpolation` has an additional
+      :attr:`target_timeseries_group` attribute). The target time series
+      is created if it does not exist.
+
+   .. method:: process_timeseries()
+
+      Performs the actual processing.
 
 .. _htimeseries: https://github.com/openmeteo/htimeseries
 .. _text format: https://github.com/openmeteo/htimeseries#text-format
