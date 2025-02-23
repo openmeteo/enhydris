@@ -23,6 +23,7 @@ We use django-rules to implement this. StationAdmin (and possibly other ModelAdm
 subclasses) inherits from rules.contrib.admin.ObjectPermissionsModelAdmin rather than
 django.contrib.admin.ModelAdmin so that they make use of these permissions.
 """
+
 from django.conf import settings
 from django.contrib.auth.backends import ModelBackend
 

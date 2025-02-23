@@ -20,7 +20,10 @@ def fetch_all_telemetry_data():
 
 @app.task(bind=True, soft_time_limit=FETCH_TIMEOUT, time_limit=FETCH_TIMEOUT + 10)
 def fetch_telemetry_data(self, telemetry_id):
-    telemetry = Telemetry.objects.get(id=telemetry_id)
+    try:
+        telemetry = Telemetry.objects.get(id=telemetry_id)
+    except Telemetry.DoesNotExist:
+        return
     lock_id = f"telemetry-{telemetry_id}"
     acquired_lock = cache.add(lock_id, self.app.oid, LOCK_TIMEOUT)
     if acquired_lock:

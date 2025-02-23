@@ -10,7 +10,7 @@ from django.test import TestCase, override_settings
 
 from bs4 import BeautifulSoup
 from django_selenium_clean import PageElement
-from model_mommy import mommy
+from model_bakery import baker
 from selenium.webdriver.common.by import By
 
 from enhydris.models import GentityFile, GentityImage, Organization, Station
@@ -21,7 +21,7 @@ from enhydris.tests import SeleniumTestCase, TimeseriesDataMixin
 class StationListTestCase(TestCase):
     @staticmethod
     def _create_station(name, x, y, srid=4326, original_srid=4326):
-        mommy.make(
+        baker.make(
             Station,
             name=name,
             geom=Point(x=x, y=y, srid=srid),
@@ -86,11 +86,11 @@ class StationListTestCase(TestCase):
 class StationListSitesTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        mommy.make(Site, id=1, domain="middleearth.com", name="Middle Earth")
-        site2 = mommy.make(Site, id=2, domain="realearth.com", name="Real Earth")
-        mommy.make(Station, name="Hobbiton")
-        mommy.make(Station, name="Rivendell")
-        komboti = mommy.make(Station, name="Komboti")
+        baker.make(Site, id=1, domain="middleearth.com", name="Middle Earth")
+        site2 = baker.make(Site, id=2, domain="realearth.com", name="Real Earth")
+        baker.make(Station, name="Hobbiton")
+        baker.make(Station, name="Rivendell")
+        komboti = baker.make(Station, name="Komboti")
         komboti.sites.set({site2})
 
     def test_list_contains_hobbiton(self):
@@ -125,12 +125,12 @@ class StationDetailTestCase(TestCase, TimeseriesDataMixin):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationDetailImagesTestCase(TestCase):
     def setUp(self):
-        self.station = mommy.make(Station)
+        self.station = baker.make(Station)
         self.image1 = self._create_image(descr="a", content="/image1.png")
         self.image2 = self._create_image(descr="b", content="/image2.png")
 
     def _create_image(self, descr, content):
-        return mommy.make(
+        return baker.make(
             GentityImage, gentity=self.station, descr=descr, content=content
         )
 
@@ -161,7 +161,7 @@ class StationDetailImagesTestCase(TestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationDetailPeriodOfOperationTestCase(TestCase):
     def setUp(self):
-        self.station = mommy.make(
+        self.station = baker.make(
             Station,
             name="Komboti",
             geom=Point(x=21.00000, y=39.00000, srid=4326),
@@ -206,25 +206,25 @@ class StationDetailPeriodOfOperationTestCase(TestCase):
 class StationDetailSitesTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        mommy.make(Site, id=1, domain="middleearth.com", name="Middle Earth")
-        mommy.make(Site, id=2, domain="realearth.com", name="Real Earth")
-        mommy.make(Station, id=42, name="Hobbiton")
+        baker.make(Site, id=1, domain="middleearth.com", name="Middle Earth")
+        baker.make(Site, id=2, domain="realearth.com", name="Real Earth")
+        baker.make(Station, id=42, name="Hobbiton")
 
     def test_hobbiton_detail(self):
         response = self.client.get("/stations/42/")
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     @override_settings(SITE_ID=2)
     def test_hobbiton_detail_unavailable_on_site_2(self):
         response = self.client.get("/stations/42/")
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
 
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class GentityFileDownloadLinkTestCase(TestCase):
     def setUp(self):
-        self.station = mommy.make(Station, name="Komboti")
-        self.gentityfile = mommy.make(GentityFile, gentity=self.station)
+        self.station = baker.make(Station, name="Komboti")
+        self.gentityfile = baker.make(GentityFile, gentity=self.station)
         self.link = (
             '<a href="/api/stations/{}/files/{}/content/" aria-label="Download">'
         ).format(self.station.id, self.gentityfile.id)
@@ -267,19 +267,19 @@ class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
     tharbad = PageElement(By.XPATH, '//h3//a[text()="Tharbad"]')
 
     def setUp(self):
-        mommy.make(
+        baker.make(
             Station,
             name="Komboti",
             geom=Point(x=21.06071, y=39.09518, srid=4326),
             original_srid=4326,
         )
-        mommy.make(
+        baker.make(
             Station,
             name="Agios Athanasios",
             geom=Point(x=21.60121, y=39.22440, srid=4326),
             original_srid=4326,
         )
-        mommy.make(
+        baker.make(
             Station,
             name="Tharbad",
             geom=Point(x=-176.48368, y=0.19377, srid=4326),
@@ -316,13 +316,13 @@ class ShowOnlySearchedForStationsOnMapTestCase(SeleniumTestCase):
     markers = PageElement(By.CSS_SELECTOR, ".leaflet-marker-pane")
 
     def setUp(self):
-        self.organization = mommy.make(Organization, name="Assassination Bureau, Ltd")
+        self.organization = baker.make(Organization, name="Assassination Bureau, Ltd")
         self._make_station("West", 23.0, 38.0)
         self._make_station("Middle", 23.1, 38.0)
         self._make_station("East", 23.2, 38.0)
 
     def _make_station(self, name, lon, lat):
-        mommy.make(
+        baker.make(
             Station,
             name=name,
             geom=Point(x=lon, y=lat, srid=4326),
@@ -357,13 +357,13 @@ class ShowStationOnStationDetailMapTestCase(SeleniumTestCase):
     markers = PageElement(By.CSS_SELECTOR, ".leaflet-marker-pane")
 
     def setUp(self):
-        self.organization = mommy.make(Organization, name="Assassination Bureau, Ltd")
+        self.organization = baker.make(Organization, name="Assassination Bureau, Ltd")
         self._make_station("West", 23.0, 38.0)
         self.station = self._make_station("Middle", 23.001, 38.0)
         self._make_station("East", 23.002, 38.0)
 
     def _make_station(self, name, lon, lat):
-        return mommy.make(
+        return baker.make(
             Station,
             name=name,
             geom=Point(x=lon, y=lat, srid=4326),

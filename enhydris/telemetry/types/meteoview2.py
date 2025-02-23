@@ -3,7 +3,7 @@ import json
 from io import StringIO
 from zoneinfo import ZoneInfo
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 import requests
 

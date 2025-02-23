@@ -12,7 +12,7 @@ import iso8601
 import numpy as np
 import pandas as pd
 from htimeseries import HTimeseries
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris import models
 from enhydris.tests import TimeseriesDataMixin
@@ -21,7 +21,7 @@ from enhydris.tests import TimeseriesDataMixin
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class Tsdata404TestCase(APITestCase):
     def setUp(self):
-        self.station = mommy.make(models.Station)
+        self.station = baker.make(models.Station)
 
     def test_get_nonexistent_timeseries(self):
         response = self.client.get(
@@ -42,13 +42,13 @@ class Tsdata404TestCase(APITestCase):
 class TsdataGetPermissionsTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        station = mommy.make(models.Station, display_timezone="Etc/GMT-2")
-        timeseries_group = mommy.make(
+        station = baker.make(models.Station, display_timezone="Etc/GMT-2")
+        timeseries_group = baker.make(
             models.TimeseriesGroup,
             gentity=station,
             precision=2,
         )
-        cls.timeseries = mommy.make(
+        cls.timeseries = baker.make(
             models.Timeseries,
             timeseries_group=timeseries_group,
             publicly_available=False,
@@ -69,7 +69,7 @@ class TsdataGetPermissionsTestCase(APITestCase):
         self.assertEqual(self.response.status_code, 200)
 
     def test_logged_on_user_is_ok(self, m):
-        self.user1 = mommy.make(User, is_active=True, is_superuser=False)
+        self.user1 = baker.make(User, is_active=True, is_superuser=False)
         self.client.force_authenticate(user=self.user1)
         self.response = self.client.get(self.url)
         self.assertEqual(self.response.status_code, 200)
@@ -194,12 +194,12 @@ class TsdataPostTestCase(APITestCase):
     @patch("enhydris.models.Timeseries.append_data")
     def setUp(self, m):
         self.mock_append_data = m
-        user = mommy.make(User, username="admin", is_superuser=True)
-        station = mommy.make(models.Station)
-        timeseries_group = mommy.make(
+        user = baker.make(User, username="admin", is_superuser=True)
+        station = baker.make(models.Station)
+        timeseries_group = baker.make(
             models.TimeseriesGroup, gentity=station, precision=2
         )
-        timeseries = mommy.make(models.Timeseries, timeseries_group=timeseries_group)
+        timeseries = baker.make(models.Timeseries, timeseries_group=timeseries_group)
         self.client.force_authenticate(user=user)
         self.response = self.client.post(
             f"/api/stations/{station.id}/timeseriesgroups/{timeseries_group.id}"
@@ -234,13 +234,13 @@ class TsdataPostTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataPostAuthorizationTestCase(APITestCase):
     def setUp(self):
-        self.user1 = mommy.make(User, is_active=True, is_superuser=False)
-        self.user2 = mommy.make(User, is_active=True, is_superuser=False)
-        self.station = mommy.make(models.Station, creator=self.user1)
-        self.timeseries_group = mommy.make(
+        self.user1 = baker.make(User, is_active=True, is_superuser=False)
+        self.user2 = baker.make(User, is_active=True, is_superuser=False)
+        self.station = baker.make(models.Station, creator=self.user1)
+        self.timeseries_group = baker.make(
             models.TimeseriesGroup, gentity=self.station, precision=2
         )
-        self.timeseries = mommy.make(
+        self.timeseries = baker.make(
             models.Timeseries, timeseries_group=self.timeseries_group
         )
 
@@ -276,12 +276,12 @@ class TsdataPostGarbageTestCase(APITestCase):
     @patch("enhydris.models.Timeseries.append_data", side_effect=iso8601.ParseError)
     def setUp(self, m):
         self.mock_append_data = m
-        user = mommy.make(User, username="admin", is_superuser=True)
-        station = mommy.make(models.Station)
-        timeseries_group = mommy.make(
+        user = baker.make(User, username="admin", is_superuser=True)
+        station = baker.make(models.Station)
+        timeseries_group = baker.make(
             models.TimeseriesGroup, gentity=station, precision=2
         )
-        timeseries = mommy.make(models.Timeseries, timeseries_group=timeseries_group)
+        timeseries = baker.make(models.Timeseries, timeseries_group=timeseries_group)
         self.client.force_authenticate(user=user)
         self.response = self.client.post(
             f"/api/stations/{station.id}/timeseriesgroups/{timeseries_group.id}"
@@ -303,10 +303,10 @@ class TsdataPostGarbageTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataPostDuplicateTimestampsTestCase(APITestCase):
     def setUp(self):
-        user = mommy.make(User, username="admin", is_superuser=True)
-        station = mommy.make(models.Station)
-        timeseries_group = mommy.make(models.TimeseriesGroup, gentity=station)
-        timeseries = mommy.make(models.Timeseries, timeseries_group=timeseries_group)
+        user = baker.make(User, username="admin", is_superuser=True)
+        station = baker.make(models.Station)
+        timeseries_group = baker.make(models.TimeseriesGroup, gentity=station)
+        timeseries = baker.make(models.Timeseries, timeseries_group=timeseries_group)
         self.client.force_authenticate(user=user)
         self.response = self.client.post(
             f"/api/stations/{station.id}/timeseriesgroups/{timeseries_group.id}"
@@ -330,11 +330,11 @@ class TsdataPostDuplicateTimestampsTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataStartAndEndDateTestCase(APITestCase):
     def setUp(self):
-        self.station = mommy.make(models.Station)
-        self.timeseries_group = mommy.make(
+        self.station = baker.make(models.Station)
+        self.timeseries_group = baker.make(
             models.TimeseriesGroup, gentity=self.station, precision=2
         )
-        self.timeseries = mommy.make(
+        self.timeseries = baker.make(
             models.Timeseries,
             timeseries_group=self.timeseries_group,
             publicly_available=True,
@@ -387,11 +387,11 @@ class TsdataStartAndEndDateTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataInvalidStartOrEndDateTestCase(APITestCase):
     def setUp(self):
-        self.station = mommy.make(models.Station)
-        self.timeseries_group = mommy.make(
+        self.station = baker.make(models.Station)
+        self.timeseries_group = baker.make(
             models.TimeseriesGroup, gentity=self.station, precision=2
         )
-        self.timeseries = mommy.make(
+        self.timeseries = baker.make(
             models.Timeseries,
             timeseries_group=self.timeseries_group,
             publicly_available=True,
@@ -418,14 +418,14 @@ class TsdataInvalidStartOrEndDateTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataHeadTestCase(APITestCase):
     def setUp(self):
-        self.station = mommy.make(models.Station)
-        self.timeseries_group = mommy.make(
+        self.station = baker.make(models.Station)
+        self.timeseries_group = baker.make(
             models.TimeseriesGroup,
             gentity=self.station,
             variable__descr="irrelevant",
             precision=2,
         )
-        self.timeseries = mommy.make(
+        self.timeseries = baker.make(
             models.Timeseries,
             timeseries_group=self.timeseries_group,
             publicly_available=True,
@@ -452,13 +452,13 @@ class TsdataHeadTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesBottomTestCase(APITestCase):
     def setUp(self):
-        self.station = mommy.make(models.Station, display_timezone="Etc/GMT-2")
-        self.timeseries_group = mommy.make(
+        self.station = baker.make(models.Station, display_timezone="Etc/GMT-2")
+        self.timeseries_group = baker.make(
             models.TimeseriesGroup,
             gentity=self.station,
             precision=2,
         )
-        self.timeseries = mommy.make(
+        self.timeseries = baker.make(
             models.Timeseries,
             timeseries_group=self.timeseries_group,
             publicly_available=True,
@@ -498,13 +498,13 @@ class TimeseriesBottomTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesBottomPermissionsTestCase(APITestCase):
     def setUp(self):
-        station = mommy.make(models.Station)
-        timeseries_group = mommy.make(
+        station = baker.make(models.Station)
+        timeseries_group = baker.make(
             models.TimeseriesGroup,
             gentity=station,
             precision=2,
         )
-        timeseries = mommy.make(
+        timeseries = baker.make(
             models.Timeseries,
             timeseries_group=timeseries_group,
             publicly_available=False,
@@ -522,7 +522,7 @@ class TimeseriesBottomPermissionsTestCase(APITestCase):
         self.assertEqual(self.response.status_code, 401)
 
     def test_logged_on_user_is_ok(self):
-        self.user1 = mommy.make(User, is_active=True, is_superuser=False)
+        self.user1 = baker.make(User, is_active=True, is_superuser=False)
         self.client.force_authenticate(user=self.user1)
         self.response = self.client.get(self.url)
         self.assertEqual(self.response.status_code, 200)
@@ -532,12 +532,12 @@ class TimeseriesBottomPermissionsTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesPostTestCase(APITestCase):
     def setUp(self):
-        self.user1 = mommy.make(User, is_active=True, is_superuser=False)
-        self.user2 = mommy.make(User, is_active=True, is_superuser=False)
-        self.variable = mommy.make(models.Variable, descr="Temperature")
-        self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
-        self.station = mommy.make(models.Station, creator=self.user1)
-        self.timeseries_group = mommy.make(models.TimeseriesGroup, gentity=self.station)
+        self.user1 = baker.make(User, is_active=True, is_superuser=False)
+        self.user2 = baker.make(User, is_active=True, is_superuser=False)
+        self.variable = baker.make(models.Variable, descr="Temperature")
+        self.unit_of_measurement = baker.make(models.UnitOfMeasurement)
+        self.station = baker.make(models.Station, creator=self.user1)
+        self.timeseries_group = baker.make(models.TimeseriesGroup, gentity=self.station)
 
     def _create_timeseries(self, **kwargs):
         return self.client.post(
@@ -579,18 +579,18 @@ class TimeseriesPostTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesPostWithWrongStationOrTimeseriesGroupTestCase(APITestCase):
     def setUp(self):
-        self.user = mommy.make(User, is_active=True, is_superuser=False)
-        self.variable = mommy.make(models.Variable, descr="Temperature")
-        self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
-        self.station1 = mommy.make(models.Station, creator=self.user)
-        self.timeseries_group_1_1 = mommy.make(
+        self.user = baker.make(User, is_active=True, is_superuser=False)
+        self.variable = baker.make(models.Variable, descr="Temperature")
+        self.unit_of_measurement = baker.make(models.UnitOfMeasurement)
+        self.station1 = baker.make(models.Station, creator=self.user)
+        self.timeseries_group_1_1 = baker.make(
             models.TimeseriesGroup, gentity=self.station1
         )
-        self.timeseries_group_1_2 = mommy.make(
+        self.timeseries_group_1_2 = baker.make(
             models.TimeseriesGroup, gentity=self.station1
         )
-        self.station2 = mommy.make(models.Station, creator=self.user)
-        self.timeseries_group_2_1 = mommy.make(
+        self.station2 = baker.make(models.Station, creator=self.user)
+        self.timeseries_group_2_1 = baker.make(
             models.TimeseriesGroup, gentity=self.station2
         )
 
@@ -639,11 +639,11 @@ class TimeseriesPostWithWrongStationOrTimeseriesGroupTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesPostWithWrongTimeseriesTypeTestCase(APITestCase):
     def setUp(self):
-        self.user = mommy.make(User, is_active=True, is_superuser=False)
-        self.variable = mommy.make(models.Variable, descr="Temperature")
-        self.unit_of_measurement = mommy.make(models.UnitOfMeasurement)
-        self.station = mommy.make(models.Station, creator=self.user)
-        self.timeseries_group = mommy.make(models.TimeseriesGroup, gentity=self.station)
+        self.user = baker.make(User, is_active=True, is_superuser=False)
+        self.variable = baker.make(models.Variable, descr="Temperature")
+        self.unit_of_measurement = baker.make(models.UnitOfMeasurement)
+        self.station = baker.make(models.Station, creator=self.user)
+        self.timeseries_group = baker.make(models.TimeseriesGroup, gentity=self.station)
 
     def _create_timeseries(self, type):
         self.client.force_authenticate(user=self.user)
@@ -674,13 +674,13 @@ class TimeseriesPostWithWrongTimeseriesTypeTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesDeleteTestCase(APITestCase):
     def setUp(self):
-        self.user1 = mommy.make(User, is_active=True, is_superuser=False)
-        self.user2 = mommy.make(User, is_active=True, is_superuser=False)
-        self.station = mommy.make(models.Station, creator=self.user1)
-        self.timeseries_group = mommy.make(
+        self.user1 = baker.make(User, is_active=True, is_superuser=False)
+        self.user2 = baker.make(User, is_active=True, is_superuser=False)
+        self.station = baker.make(models.Station, creator=self.user1)
+        self.timeseries_group = baker.make(
             models.TimeseriesGroup, gentity=self.station, precision=2
         )
-        self.timeseries = mommy.make(
+        self.timeseries = baker.make(
             models.Timeseries, timeseries_group=self.timeseries_group
         )
 
@@ -806,7 +806,7 @@ class TimeseriesChartTestCase(
 
     def test_authenticated_user_allowed(self, mock):
         self._create_timeseries(publicly_available=False)
-        self.client.force_authenticate(user=mommy.make(User, is_active=True))
+        self.client.force_authenticate(user=baker.make(User, is_active=True))
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)

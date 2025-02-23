@@ -1,5 +1,5 @@
-model-mommy>=1.6.0
-django-cors-headers
+model-bakery>=1.20.0,<2
+django-cors-headers>=4,<5
 sphinx>=4
 django-selenium-clean>=1,<2
 beautifulsoup4>=4.4

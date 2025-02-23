@@ -11,7 +11,7 @@ from django.test import TestCase
 import pandas as pd
 import pytz
 from htimeseries import HTimeseries
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris import models
 from enhydris.tests import ClearCacheMixin, TestTimeseriesMixin
@@ -27,7 +27,7 @@ def get_tzinfo(tzname):
 
 class TimeseriesTestCase(TestCase):
     def test_create(self):
-        timeseries_group = mommy.make(models.TimeseriesGroup)
+        timeseries_group = baker.make(models.TimeseriesGroup)
         timeseries = models.Timeseries(
             type=models.Timeseries.AGGREGATED, timeseries_group=timeseries_group
         )
@@ -37,7 +37,7 @@ class TimeseriesTestCase(TestCase):
         )
 
     def test_update(self):
-        mommy.make(models.Timeseries, type=models.Timeseries.INITIAL)
+        baker.make(models.Timeseries, type=models.Timeseries.INITIAL)
         timeseries = models.Timeseries.objects.first()
         timeseries.type = models.Timeseries.AGGREGATED
         timeseries.save()
@@ -46,7 +46,7 @@ class TimeseriesTestCase(TestCase):
         )
 
     def test_delete(self):
-        mommy.make(models.Timeseries)
+        baker.make(models.Timeseries)
         timeseries = models.Timeseries.objects.first()
         timeseries.delete()
         self.assertEqual(models.Timeseries.objects.count(), 0)
@@ -60,24 +60,36 @@ class TimeseriesTestCase(TestCase):
     def test_str_regularized(self):
         self._test_str(type=models.Timeseries.REGULARIZED, result="Regularized")
 
-    def test_str_aggregated(self):
-        self._test_str(type=models.Timeseries.AGGREGATED, result="Aggregated (H)")
+    def test_str_with_name(self):
+        self._test_str(
+            type=models.Timeseries.INITIAL,
+            name="hello",
+            result="Initial (hello)",
+        )
 
-    def _make_timeseries(self, timeseries_group, type):
-        return mommy.make(
+    def test_str_aggregated(self):
+        self._test_str(
+            type=models.Timeseries.AGGREGATED,
+            name="Mean",
+            result="Aggregated (H Mean)",
+        )
+
+    def _make_timeseries(self, timeseries_group, type, name=""):
+        return baker.make(
             models.Timeseries,
             timeseries_group=timeseries_group,
             type=type,
             time_step="H",
+            name=name,
         )
 
-    def _test_str(self, type, result):
-        timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
-        timeseries = self._make_timeseries(timeseries_group, type)
+    def _test_str(self, type, result, name=""):
+        timeseries_group = baker.make(models.TimeseriesGroup, name="Temperature")
+        timeseries = self._make_timeseries(timeseries_group, type, name=name)
         self.assertEqual(str(timeseries), result)
 
     def test_only_one_initial_per_group(self):
-        timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
+        timeseries_group = baker.make(models.TimeseriesGroup, name="Temperature")
         self._make_timeseries(timeseries_group, models.Timeseries.INITIAL)
         with self.assertRaises(IntegrityError):
             models.Timeseries(
@@ -87,7 +99,7 @@ class TimeseriesTestCase(TestCase):
             ).save()
 
     def test_only_one_checked_per_group(self):
-        timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
+        timeseries_group = baker.make(models.TimeseriesGroup, name="Temperature")
         self._make_timeseries(timeseries_group, models.Timeseries.CHECKED)
         with self.assertRaises(IntegrityError):
             models.Timeseries(
@@ -97,7 +109,7 @@ class TimeseriesTestCase(TestCase):
             ).save()
 
     def test_only_one_regularized_per_group(self):
-        timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
+        timeseries_group = baker.make(models.TimeseriesGroup, name="Temperature")
         self._make_timeseries(timeseries_group, models.Timeseries.REGULARIZED)
         with self.assertRaises(IntegrityError):
             models.Timeseries(
@@ -107,7 +119,7 @@ class TimeseriesTestCase(TestCase):
             ).save()
 
     def test_uniqueness(self):
-        timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
+        timeseries_group = baker.make(models.TimeseriesGroup, name="Temperature")
         self._make_timeseries(timeseries_group, models.Timeseries.AGGREGATED)
         with self.assertRaises(IntegrityError):
             models.Timeseries(
@@ -117,7 +129,7 @@ class TimeseriesTestCase(TestCase):
             ).save()
 
     def test_many_aggregated_per_group(self):
-        timeseries_group = mommy.make(models.TimeseriesGroup, name="Temperature")
+        timeseries_group = baker.make(models.TimeseriesGroup, name="Temperature")
         self._make_timeseries(timeseries_group, models.Timeseries.AGGREGATED)
         models.Timeseries(
             timeseries_group=timeseries_group,
@@ -128,10 +140,10 @@ class TimeseriesTestCase(TestCase):
 
 def make_timeseries(*, start_date, end_date, **kwargs):
     """Make a test timeseries, setting start_date and end_date.
-    This is essentially the same as mommy.make(models.Timeseries, **kwargs), except
+    This is essentially the same as baker.make(models.Timeseries, **kwargs), except
     that it also creates two records with the specified dates.
     """
-    result = mommy.make(models.Timeseries, **kwargs)
+    result = baker.make(models.Timeseries, **kwargs)
     result.timeseriesrecord_set.create(timestamp=start_date, value=0, flags="")
     result.timeseriesrecord_set.create(timestamp=end_date, value=0, flags="")
     return result
@@ -497,6 +509,25 @@ class TimeseriesGetDataCacheTestCase(DataTestCase):
         data = self.timeseries.get_data(start_date=self.timeseries.end_date)
         self.assertEqual(len(data.data), 1)
 
+    @mock.patch("enhydris.models.timeseries.Timeseries._invalidate_cached_data")
+    def test_race_condition(self, m):
+        # Populate cache
+        self._get_data_and_check_num_queries(1, start_date=None, end_date=None)
+
+        # Pretend there's a race condition. We delete the time series data, but
+        # because we've mocked _invalidate_cached_data, the cache will not be deleted.
+        # However, we manually delete the cached end date. This simulates the case
+        # where another thread or process deletes the data (and invalidates the
+        # cache) between examining the start date and end date.
+        self.timeseries.set_data(HTimeseries())
+        cache.delete(f"timeseries_end_date_{self.timeseries.id}")
+
+        # Try getting the data again and see that it works. There are two queries now;
+        # one is for the end date.
+        with self.assertNumQueries(2):
+            data = self.timeseries.get_data(start_date=None, end_date=None)
+        self.assertEqual(len(data.data), 0)
+
 
 class TimeseriesSetDataTestCase(TestTimeseriesMixin, TestCase):
     def setUp(self):
@@ -729,9 +760,9 @@ class TimeseriesRecordBulkInsertTestCase(TestTimeseriesMixin, TestCase):
 class TimeseriesDatesCacheInvalidationTestCase(TestCase):
     def setUp(self):
         cache.clear()
-        self.station = mommy.make(models.Station, name="Celduin")
-        self.timeseries_group = mommy.make(models.TimeseriesGroup, gentity=self.station)
-        self.timeseries = mommy.make(
+        self.station = baker.make(models.Station, name="Celduin")
+        self.timeseries_group = baker.make(models.TimeseriesGroup, gentity=self.station)
+        self.timeseries = baker.make(
             models.Timeseries,
             timeseries_group=self.timeseries_group,
             type=models.Timeseries.INITIAL,

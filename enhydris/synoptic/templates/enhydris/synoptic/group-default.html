@@ -1,0 +1,81 @@
+{% extends "enhydris/synoptic/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}
+  {% blocktrans with name=object.name %}
+    {{ name }} meteorological report
+  {% endblocktrans %}
+{% endblock %}
+
+{% block basecss %}
+  {{ block.super }}
+  <style>
+    header.page-header { position: absolute; };
+  </style>
+{% endblock %}
+
+{% block extracss %}
+  {{ block.super }}
+  <link type="text/css" rel="stylesheet" href="{% static 'css/vendor/leaflet.groupedlayercontrol.min.css' %}">
+{% endblock %}
+
+{% block body_classes %}
+  page page-map-full
+{% endblock %}
+
+{% block content %}
+  <div id="map map-fullpage">
+    <div id="mapid"></div>
+    <p id="timezone-info">
+      {% blocktrans with timezone=object.timezone %}
+        All times are in {{ timezone }}
+      {% endblocktrans %}
+    </p>
+  </div>
+{% endblock %}
+
+{% block mainjs %}
+  {{ block.super }}
+  <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js"></script>
+  <script type="text/javascript" src="{% static 'js/vendor/L.Control.MousePosition.js' %}"></script>
+  {% block leaflet_plugins %}
+    <script type="text/javascript" src="{% static 'js/vendor/leaflet.groupedlayercontrol.min.js' %}"></script>
+  {% endblock %}
+  <script type="text/javascript">
+    enhydris.mapBaseLayers = {{ map_base_layers|safe }};
+    enhydris.mapDefaultBaseLayer = "{{ map_default_base_layer|safe }}";
+    enhydris.mapViewport = {{ map_viewport|safe }};
+    enhydris.searchString = {{ searchString|safe }};
+    enhydris.mapStations = [];
+    {% for object in object.synopticgroupstation_set.all %}
+      enhydris.mapStations.push({
+        id: {{ object.id }},
+        name: "{{ object.station.name | truncatechars:13 }}",
+        target_url: "{{ object.target_url }}",
+        latitude: {{ object.station.geom.y }},
+        longitude: {{ object.station.geom.x }},
+        last_common_date_pretty_without_timezone: "{{ object.last_common_date_pretty_without_timezone }}",
+        freshness: "{{ object.freshness }}",
+        last_values: {
+          {% for syntsg in object.synoptic_timeseries_groups %}
+            "{{ syntsg.full_name }}":
+            {% with precision=syntsg.timeseries_group.precision|default:0 %}
+              "{{ syntsg.value|floatformat:precision }} {{ syntsg.timeseries_group.unit_of_measurement.symbol }}"
+            {% endwith %}
+            {% if not forloop.last %},{% endif %}
+          {% endfor %}
+        },
+        last_values_status: {
+          {% for syntsg in object.synoptic_timeseries_groups %}
+            "{{ syntsg.full_name }}": "{{ syntsg.value_status }}"
+            {% if not forloop.last %},{% endif %}
+          {% endfor %}
+        },
+
+      });
+    {% endfor %}
+  </script>
+  <script type="text/javascript" src="{% static 'js/enhydris.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/enhydris-synoptic.js' %}"></script>
+{% endblock %}

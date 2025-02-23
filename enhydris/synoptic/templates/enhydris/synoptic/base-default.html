@@ -1,0 +1,8 @@
+{% extends "enhydris/base/main.html" %}
+{% load static %}
+
+
+{% block extracss %}
+  {{ block.super }}
+  <link type="text/css" rel="stylesheet" href="{% static 'css/enhydris-synoptic.css' %}">
+{% endblock %}

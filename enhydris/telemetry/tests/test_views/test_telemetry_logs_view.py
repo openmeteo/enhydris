@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
 
 from bs4 import BeautifulSoup
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris.models import Station
 from enhydris.telemetry.models import Telemetry, TelemetryLogMessage
@@ -14,10 +14,10 @@ class TelemetryLogViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user("alice", password="topsecret")
-        cls.station = mommy.make(Station, name="great station", creator=cls.user)
-        cls.station2 = mommy.make(Station, name="another station", creator=cls.user)
-        cls.telemetry = mommy.make(Telemetry, station=cls.station)
-        cls.telemetry_log = mommy.make(
+        cls.station = baker.make(Station, name="great station", creator=cls.user)
+        cls.station2 = baker.make(Station, name="another station", creator=cls.user)
+        cls.telemetry = baker.make(Telemetry, station=cls.station)
+        cls.telemetry_log = baker.make(
             TelemetryLogMessage,
             telemetry=cls.telemetry,
             exception_name="HugeError",
@@ -110,8 +110,8 @@ class PermissionsTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user("alice", password="topsecret")
-        cls.station = mommy.make(Station, creator=cls.user)
-        cls.telemetry_log_message = mommy.make(
+        cls.station = baker.make(Station, creator=cls.user)
+        cls.telemetry_log_message = baker.make(
             TelemetryLogMessage,
             telemetry__station=cls.station,
         )

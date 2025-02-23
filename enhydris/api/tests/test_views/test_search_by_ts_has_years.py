@@ -2,7 +2,7 @@ from io import StringIO
 
 from rest_framework.test import APITestCase
 
-from model_mommy import mommy
+from model_bakery import baker
 
 from enhydris import models
 from enhydris.tests import ClearCacheMixin
@@ -17,8 +17,8 @@ class SearchWithYearExistingInOneStationTest(
     search_result = "Tharbad"
 
     def _create_models(self):
-        komboti = mommy.make(models.Station, name="Komboti")
-        tharbad = mommy.make(models.Station, name="Tharbad")
+        komboti = baker.make(models.Station, name="Komboti")
+        tharbad = baker.make(models.Station, name="Tharbad")
         self.komboti_temperature = self._make_timeseries(
             komboti, "Temperature", "2005-03-23 18:20,5,\r\n2012-03-24 18:25,6,\r\n"
         )
@@ -33,7 +33,7 @@ class SearchWithYearExistingInOneStationTest(
         )
 
     def _make_timeseries(self, station, variable_descr, datastr):
-        result = mommy.make(
+        result = baker.make(
             models.Timeseries,
             timeseries_group__gentity=station,
             timeseries_group__variable__descr=variable_descr,
