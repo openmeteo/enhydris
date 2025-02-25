@@ -71,14 +71,13 @@ class AutoProcessSaveTestCase(TransactionTestCase):
             tasks.execute_auto_process.delay.assert_not_called()
 
 
+@mock.patch(
+    "enhydris.autoprocess.models.Checks.process_timeseries",
+    side_effect=lambda self: self.htimeseries,
+    autospec=True,
+)
 class AutoProcessExecuteTestCase(ClearCacheMixin, TestCase):
-    @mock.patch(
-        "enhydris.autoprocess.models.Checks.process_timeseries",
-        side_effect=lambda self: self.htimeseries,
-        autospec=True,
-    )
-    def setUp(self, m):
-        self.mock_execute = m
+    def setUp(self):
         station = baker.make(Station, display_timezone="Etc/GMT-2")
         self.timeseries_group = baker.make(
             TimeseriesGroup,
@@ -87,13 +86,22 @@ class AutoProcessExecuteTestCase(ClearCacheMixin, TestCase):
         )
         self.checks = baker.make(Checks, timeseries_group=self.timeseries_group)
         self.range_check = baker.make(RangeCheck, checks=self.checks)
+
+    def test_called_once(self, m):
         self.checks.execute()
+        self.assertEqual(len(m.mock_calls), 1)
 
-    def test_called_once(self):
-        self.assertEqual(len(self.mock_execute.mock_calls), 1)
-
-    def test_called_with_empty_content(self):
+    def test_called_with_empty_content(self, m):
+        self.checks.execute()
         self.assertEqual(len(self.checks.htimeseries.data), 0)
+
+    def test_critical_error(self, m):
+        m.side_effect = ValueError("hello")
+        msg = (
+            f"^ValueError while executing AutoProcess with id={self.checks.id}: hello$"
+        )
+        with self.assertRaisesRegex(RuntimeError, msg):
+            self.checks.execute()
 
 
 class AutoProcessExecuteDealsOnlyWithNewerTimeseriesPartTestCase(TestCase):
