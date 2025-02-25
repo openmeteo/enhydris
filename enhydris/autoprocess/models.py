@@ -28,8 +28,15 @@ class AutoProcess(models.Model):
         verbose_name_plural = _("Auto processes")
 
     def execute(self):
-        result = self.process_timeseries()
-        self.target_timeseries.append_data(result)
+        try:
+            result = self.process_timeseries()
+            self.target_timeseries.append_data(result)
+        except Exception as e:
+            msg = (
+                f"{e.__class__.__name__} while executing AutoProcess with "
+                f"id={self.id}: {str(e)}"
+            )
+            raise RuntimeError(msg)
 
     @property
     def htimeseries(self):
