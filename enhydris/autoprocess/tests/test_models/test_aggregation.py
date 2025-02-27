@@ -470,3 +470,57 @@ class AggregationRecalculatesLastValueIfNeededTestCase(TestCase):
             index=new_dates,
         )
         source_timeseries.append_data(new_data)
+
+
+@mock.patch("enhydris.autoprocess.models.logging")
+class AggregationTooFewValuesTestCase(TestCase):
+    """
+    At some point the aggregation tries to "infer frequency", i.e. determine the time
+    step of the source timeseries, which raises an exception if the source timeseries
+    has fewer than three records. We test that this case is correctly handled.
+    """
+
+    def setUp(self):
+        station = baker.make(Station, name="Hobbiton", display_timezone="Etc/GMT-2")
+        timeseries_group = baker.make(
+            TimeseriesGroup,
+            gentity=station,
+            variable__descr="h",
+            precision=0,
+        )
+        source_timeseries = baker.make(
+            Timeseries,
+            timeseries_group=timeseries_group,
+            type=Timeseries.CHECKED,
+            time_step="10min",
+        )
+        adate = dt.datetime(2019, 5, 21, 17, 0, tzinfo=get_tzinfo("Etc/GMT-2"))
+        source_timeseries.set_data(
+            pd.DataFrame(
+                data={"value": [42], "flags": [""]},
+                columns=["value", "flags"],
+                index=[adate],
+            )
+        )
+        aggregation = Aggregation(
+            timeseries_group=timeseries_group,
+            target_time_step="1h",
+            method="sum",
+            max_missing=2,
+            resulting_timestamp_offset="",
+        )
+        super(AutoProcess, aggregation).save()  # Avoid triggering a celery task
+        self.aggregation_id = aggregation.id
+
+    def test_result(self, m):
+        aggregation = Aggregation.objects.get(id=self.aggregation_id)
+        aggregation.execute()
+        actual_data = aggregation.target_timeseries.get_data().data
+        self.assertEqual(len(actual_data), 0)
+
+    def test_log(self, logging_mock):
+        aggregation = Aggregation.objects.get(id=self.aggregation_id)
+        aggregation.execute()
+        logging_mock.getLogger.return_value.error.assert_called_once_with(
+            "Need at least 3 dates to infer frequency"
+        )

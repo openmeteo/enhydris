@@ -513,10 +513,10 @@ class Aggregation(AutoProcess):
         self.source_end_date = self.htimeseries.data.index[-1]
         try:
             regularized = self._regularize_time_series(self.htimeseries)
-        except RegularizeError as e:
+            aggregated = self._aggregate_time_series(regularized)
+        except (RegularizeError, ValueError) as e:
             logging.getLogger("enhydris.autoprocess").error(str(e))
             return HTimeseries()
-        aggregated = self._aggregate_time_series(regularized)
         return aggregated
 
     def _regularize_time_series(self, source_htimeseries):
