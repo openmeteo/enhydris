@@ -165,31 +165,13 @@ class RangeCheckProcessTimeseriesTestCase(TestCase):
         dt.datetime(2019, 5, 21, 11, 20, tzinfo=dt.timezone.utc),
     ]
 
-    source_timeseries = pd.DataFrame(
-        data={
-            "value": [1.5, 2.9, 3.1, np.nan, 3.8, 4.9, 7.2],
-            "flags": ["", "", "", "", "FLAG1", "FLAG2", "FLAG3"],
-        },
-        columns=["value", "flags"],
-        index=_index,
-    )
-
-    expected_result = pd.DataFrame(
-        data={
-            "value": [np.nan, 2.9, 3.1, np.nan, 3.8, 4.9, np.nan],
-            "flags": [
-                "RANGE",
-                "SUSPECT",
-                "",
-                "",
-                "FLAG1",
-                "FLAG2 SUSPECT",
-                "FLAG3 RANGE",
-            ],
-        },
-        columns=["value", "flags"],
-        index=_index,
-    )
+    def _get_dataframe(self, value, flags):
+        vallen = len(value)
+        return pd.DataFrame(
+            data={"value": value, "flags": flags},
+            columns=["value", "flags"],
+            index=self._index[:vallen],
+        )
 
     def test_execute(self):
         self.range_check = baker.make(
@@ -199,9 +181,65 @@ class RangeCheckProcessTimeseriesTestCase(TestCase):
             soft_lower_bound=3,
             soft_upper_bound=4,
         )
-        self.range_check.checks._htimeseries = HTimeseries(self.source_timeseries)
+        source_timeseries = self._get_dataframe(
+            [1.5, 2.9, 3.1, np.nan, 3.8, 4.9, 7.2],
+            ["", "", "", "", "FLAG1", "FLAG2", "FLAG3"],
+        )
+        self.range_check.checks._htimeseries = HTimeseries(source_timeseries)
         result = self.range_check.checks.process_timeseries()
-        pd.testing.assert_frame_equal(result, self.expected_result)
+        expected_result = self._get_dataframe(
+            [np.nan, 2.9, 3.1, np.nan, 3.8, 4.9, np.nan],
+            ["RANGE", "SUSPECT", "", "", "FLAG1", "FLAG2 SUSPECT", "FLAG3 RANGE"],
+        )
+        pd.testing.assert_frame_equal(result, expected_result)
+
+    def test_execute_with_limit_values(self):
+        self.range_check = baker.make(
+            RangeCheck,
+            lower_bound=2,
+            upper_bound=5,
+            soft_lower_bound=3,
+            soft_upper_bound=4,
+        )
+        source_timeseries = self._get_dataframe([2, 5, 3, 4], ["", "", "", ""])
+        self.range_check.checks._htimeseries = HTimeseries(source_timeseries)
+        result = self.range_check.checks.process_timeseries()
+        expected_result = self._get_dataframe(
+            [2.0, 5.0, 3.0, 4.0], ["SUSPECT", "SUSPECT", "", ""]
+        )
+        pd.testing.assert_frame_equal(result, expected_result)
+
+    def test_execute_with_no_lower_soft_bound(self):
+        self.range_check = baker.make(
+            RangeCheck,
+            lower_bound=2,
+            upper_bound=5,
+            soft_lower_bound=None,
+            soft_upper_bound=4,
+        )
+        source_timeseries = self._get_dataframe([2, 5, 3, 4], ["", "", "", ""])
+        self.range_check.checks._htimeseries = HTimeseries(source_timeseries)
+        result = self.range_check.checks.process_timeseries()
+        expected_result = self._get_dataframe(
+            [2.0, 5.0, 3.0, 4.0], ["", "SUSPECT", "", ""]
+        )
+        pd.testing.assert_frame_equal(result, expected_result)
+
+    def test_execute_with_no_upper_soft_bound(self):
+        self.range_check = baker.make(
+            RangeCheck,
+            lower_bound=2,
+            upper_bound=5,
+            soft_lower_bound=3,
+            soft_upper_bound=None,
+        )
+        source_timeseries = self._get_dataframe([2, 5, 3, 4], ["", "", "", ""])
+        self.range_check.checks._htimeseries = HTimeseries(source_timeseries)
+        result = self.range_check.checks.process_timeseries()
+        expected_result = self._get_dataframe(
+            [2.0, 5.0, 3.0, 4.0], ["SUSPECT", "", "", ""]
+        )
+        pd.testing.assert_frame_equal(result, expected_result)
 
 
 class RateOfChangeCheckTestCase(TestCase):

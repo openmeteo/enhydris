@@ -182,6 +182,10 @@ class RangeCheck(models.Model):
         )
 
     def _find_out_of_bounds_values(self, source_htimeseries, low, high):
+        if low is None:
+            low = -1e38
+        if high is None:
+            high = 1e38
         timeseries = source_htimeseries.data
         return ~pd.isnull(timeseries["value"]) & ~timeseries["value"].between(low, high)
 
