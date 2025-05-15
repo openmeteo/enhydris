@@ -88,6 +88,7 @@ class ChooseSensorForm(FormBase):
         )
         with self.driver(telemetry) as api_client:
             sensors = api_client.get_sensors()
+        sensors = dict(sorted(sensors.items(), key=lambda item: item[1]))
         station = models.Station.objects.get(pk=self.station.id)
         timeseries_groups = station.timeseriesgroup_set
         choices = [("", _("Ignore this sensor"))]
@@ -108,9 +109,11 @@ class ChooseSensorForm(FormBase):
         cleaned_data = super().clean()
         seen_timeseries_group_ids = set()
         for sensor_id, timeseries_group_id in cleaned_data.items():
+            if not timeseries_group_id:
+                continue
             if timeseries_group_id in seen_timeseries_group_ids:
                 raise forms.ValidationError(
-                    "A given time series may be specified for only one sensor"
+                    _("A given time series may be specified for only one sensor")
                 )
             seen_timeseries_group_ids.add(timeseries_group_id)
         return cleaned_data

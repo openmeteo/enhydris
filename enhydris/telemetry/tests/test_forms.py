@@ -219,6 +219,10 @@ class ChooseSensorFormTestCase(TestCase):
         )
 
     def _setup_mock_get_sensors(self):
+        # The order of insertion matters, because test_order below will check that
+        # "Humidity" comes before "Temperature".  So here they must be entered in
+        # a different order, to ensure that if the system doesn't properly sort them,
+        # test_order will fail.
         TestTelemetryAPIClient.get_sensors.return_value = {
             "251": "Temperature sensor",
             "362": "Humidity sensor",
@@ -257,6 +261,11 @@ class ChooseSensorFormTestCase(TestCase):
             "To which Enhydris time series does sensor "
             '"Humidity sensor" (362) correspond?',
         )
+
+    def test_order(self):
+        # Sensor 362 should come before 251 because "Humidity" comes before
+        # "Temperature" alphabetically
+        self.assertEqual(list(self.form.fields.keys()), ["sensor_362", "sensor_251"])
 
     def test_choices(self):
         self.assertEqual(
