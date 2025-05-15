@@ -88,6 +88,7 @@ class ChooseSensorForm(FormBase):
         )
         with self.driver(telemetry) as api_client:
             sensors = api_client.get_sensors()
+        sensors = dict(sorted(sensors.items(), key=lambda item: item[1]))
         station = models.Station.objects.get(pk=self.station.id)
         timeseries_groups = station.timeseriesgroup_set
         choices = [("", _("Ignore this sensor"))]
