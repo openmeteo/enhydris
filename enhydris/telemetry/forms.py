@@ -109,6 +109,8 @@ class ChooseSensorForm(FormBase):
         cleaned_data = super().clean()
         seen_timeseries_group_ids = set()
         for sensor_id, timeseries_group_id in cleaned_data.items():
+            if not timeseries_group_id:
+                continue
             if timeseries_group_id in seen_timeseries_group_ids:
                 raise forms.ValidationError(
                     _("A given time series may be specified for only one sensor")

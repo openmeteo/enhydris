@@ -479,20 +479,23 @@ class FinalStepDuplicateTimeseriesTestCase(SecondStepPostSuccessfulMixin, TestCa
         super().setUpTestData()
         cls.tg1 = baker.make(TimeseriesGroup, id=518, gentity=cls.station)
 
-    def setUp(self):
+    def test_same_timeseries_twice(self):
         # We submit two sensors mapped to the same time series, which is not allowed.
-        self.response = self._post_step_4()
+        self.response = self._post_step_4(518, 518, "")
 
-    def test_status_code(self):
         # The result should be 200 (i.e. error in the form) as opposed to 302
         # (successful submission) or 500 (error because of primary key violation).
         self.assertEqual(self.response.status_code, 200)
 
-    def test_error_message(self):
         self.assertContains(
             self.response,
             "A given time series may be specified for only one sensor",
         )
+
+    def test_allow_ignoring_many_sensors(self):
+        # We submit two sensors to be ignored; this is allowed.
+        self.response = self._post_step_4(518, "", "")
+        self.assertEqual(self.response.status_code, 302)
 
     @patch(
         "enhydris.telemetry.types.meteoview2.requests.request",
@@ -503,17 +506,19 @@ class FinalStepDuplicateTimeseriesTestCase(SecondStepPostSuccessfulMixin, TestCa
                 "sensors": [
                     {"id": "1234", "title": "Beautymeter"},
                     {"id": "4321", "title": "Acmemeter"},
+                    {"id": "5678", "title": "Telemeter"},
                 ],
             },
         ),
     )
-    def _post_step_4(self, m):
+    def _post_step_4(self, value1, value2, value3, m):
         return self.cclient.post(
             f"/stations/{self.station.id}/telemetry/4/",
             {
                 "type": "meteoview2",
-                "sensor_1234": 518,
-                "sensor_4321": 518,
+                "sensor_1234": value1,
+                "sensor_4321": value2,
+                "sensor_5678": value3,
             },
         )
 
