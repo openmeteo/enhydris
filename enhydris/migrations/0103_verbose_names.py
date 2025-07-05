@@ -58,15 +58,6 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.AlterModelOptions(
-            name="timeseriesrecord",
-            options={
-                "get_latest_by": "timestamp",
-                "managed": False,
-                "verbose_name": "Time series record",
-                "verbose_name_plural": "Time series records",
-            },
-        ),
-        migrations.AlterModelOptions(
             name="timezone",
             options={
                 "ordering": ("utc_offset",),

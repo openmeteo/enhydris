@@ -476,11 +476,7 @@ class Aggregation(AutoProcess):
 
     def _get_start_date(self):
         if self._last_target_timeseries_record_needs_recalculation():
-            # NOTE:
-            #   Running ...latest().delete() won't work. Maybe because currently
-            #   TimeseriesRecord has some primary key hacks.
-            adate = self.target_timeseries.timeseriesrecord_set.latest().timestamp
-            self.target_timeseries.timeseriesrecord_set.filter(timestamp=adate).delete()
+            self.target_timeseries.timeseriesrecord_set.latest().delete()
             self.target_timeseries.save()
         return super()._get_start_date()
 
