@@ -2,7 +2,7 @@
   "name": "enhydris",
   "version": "0.0.0",
   "devDependencies": {
-    "eslint": "^6.8.0",
+    "eslint": "^9.32.0",
     "eslint-config-airbnb": "^18.2.0",
     "eslint-plugin-import": "^2.22.0",
     "jest": "^29.7.0",
