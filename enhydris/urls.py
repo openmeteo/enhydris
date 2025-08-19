@@ -30,6 +30,7 @@ urlpatterns = [
         name="timeseries_group_detail",
     ),
     path("downloaddata/", views.DownloadData.as_view(), name="download_data"),
+    path("grappelli/", include("grappelli.urls")),
     path("admin/", admin.site.urls),
     path("api/", include(enhydris_api_urls)),
     path(
