@@ -241,7 +241,7 @@ TimeseriesGroupInline.fieldsets.append(
                 "soft_upper_bound",
                 "upper_bound",
             ),
-            "classes": ("collapse",),
+            "classes": ("grp-collapse grp-closed",),
         },
     ),
 )
@@ -250,7 +250,7 @@ TimeseriesGroupInline.fieldsets.append(
         _("Time consistency check"),
         {
             "fields": (("rocc_thresholds", "rocc_symmetric"),),
-            "classes": ("collapse",),
+            "classes": ("grp-collapse grp-closed",),
         },
     ),
 )
@@ -313,14 +313,14 @@ class CurveInterpolationForm(forms.ModelForm):
 
 
 class CurveInterpolationInline(
-    InlinePermissionsMixin, nested_admin.NestedTabularInline
+    InlinePermissionsMixin, nested_admin.NestedStackedInline
 ):
     model = CurveInterpolation
     fk_name = "timeseries_group"
     classes = ("collapse",)
     form = CurveInterpolationForm
     inlines = [CurvePeriodInline]
-    extra = 1
+    extra = 0
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "target_timeseries_group":
@@ -355,13 +355,13 @@ class AggregationForm(forms.ModelForm):
             raise forms.ValidationError(str(e))
 
 
-class AggregationInline(InlinePermissionsMixin, nested_admin.NestedTabularInline):
+class AggregationInline(InlinePermissionsMixin, nested_admin.NestedStackedInline):
     model = Aggregation
     classes = ("collapse",)
     form = AggregationForm
     verbose_name = _("Aggregation")
     verbose_name_plural = _("Aggregations")
-    extra = 1
+    extra = 0
 
 
 TimeseriesGroupInline.inlines.append(AggregationInline)
