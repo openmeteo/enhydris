@@ -565,7 +565,7 @@ class NextOrFinishButtonTestCase(TestCase):
     def _get_button_text_for_step_2(self):
         response = self.client.get(f"/stations/{self.station.id}/telemetry/2/")
         soup = BeautifulSoup(response.content, "html.parser")
-        return soup.find("button", attrs={"type": "submit"}).get_text().strip()
+        return soup.select_one("main button[type='submit']").get_text().strip()
 
     def test_button_says_next_in_nonfinal_step(self, m):
         button_text = self._get_button_text_for_step_2()
