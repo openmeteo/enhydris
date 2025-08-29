@@ -84,10 +84,14 @@ class GetDataTestCase(APITestCase, TimeseriesDataMixin):
     def setUpTestData(cls):
         cls.create_timeseries(publicly_available=True)
 
-    def _get_response(self, urlsuffix=""):
+    def _get_response(self, urlsuffix="", station_id=None, timeseries_group_id=None):
+        if station_id is None:
+            station_id = self.station.id
+        if timeseries_group_id is None:
+            timeseries_group_id = self.timeseries_group.id
         return self.client.get(
-            f"/api/stations/{self.station.id}/timeseriesgroups/"
-            f"{self.timeseries_group.id}/timeseries/{self.timeseries.id}/data/"
+            f"/api/stations/{station_id}/timeseriesgroups/"
+            f"{timeseries_group_id}/timeseries/{self.timeseries.id}/data/"
             f"{urlsuffix}"
         )
 
@@ -116,6 +120,14 @@ class GetDataTestCase(APITestCase, TimeseriesDataMixin):
             response.content.decode(),
             "2017-11-23 15:23,1.00,\r\n2018-11-24 23:00,2.00,\r\n",
         )
+
+    def test_wrong_station_id(self):
+        response = self._get_response(station_id=self.station.id + 1)
+        self.assertEqual(response.status_code, 404)
+
+    def test_wrong_timeseries_group_id(self):
+        response = self._get_response(timeseries_group_id=self.timeseries_group.id + 1)
+        self.assertEqual(response.status_code, 404)
 
 
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)

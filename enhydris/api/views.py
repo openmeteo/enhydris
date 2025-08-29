@@ -299,7 +299,7 @@ class TimeseriesViewSet(ModelViewSet):
         return start_date, end_date
 
     def _get_data(self, request, pk, format=None):
-        timeseries = get_object_or_404(models.Timeseries, pk=int(pk))
+        timeseries = self.get_object()
         self.check_object_permissions(request, timeseries)
         start_date, end_date = self._get_date_bounds(request, timeseries)
         fmt_param = request.GET.get("fmt", "csv").lower()
@@ -333,7 +333,7 @@ class TimeseriesViewSet(ModelViewSet):
 
     def _post_data(self, request, pk, format=None):
         try:
-            atimeseries = get_object_or_404(models.Timeseries, pk=int(pk))
+            atimeseries = self.get_object()
             self.check_object_permissions(request, atimeseries)
             atimeseries.append_data(
                 StringIO(request.data["timeseries_records"]),
