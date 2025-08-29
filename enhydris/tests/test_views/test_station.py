@@ -248,15 +248,6 @@ class StationEditRedirectTestCase(TestCase):
         )
 
 
-@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
-class RedirectOldUrlsTestCase(TestCase):
-    def test_old_stations_url_redirects(self):
-        r = self.client.get("/stations/d/200348/")
-        self.assertRedirects(
-            r, "/stations/200348/", status_code=301, fetch_redirect_response=False
-        )
-
-
 @skipUnless(getattr(settings, "SELENIUM_WEBDRIVERS", False), "Selenium is unconfigured")
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class ListStationsVisibleOnMapTestCase(SeleniumTestCase):

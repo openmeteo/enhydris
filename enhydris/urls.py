@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import include, path
-from django.views.generic import RedirectView, View
+from django.views.generic import View
 
 from registration.backends.default.views import RegistrationView
 
@@ -33,11 +33,6 @@ urlpatterns = [
     path("grappelli/", include("grappelli.urls")),
     path("admin/", admin.site.urls),
     path("api/", include(enhydris_api_urls)),
-    path(
-        "stations/d/<int:pk>/",
-        RedirectView.as_view(pattern_name="station_detail", permanent=True),
-    ),
-    path("timeseries/d/<int:pk>/", views.OldTimeseriesDetailRedirectView.as_view()),
     path("_nested_admin/", include("nested_admin.urls")),
     *enhydris_telemetry_urlpatterns,
 ]

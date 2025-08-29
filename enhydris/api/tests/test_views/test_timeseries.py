@@ -22,16 +22,19 @@ from enhydris.tests import TimeseriesDataMixin
 class Tsdata404TestCase(APITestCase):
     def setUp(self):
         self.station = baker.make(models.Station)
+        self.timeseries_group = baker.make(models.TimeseriesGroup, gentity=self.station)
 
     def test_get_nonexistent_timeseries(self):
         response = self.client.get(
-            "/api/stations/{}/timeseries/1234/data/".format(self.station.id)
+            f"/api/stations/{self.station.id}/timeseriesgroups/"
+            f"{self.timeseries_group.id}/timeseries/1234/data/"
         )
         self.assertEqual(response.status_code, 404)
 
     def test_post_nonexistent_timeseries(self):
         response = self.client.post(
-            "/api/stations/{}/timeseries/1234/data/".format(self.station.id)
+            f"/api/stations/{self.station.id}/timeseriesgroups/"
+            f"{self.timeseries_group.id}/timeseries/1235/data/"
         )
         self.assertEqual(response.status_code, 404)
 

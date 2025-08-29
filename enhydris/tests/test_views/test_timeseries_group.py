@@ -1,31 +1,6 @@
 from django.test import TestCase, override_settings
 
-from model_bakery import baker
-
-from enhydris.models import Timeseries
 from enhydris.tests import TimeseriesDataMixin
-
-
-@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
-class RedirectOldUrlsTestCase(TestCase):
-    def test_old_timeseries_url_redirects(self):
-        baker.make(
-            Timeseries,
-            id=1169,
-            timeseries_group__id=100174,
-            timeseries_group__gentity__id=200348,
-        )
-        r = self.client.get("/timeseries/d/1169/")
-        self.assertRedirects(
-            r,
-            "/stations/200348/timeseriesgroups/100174/",
-            status_code=301,
-            fetch_redirect_response=False,
-        )
-
-    def test_old_timeseries_url_for_nonexistent_timeseries_returns_404(self):
-        r = self.client.get("/timeseries/d/1169/")
-        self.assertEqual(r.status_code, 404)
 
 
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)

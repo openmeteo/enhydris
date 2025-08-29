@@ -182,18 +182,10 @@ class TimeseriesViewSet(ModelViewSet):
         return [x() for x in pc]
 
     def get_queryset(self):
-        try:
-            return models.Timeseries.objects.filter(
-                timeseries_group_id=self.kwargs["timeseries_group_id"]
-            )
-        except KeyError:
-            # Sometimes we know the station_id but not the timeseries_group_id. This
-            # happens in backwards-compatible URLs like /api/stations/1403/timeseries/.
-            # We don't unit-test this since it's deprecated and will be removed in a
-            # future version.
-            return models.Timeseries.objects.filter(
-                timeseries_group__gentity_id=self.kwargs["station_id"]
-            )
+        return models.Timeseries.objects.filter(
+            timeseries_group__gentity__id=self.kwargs["station_id"],
+            timeseries_group_id=self.kwargs["timeseries_group_id"],
+        )
 
     def create(self, request, *args, **kwargs):
         """Redefine create, checking permissions and gentity_id.
