@@ -13,12 +13,10 @@ class SimpleBoundingBoxTestCase(APITestCase):
         baker.make(
             models.Station,
             geom=Point(x=21.06071, y=39.09518, srid=4326),
-            original_srid=4326,
         )
         baker.make(
             models.Station,
             geom=Point(x=21.60121, y=39.22440, srid=4326),
-            original_srid=4326,
         )
         response = self.client.get("/api/stations/")
         self.bounding_box = response.json()["bounding_box"]
@@ -63,12 +61,10 @@ class TooSmallBoundingBoxTestCase(APITestCase):
         baker.make(
             models.Station,
             geom=Point(x=21.06071, y=39.09518, srid=4326),
-            original_srid=4326,
         )
         baker.make(
             models.Station,
             geom=Point(x=21.60121, y=39.22440, srid=4326),
-            original_srid=4326,
         )
         response = self.client.get("/api/stations/")
         self.bounding_box = response.json()["bounding_box"]

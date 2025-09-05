@@ -20,12 +20,11 @@ from enhydris.tests import SeleniumTestCase, TimeseriesDataMixin
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationListTestCase(TestCase):
     @staticmethod
-    def _create_station(name, x, y, srid=4326, original_srid=4326):
+    def _create_station(name, x, y, srid=4326):
         baker.make(
             Station,
             name=name,
             geom=Point(x=x, y=y, srid=srid),
-            original_srid=original_srid,
         )
 
     @classmethod
@@ -37,9 +36,7 @@ class StationListTestCase(TestCase):
         create_station("Komboti", 21.06071, 39.09518)
         create_station("Agios Athanasios", 21.60121, 39.22440)
         create_station("Tharbad", -176.48368, 0.19377)
-        create_station("SRID Point, NoSRID Station", -176.48368, 0.19377, 4326, None)
-        create_station("NoSRID Point, SRID Station", -176.48368, 0.19377, None, 4326)
-        create_station("NoSRID Point, NoSRID Station", -176.48368, 0.19377, None, None)
+        create_station("NoSRID Point", -176.48368, 0.19377, None)
 
     def test_station_list(self):
         response = self.client.get("/?q=t")
@@ -165,7 +162,6 @@ class StationDetailPeriodOfOperationTestCase(TestCase):
             Station,
             name="Komboti",
             geom=Point(x=21.00000, y=39.00000, srid=4326),
-            original_srid=4326,
         )
 
     def _set_dates(self, start_date, end_date):
@@ -262,19 +258,16 @@ class ListStationsVisibleOnMapTestCase(SeleniumTestCase):
             Station,
             name="Komboti",
             geom=Point(x=21.06071, y=39.09518, srid=4326),
-            original_srid=4326,
         )
         baker.make(
             Station,
             name="Agios Athanasios",
             geom=Point(x=21.60121, y=39.22440, srid=4326),
-            original_srid=4326,
         )
         baker.make(
             Station,
             name="Tharbad",
             geom=Point(x=-176.48368, y=0.19377, srid=4326),
-            original_srid=4326,
         )
 
     def test_list_stations_visible_on_map(self):

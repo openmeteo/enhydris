@@ -34,15 +34,6 @@ class StationAdminForm(forms.ModelForm):
         label=_("Co-ordinates"),
         help_text=_("Longitude and latitude in decimal degrees"),
     )
-    original_srid = forms.IntegerField(
-        label=_("Original SRID"),
-        required=False,
-        help_text=_(
-            "Set this to 4326 if you have no idea what we're talking about. "
-            "If the latitude and longitude has been converted from another co-ordinate "
-            "system, enter the SRID of the original co-ordinate system."
-        ),
-    )
 
     class Meta:
         model = models.Station
@@ -366,7 +357,7 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
                     "fields": [
                         ("name", "code"),
                         "owner",
-                        ("geom", "original_srid"),
+                        "geom",
                         "altitude",
                         "remarks",
                         ("start_date", "end_date"),

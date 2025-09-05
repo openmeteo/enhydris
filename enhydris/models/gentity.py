@@ -77,25 +77,8 @@ class Gentity(models.Model):
 
 
 class Gpoint(Gentity):
-    original_srid = models.IntegerField(
-        null=True, blank=True, verbose_name=_("Original SRID")
-    )
     altitude = models.FloatField(null=True, blank=True, verbose_name=_("Altitude"))
     f_dependencies = ["Gentity"]
-
-    def original_abscissa(self):
-        if self.original_srid:
-            (x, y) = self.geom.transform(self.original_srid, clone=True)
-            return round(x, 2) if abs(x) > 180 and abs(y) > 90 else x
-        else:
-            return self.geom.x
-
-    def original_ordinate(self):
-        if self.original_srid:
-            (x, y) = self.geom.transform(self.original_srid, clone=True)
-            return round(y, 2) if abs(x) > 180 and abs(y) > 90 else y
-        else:
-            return self.geom.y
 
 
 class GareaCategory(Lookup):

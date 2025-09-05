@@ -44,7 +44,6 @@ class TestTimeseriesMixin(ClearCacheMixin):
         cls.station = baker.make(
             models.Station,
             name="Celduin",
-            original_srid=2100,
             geom=Point(x=21.06071, y=39.09518, srid=4326),
             altitude=219,
             display_timezone="Etc/GMT-2",
@@ -89,7 +88,6 @@ class TimeseriesDataMixin(ClearCacheMixin):
             models.Station,
             name="Komboti",
             geom=Point(x=21.00000, y=39.00000, srid=4326),
-            original_srid=4326,
             display_timezone=cls.timezone,
         )
         cls.variable = models.Variable()

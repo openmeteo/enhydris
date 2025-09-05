@@ -16,13 +16,6 @@
 
         <div>
           ϕ, λ = {{ object.gentity.geom.y | floatformat:5 }}, {{ object.gentity.geom.x | floatformat:5 }}
-          {% if object.gentity.gpoint.original_srid != 4326 %}
-            <p>
-              {% blocktrans with srid=object.gentity.gpoint.original_srid x=object.gentity.gpoint.original_abscissa y=object.gentity.gpoint.original_ordinate %}
-                (originally srid={{ srid }}, x={{ x }}, y={{ y }})
-              {% endblocktrans %}
-            </p>
-          {% endif %}
           {% if object.gentity.gpoint.altitude != None %}
             z = {{ object.gentity.gpoint.altitude|floatformat:2 }}
           {% endif %}

@@ -158,13 +158,6 @@ implemented by using Django's `multi-table inheritance`_.
 
 .. class:: enhydris.models.Gpoint(Gentity)
 
-   .. attribute:: enhydris.models.Gpoint.original_srid
-
-      Specifies the reference system in which the user originally
-      entered the co-ordinates of the point.  Valid *srid*'s are
-      registered at http://www.epsg-registry.org/.  See also
-      https://medium.com/@aptiko/introduction-to-geographical-co-ordinate-systems-4e143c5b21bc.
-
    .. attribute:: enhydris.models.Gpoint.altitude
 
       The altitude in metres above mean sea level.
