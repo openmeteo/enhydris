@@ -262,7 +262,9 @@ class RateOfChangeCheckTestCase(TestCase):
 
     def test_create_roc_check(self):
         checks = baker.make(Checks)
-        roc_check = RateOfChangeCheck(checks=checks, symmetric=True)
+        roc_check = RateOfChangeCheck(
+            checks=checks, symmetric=True, remove_failing_values=True
+        )
         roc_check.save()
         self.assertEqual(RateOfChangeCheck.objects.count(), 1)
 
@@ -366,7 +368,7 @@ class RateOfChangeCheckProcessTimeseriesTestCase(TestCase):
         index=_index,
     )
 
-    expected_result = pd.DataFrame(
+    expected_result_with_remove_failing_values = pd.DataFrame(
         data={
             "value": [1.5, np.nan, 3.1, np.nan, 3.8, np.nan, 7.2],
             "flags": ["", "TEMPORAL", "", "", "FLAG1", "FLAG2 TEMPORAL", "FLAG3"],
@@ -375,8 +377,17 @@ class RateOfChangeCheckProcessTimeseriesTestCase(TestCase):
         index=_index,
     )
 
-    def test_execute(self):
-        self.roc_check = baker.make(RateOfChangeCheck)
+    expected_result_without_remove_failing_values = pd.DataFrame(
+        data={
+            "value": [1.5, 8.9, 3.1, np.nan, 3.8, 11.9, 7.2],
+            "flags": ["", "TEMPORAL", "", "", "FLAG1", "FLAG2 TEMPORAL", "FLAG3"],
+        },
+        columns=["value", "flags"],
+        index=_index,
+    )
+
+    def test_execute_with_remove_failing_values(self):
+        self.roc_check = baker.make(RateOfChangeCheck, remove_failing_values=True)
         baker.make(
             RateOfChangeThreshold,
             rate_of_change_check=self.roc_check,
@@ -385,4 +396,20 @@ class RateOfChangeCheckProcessTimeseriesTestCase(TestCase):
         )
         self.roc_check.checks._htimeseries = HTimeseries(self.source_timeseries)
         result = self.roc_check.checks.process_timeseries()
-        pd.testing.assert_frame_equal(result, self.expected_result)
+        pd.testing.assert_frame_equal(
+            result, self.expected_result_with_remove_failing_values
+        )
+
+    def test_execute_without_remove_failing_values(self):
+        self.roc_check = baker.make(RateOfChangeCheck, remove_failing_values=False)
+        baker.make(
+            RateOfChangeThreshold,
+            rate_of_change_check=self.roc_check,
+            delta_t="10min",
+            allowed_diff=7.0,
+        )
+        self.roc_check.checks._htimeseries = HTimeseries(self.source_timeseries)
+        result = self.roc_check.checks.process_timeseries()
+        pd.testing.assert_frame_equal(
+            result, self.expected_result_without_remove_failing_values
+        )

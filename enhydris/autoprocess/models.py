@@ -216,6 +216,14 @@ class RateOfChangeCheck(models.Model):
         ),
         verbose_name=_("Symmetric"),
     )
+    remove_failing_values = models.BooleanField(
+        help_text=_(
+            "If this is selected, records that fail the test will be set to null, "
+            "otherwise they will be left as is. In both cases, the TEMPORAL flag will "
+            "be applied to the affected records."
+        ),
+        verbose_name=_("Remove failing values"),
+    )
     objects = SelectRelatedManager()
 
     class Meta:
@@ -236,7 +244,8 @@ class RateOfChangeCheck(models.Model):
             flag="TEMPORAL",
         )
         data = source_htimeseries.data
-        data.loc[data["flags"].str.contains("TEMPORAL"), "value"] = np.nan
+        if self.remove_failing_values:
+            data.loc[data["flags"].str.contains("TEMPORAL"), "value"] = np.nan
         return source_htimeseries
 
     @property
