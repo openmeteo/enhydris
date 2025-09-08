@@ -118,7 +118,8 @@ class Checks(AutoProcess):
     @property
     def target_timeseries(self):
         obj, created = self.timeseries_group.timeseries_set.get_or_create(
-            type=Timeseries.CHECKED
+            type=Timeseries.CHECKED,
+            defaults={"time_step": self.source_timeseries.time_step},
         )
         return obj
 

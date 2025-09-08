@@ -76,6 +76,18 @@ class ChecksTestCase(TestCase):
         checks.target_timeseries.id
         self.assertTrue(Timeseries.objects.exists())
 
+    def test_target_timeseries_has_same_time_step_as_source(self):
+        timeseries_group = baker.make(TimeseriesGroup)
+        baker.make(
+            Timeseries,
+            timeseries_group=timeseries_group,
+            type=Timeseries.INITIAL,
+            time_step="15min",
+        )  # source time series
+        checks = baker.make(Checks, timeseries_group=timeseries_group)
+        self.assertEqual(checks.target_timeseries.time_step, "15min")
+        self.assertTrue(Timeseries.objects.exists())
+
     @mock.patch("enhydris.autoprocess.models.RangeCheck.check_timeseries")
     @mock.patch("enhydris.models.Timeseries.append_data")
     def test_runs_range_check(self, m1, m2):
