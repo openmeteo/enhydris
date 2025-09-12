@@ -1,7 +1,6 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from enhydris.telemetry import TelemetryError
 from enhydris.telemetry.models import Telemetry, timezone_choices
 
 
@@ -43,6 +42,8 @@ class ConnectionDataForm(FormBase):
             self.fields["data_timezone"].required = False
 
     def clean(self):
+        from enhydris.telemetry import TelemetryError
+
         cleaned_data = super().clean()
         try:
             telemetry = Telemetry(
@@ -65,12 +66,20 @@ class ChooseStationForm(FormBase):
         user = self.initial["username"]
         passwd = self.initial["password"]
         loc = self.initial["device_locator"]
-        telemetry = Telemetry(username=user, password=passwd, device_locator=loc)
+        telemetry = Telemetry(
+            username=user,
+            password=passwd,
+            device_locator=loc,
+            additional_config=self.initial.get("additional_config", {}),
+        )
         with self.driver(telemetry) as api_client:
             stations = api_client.get_stations()
         choices = []
         for key, value in stations.items():
-            choices.append((key, f"{value} ({key})"))
+            if value:
+                choices.append((key, f"{value} ({key})"))
+            else:
+                choices.append((key, key))
         self.fields["remote_station_id"].choices = choices
 
 
@@ -85,6 +94,7 @@ class ChooseSensorForm(FormBase):
             device_locator=self.initial["device_locator"],
             station=self.station,
             remote_station_id=self.initial["remote_station_id"],
+            additional_config=self.initial.get("additional_config", {}),
         )
         with self.driver(telemetry) as api_client:
             sensors = api_client.get_sensors()
@@ -96,11 +106,15 @@ class ChooseSensorForm(FormBase):
             [(tg.id, f"{tg.name} ({tg.id})") for tg in timeseries_groups.all()]
         )
         for sensor_id, sensor_name in sensors.items():
+            if sensor_name:
+                sensor_label = f'"{sensor_name}" ({sensor_id})'
+            else:
+                sensor_label = f'"{sensor_id}"'
             self.fields[f"sensor_{sensor_id}"] = forms.ChoiceField(
                 label=_(
                     "To which Enhydris time series does sensor "
-                    '"{sensor_name}" ({sensor_id}) correspond?'
-                ).format(sensor_name=sensor_name, sensor_id=sensor_id),
+                    "{sensor_label} correspond?"
+                ).format(sensor_label=sensor_label),
                 choices=choices,
                 required=False,
             )

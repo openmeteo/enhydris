@@ -11,12 +11,7 @@ from rules.contrib.views import PermissionRequiredMixin
 
 from enhydris.models import Station
 from enhydris.telemetry import drivers
-from enhydris.telemetry.forms import (
-    ChooseSensorForm,
-    ChooseStationForm,
-    ConnectionDataForm,
-    EssentialDataForm,
-)
+from enhydris.telemetry.forms import EssentialDataForm
 from enhydris.telemetry.models import Sensor, Telemetry, TelemetryLogMessage
 
 
@@ -26,7 +21,6 @@ class RedirectToFirstStep(Exception):
 
 class TelemetryWizardView(PermissionRequiredMixin, View):
     permission_required = "enhydris.change_station"
-    forms = [EssentialDataForm, ConnectionDataForm, ChooseStationForm, ChooseSensorForm]
 
     def get_permission_object(self):
         return self.station
@@ -50,12 +44,15 @@ class TelemetryWizardView(PermissionRequiredMixin, View):
             return self._process_get()
 
     def _get_form_from_request(self):
-        Form = self.forms[self.seq - 1]
-
         if self.seq == 1:
             self.copy_telemetry_data_from_database_to_session()
         self.session_config = self._get_station_telemetry_data_from_session()
         self.driver = drivers.get(self.session_config["type"])
+
+        if self.seq == 1:
+            Form = EssentialDataForm
+        else:
+            Form = self.driver.forms[self.seq - 1]
 
         if self.request.method == "POST":
             form = Form(
@@ -112,7 +109,7 @@ class TelemetryWizardView(PermissionRequiredMixin, View):
 
     def _process_valid_form_post_of_step_gte_2(self):
         self._update_session_data(self.form.cleaned_data)
-        if self.seq < len(self.forms):
+        if self.seq < len(self.driver.forms):
             # Non-final step
             kwargs = {"station_id": self.station.id, "seq": self.seq + 1}
             target = reverse("telemetry_wizard", kwargs=kwargs)
@@ -156,7 +153,7 @@ class TelemetryWizardView(PermissionRequiredMixin, View):
                 "form": self.form,
                 "seq": self.seq,
                 "prev_seq": self.seq - 1,
-                "max_seq": len(self.forms),
+                "max_seq": len(self.driver.forms) if self.driver else 4,
             },
         )
 

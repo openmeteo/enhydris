@@ -15,7 +15,6 @@ import iso8601
 
 import enhydris
 from enhydris.models import Station, Timeseries, TimeseriesGroup
-from enhydris.telemetry import drivers
 
 
 def fix_zone_name(timezone):
@@ -27,6 +26,12 @@ def fix_zone_name(timezone):
         return timezone
 
 
+def _get_type_choices():
+    from enhydris.telemetry import drivers
+
+    return sorted([(x, drivers[x].name) for x in drivers], key=lambda x: x[1])
+
+
 timezones = zoneinfo.available_timezones()
 timezone_choices = [(zone, fix_zone_name(zone)) for zone in timezones]
 timezone_choices.sort()
@@ -36,7 +41,7 @@ class Telemetry(models.Model):
     station = models.OneToOneField(Station, on_delete=models.CASCADE)
     type = models.CharField(
         max_length=30,
-        choices=sorted([(x, drivers[x].name) for x in drivers], key=lambda x: x[1]),
+        choices=_get_type_choices,
         verbose_name=_("Telemetry system type"),
         help_text=_(
             "The type of the system from which the data is to be fetched. "
@@ -129,7 +134,7 @@ class Telemetry(models.Model):
 
 class Sensor(models.Model):
     telemetry = models.ForeignKey(Telemetry, on_delete=models.CASCADE)
-    sensor_id = models.CharField(max_length=20, blank=False)
+    sensor_id = models.CharField(max_length=200, blank=False)
     timeseries_group = models.ForeignKey(TimeseriesGroup, on_delete=models.CASCADE)
 
     class Meta:

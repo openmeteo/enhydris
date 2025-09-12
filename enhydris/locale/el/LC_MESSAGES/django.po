@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-08 07:06-0500\n"
+"POT-Creation-Date: 2025-09-12 04:35-0500\n"
 "PO-Revision-Date: 2011-11-24 14:33+0200\n"
 "Last-Translator: Antonis Christofides <anthony@itia.ntua.gr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -872,28 +872,25 @@ msgstr "Η χρονοσειρά \"{}\" εισήχθη επιτυχώς"
 msgid "Importing time series \"{}\" failed"
 msgstr "Η εισαγωγή της χρονοσειράς \"{}\" απέτυχε"
 
-#: enhydris/telemetry/forms.py:94
+#: enhydris/telemetry/forms.py:104
 msgid "Ignore this sensor"
 msgstr "Να αγνοηθεί αυτός ο αισθητήρας"
 
-#: enhydris/telemetry/forms.py:101
-#, python-brace-format
-msgid ""
-"To which Enhydris time series does sensor \"{sensor_name}\" ({sensor_id}) "
-"correspond?"
+#: enhydris/telemetry/forms.py:115
+msgid "To which Enhydris time series does sensor {sensor_label} correspond?"
 msgstr ""
 "Σε ποια χρονοσειρά της Ενυδρίδας αντιστοιχεί ο αισθητήρας "
-"\"{sensor_name}\" ({sensor_id});"
+"\"{sensor_label}\";"
 
-#: enhydris/telemetry/forms.py:116
+#: enhydris/telemetry/forms.py:130
 msgid "A given time series may be specified for only one sensor"
 msgstr "Μια χρονοσειρά επιτρέπεται να προσδιοριστεί μόνο για έναν αισθητήρα"
 
-#: enhydris/telemetry/models.py:40
+#: enhydris/telemetry/models.py:45
 msgid "Telemetry system type"
 msgstr "Τύπος τηλεμετρικού συστήματος"
 
-#: enhydris/telemetry/models.py:42
+#: enhydris/telemetry/models.py:47
 msgid ""
 "The type of the system from which the data is to be fetched. If unlisted, it "
 "might mean that it is currently unsupported."
@@ -902,28 +899,28 @@ msgstr ""
 "αναφέρεται στον κατάλογο, αυτό συνήθως σημαίνει ότι προς το παρόν δεν "
 "υποστηρίζεται."
 
-#: enhydris/telemetry/models.py:50
+#: enhydris/telemetry/models.py:55
 msgid "Time zone of the timestamps"
 msgstr "Ζώνη ώρας των χρονοσφραγίδων"
 
-#: enhydris/telemetry/models.py:51
+#: enhydris/telemetry/models.py:56
 msgid "The time zone of the data, like \"Europe/Athens\" or \"Etc/GMT\"."
 msgstr ""
 
-#: enhydris/telemetry/models.py:55
+#: enhydris/telemetry/models.py:60
 msgid "Fetch interval (how often to fetch data), in minutes"
 msgstr "Διάστημα λήψης (πόσο συχνά να λαμβάνονται δεδομένα), σε λεπτά"
 
-#: enhydris/telemetry/models.py:56
+#: enhydris/telemetry/models.py:61
 msgid "E.g. 60 to fetch data every 60 minutes, 1440 for once a day"
 msgstr ""
 "Π.χ. 60 για να λαμβάνονται δεδομένα κάθε 60 λεπτά, 1440 για άπαξ ημερησίως"
 
-#: enhydris/telemetry/models.py:60
+#: enhydris/telemetry/models.py:65
 msgid "Fetch time offset, in minutes"
 msgstr "Καθυστέρηση λήψης, σε λεπτά"
 
-#: enhydris/telemetry/models.py:62
+#: enhydris/telemetry/models.py:67
 msgid ""
 "If the fetch interval is 10 and the offset is 2, then data will be fetched "
 "at :02, :12, :22, etc. If the fetch interval is 1440 and the offset is 125, "
@@ -1034,15 +1031,15 @@ msgstr "Τέλος"
 msgid "Next"
 msgstr "Επόμενη"
 
-#: enhydris/telemetry/types/__init__.py:5
+#: enhydris/telemetry/types/__init__.py:12
 msgid "URL"
 msgstr ""
 
-#: enhydris/telemetry/types/__init__.py:9
+#: enhydris/telemetry/types/__init__.py:16
 msgid "Username"
 msgstr "Χρήστης"
 
-#: enhydris/telemetry/types/__init__.py:10
+#: enhydris/telemetry/types/__init__.py:17
 msgid "Password"
 msgstr "Password"
 
@@ -1057,6 +1054,39 @@ msgid ""
 msgstr ""
 "Χρησιμοποιήστε τη μορφή \"https://hostname:port\" ή \"https://hostname\". "
 "Μπορείτε να χρησιμοποιήσετε http αντί για https, αλλά δεν συνιστάται."
+
+#: enhydris/telemetry/types/influxdb.py:19
+msgid "The InfluxDB \"bucket\"."
+msgstr "Το \"bucket\"."
+
+#: enhydris/telemetry/types/influxdb.py:21
+msgid "The InfluxDB \"measurement\"; i.e. the group of relevant data."
+msgstr "Το \"measurement\", δηλαδή, στην ορολογία του InfluxDB, το σύνολο των σχετικών δεδομένων."
+
+#: enhydris/telemetry/types/influxdb.py:24
+msgid "The InfluxDB tag that can be used to identify stations."
+msgstr "Το InfluxDB tag που μπορεί να χρησιμοποιηθεί για ταυτοποίηση σταθμών."
+
+#: enhydris/telemetry/types/influxdb.py:53
+msgid "No stations found. Check the \"measurement\" and \"station tag\""
+msgstr "Δεν βρέθηκαν σταθμοί. Ελέγξτε τα \"measurement\" και \"station tag\""
+
+#: enhydris/telemetry/types/influxdb.py:59
+msgctxt "InfluxDB API term"
+msgid "Organization"
+msgstr "Organization"
+
+#: enhydris/telemetry/types/influxdb.py:60
+msgid "API token"
+msgstr "API token"
+
+#: enhydris/telemetry/types/influxdb.py:61
+msgid "InfluxDB API URL"
+msgstr "InfluxDB API URL"
+
+#: enhydris/telemetry/types/influxdb.py:62
+msgid "For example, https://influxdb.example.com/api/v2/."
+msgstr "Για παράδειγμα, https://influxdb.example.com/api/v2/."
 
 #: enhydris/telemetry/types/meteoview2.py:15
 msgid "Email"
@@ -1075,7 +1105,7 @@ msgid "If this is left blank, https://meteoview2.gr/api/ will be used."
 msgstr ""
 "Αν το αφήσετε κενό, θα χρησιμοποιηθεί η τιμή https://meteoview2.gr/api/."
 
-#: enhydris/telemetry/views.py:124
+#: enhydris/telemetry/views.py:121
 msgid "Telemetry has been configured"
 msgstr "Η τηλεμετρία ορίστηκε"
 

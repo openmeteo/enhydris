@@ -1,5 +1,12 @@
 from django.utils.translation import gettext_lazy as _
 
+from enhydris.telemetry.forms import (
+    ChooseSensorForm,
+    ChooseStationForm,
+    ConnectionDataForm,
+    EssentialDataForm,
+)
+
 
 class TelemetryAPIClientBase:
     device_locator_label = _("URL")
@@ -8,6 +15,7 @@ class TelemetryAPIClientBase:
     hide_data_timezone = False
     username_label = _("Username")
     password_label = _("Password")
+    forms = [EssentialDataForm, ConnectionDataForm, ChooseStationForm, ChooseSensorForm]
 
     def __init__(self, telemetry):
         self.telemetry = telemetry
