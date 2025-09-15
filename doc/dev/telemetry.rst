@@ -220,6 +220,13 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
       form. This is useful for APIs that are served from a well-known
       location for all stations, such as TheThingsNetwork.
 
+   .. attribute:: hide_username
+      :type: boolean
+
+      The default is :const:`False`. Set it to :const:`True` if that
+      particular driver shouldn't show the username in the connection
+      data form (e.g. if the API just requires an API token).
+
    .. attribute:: hide_data_timezone
       :type: boolean
 
@@ -230,6 +237,24 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
 
       If :const:`True`, the timestamps in the return value of
       :meth:`get_measurements` must be in UTC.
+
+   .. attribute:: sensor_prompt
+      :type: str
+
+      The default is something along the lines of "To which Enhydris
+      time series does sensor X correspond?". It is shown in the
+      (usually) last step of the form. A different one can be specified
+      here if the default doesn't make much sense (e.g. if the remote
+      system is a database that has time series that aren't "sensors").
+
+   .. attribute:: ignore_sensor_prompt
+      :type: str
+
+      To the question posed by :attr:`sensor_prompt` there's a dropdown
+      with possible answers. One of these answers is, by default,
+      "Ignore this sensor". A different phrasing can be specified here
+      if the default doesn't make much sense (e.g. if the remote system
+      is a database that has time series that aren't "sensors").
 
    .. attribute:: forms
       :type: list

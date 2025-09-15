@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-12 04:35-0500\n"
+"POT-Creation-Date: 2025-09-15 06:43-0500\n"
 "PO-Revision-Date: 2011-11-24 14:33+0200\n"
 "Last-Translator: Antonis Christofides <anthony@itia.ntua.gr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -872,17 +872,7 @@ msgstr "Η χρονοσειρά \"{}\" εισήχθη επιτυχώς"
 msgid "Importing time series \"{}\" failed"
 msgstr "Η εισαγωγή της χρονοσειράς \"{}\" απέτυχε"
 
-#: enhydris/telemetry/forms.py:104
-msgid "Ignore this sensor"
-msgstr "Να αγνοηθεί αυτός ο αισθητήρας"
-
-#: enhydris/telemetry/forms.py:115
-msgid "To which Enhydris time series does sensor {sensor_label} correspond?"
-msgstr ""
-"Σε ποια χρονοσειρά της Ενυδρίδας αντιστοιχεί ο αισθητήρας "
-"\"{sensor_label}\";"
-
-#: enhydris/telemetry/forms.py:130
+#: enhydris/telemetry/forms.py:129
 msgid "A given time series may be specified for only one sensor"
 msgstr "Μια χρονοσειρά επιτρέπεται να προσδιοριστεί μόνο για έναν αισθητήρα"
 
@@ -905,7 +895,7 @@ msgstr "Ζώνη ώρας των χρονοσφραγίδων"
 
 #: enhydris/telemetry/models.py:56
 msgid "The time zone of the data, like \"Europe/Athens\" or \"Etc/GMT\"."
-msgstr ""
+msgstr "Η ζώνη ώρας των δεδομένων, όπως \"Europe/Athens\" ή \"Etc/GMT\"."
 
 #: enhydris/telemetry/models.py:60
 msgid "Fetch interval (how often to fetch data), in minutes"
@@ -1035,13 +1025,23 @@ msgstr "Επόμενη"
 msgid "URL"
 msgstr ""
 
-#: enhydris/telemetry/types/__init__.py:16
+#: enhydris/telemetry/types/__init__.py:17
 msgid "Username"
 msgstr "Χρήστης"
 
-#: enhydris/telemetry/types/__init__.py:17
+#: enhydris/telemetry/types/__init__.py:18
 msgid "Password"
 msgstr "Password"
+
+#: enhydris/telemetry/types/__init__.py:21
+#, python-brace-format
+msgid "To which Enhydris time series does sensor {sensor_label} correspond?"
+msgstr ""
+"Σε ποια χρονοσειρά της Ενυδρίδας αντιστοιχεί ο αισθητήρας \"{sensor_label}\";"
+
+#: enhydris/telemetry/types/__init__.py:23
+msgid "Ignore this sensor"
+msgstr "Να αγνοηθεί αυτός ο αισθητήρας"
 
 #: enhydris/telemetry/types/addupi.py:14
 msgid "Gateway or addVANTAGE server URL"
@@ -1055,13 +1055,39 @@ msgstr ""
 "Χρησιμοποιήστε τη μορφή \"https://hostname:port\" ή \"https://hostname\". "
 "Μπορείτε να χρησιμοποιήσετε http αντί για https, αλλά δεν συνιστάται."
 
+#: enhydris/telemetry/types/enhydris.py:16
+#: enhydris/telemetry/types/influxdb.py:60
+msgid "API token"
+msgstr "API token"
+
+#: enhydris/telemetry/types/enhydris.py:17
+msgid "Location of the other Enhydris instance"
+msgstr "URL της άλλης εγκατάστασης Ενυδρίδας"
+
+#: enhydris/telemetry/types/enhydris.py:18
+msgid "For example, https://enhydris.example.com/."
+msgstr "Για παράδειγμα, https://enhydris.example.com/."
+
+#: enhydris/telemetry/types/enhydris.py:22
+msgid ""
+"To which local time series does the remote time series {sensor_label} "
+"correspond?"
+msgstr ""
+"Σε ποια τοπική χρονοσειρά αντιστοιχεί η απομακρυσμένη \"{sensor_label}\";"
+
+#: enhydris/telemetry/types/enhydris.py:25
+msgid "Ignore this remote time series"
+msgstr "Να αγνοηθεί αυτή η απομακρυσμένη χρονοσειρά"
+
 #: enhydris/telemetry/types/influxdb.py:19
 msgid "The InfluxDB \"bucket\"."
 msgstr "Το \"bucket\"."
 
 #: enhydris/telemetry/types/influxdb.py:21
 msgid "The InfluxDB \"measurement\"; i.e. the group of relevant data."
-msgstr "Το \"measurement\", δηλαδή, στην ορολογία του InfluxDB, το σύνολο των σχετικών δεδομένων."
+msgstr ""
+"Το \"measurement\", δηλαδή, στην ορολογία του InfluxDB, το σύνολο των "
+"σχετικών δεδομένων."
 
 #: enhydris/telemetry/types/influxdb.py:24
 msgid "The InfluxDB tag that can be used to identify stations."
@@ -1075,10 +1101,6 @@ msgstr "Δεν βρέθηκαν σταθμοί. Ελέγξτε τα \"measuremen
 msgctxt "InfluxDB API term"
 msgid "Organization"
 msgstr "Organization"
-
-#: enhydris/telemetry/types/influxdb.py:60
-msgid "API token"
-msgstr "API token"
 
 #: enhydris/telemetry/types/influxdb.py:61
 msgid "InfluxDB API URL"
@@ -1533,46 +1555,3 @@ msgstr "Εγγραφή"
 #, python-brace-format
 msgid "Method \"{method}\" not allowed."
 msgstr "Η μέθοδος \"{method}\" δεν επιτρέπεται."
-
-#~ msgid "Original SRID"
-#~ msgstr "Αρχικό SRID"
-
-#~ msgid ""
-#~ "Set this to 4326 if you have no idea what we're talking about. If the "
-#~ "latitude and longitude has been converted from another co-ordinate "
-#~ "system, enter the SRID of the original co-ordinate system."
-#~ msgstr ""
-#~ "Αν δεν ξέρετε για ποιο πράγμα μιλάμε, ορίστε την τιμή 4326. Αν το "
-#~ "γεωγραφικό πλάτος και μήκος έχουν βρεθεί με μετατροπή από άλλο σύστημα "
-#~ "συντεταγμένων, προσδιορίστε το SRID εκείνου του συστήματος."
-
-#, python-format
-#~ msgid ""
-#~ "\n"
-#~ "                (originally srid=%(srid)s, x=%(x)s, y=%(y)s)\n"
-#~ "              "
-#~ msgstr ""
-#~ "\n"
-#~ "          (με μετατροπή από srid=%(srid)s, x=%(x)s, y=%(y)s)\n"
-#~ "        "
-
-#~ msgid "Time zone of the timestamps (useful only for DST switches)"
-#~ msgstr ""
-#~ "Ζώνη ώρας των χρονοσφραγίδων (χρήσιμο μόνο για αλλαγές σε θερινή ώρα)"
-
-#~ msgid ""
-#~ "If the station switches to Daylight Saving Time, enter the time zone "
-#~ "here. This is only used in order to know when the DST switches occur. The "
-#~ "timestamp, after converting to winter time, is entered as is. If the "
-#~ "station does not switch to DST, leave this field empty."
-#~ msgstr ""
-#~ "Αν ο σταθμός αλλάζει σε θερινή ώρα, προσδιορίστε τη ζώνη ώρας εδώ. Αυτό "
-#~ "χρησιμοποιείται μόνο για να γνωρίζουμε πότε γίνονται οι αλλαγές σε θερινή "
-#~ "ώρα. Η χρονοσφραγίδα, αφού μετατραπεί σε χειμερινή ώρα, αποθηκεύεται όπως "
-#~ "είναι. Αν ο σταθμός δεν αλλάζει σε θερινή ώρα, αφήστε το πεδίο κενό."
-
-#~ msgid "The time zone to which the fetch time offset refers."
-#~ msgstr "Η ζώνη ώρας στην οποία αναφέρεται η καθυστέρηση λήψης."
-
-#~ msgid "Unauthorized"
-#~ msgstr "Δεν έχετε δικαίωμα λήψης"
