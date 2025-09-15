@@ -110,7 +110,10 @@ class TimeseriesGroupFormTestCaseBase(TestCaseBase):
     def _create_roc_check(cls):
         cls._ensure_we_have_checks()
         cls.roc_check = baker.make(
-            models.RateOfChangeCheck, checks=cls.checks, symmetric=True
+            models.RateOfChangeCheck,
+            checks=cls.checks,
+            symmetric=True,
+            remove_failing_values=True,
         )
         cls.roc_check.set_thresholds("10min\t25.0\n1h\t35.0\n")
 
@@ -318,6 +321,7 @@ class TimeseriesGroupFormCreatesRocCheckTestCase(TimeseriesGroupFormTestCaseBase
         data = {
             **self._get_basic_form_contents(),
             "timeseriesgroup_set-0-rocc_symmetric": True,
+            "timeseriesgroup_set-0-rocc_remove_failing_values": True,
             "timeseriesgroup_set-0-rocc_thresholds": "10min 25.0\n1h 35",
         }
         response = self._post_form(data)
@@ -352,6 +356,7 @@ class TimeseriesGroupFormSavesExistingRocCheckTestCase(
             "timeseriesgroup_set-0-id": self.timeseries_group.id,
             "timeseriesgroup_set-0-gentity": self.station.id,
             "timeseriesgroup_set-0-rocc_symmetric": True,
+            "timeseriesgroup_set-0-rocc_remove_failing_values": True,
             "timeseriesgroup_set-0-rocc_thresholds": "10min 25.0\n1h 35",
         }
         response = self._post_form(data)
@@ -382,6 +387,7 @@ class TimeseriesGroupFormDeletesRocCheckTestCase(TimeseriesGroupFormTestCaseBase
             "timeseriesgroup_set-0-soft_upper_bound": "5",
             "timeseriesgroup_set-0-upper_bound": "6",
             "timeseriesgroup_set-0-rocc_symmetric": True,
+            "timeseriesgroup_set-0-rocc_remove_failing_values": True,
             "timeseriesgroup_set-0-rocc_thresholds": "",
         }
         response = self._post_form(data)

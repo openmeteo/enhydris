@@ -12,6 +12,16 @@ Development
 Changes from 4.0
 ----------------
 
+* The field ``Gpoint.original_srid``` has been abolished. In the old
+  times the user could specify the CRS of the co-ordinates of a
+  station, but for some time the co-ordinates were always being stored
+  in WGS84; but if the station's co-ordinates, before being entered into
+  the database, had been in a different co-ordinate system, this field
+  could be used as an informative indication of where the data came
+  from. However it was more trouble than it was worth, not to mention
+  the fact that converting the co-ordinates back to the supposed
+  original wasn't really possible without knowing the details of the
+  transformation.
 * Apps ``enhydris-synoptic`` and ``enhydris-autoprocess``, which were
   third-party, have been included in Enhydris as ``enhydris.synoptic``
   and ``enhydris.autoprocess``.

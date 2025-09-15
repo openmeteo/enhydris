@@ -11,7 +11,7 @@ from model_bakery import baker
 from enhydris.models import Station, TimeseriesGroup
 from enhydris.telemetry.forms import ConnectionDataForm
 from enhydris.telemetry.models import Telemetry
-from enhydris.telemetry.views import TelemetryWizardView
+from enhydris.telemetry.types import meteoview2
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
@@ -422,14 +422,16 @@ class FinalStepPostSuccessfulMixin(SecondStepPostSuccessfulMixin):
     # to fool the system into thinking it's the final step.
     @classmethod
     def setUpClass(cls):
-        cls.saved_forms = TelemetryWizardView.forms
-        TelemetryWizardView.forms = TelemetryWizardView.forms[:2]
+        c = meteoview2.TelemetryAPIClient
+        cls.saved_forms = c.forms
+        c.forms = c.forms[:2]
         super().setUpClass()
 
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
-        TelemetryWizardView.forms = cls.saved_forms
+        c = meteoview2.TelemetryAPIClient
+        c.forms = cls.saved_forms
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
@@ -557,10 +559,10 @@ class NextOrFinishButtonTestCase(TestCase):
         }
         session.save()
 
-        self.saved_forms = TelemetryWizardView.forms
+        self.saved_forms = meteoview2.TelemetryAPIClient.forms
 
     def tearDown(self):
-        TelemetryWizardView.forms = self.saved_forms
+        meteoview2.TelemetryAPIClient.forms = self.saved_forms
 
     def _get_button_text_for_step_2(self):
         response = self.client.get(f"/stations/{self.station.id}/telemetry/2/")
@@ -572,7 +574,8 @@ class NextOrFinishButtonTestCase(TestCase):
         self.assertEqual(button_text, "Next")
 
     def test_button_says_finish_in_final_step(self, m):
-        TelemetryWizardView.forms = TelemetryWizardView.forms[:2]
+        c = meteoview2.TelemetryAPIClient
+        c.forms = c.forms[:2]
         button_text = self._get_button_text_for_step_2()
         self.assertEqual(button_text, "Finish")
 

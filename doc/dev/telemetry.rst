@@ -176,8 +176,8 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
    :class:`~enhydris.telemetry.models.Telemetry` object, which becomes
    the :attr:`telemetry` attribute.
 
-   :class:`TelemetryAPIClient` classes must define the following attributes,
-   methods and properties:
+   :class:`TelemetryAPIClient` classes may define the following
+   attributes, methods and properties (some of them must be defined):
 
    .. attribute:: name
       :type: string
@@ -224,13 +224,20 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
       :type: boolean
 
       The default is :const:`False`. Set it to :const:`True` if that
-      particular driver shouldn't show the device locator (i.e. the URL
-      or hostname or IP address of the device) in the data form. This is
-      useful for APIs that are known to always provide timestamps in a
-      given time zone.
+      particular driver shouldn't show the data timezone field in the
+      data form. This is useful for APIs that are known to always
+      provide timestamps in a given time zone.
 
       If :const:`True`, the timestamps in the return value of
       :meth:`get_measurements` must be in UTC.
+
+   .. attribute:: forms
+      :type: list
+
+      The forms that appear in the wizard. The base class provides a
+      default that is suitable for most telemetry types, but it can be
+      overridden (see :file:`influxdb.py` for an example that overrides
+      :attr:`forms`).
 
    .. method:: connect() -> None
                disconnect() -> None

@@ -172,9 +172,9 @@ class Timeseries(models.Model):
     def _set_extra_timeseries_properties(self, ahtimeseries, timezone):
         if self.timeseries_group.gentity.geom:
             location = {
-                "abscissa": self.timeseries_group.gentity.gpoint.original_abscissa(),
-                "ordinate": self.timeseries_group.gentity.gpoint.original_ordinate(),
-                "srid": self.timeseries_group.gentity.gpoint.original_srid,
+                "abscissa": self.timeseries_group.gentity.gpoint.geom.x,
+                "ordinate": self.timeseries_group.gentity.gpoint.geom.y,
+                "srid": 4326,
                 "altitude": self.timeseries_group.gentity.gpoint.altitude,
             }
         else:

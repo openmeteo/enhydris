@@ -25,13 +25,6 @@
         </div>
         <div>
           ϕ, λ = {{ station.geom.y | floatformat:5 }}, {{ station.geom.x | floatformat:5 }}
-          {% if station.original_srid != 4326 %}
-            <p>
-              {% blocktrans with srid=station.original_srid x=station.original_abscissa y=station.original_ordinate %}
-                (originally srid={{ srid }}, x={{ x }}, y={{ y }})
-              {% endblocktrans %}
-            </p>
-          {% endif %}
           {% if station.altitude != None %}
             z = {{ station.altitude|floatformat:2 }}
           {% endif %}
