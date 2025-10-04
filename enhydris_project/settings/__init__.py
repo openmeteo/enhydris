@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "enhydris.api",
     "enhydris.synoptic",
     "enhydris.autoprocess",
+    "grappelli",
     "django.contrib.admin",
     "rules.apps.AutodiscoverRulesConfig",
     "parler",

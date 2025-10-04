@@ -14,7 +14,12 @@
       {% block main_menu %}
         {% if user.is_authenticated %}
           <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">{% trans "dashboard" %}</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'auth_logout' %}?next={{request.path}}">{% blocktrans with username=user.username %}logout {{username }} {% endblocktrans %}</a></li>
+          <li class="nav-item">
+            <form action="{% url 'auth_logout' %}?next={{request.path}}" method="post" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="nav-link btn btn-link" style="padding:0;">{% blocktrans with username=user.username %}logout {{username }} {% endblocktrans %}</button>
+            </form>
+          </li>
         {% else %}
           {% if REGISTRATION_OPEN %}
             <li class="nav-item"><a class="nav-link" href="{% url 'registration_register' %}">{% trans "register" %}</a></li>

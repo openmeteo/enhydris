@@ -130,6 +130,18 @@ class ConnectionDataFormHideStuffTestCase(TestCase):
             form.fields["device_locator"].widget.__class__.__name__, "TextInput"
         )
 
+    def test_username_hidden(self):
+        TestTelemetryAPIClient.hide_username = True
+        form = ConnectionDataForm(*self.form_args, **self.form_kwargs)
+        self.assertEqual(
+            form.fields["username"].widget.__class__.__name__, "HiddenInput"
+        )
+
+    def test_username_not_hidden(self):
+        TestTelemetryAPIClient.hide_username = False
+        form = ConnectionDataForm(*self.form_args, **self.form_kwargs)
+        self.assertEqual(form.fields["username"].widget.__class__.__name__, "TextInput")
+
     def test_data_timezone_hidden(self):
         TestTelemetryAPIClient.hide_data_timezone = True
         form = ConnectionDataForm(*self.form_args, **self.form_kwargs)

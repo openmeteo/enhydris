@@ -34,15 +34,6 @@ class StationAdminForm(forms.ModelForm):
         label=_("Co-ordinates"),
         help_text=_("Longitude and latitude in decimal degrees"),
     )
-    original_srid = forms.IntegerField(
-        label=_("Original SRID"),
-        required=False,
-        help_text=_(
-            "Set this to 4326 if you have no idea what we're talking about. "
-            "If the latitude and longitude has been converted from another co-ordinate "
-            "system, enter the SRID of the original co-ordinate system."
-        ),
-    )
 
     class Meta:
         model = models.Station
@@ -100,12 +91,14 @@ class GentityFileInline(InlinePermissionsMixin, nested_admin.NestedStackedInline
     model = models.GentityFile
     classes = ("collapse",)
     fields = (("descr", "date"), ("content"), "remarks")
+    extra = 0
 
 
 class GentityEventInline(InlinePermissionsMixin, nested_admin.NestedStackedInline):
     model = models.GentityEvent
     classes = ("collapse",)
     fields = (("user", "date"), "type", "report")
+    extra = 0
 
 
 class TimeseriesInlineAdminForm(forms.ModelForm):
@@ -265,7 +258,7 @@ class TimeseriesInline(InlinePermissionsMixin, nested_admin.NestedStackedInline)
     formset = TimeseriesInlineFormSet
     model = models.Timeseries
     classes = ("collapse",)
-    extra = 1
+    extra = 0
     fields = (
         ("type", "time_step", "name"),
         "publicly_available",
@@ -277,7 +270,7 @@ class TimeseriesGroupInline(InlinePermissionsMixin, nested_admin.NestedStackedIn
     model = models.TimeseriesGroup
     classes = ("collapse",)
     inlines = [TimeseriesInline]
-    extra = 1
+    extra = 0
     fieldsets = [
         (
             _("Metadata"),
@@ -289,7 +282,7 @@ class TimeseriesGroupInline(InlinePermissionsMixin, nested_admin.NestedStackedIn
                     "hidden",
                     "remarks",
                 ),
-                "classes": ("collapse",),
+                "classes": ("grp-collapse grp-closed",),
             },
         )
     ]
@@ -331,6 +324,8 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
     search_fields = ("id", "name", "code", "owner__ordering_string")
     list_display = ("name", "owner")
     list_filter = (SiteFilter,)
+    change_list_template = "admin/change_list_filter_sidebar.html"
+    change_list_filter_template = "admin/filter_listing.html"
     delete_confirmation_template = "admin/enhydris/station/delete_confirmation.html"
     delete_selected_confirmation_template = (
         "admin/enhydris/station/delete_selected_confirmation.html"
@@ -362,12 +357,13 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
                     "fields": [
                         ("name", "code"),
                         "owner",
-                        ("geom", "original_srid"),
+                        "geom",
                         "altitude",
                         "remarks",
                         ("start_date", "end_date"),
                         "display_timezone",
                     ],
+                    "classes": ["grp-collapse grp-closed"],
                 },
             ),
         ]
@@ -387,7 +383,10 @@ class StationAdmin(ObjectPermissionsModelAdmin, nested_admin.NestedModelAdmin):
             self._fieldsets.append(
                 (
                     _("Permissions"),
-                    {"fields": permissions_fields, "classes": ("collapse",)},
+                    {
+                        "fields": permissions_fields,
+                        "classes": ["grp-collapse grp-closed"],
+                    },
                 )
             )
 

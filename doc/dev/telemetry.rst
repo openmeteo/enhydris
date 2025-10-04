@@ -176,8 +176,8 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
    :class:`~enhydris.telemetry.models.Telemetry` object, which becomes
    the :attr:`telemetry` attribute.
 
-   :class:`TelemetryAPIClient` classes must define the following attributes,
-   methods and properties:
+   :class:`TelemetryAPIClient` classes may define the following
+   attributes, methods and properties (some of them must be defined):
 
    .. attribute:: name
       :type: string
@@ -220,17 +220,49 @@ scanning goes to :data:`enhydris.telemetry.drivers`.
       form. This is useful for APIs that are served from a well-known
       location for all stations, such as TheThingsNetwork.
 
+   .. attribute:: hide_username
+      :type: boolean
+
+      The default is :const:`False`. Set it to :const:`True` if that
+      particular driver shouldn't show the username in the connection
+      data form (e.g. if the API just requires an API token).
+
    .. attribute:: hide_data_timezone
       :type: boolean
 
       The default is :const:`False`. Set it to :const:`True` if that
-      particular driver shouldn't show the device locator (i.e. the URL
-      or hostname or IP address of the device) in the data form. This is
-      useful for APIs that are known to always provide timestamps in a
-      given time zone.
+      particular driver shouldn't show the data timezone field in the
+      data form. This is useful for APIs that are known to always
+      provide timestamps in a given time zone.
 
       If :const:`True`, the timestamps in the return value of
       :meth:`get_measurements` must be in UTC.
+
+   .. attribute:: sensor_prompt
+      :type: str
+
+      The default is something along the lines of "To which Enhydris
+      time series does sensor X correspond?". It is shown in the
+      (usually) last step of the form. A different one can be specified
+      here if the default doesn't make much sense (e.g. if the remote
+      system is a database that has time series that aren't "sensors").
+
+   .. attribute:: ignore_sensor_prompt
+      :type: str
+
+      To the question posed by :attr:`sensor_prompt` there's a dropdown
+      with possible answers. One of these answers is, by default,
+      "Ignore this sensor". A different phrasing can be specified here
+      if the default doesn't make much sense (e.g. if the remote system
+      is a database that has time series that aren't "sensors").
+
+   .. attribute:: forms
+      :type: list
+
+      The forms that appear in the wizard. The base class provides a
+      default that is suitable for most telemetry types, but it can be
+      overridden (see :file:`influxdb.py` for an example that overrides
+      :attr:`forms`).
 
    .. method:: connect() -> None
                disconnect() -> None

@@ -59,6 +59,11 @@ class TimeseriesGroupForm(forms.ModelForm):
         label=_("Symmetric"),
         help_text=RateOfChangeCheck._meta.get_field("symmetric").help_text,
     )
+    rocc_remove_failing_values = forms.BooleanField(
+        required=False,
+        label=_("Remove failing values"),
+        help_text=RateOfChangeCheck._meta.get_field("remove_failing_values").help_text,
+    )
 
     class Meta:
         model = TimeseriesGroup
@@ -174,6 +179,9 @@ class _RocCheckSubform:
             )
             pf.fields["rocc_symmetric"].initial = roc_check.symmetric
             pf.fields["rocc_thresholds"].initial = roc_check.get_thresholds_as_text()
+            pf.fields["rocc_remove_failing_values"].initial = (
+                roc_check.remove_failing_values
+            )
         except RateOfChangeCheck.DoesNotExist:
             pass
 
@@ -221,12 +229,19 @@ class _RocCheckSubform:
     def _save_existing_roc_check(self, checks):
         rocc_check = RateOfChangeCheck.objects.get(checks=checks)
         rocc_check.symmetric = self.parent_form.cleaned_data["rocc_symmetric"]
+        rocc_check.remove_failing_values = self.parent_form.cleaned_data[
+            "rocc_remove_failing_values"
+        ]
         rocc_check.save()
         return rocc_check
 
     def _save_new_roc_check(self, checks):
         return RateOfChangeCheck.objects.create(
-            checks=checks, symmetric=self.parent_form.cleaned_data["rocc_symmetric"]
+            checks=checks,
+            symmetric=self.parent_form.cleaned_data["rocc_symmetric"],
+            remove_failing_values=self.parent_form.cleaned_data[
+                "rocc_remove_failing_values"
+            ],
         )
 
 
@@ -241,7 +256,7 @@ TimeseriesGroupInline.fieldsets.append(
                 "soft_upper_bound",
                 "upper_bound",
             ),
-            "classes": ("collapse",),
+            "classes": ("grp-collapse grp-closed",),
         },
     ),
 )
@@ -249,8 +264,11 @@ TimeseriesGroupInline.fieldsets.append(
     (
         _("Time consistency check"),
         {
-            "fields": (("rocc_thresholds", "rocc_symmetric"),),
-            "classes": ("collapse",),
+            "fields": (
+                ("rocc_thresholds",),
+                ("rocc_symmetric", "rocc_remove_failing_values"),
+            ),
+            "classes": ("grp-collapse grp-closed",),
         },
     ),
 )
@@ -313,14 +331,14 @@ class CurveInterpolationForm(forms.ModelForm):
 
 
 class CurveInterpolationInline(
-    InlinePermissionsMixin, nested_admin.NestedTabularInline
+    InlinePermissionsMixin, nested_admin.NestedStackedInline
 ):
     model = CurveInterpolation
     fk_name = "timeseries_group"
     classes = ("collapse",)
     form = CurveInterpolationForm
     inlines = [CurvePeriodInline]
-    extra = 1
+    extra = 0
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "target_timeseries_group":
@@ -355,13 +373,13 @@ class AggregationForm(forms.ModelForm):
             raise forms.ValidationError(str(e))
 
 
-class AggregationInline(InlinePermissionsMixin, nested_admin.NestedTabularInline):
+class AggregationInline(InlinePermissionsMixin, nested_admin.NestedStackedInline):
     model = Aggregation
     classes = ("collapse",)
     form = AggregationForm
     verbose_name = _("Aggregation")
     verbose_name_plural = _("Aggregations")
-    extra = 1
+    extra = 0
 
 
 TimeseriesGroupInline.inlines.append(AggregationInline)

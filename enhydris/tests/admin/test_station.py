@@ -377,15 +377,17 @@ class StationListFromDifferentSites(TestCase):
         response = self.client.get("/admin/enhydris/station/43/change/")
         self.assertEqual(response.status_code, 200)
 
+    by_site_filter = "<h3>Site</h3>"
+
     def test_alice_has_a_by_site_list_filter(self):
         self.client.login(username="alice", password="topsecret")
         response = self.client.get("/admin/enhydris/station/")
-        self.assertContains(response, "By Site")
+        self.assertContains(response, self.by_site_filter)
 
     def test_bob_does_not_have_a_by_site_list_filter(self):
         self.client.login(username="bob", password="topsecret")
         response = self.client.get("/admin/enhydris/station/")
-        self.assertNotContains(response, "By Site")
+        self.assertNotContains(response, self.by_site_filter)
 
 
 class TestTimeseriesFormMixin(TestTimeseriesMixin):
@@ -542,6 +544,10 @@ class TimeseriesUploadFileMixin:
             "timeseriesgroup_set-0-timeseries_set-0-type": "100",
             "timeseriesgroup_set-0-timeseries_set-0-replace_or_append": "APPEND",
             "timeseriesgroup_set-0-timeseries_set-0-default_timezone": "Etc/GMT-2",
+            "timeseriesgroup_set-0-curveinterpolation_set-TOTAL_FORMS": "0",
+            "timeseriesgroup_set-0-curveinterpolation_set-INITIAL_FORMS": "0",
+            "timeseriesgroup_set-0-aggregation_set-TOTAL_FORMS": "0",
+            "timeseriesgroup_set-0-aggregation_set-INITIAL_FORMS": "0",
         }
 
 
@@ -711,6 +717,10 @@ class TimeseriesInlineFormSetTestCase(TestCase):
             ).id,
             "timeseriesgroup_set-0-precision": 2,
             "timeseriesgroup_set-0-timeseries_set-INITIAL_FORMS": "0",
+            "timeseriesgroup_set-0-curveinterpolation_set-TOTAL_FORMS": "0",
+            "timeseriesgroup_set-0-curveinterpolation_set-INITIAL_FORMS": "0",
+            "timeseriesgroup_set-0-aggregation_set-TOTAL_FORMS": "0",
+            "timeseriesgroup_set-0-aggregation_set-INITIAL_FORMS": "0",
         }
 
     def test_checks_unique_key(self):

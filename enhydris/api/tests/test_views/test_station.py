@@ -196,37 +196,26 @@ class StationCsvTestCase(APITestCase):
             models.Station,
             name="Komboti",
             geom=Point(x=21.06071, y=39.09518, srid=4326),
-            original_srid=4326,
         )
         self.station_agios_athanasios = baker.make(
             models.Station,
             name="Agios Athanasios",
             geom=Point(x=21.60121, y=39.22440, srid=4326),
-            original_srid=4326,
         )
         baker.make(
             models.Station,
             name="Tharbad",
             geom=Point(x=-176.48368, y=0.19377, srid=4326),
-            original_srid=4326,
         )
         baker.make(
             models.Station,
             name="SRID Point, NoSRID Station",
             geom=Point(x=-176.48368, y=0.19377, srid=4326),
-            original_srid=None,
         )
         baker.make(
             models.Station,
-            name="NoSRID Point, SRID Station",
+            name="NoSRID Point",
             geom=Point(x=-176.48368, y=0.19377, srid=None),
-            original_srid=4326,
-        )
-        baker.make(
-            models.Station,
-            name="NoSRID Point, NoSRID Station",
-            geom=Point(x=-176.48368, y=0.19377, srid=None),
-            original_srid=None,
         )
 
     def _create_timeseries_groups(self):
@@ -248,29 +237,13 @@ class StationCsvTestCase(APITestCase):
                 stations_csv = f.open("stations.csv").read().decode()
                 self.assertIn(",Agios Athanasios,", stations_csv)
 
-    def test_station_with_no_original_srid_is_included(self):
+    def test_station_with_geometry_with_no_srid_is_included(self):
         response = self.client.get("/api/stations/csv/")
         with tempfile.TemporaryFile() as t:
             t.write(response.content)
             with ZipFile(t) as f:
                 stations_csv = f.open("stations.csv").read().decode()
-                self.assertIn("SRID Point, NoSRID Station", stations_csv)
-
-    def test_station_with_geometry_with_no_original_srid_is_included(self):
-        response = self.client.get("/api/stations/csv/")
-        with tempfile.TemporaryFile() as t:
-            t.write(response.content)
-            with ZipFile(t) as f:
-                stations_csv = f.open("stations.csv").read().decode()
-                self.assertIn("NoSRID Point, SRID Station", stations_csv)
-
-    def test_station_with_no_srid_and_geometry_with_no_srid_is_included(self):
-        response = self.client.get("/api/stations/csv/")
-        with tempfile.TemporaryFile() as t:
-            t.write(response.content)
-            with ZipFile(t) as f:
-                stations_csv = f.open("stations.csv").read().decode()
-                self.assertIn("NoSRID Point, NoSRID Station", stations_csv)
+                self.assertIn("NoSRID Point", stations_csv)
 
     def test_num_queries(self):
         self._create_timeseries_groups()

@@ -18,5 +18,5 @@ class SiteHeaderTestCase(TestCase):
 
     def test_site_name(self):
         self.soup = BeautifulSoup(self.response.content, "html.parser")
-        value = self.soup.find(id="site-name").a.contents[0]
-        self.assertEqual(value, "Enhydris dashboard")
+        value = self.soup.find(id="grp-admin-title").contents[0]
+        self.assertEqual(value.strip(), "Enhydris dashboard")

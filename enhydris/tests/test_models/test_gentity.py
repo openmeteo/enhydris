@@ -162,40 +162,6 @@ class StationTestCase(TestCase):
         self.assertEqual(str(station), "Hobbiton")
 
 
-class StationOriginalCoordinatesTestCase(TestCase):
-    def setUp(self):
-        baker.make(
-            models.Station,
-            name="Komboti",
-            geom=Point(x=21.06071, y=39.09518, srid=4326),
-            original_srid=2100,
-        )
-        self.station = models.Station.objects.get(name="Komboti")
-
-    def test_original_abscissa(self):
-        self.assertAlmostEqual(self.station.original_abscissa(), 245648.96, places=1)
-
-    def test_original_ordinate(self):
-        self.assertAlmostEqual(self.station.original_ordinate(), 4331165.20, places=1)
-
-
-class StationOriginalCoordinatesWithNullSridTestCase(TestCase):
-    def setUp(self):
-        baker.make(
-            models.Station,
-            name="Komboti",
-            geom=Point(x=21.06071, y=39.09518, srid=4326),
-            original_srid=None,
-        )
-        self.station = models.Station.objects.get(name="Komboti")
-
-    def test_original_abscissa(self):
-        self.assertAlmostEqual(self.station.original_abscissa(), 21.06071)
-
-    def test_original_ordinate(self):
-        self.assertAlmostEqual(self.station.original_ordinate(), 39.09518)
-
-
 class StationLastUpdateTestCase(ClearCacheMixin, TestCase):
     def setUp(self):
         timezone = ZoneInfo("Etc/GMT-2")

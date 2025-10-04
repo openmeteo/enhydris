@@ -8,7 +8,12 @@ from model_bakery import baker
 
 import enhydris.models
 from enhydris.autoprocess import models
-from enhydris.autoprocess.admin import AggregationForm, CurvePeriodForm
+from enhydris.autoprocess.admin import (
+    AggregationForm,
+    CurveInterpolationInline,
+    CurvePeriodForm,
+    TimeseriesGroupInline,
+)
 from enhydris.tests import ClearCacheMixin
 from enhydris.tests.admin import get_formset_parameters
 
@@ -64,7 +69,12 @@ class TimeseriesGroupFormTestCaseBase(TestCaseBase):
             "timeseriesgroup_set-0-variable": self.variable.id,
             "timeseriesgroup_set-0-unit_of_measurement": self.unit.id,
             "timeseriesgroup_set-0-precision": 2,
+            "timeseriesgroup_set-0-timeseries_set-TOTAL_FORMS": "0",
             "timeseriesgroup_set-0-timeseries_set-INITIAL_FORMS": "0",
+            "timeseriesgroup_set-0-curveinterpolation_set-TOTAL_FORMS": "0",
+            "timeseriesgroup_set-0-curveinterpolation_set-INITIAL_FORMS": "0",
+            "timeseriesgroup_set-0-aggregation_set-TOTAL_FORMS": "0",
+            "timeseriesgroup_set-0-aggregation_set-INITIAL_FORMS": "0",
         }
 
     @classmethod
@@ -100,7 +110,10 @@ class TimeseriesGroupFormTestCaseBase(TestCaseBase):
     def _create_roc_check(cls):
         cls._ensure_we_have_checks()
         cls.roc_check = baker.make(
-            models.RateOfChangeCheck, checks=cls.checks, symmetric=True
+            models.RateOfChangeCheck,
+            checks=cls.checks,
+            symmetric=True,
+            remove_failing_values=True,
         )
         cls.roc_check.set_thresholds("10min\t25.0\n1h\t35.0\n")
 
@@ -160,7 +173,7 @@ class TimeseriesGroupFormCreatesRangeCheckTestCase(TimeseriesGroupFormTestCaseBa
             "timeseriesgroup_set-0-upper_bound": 420,
         }
         response = self._post_form(data)
-        assert response.status_code == 302
+        self.assertEqual(response.status_code, 302)
 
     def test_lower_bound(self):
         self.assertEqual(self.range_check.lower_bound, 42)
@@ -308,6 +321,7 @@ class TimeseriesGroupFormCreatesRocCheckTestCase(TimeseriesGroupFormTestCaseBase
         data = {
             **self._get_basic_form_contents(),
             "timeseriesgroup_set-0-rocc_symmetric": True,
+            "timeseriesgroup_set-0-rocc_remove_failing_values": True,
             "timeseriesgroup_set-0-rocc_thresholds": "10min 25.0\n1h 35",
         }
         response = self._post_form(data)
@@ -342,6 +356,7 @@ class TimeseriesGroupFormSavesExistingRocCheckTestCase(
             "timeseriesgroup_set-0-id": self.timeseries_group.id,
             "timeseriesgroup_set-0-gentity": self.station.id,
             "timeseriesgroup_set-0-rocc_symmetric": True,
+            "timeseriesgroup_set-0-rocc_remove_failing_values": True,
             "timeseriesgroup_set-0-rocc_thresholds": "10min 25.0\n1h 35",
         }
         response = self._post_form(data)
@@ -372,6 +387,7 @@ class TimeseriesGroupFormDeletesRocCheckTestCase(TimeseriesGroupFormTestCaseBase
             "timeseriesgroup_set-0-soft_upper_bound": "5",
             "timeseriesgroup_set-0-upper_bound": "6",
             "timeseriesgroup_set-0-rocc_symmetric": True,
+            "timeseriesgroup_set-0-rocc_remove_failing_values": True,
             "timeseriesgroup_set-0-rocc_thresholds": "",
         }
         response = self._post_form(data)
@@ -536,6 +552,18 @@ class CurveInterpolationInlineTargetTimeseriesGroupTestCase(TestCaseBase):
             gentity=cls.station2,
             variable=cls.variable,
         )
+
+    def setUp(self):
+        self.saved_curve_interpolation_extra = CurveInterpolationInline.extra
+        self.saved_timeseries_group_extra = TimeseriesGroupInline.extra
+        CurveInterpolationInline.extra = 1
+        TimeseriesGroupInline.extra = 1
+        super().setUp()
+
+    def tearDown(self):
+        CurveInterpolationInline.extra = self.saved_curve_interpolation_extra
+        TimeseriesGroupInline.extra = self.saved_timeseries_group_extra
+        super().tearDown()
 
     def test_target_timeseries_group_dropdown_contains_options_from_station1(self):
         response = self._get_form()

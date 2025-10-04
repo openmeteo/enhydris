@@ -1,4 +1,4 @@
-const setupMarkers = function (dataLayers) {
+const setupMarkers = (dataLayers) => {
   for (let i = 0; i < enhydris.mapStations.length; i += 1) {
     const station = enhydris.mapStations[i];
 
@@ -10,7 +10,7 @@ const setupMarkers = function (dataLayers) {
       },
     ).addTo(enhydris.map.leafletMap);
 
-    Object.keys(station.last_values).forEach(function (key) {
+    Object.keys(station.last_values).forEach((key) => {
       // Rectangle with info
       const html = (
         `<strong><a href='${station.target_url}'>${station.name}</a></strong><br>`
@@ -25,7 +25,7 @@ const setupMarkers = function (dataLayers) {
   }
 };
 
-const setupLayersControl = function (dataLayers) {
+const setupLayersControl = (dataLayers) => {
   L.control.groupedLayers(
     enhydris.mapBaseLayers,
     { '': dataLayers },
@@ -33,11 +33,11 @@ const setupLayersControl = function (dataLayers) {
   ).addTo(enhydris.map.leafletMap);
 };
 
-const getDataLayers = function () {
+const getDataLayers = () => {
   const layers = {};
   for (let i = 0; i < enhydris.mapStations.length; i += 1) {
     const station = enhydris.mapStations[i];
-    Object.keys(station.last_values).forEach(function (key) {
+    Object.keys(station.last_values).forEach((key) => {
       if (!(key in layers)) {
         layers[key] = L.featureGroup();
         if (Object.keys(layers).length === 1) {
