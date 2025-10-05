@@ -408,9 +408,12 @@ class SynopticTimeseriesGroup(models.Model):
 
     @property
     def roc_thresholds(self):
-        thresholds = RateOfChangeThreshold.objects.filter(
-            synoptic_timeseries_group=self
-        ).order_by("delta_t")
+        if self.pk:
+            thresholds = RateOfChangeThreshold.objects.filter(
+                synoptic_timeseries_group=self
+            ).order_by("delta_t")
+        else:
+            thresholds = []
         result = []
         for threshold in thresholds:
             result.append(Threshold(threshold.delta_t, threshold.allowed_diff))
