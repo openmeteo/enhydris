@@ -125,7 +125,7 @@ class StationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Station
-        exclude = ("creator", "maintainers", "sites")
+        exclude = ("creator", "maintainers", "sites", "timeseries_data_viewers")
 
     def validate_nested_many_serializer(self, value):
         try:
