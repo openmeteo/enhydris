@@ -112,6 +112,12 @@ class GentityFileSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class GentityImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.GentityImage
+        fields = "__all__"
+
+
 class GentityEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.GentityEvent

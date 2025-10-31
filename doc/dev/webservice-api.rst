@@ -676,8 +676,9 @@ Other items of stations
 Media and other station files
 -----------------------------
 
-List station files::
+List station images or files::
 
+    curl https://openmeteo.org/api/stations/1334/images/
     curl https://openmeteo.org/api/stations/1334/files/
 
 Response::
@@ -702,6 +703,7 @@ Response::
 
 Or you can get the detail of a single one::
 
+    curl https://openmeteo.org/api/stations/1334/images/59/
     curl https://openmeteo.org/api/stations/1334/files/39/
 
 Response::
@@ -718,6 +720,7 @@ Response::
 
 Get content of such files::
 
+    curl https://openmeteo.org/api/stations/1334/images/59/content/
     curl https://openmeteo.org/api/stations/1334/files/39/content/
 
 The response is the contents of the file (usually binary data). The
