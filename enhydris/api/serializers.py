@@ -112,6 +112,12 @@ class GentityFileSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class GentityImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.GentityImage
+        fields = "__all__"
+
+
 class GentityEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.GentityEvent
@@ -125,7 +131,7 @@ class StationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Station
-        exclude = ("creator", "maintainers", "sites")
+        exclude = ("creator", "maintainers", "sites", "timeseries_data_viewers")
 
     def validate_nested_many_serializer(self, value):
         try:

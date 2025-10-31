@@ -127,6 +127,13 @@ class GentityFileViewSet(ReadOnlyModelViewSet):
         return response
 
 
+class GentityImageViewSet(GentityFileViewSet):
+    serializer_class = serializers.GentityImageSerializer
+
+    def get_queryset(self):
+        return models.GentityImage.objects.filter(gentity_id=self.kwargs["station_id"])
+
+
 class TimeseriesGroupViewSet(ModelViewSet):
     serializer_class = serializers.TimeseriesGroupSerializer
     permission_classes = [
