@@ -534,8 +534,8 @@ The result is a `paginated list`_ of time series::
         ]
     }
 
-Create time series
-------------------
+Create or update time series
+----------------------------
 
 POST to create a time series::
 
@@ -550,6 +550,16 @@ standard `error response`_.
 When specifying nested objects, these objects are not created or
 updated—only the id is used and a reference to the nested object with
 that id is created.
+
+PUT or PATCH a time series::
+
+    curl -X PATCH -H "Authorization: token OAUTH-TOKEN" \
+        -d "name='Aggregated max'" \
+        https://openmeteo.org/api/stations/1334/timeseriesgroups/851/timeseries/27/
+
+The response is a 200 with a similar content as the GET detail response
+(with the updated data), unless there is a problem, in which case
+there's a standard `error response`_.
 
 Time series data
 ----------------
