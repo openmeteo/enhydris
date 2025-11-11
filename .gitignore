@@ -1,6 +1,7 @@
 *.pyc
 *.egg
 *.egg-info
+venv
 node_modules
 doc/_build
 dist

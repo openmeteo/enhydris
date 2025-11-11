@@ -1,4 +1,5 @@
 import datetime as dt
+from typing import Any
 
 from django.utils import translation
 from rest_framework import serializers
@@ -26,33 +27,44 @@ class TimeseriesTypeField(serializers.Field):
             )
 
 
-class TimeseriesSerializer(serializers.ModelSerializer):
+class TimeseriesSerializer(serializers.ModelSerializer[models.Timeseries]):
     type = TimeseriesTypeField()
 
     class Meta:
         model = models.Timeseries
         fields = "__all__"
 
-    def validate(self, data):
-        result = super().validate(data)
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        result = super().validate(attrs)
+        self._check_for_change_of_timeseries_group(result)
         self._check_for_uniqueness_of_type(result)
         return result
 
-    def _check_for_uniqueness_of_type(self, data):
+    def _check_for_change_of_timeseries_group(self, data: dict[str, Any]):
+        if not self.instance:
+            return
+        if "timeseries_group" in data:
+            msg = "It is not allowed to change the timeseries_group of a time series."
+            new_timeseries_group = data["timeseries_group"]
+            if new_timeseries_group != self.instance.timeseries_group:
+                raise serializers.ValidationError({"timeseries_group": msg})
+
+    def _check_for_uniqueness_of_type(self, data: dict[str, Any]):
         types = (
             models.Timeseries.INITIAL,
             models.Timeseries.CHECKED,
             models.Timeseries.REGULARIZED,
         )
-        if data["type"] in types:
-            self._check_timeseries_does_not_exist(
-                data["timeseries_group"], data["type"]
-            )
+        tg = data.get("timeseries_group") or self.instance.timeseries_group
+        if data.get("type") in types:
+            self._check_timeseries_does_not_exist(tg, data["type"])
 
-    def _check_timeseries_does_not_exist(self, timeseries_group, type):
+    def _check_timeseries_does_not_exist(
+        self, timeseries_group: models.TimeseriesGroup, type: int
+    ):
         queryset = models.Timeseries.objects.filter(
             timeseries_group=timeseries_group, type=type
-        )
+        ).exclude(id=getattr(self.instance, "id", None))
         if queryset.exists():
             with translation.override(None):
                 type_str = str(dict(models.Timeseries.TIMESERIES_TYPES)[type])
@@ -142,10 +154,22 @@ class StationSerializer(serializers.ModelSerializer):
     validate_maintainers = validate_nested_many_serializer
 
 
-class TimeseriesGroupSerializer(serializers.ModelSerializer):
+class TimeseriesGroupSerializer(serializers.ModelSerializer[models.TimeseriesGroup]):
     class Meta:
         model = models.TimeseriesGroup
         fields = "__all__"
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        result = super().validate(attrs)
+        self._check_for_change_of_gentity(result)
+        return result
+
+    def _check_for_change_of_gentity(self, data: dict[str, Any]) -> None:
+        if not self.instance or "gentity" not in data:
+            return
+        msg = "It is not allowed to change the gentity of a time series group."
+        if data["gentity"] != self.instance.gentity:
+            raise serializers.ValidationError({"gentity": msg})
 
 
 class TimeseriesRecordChartSerializer(serializers.Serializer):

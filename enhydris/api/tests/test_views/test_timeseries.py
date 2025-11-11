@@ -720,6 +720,80 @@ class TimeseriesDeleteTestCase(APITestCase):
         self.assertEqual(response.status_code, 204)
 
 
+@override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
+@override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
+class TimeseriesValidationTestCase(APITestCase):
+    def setUp(self):
+        self.user = baker.make(User, is_active=True, is_superuser=True)
+        self.station = baker.make(models.Station, creator=self.user)
+        self.timeseries_group = baker.make(models.TimeseriesGroup, gentity=self.station)
+        self.other_group = baker.make(models.TimeseriesGroup, gentity=self.station)
+        self.timeseries = baker.make(
+            models.Timeseries,
+            timeseries_group=self.timeseries_group,
+            type=models.Timeseries.INITIAL,
+            time_step="",
+            name="",
+            publicly_available=False,
+        )
+        self.url = (
+            f"/api/stations/{self.station.id}/timeseriesgroups/{self.timeseries_group.id}/"
+            f"timeseries/{self.timeseries.id}/"
+        )
+        self.client.force_authenticate(user=self.user)
+
+    def test_patch_cannot_change_group(self):
+        response = self.client.patch(
+            self.url,
+            data={"timeseries_group": self.other_group.id},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.timeseries.refresh_from_db()
+        self.assertEqual(self.timeseries.timeseries_group_id, self.timeseries_group.id)
+
+    def test_patch_can_change_type(self):
+        self.assertNotEqual(self.timeseries.type, "Checked")
+        response = self.client.patch(
+            self.url,
+            data={"type": "Checked"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.timeseries.refresh_from_db()
+        self.assertEqual(self.timeseries.type, models.Timeseries.CHECKED)
+
+    def test_put_cannot_change_group(self):
+        response = self.client.put(
+            self.url,
+            data={
+                "timeseries_group": self.other_group.id,
+                "type": "Initial",
+                "time_step": self.timeseries.time_step,
+                "name": self.timeseries.name,
+                "publicly_available": self.timeseries.publicly_available,
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.timeseries.refresh_from_db()
+        self.assertEqual(self.timeseries.timeseries_group_id, self.timeseries_group.id)
+
+    def test_put_can_allow_type_to_stay_the_same(self):
+        response = self.client.put(
+            self.url,
+            data={
+                "timeseries_group": self.timeseries_group.id,
+                "type": "Initial",
+                "time_step": self.timeseries.time_step,
+                "name": self.timeseries.name,
+                "publicly_available": self.timeseries.publicly_available,
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200)
+
+
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 @patch("enhydris.api.views.TimeseriesViewSet._get_stats_for_all_intervals")
 @patch("enhydris.models.Timeseries.get_data")

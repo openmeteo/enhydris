@@ -94,3 +94,35 @@ class TimeseriesGroupPostTestCase(APITestCase):
     def test_authorized_user_can_update_timeseries_group(self):
         self.client.force_authenticate(user=self.user1)
         self.assertEqual(self._update_timeseries_group().status_code, 200)
+
+
+class TimeseriesGroupUpdateValidationTestCase(APITestCase):
+    def setUp(self):
+        self.user = baker.make(User, is_active=True, is_superuser=True)
+        self.station = baker.make(models.Station, creator=self.user)
+        self.other_station = baker.make(models.Station)
+        self.timeseries_group = baker.make(models.TimeseriesGroup, gentity=self.station)
+        self.url = f"/api/stations/{self.station.id}/timeseriesgroups/{self.timeseries_group.id}/"
+        self.client.force_authenticate(user=self.user)
+
+    def test_patch_cannot_change_station(self):
+        response = self.client.patch(
+            self.url, data={"gentity": self.other_station.id}, format="json"
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_put_cannot_change_station(self):
+        response = self.client.put(
+            self.url,
+            data={
+                "name": self.timeseries_group.name,
+                "gentity": self.other_station.id,
+                "variable": self.timeseries_group.variable.id,
+                "unit_of_measurement": self.timeseries_group.unit_of_measurement.id,
+                "precision": self.timeseries_group.precision,
+                "hidden": self.timeseries_group.hidden,
+                "remarks": self.timeseries_group.remarks,
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 400)
