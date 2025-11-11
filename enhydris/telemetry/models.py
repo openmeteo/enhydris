@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime as dt
 import logging
 import os.path
@@ -72,8 +74,8 @@ class Telemetry(models.Model):
     )
     device_locator = models.CharField(max_length=200, blank=True)
     username = models.CharField(max_length=200, blank=True)
-    password = models.CharField(max_length=200, blank=True)
-    remote_station_id = models.CharField(max_length=20, blank=True)
+    password: models.CharField[str, str] = models.CharField(blank=True)
+    remote_station_id: models.CharField[str, str] = models.CharField(blank=True)
 
     additional_config = models.JSONField(default=dict)
 

@@ -6,6 +6,7 @@ from enhydris.telemetry.forms import (
     ConnectionDataForm,
     EssentialDataForm,
 )
+from enhydris.telemetry.models import Telemetry
 
 
 class TelemetryAPIClientBase:
@@ -22,7 +23,7 @@ class TelemetryAPIClientBase:
     )
     ignore_sensor_prompt = _("Ignore this sensor")
 
-    def __init__(self, telemetry):
+    def __init__(self, telemetry: Telemetry):
         self.telemetry = telemetry
 
     def __enter__(self):
