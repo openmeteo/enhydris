@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 import datetime as dt
 from io import StringIO
 from itertools import islice
 from os.path import abspath
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from django.conf import settings
 from django.contrib.gis.db import models
+from django.contrib.gis.geos import Point
 from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
 from django.db import IntegrityError, connection
@@ -14,26 +18,27 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
 import numpy as np
+import pandas as pd
 from htimeseries import HTimeseries
 
 from .gentity import Station
 from .timeseries_group import TimeseriesGroup
 
 
-def check_time_step(time_step):
+def check_time_step(time_step: str):
     if not time_step:
         return
     else:
         _check_nonempty_time_step(time_step)
 
 
-def _check_nonempty_time_step(time_step):
-    number, unit = _parse_time_step(time_step)
+def _check_nonempty_time_step(time_step: str):
+    unit = _parse_time_step(time_step)[1]
     if unit not in ("min", "H", "D", "M", "Y", "h"):
         raise ValueError('"{}" is not a valid time step'.format(time_step))
 
 
-def _parse_time_step(time_step):
+def _parse_time_step(time_step: str) -> tuple[str, str]:
     first_nondigit_pos = 0
     length = len(time_step)
     while first_nondigit_pos < length and time_step[first_nondigit_pos].isdigit():
@@ -55,7 +60,7 @@ class TimeseriesStorage(FileSystemStorage):
     models.py is read and that would be it.
     """
 
-    def path(self, name):
+    def path(self, name: str):
         self.location = abspath(settings.ENHYDRIS_TIMESERIES_DATA_DIR)
         return super().path(name)
 
@@ -69,6 +74,8 @@ def get_default_publicly_available():
 
 
 class Timeseries(models.Model):
+    timeseriesrecord_set: models.Manager["TimeseriesRecord"]
+
     INITIAL = 100
     CHECKED = 200
     REGULARIZED = 300
@@ -80,12 +87,16 @@ class Timeseries(models.Model):
         (AGGREGATED, _("Aggregated")),
     )
 
-    last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    timeseries_group = models.ForeignKey(TimeseriesGroup, on_delete=models.CASCADE)
-    type = models.PositiveSmallIntegerField(
+    last_modified: models.DateTimeField[dt.datetime, dt.datetime] = (
+        models.DateTimeField(default=now, null=True, editable=False)
+    )
+    timeseries_group: models.ForeignKey[TimeseriesGroup, TimeseriesGroup] = (
+        models.ForeignKey(TimeseriesGroup, on_delete=models.CASCADE)
+    )
+    type: models.PositiveSmallIntegerField[int, int] = models.PositiveSmallIntegerField(
         choices=TIMESERIES_TYPES, verbose_name=_("Type")
     )
-    time_step = models.CharField(
+    time_step: models.CharField[str, str] = models.CharField(
         max_length=7,
         blank=True,
         help_text=_(
@@ -96,7 +107,7 @@ class Timeseries(models.Model):
         ),
         verbose_name=_("Time step"),
     )
-    name = models.CharField(
+    name: models.CharField[str, str] = models.CharField(
         max_length=100,
         blank=True,
         default="",
@@ -107,7 +118,7 @@ class Timeseries(models.Model):
         ),
         verbose_name=_("Name"),
     )
-    publicly_available = models.BooleanField(
+    publicly_available: models.BooleanField[bool, bool] = models.BooleanField(
         default=get_default_publicly_available,
         verbose_name=_("Publicly available"),
         help_text=_(
@@ -140,8 +151,8 @@ class Timeseries(models.Model):
         ]
 
     @property
-    def start_date(self):
-        def get_start_date():
+    def start_date(self) -> dt.datetime | None:
+        def get_start_date() -> dt.datetime | None:
             try:
                 return self.timeseriesrecord_set.earliest().timestamp.astimezone(
                     ZoneInfo(self.timeseries_group.gentity.display_timezone)
@@ -152,11 +163,11 @@ class Timeseries(models.Model):
                 # problem in Django>=4.
                 return None
 
-        return cache.get_or_set(f"timeseries_start_date_{self.id}", get_start_date)
+        return cache.get_or_set(f"timeseries_start_date_{self.pk}", get_start_date)
 
     @property
-    def end_date(self):
-        def get_end_date():
+    def end_date(self) -> dt.datetime | None:
+        def get_end_date() -> dt.datetime | None:
             try:
                 return self.timeseriesrecord_set.latest().timestamp.astimezone(
                     ZoneInfo(self.timeseries_group.gentity.display_timezone)
@@ -167,9 +178,12 @@ class Timeseries(models.Model):
                 # problem in Django>=4.
                 return None
 
-        return cache.get_or_set(f"timeseries_end_date_{self.id}", get_end_date)
+        return cache.get_or_set(f"timeseries_end_date_{self.pk}", get_end_date)
 
-    def _set_extra_timeseries_properties(self, ahtimeseries, timezone):
+    def _set_extra_timeseries_properties(
+        self, ahtimeseries: HTimeseries, timezone: str
+    ):
+        assert isinstance(self.timeseries_group.gentity.gpoint.geom, Point)
         if self.timeseries_group.gentity.geom:
             location = {
                 "abscissa": self.timeseries_group.gentity.gpoint.geom.x,
@@ -182,19 +196,19 @@ class Timeseries(models.Model):
         ahtimeseries.time_step = self.time_step
         ahtimeseries.unit = self.timeseries_group.unit_of_measurement.symbol
         ahtimeseries.title = self.timeseries_group.get_name()
-        ahtimeseries.timezone = self._format_timezone(timezone)
-        ahtimeseries.variable = self.timeseries_group.variable.descr
+        ahtimeseries.timezone = self._format_timezone(timezone)  # type: ignore
+        ahtimeseries.variable = self.timeseries_group.variable.descr  # type: ignore
         ahtimeseries.precision = self.timeseries_group.precision
         ahtimeseries.location = location
         ahtimeseries.comment = (
             f"{self.timeseries_group.gentity.name}\n\n{self.timeseries_group.remarks}"
         )
 
-    def _format_timezone(self, timezone):
+    def _format_timezone(self, timezone: str) -> str:
         offset = self._get_timezone_offset(timezone)
         return f"{timezone} (UTC{offset})"
 
-    def _get_timezone_offset(self, timezone):
+    def _get_timezone_offset(self, timezone: str) -> str:
         assert timezone == "UTC" or (
             timezone.startswith("Etc/GMT") and len(timezone) in (7, 9, 10)
         )
@@ -206,7 +220,12 @@ class Timeseries(models.Model):
         else:
             return f"{sign}{timezone[8:]}00"
 
-    def get_data(self, start_date=None, end_date=None, timezone=None):
+    def get_data(
+        self,
+        start_date: dt.datetime | None = None,
+        end_date: dt.datetime | None = None,
+        timezone: str | None = None,
+    ):
         start_date = start_date or dt.datetime(1678, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
         end_date = end_date or dt.datetime(2261, 12, 31, 23, 59, tzinfo=dt.timezone.utc)
         try:
@@ -215,20 +234,23 @@ class Timeseries(models.Model):
             data = self._retrieve_and_cache_data(start_date, end_date)
         timezone = timezone or self.timeseries_group.gentity.display_timezone
         if not data.empty:
+            assert isinstance(data.index, pd.DatetimeIndex)
             data.index = data.index.tz_convert(timezone)
         result = HTimeseries(data)
         self._set_extra_timeseries_properties(result, timezone)
         return result
 
-    def _get_data_from_cache(self, start_date, end_date):
-        data = cache.get(f"timeseries_data_{self.id}")
+    def _get_data_from_cache(
+        self, start_date: dt.datetime, end_date: dt.datetime
+    ) -> pd.DataFrame:
+        data = cache.get(f"timeseries_data_{self.pk}")
         if data is None or data.empty:
             raise DataNotInCache()
         if self.start_date is None:
             return data  # Data should be empty in that case; just return it
         try:
             start_date = max(start_date, self.start_date).astimezone(data.index.tzinfo)
-            end_date = min(end_date, self.end_date).astimezone(data.index.tzinfo)
+            end_date = min(end_date, self.end_date).astimezone(data.index.tzinfo)  # type: ignore
         except TypeError:
             # A TypeError will occur if self.start_date or self.end_date above is none.
             # This should normally not happen, because self.start_date had already
@@ -241,7 +263,7 @@ class Timeseries(models.Model):
             raise DataNotInCache()
         return data.loc[start_date:end_date]
 
-    def _retrieve_and_cache_data(self, start_date, end_date):
+    def _retrieve_and_cache_data(self, start_date: dt.datetime, end_date: dt.datetime):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -258,25 +280,33 @@ class Timeseries(models.Model):
                 FROM enhydris_timeseriesrecord
                 WHERE timeseries_id=%s AND timestamp >= %s AND timestamp <= %s
                 """,
-                [self.id, start_date, end_date],
+                [self.pk, start_date, end_date],
             )
             result_string = StringIO(cursor.fetchone()[0])
         data = HTimeseries(result_string, default_tzinfo=dt.timezone.utc).data
-        cache.set(f"timeseries_data_{self.id}", data)
+        cache.set(f"timeseries_data_{self.pk}", data)
         return data
 
-    def set_data(self, data, default_timezone=None):
+    def set_data(
+        self,
+        data: HTimeseries | pd.DataFrame | StringIO,
+        default_timezone: str | None = None,
+    ):
         self.timeseriesrecord_set.all().delete()
         return self.append_data(data, default_timezone)
 
-    def append_data(self, data, default_timezone=None):
+    def append_data(
+        self,
+        data: HTimeseries | pd.DataFrame | StringIO,
+        default_timezone: str | None = None,
+    ):
         ahtimeseries = self._get_htimeseries_from_data(data, default_timezone)
         self._check_new_data_is_newer(ahtimeseries)
         result = TimeseriesRecord.bulk_insert(self, ahtimeseries)
         self.save()
         return result
 
-    def _check_new_data_is_newer(self, ahtimeseries):
+    def _check_new_data_is_newer(self, ahtimeseries: HTimeseries):
         if not len(ahtimeseries.data):
             return 0
         new_data_start_date = ahtimeseries.data.index[0]
@@ -289,14 +319,18 @@ class Timeseries(models.Model):
                 ).format(new_data_start_date, self.end_date)
             )
 
-    def _get_htimeseries_from_data(self, data, default_timezone):
+    def _get_htimeseries_from_data(
+        self,
+        data: HTimeseries | pd.DataFrame | StringIO,
+        default_timezone: str | None,
+    ):
         default_tzinfo = default_timezone and ZoneInfo(default_timezone) or None
         if isinstance(data, HTimeseries):
             return data
         else:
             return HTimeseries(data, default_tzinfo=default_tzinfo)
 
-    def get_last_record_as_string(self, timezone=None):
+    def get_last_record_as_string(self, timezone: str = "") -> str:
         try:
             return self.timeseriesrecord_set.latest().__str__(timezone=timezone)
         except TimeseriesRecord.DoesNotExist:
@@ -305,7 +339,7 @@ class Timeseries(models.Model):
     @property
     def related_station(self):
         try:
-            return Station.objects.get(id=self.timeseries_group.gentity.id)
+            return Station.objects.get(id=self.timeseries_group.gentity.pk)
         except Station.DoesNotExist:
             return None
 
@@ -320,20 +354,20 @@ class Timeseries(models.Model):
          - start_date`, end_date of the current `Timeseries` model instance.
         """
         cached_property_names = [
-            f"timeseries_data_{self.id}",
-            f"timeseries_start_date_{self.id}",
-            f"timeseries_end_date_{self.id}",
-            f"timeseries_group_start_date_{self.timeseries_group.id}",
-            f"timeseries_group_end_date_{self.timeseries_group.id}",
+            f"timeseries_data_{self.pk}",
+            f"timeseries_start_date_{self.pk}",
+            f"timeseries_end_date_{self.pk}",
+            f"timeseries_group_start_date_{self.timeseries_group.pk}",
+            f"timeseries_group_end_date_{self.timeseries_group.pk}",
         ]
         if self.related_station:
             cached_property_names += [
-                f"station_last_update_{self.related_station.id}",
+                f"station_last_update_{self.related_station.pk}",
             ]
         cache.delete_many(cached_property_names)
 
-    def __str__(self):
-        type = self.get_type_display()
+    def __str__(self) -> str:
+        type = self.get_type_display()  # type: ignore
         explanation = ""
         if self.type == self.AGGREGATED:
             explanation = f" ({self.time_step} {self.name})"
@@ -341,18 +375,33 @@ class Timeseries(models.Model):
             explanation = f" ({self.name})"
         return f"{type}{explanation}"
 
-    def save(self, force_insert=False, force_update=False, *args, **kwargs):
+    def save(
+        self,
+        force_insert: bool = False,
+        force_update: bool = False,
+        **kwargs: Any,
+    ):
         check_time_step(self.time_step)
-        super(Timeseries, self).save(force_insert, force_update, *args, **kwargs)
+        super(Timeseries, self).save(
+            force_insert=force_insert, force_update=force_update, **kwargs
+        )
         self._invalidate_cached_data()
 
 
 class TimeseriesRecord(models.Model):
     pk = models.CompositePrimaryKey("timeseries_id", "timestamp")
-    timeseries = models.ForeignKey(Timeseries, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(verbose_name=_("Timestamp"))
-    value = models.FloatField(blank=True, null=True, verbose_name=_("Value"))
-    flags = models.CharField(max_length=237, blank=True, verbose_name=_("Flags"))
+    timeseries: models.ForeignKey[Timeseries, Timeseries] = models.ForeignKey(
+        Timeseries, on_delete=models.CASCADE
+    )
+    timestamp: models.DateTimeField[dt.datetime, dt.datetime] = models.DateTimeField(
+        verbose_name=_("Timestamp")
+    )
+    value: models.FloatField[float | None, float | None] = models.FloatField(
+        blank=True, null=True, verbose_name=_("Value")
+    )
+    flags: models.CharField[str, str] = models.CharField(
+        max_length=237, blank=True, verbose_name=_("Flags")
+    )
 
     class Meta:
         verbose_name = _("Time series record")
@@ -363,13 +412,13 @@ class TimeseriesRecord(models.Model):
         ]
 
     @classmethod
-    def bulk_insert(cls, timeseries, htimeseries):
+    def bulk_insert(cls, timeseries: Timeseries, htimeseries: HTimeseries):
         record_generator = (
-            TimeseriesRecord(
-                timeseries_id=timeseries.id,
-                timestamp=t.Index,
-                value=None if np.isnan(t.value) else t.value,
-                flags=t.flags,
+            cls(
+                timeseries_id=timeseries.pk,
+                timestamp=t.Index,  # type: ignore
+                value=None if np.isnan(t.value) else t.value,  # type: ignore
+                flags=t.flags,  # type: ignore
             )
             for t in htimeseries.data.itertuples()
         )
@@ -383,8 +432,8 @@ class TimeseriesRecord(models.Model):
             count += len(batch)
         return count
 
-    def __str__(self, timezone=None):
-        if timezone is None:
+    def __str__(self, timezone: str = "") -> str:
+        if timezone == "":
             timezone = self.timeseries.timeseries_group.gentity.display_timezone
         tzinfo = ZoneInfo(timezone)
         precision = self.timeseries.timeseries_group.precision

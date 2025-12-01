@@ -71,8 +71,10 @@ class TestTimeseriesMixin(ClearCacheMixin):
 
 
 class TimeseriesDataMixin(ClearCacheMixin):
+    timeseries: models.Timeseries
+
     @classmethod
-    def create_timeseries(cls, publicly_available=None):
+    def create_timeseries(cls, publicly_available: bool | None = None):
         cls.timezone = "Etc/GMT-2"
         cls.tzinfo = ZoneInfo(cls.timezone)
         cls.htimeseries = HTimeseries()

@@ -245,7 +245,7 @@ class TimeseriesViewSet(ModelViewSet):
         ts = get_object_or_404(models.Timeseries, pk=int(pk))
         self.check_object_permissions(request, ts)
         response = HttpResponse(content_type="text/plain")
-        timezone_param = request.GET.get("timezone", None)
+        timezone_param = request.GET.get("timezone", "")
         response.write(ts.get_last_record_as_string(timezone=timezone_param))
         return response
 
