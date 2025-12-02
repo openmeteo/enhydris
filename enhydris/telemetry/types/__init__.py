@@ -6,18 +6,24 @@ from enhydris.telemetry.forms import (
     ConnectionDataForm,
     EssentialDataForm,
 )
+from enhydris.telemetry.models import Telemetry
 
 
 class TelemetryAPIClientBase:
     device_locator_label = _("URL")
     device_locator_help_text = ""
     hide_device_locator = False
+    hide_username = False
     hide_data_timezone = False
     username_label = _("Username")
     password_label = _("Password")
     forms = [EssentialDataForm, ConnectionDataForm, ChooseStationForm, ChooseSensorForm]
+    sensor_prompt = _(
+        "To which Enhydris time series does sensor {sensor_label} correspond?"
+    )
+    ignore_sensor_prompt = _("Ignore this sensor")
 
-    def __init__(self, telemetry):
+    def __init__(self, telemetry: Telemetry):
         self.telemetry = telemetry
 
     def __enter__(self):

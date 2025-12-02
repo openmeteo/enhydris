@@ -211,6 +211,8 @@ class SynopticGroupStation(models.Model):
         return f"{timestr} {asyntsg.value} ({clarification})"
 
     def _check_rate_of_change(self, asyntsg):
+        if not asyntsg.roc_thresholds:
+            return None
         start_date = self.last_common_date - self._get_roc_timedelta(asyntsg)
         timeseries = asyntsg.timeseries_group.default_timeseries.get_data(
             start_date=start_date, end_date=self.last_common_date
@@ -408,9 +410,12 @@ class SynopticTimeseriesGroup(models.Model):
 
     @property
     def roc_thresholds(self):
-        thresholds = RateOfChangeThreshold.objects.filter(
-            synoptic_timeseries_group=self
-        ).order_by("delta_t")
+        if self.pk:
+            thresholds = RateOfChangeThreshold.objects.filter(
+                synoptic_timeseries_group=self
+            ).order_by("delta_t")
+        else:
+            thresholds = []
         result = []
         for threshold in thresholds:
             result.append(Threshold(threshold.delta_t, threshold.allowed_diff))

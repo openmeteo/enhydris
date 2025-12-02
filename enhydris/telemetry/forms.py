@@ -24,7 +24,7 @@ class EssentialDataForm(FormBase, forms.ModelForm):
 class ConnectionDataForm(FormBase):
     device_locator = forms.CharField(required=False)
     data_timezone = forms.ChoiceField(choices=timezone_choices)
-    username = forms.CharField()
+    username = forms.CharField(required=False)
     password = forms.CharField()
 
     def __init__(self, *args, **kwargs):
@@ -35,6 +35,8 @@ class ConnectionDataForm(FormBase):
         self.fields["device_locator"].help_text = self.driver.device_locator_help_text
         if self.driver.hide_device_locator:
             self.fields["device_locator"].widget = forms.HiddenInput()
+        if self.driver.hide_username:
+            self.fields["username"].widget = forms.HiddenInput()
         if self.driver.hide_data_timezone:
             self.fields["data_timezone"].widget = forms.HiddenInput(
                 attrs={"value": "UTC"}
@@ -101,7 +103,7 @@ class ChooseSensorForm(FormBase):
         sensors = dict(sorted(sensors.items(), key=lambda item: item[1]))
         station = models.Station.objects.get(pk=self.station.id)
         timeseries_groups = station.timeseriesgroup_set
-        choices = [("", _("Ignore this sensor"))]
+        choices = [("", self.driver.ignore_sensor_prompt)]
         choices.extend(
             [(tg.id, f"{tg.name} ({tg.id})") for tg in timeseries_groups.all()]
         )
@@ -111,10 +113,7 @@ class ChooseSensorForm(FormBase):
             else:
                 sensor_label = f'"{sensor_id}"'
             self.fields[f"sensor_{sensor_id}"] = forms.ChoiceField(
-                label=_(
-                    "To which Enhydris time series does sensor "
-                    "{sensor_label} correspond?"
-                ).format(sensor_label=sensor_label),
+                label=self.driver.sensor_prompt.format(sensor_label=sensor_label),
                 choices=choices,
                 required=False,
             )

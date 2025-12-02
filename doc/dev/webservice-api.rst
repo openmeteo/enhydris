@@ -534,8 +534,8 @@ The result is a `paginated list`_ of time series::
         ]
     }
 
-Create time series
-------------------
+Create or update time series
+----------------------------
 
 POST to create a time series::
 
@@ -550,6 +550,16 @@ standard `error response`_.
 When specifying nested objects, these objects are not created or
 updated—only the id is used and a reference to the nested object with
 that id is created.
+
+PUT or PATCH a time series::
+
+    curl -X PATCH -H "Authorization: token OAUTH-TOKEN" \
+        -d "name='Aggregated max'" \
+        https://openmeteo.org/api/stations/1334/timeseriesgroups/851/timeseries/27/
+
+The response is a 200 with a similar content as the GET detail response
+(with the updated data), unless there is a problem, in which case
+there's a standard `error response`_.
 
 Time series data
 ----------------
@@ -676,8 +686,9 @@ Other items of stations
 Media and other station files
 -----------------------------
 
-List station files::
+List station images or files::
 
+    curl https://openmeteo.org/api/stations/1334/images/
     curl https://openmeteo.org/api/stations/1334/files/
 
 Response::
@@ -702,6 +713,7 @@ Response::
 
 Or you can get the detail of a single one::
 
+    curl https://openmeteo.org/api/stations/1334/images/59/
     curl https://openmeteo.org/api/stations/1334/files/39/
 
 Response::
@@ -718,6 +730,7 @@ Response::
 
 Get content of such files::
 
+    curl https://openmeteo.org/api/stations/1334/images/59/content/
     curl https://openmeteo.org/api/stations/1334/files/39/content/
 
 The response is the contents of the file (usually binary data). The
