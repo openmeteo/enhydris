@@ -184,15 +184,12 @@ class Timeseries(models.Model):
         self, ahtimeseries: HTimeseries, timezone: str
     ):
         assert isinstance(self.timeseries_group.gentity.gpoint.geom, Point)
-        if self.timeseries_group.gentity.geom:
-            location = {
-                "abscissa": self.timeseries_group.gentity.gpoint.geom.x,
-                "ordinate": self.timeseries_group.gentity.gpoint.geom.y,
-                "srid": 4326,
-                "altitude": self.timeseries_group.gentity.gpoint.altitude,
-            }
-        else:
-            location = None
+        location = {
+            "abscissa": self.timeseries_group.gentity.gpoint.geom.x,
+            "ordinate": self.timeseries_group.gentity.gpoint.geom.y,
+            "srid": 4326,
+            "altitude": self.timeseries_group.gentity.gpoint.altitude,
+        }
         ahtimeseries.time_step = self.time_step
         ahtimeseries.unit = self.timeseries_group.unit_of_measurement.symbol
         ahtimeseries.title = self.timeseries_group.get_name()
@@ -225,7 +222,7 @@ class Timeseries(models.Model):
         start_date: dt.datetime | None = None,
         end_date: dt.datetime | None = None,
         timezone: str | None = None,
-    ):
+    ) -> HTimeseries:
         start_date = start_date or dt.datetime(1678, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
         end_date = end_date or dt.datetime(2261, 12, 31, 23, 59, tzinfo=dt.timezone.utc)
         try:

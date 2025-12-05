@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import copy
 import datetime as dt
 import logging
 from io import StringIO
+from typing import Any, cast
 from zoneinfo import ZoneInfo
 
 from django.conf import settings
@@ -22,8 +25,8 @@ from enhydris import models
 
 class ClearCacheMixin:
     @classmethod
-    def setUpClass(cls, *args, **kwargs):
-        super().setUpClass(*args, **kwargs)
+    def setUpClass(cls, *args: Any, **kwargs: Any):
+        super().setUpClass(*args, **kwargs)  # type: ignore[misc]
         cls.settings_overrider = override_settings(
             CACHES={
                 "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}
@@ -33,14 +36,16 @@ class ClearCacheMixin:
         cache.clear()
 
     @classmethod
-    def tearDownClass(cls, *args, **kwargs):
-        cls.settings_overrider.__exit__(exc_type=None, exc_value=None, traceback=None)
-        super().tearDownClass(*args, **kwargs)
+    def tearDownClass(cls, *args: Any, **kwargs: Any):
+        cls.settings_overrider.__exit__(exc_type=None, exc_value=None, traceback=None)  # type: ignore[misc]
+        super().tearDownClass(*args, **kwargs)  # type: ignore[misc]
 
 
 class TestTimeseriesMixin(ClearCacheMixin):
     @classmethod
-    def _create_test_timeseries(cls, data="", publicly_available=None):
+    def _create_test_timeseries(
+        cls, data: str = "", publicly_available: bool | None = None
+    ):
         cls.station = baker.make(
             models.Station,
             name="Celduin",
@@ -57,15 +62,18 @@ class TestTimeseriesMixin(ClearCacheMixin):
             precision=1,
             remarks="This timeseries group rocks",
         )
-        more_kwargs = {}
+        more_kwargs: dict[str, Any] = {}
         if publicly_available is not None:
             more_kwargs["publicly_available"] = publicly_available
-        cls.timeseries = baker.make(
+        cls.timeseries = cast(
             models.Timeseries,
-            timeseries_group=cls.timeseries_group,
-            type=models.Timeseries.INITIAL,
-            time_step="H",
-            **more_kwargs,
+            baker.make(
+                models.Timeseries,
+                timeseries_group=cls.timeseries_group,
+                type=models.Timeseries.INITIAL,
+                time_step="H",
+                **more_kwargs,
+            ),
         )
         cls.timeseries.set_data(StringIO(data), default_timezone="Etc/GMT-2")
 

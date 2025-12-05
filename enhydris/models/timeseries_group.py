@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import datetime as dt
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.cache import cache
 from django.db.models import FilteredRelation, Q
 from django.db.models.functions import Coalesce
+from django.db.models.manager import Manager
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
@@ -17,6 +19,9 @@ from parler.utils import get_active_language_choices
 
 from .base import Lookup
 from .gentity import Gentity
+
+if TYPE_CHECKING:
+    from enhydris.models import Timeseries
 
 
 class VariableManager(TranslatableManager):
@@ -90,6 +95,8 @@ class UnitOfMeasurement(Lookup):
 
 
 class TimeseriesGroup(models.Model):
+    timeseries_set: Manager["Timeseries"]
+
     last_modified: models.DateTimeField[dt.datetime, dt.datetime] = (
         models.DateTimeField(default=now, null=True, editable=False)
     )
@@ -168,7 +175,7 @@ class TimeseriesGroup(models.Model):
             or self._get_timeseries(Timeseries.INITIAL)
         )
 
-    def _get_timeseries(self, type):
+    def _get_timeseries(self, type: int):
         # We don't just do self.timeseries_set.get(type=type) because sometimes we have
         # the timeseries prefetched and this would cause another query.
         for timeseries in self.timeseries_set.all():
