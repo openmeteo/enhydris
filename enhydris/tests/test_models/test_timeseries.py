@@ -600,12 +600,12 @@ class TimeseriesSetDataTestCase(TestTimeseriesMixin, TestCase):
         )
 
 
-class TimeseriesAppendDataTestCase(TestTimeseriesMixin, TestCase):
+class TimeseriesInsertOrAppendDataTestCase(TestTimeseriesMixin, TestCase):
     def setUp(self):
         self._create_test_timeseries("2016-01-01 00:00,42,\n")
 
     def test_call_with_file_object(self):
-        returned_length = self.timeseries.append_data(
+        returned_length = self.timeseries.insert_or_append_data(
             StringIO("2017-11-23 17:23,1,\n" "2018-11-25 01:00,2,\n"),
             default_timezone="Etc/GMT-2",
         )
@@ -613,14 +613,14 @@ class TimeseriesAppendDataTestCase(TestTimeseriesMixin, TestCase):
         self._assert_wrote_data()
 
     def test_call_with_dataframe(self):
-        returned_length = self.timeseries.append_data(
+        returned_length = self.timeseries.insert_or_append_data(
             self._get_dataframe(), default_timezone="Etc/GMT-2"
         )
         self.assertEqual(returned_length, 2)
         self._assert_wrote_data()
 
     def test_call_with_htimeseries(self):
-        returned_length = self.timeseries.append_data(
+        returned_length = self.timeseries.insert_or_append_data(
             HTimeseries(self._get_dataframe()), default_timezone="Etc/GMT-2"
         )
         self.assertEqual(returned_length, 2)
@@ -654,12 +654,14 @@ class TimeseriesAppendDataTestCase(TestTimeseriesMixin, TestCase):
         pd.testing.assert_frame_equal(self.timeseries.get_data().data, expected_result)
 
 
-class TimeseriesAppendDataToEmptyTimeseriesTestCase(TestTimeseriesMixin, TestCase):
+class TimeseriesInsertOrAppendDataToEmptyTimeseriesTestCase(
+    TestTimeseriesMixin, TestCase
+):
     def setUp(self):
         self._create_test_timeseries()
 
     def test_call_with_dataframe(self):
-        returned_length = self.timeseries.append_data(
+        returned_length = self.timeseries.insert_or_append_data(
             self._get_dataframe(), default_timezone="Etc/GMT-2"
         )
         self.assertEqual(returned_length, 2)
@@ -684,13 +686,31 @@ class TimeseriesAppendDataToEmptyTimeseriesTestCase(TestTimeseriesMixin, TestCas
         )
 
 
-class TimeseriesAppendErrorTestCase(TestTimeseriesMixin, TestCase):
+class TimeseriesInsertVsAppendTestCase(TestTimeseriesMixin, TestCase):
     def test_does_not_update_if_data_to_append_are_not_later(self):
         self._create_test_timeseries("2018-01-01 00:00,42,\n")
         with self.assertRaises(IntegrityError):
-            self.timeseries.append_data(
+            self.timeseries.insert_or_append_data(
                 StringIO("2017-11-23 17:23,1,\n2018-11-25 01:00,2,\n"),
                 default_timezone="Etc/GMT-2",
+                append_only=True,
+            )
+
+    def test_allows_insertion_of_data_before_existing_data(self):
+        self._create_test_timeseries("2018-01-01 00:00,42,\n")
+        self.timeseries.insert_or_append_data(
+            StringIO("2017-11-23 17:23,1,\n2018-11-25 01:00,2,\n"),
+            default_timezone="Etc/GMT-2",
+            append_only=False,
+        )
+
+    def test_disallows_overwrite(self):
+        self._create_test_timeseries("2018-01-01 00:00,42,\n")
+        with self.assertRaises(IntegrityError):
+            self.timeseries.insert_or_append_data(
+                StringIO("2017-11-23 17:23,1,\n2018-01-01 00:00,2,\n"),
+                default_timezone="Etc/GMT-2",
+                append_only=False,
             )
 
 
@@ -728,7 +748,7 @@ class TimeseriesExecutesTriggersUponAddingRecordsTestCase(DataTestCase):
         self.trigger.assert_called()
 
     def test_calls_trigger_upon_appending_data(self):
-        self.timeseries.append_data(
+        self.timeseries.insert_or_append_data(
             StringIO("2020-10-26 09:34,18,\n"), default_timezone="Etc/GMT-2"
         )
         self.trigger.assert_called()

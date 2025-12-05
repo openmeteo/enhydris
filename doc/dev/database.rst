@@ -433,12 +433,13 @@ Time series and related models
        If *default_timezone* is specified and *data* also specifies the time
        zone in one of these ways, *default_timezone* is ignored.
 
-   .. method:: enhydris.models.Timeseries.append_data(data, default_timezone=None)
+   .. method:: enhydris.models.Timeseries.insert_or_append_data(data, default_timezone=None, append_only=True)
 
       Same as :meth:`~enhydris.models.Timeseries.set_data`, except that
-      the data is appended to the already existing data. Raises
-      ``ValueError`` if the new data is not more recent than the old
-      data.
+      it does not delete the old data; but it will not overwrite existing
+      records either.  Raises ``IntegrityError`` if any records would be
+      overwritten, or if ``append_only`` is ``True`` and the new data is not
+      more recent than the old data.
 
    .. method:: enhydris.models.Timeseries.get_last_record_as_string(timezone=None)
 

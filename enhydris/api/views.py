@@ -377,12 +377,20 @@ class TimeseriesViewSet(ModelViewSet[models.Timeseries]):
         return response
 
     def _post_data(self, request: Request, pk: int, format: str | None = None):
+        mode = request.data.get("mode", "append")
+        if mode not in ("append", "insert"):
+            return HttpResponse(
+                status=status.HTTP_400_BAD_REQUEST,
+                content="Invalid mode value",
+                content_type="text/plain",
+            )
         try:
             atimeseries = self.get_object()
             self.check_object_permissions(request, atimeseries)
-            atimeseries.append_data(
+            atimeseries.insert_or_append_data(
                 StringIO(request.data["timeseries_records"]),
                 default_timezone=request.data["timezone"],
+                append_only=(mode == "append"),
             )
             return HttpResponse(status=status.HTTP_204_NO_CONTENT)
         except (IntegrityError, iso8601.ParseError, ValueError, KeyError) as e:

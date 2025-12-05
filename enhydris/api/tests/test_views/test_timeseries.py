@@ -215,43 +215,64 @@ class GetDataInVariousFormatsTestCase(APITestCase, TimeseriesDataMixin):
 
 
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
+@patch("enhydris.models.Timeseries.insert_or_append_data")
 class TsdataPostTestCase(APITestCase):
-    @patch("enhydris.models.Timeseries.append_data")
-    def setUp(self, m: MagicMock):
-        self.mock_append_data = m
-        user = baker.make(User, username="admin", is_superuser=True)
-        station = baker.make(models.Station)
-        timeseries_group = baker.make(
-            models.TimeseriesGroup, gentity=station, precision=2
+    def setUp(self):
+        self.user = baker.make(User, username="admin", is_superuser=True)
+        self.station = baker.make(models.Station)
+        self.timeseries_group = baker.make(
+            models.TimeseriesGroup, gentity=self.station, precision=2
         )
-        timeseries = baker.make(models.Timeseries, timeseries_group=timeseries_group)
-        self.client.force_authenticate(user=user)
-        self.response = self.client.post(
-            f"/api/stations/{station.pk}/timeseriesgroups/{timeseries_group.pk}"
-            f"/timeseries/{timeseries.pk}/data/",
-            data={
-                "timezone": "Etc/GMT-2",
-                "timeseries_records": (
-                    "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
-                ),
-            },
+        self.timeseries = baker.make(
+            models.Timeseries, timeseries_group=self.timeseries_group
         )
 
-    def test_status_code(self):
+    def make_request(self, mode: str = ""):
+        self.client.force_authenticate(user=self.user)
+        data = {
+            "timezone": "Etc/GMT-2",
+            "timeseries_records": (
+                "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
+            ),
+        }
+        if mode:
+            data["mode"] = mode
+        self.response = self.client.post(
+            f"/api/stations/{self.station.pk}/timeseriesgroups/{self.timeseries_group.pk}"
+            f"/timeseries/{self.timeseries.pk}/data/",
+            data=data,
+        )
+
+    def test_status_code(self, m: MagicMock):
+        self.make_request()
         self.assertEqual(self.response.status_code, 204)
 
-    def test_called_append_data(self):
-        self.assertEqual(self.mock_append_data.call_count, 1)
+    def test_called_append_data(self, m: MagicMock):
+        self.make_request()
+        self.assertEqual(m.call_count, 1)
 
-    def test_called_append_data_with_correct_data(self):
+    def test_called_append_data_with_correct_arguments(self, m: MagicMock):
+        self.make_request()
         self.assertEqual(
-            self.mock_append_data.call_args.args[0].getvalue(),
+            m.call_args.args[0].getvalue(),
             "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
         )
-
-    def test_called_append_data_with_correct_timezone(self):
         self.assertEqual(
-            self.mock_append_data.call_args.kwargs["default_timezone"], "Etc/GMT-2"
+            m.call_args.kwargs, {"default_timezone": "Etc/GMT-2", "append_only": True}
+        )
+
+    def test_disallows_wrong_values_of_mode(self, m: MagicMock):
+        self.make_request(mode="invalid_mode")
+        self.assertEqual(self.response.status_code, 400)
+
+    def test_allows_insert_mode(self, m: MagicMock):
+        self.make_request(mode="insert")
+        self.assertEqual(
+            m.call_args.args[0].getvalue(),
+            "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
+        )
+        self.assertEqual(
+            m.call_args.kwargs, {"default_timezone": "Etc/GMT-2", "append_only": False}
         )
 
 
@@ -281,18 +302,18 @@ class TsdataPostAuthorizationTestCase(APITestCase):
             },
         )
 
-    @patch("enhydris.models.Timeseries.append_data")
+    @patch("enhydris.models.Timeseries.insert_or_append_data")
     def test_unauthenticated_user_is_denied_permission_to_post_tsdata(
         self, m: MagicMock
     ):
         self.assertEqual(self._post_tsdata().status_code, 401)
 
-    @patch("enhydris.models.Timeseries.append_data")
+    @patch("enhydris.models.Timeseries.insert_or_append_data")
     def test_unauthorized_user_is_denied_permission_to_post_tsdata(self, m: MagicMock):
         self.client.force_authenticate(user=self.user2)
         self.assertEqual(self._post_tsdata().status_code, 403)
 
-    @patch("enhydris.models.Timeseries.append_data")
+    @patch("enhydris.models.Timeseries.insert_or_append_data")
     def test_authorized_user_can_posttsdata(self, m: MagicMock):
         self.client.force_authenticate(user=self.user1)
         self.assertEqual(self._post_tsdata().status_code, 204)
@@ -300,7 +321,10 @@ class TsdataPostAuthorizationTestCase(APITestCase):
 
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataPostGarbageTestCase(APITestCase):
-    @patch("enhydris.models.Timeseries.append_data", side_effect=iso8601.ParseError)
+    @patch(
+        "enhydris.models.Timeseries.insert_or_append_data",
+        side_effect=iso8601.ParseError,
+    )
     def setUp(self, m: MagicMock):
         self.mock_append_data = m
         user = baker.make(User, username="admin", is_superuser=True)

@@ -30,7 +30,7 @@ class AutoProcess(models.Model):
     def execute(self):
         try:
             result = self.process_timeseries()
-            self.target_timeseries.append_data(result)
+            self.target_timeseries.insert_or_append_data(result)
         except Exception as e:
             msg = (
                 f"{e.__class__.__name__} while executing AutoProcess with "

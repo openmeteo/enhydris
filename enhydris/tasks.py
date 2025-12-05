@@ -26,7 +26,7 @@ class SaveTimeseriesData(celery.Task):
         try:
             with open(self.datafilename, newline="\n") as f:
                 if self.replace_or_append == "APPEND":
-                    self.timeseries.append_data(
+                    self.timeseries.insert_or_append_data(
                         f, default_timezone=self.default_timezone
                     )
                 else:

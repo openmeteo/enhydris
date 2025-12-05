@@ -290,15 +290,17 @@ class Timeseries(models.Model):
         default_timezone: str | None = None,
     ):
         self.timeseriesrecord_set.all().delete()
-        return self.append_data(data, default_timezone)
+        return self.insert_or_append_data(data, default_timezone)
 
-    def append_data(
+    def insert_or_append_data(
         self,
         data: HTimeseries | pd.DataFrame | StringIO,
         default_timezone: str | None = None,
+        append_only: bool = True,
     ):
         ahtimeseries = self._get_htimeseries_from_data(data, default_timezone)
-        self._check_new_data_is_newer(ahtimeseries)
+        if append_only:
+            self._check_new_data_is_newer(ahtimeseries)
         result = TimeseriesRecord.bulk_insert(self, ahtimeseries)
         self.save()
         return result

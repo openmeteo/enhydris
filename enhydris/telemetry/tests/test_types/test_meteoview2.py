@@ -201,7 +201,7 @@ class TelemetryFetchIgnoresTimeZoneTestCase(
             type=Timeseries.INITIAL,
         )
         timeseries.save()
-        timeseries.append_data(
+        timeseries.insert_or_append_data(
             StringIO("2022-06-14 08:00,42.1,\n"), default_timezone="Etc/GMT"
         )
         self.telemetry.data_timezone = "Europe/Athens"
