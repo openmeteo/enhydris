@@ -1,7 +1,8 @@
 import datetime as dt
 import json
 from io import StringIO
-from unittest.mock import patch
+from typing import Any
+from unittest.mock import MagicMock, patch
 from zoneinfo import ZoneInfo
 
 from django.contrib.auth.models import User
@@ -26,15 +27,15 @@ class Tsdata404TestCase(APITestCase):
 
     def test_get_nonexistent_timeseries(self):
         response = self.client.get(
-            f"/api/stations/{self.station.id}/timeseriesgroups/"
-            f"{self.timeseries_group.id}/timeseries/1234/data/"
+            f"/api/stations/{self.station.pk}/timeseriesgroups/"
+            f"{self.timeseries_group.pk}/timeseries/1234/data/"
         )
         self.assertEqual(response.status_code, 404)
 
     def test_post_nonexistent_timeseries(self):
         response = self.client.post(
-            f"/api/stations/{self.station.id}/timeseriesgroups/"
-            f"{self.timeseries_group.id}/timeseries/1235/data/"
+            f"/api/stations/{self.station.pk}/timeseriesgroups/"
+            f"{self.timeseries_group.pk}/timeseries/1235/data/"
         )
         self.assertEqual(response.status_code, 404)
 
@@ -43,6 +44,8 @@ class Tsdata404TestCase(APITestCase):
 @override_settings(ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS=False)
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataGetPermissionsTestCase(APITestCase):
+    timeseries: models.Timeseries
+
     @classmethod
     def setUpTestData(cls):
         station = baker.make(models.Station, display_timezone="Etc/GMT-2")
@@ -57,21 +60,23 @@ class TsdataGetPermissionsTestCase(APITestCase):
             publicly_available=False,
         )
         cls.url = (
-            f"/api/stations/{station.id}/timeseriesgroups/{timeseries_group.id}/"
-            f"timeseries/{cls.timeseries.id}/data/"
+            f"/api/stations/{station.pk}/timeseriesgroups/{timeseries_group.pk}/"
+            f"timeseries/{cls.timeseries.pk}/data/"
         )
 
-    def test_anonymous_user_is_denied_by_default(self, m):
+    def test_anonymous_user_is_denied_by_default(self, m: MagicMock):
         self.response = self.client.get(self.url)
         self.assertEqual(self.response.status_code, 401)
 
-    def test_anonymous_user_is_accepted_if_publicly_available_is_true(self, m):
+    def test_anonymous_user_is_accepted_if_publicly_available_is_true(
+        self, m: MagicMock
+    ):
         self.timeseries.publicly_available = True
         self.timeseries.save()
         self.response = self.client.get(self.url)
         self.assertEqual(self.response.status_code, 200)
 
-    def test_logged_on_user_is_ok(self, m):
+    def test_logged_on_user_is_ok(self, m: MagicMock):
         self.user1 = baker.make(User, is_active=True, is_superuser=False)
         self.client.force_authenticate(user=self.user1)
         self.response = self.client.get(self.url)
@@ -84,14 +89,19 @@ class GetDataTestCase(APITestCase, TimeseriesDataMixin):
     def setUpTestData(cls):
         cls.create_timeseries(publicly_available=True)
 
-    def _get_response(self, urlsuffix="", station_id=None, timeseries_group_id=None):
+    def _get_response(
+        self,
+        urlsuffix: str = "",
+        station_id: int | None = None,
+        timeseries_group_id: int | None = None,
+    ):
         if station_id is None:
-            station_id = self.station.id
+            station_id = self.station.pk
         if timeseries_group_id is None:
-            timeseries_group_id = self.timeseries_group.id
+            timeseries_group_id = self.timeseries_group.pk
         return self.client.get(
             f"/api/stations/{station_id}/timeseriesgroups/"
-            f"{timeseries_group_id}/timeseries/{self.timeseries.id}/data/"
+            f"{timeseries_group_id}/timeseries/{self.timeseries.pk}/data/"
             f"{urlsuffix}"
         )
 
@@ -122,11 +132,11 @@ class GetDataTestCase(APITestCase, TimeseriesDataMixin):
         )
 
     def test_wrong_station_id(self):
-        response = self._get_response(station_id=self.station.id + 1)
+        response = self._get_response(station_id=self.station.pk + 1)
         self.assertEqual(response.status_code, 404)
 
     def test_wrong_timeseries_group_id(self):
-        response = self._get_response(timeseries_group_id=self.timeseries_group.id + 1)
+        response = self._get_response(timeseries_group_id=self.timeseries_group.pk + 1)
         self.assertEqual(response.status_code, 404)
 
 
@@ -139,8 +149,8 @@ class GetDataInVariousFormatsTestCase(APITestCase, TimeseriesDataMixin):
             "enhydris.models.Timeseries.get_data", return_value=self.htimeseries
         )
         self.base_url = (
-            f"/api/stations/{self.station.id}/timeseriesgroups/"
-            f"{self.timeseries_group.id}/timeseries/{self.timeseries.id}/data/"
+            f"/api/stations/{self.station.pk}/timeseriesgroups/"
+            f"{self.timeseries_group.pk}/timeseries/{self.timeseries.pk}/data/"
         )
 
     def test_response_content_hts_version_2(self):
@@ -156,7 +166,7 @@ class GetDataInVariousFormatsTestCase(APITestCase, TimeseriesDataMixin):
         )
         self.assertEqual(
             response["Content-Disposition"],
-            f'inline; filename="{self.timeseries.id}.hts"',
+            f'inline; filename="{self.timeseries.pk}.hts"',
         )
 
     def test_response_content_hts_version_5(self):
@@ -172,7 +182,7 @@ class GetDataInVariousFormatsTestCase(APITestCase, TimeseriesDataMixin):
         )
         self.assertEqual(
             response["Content-Disposition"],
-            f'inline; filename="{self.timeseries.id}.hts"',
+            f'inline; filename="{self.timeseries.pk}.hts"',
         )
 
     def test_response_content_csv(self):
@@ -186,7 +196,7 @@ class GetDataInVariousFormatsTestCase(APITestCase, TimeseriesDataMixin):
         self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
         self.assertEqual(
             response["Content-Disposition"],
-            f'inline; filename="{self.timeseries.id}.csv"',
+            f'inline; filename="{self.timeseries.pk}.csv"',
         )
 
     def test_response_content_csv_default(self):
@@ -200,48 +210,69 @@ class GetDataInVariousFormatsTestCase(APITestCase, TimeseriesDataMixin):
         self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
         self.assertEqual(
             response["Content-Disposition"],
-            f'inline; filename="{self.timeseries.id}.csv"',
+            f'inline; filename="{self.timeseries.pk}.csv"',
         )
 
 
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
+@patch("enhydris.models.Timeseries.insert_or_append_data")
 class TsdataPostTestCase(APITestCase):
-    @patch("enhydris.models.Timeseries.append_data")
-    def setUp(self, m):
-        self.mock_append_data = m
-        user = baker.make(User, username="admin", is_superuser=True)
-        station = baker.make(models.Station)
-        timeseries_group = baker.make(
-            models.TimeseriesGroup, gentity=station, precision=2
+    def setUp(self):
+        self.user = baker.make(User, username="admin", is_superuser=True)
+        self.station = baker.make(models.Station)
+        self.timeseries_group = baker.make(
+            models.TimeseriesGroup, gentity=self.station, precision=2
         )
-        timeseries = baker.make(models.Timeseries, timeseries_group=timeseries_group)
-        self.client.force_authenticate(user=user)
-        self.response = self.client.post(
-            f"/api/stations/{station.id}/timeseriesgroups/{timeseries_group.id}"
-            f"/timeseries/{timeseries.id}/data/",
-            data={
-                "timezone": "Etc/GMT-2",
-                "timeseries_records": (
-                    "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
-                ),
-            },
+        self.timeseries = baker.make(
+            models.Timeseries, timeseries_group=self.timeseries_group
         )
 
-    def test_status_code(self):
+    def make_request(self, mode: str = ""):
+        self.client.force_authenticate(user=self.user)
+        data = {
+            "timezone": "Etc/GMT-2",
+            "timeseries_records": (
+                "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
+            ),
+        }
+        if mode:
+            data["mode"] = mode
+        self.response = self.client.post(
+            f"/api/stations/{self.station.pk}/timeseriesgroups/{self.timeseries_group.pk}"
+            f"/timeseries/{self.timeseries.pk}/data/",
+            data=data,
+        )
+
+    def test_status_code(self, m: MagicMock):
+        self.make_request()
         self.assertEqual(self.response.status_code, 204)
 
-    def test_called_append_data(self):
-        self.assertEqual(self.mock_append_data.call_count, 1)
+    def test_called_append_data(self, m: MagicMock):
+        self.make_request()
+        self.assertEqual(m.call_count, 1)
 
-    def test_called_append_data_with_correct_data(self):
+    def test_called_append_data_with_correct_arguments(self, m: MagicMock):
+        self.make_request()
         self.assertEqual(
-            self.mock_append_data.call_args.args[0].getvalue(),
+            m.call_args.args[0].getvalue(),
             "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
         )
-
-    def test_called_append_data_with_correct_timezone(self):
         self.assertEqual(
-            self.mock_append_data.call_args.kwargs["default_timezone"], "Etc/GMT-2"
+            m.call_args.kwargs, {"default_timezone": "Etc/GMT-2", "append_only": True}
+        )
+
+    def test_disallows_wrong_values_of_mode(self, m: MagicMock):
+        self.make_request(mode="invalid_mode")
+        self.assertEqual(self.response.status_code, 400)
+
+    def test_allows_insert_mode(self, m: MagicMock):
+        self.make_request(mode="insert")
+        self.assertEqual(
+            m.call_args.args[0].getvalue(),
+            "2017-11-23 17:23,1.000000,\r\n" "2018-11-25 01:00,2.000000,\r\n",
+        )
+        self.assertEqual(
+            m.call_args.kwargs, {"default_timezone": "Etc/GMT-2", "append_only": False}
         )
 
 
@@ -261,8 +292,8 @@ class TsdataPostAuthorizationTestCase(APITestCase):
 
     def _post_tsdata(self):
         return self.client.post(
-            f"/api/stations/{self.station.id}/timeseriesgroups"
-            f"/{self.timeseries_group.id}/timeseries/{self.timeseries.id}/data/",
+            f"/api/stations/{self.station.pk}/timeseriesgroups"
+            f"/{self.timeseries_group.pk}/timeseries/{self.timeseries.pk}/data/",
             data={
                 "timezone": "Etc/GMT-2",
                 "timeseries_records": (
@@ -271,25 +302,30 @@ class TsdataPostAuthorizationTestCase(APITestCase):
             },
         )
 
-    @patch("enhydris.models.Timeseries.append_data")
-    def test_unauthenticated_user_is_denied_permission_to_post_tsdata(self, m):
+    @patch("enhydris.models.Timeseries.insert_or_append_data")
+    def test_unauthenticated_user_is_denied_permission_to_post_tsdata(
+        self, m: MagicMock
+    ):
         self.assertEqual(self._post_tsdata().status_code, 401)
 
-    @patch("enhydris.models.Timeseries.append_data")
-    def test_unauthorized_user_is_denied_permission_to_post_tsdata(self, m):
+    @patch("enhydris.models.Timeseries.insert_or_append_data")
+    def test_unauthorized_user_is_denied_permission_to_post_tsdata(self, m: MagicMock):
         self.client.force_authenticate(user=self.user2)
         self.assertEqual(self._post_tsdata().status_code, 403)
 
-    @patch("enhydris.models.Timeseries.append_data")
-    def test_authorized_user_can_posttsdata(self, m):
+    @patch("enhydris.models.Timeseries.insert_or_append_data")
+    def test_authorized_user_can_posttsdata(self, m: MagicMock):
         self.client.force_authenticate(user=self.user1)
         self.assertEqual(self._post_tsdata().status_code, 204)
 
 
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataPostGarbageTestCase(APITestCase):
-    @patch("enhydris.models.Timeseries.append_data", side_effect=iso8601.ParseError)
-    def setUp(self, m):
+    @patch(
+        "enhydris.models.Timeseries.insert_or_append_data",
+        side_effect=iso8601.ParseError,
+    )
+    def setUp(self, m: MagicMock):
         self.mock_append_data = m
         user = baker.make(User, username="admin", is_superuser=True)
         station = baker.make(models.Station)
@@ -299,8 +335,8 @@ class TsdataPostGarbageTestCase(APITestCase):
         timeseries = baker.make(models.Timeseries, timeseries_group=timeseries_group)
         self.client.force_authenticate(user=user)
         self.response = self.client.post(
-            f"/api/stations/{station.id}/timeseriesgroups/{timeseries_group.id}"
-            f"/timeseries/{timeseries.id}/data/",
+            f"/api/stations/{station.pk}/timeseriesgroups/{timeseries_group.pk}"
+            f"/timeseries/{timeseries.pk}/data/",
             data={
                 "timeseries_records": (
                     # The actual content doesn't matter, since the mock will raise
@@ -324,8 +360,8 @@ class TsdataPostDuplicateTimestampsTestCase(APITestCase):
         timeseries = baker.make(models.Timeseries, timeseries_group=timeseries_group)
         self.client.force_authenticate(user=user)
         self.response = self.client.post(
-            f"/api/stations/{station.id}/timeseriesgroups/{timeseries_group.id}"
-            f"/timeseries/{timeseries.id}/data/",
+            f"/api/stations/{station.pk}/timeseriesgroups/{timeseries_group.pk}"
+            f"/timeseries/{timeseries.pk}/data/",
             data={
                 "timezone": "Etc/GMT-2",
                 "timeseries_records": (
@@ -355,15 +391,15 @@ class TsdataStartAndEndDateTestCase(APITestCase):
             publicly_available=True,
         )
 
-    def _make_request(self, query_string):
+    def _make_request(self, query_string: str):
         return self.client.get(
-            f"/api/stations/{self.station.id}/timeseriesgroups"
-            f"/{self.timeseries_group.id}/timeseries/{self.timeseries.id}/data"
+            f"/api/stations/{self.station.pk}/timeseriesgroups"
+            f"/{self.timeseries_group.pk}/timeseries/{self.timeseries.pk}/data"
             f"/?{query_string}"
         )
 
     @patch("enhydris.models.Timeseries.get_data")
-    def test_called_get_data_with_proper_start_date(self, m):
+    def test_called_get_data_with_proper_start_date(self, m: MagicMock):
         self._make_request("start_date=2005-08-23T19:54")
         m.assert_called_once_with(
             start_date=dt.datetime(2005, 8, 23, 19, 54, tzinfo=ZoneInfo("Etc/GMT")),
@@ -372,7 +408,7 @@ class TsdataStartAndEndDateTestCase(APITestCase):
         )
 
     @patch("enhydris.models.Timeseries.get_data")
-    def test_called_get_data_with_proper_end_date(self, m):
+    def test_called_get_data_with_proper_end_date(self, m: MagicMock):
         self._make_request("end_date=2005-08-23T19:54")
         m.assert_called_once_with(
             start_date=None,
@@ -381,7 +417,7 @@ class TsdataStartAndEndDateTestCase(APITestCase):
         )
 
     @patch("enhydris.models.Timeseries.get_data")
-    def test_called_get_data_with_very_early_start_date(self, m):
+    def test_called_get_data_with_very_early_start_date(self, m: MagicMock):
         self._make_request("start_date=0001-01-01T00:01")
         m.assert_called_once_with(
             start_date=dt.datetime(1680, 1, 1, 0, 0, tzinfo=ZoneInfo("Etc/GMT")),
@@ -390,7 +426,7 @@ class TsdataStartAndEndDateTestCase(APITestCase):
         )
 
     @patch("enhydris.models.Timeseries.get_data")
-    def test_called_get_data_with_very_late_start_date(self, m):
+    def test_called_get_data_with_very_late_start_date(self, m: MagicMock):
         self._make_request("end_date=3999-01-01T00:01")
         m.assert_called_once_with(
             start_date=None,
@@ -412,20 +448,20 @@ class TsdataInvalidStartOrEndDateTestCase(APITestCase):
             publicly_available=True,
         )
 
-    def _make_request(self, query_string):
+    def _make_request(self, query_string: str):
         return self.client.get(
-            f"/api/stations/{self.station.id}/timeseriesgroups"
-            f"/{self.timeseries_group.id}/timeseries/{self.timeseries.id}/data"
+            f"/api/stations/{self.station.pk}/timeseriesgroups"
+            f"/{self.timeseries_group.pk}/timeseries/{self.timeseries.pk}/data"
             f"/?{query_string}"
         )
 
     @patch("enhydris.models.Timeseries.get_data")
-    def test_invalid_start_date(self, m):
+    def test_invalid_start_date(self, m: MagicMock):
         self._make_request("?start_date=hello")
         m.assert_called_once_with(start_date=None, end_date=None, timezone=None)
 
     @patch("enhydris.models.Timeseries.get_data")
-    def test_invalid_end_date(self, m):
+    def test_invalid_end_date(self, m: MagicMock):
         self._make_request("?end_date=hello")
         m.assert_called_once_with(start_date=None, end_date=None, timezone=None)
 
@@ -451,8 +487,8 @@ class TsdataHeadTestCase(APITestCase):
 
     def _get_url(self):
         return (
-            f"/api/stations/{self.station.id}/timeseriesgroups"
-            f"/{self.timeseries_group.id}/timeseries/{self.timeseries.id}/data/"
+            f"/api/stations/{self.station.pk}/timeseriesgroups"
+            f"/{self.timeseries_group.pk}/timeseries/{self.timeseries.pk}/data/"
         )
 
     def test_get(self):
@@ -466,6 +502,8 @@ class TsdataHeadTestCase(APITestCase):
 
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TimeseriesBottomTestCase(APITestCase):
+    timeseries: models.Timeseries
+
     def setUp(self):
         self.station = baker.make(models.Station, display_timezone="Etc/GMT-2")
         self.timeseries_group = baker.make(
@@ -482,13 +520,13 @@ class TimeseriesBottomTestCase(APITestCase):
             StringIO("2018-12-09 13:10,20,\n"), default_timezone="Etc/GMT-2"
         )
 
-    def _get_response(self, timezone=None):
+    def _get_response(self, timezone: str | None = None):
         params = None
         if timezone:
             params = {"timezone": timezone}
         self.response = self.client.get(
-            f"/api/stations/{self.station.id}/timeseriesgroups/"
-            f"{self.timeseries_group.id}/timeseries/{self.timeseries.id}/bottom/",
+            f"/api/stations/{self.station.pk}/timeseriesgroups/"
+            f"{self.timeseries_group.pk}/timeseries/{self.timeseries.pk}/bottom/",
             data=params,
         )
 
@@ -528,8 +566,8 @@ class TimeseriesBottomPermissionsTestCase(APITestCase):
             StringIO("2018-12-09 13:10,20,\n"), default_timezone="Etc/GMT-2"
         )
         self.url = (
-            f"/api/stations/{station.id}/timeseriesgroups/{timeseries_group.id}/"
-            f"timeseries/{timeseries.id}/bottom/"
+            f"/api/stations/{station.pk}/timeseriesgroups/{timeseries_group.pk}/"
+            f"timeseries/{timeseries.pk}/bottom/"
         )
 
     def test_anonymous_user_is_denied(self):
@@ -554,13 +592,13 @@ class TimeseriesPostTestCase(APITestCase):
         self.station = baker.make(models.Station, creator=self.user1)
         self.timeseries_group = baker.make(models.TimeseriesGroup, gentity=self.station)
 
-    def _create_timeseries(self, **kwargs):
+    def _create_timeseries(self, **kwargs: Any):
         return self.client.post(
-            f"/api/stations/{self.station.id}/timeseriesgroups/"
-            f"{self.timeseries_group.id}/timeseries/",
+            f"/api/stations/{self.station.pk}/timeseriesgroups/"
+            f"{self.timeseries_group.pk}/timeseries/",
             data={
                 "name": "Great time series",
-                "timeseries_group": self.timeseries_group.id,
+                "timeseries_group": self.timeseries_group.pk,
                 "type": "Initial",
                 "time_step": "",
                 **kwargs,
@@ -585,7 +623,7 @@ class TimeseriesPostTestCase(APITestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             json.loads(response.content.decode())["non_field_errors"][0],
-            f"A time series with timeseries_group_id={self.timeseries_group.id} and "
+            f"A time series with timeseries_group_id={self.timeseries_group.pk} and "
             "type=Initial already exists",
         )
 
@@ -609,17 +647,18 @@ class TimeseriesPostWithWrongStationOrTimeseriesGroupTestCase(APITestCase):
             models.TimeseriesGroup, gentity=self.station2
         )
 
-    def _create_timeseries(self, **kwargs):
+    def _create_timeseries(self, **kwargs: Any):
         self.client.force_authenticate(user=self.user)
+        assert isinstance(self.variable.pk, int)  # type: ignore[misc]
         return self.client.post(
-            f"/api/stations/{kwargs['station_for_url'].id}/timeseriesgroups/"
-            f"{kwargs['timeseries_group_for_url'].id}/timeseries/",
+            f"/api/stations/{kwargs['station_for_url'].pk}/timeseriesgroups/"
+            f"{kwargs['timeseries_group_for_url'].pk}/timeseries/",
             data={
                 "name": "Great time series",
                 "timeseries_group": kwargs["timeseries_group_for_data"].id,
                 "type": "Initial",
-                "variable": self.variable.id,
-                "unit_of_measurement": self.unit_of_measurement.id,
+                "variable": self.variable.pk,
+                "unit_of_measurement": self.unit_of_measurement.pk,
                 "precision": 2,
                 "time_step": "",
             },
@@ -660,17 +699,18 @@ class TimeseriesPostWithWrongTimeseriesTypeTestCase(APITestCase):
         self.station = baker.make(models.Station, creator=self.user)
         self.timeseries_group = baker.make(models.TimeseriesGroup, gentity=self.station)
 
-    def _create_timeseries(self, type):
+    def _create_timeseries(self, type: str):
         self.client.force_authenticate(user=self.user)
+        assert isinstance(self.variable.pk, int)  # type: ignore[misc]
         return self.client.post(
-            f"/api/stations/{self.station.id}/timeseriesgroups/"
-            f"{self.timeseries_group.id}/timeseries/",
+            f"/api/stations/{self.station.pk}/timeseriesgroups/"
+            f"{self.timeseries_group.pk}/timeseries/",
             data={
                 "name": "Great time series",
-                "timeseries_group": self.timeseries_group.id,
+                "timeseries_group": self.timeseries_group.pk,
                 "type": type,
-                "variable": self.variable.id,
-                "unit_of_measurement": self.unit_of_measurement.id,
+                "variable": self.variable.pk,
+                "unit_of_measurement": self.unit_of_measurement.pk,
                 "precision": 2,
                 "time_step": "",
             },
@@ -701,8 +741,8 @@ class TimeseriesDeleteTestCase(APITestCase):
 
     def _make_request(self):
         return self.client.delete(
-            f"/api/stations/{self.station.id}/timeseriesgroups/"
-            f"{self.timeseries_group.id}/timeseries/{self.timeseries.id}/"
+            f"/api/stations/{self.station.pk}/timeseriesgroups/"
+            f"{self.timeseries_group.pk}/timeseries/{self.timeseries.pk}/"
         )
 
     def test_unauthenticated_user_is_denied_permission_to_delete_timeseries(self):
@@ -737,20 +777,20 @@ class TimeseriesValidationTestCase(APITestCase):
             publicly_available=False,
         )
         self.url = (
-            f"/api/stations/{self.station.id}/timeseriesgroups/{self.timeseries_group.id}/"
-            f"timeseries/{self.timeseries.id}/"
+            f"/api/stations/{self.station.pk}/timeseriesgroups/{self.timeseries_group.pk}/"
+            f"timeseries/{self.timeseries.pk}/"
         )
         self.client.force_authenticate(user=self.user)
 
     def test_patch_cannot_change_group(self):
         response = self.client.patch(
             self.url,
-            data={"timeseries_group": self.other_group.id},
+            data={"timeseries_group": self.other_group.pk},
             format="json",
         )
         self.assertEqual(response.status_code, 400)
         self.timeseries.refresh_from_db()
-        self.assertEqual(self.timeseries.timeseries_group_id, self.timeseries_group.id)
+        self.assertEqual(self.timeseries.timeseries_group.pk, self.timeseries_group.pk)
 
     def test_patch_can_change_type(self):
         self.assertNotEqual(self.timeseries.type, "Checked")
@@ -767,7 +807,7 @@ class TimeseriesValidationTestCase(APITestCase):
         response = self.client.put(
             self.url,
             data={
-                "timeseries_group": self.other_group.id,
+                "timeseries_group": self.other_group.pk,
                 "type": "Initial",
                 "time_step": self.timeseries.time_step,
                 "name": self.timeseries.name,
@@ -777,13 +817,13 @@ class TimeseriesValidationTestCase(APITestCase):
         )
         self.assertEqual(response.status_code, 400)
         self.timeseries.refresh_from_db()
-        self.assertEqual(self.timeseries.timeseries_group_id, self.timeseries_group.id)
+        self.assertEqual(self.timeseries.timeseries_group.pk, self.timeseries_group.pk)
 
     def test_put_can_allow_type_to_stay_the_same(self):
         response = self.client.put(
             self.url,
             data={
-                "timeseries_group": self.timeseries_group.id,
+                "timeseries_group": self.timeseries_group.pk,
                 "type": "Initial",
                 "time_step": self.timeseries.time_step,
                 "name": self.timeseries.name,
@@ -803,16 +843,16 @@ class TimeseriesChartDateBoundsTestCase(APITestCase, TimeseriesDataMixin):
         # comparisons in the view, which would compare mocks, raising an exception
         self.create_timeseries(publicly_available=True)
         self.url = (
-            f"/api/stations/{self.station.id}/timeseriesgroups"
-            f"/{self.timeseries_group.id}/timeseries/{self.timeseries.id}/chart/"
+            f"/api/stations/{self.station.pk}/timeseriesgroups"
+            f"/{self.timeseries_group.pk}/timeseries/{self.timeseries.pk}/chart/"
         )
 
-    def test_no_bounds_supplied(self, mock, _):
+    def test_no_bounds_supplied(self, mock: MagicMock, _):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         mock.assert_called_once_with(start_date=None, end_date=None)
 
-    def test_start_date_filter(self, mock, _):
+    def test_start_date_filter(self, mock: MagicMock, _):
         response = self.client.get(self.url + "?start_date=2012-03-01T00:00")
         self.assertEqual(response.status_code, 200)
         mock.assert_called_once_with(
@@ -820,7 +860,7 @@ class TimeseriesChartDateBoundsTestCase(APITestCase, TimeseriesDataMixin):
             end_date=None,
         )
 
-    def test_end_date_filter(self, mock, _):
+    def test_end_date_filter(self, mock: MagicMock, _):
         response = self.client.get(self.url + "?end_date=2012-03-01T00:00")
         self.assertEqual(response.status_code, 200)
         mock.assert_called_once_with(
@@ -828,7 +868,7 @@ class TimeseriesChartDateBoundsTestCase(APITestCase, TimeseriesDataMixin):
             end_date=dt.datetime(2012, 3, 1, 0, 0, tzinfo=ZoneInfo(self.timezone)),
         )
 
-    def test_start_and_end_date_filters(self, mock, _):
+    def test_start_and_end_date_filters(self, mock: MagicMock, _):
         response = self.client.get(
             self.url + "?start_date=2012-03-01T00:00&end_date=2017-03-01T00:00"
         )
@@ -839,8 +879,10 @@ class TimeseriesChartDateBoundsTestCase(APITestCase, TimeseriesDataMixin):
         )
 
 
-class TimeseriesChartTestMixin:
-    def _assertChartResponse(self, response, expected, tolerance_in_days=2):
+class TimeseriesChartTestBase(APITestCase):
+    def _assertChartResponse(
+        self, response: Any, expected: Any, tolerance_in_days: int = 2
+    ):
         """Assert chart response by allowing timestamp tolerance, but not values.
 
         The expected is a list of {value, date} rather than timestamp to make the
@@ -858,7 +900,13 @@ class TimeseriesChartTestMixin:
                 d["timestamp"], e["date"].timestamp(), delta=tolerance_in_seconds
             )
 
-    def _value(self, yyyymmddhhmm, min, max, mean):
+    def _value(
+        self,
+        yyyymmddhhmm: tuple[int, int, int, int, int],
+        min: float | None,
+        max: float | None,
+        mean: float | None,
+    ):
         return {
             "date": dt.datetime(*yyyymmddhhmm),
             "min": min,
@@ -871,36 +919,35 @@ class TimeseriesChartTestMixin:
 @patch("enhydris.api.views.TimeseriesViewSet.CHART_MAX_INTERVALS", new=20)
 @patch("enhydris.models.Timeseries.get_data")
 @override_settings(ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS=False)
-class TimeseriesChartTestCase(
-    APITestCase, TimeseriesDataMixin, TimeseriesChartTestMixin
-):
-    def _create_timeseries(self, publicly_available=None):
+class TimeseriesChartTestCase(TimeseriesDataMixin, TimeseriesChartTestBase):
+    @classmethod
+    def _create_timeseries(cls, publicly_available: bool | None = None):
         # Create the timeseries so that we have 5 entries, one per year
         super().create_timeseries(publicly_available=publicly_available)
-        self.htimeseries.data = pd.DataFrame(
+        cls.htimeseries.data = pd.DataFrame(
             index=[dt.datetime(year, 1, 1) for year in range(2010, 2015)],
             data={"value": [year for year in range(2010, 2015)], "flags": [""] * 5},
             columns=["value", "flags"],
         )
-        self.url = (
-            f"/api/stations/{self.station.id}/timeseriesgroups"
-            f"/{self.timeseries_group.id}/timeseries/{self.timeseries.id}/chart/"
+        cls.url = (
+            f"/api/stations/{cls.station.pk}/timeseriesgroups"
+            f"/{cls.timeseries_group.pk}/timeseries/{cls.timeseries.pk}/chart/"
         )
 
-    def test_unauthenticated_user_denied(self, mock):
+    def test_unauthenticated_user_denied(self, mock: MagicMock):
         self._create_timeseries(publicly_available=False)
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 401)
 
-    def test_authenticated_user_allowed(self, mock):
+    def test_authenticated_user_allowed(self, mock: MagicMock):
         self._create_timeseries(publicly_available=False)
         self.client.force_authenticate(user=baker.make(User, is_active=True))
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
 
-    def test_all_values_returned(self, mock):
+    def test_all_values_returned(self, mock: MagicMock):
         self._create_timeseries(publicly_available=True)
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
@@ -913,7 +960,7 @@ class TimeseriesChartTestCase(
         ]
         self._assertChartResponse(response, expected)
 
-    def test_null_values_are_dropped(self, mock):
+    def test_null_values_are_dropped(self, mock: MagicMock):
         self._create_timeseries(publicly_available=True)
         self.htimeseries.data.loc["2010-01-01", "value"] = np.nan
         mock.return_value = self.htimeseries
@@ -930,9 +977,7 @@ class TimeseriesChartTestCase(
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 @patch("enhydris.api.views.TimeseriesViewSet.CHART_MAX_INTERVALS", new=3)
 @patch("enhydris.models.Timeseries.get_data")
-class TimeseriesChartValuesTestCase(
-    APITestCase, TimeseriesDataMixin, TimeseriesChartTestMixin
-):
+class TimeseriesChartValuesTestCase(TimeseriesDataMixin, TimeseriesChartTestBase):
     def setUp(self):
         self.create_timeseries(publicly_available=True)
         self.htimeseries.data = pd.DataFrame(
@@ -941,11 +986,11 @@ class TimeseriesChartValuesTestCase(
             columns=["value", "flags"],
         )
         self.url = (
-            f"/api/stations/{self.station.id}/timeseriesgroups"
-            f"/{self.timeseries_group.id}/timeseries/{self.timeseries.id}/chart/"
+            f"/api/stations/{self.station.pk}/timeseriesgroups"
+            f"/{self.timeseries_group.pk}/timeseries/{self.timeseries.pk}/chart/"
         )
 
-    def test_simple(self, mock):
+    def test_simple(self, mock: MagicMock):
         mock.return_value = self.htimeseries
         response = self.client.get(self.url)
         expected = [
@@ -955,7 +1000,7 @@ class TimeseriesChartValuesTestCase(
         ]
         self._assertChartResponse(response, expected)
 
-    def test_null(self, mock):
+    def test_null(self, mock: MagicMock):
         """Test that unspecified data points get a value of null.
 
         In this test we use this test time series:
@@ -983,7 +1028,7 @@ class TimeseriesChartValuesTestCase(
         ]
         self._assertChartResponse(response, expected)
 
-    def test_insufficient_number_of_records(self, mock):
+    def test_insufficient_number_of_records(self, mock: MagicMock):
         mock.return_value = self.htimeseries
         self.htimeseries.data = pd.DataFrame(
             index=[dt.datetime(2010, 1, 1)],
