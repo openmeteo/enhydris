@@ -1,6 +1,75 @@
+{% load static %}
+{% load i18n %}
+
 <div id="data_holder">
   <div id="chart-wrapper">
     <div id="chart-main"></div>
     <div id="chart-mini"></div>
+    <div class="modal fade" id="chart-info-modal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-body chart-legend">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+
+            <img src="{% static 'images/chart-legend.png' %}" alt="{% trans 'Chart example' %}">
+
+            <!-- Overlay -->
+            <svg class="overlay" viewBox="0 0 100 100" aria-hidden="true">
+              <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                        markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
+                </marker>
+              </defs>
+
+              <!-- Vertical line -->
+              <line x1="61" y1="05" x2="61" y2="90"
+                    stroke="currentColor" stroke-width="0.3" />
+
+
+              <!-- First textbox and its arrow -->
+              <rect x="-35" y="15" width="70" height="45" rx="2" ry="2" fill="white" opacity="0.85"></rect>
+              <foreignObject x="-30" y="20" width="300" height="180">
+                  <div class="chart-legend-textbox">
+                    {% blocktrans %}
+                    Each "point" of the chart actually corresponds to an interval (except in
+                    high zoom levels). For example, the red vertical line in this example
+                    corresponds to several hours.
+                    {% endblocktrans %}
+                  </div>
+              </foreignObject>
+              <line x1="13" y1="52" x2="60" y2="65"
+                    stroke="currentColor" stroke-width="0.8" marker-end="url(#arrow)" />
+
+              <!-- Second textbox -->
+              <rect x="75" y="45" width="70" height="45" rx="2" ry="2" fill="white" opacity="0.85"></rect>
+              <foreignObject x="80" y="50" width="300" height="180">
+                  <div class="chart-legend-textbox">
+                    {% blocktrans %}
+                    The three lines show the max, mean and min value of the interval.  As
+                    you zoom in, the intervals become smaller and the three lines
+                    come closer to each other.
+                    {% endblocktrans %}
+                  </div>
+              </foreignObject>
+
+              <!-- Arrow max -->
+              <line x1="80" y1="50" x2="62" y2="18"
+                    stroke="currentColor" stroke-width="0.8" marker-end="url(#arrow)" />
+
+              <!-- Arrow mean -->
+              <line x1="80" y1="50" x2="62" y2="25"
+                    stroke="currentColor" stroke-width="0.8" marker-end="url(#arrow)" />
+
+              <!-- Arrow min -->
+              <line x1="80" y1="50" x2="62" y2="34"
+                    stroke="currentColor" stroke-width="0.8" marker-end="url(#arrow)" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

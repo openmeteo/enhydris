@@ -815,7 +815,6 @@ h4.tab-no-data {
 .station-info {
   position: relative;
   top: -85px;
-  z-index: 100000;
 }
 
 .station-info-header {
@@ -829,6 +828,8 @@ h4.tab-no-data {
   border-top-left-radius: 30px;
   border-top-right-radius: 30px;
   background-color: #ffffff;
+
+  z-index: 1020;
 }
 
 .station-title-wrapper {
@@ -1422,6 +1423,36 @@ h4.tab-no-data {
     width: 100%;
     height: 370px;
   }
+}
+
+.chart-legend {
+  position: relative;
+  width: min(900px, 100%);
+}
+
+.chart-legend img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.chart-legend .overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  color: #e11d48;
+}
+
+.chart-legend-textbox {
+  transform: scale(0.2);
+  transform-origin: 0 0;
+  font-family: sans-serif;
+  font-size: 20px;
+  line-height: 1.2;
+  color: black;
+  white-space: normal;
 }
 
 /* STATION DOWNLOAD */

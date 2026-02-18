@@ -292,6 +292,14 @@ enhydris.chart = {
             zoomout: true,
             pan: false,
             reset: false,
+            customIcons: [
+              {
+                icon: '<span><b>ⓘ</b></span>',
+                index: 4,
+                title: enhydris.strInfo,
+                click: () => { $('#chart-info-modal').modal('show'); },
+              },
+            ],
           },
         },
         events: {
