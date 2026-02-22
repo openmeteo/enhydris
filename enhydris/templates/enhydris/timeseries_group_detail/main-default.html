@@ -61,6 +61,7 @@
     enhydris.strLoading = "{% trans 'Loading...'  %}";
     enhydris.strNoData = "{% trans 'No data' %}";
     enhydris.precision = parseInt("{{ object.precision }}");
+    enhydris.unit = "{{ object.unit_of_measurement.symbol }}";
     enhydris.strInfo = "{% trans 'Info' %}";
 
     {% if object.default_timeseries %}

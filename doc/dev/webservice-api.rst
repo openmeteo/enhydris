@@ -673,7 +673,11 @@ You can provide time limits using the following query parameters
 ``start_date=<TIME>&end_date=<TIME>``.  For instance, to request data prior to
 2015 only, we can make the following request::
 
-    curl 'https://openmeteo.org/api/stations/1334/timeseries/232/chart/?end_date=2015-01-01T00:00`
+    curl 'https://openmeteo.org/api/stations/1334/timeseries/232/chart/?end_date=2015-01-01T00:00Z`
+
+The timestamp in the response is a Unix timestamp (i.e. seconds since
+1970-01-01T00:00:00Z). In the query parameters, the timestamp is in ISO8601
+format and must always contain a time zone.
 
 The purpose of this endpoint is to be used when creating a chart for the
 time series. When the user pans or zooms the chart, a new request with

@@ -13,8 +13,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import IntegrityError, models
 from django.utils.translation import gettext_lazy as _
 
-import iso8601
-
 import enhydris
 from enhydris.models import Station, Timeseries, TimeseriesGroup
 
@@ -118,7 +116,7 @@ class Telemetry(models.Model):
         prev_timestamp = dt.datetime(1, 1, 1, 0, 0)
         measurements.seek(0)
         for line in measurements:
-            cur_timestamp = iso8601.parse_date(line.split(",")[0])
+            cur_timestamp = dt.datetime.fromisoformat(line.split(",")[0])
             cur_timestamp = cur_timestamp.replace(second=0, tzinfo=None)
             if cur_timestamp == prev_timestamp:
                 continue

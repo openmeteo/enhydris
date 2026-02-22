@@ -164,8 +164,8 @@ enhydris.chart = {
     /* Make API call to fetch & populate chart data between two selected
     data points (i.e. start datetime and end datetime).
     */
-    const startDate = new Date(min).toISOString().substring(0, 16);
-    const endDate = new Date(max).toISOString().substring(0, 16);
+    const startDate = new Date(min).toISOString();
+    const endDate = new Date(max).toISOString();
 
     this.mainChart.updateSeries([
       {
@@ -333,6 +333,9 @@ enhydris.chart = {
         tooltip: {
           enabled: false,
         },
+        title: {
+          text: 't (UTC)',
+        },
       },
       yaxis: {
         labels: {
@@ -340,12 +343,15 @@ enhydris.chart = {
             return val.toFixed(enhydris.precision >= 0 ? enhydris.precision : 0);
           },
         },
+        title: {
+          text: enhydris.unit,
+        },
       },
       tooltip: {
         enabled: true,
         x: {
           show: true,
-          format: 'dd MMM yyyy HH:mm',
+          format: 'dd MMM yyyy HH:mm U\\TC',
         },
       },
       legend: {

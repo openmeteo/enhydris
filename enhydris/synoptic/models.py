@@ -7,7 +7,6 @@ from django.core.mail import send_mail
 from django.db import DataError, IntegrityError, models
 from django.utils.translation import gettext as _
 
-import iso8601
 from rocc import Threshold, rocc
 
 from enhydris.models import DISPLAY_TIMEZONE_CHOICES, Station, TimeseriesGroup
@@ -226,7 +225,7 @@ class SynopticGroupStation(models.Model):
         if not messages:
             return None
         message = messages[-1]
-        date = iso8601.parse_date(message.split()[0]).replace(tzinfo=None)
+        date = dt.datetime.fromisoformat(message.split()[0]).replace(tzinfo=None)
         if date == self.last_common_date.replace(tzinfo=None):
             return message
 

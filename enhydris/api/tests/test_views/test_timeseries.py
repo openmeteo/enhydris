@@ -9,7 +9,6 @@ from django.contrib.auth.models import User
 from django.test.utils import override_settings
 from rest_framework.test import APITestCase
 
-import iso8601
 import numpy as np
 import pandas as pd
 from htimeseries import HTimeseries
@@ -121,7 +120,7 @@ class GetDataTestCase(APITestCase, TimeseriesDataMixin):
         )
 
     def test_request_with_start_date(self):
-        response = self._get_response(urlsuffix="?start_date=2017-11-23T17:24")
+        response = self._get_response(urlsuffix="?start_date=2017-11-23T17:24Z")
         self.assertEqual(response.content.decode(), "2018-11-25 01:00,2.00,\r\n")
 
     def test_response_content_in_other_timezone(self):
@@ -321,10 +320,7 @@ class TsdataPostAuthorizationTestCase(APITestCase):
 
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataPostGarbageTestCase(APITestCase):
-    @patch(
-        "enhydris.models.Timeseries.insert_or_append_data",
-        side_effect=iso8601.ParseError,
-    )
+    @patch("enhydris.models.Timeseries.insert_or_append_data", side_effect=ValueError)
     def setUp(self, m: MagicMock):
         self.mock_append_data = m
         user = baker.make(User, username="admin", is_superuser=True)
@@ -400,7 +396,7 @@ class TsdataStartAndEndDateTestCase(APITestCase):
 
     @patch("enhydris.models.Timeseries.get_data")
     def test_called_get_data_with_proper_start_date(self, m: MagicMock):
-        self._make_request("start_date=2005-08-23T19:54")
+        self._make_request("start_date=2005-08-23T19:54Z")
         m.assert_called_once_with(
             start_date=dt.datetime(2005, 8, 23, 19, 54, tzinfo=ZoneInfo("Etc/GMT")),
             end_date=None,
@@ -409,7 +405,7 @@ class TsdataStartAndEndDateTestCase(APITestCase):
 
     @patch("enhydris.models.Timeseries.get_data")
     def test_called_get_data_with_proper_end_date(self, m: MagicMock):
-        self._make_request("end_date=2005-08-23T19:54")
+        self._make_request("end_date=2005-08-23T19:54Z")
         m.assert_called_once_with(
             start_date=None,
             end_date=dt.datetime(2005, 8, 23, 19, 54, tzinfo=ZoneInfo("Etc/GMT")),
@@ -418,7 +414,7 @@ class TsdataStartAndEndDateTestCase(APITestCase):
 
     @patch("enhydris.models.Timeseries.get_data")
     def test_called_get_data_with_very_early_start_date(self, m: MagicMock):
-        self._make_request("start_date=0001-01-01T00:01")
+        self._make_request("start_date=0001-01-01T00:01Z")
         m.assert_called_once_with(
             start_date=dt.datetime(1680, 1, 1, 0, 0, tzinfo=ZoneInfo("Etc/GMT")),
             end_date=None,
@@ -427,7 +423,7 @@ class TsdataStartAndEndDateTestCase(APITestCase):
 
     @patch("enhydris.models.Timeseries.get_data")
     def test_called_get_data_with_very_late_start_date(self, m: MagicMock):
-        self._make_request("end_date=3999-01-01T00:01")
+        self._make_request("end_date=3999-01-01T00:01Z")
         m.assert_called_once_with(
             start_date=None,
             end_date=dt.datetime(2260, 1, 1, 0, 0, tzinfo=ZoneInfo("Etc/GMT")),
@@ -853,29 +849,33 @@ class TimeseriesChartDateBoundsTestCase(APITestCase, TimeseriesDataMixin):
         mock.assert_called_once_with(start_date=None, end_date=None)
 
     def test_start_date_filter(self, mock: MagicMock, _):
-        response = self.client.get(self.url + "?start_date=2012-03-01T00:00")
+        response = self.client.get(self.url + "?start_date=2012-03-01T00:00Z")
         self.assertEqual(response.status_code, 200)
         mock.assert_called_once_with(
-            start_date=dt.datetime(2012, 3, 1, 0, 0, tzinfo=ZoneInfo(self.timezone)),
+            start_date=dt.datetime(2012, 3, 1, 0, 0, tzinfo=dt.timezone.utc),
             end_date=None,
         )
 
+    def test_start_date_filter_without_timezone(self, mock: MagicMock, _):
+        response = self.client.get(self.url + "?start_date=2012-03-01T00:00")
+        self.assertEqual(response.status_code, 400)
+
     def test_end_date_filter(self, mock: MagicMock, _):
-        response = self.client.get(self.url + "?end_date=2012-03-01T00:00")
+        response = self.client.get(self.url + "?end_date=2012-03-01T00:00Z")
         self.assertEqual(response.status_code, 200)
         mock.assert_called_once_with(
             start_date=None,
-            end_date=dt.datetime(2012, 3, 1, 0, 0, tzinfo=ZoneInfo(self.timezone)),
+            end_date=dt.datetime(2012, 3, 1, 0, 0, tzinfo=dt.timezone.utc),
         )
 
     def test_start_and_end_date_filters(self, mock: MagicMock, _):
         response = self.client.get(
-            self.url + "?start_date=2012-03-01T00:00&end_date=2017-03-01T00:00"
+            self.url + "?start_date=2012-03-01T00:00Z&end_date=2017-03-01T00:00Z"
         )
         self.assertEqual(response.status_code, 200)
         mock.assert_called_once_with(
-            start_date=dt.datetime(2012, 3, 1, 0, 0, tzinfo=ZoneInfo(self.timezone)),
-            end_date=dt.datetime(2017, 3, 1, 0, 0, tzinfo=ZoneInfo(self.timezone)),
+            start_date=dt.datetime(2012, 3, 1, 0, 0, tzinfo=dt.timezone.utc),
+            end_date=dt.datetime(2017, 3, 1, 0, 0, tzinfo=dt.timezone.utc),
         )
 
 

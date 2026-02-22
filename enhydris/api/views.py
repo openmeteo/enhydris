@@ -6,19 +6,18 @@ import os
 from io import StringIO
 from typing import Any
 from wsgiref.util import FileWrapper
-from zoneinfo import ZoneInfo
 
 from django.db import IntegrityError
 from django.db.models import Prefetch, QuerySet
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
+from django.utils.timezone import is_aware
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-import iso8601
 import numpy as np
 import pandas as pd
 from htimeseries import HTimeseries
@@ -282,9 +281,16 @@ class TimeseriesViewSet(ModelViewSet[models.Timeseries]):
     ):
         timeseries = get_object_or_404(models.Timeseries, pk=int(pk))
         self.check_object_permissions(request, timeseries)
-        serializer = serializers.TimeseriesRecordChartSerializer(
-            self._get_chart_data(request, timeseries), many=True
-        )
+        try:
+            serializer = serializers.TimeseriesRecordChartSerializer(
+                self._get_chart_data(request, timeseries), many=True
+            )
+        except ValueError as e:
+            return HttpResponse(
+                status=status.HTTP_400_BAD_REQUEST,
+                content=str(e),
+                content_type="text/plain",
+            )
         return Response(serializer.data)  # type: ignore
 
     def _get_chart_data(self, request: Request, timeseries: models.Timeseries):
@@ -336,17 +342,25 @@ class TimeseriesViewSet(ModelViewSet[models.Timeseries]):
         }
 
     def _get_date_bounds(self, request: Request, timeseries: models.Timeseries):
-        tz = ZoneInfo(timeseries.timeseries_group.gentity.display_timezone)
-        start_date = request.GET.get("start_date") or ""
-        end_date = request.GET.get("end_date") or ""
-        start_date = self._get_date_from_string(start_date, tz)  # type: ignore
-        end_date = self._get_date_from_string(end_date, tz)  # type: ignore
+        start_date = request.GET.get("start_date") or None
+        end_date = request.GET.get("end_date") or None
+        if start_date is not None:
+            start_date = self._get_date_from_string(start_date)  # type: ignore
+        if end_date is not None:
+            end_date = self._get_date_from_string(end_date)  # type: ignore
         return start_date, end_date
 
     def _get_data(self, request: Request, pk: int, format: str | None = None):
         timeseries = self.get_object()
         self.check_object_permissions(request, timeseries)
-        start_date, end_date = self._get_date_bounds(request, timeseries)
+        try:
+            start_date, end_date = self._get_date_bounds(request, timeseries)
+        except ValueError as e:
+            return HttpResponse(
+                status=status.HTTP_400_BAD_REQUEST,
+                content=str(e),
+                content_type="text/plain",
+            )
         fmt_param = request.GET.get("fmt", "csv").lower()
         timezone_param = request.GET.get("timezone", None)
 
@@ -393,28 +407,25 @@ class TimeseriesViewSet(ModelViewSet[models.Timeseries]):
                 append_only=(mode == "append"),
             )
             return HttpResponse(status=status.HTTP_204_NO_CONTENT)
-        except (IntegrityError, iso8601.ParseError, ValueError, KeyError) as e:
+        except (IntegrityError, ValueError, KeyError) as e:
             return HttpResponse(
                 status=status.HTTP_400_BAD_REQUEST,
                 content=str(e),
                 content_type="text/plain",
             )
 
-    def _get_date_from_string(self, adate: str, tz: dt.timezone):
-        date = self._parse_date(adate, tz)
-        if not date:
-            return None
+    def _get_date_from_string(self, adate: str):
+        date = self._parse_date(adate)
+        if not date or not is_aware(date):
+            raise ValueError(f"Invalid date: '{adate}' (must contain timezone)")
         return self._bring_date_within_system_limits(date)
 
-    def _parse_date(self, adate: str, tz: dt.timezone):
-        try:
-            return iso8601.parse_date(adate, default_timezone=tz)
-        except iso8601.ParseError:
-            return None
+    def _parse_date(self, adate: str):
+        return dt.datetime.fromisoformat(adate)
 
     def _bring_date_within_system_limits(self, date: dt.datetime):
-        if date.isoformat() < "1680-01-01T00:00":
-            date = dt.datetime(1680, 1, 1, 0, 0, tzinfo=date.tzinfo)
-        if date.isoformat() > "2260-01-01T00:00":
-            date = dt.datetime(2260, 1, 1, 0, 0, tzinfo=date.tzinfo)
+        if date < dt.datetime(1680, 1, 1, 0, 0, tzinfo=dt.timezone.utc):
+            date = dt.datetime(1680, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
+        if date > dt.datetime(2260, 1, 1, 0, 0, tzinfo=dt.timezone.utc):
+            date = dt.datetime(2260, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
         return date
