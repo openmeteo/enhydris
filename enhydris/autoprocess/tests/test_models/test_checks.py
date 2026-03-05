@@ -97,7 +97,7 @@ class ChecksTestCase(TestCase):
             checks__timeseries_group__gentity=station,
             checks__timeseries_group__variable__descr="Temperature",
         )
-        range_check.checks.execute()
+        range_check.checks.execute(recalculate=False)
         m2.assert_called_once()
 
     def test_no_extra_queries_for_str(self):

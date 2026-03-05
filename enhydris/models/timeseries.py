@@ -76,6 +76,15 @@ def get_default_publicly_available():
 class Timeseries(models.Model):
     timeseriesrecord_set: models.Manager["TimeseriesRecord"]
 
+    # When the calculation of derivative time series (e.g. checked, regularized,
+    # aggregated) is triggered, it is performed on the newer data only; the older data
+    # is left as is. This does not work if the modification of the source time series
+    # (i.e. this timeseries) is anything other than append (e.g. if data is inserted in
+    # the middle of the time series, or if some records are deleted). In this case, the
+    # derivative time series should be fully recalculated.  The
+    # has_non_append_modifications attribute is used to signal this case.
+    has_non_append_modifications: bool = False
+
     INITIAL = 100
     CHECKED = 200
     REGULARIZED = 300
@@ -290,7 +299,7 @@ class Timeseries(models.Model):
         default_timezone: str | None = None,
     ):
         self.timeseriesrecord_set.all().delete()
-        return self.insert_or_append_data(data, default_timezone)
+        return self.insert_or_append_data(data, default_timezone, append_only=False)
 
     def insert_or_append_data(
         self,
@@ -299,6 +308,8 @@ class Timeseries(models.Model):
         append_only: bool = True,
     ):
         ahtimeseries = self._get_htimeseries_from_data(data, default_timezone)
+        if not append_only:
+            self.has_non_append_modifications = True
         if append_only:
             self._check_new_data_is_newer(ahtimeseries)
         result = TimeseriesRecord.bulk_insert(self, ahtimeseries)

@@ -1,3 +1,4 @@
+from io import StringIO
 from unittest import mock
 
 from django.contrib.gis.geos import Point
@@ -38,10 +39,28 @@ class EnqueueAutoProcessTestCase(TransactionTestCase):
     def test_enqueues_auto_process(self, m):
         with transaction.atomic():
             self.timeseries.save()
-        m.delay.assert_any_call(self.auto_process.id)
+        m.delay.assert_called_once_with(self.auto_process.id, False)
 
     @mock.patch("enhydris.autoprocess.apps.execute_auto_process")
     def test_auto_process_is_not_triggered_before_commit(self, m):
         with transaction.atomic():
             self.timeseries.save()
             m.delay.assert_not_called()
+
+    @mock.patch("enhydris.autoprocess.apps.execute_auto_process")
+    def test_inserting_data_enqueues_task_with_non_append_modifications_true(self, m):
+        self.timeseries.insert_or_append_data(
+            StringIO("2020-01-01 00:10,15,\n"),
+            default_timezone="UTC",
+            append_only=False,
+        )
+        m.delay.assert_called_once_with(self.auto_process.id, True)
+
+    @mock.patch("enhydris.autoprocess.apps.execute_auto_process")
+    def test_appending_data_enqueues_task_with_non_append_modifications_false(self, m):
+        self.timeseries.insert_or_append_data(
+            StringIO("2020-01-01 00:10,15,\n"),
+            default_timezone="UTC",
+            append_only=True,
+        )
+        m.delay.assert_called_once_with(self.auto_process.id, False)

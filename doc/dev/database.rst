@@ -534,12 +534,14 @@ they result in the "checked" time series.)
 
       The time series group to which this auto-process applies.
 
-   .. method:: execute()
+   .. method:: execute(recalculate: bool)
 
-      Performs the auto-processing. It retrieves the new part of the
-      source time series (i.e. the part that starts after the last date
-      of the target time series) and calls the
-      :meth:`process_timeseries` method.
+      Performs the auto-processing. If ``recalculate`` is ``False``, it
+      retrieves the new part of the source time series (i.e. the part that
+      starts after the last date of the target time series) and calls the
+      :meth:`process_timeseries` method. If ``recalculate`` is ``True``, it
+      deletes all records of the target timeseries first and therefore
+      recalculates its entirety.
 
    .. attribute:: source_timeseries
 

@@ -62,7 +62,9 @@ class AutoProcessSaveTestCase(TransactionTestCase):
         with transaction.atomic():
             auto_process = baker.make(Checks, timeseries_group=self.timeseries_group)
             auto_process.save()
-        tasks.execute_auto_process.delay.assert_any_call(auto_process.id)
+        tasks.execute_auto_process.delay.assert_any_call(
+            auto_process.id, has_non_append_modifications=True
+        )
 
     def test_auto_process_is_not_triggered_before_commit(self):
         with transaction.atomic():
@@ -88,11 +90,11 @@ class AutoProcessExecuteTestCase(ClearCacheMixin, TestCase):
         self.range_check = baker.make(RangeCheck, checks=self.checks)
 
     def test_called_once(self, m):
-        self.checks.execute()
+        self.checks.execute(recalculate=False)
         self.assertEqual(len(m.mock_calls), 1)
 
     def test_called_with_empty_content(self, m):
-        self.checks.execute()
+        self.checks.execute(recalculate=False)
         self.assertEqual(len(self.checks.htimeseries.data), 0)
 
     def test_critical_error(self, m):
@@ -101,16 +103,16 @@ class AutoProcessExecuteTestCase(ClearCacheMixin, TestCase):
             f"^ValueError while executing AutoProcess with id={self.checks.id}: hello$"
         )
         with self.assertRaisesRegex(RuntimeError, msg):
-            self.checks.execute()
+            self.checks.execute(recalculate=False)
 
 
-class AutoProcessExecuteDealsOnlyWithNewerTimeseriesPartTestCase(TestCase):
+class AutoProcessRecalculateTestCaseBase(TestCase):
     @mock.patch(
         "enhydris.autoprocess.models.Checks.process_timeseries",
         side_effect=lambda self: self.htimeseries,
         autospec=True,
     )
-    def setUp(self, m):
+    def setUp(self, m: mock.MagicMock):
         self.mock_process_timeseries = m
         station = baker.make(Station, display_timezone="Etc/GMT-2")
         self.timeseries_group = baker.make(
@@ -149,7 +151,11 @@ class AutoProcessExecuteDealsOnlyWithNewerTimeseriesPartTestCase(TestCase):
         )
         self.checks = baker.make(Checks, timeseries_group=self.timeseries_group)
         self.range_check = baker.make(RangeCheck, checks=self.checks)
-        self.checks.execute()
+        self.checks.execute(recalculate=self.recalculate)
+
+
+class AutoProcessExecuteRecalculateFalseTestCase(AutoProcessRecalculateTestCaseBase):
+    recalculate = False
 
     def test_called_once(self):
         self.assertEqual(len(self.mock_process_timeseries.mock_calls), 1)
@@ -181,3 +187,21 @@ class AutoProcessExecuteDealsOnlyWithNewerTimeseriesPartTestCase(TestCase):
         pd.testing.assert_frame_equal(
             self.target_timeseries.get_data().data, expected_result
         )
+
+
+class AutoProcessExecuteRecalculateTestCase(AutoProcessRecalculateTestCaseBase):
+    recalculate = True
+
+    def test_called_with_entire_source_timeseries(self):
+        expected_arg = pd.DataFrame(
+            data={"value": [1.0, 2.0, 3.0, 4.0], "flags": ["", "", "", ""]},
+            columns=["value", "flags"],
+            index=[
+                dt.datetime(2019, 5, 21, 17, 0, tzinfo=get_tzinfo("Etc/GMT-2")),
+                dt.datetime(2019, 5, 21, 17, 10, tzinfo=get_tzinfo("Etc/GMT-2")),
+                dt.datetime(2019, 5, 21, 17, 20, tzinfo=get_tzinfo("Etc/GMT-2")),
+                dt.datetime(2019, 5, 21, 17, 30, tzinfo=get_tzinfo("Etc/GMT-2")),
+            ],
+        )
+        expected_arg.index.name = "date"
+        pd.testing.assert_frame_equal(self.checks.htimeseries.data, expected_arg)

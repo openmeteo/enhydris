@@ -6,6 +6,7 @@ from io import StringIO
 
 from django.db import DataError, IntegrityError, models, transaction
 from django.db.models.signals import post_delete
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 import numpy as np
@@ -27,10 +28,16 @@ class AutoProcess(models.Model):
         db_table = "enhydris_autoprocess_autoprocess"
         verbose_name_plural = _("Auto processes")
 
-    def execute(self):
+    def execute(self, recalculate: bool):
         try:
-            result = self.process_timeseries()
-            self.target_timeseries.insert_or_append_data(result)
+            with transaction.atomic():
+                target_timeseries = self.target_timeseries
+                if recalculate:
+                    target_timeseries.timeseriesrecord_set.all().delete()
+                    target_timeseries.has_non_append_modifications = True
+                    target_timeseries._invalidate_cached_data()
+                result = self.process_timeseries()
+                target_timeseries.insert_or_append_data(result)
         except Exception as e:
             msg = (
                 f"{e.__class__.__name__} while executing AutoProcess with "
@@ -74,14 +81,18 @@ class AutoProcess(models.Model):
 
     def save(self, *args, **kwargs):
         result = super().save(*args, **kwargs)
-        transaction.on_commit(lambda: tasks.execute_auto_process.delay(self.id))
+        transaction.on_commit(
+            lambda: tasks.execute_auto_process.delay(
+                self.id, has_non_append_modifications=True
+            )
+        )
         return result
 
-    @property
+    @cached_property
     def source_timeseries(self):
         raise NotImplementedError("This property is available only in subclasses")
 
-    @property
+    @cached_property
     def target_timeseries(self):
         raise NotImplementedError("This property is available only in subclasses")
 
@@ -108,14 +119,14 @@ class Checks(AutoProcess):
     def __str__(self):
         return _("Checks for {}").format(str(self.timeseries_group))
 
-    @property
+    @cached_property
     def source_timeseries(self):
         obj, created = self.timeseries_group.timeseries_set.get_or_create(
             type=Timeseries.INITIAL
         )
         return obj
 
-    @property
+    @cached_property
     def target_timeseries(self):
         obj, created = self.timeseries_group.timeseries_set.get_or_create(
             type=Timeseries.CHECKED,
@@ -319,7 +330,7 @@ class CurveInterpolation(AutoProcess):
     def __str__(self):
         return f"=> {self.target_timeseries_group}"
 
-    @property
+    @cached_property
     def source_timeseries(self):
         try:
             return self.timeseries_group.timeseries_set.get(type=Timeseries.CHECKED)
@@ -330,7 +341,7 @@ class CurveInterpolation(AutoProcess):
         )
         return obj
 
-    @property
+    @cached_property
     def target_timeseries(self):
         obj, created = self.target_timeseries_group.timeseries_set.get_or_create(
             type=Timeseries.INITIAL
@@ -460,7 +471,7 @@ class Aggregation(AutoProcess):
     def __str__(self):
         return _("Aggregation for {}").format(str(self.timeseries_group))
 
-    @property
+    @cached_property
     def source_timeseries(self):
         try:
             return self.timeseries_group.timeseries_set.get(type=Timeseries.CHECKED)
@@ -470,7 +481,7 @@ class Aggregation(AutoProcess):
             )
             return obj
 
-    @property
+    @cached_property
     def target_timeseries(self):
         obj, created = self.timeseries_group.timeseries_set.get_or_create(
             type=Timeseries.AGGREGATED,

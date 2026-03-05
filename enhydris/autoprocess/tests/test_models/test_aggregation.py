@@ -424,7 +424,7 @@ class AggregationRecalculatesLastValueIfNeededTestCase(TestCase):
 
     def test_initial_target_timeseries(self):
         aggregation = Aggregation.objects.get(id=self.aggregation_id)
-        aggregation.execute()
+        aggregation.execute(recalculate=False)
         actual_data = aggregation.target_timeseries.get_data().data
         expected_data = pd.DataFrame(
             data={"value": [21.0, 34.0], "flags": ["", "MISSING2"]},
@@ -438,11 +438,11 @@ class AggregationRecalculatesLastValueIfNeededTestCase(TestCase):
         pd.testing.assert_frame_equal(actual_data, expected_data)
 
     def test_updated_target_timeseries(self):
-        Aggregation.objects.get(id=self.aggregation_id).execute()
+        Aggregation.objects.get(id=self.aggregation_id).execute(recalculate=False)
 
         self._extend_source_timeseries()
         aggregation = Aggregation.objects.get(id=self.aggregation_id)
-        aggregation.execute()
+        aggregation.execute(recalculate=False)
 
         ahtimeseries = aggregation.target_timeseries.get_data()
         expected_data = pd.DataFrame(
@@ -514,13 +514,13 @@ class AggregationTooFewValuesTestCase(TestCase):
 
     def test_result(self, m):
         aggregation = Aggregation.objects.get(id=self.aggregation_id)
-        aggregation.execute()
+        aggregation.execute(recalculate=False)
         actual_data = aggregation.target_timeseries.get_data().data
         self.assertEqual(len(actual_data), 0)
 
     def test_log(self, logging_mock):
         aggregation = Aggregation.objects.get(id=self.aggregation_id)
-        aggregation.execute()
+        aggregation.execute(recalculate=False)
         logging_mock.getLogger.return_value.error.assert_called_once_with(
             "Need at least 3 dates to infer frequency"
         )

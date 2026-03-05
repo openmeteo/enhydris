@@ -15,7 +15,7 @@ from htimeseries import HTimeseries
 from model_bakery import baker
 
 from enhydris import models
-from enhydris.tests import ClearCacheMixin, TestTimeseriesMixin
+from enhydris.tests import ClearCacheMixin, TestTimeseriesMixin, TimeseriesDataMixin
 
 
 def get_tzinfo(tzname: str):
@@ -712,6 +712,41 @@ class TimeseriesInsertVsAppendTestCase(TestTimeseriesMixin, TestCase):
                 default_timezone="Etc/GMT-2",
                 append_only=False,
             )
+
+
+class TimeseriesHasNonAppendModificationsTestCase(TimeseriesDataMixin, TestCase):
+    def setUp(self):
+        self.create_timeseries()
+
+    def test_default_value_is_false(self):
+        timeseries = baker.make(models.Timeseries)
+        self.assertFalse(timeseries.has_non_append_modifications)
+
+    def test_append_keeps_value_false(self):
+        self.timeseries.has_non_append_modifications = False
+        self.timeseries.insert_or_append_data(
+            StringIO("2019-01-01 01:00,43,\n"),
+            default_timezone=self.timezone,
+            append_only=True,
+        )
+        self.assertFalse(self.timeseries.has_non_append_modifications)
+
+    def test_insert_sets_value_true(self):
+        self.timeseries.has_non_append_modifications = False
+        self.timeseries.insert_or_append_data(
+            StringIO("2019-01-01 01:00,43,\n"),
+            default_timezone=self.timezone,
+            append_only=False,
+        )
+        self.assertTrue(self.timeseries.has_non_append_modifications)
+
+    def test_set_data_sets_value_true(self):
+        self.timeseries.has_non_append_modifications = False
+        self.timeseries.set_data(
+            StringIO("2018-01-01 00:00,42,\n"),
+            default_timezone=self.timezone,
+        )
+        self.assertTrue(self.timeseries.has_non_append_modifications)
 
 
 class TimeseriesGetLastRecordAsStringTestCase(TestTimeseriesMixin, TestCase):
