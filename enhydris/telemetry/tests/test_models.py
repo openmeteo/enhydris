@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 from io import StringIO
+from typing import ClassVar
 from unittest.mock import MagicMock, patch
 
 from django.core.exceptions import ValidationError
@@ -82,6 +83,8 @@ class TelemetryFetchValidatorsTestCase(TestCase):
 
 
 class TelemetryIsDueTestCase(TestCase):
+    telemetry: ClassVar[Telemetry]
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -93,7 +96,12 @@ class TelemetryIsDueTestCase(TestCase):
             additional_config="{}",
         )
 
-    def _check(self, fetch_interval_minutes, fetch_offset_minutes, expected_result):
+    def _check(
+        self,
+        fetch_interval_minutes: int,
+        fetch_offset_minutes: int,
+        expected_result: bool,
+    ):
         self.telemetry.fetch_interval_minutes = fetch_interval_minutes
         self.telemetry.fetch_offset_minutes = fetch_offset_minutes
         self.assertEqual(self.telemetry.is_due, expected_result)
@@ -127,6 +135,10 @@ class FixZoneNameTestCase(TestCase):
 
 
 class TelemetryFetchTestCaseBase(TestCase):
+    telemetry: ClassVar[Telemetry]
+    timeseries_group: ClassVar[TimeseriesGroup]
+    station: ClassVar[Station]
+
     @classmethod
     def setUpTestData(cls):
         cls.station = baker.make(Station, display_timezone="Etc/GMT-2")
@@ -171,33 +183,33 @@ class TelemetryFetchTestCase(TelemetryFetchTestCaseBase):
         patcher = patch("enhydris.telemetry.types.meteoview2.requests.request")
         mock_request = patcher.start()
         self.addCleanup(patcher.stop)
-        mock_request.side_effect = [
-            MagicMock(  # Response for login
-                **{"json.return_value": {"code": "200", "token": "topsecretapitoken"}}
-            ),
-            MagicMock(  # Response for measurements
-                **{
-                    "json.return_value": {
-                        "code": "200",
-                        "measurements": [
-                            {
-                                "total_values": 1,
-                                "values": [
-                                    {
-                                        "year": "1990",
-                                        "month": "0",
-                                        "day": "1",
-                                        "hour": "0",
-                                        "minute": "0",
-                                        "mvalue": "42",
-                                    }
-                                ],
-                            }
-                        ],
-                    }
+        mock_login_response = MagicMock()
+        mock_login_response.json.return_value = {
+            "code": "200",
+            "token": "topsecretapitoken",
+        }
+
+        mock_measurements_response = MagicMock()
+        mock_measurements_response.json.return_value = {
+            "code": "200",
+            "measurements": [
+                {
+                    "total_values": 1,
+                    "values": [
+                        {
+                            "year": "1990",
+                            "month": "0",
+                            "day": "1",
+                            "hour": "0",
+                            "minute": "0",
+                            "mvalue": "42",
+                        }
+                    ],
                 }
-            ),
-        ]
+            ],
+        }
+
+        mock_request.side_effect = [mock_login_response, mock_measurements_response]
         return mock_request
 
     def test_logs_on(self):
@@ -255,62 +267,64 @@ class TelemetryFetchDealsWithTooCloseTimestampsTestCase(TelemetryFetchTestCaseBa
     test it's a good idea to temporarily modify fetch() to raise exceptions.
     """
 
-    def test_return_value(self, mock_request):
+    def test_return_value(self, mock_request: MagicMock):
         self._set_request_result(mock_request)
         self.telemetry.fetch()
         result = StringIO()
-        self.timeseries_group.default_timeseries.get_data().write(result)
+        default_timeseries = self.timeseries_group.default_timeseries
+        assert default_timeseries is not None
+        default_timeseries.get_data().write(result)
         self.assertEqual(
             result.getvalue(),
             "2021-12-14 08:10,1.4,\r\n" "2021-12-14 08:20,1.4,\r\n",
         )
 
-    def _set_request_result(self, mock_request):
-        mock_request.side_effect = [
-            MagicMock(  # Response for login
-                **{"json.return_value": {"code": "200", "token": "topsecretapitoken"}}
-            ),
-            MagicMock(  # Response for measurements
-                **{
-                    "json.return_value": {
-                        "code": "200",
-                        "measurements": [
-                            {
-                                "total_values": 3,
-                                "values": [
-                                    {
-                                        "year": "2021",
-                                        "month": "11",
-                                        "day": "14",
-                                        "hour": "08",
-                                        "minute": "10",
-                                        "second": "07",
-                                        "mvalue": "1.42",
-                                    },
-                                    {
-                                        "year": "2021",
-                                        "month": "11",
-                                        "day": "14",
-                                        "hour": "08",
-                                        "minute": "10",
-                                        "second": "37",
-                                        "mvalue": "1.47",
-                                    },
-                                    {
-                                        "year": "2021",
-                                        "month": "11",
-                                        "day": "14",
-                                        "hour": "08",
-                                        "minute": "20",
-                                        "mvalue": "1.43",
-                                    },
-                                ],
-                            }
-                        ],
-                    }
+    def _set_request_result(self, mock_request: MagicMock):
+        mock_login_response = MagicMock()
+        mock_login_response.json.return_value = {
+            "code": "200",
+            "token": "topsecretapitoken",
+        }
+
+        mock_measurements_response = MagicMock()
+        mock_measurements_response.json.return_value = {
+            "code": "200",
+            "measurements": [
+                {
+                    "total_values": 3,
+                    "values": [
+                        {
+                            "year": "2021",
+                            "month": "11",
+                            "day": "14",
+                            "hour": "08",
+                            "minute": "10",
+                            "second": "07",
+                            "mvalue": "1.42",
+                        },
+                        {
+                            "year": "2021",
+                            "month": "11",
+                            "day": "14",
+                            "hour": "08",
+                            "minute": "10",
+                            "second": "37",
+                            "mvalue": "1.47",
+                        },
+                        {
+                            "year": "2021",
+                            "month": "11",
+                            "day": "14",
+                            "hour": "08",
+                            "minute": "20",
+                            "mvalue": "1.43",
+                        },
+                    ],
                 }
-            ),
-        ]
+            ],
+        }
+
+        mock_request.side_effect = [mock_login_response, mock_measurements_response]
 
 
 @freeze_time("2024-12-07 17:46:00", tz_offset=0)
@@ -324,7 +338,7 @@ class TelemetryLogMessageTestCase(OverrideLoggingMixin, TestCase):
         try:
             raise OSError(errno.ECONNRESET, "Connection reset")
         except ConnectionResetError:
-            self.approx_error_time = dt.datetime.utcnow()
+            self.approx_error_time = dt.datetime.now()
             TelemetryLogMessage.log(self.telemetry)
 
     def test_logged_one_record(self):
@@ -332,26 +346,26 @@ class TelemetryLogMessageTestCase(OverrideLoggingMixin, TestCase):
 
     def test_telemetry(self):
         self.assertEqual(
-            TelemetryLogMessage.objects.first().telemetry_id, self.telemetry.id
+            TelemetryLogMessage.objects.get().telemetry.pk, self.telemetry.pk
         )
 
     def test_exception_name(self):
         self.assertEqual(
-            TelemetryLogMessage.objects.first().exception_name, "ConnectionResetError"
+            TelemetryLogMessage.objects.get().exception_name, "ConnectionResetError"
         )
 
     def test_message(self):
         self.assertEqual(
-            TelemetryLogMessage.objects.first().message,
+            TelemetryLogMessage.objects.get().message,
             "[Errno 104] Connection reset",
         )
 
     def test_traceback(self):
-        self.assertIn(__file__, TelemetryLogMessage.objects.first().traceback)
+        self.assertIn(__file__, TelemetryLogMessage.objects.get().traceback)
 
     def test_enhydris_version(self):
         self.assertEqual(
-            TelemetryLogMessage.objects.first().enhydris_version, enhydris.__version__
+            TelemetryLogMessage.objects.get().enhydris_version, enhydris.__version__
         )
 
     def test_git_commit_id(self):
@@ -361,11 +375,11 @@ class TelemetryLogMessageTestCase(OverrideLoggingMixin, TestCase):
             .strip()
         )
         self.assertEqual(
-            TelemetryLogMessage.objects.first().enhydris_commit_id, actual_commit_id
+            TelemetryLogMessage.objects.get().enhydris_commit_id, actual_commit_id
         )
 
     def test_ordering(self):
-        lm1 = TelemetryLogMessage.objects.first()
+        lm1 = TelemetryLogMessage.objects.get()
         lm1.timestamp = dt.datetime(1994, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
         lm1.save()
         lm2 = TelemetryLogMessage.objects.create(
@@ -379,12 +393,14 @@ class TelemetryLogMessageTestCase(OverrideLoggingMixin, TestCase):
         lm2.save()
 
         # That last log message must come first because it has a later date
-        self.assertEqual(TelemetryLogMessage.objects.first().message, "hello")
+        telemetry_log_message = TelemetryLogMessage.objects.first()
+        assert telemetry_log_message is not None
+        self.assertEqual(telemetry_log_message.message, "hello")
 
     def test_get_full_message(self):
         isotime = self.approx_error_time.isoformat(sep=" ", timespec="seconds")
         self.assertEqual(
-            TelemetryLogMessage.objects.first().get_full_message(),
+            TelemetryLogMessage.objects.get().get_full_message(),
             f"{isotime} ConnectionResetError: [Errno 104] Connection reset",
         )
 
@@ -405,7 +421,7 @@ class TelemetryLogMessageGetEnhydrisCommitIdFromGitTestCase(TestCase):
     def setUp(self):
         self.saved_cwd = os.getcwd()
         try:
-            del TelemetryLogMessage._saved_commit_id
+            del TelemetryLogMessage._saved_commit_id  # type: ignore
         except AttributeError:
             pass
 
@@ -424,30 +440,32 @@ class TelemetryLogMessageGetEnhydrisCommitIdFromGitTestCase(TestCase):
         )
 
     @patch("subprocess.run", side_effect=FileNotFoundError("foo"))
-    def test_returns_empty_git_commit_on_problem(self, m):
+    def test_returns_empty_git_commit_on_problem(self, m: MagicMock):
         self.assertEqual(TelemetryLogMessage.get_enhydris_commit_id_from_git(), "")
 
     @patch("subprocess.run")
-    def test_caches_git_commit_id(self, m):
+    def test_caches_git_commit_id(self, m: MagicMock):
         m.return_value.stdout.decode.return_value.strip.return_value = "hello"
         self.assertEqual(TelemetryLogMessage.get_enhydris_commit_id_from_git(), "hello")
         self.assertEqual(TelemetryLogMessage.get_enhydris_commit_id_from_git(), "hello")
         m.assert_called_once()
 
     @patch("subprocess.run", side_effect=FileNotFoundError("foo"))
-    def test_caches_empty_git_commit_id(self, m):
+    def test_caches_empty_git_commit_id(self, m: MagicMock):
         self.assertEqual(TelemetryLogMessage.get_enhydris_commit_id_from_git(), "")
         self.assertEqual(TelemetryLogMessage.get_enhydris_commit_id_from_git(), "")
         m.assert_called_once()
 
 
 class TelemetryFetchErrorTestCase(OverrideLoggingMixin, TestCase):
+    telemetry: ClassVar[Telemetry]
+
     @classmethod
     def setUpTestData(cls):
         cls.telemetry = baker.make(Telemetry, type="meteoview2", additional_config={})
 
     @patch("enhydris.telemetry.models.Telemetry._setup_api_client")
-    def _execute_fetch_with_error(self, m):
+    def _execute_fetch_with_error(self, m: MagicMock):
         m.side_effect = KeyError("foo")
         self.telemetry.fetch()
 

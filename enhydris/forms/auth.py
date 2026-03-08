@@ -1,7 +1,7 @@
 from django.utils.translation import gettext_lazy as _
 
-from captcha.fields import CaptchaField
-from registration.forms import RegistrationFormTermsOfService
+from captcha.fields import CaptchaField  # type: ignore
+from registration.forms import RegistrationFormTermsOfService  # type: ignore
 
 
 class MyRegistrationForm(RegistrationFormTermsOfService):

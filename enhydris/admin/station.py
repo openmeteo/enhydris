@@ -10,10 +10,9 @@ from django.contrib.sites.models import Site
 from django.db.models import Q, TextField
 from django.utils.translation import gettext_lazy as _
 
-import nested_admin
+import nested_admin  # type: ignore
 import pandas as pd
-from crequest.middleware import CrequestMiddleware
-from geowidgets import LatLonField
+from geowidgets import LatLonField  # type: ignore
 from htimeseries import HTimeseries
 from rules.contrib.admin import ObjectPermissionsModelAdmin
 
@@ -102,7 +101,7 @@ class GentityEventInline(InlinePermissionsMixin, nested_admin.NestedStackedInlin
 
 
 class TimeseriesInlineAdminForm(forms.ModelForm):
-    data = forms.FileField(label=_("Data file"), required=False)
+    data_file = forms.FileField(label=_("Data file"), required=False)
     default_timezone = forms.ChoiceField(
         label=_("Time zone"),
         required=False,
@@ -131,10 +130,14 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
         model = models.Timeseries
         exclude = ()
 
+    def __init__(self, *args, request=None, **kwargs):
+        self.request = request
+        super().__init__(*args, **kwargs)
+
     def clean(self):
         result = super().clean()
-        if self.cleaned_data.get("data") is not None:
-            self._check_submitted_data(self.cleaned_data["data"])
+        if self.cleaned_data.get("data_file") is not None:
+            self._check_submitted_data(self.cleaned_data["data_file"])
         return result
 
     def clean_time_step(self):
@@ -195,17 +198,18 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
 
     def save(self, *args, **kwargs):
         result = super().save(*args, **kwargs)
-        if self.cleaned_data.get("data") is not None:
+        if self.cleaned_data.get("data_file") is not None:
             self._save_timeseries_data()
         return result
 
     def _save_timeseries_data(self):
-        request = CrequestMiddleware.get_request()
+        request = self.request
+        assert request is not None
 
         # Create a hard link to the temporary uploaded file with the data
         # so that it's not automatically deleted and can be used by the celery
         # worker
-        tmpfilename = self.cleaned_data["data"].temporary_file_path()
+        tmpfilename = self.cleaned_data["data_file"].temporary_file_path()
         datafilename = tmpfilename + ".1"
         os.link(tmpfilename, datafilename)
 
@@ -231,6 +235,14 @@ class TimeseriesInlineAdminForm(forms.ModelForm):
 
 
 class TimeseriesInlineFormSet(nested_admin.formsets.NestedInlineFormSet):
+    def __init__(self, *args, request=None, **kwargs):
+        self.request = request
+        super().__init__(*args, **kwargs)
+
+    def _construct_form(self, i, **kwargs):
+        kwargs["request"] = self.request
+        return super()._construct_form(i, **kwargs)
+
     def clean(self):
         super().clean()
         self._check_only_one_timeseries_with_type(models.Timeseries.INITIAL)
@@ -262,8 +274,18 @@ class TimeseriesInline(InlinePermissionsMixin, nested_admin.NestedStackedInline)
     fields = (
         ("type", "time_step", "name"),
         "publicly_available",
-        ("data", "default_timezone", "replace_or_append"),
+        ("data_file", "default_timezone", "replace_or_append"),
     )
+
+    def get_formset(self, request, obj=None, **kwargs):
+        base_formset = super().get_formset(request, obj, **kwargs)
+
+        class RequestAwareFormSet(base_formset):
+            def __init__(self, *args, **inner_kwargs):
+                inner_kwargs["request"] = request
+                super().__init__(*args, **inner_kwargs)
+
+        return RequestAwareFormSet
 
 
 class TimeseriesGroupInline(InlinePermissionsMixin, nested_admin.NestedStackedInline):

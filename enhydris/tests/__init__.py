@@ -4,7 +4,7 @@ import copy
 import datetime as dt
 import logging
 from io import StringIO
-from typing import Any, cast
+from typing import Any, Protocol, cast
 from zoneinfo import ZoneInfo
 
 from django.conf import settings
@@ -14,7 +14,7 @@ from django.core.management import call_command
 from django.test.utils import override_settings
 from django.utils.log import DEFAULT_LOGGING, configure_logging
 
-import django_selenium_clean
+import django_selenium_clean  # type: ignore[import-untyped]
 import pandas as pd
 from htimeseries import HTimeseries
 from model_bakery import baker
@@ -23,6 +23,8 @@ from enhydris import models
 
 
 class ClearCacheMixin:
+    settings_overrider: override_settings
+
     @classmethod
     def setUpClass(cls, *args: Any, **kwargs: Any):
         super().setUpClass(*args, **kwargs)  # type: ignore[misc]
@@ -36,15 +38,19 @@ class ClearCacheMixin:
 
     @classmethod
     def tearDownClass(cls, *args: Any, **kwargs: Any):
-        cls.settings_overrider.__exit__(exc_type=None, exc_value=None, traceback=None)  # type: ignore[misc]
+        cls.settings_overrider.__exit__(None, None, None)
         super().tearDownClass(*args, **kwargs)  # type: ignore[misc]
 
 
 class TestTimeseriesMixin(ClearCacheMixin):
+    station: models.Station
+    timeseries_group: models.TimeseriesGroup
+    timeseries: models.Timeseries
+
     @classmethod
     def _create_test_timeseries(
         cls, data: str = "", publicly_available: bool | None = None
-    ):
+    ) -> None:
         cls.station = baker.make(
             models.Station,
             name="Celduin",
@@ -80,10 +86,16 @@ class TestTimeseriesMixin(ClearCacheMixin):
 
 
 class TimeseriesDataMixin(ClearCacheMixin):
+    timezone: str
+    tzinfo: ZoneInfo
+    htimeseries: HTimeseries
+    station: models.Station
+    variable: models.Variable
+    timeseries_group: models.TimeseriesGroup
     timeseries: models.Timeseries
 
     @classmethod
-    def create_timeseries(cls, publicly_available: bool | None = None):
+    def create_timeseries(cls, publicly_available: bool | None = None) -> None:
         cls.timezone = "Etc/GMT-2"
         cls.tzinfo = ZoneInfo(cls.timezone)
         cls.htimeseries = HTimeseries()
@@ -110,14 +122,17 @@ class TimeseriesDataMixin(ClearCacheMixin):
             variable=cls.variable,
             unit_of_measurement__symbol="beauton",
         )
-        more_kwargs = {}
+        more_kwargs: dict[str, Any] = {}
         if publicly_available is not None:
             more_kwargs["publicly_available"] = publicly_available
-        cls.timeseries = baker.make(
+        cls.timeseries = cast(
             models.Timeseries,
-            type=models.Timeseries.INITIAL,
-            timeseries_group=cls.timeseries_group,
-            **more_kwargs,
+            baker.make(
+                models.Timeseries,
+                type=models.Timeseries.INITIAL,
+                timeseries_group=cls.timeseries_group,
+                **more_kwargs,
+            ),
         )
         cls.timeseries.set_data(cls.htimeseries.data, default_timezone=cls.timezone)
 
@@ -142,7 +157,7 @@ class SeleniumTestCase(django_selenium_clean.SeleniumTestCase):
     """
 
     def _fixture_teardown(self):
-        for db_name in self._databases_names(include_mirrors=False):
+        for db_name in self._databases_names(include_mirrors=False):  # type: ignore
             call_command(
                 "flush",
                 verbosity=0,
@@ -154,9 +169,15 @@ class SeleniumTestCase(django_selenium_clean.SeleniumTestCase):
             )
 
 
+class _HasTearDown(Protocol):
+    def tearDown(self) -> None: ...
+
+
 class OverrideLoggingMixin:
-    def tearDown(self):
-        super().tearDown()
+    saved_root_handlers: list[logging.Handler]
+
+    def tearDown(self) -> None:
+        cast(_HasTearDown, super()).tearDown()
         self._revert_logging_config()
 
     def _override_logging_config(self):

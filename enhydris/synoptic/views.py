@@ -208,7 +208,7 @@ class Chart:
             self.ymax = max(
                 self.current_synoptic_timeseries_group.default_chart_max, self.ymax
             )
-        self.ax.set_ylim([self.ymin, self.ymax])
+        self.ax.set_ylim((self.ymin, self.ymax))
 
     def _fill(self):
         self.ax.fill_between(self.xdata, self.gydata, self.ymin, color="#ffff00")
@@ -222,7 +222,7 @@ class Chart:
         )
 
     def _set_gridlines_and_legend(self):
-        self.ax.grid(b=True, which="both", color="b", linestyle=":")
+        self.ax.grid(visible=True, which="both", color="b", linestyle=":")
         if len(self._synoptic_timeseries_groups) > 1:
             self.ax.legend()
 

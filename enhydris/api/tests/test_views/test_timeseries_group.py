@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.contrib.auth.models import User
 from django.test import override_settings
 from rest_framework.test import APITestCase
@@ -15,7 +17,7 @@ class TimeseriesGroupListTestCase(APITestCase):
             models.TimeseriesGroup, name="Temperature", gentity=self.station
         )
         self.response = self.client.get(
-            f"/api/stations/{self.station.id}/timeseriesgroups/"
+            f"/api/stations/{self.station.pk}/timeseriesgroups/"
         )
 
     def test_status_code(self):
@@ -41,28 +43,28 @@ class TimeseriesGroupPostTestCase(APITestCase):
         self.station2 = baker.make(models.Station, creator=self.user1)
         self.timeseries_group = baker.make(models.TimeseriesGroup, gentity=self.station)
 
-    def _create_timeseries_group(self, **kwargs):
+    def _create_timeseries_group(self, **kwargs: Any):
         return self.client.post(
-            f"/api/stations/{self.station.id}/timeseriesgroups/",
+            f"/api/stations/{self.station.pk}/timeseriesgroups/",
             data={
                 "name": "Great time series group",
-                "gentity": self.station.id,
-                "variable": self.variable.id,
-                "unit_of_measurement": self.unit_of_measurement.id,
+                "gentity": self.station.pk,
+                "variable": self.variable.pk,
+                "unit_of_measurement": self.unit_of_measurement.pk,
                 "precision": 2,
                 **kwargs,
             },
         )
 
-    def _update_timeseries_group(self, **kwargs):
+    def _update_timeseries_group(self, **kwargs: Any):
         return self.client.put(
-            f"/api/stations/{self.station.id}/timeseriesgroups/"
-            f"{self.timeseries_group.id}/",
+            f"/api/stations/{self.station.pk}/timeseriesgroups/"
+            f"{self.timeseries_group.pk}/",
             data={
                 "name": "Great time series group",
-                "gentity": self.station.id,
-                "variable": self.variable.id,
-                "unit_of_measurement": self.unit_of_measurement.id,
+                "gentity": self.station.pk,
+                "variable": self.variable.pk,
+                "unit_of_measurement": self.unit_of_measurement.pk,
                 "precision": 2,
                 **kwargs,
             },
@@ -82,7 +84,7 @@ class TimeseriesGroupPostTestCase(APITestCase):
     def test_returns_error_if_wrong_gentity(self):
         self.client.force_authenticate(user=self.user1)
         self.assertEqual(
-            self._create_timeseries_group(gentity=self.station2.id).status_code, 400
+            self._create_timeseries_group(gentity=self.station2.pk).status_code, 400
         )
 
     def test_unauthenticated_user_is_denied_permission_to_update_timeseries_group(self):
@@ -103,12 +105,12 @@ class TimeseriesGroupUpdateValidationTestCase(APITestCase):
         self.station = baker.make(models.Station, creator=self.user)
         self.other_station = baker.make(models.Station)
         self.timeseries_group = baker.make(models.TimeseriesGroup, gentity=self.station)
-        self.url = f"/api/stations/{self.station.id}/timeseriesgroups/{self.timeseries_group.id}/"
+        self.url = f"/api/stations/{self.station.pk}/timeseriesgroups/{self.timeseries_group.pk}/"
         self.client.force_authenticate(user=self.user)
 
     def test_patch_cannot_change_station(self):
         response = self.client.patch(
-            self.url, data={"gentity": self.other_station.id}, format="json"
+            self.url, data={"gentity": self.other_station.pk}, format="json"
         )
         self.assertEqual(response.status_code, 400)
 
@@ -117,9 +119,9 @@ class TimeseriesGroupUpdateValidationTestCase(APITestCase):
             self.url,
             data={
                 "name": self.timeseries_group.name,
-                "gentity": self.other_station.id,
-                "variable": self.timeseries_group.variable.id,
-                "unit_of_measurement": self.timeseries_group.unit_of_measurement.id,
+                "gentity": self.other_station.pk,
+                "variable": self.timeseries_group.variable.pk,
+                "unit_of_measurement": self.timeseries_group.unit_of_measurement.pk,
                 "precision": self.timeseries_group.precision,
                 "hidden": self.timeseries_group.hidden,
                 "remarks": self.timeseries_group.remarks,

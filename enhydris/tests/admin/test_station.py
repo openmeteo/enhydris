@@ -10,9 +10,8 @@ from django.contrib.messages.storage.cookie import CookieStorage
 from django.contrib.sites.models import Site
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.http import HttpRequest
-from django.test import TestCase, override_settings
+from django.test import Client, TestCase, override_settings
 
-from crequest.middleware import CrequestMiddleware
 from model_bakery import baker
 
 from enhydris import models
@@ -276,7 +275,7 @@ class StationCreateSetsCreatorTestCase(TestCase):
             },
         )
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(models.Station.objects.first().creator, self.bob)
+        self.assertEqual(models.Station.objects.get().creator, self.bob)
 
 
 @override_settings(ENHYDRIS_USERS_CAN_ADD_CONTENT=True)
@@ -392,8 +391,13 @@ class StationListFromDifferentSites(TestCase):
 
 
 class TestTimeseriesFormMixin(TestTimeseriesMixin):
+    files: dict[str, TemporaryUploadedFile] | None
+
     def _create_timeseries_inline_admin_form(
-        self, replace_or_append, file_contents="", default_timezone="Etc/GMT-2"
+        self,
+        replace_or_append,
+        file_contents: str | bytes = "",
+        default_timezone="Etc/GMT-2",
     ):
         self.data = {
             "replace_or_append": replace_or_append,
@@ -403,58 +407,53 @@ class TestTimeseriesFormMixin(TestTimeseriesMixin):
         }
         if file_contents:
             self.files = {
-                "data": TemporaryUploadedFile(
+                "data_file": TemporaryUploadedFile(
                     "mytimeseries.csv",
                     "text/plain",
                     size=len(file_contents),
                     charset="utf8",
                 )
             }
-            self.files["data"].write(file_contents)
-            self.files["data"].seek(0)
+            self.files["data_file"].write(file_contents)
+            self.files["data_file"].seek(0)
         else:
             self.files = None
-        self.form = TimeseriesInlineAdminForm(
-            data=self.data, files=self.files, instance=self.timeseries
-        )
-
-    def _setup_request_object(self):
         self.request = HttpRequest()
         self.request.user = User.objects.create_user(
             username="alice", email="alice@example.com"
         )
-        self.request._messages = CookieStorage(self.request)
-        CrequestMiddleware.set_request(self.request)
-
-    def _teardown_request_object(self):
-        CrequestMiddleware.del_request()
+        self.request._messages = CookieStorage(self.request)  # type: ignore
+        self.form = TimeseriesInlineAdminForm(
+            data=self.data,
+            files=self.files,
+            instance=self.timeseries,
+            request=self.request,
+        )
 
     def _delete_temporary_file(self):
         if self.files:
-            os.remove(self.files["data"].temporary_file_path())
+            os.remove(self.files["data_file"].temporary_file_path())
 
 
 class TimeseriesInlineAdminFormRefusesToAppendIfNotInOrderTestCase(
     TestTimeseriesFormMixin, TestCase
 ):
     def setUp(self):
-        self._setup_request_object()
         self._create_test_timeseries(data="2005-11-01 18:00,3,\n2019-01-01 00:30,25,\n")
         self._create_timeseries_inline_admin_form(
             "APPEND", b"2005-12-01 18:35,7,\n2019-04-09 13:36,0,\n"
         )
 
-    def tearDown(self):
-        self._teardown_request_object()
-
     def test_form_is_not_valid(self):
         self.assertFalse(self.form.is_valid())
 
     def test_form_errors(self):
+        errors = self.form.errors["__all__"][0]
+        assert isinstance(errors, str)
         self.assertIn(
             "the first record of the time series to append is earlier than the last "
             "record of the existing time series",
-            self.form.errors["__all__"][0],
+            errors,
         )
 
 
@@ -473,7 +472,6 @@ class TimeseriesInlineAdminFormRefusesToUploadIfNoTimezoneTestCase(
     TestTimeseriesFormMixin, TestCase
 ):
     def setUp(self):
-        self._setup_request_object()
         self._create_test_timeseries(data="2005-11-01 18:00,3,\n2019-01-01 00:30,25,\n")
         self._create_timeseries_inline_admin_form(
             replace_or_append="REPLACE",
@@ -481,16 +479,15 @@ class TimeseriesInlineAdminFormRefusesToUploadIfNoTimezoneTestCase(
             default_timezone="",
         )
 
-    def tearDown(self):
-        self._teardown_request_object()
-
     def test_form_is_not_valid(self):
         self.assertFalse(self.form.is_valid())
 
     def test_form_errors(self):
+        errors = self.form.errors["__all__"][0]
+        assert isinstance(errors, str)
         self.assertIn(
             "The file you attempted to upload does not specify a time zone.",
-            self.form.errors["__all__"][0],
+            errors,
         )
 
 
@@ -523,6 +520,8 @@ class TimeseriesInlineAdminFormAcceptsReplacingTestCase(
 
 
 class TimeseriesUploadFileMixin:
+    client: Client
+
     def _get_basic_form_contents(self) -> dict[str, Any]:
         variable = models.Variable.objects.create()
         variable.translations.create(language_code="en", descr="myvar")
@@ -566,7 +565,7 @@ class TimeseriesUploadFileTestCase(TestCase, TimeseriesUploadFileMixin):
         self.client.login(username="alice", password="topsecret")
         self.data = self._get_basic_form_contents()
         with StringIO("Precision=2\n\n2019-08-18 12:39,0.12345678901234,\n") as f:
-            self.data["timeseriesgroup_set-0-timeseries_set-0-data"] = f
+            self.data["timeseriesgroup_set-0-timeseries_set-0-data_file"] = f
             self.response = self.client.post("/admin/enhydris/station/add/", self.data)
 
     def tearDown(self):
@@ -676,12 +675,10 @@ class TimeseriesInlineAdminFormProcessWithoutFileTestCase(
     TestTimeseriesFormMixin, TestCase
 ):
     def setUp(self):
-        self._setup_request_object()
         self._create_test_timeseries(data="2019-01-01 00:30,25,\n")
         self._create_timeseries_inline_admin_form("REPLACE")
 
     def tearDown(self):
-        self._teardown_request_object()
         self._delete_temporary_file()
 
     def test_form_is_valid(self):

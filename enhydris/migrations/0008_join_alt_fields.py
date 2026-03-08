@@ -79,9 +79,9 @@ def unjoin_alt_fields(apps, schema_editor):
                 if type(field).__name__ == "CharField":
                     if "[" not in value or value[-1] != "]":
                         continue
-                    value, value_alt = re.match(
-                        r"(.*?) \[(.*)\]$", value, flags=re.DOTALL
-                    ).groups()
+                    m = re.match(r"(.*?) \[(.*)\]$", value, flags=re.DOTALL)
+                    assert m is not None
+                    value, value_alt = m.groups()
                 elif type(field).__name__ == "TextField":
                     if SEPARATOR not in value:
                         continue

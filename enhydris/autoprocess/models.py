@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import csv
 import datetime as dt
 import logging
 import re
 from io import StringIO
+from typing import ClassVar, Type
 
 from django.db import DataError, IntegrityError, models, transaction
 from django.db.models.signals import post_delete
@@ -72,6 +75,7 @@ class AutoProcess(models.Model):
         for alternative in ("checks", "curveinterpolation", "aggregation"):
             if hasattr(self, alternative):
                 return getattr(self, alternative)
+        assert False, "This place should be unreachable"
 
     def _get_start_date(self):
         start_date = self.target_timeseries.end_date
@@ -96,6 +100,9 @@ class AutoProcess(models.Model):
     def target_timeseries(self):
         raise NotImplementedError("This property is available only in subclasses")
 
+    def process_timeseries(self) -> HTimeseries:
+        raise NotImplementedError("This method is available only in subclasses")
+
 
 class SelectRelatedManager(models.Manager):
     """A manager that calls select_related().
@@ -110,8 +117,8 @@ class SelectRelatedManager(models.Manager):
 
 
 class Checks(AutoProcess):
-    objects = SelectRelatedManager()
-    check_types = []
+    objects: ClassVar = SelectRelatedManager()
+    check_types: list[Type[models.Model]] = []
 
     class Meta:
         db_table = "enhydris_autoprocess_checks"
@@ -320,7 +327,7 @@ class CurveInterpolation(AutoProcess):
         on_delete=models.CASCADE,
         verbose_name=_("Target time series group"),
     )
-    objects = SelectRelatedManager()
+    objects: ClassVar = SelectRelatedManager()
 
     class Meta:
         db_table = "enhydris_autoprocess_curveinterpolation"
@@ -461,7 +468,7 @@ class Aggregation(AutoProcess):
         ),
         verbose_name=_("Resulting timestamp offset"),
     )
-    objects = SelectRelatedManager()
+    objects: ClassVar = SelectRelatedManager()
 
     class Meta:
         db_table = "enhydris_autoprocess_aggregation"
@@ -520,6 +527,7 @@ class Aggregation(AutoProcess):
 
     def _check_nonempty_resulting_timestamp_offset(self):
         m = re.match(r"(-?)(\d*)(.*)$", self.resulting_timestamp_offset)
+        assert m is not None
         sign, number, unit = m.group(1, 2, 3)
         if unit != "min" or (sign == "-" and number == ""):
             raise IntegrityError(

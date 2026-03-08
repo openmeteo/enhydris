@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "rules.apps.AutodiscoverRulesConfig",
     "nested_admin",
-    "crequest",
     "bootstrap4",
     #
     # Registration
@@ -62,7 +61,6 @@ MIDDLEWARE = [
     "enhydris.middleware.GlobalLoginRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.contrib.flatpages.middleware.FlatpageFallbackMiddleware",
-    "crequest.middleware.CrequestMiddleware",
 ]
 
 APPEND_SLASH = True
@@ -162,7 +160,7 @@ ENHYDRIS_MAP_DEFAULT_VIEWPORT = (19.3, 34.75, 29.65, 41.8)
 ENHYDRIS_TIMESERIES_DATA_DIR = "timeseries_data"
 ENHYDRIS_TS_GRAPH_BIG_STEP_DENOMINATOR = 200
 ENHYDRIS_TS_GRAPH_FINE_STEP_DENOMINATOR = 50
-ENHYDRIS_SITES_FOR_NEW_STATIONS = set()
+ENHYDRIS_SITES_FOR_NEW_STATIONS: set[int] = set()
 ENHYDRIS_CELERY_SEND_TASK_ERROR_EMAILS = True
 
 ENHYDRIS_SYNOPTIC_URL = "/synoptic"

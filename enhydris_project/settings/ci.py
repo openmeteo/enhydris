@@ -10,7 +10,7 @@ DATABASES = {
         "USER": "runner",
         "PASSWORD": "topsecret",
         "HOST": "localhost",
-        "PORT": 5432,
+        "PORT": "5432",
     }
 }
 LANGUAGE_CODE = "en"

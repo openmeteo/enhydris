@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.contrib.gis.geos import MultiPolygon, Point, Polygon
@@ -9,8 +10,15 @@ from model_bakery import baker
 
 from enhydris import models
 
+if TYPE_CHECKING:
+    SearchTestCaseBaseBase = APITestCase
+else:
 
-class SearchTestCaseBase(ABC):
+    class SearchTestCaseBaseBase:
+        pass
+
+
+class SearchTestCaseBase(SearchTestCaseBaseBase, ABC):
     """A test case base that checks whether a search returns correct result.
 
     Use like this:
@@ -22,6 +30,9 @@ class SearchTestCaseBase(ABC):
                 # Create models such that when searching for "hello:world" the result
                 # will be a single station with name "planet".
     """
+
+    search_term: str
+    search_result: str | set[str]
 
     status_code = 200
     number_of_results = 1
@@ -189,7 +200,7 @@ class SearchByBboxTestCase(SearchTestCaseBase, APITestCase):
 
 class SearchByInTestCase(SearchTestCaseBase, APITestCase):
     search_term = "in:baranduin"
-    search_result = "Sarn Ford"
+    search_result: str | set[str] = "Sarn Ford"
 
     def _create_models(self):
         baker.make(
@@ -209,4 +220,4 @@ class SearchByInUsingCodeTestCase(SearchByInTestCase, APITestCase):
 class SearchByInWithEmptyResultTestCase(SearchByInTestCase, APITestCase):
     search_term = "in:nothing_has_this_name"
     number_of_results = 0
-    search_result = set()
+    search_result: set[str] = set()

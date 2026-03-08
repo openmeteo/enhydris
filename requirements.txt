@@ -8,7 +8,6 @@ django-parler>=2.2,<3
 django-parler-rest>=2,<3
 django-geowidgets>=0.1.1,<1
 django-nested-admin>=4.1,<5
-django-crequest
 celery>=5.2.2,<6
 django-registration-redux>=2.9,<3
 django-simple-captcha>=0.5.14,<1
@@ -16,5 +15,5 @@ django-bootstrap4>=2,<4
 requests>=2.25,<3
 defusedxml>=0.7.1,<1
 pthelma[all]>=2.4,<3
-matplotlib>=3,<3.7
+matplotlib>=3.8,<4
 django-grappelli>=4,<5

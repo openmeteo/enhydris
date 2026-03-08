@@ -1,3 +1,5 @@
+# pyright: reportPrivateImportUsage=false
+# pyright: reportOperatorIssue=false
 """How the Enhydris object-level permissions system works.
 
 django.contrib.auth has some provisions (but not actual support) for object-level

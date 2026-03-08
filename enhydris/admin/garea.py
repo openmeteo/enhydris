@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import os
 import tempfile
 import textwrap
+from typing import TYPE_CHECKING
 from zipfile import BadZipFile, ZipFile
 
 from django import forms
@@ -8,14 +11,25 @@ from django.contrib import messages
 from django.contrib.gis import admin
 from django.contrib.gis.forms import MultiPolygonField, OSMWidget
 from django.contrib.gis.gdal import DataSource
+from django.contrib.gis.gdal.feature import Feature
 from django.contrib.gis.geos import MultiPolygon
+from django.core.files.uploadedfile import UploadedFile
 from django.db import IntegrityError, transaction
-from django.http import HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import path
 from django.utils.translation import gettext_lazy as _
 
 from enhydris import models
+
+if TYPE_CHECKING:
+    GareaCategoryAdminBase = admin.ModelAdmin[models.GareaCategory]
+    GareaFormBase = forms.ModelForm[models.Garea]
+    GareaAdminBase = admin.ModelAdmin[models.Garea]
+else:
+    GareaCategoryAdminBase = admin.ModelAdmin
+    GareaFormBase = forms.ModelForm
+    GareaAdminBase = admin.ModelAdmin
 
 
 class MissingAttribute(Exception):
@@ -23,7 +37,7 @@ class MissingAttribute(Exception):
 
 
 @admin.register(models.GareaCategory)
-class GareaCategory(admin.ModelAdmin):
+class GareaCategory(GareaCategoryAdminBase):
     pass
 
 
@@ -65,7 +79,7 @@ class GareaUploadForm(forms.Form):
         return data
 
 
-class GareaForm(forms.ModelForm):
+class GareaForm(GareaFormBase):
     geometry = MultiPolygonField(
         widget=OSMWidget,
         disabled=True,
@@ -84,7 +98,7 @@ class GareaForm(forms.ModelForm):
 
 
 @admin.register(models.Garea)
-class GareaAdmin(admin.ModelAdmin):
+class GareaAdmin(GareaAdminBase):
     form = GareaForm
     list_display = ["id", "name", "code", "category"]
     list_filter = ["category"]
@@ -95,25 +109,25 @@ class GareaAdmin(admin.ModelAdmin):
         new_urls = [path("bulk_add/", self.admin_site.admin_view(self.bulk_add))]
         return new_urls + urls
 
-    def bulk_add(self, request):
+    def bulk_add(self, request: HttpRequest):
         if request.method == "POST":
             return self._bulk_post(request)
         else:
             return self._get_template_response(request, GareaUploadForm())
 
-    def _bulk_post(self, request):
+    def _bulk_post(self, request: HttpRequest):
         form = GareaUploadForm(request.POST, request.FILES)
         if form.is_valid():
             return self._process_uploaded_form(request, form)
         else:
             return self._get_template_response(request, form)
 
-    def _process_uploaded_form(self, request, form):
+    def _process_uploaded_form(self, request: HttpRequest, form: GareaUploadForm):
         try:
             category = models.GareaCategory.objects.get(id=request.POST["category"])
-            nnew, nold = self._process_uploaded_shapefile(
-                category, request.FILES["file"]
-            )
+            uploaded_file = request.FILES["file"]
+            assert isinstance(uploaded_file, UploadedFile)
+            nnew, nold = self._process_uploaded_shapefile(category, uploaded_file)
         except IntegrityError as e:
             messages.add_message(request, messages.ERROR, str(e))
         else:
@@ -126,13 +140,15 @@ class GareaAdmin(admin.ModelAdmin):
             )
         return HttpResponseRedirect("")
 
-    def _get_template_response(self, request, form):
+    def _get_template_response(self, request: HttpRequest, form: GareaUploadForm):
         return TemplateResponse(
             request, "admin/enhydris/garea/bulk_add.html", {"form": form}
         )
 
     @transaction.atomic
-    def _process_uploaded_shapefile(self, category, file):
+    def _process_uploaded_shapefile(
+        self, category: models.GareaCategory, file: UploadedFile
+    ):
         zipfile = ZipFile(file)
         shapefilename = [x for x in zipfile.namelist() if x.lower()[-4:] == ".shp"][0]
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -152,18 +168,20 @@ class GareaAdmin(admin.ModelAdmin):
                 nnew += 1
         return nnew, nold
 
-    def _get_garea(self, feature, category):
+    def _get_garea(self, feature: Feature, category: models.GareaCategory):
         garea = models.Garea()
         if isinstance(feature.geom.geos, MultiPolygon):
             garea.geom = feature.geom.geos
         else:
             garea.geom = MultiPolygon(feature.geom.geos)
-        garea.name = self._get_feature_attr(feature, "Name")
+        name = self._get_feature_attr(feature, "Name")
+        assert name is not None
+        garea.name = name
         garea.code = self._get_feature_attr(feature, "Code", allow_empty=True) or ""
         garea.category = category
         return garea
 
-    def _get_feature_attr(self, feature, attr, allow_empty=False):
+    def _get_feature_attr(self, feature: Feature, attr: str, allow_empty: bool = False):
         try:
             value = feature.get(attr)
         except IndexError:

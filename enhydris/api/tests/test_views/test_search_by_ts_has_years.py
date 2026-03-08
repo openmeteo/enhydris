@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from io import StringIO
 
 from rest_framework.test import APITestCase
@@ -14,7 +16,7 @@ class SearchWithYearExistingInOneStationTest(
     ClearCacheMixin, SearchTestCaseBase, APITestCase
 ):
     search_term = "ts_has_years:2005,2012,2016"
-    search_result = "Tharbad"
+    search_result: str | set[str] = "Tharbad"
 
     def _create_models(self):
         komboti = baker.make(models.Station, name="Komboti")
@@ -32,7 +34,9 @@ class SearchWithYearExistingInOneStationTest(
             tharbad, "Rain", "2005-03-23 18:20,5,\r\n2016-03-24 18:25,6,\r\n"
         )
 
-    def _make_timeseries(self, station, variable_descr, datastr):
+    def _make_timeseries(
+        self, station: models.Station, variable_descr: str, datastr: str
+    ):
         result = baker.make(
             models.Timeseries,
             timeseries_group__gentity=station,
@@ -52,7 +56,7 @@ class SearchWithYearsExistingInAllStationsTest(SearchWithYearExistingInOneStatio
 
 class SearchWithYearsExistingNowhereTest(SearchWithYearExistingInOneStationTest):
     search_term = "ts_has_years:2005,2012,2018"
-    search_result = set()
+    search_result: set[str] = set()
     number_of_results = 0
 
 

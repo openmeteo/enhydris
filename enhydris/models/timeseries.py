@@ -4,7 +4,7 @@ import datetime as dt
 from io import StringIO
 from itertools import islice
 from os.path import abspath
-from typing import Any
+from typing import Any, TextIO
 from zoneinfo import ZoneInfo
 
 from django.conf import settings
@@ -13,6 +13,7 @@ from django.contrib.gis.geos import Point
 from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
 from django.db import IntegrityError, connection
+from django.db.models.base import ModelBase
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
@@ -96,16 +97,12 @@ class Timeseries(models.Model):
         (AGGREGATED, _("Aggregated")),
     )
 
-    last_modified: models.DateTimeField[dt.datetime, dt.datetime] = (
-        models.DateTimeField(default=now, null=True, editable=False)
-    )
-    timeseries_group: models.ForeignKey[TimeseriesGroup, TimeseriesGroup] = (
-        models.ForeignKey(TimeseriesGroup, on_delete=models.CASCADE)
-    )
-    type: models.PositiveSmallIntegerField[int, int] = models.PositiveSmallIntegerField(
+    last_modified = models.DateTimeField(default=now, null=True, editable=False)
+    timeseries_group = models.ForeignKey(TimeseriesGroup, on_delete=models.CASCADE)
+    type = models.PositiveSmallIntegerField(
         choices=TIMESERIES_TYPES, verbose_name=_("Type")
     )
-    time_step: models.CharField[str, str] = models.CharField(
+    time_step = models.CharField(
         max_length=7,
         blank=True,
         help_text=_(
@@ -116,7 +113,7 @@ class Timeseries(models.Model):
         ),
         verbose_name=_("Time step"),
     )
-    name: models.CharField[str, str] = models.CharField(
+    name = models.CharField(
         max_length=100,
         blank=True,
         default="",
@@ -127,7 +124,7 @@ class Timeseries(models.Model):
         ),
         verbose_name=_("Name"),
     )
-    publicly_available: models.BooleanField[bool, bool] = models.BooleanField(
+    publicly_available = models.BooleanField(
         default=get_default_publicly_available,
         verbose_name=_("Publicly available"),
         help_text=_(
@@ -267,7 +264,7 @@ class Timeseries(models.Model):
             raise DataNotInCache()
         if data.index.min() > start_date or data.index.max() < end_date:
             raise DataNotInCache()
-        return data.loc[start_date:end_date]
+        return data.loc[start_date:end_date]  # type: ignore
 
     def _retrieve_and_cache_data(self, start_date: dt.datetime, end_date: dt.datetime):
         with connection.cursor() as cursor:
@@ -295,7 +292,7 @@ class Timeseries(models.Model):
 
     def set_data(
         self,
-        data: HTimeseries | pd.DataFrame | StringIO,
+        data: HTimeseries | pd.DataFrame | TextIO,
         default_timezone: str | None = None,
     ):
         self.timeseriesrecord_set.all().delete()
@@ -303,7 +300,7 @@ class Timeseries(models.Model):
 
     def insert_or_append_data(
         self,
-        data: HTimeseries | pd.DataFrame | StringIO,
+        data: HTimeseries | pd.DataFrame | TextIO,
         default_timezone: str | None = None,
         append_only: bool = True,
     ):
@@ -331,7 +328,7 @@ class Timeseries(models.Model):
 
     def _get_htimeseries_from_data(
         self,
-        data: HTimeseries | pd.DataFrame | StringIO,
+        data: HTimeseries | pd.DataFrame | TextIO,
         default_timezone: str | None,
     ):
         default_tzinfo = default_timezone and ZoneInfo(default_timezone) or None
@@ -342,7 +339,7 @@ class Timeseries(models.Model):
 
     def get_last_record_as_string(self, timezone: str = "") -> str:
         try:
-            return self.timeseriesrecord_set.latest().__str__(timezone=timezone)
+            return self.timeseriesrecord_set.latest().to_string(timezone=timezone)
         except TimeseriesRecord.DoesNotExist:
             return ""
 
@@ -387,31 +384,25 @@ class Timeseries(models.Model):
 
     def save(
         self,
-        force_insert: bool = False,
+        force_insert: bool | tuple[ModelBase, ...] = False,
         force_update: bool = False,
         **kwargs: Any,
-    ):
+    ) -> None:
         check_time_step(self.time_step)
         super(Timeseries, self).save(
-            force_insert=force_insert, force_update=force_update, **kwargs
+            force_insert=force_insert,
+            force_update=force_update,
+            **kwargs,
         )
         self._invalidate_cached_data()
 
 
 class TimeseriesRecord(models.Model):
     pk = models.CompositePrimaryKey("timeseries_id", "timestamp")
-    timeseries: models.ForeignKey[Timeseries, Timeseries] = models.ForeignKey(
-        Timeseries, on_delete=models.CASCADE
-    )
-    timestamp: models.DateTimeField[dt.datetime, dt.datetime] = models.DateTimeField(
-        verbose_name=_("Timestamp")
-    )
-    value: models.FloatField[float | None, float | None] = models.FloatField(
-        blank=True, null=True, verbose_name=_("Value")
-    )
-    flags: models.CharField[str, str] = models.CharField(
-        max_length=237, blank=True, verbose_name=_("Flags")
-    )
+    timeseries = models.ForeignKey(Timeseries, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(verbose_name=_("Timestamp"))
+    value = models.FloatField(blank=True, null=True, verbose_name=_("Value"))
+    flags = models.CharField(max_length=237, blank=True, verbose_name=_("Flags"))
 
     class Meta:
         verbose_name = _("Time series record")
@@ -438,11 +429,11 @@ class TimeseriesRecord(models.Model):
             batch = list(islice(record_generator, batch_size))
             if not batch:
                 break
-            cls.objects.bulk_create(batch, batch_size)
+            TimeseriesRecord.objects.bulk_create(batch, batch_size)
             count += len(batch)
         return count
 
-    def __str__(self, timezone: str = "") -> str:
+    def to_string(self, timezone: str = "") -> str:
         if timezone == "":
             timezone = self.timeseries.timeseries_group.gentity.display_timezone
         tzinfo = ZoneInfo(timezone)
@@ -450,3 +441,6 @@ class TimeseriesRecord(models.Model):
         datestr = self.timestamp.astimezone(tzinfo).strftime("%Y-%m-%d %H:%M")
         value = "" if self.value is None else f"{self.value:.{precision}f}"
         return f"{datestr},{value},{self.flags}"
+
+    def __str__(self) -> str:
+        return self.to_string()

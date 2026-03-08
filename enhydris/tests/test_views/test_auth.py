@@ -44,6 +44,7 @@ class RegisterTestCase(TransactionTestCase):
 
         # Get the key from the link in the email
         m = re.search(r"http://([^/]+)(.*)", django.core.mail.outbox[0].body)
+        assert m is not None
         path = m.group(2)
 
         # Submit it

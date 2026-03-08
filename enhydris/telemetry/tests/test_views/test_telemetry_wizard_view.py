@@ -6,6 +6,7 @@ from django.test import Client, TestCase, override_settings
 
 import requests
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 from model_bakery import baker
 
 from enhydris.models import Station, TimeseriesGroup
@@ -65,19 +66,27 @@ class CopyTelemetryDataFromDatabaseToSessionTestCase(TestCase):
         self.assertEqual(self.response.status_code, 200)
 
     def test_default_type_is_empty(self):
-        option_empty = self.soup.find(id="id_type").find("option", value="")
+        type_element = self.soup.find(id="id_type")
+        assert type_element is not None
+        option_empty = type_element.find("option", value="")  # type: ignore
+        assert option_empty is not None
         self.assertEqual(option_empty.get("selected"), "")
 
     def test_meteoview2_option_is_not_selected(self):
-        option_empty = self.soup.find(id="id_type").find("option", value="meteoview2")
+        type_element = self.soup.find(id="id_type")
+        assert type_element is not None
+        option_empty = type_element.find("option", value="meteoview2")  # type: ignore
+        assert option_empty is not None
         self.assertIsNone(option_empty.get("selected"))
 
     def test_default_fetch_interval_minutes_is_empty(self):
         fetch_interval_minutes = self.soup.find(id="id_fetch_interval_minutes")
+        assert fetch_interval_minutes is not None
         self.assertIsNone(fetch_interval_minutes.get("value"))
 
     def test_default_fetch_offset_minutes_is_empty(self):
         fetch_offset_minutes = self.soup.find(id="id_fetch_offset_minutes")
+        assert fetch_offset_minutes is not None
         self.assertIsNone(fetch_offset_minutes.get("value"))
 
 
@@ -113,21 +122,27 @@ class CopyTelemetryDataFromDatabaseToSessionWithExistingTelemetryTestCase(TestCa
         self.assertEqual(self.response.status_code, 200)
 
     def test_empty_type_is_not_selected(self):
-        option_empty = self.soup.find(id="id_type").find("option", value="")
+        type_element = self.soup.find(id="id_type")
+        assert type_element is not None
+        option_empty = type_element.find("option", value="")  # type: ignore
+        assert option_empty is not None
         self.assertIsNone(option_empty.get("selected"))
 
     def test_default_type_is_meteoview2(self):
-        option_meteoview2 = self.soup.find(id="id_type").find(
-            "option", value="meteoview2"
-        )
+        type_element = self.soup.find(id="id_type")
+        assert type_element is not None
+        option_meteoview2 = type_element.find("option", value="meteoview2")  # type: ignore
+        assert option_meteoview2 is not None
         self.assertEqual(option_meteoview2.get("selected"), "")
 
     def test_default_fetch_interval_minutes_is_10(self):
         fetch_interval_minutes = self.soup.find(id="id_fetch_interval_minutes")
+        assert isinstance(fetch_interval_minutes, Tag)
         self.assertEqual(fetch_interval_minutes["value"], "10")
 
     def test_default_fetch_offset_minutes_is_2(self):
         fetch_offset_minutes = self.soup.find(id="id_fetch_offset_minutes")
+        assert isinstance(fetch_offset_minutes, Tag)
         self.assertEqual(fetch_offset_minutes["value"], "2")
 
     def test_configuration_is_in_the_session(self):
@@ -341,15 +356,11 @@ class MockResponse(requests.Response):
 class SecondStepPostWithErrorTestCase(SecondStepPostMixin, TestCase):
     @classmethod
     def _post_step_2(cls):
-        p1 = patch(
-            "enhydris.telemetry.types.meteoview2.requests.request",
-            **{
-                "return_value.raise_for_status.side_effect": requests.RequestException(
-                    "error"
-                )
-            },
-        )
-        with p1:
+        p1 = patch("enhydris.telemetry.types.meteoview2.requests.request")
+        with p1 as m:
+            m.return_value.raise_for_status.side_effect = requests.RequestException(
+                "error"
+            )
             cls.response = cls.cclient.post(
                 f"/stations/{cls.station.id}/telemetry/2/",
                 data={"invalid": "data"},
@@ -567,7 +578,9 @@ class NextOrFinishButtonTestCase(TestCase):
     def _get_button_text_for_step_2(self):
         response = self.client.get(f"/stations/{self.station.id}/telemetry/2/")
         soup = BeautifulSoup(response.content, "html.parser")
-        return soup.select_one("main button[type='submit']").get_text().strip()
+        submit_element = soup.select_one("main button[type='submit']")
+        assert submit_element is not None
+        return submit_element.get_text().strip()
 
     def test_button_says_next_in_nonfinal_step(self, m):
         button_text = self._get_button_text_for_step_2()

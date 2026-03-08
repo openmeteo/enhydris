@@ -231,14 +231,11 @@ class TelemetryFetchIgnoresTimeZoneTestCase(
         )
 
     def _set_mock_request_return_values(self, mock_request):
-        mock_request.side_effect = [
-            MagicMock(  # Response for login
-                **{"json.return_value": {"code": "200", "token": "topsecretapitoken"}}
-            ),
-            MagicMock(  # Response for measurements
-                **{"json.return_value": "irrelevant"}
-            ),
-        ]
+        m1 = MagicMock()
+        m1.json.return_value = {"code": "200", "token": "topsecretapitoken"}
+        m2 = MagicMock()
+        m2.json.return_value = "irrelevant"
+        mock_request.side_effect = [m1, m2]
 
 
 @patch("enhydris.telemetry.types.meteoview2.requests.request")

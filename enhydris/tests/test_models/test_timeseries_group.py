@@ -75,7 +75,7 @@ class UnitOfMeasurementTestCase(TestCase):
 
     def test_str_when_symbol_is_empty(self):
         unit = baker.make(models.UnitOfMeasurement, symbol="")
-        self.assertEqual(str(unit), str(unit.id))
+        self.assertEqual(str(unit), str(unit.pk))
 
 
 class TimeseriesGroupGetNameTestCase(TestCase):
@@ -106,7 +106,7 @@ class TimeseriesGroupDefaultTimeseriesTestCase(TestCase):
             models.Timeseries.REGULARIZED
         )
 
-    def _make_timeseries(self, type):
+    def _make_timeseries(self, type: int):
         return baker.make(
             models.Timeseries, timeseries_group=self.timeseries_group, type=type
         )
@@ -146,7 +146,7 @@ class TimeseriesGroupDefaultTimeseriesTestCase(TestCase):
             # The following should cause two queries.
             group = models.TimeseriesGroup.objects.prefetch_related(
                 "timeseries_set"
-            ).first()
+            ).get()
             # The following should cause no queries since the time series have
             # been prefetched.
             group.default_timeseries
@@ -170,7 +170,7 @@ class TimeseriesGroupStartAndEndDateTestCase(TimeseriesDataMixin, TestCase):
             self.timeseries_group.start_date
 
         timeseries_group = models.TimeseriesGroup.objects.get(
-            id=self.timeseries_group.id
+            id=self.timeseries_group.pk
         )
         with self.assertNumQueries(0):
             timeseries_group.start_date
@@ -189,7 +189,7 @@ class TimeseriesGroupStartAndEndDateTestCase(TimeseriesDataMixin, TestCase):
             self.timeseries_group.end_date
 
         timeseries_group = models.TimeseriesGroup.objects.get(
-            id=self.timeseries_group.id
+            id=self.timeseries_group.pk
         )
         with self.assertNumQueries(0):
             timeseries_group.end_date
@@ -215,33 +215,33 @@ class TimestepTestCase(TestCase):
     def setUp(self):
         self.timeseries = baker.make(models.Timeseries)
 
-    def set_time_step(self, time_step):
+    def set_time_step(self, time_step: str):
         self.timeseries.time_step = time_step
         self.timeseries.save()
 
     def test_min(self):
         self.set_time_step("27min")
-        self.assertEqual(models.Timeseries.objects.first().time_step, "27min")
+        self.assertEqual(models.Timeseries.objects.get().time_step, "27min")
 
     def test_hour(self):
         self.set_time_step("3H")
-        self.assertEqual(models.Timeseries.objects.first().time_step, "3H")
+        self.assertEqual(models.Timeseries.objects.get().time_step, "3H")
 
     def test_day(self):
         self.set_time_step("3D")
-        self.assertEqual(models.Timeseries.objects.first().time_step, "3D")
+        self.assertEqual(models.Timeseries.objects.get().time_step, "3D")
 
     def test_month(self):
         self.set_time_step("3M")
-        self.assertEqual(models.Timeseries.objects.first().time_step, "3M")
+        self.assertEqual(models.Timeseries.objects.get().time_step, "3M")
 
     def test_3Y(self):
         self.set_time_step("3Y")
-        self.assertEqual(models.Timeseries.objects.first().time_step, "3Y")
+        self.assertEqual(models.Timeseries.objects.get().time_step, "3Y")
 
     def test_Y(self):
         self.set_time_step("Y")
-        self.assertEqual(models.Timeseries.objects.first().time_step, "Y")
+        self.assertEqual(models.Timeseries.objects.get().time_step, "Y")
 
     def test_garbage(self):
         with self.assertRaisesRegex(ValueError, '"hello" is not a valid time step'):

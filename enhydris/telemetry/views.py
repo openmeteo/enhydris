@@ -52,6 +52,7 @@ class TelemetryWizardView(PermissionRequiredMixin, View):
         if self.seq == 1:
             Form = EssentialDataForm
         else:
+            assert self.driver is not None
             Form = self.driver.forms[self.seq - 1]
 
         if self.request.method == "POST":
@@ -109,6 +110,7 @@ class TelemetryWizardView(PermissionRequiredMixin, View):
 
     def _process_valid_form_post_of_step_gte_2(self):
         self._update_session_data(self.form.cleaned_data)
+        assert self.driver is not None
         if self.seq < len(self.driver.forms):
             # Non-final step
             kwargs = {"station_id": self.station.id, "seq": self.seq + 1}

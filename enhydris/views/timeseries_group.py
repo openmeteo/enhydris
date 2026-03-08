@@ -1,3 +1,5 @@
+from typing import Any
+
 from enhydris import forms, models
 
 from .utils import MapWithSingleStationBaseView
@@ -7,7 +9,7 @@ class TimeseriesGroupDetail(MapWithSingleStationBaseView):
     model = models.TimeseriesGroup
     template_name = "enhydris/timeseries_group_detail/main.html"
 
-    def get_context_data(self, *args, **kwargs):
+    def get_context_data(self, *args: Any, **kwargs: Any):
         context = super().get_context_data(*args, **kwargs)
         context["download_data_form"] = forms.DownloadDataForm(
             timeseries_group=self.object
@@ -15,9 +17,10 @@ class TimeseriesGroupDetail(MapWithSingleStationBaseView):
         context["timeseries_set"] = self._get_timeseries_set()
         return context
 
-    def _get_timeseries_set(self):
-        result = []
+    def _get_timeseries_set(self) -> list[models.Timeseries]:
+        assert isinstance(self.object, models.TimeseriesGroup)
+        result: list[models.Timeseries] = []
         for timeseries in self.object.timeseries_set.all():
-            if self.request.user.has_perm("enhydris.view_timeseries_data", timeseries):
+            if self.request.user.has_perm("enhydris.view_timeseries_data", timeseries):  # type: ignore
                 result.append(timeseries)
         return result

@@ -16,18 +16,18 @@ class GentityFileTestCase(TestCase):
         station = baker.make(models.Station)
         gentity_file = models.GentityFile(gentity=station, descr="North view")
         gentity_file.save()
-        self.assertEqual(models.GentityFile.objects.first().descr, "North view")
+        self.assertEqual(models.GentityFile.objects.get().descr, "North view")
 
     def test_update(self):
         baker.make(models.GentityFile)
-        gentity_file = models.GentityFile.objects.first()
+        gentity_file = models.GentityFile.objects.get()
         gentity_file.descr = "North view"
         gentity_file.save()
-        self.assertEqual(models.GentityFile.objects.first().descr, "North view")
+        self.assertEqual(models.GentityFile.objects.get().descr, "North view")
 
     def test_delete(self):
         baker.make(models.GentityFile)
-        gentity_file = models.GentityFile.objects.first()
+        gentity_file = models.GentityFile.objects.get()
         gentity_file.delete()
         self.assertEqual(models.GentityFile.objects.count(), 0)
 
@@ -72,18 +72,18 @@ class GentityEventTestCase(TestCase):
             report="Station exploded",
         )
         gentity_event.save()
-        self.assertEqual(models.GentityEvent.objects.first().report, "Station exploded")
+        self.assertEqual(models.GentityEvent.objects.get().report, "Station exploded")
 
     def test_update(self):
         baker.make(models.GentityEvent)
-        gentity_event = models.GentityEvent.objects.first()
+        gentity_event = models.GentityEvent.objects.get()
         gentity_event.report = "Station exploded"
         gentity_event.save()
-        self.assertEqual(models.GentityEvent.objects.first().report, "Station exploded")
+        self.assertEqual(models.GentityEvent.objects.get().report, "Station exploded")
 
     def test_delete(self):
         baker.make(models.GentityEvent)
-        gentity_event = models.GentityEvent.objects.first()
+        gentity_event = models.GentityEvent.objects.get()
         gentity_event.delete()
         self.assertEqual(models.GentityEvent.objects.count(), 0)
 
@@ -113,18 +113,18 @@ class GareaTestCase(TestCase):
             geom=MultiPolygon(Polygon(((30, 20), (45, 40), (10, 40), (30, 20)))),
         )
         garea.save()
-        self.assertEqual(models.Garea.objects.first().name, "Esgalduin")
+        self.assertEqual(models.Garea.objects.get().name, "Esgalduin")
 
     def test_update(self):
         baker.make(models.Garea)
-        garea = models.Garea.objects.first()
+        garea = models.Garea.objects.get()
         garea.name = "Esgalduin"
         garea.save()
-        self.assertEqual(models.Garea.objects.first().name, "Esgalduin")
+        self.assertEqual(models.Garea.objects.get().name, "Esgalduin")
 
     def test_delete(self):
         baker.make(models.Garea)
-        garea = models.Garea.objects.first()
+        garea = models.Garea.objects.get()
         garea.delete()
         self.assertEqual(models.Garea.objects.count(), 0)
 
@@ -142,18 +142,18 @@ class StationTestCase(TestCase):
             geom=Point(x=21.06071, y=39.09518, srid=4326),
         )
         station.save()
-        self.assertEqual(models.Station.objects.first().name, "Hobbiton")
+        self.assertEqual(models.Station.objects.get().name, "Hobbiton")
 
     def test_update(self):
         baker.make(models.Station)
-        station = models.Station.objects.first()
+        station = models.Station.objects.get()
         station.name = "Hobbiton"
         station.save()
-        self.assertEqual(models.Station.objects.first().name, "Hobbiton")
+        self.assertEqual(models.Station.objects.get().name, "Hobbiton")
 
     def test_delete(self):
         baker.make(models.Station)
-        station = models.Station.objects.first()
+        station = models.Station.objects.get()
         station.delete()
         self.assertEqual(models.Station.objects.count(), 0)
 
@@ -177,14 +177,15 @@ class StationLastUpdateTestCase(ClearCacheMixin, TestCase):
 
     def _create_timeseries(
         self,
-        ye=None,
-        mo=None,
-        da=None,
-        ho=None,
-        mi=None,
-        type=models.Timeseries.INITIAL,
+        ye: int | None = None,
+        mo: int | None = None,
+        da: int | None = None,
+        ho: int | None = None,
+        mi: int | None = None,
+        type: int = models.Timeseries.INITIAL,
     ):
         if ye:
+            assert mo and da and ho is not None and mi is not None
             end_date_utc = dt.datetime(ye, mo, da, ho, mi, tzinfo=dt.timezone.utc)
         else:
             end_date_utc = None
@@ -210,7 +211,7 @@ class StationLastUpdateTestCase(ClearCacheMixin, TestCase):
 
         # Make sure to fetch the `end_date` value of the timeseries
         timeseries = models.Timeseries.objects.filter(
-            timeseries_group__gentity_id=self.station.id
+            timeseries_group__gentity_id=self.station.pk
         )
         for t in timeseries:
             t.end_date
@@ -218,7 +219,7 @@ class StationLastUpdateTestCase(ClearCacheMixin, TestCase):
         with self.assertNumQueries(1):
             self.station.last_update
 
-        station = models.Station.objects.get(id=self.station.id)
+        station = models.Station.objects.get(id=self.station.pk)
         with self.assertNumQueries(0):
             station.last_update
 
@@ -238,7 +239,7 @@ class StationSitesTestCase(TestCase):
         )
         station.save()
         self.assertEqual(
-            list(models.Station.objects.first().sites.values("id")), [{"id": 4}]
+            list(models.Station.objects.get().sites.values("id")), [{"id": 4}]
         )
 
     def test_updating_station_does_not_touch_its_sites(self):
@@ -256,7 +257,7 @@ class StationSitesTestCase(TestCase):
 
         # Should still be in site5
         self.assertEqual(
-            list(models.Station.objects.first().sites.values("id")), [{"id": 5}]
+            list(models.Station.objects.get().sites.values("id")), [{"id": 5}]
         )
 
     @override_settings(ENHYDRIS_SITES_FOR_NEW_STATIONS={5})
@@ -267,6 +268,6 @@ class StationSitesTestCase(TestCase):
         )
         station.save()
         self.assertEqual(
-            list(models.Station.objects.first().sites.values("id")),
+            list(models.Station.objects.get().sites.values("id")),
             [{"id": 4}, {"id": 5}],
         )

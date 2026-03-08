@@ -22,7 +22,9 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
         u = self.telemetry.username
         p = self.telemetry.password
         xmlroot = self._make_request(f"function=login&user={u}&passwd={p}")
-        self.session_id = xmlroot.find("result/string").text
+        element = xmlroot.find("result/string")
+        assert element is not None
+        self.session_id = element.text
 
     def disconnect(self):
         if hasattr(self, "session_id"):
@@ -43,6 +45,7 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
     def get_sensors(self):
         xmlroot = self._make_request("function=getconfig")
         station = xmlroot.find(f".//node[@id='{self.telemetry.remote_station_id}']")
+        assert station is not None
         sensors = station.findall("./nodes/node")
         return {x.attrib["id"]: x.attrib["name"] for x in sensors}
 
@@ -61,11 +64,13 @@ class TelemetryAPIClient(TelemetryAPIClientBase):
         for record in xmlroot.findall("node/v"):
             timestamp = record.attrib["t"]
             if timestamp.startswith("+"):
+                assert prev_timestamp is not None
                 timestamp = prev_timestamp + dt.timedelta(seconds=int(timestamp))
             else:
                 timestamp = dt.datetime.fromtimestamp(
                     int(timestamp), dt.timezone.utc
                 ).replace(tzinfo=None)
+            assert record.text is not None
             value = float(record.text)
             flags = self._get_flags(record, timestamp)
             result += f"{timestamp.isoformat()},{value},{flags}\n"

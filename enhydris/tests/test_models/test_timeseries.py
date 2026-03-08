@@ -820,7 +820,9 @@ class TimeseriesRecordTestCase(TestTimeseriesMixin, TestCase):
         record = models.TimeseriesRecord.objects.first()
         assert record is not None
         record.save()
-        self.assertEqual(record.__str__(timezone="Etc/GMT-5"), "2017-11-23 20:23,3.1,")
+        self.assertEqual(
+            record.to_string(timezone="Etc/GMT-5"), "2017-11-23 20:23,3.1,"
+        )
 
 
 class TimeseriesRecordBulkInsertTestCase(TestTimeseriesMixin, TestCase):

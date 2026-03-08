@@ -12,7 +12,7 @@ class GareaTestCase(APITestCase):
         self.garea = baker.make(models.Garea)
 
     def test_get_garea(self):
-        r = self.client.get("/api/gareas/{}/".format(self.garea.id))
+        r = self.client.get("/api/gareas/{}/".format(self.garea.pk))
         self.assertEqual(r.status_code, 200)
 
 
@@ -22,7 +22,7 @@ class OrganizationTestCase(APITestCase):
         self.organization = baker.make(models.Organization)
 
     def test_get_organization(self):
-        r = self.client.get("/api/organizations/{}/".format(self.organization.id))
+        r = self.client.get("/api/organizations/{}/".format(self.organization.pk))
         self.assertEqual(r.status_code, 200)
 
 
@@ -32,7 +32,7 @@ class PersonTestCase(APITestCase):
         self.person = baker.make(models.Person)
 
     def test_get_person(self):
-        r = self.client.get("/api/persons/{}/".format(self.person.id))
+        r = self.client.get("/api/persons/{}/".format(self.person.pk))
         self.assertEqual(r.status_code, 200)
 
 
@@ -42,7 +42,7 @@ class EventTypeTestCase(APITestCase):
         self.event_type = baker.make(models.EventType)
 
     def test_get_event_type(self):
-        r = self.client.get("/api/eventtypes/{}/".format(self.event_type.id))
+        r = self.client.get("/api/eventtypes/{}/".format(self.event_type.pk))
         self.assertEqual(r.status_code, 200)
 
 
@@ -54,7 +54,7 @@ class VariableTestCase(APITestCase):
         self.variable.translations.create(language_code="el", descr="Θερμοκρασία")
 
     def test_get_variable(self):
-        r = self.client.get("/api/variables/{}/".format(self.variable.id))
+        r = self.client.get("/api/variables/{}/".format(self.variable.pk))
         self.assertEqual(r.status_code, 200)
         self.assertEqual(
             r.json()["translations"],
@@ -76,7 +76,7 @@ class UnitOfMeasurementTestCase(APITestCase):
         self.unit_of_measurement = baker.make(models.UnitOfMeasurement)
 
     def test_get_unit_of_measurement(self):
-        r = self.client.get("/api/units/{}/".format(self.unit_of_measurement.id))
+        r = self.client.get("/api/units/{}/".format(self.unit_of_measurement.pk))
         self.assertEqual(r.status_code, 200)
 
 
@@ -89,7 +89,7 @@ class GentityEventTestCase(APITestCase):
         self.gentity_file = baker.make(models.GentityEvent, gentity=self.station)
 
     def test_list_status_code(self):
-        r = self.client.get("/api/stations/{}/events/".format(self.station.id))
+        r = self.client.get("/api/stations/{}/events/".format(self.station.pk))
         self.assertEqual(r.status_code, 200)
 
 

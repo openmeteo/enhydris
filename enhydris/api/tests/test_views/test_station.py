@@ -80,7 +80,7 @@ class StationCreateTestCase(APITestCase):
             "/api/stations/",
             data={
                 "name": "Hobbiton",
-                "owner": self.bilbo.id,
+                "owner": self.bilbo.pk,
                 "geom": "SRID=4326;POINT (20.94565 39.12102)",
             },
         )
@@ -101,7 +101,7 @@ class StationCreateTestCase(APITestCase):
         permission = Permission.objects.get(
             content_type__app_label="enhydris", codename="add_station"
         )
-        self.user.user_permissions.add(permission)
+        self.user.user_permissions.add(permission)  # type: ignore
         self.user.save()
         self.client.force_authenticate(user=self.user)
         response = self._create_station()
@@ -127,21 +127,21 @@ class StationUpdateAndDeleteTestCase(APITestCase):
 
     def _put_station(self):
         return self.client.put(
-            "/api/stations/{}/".format(self.station.id),
+            "/api/stations/{}/".format(self.station.pk),
             data={
                 "name": "Hobbiton",
-                "owner": self.bilbo.id,
+                "owner": self.bilbo.pk,
                 "geom": "SRID=4326;POINT (20.94565 39.12102)",
             },
         )
 
     def _patch_station(self):
         return self.client.patch(
-            "/api/stations/{}/".format(self.station.id), data={"name": "Hobbiton"}
+            "/api/stations/{}/".format(self.station.pk), data={"name": "Hobbiton"}
         )
 
     def _delete_station(self):
-        return self.client.delete("/api/stations/{}/".format(self.station.id))
+        return self.client.delete("/api/stations/{}/".format(self.station.pk))
 
     def test_unauthenticated_user_is_denied_permission_to_put_station(self):
         response = self._put_station()
@@ -224,7 +224,7 @@ class StationCsvTestCase(APITestCase):
         self._create_timeseries_group(self.station_agios_athanasios, "Temperature")
         self._create_timeseries_group(self.station_agios_athanasios, "Humidity")
 
-    def _create_timeseries_group(self, station, variable_descr):
+    def _create_timeseries_group(self, station: models.Station, variable_descr: str):
         timeseries_group = baker.make(models.TimeseriesGroup, gentity=station)
         timeseries_group.variable.translations.create(
             language_code="en", descr=variable_descr

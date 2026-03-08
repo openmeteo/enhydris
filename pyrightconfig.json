@@ -1,0 +1,15 @@
+{
+    "typeCheckingMode": "basic",
+    "reportAttributeAccessIssue": "none",
+    "exclude": [
+        "**/.git",
+        "**/__pycache__",
+        "**/.mypy_cache",
+        "**/.pytest_cache",
+        "**/.venv",
+        "**/venv",
+        "**/node_modules",
+        "**/dist",
+        "**/build"
+    ]
+}

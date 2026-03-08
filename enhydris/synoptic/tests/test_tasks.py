@@ -15,7 +15,7 @@ from django.test import TestCase, override_settings
 
 import numpy as np
 from bs4 import BeautifulSoup
-from django_selenium_clean import PageElement
+from django_selenium_clean import PageElement  # type: ignore
 from freezegun import freeze_time
 from selenium.webdriver.common.by import By
 
@@ -89,7 +89,7 @@ class ChartTestCase(ClearCacheMixin, TestCase):
         create_static_files()
 
     @classmethod
-    def tearDownClass(self):
+    def tearDownClass(cls):
         settings.TEST_MATPLOTLIB = False
         super().tearDownClass()
 
@@ -175,8 +175,10 @@ class StationReportTestCase(ClearCacheMixin, TestCase):
         )
         with open(filename) as f:
             cls.soup = BeautifulSoup(f, "html.parser")
-        cls.labels = cls.soup.find("dl").find_all("dt")
-        cls.values = cls.soup.find("dl").find_all("dd")
+        dl = cls.soup.find("dl")
+        assert dl is not None
+        cls.labels = dl.find_all("dt")
+        cls.values = dl.find_all("dd")
 
     def _check(self, i, expected_label, expected_value):
         self.assertEqual(self.labels[i].contents[0].strip(), expected_label)
@@ -218,11 +220,12 @@ class AsciiSystemLocaleTestCase(ClearCacheMixin, AssertHtmlContainsMixin, TestCa
 
 
 class EarlyWarningTestMixin:
-    def _set_limits(self, low_temperature, high_gust):
-        self.data.stsg1_4.high_limit = high_gust
-        self.data.stsg1_4.save()
-        self.data.stsg1_2.low_limit = low_temperature
-        self.data.stsg1_2.save()
+    @staticmethod
+    def _set_limits(data: TestData, low_temperature, high_gust):
+        data.stsg1_4.high_limit = high_gust
+        data.stsg1_4.save()
+        data.stsg1_2.low_limit = low_temperature
+        data.stsg1_2.save()
 
 
 class MapTestCaseMixin(EarlyWarningTestMixin):
@@ -346,7 +349,7 @@ class DateFormatTestCase(MapTestCaseMixin, SeleniumTestCase):
 )
 class ValueStatusTestCase(MapTestCaseMixin, SeleniumTestCase):
     def test_value_status(self):
-        self._set_limits(low_temperature=17.1, high_gust=4)
+        self._set_limits(self.data, low_temperature=17.1, high_gust=4)
         self._get_synoptic_page()
         self.layer_control.wait_until_is_displayed()
         self.layer_control.click()
@@ -397,7 +400,9 @@ class EmptyTimeseriesTestCase(ClearCacheMixin, TestCase):
     def setUp(self):
         self.data = TestData()
         settings.TEST_MATPLOTLIB = True
-        self.data.tsg_komboti_temperature.default_timeseries.set_data(StringIO(""))
+        default_timeseries = self.data.tsg_komboti_temperature.default_timeseries
+        assert default_timeseries is not None
+        default_timeseries.set_data(StringIO(""))
         create_static_files()
 
     def test_chart(self):
@@ -418,7 +423,9 @@ class TimeseriesWithOneRecordTestCase(ClearCacheMixin, TestCase):
     def setUp(self):
         self.data = TestData()
         settings.TEST_MATPLOTLIB = True
-        self.data.tsg_komboti_temperature.default_timeseries.set_data(
+        default_timeseries = self.data.tsg_komboti_temperature.default_timeseries
+        assert default_timeseries is not None
+        default_timeseries.set_data(
             StringIO("2015-10-22 15:10,0,\n"), default_timezone="Etc/GMT-2"
         )
         create_static_files()
@@ -443,7 +450,7 @@ class EmailTestCase(ClearCacheMixin, TestCase, EarlyWarningTestMixin):
         self.data = TestData()
 
     def test_sends_email_if_emails_are_registered(self):
-        self._set_limits(low_temperature=17.1, high_gust=4)
+        self._set_limits(self.data, low_temperature=17.1, high_gust=4)
         models.EarlyWarningEmail.objects.create(
             synoptic_group=self.data.sg1, email="someone@blackhole.com"
         )
@@ -451,7 +458,7 @@ class EmailTestCase(ClearCacheMixin, TestCase, EarlyWarningTestMixin):
         self.assertEqual(len(mail.outbox), 1)
 
     def test_does_not_send_email_if_no_emails_are_registered(self):
-        self._set_limits(low_temperature=17.1, high_gust=4)
+        self._set_limits(self.data, low_temperature=17.1, high_gust=4)
         create_static_files()
         self.assertEqual(len(mail.outbox), 0)
 
@@ -459,7 +466,7 @@ class EmailTestCase(ClearCacheMixin, TestCase, EarlyWarningTestMixin):
         models.EarlyWarningEmail.objects.create(
             synoptic_group=self.data.sg1, email="someone@blackhole.com"
         )
-        self._set_limits(low_temperature=10, high_gust=5)
+        self._set_limits(self.data, low_temperature=10, high_gust=5)
         create_static_files()
         self.assertEqual(len(mail.outbox), 0)
 
@@ -473,7 +480,7 @@ class EmailContentTestCase(ClearCacheMixin, TestCase, EarlyWarningTestMixin):
     @classmethod
     def setUpTestData(cls):
         cls.data = TestData()
-        cls._set_limits(cls, low_temperature=17.1, high_gust=4)
+        cls._set_limits(cls.data, low_temperature=17.1, high_gust=4)
         models.EarlyWarningEmail.objects.create(
             synoptic_group=cls.data.sg1, email="someone@blackhole.com"
         )

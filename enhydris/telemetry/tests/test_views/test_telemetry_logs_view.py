@@ -47,7 +47,11 @@ class TelemetryLogListViewTestCase(TelemetryLogViewTestCase):
     def test_links_to_detail_page(self):
         log_id = self.telemetry_log.id
         soup = BeautifulSoup(self.response.content, "html.parser")
-        target = soup.find("div", class_="list-group-item").find("a").get("href")
+        div_element = soup.find("div", class_="list-group-item")
+        assert div_element is not None
+        a_element = div_element.find("a")
+        assert a_element is not None
+        target = a_element.get("href")
         self.assertEqual(target, f"{self.url}{log_id}/")
 
     def test_no_message_about_no_logs(self):
@@ -100,7 +104,9 @@ class TelemetryLogDetailViewTestCase(TelemetryLogViewTestCase):
 
     def test_back_button(self):
         soup = BeautifulSoup(self.response.content, "html.parser")
-        target = soup.find(id="back-button").get("href")
+        back_button = soup.find(id="back-button")
+        assert back_button is not None
+        target = back_button.get("href")
         station_id = self.telemetry.station_id
         self.assertEqual(target, f"/stations/{station_id}/telemetry/logs/")
 

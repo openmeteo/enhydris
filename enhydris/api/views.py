@@ -32,7 +32,7 @@ from .csv import prepare_csv
 class StationViewSet(StationListViewMixin, ModelViewSet[models.Station]):
     serializer_class = serializers.StationSerializer
 
-    def get_permissions(self):
+    def get_permissions(self) -> list[Any]:
         pc: list[Any] = [permissions.SatisfiesAuthenticationRequiredSetting]
         if self.action == "create":
             pc.append(permissions.CanCreateStation)
@@ -111,17 +111,12 @@ class GentityEventViewSet(ReadOnlyModelViewSet[models.GentityEvent]):
         return models.GentityEvent.objects.filter(gentity_id=self.kwargs["station_id"])
 
 
-class GentityFileViewSet(ReadOnlyModelViewSet[models.GentityFile]):
-    serializer_class = serializers.GentityFileSerializer
-
-    def get_queryset(self):
-        return models.GentityFile.objects.filter(gentity_id=self.kwargs["station_id"])
-
+class GentityFileViewSetMixin:
     @action(detail=True, methods=["get"])
     def content(
         self, request: Request, pk: int | None = None, *, station_id: int | None = None
     ):
-        gfile = self.get_object()
+        gfile = self.get_object()  # type: ignore
         try:
             gfile_content_file = gfile.content.file
             filename = gfile_content_file.name
@@ -140,10 +135,21 @@ class GentityFileViewSet(ReadOnlyModelViewSet[models.GentityFile]):
         return response
 
 
-class GentityImageViewSet(GentityFileViewSet):
-    serializer_class = serializers.GentityImageSerializer
+class GentityFileViewSet(
+    ReadOnlyModelViewSet[models.GentityFile], GentityFileViewSetMixin
+):
+    serializer_class = serializers.GentityFileSerializer
 
-    def get_queryset(self):  # type: ignore
+    def get_queryset(self):
+        return models.GentityFile.objects.filter(gentity_id=self.kwargs["station_id"])
+
+
+class GentityImageViewSet(
+    ReadOnlyModelViewSet[models.GentityFile], GentityFileViewSetMixin
+):
+    serializer_class = serializers.GentityImageSerializer  # type: ignore
+
+    def get_queryset(self):
         return models.GentityImage.objects.filter(gentity_id=self.kwargs["station_id"])
 
 
@@ -289,7 +295,7 @@ class TimeseriesViewSet(ModelViewSet[models.Timeseries]):
         self.check_object_permissions(request, timeseries)
         try:
             serializer = serializers.TimeseriesRecordChartSerializer(
-                self._get_chart_data(request, timeseries), many=True
+                self._get_chart_data(request, timeseries), many=True  # type: ignore
             )
         except ValueError as e:
             return HttpResponse(
@@ -334,10 +340,11 @@ class TimeseriesViewSet(ModelViewSet[models.Timeseries]):
     def _get_stats_for_interval(
         self, df: pd.DataFrame, start_time: dt.datetime, end_time: dt.datetime
     ):
-        df_part = df[start_time:end_time]
-        min_value = df_part["value"].min()
-        max_value = df_part["value"].max()
-        mean_value = df_part["value"].mean()
+        df_part = df[start_time:end_time]  # type: ignore
+        min_value: float | None = df_part["value"].min()
+        max_value: float | None = df_part["value"].max()
+        mean_value: float | None = df_part["value"].mean()
+        assert min_value is not None
         if np.isnan(min_value):
             min_value = max_value = mean_value = None
         return {

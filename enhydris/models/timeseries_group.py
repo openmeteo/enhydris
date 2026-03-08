@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import datetime as dt
 from typing import TYPE_CHECKING
 
 from django.conf import settings
@@ -88,18 +87,14 @@ class Variable(models.Model):
 
 
 class VariableTranslation(models.Model):
-    variable: models.ForeignKey[Variable, Variable] = models.ForeignKey(
+    variable = models.ForeignKey(
         Variable,
         on_delete=models.CASCADE,
         related_name="translations",
         verbose_name=_("Variable"),
     )
-    language_code: models.CharField[str, str] = models.CharField(
-        max_length=15, verbose_name=_("Language")
-    )
-    descr: models.CharField[str, str] = models.CharField(
-        max_length=200, verbose_name=_("Description")
-    )
+    language_code = models.CharField(max_length=15, verbose_name=_("Language"))
+    descr = models.CharField(max_length=200, verbose_name=_("Description"))
 
     class Meta:
         unique_together = (
@@ -111,17 +106,15 @@ class VariableTranslation(models.Model):
 
 
 class UnitOfMeasurement(Lookup):
-    symbol: models.CharField[str, str] = models.CharField(
-        max_length=50, verbose_name=_("Symbol")
-    )
+    symbol = models.CharField(max_length=50, verbose_name=_("Symbol"))
     variables = models.ManyToManyField(Variable)
 
     def __str__(self):
         if self.symbol:
             return self.symbol
-        return str(self.id)
+        return str(self.pk)
 
-    class Meta:
+    class Meta:  # type: ignore
         verbose_name = _("Unit of measurement")
         verbose_name_plural = _("Units of measurement")
         ordering = ["symbol"]
@@ -130,23 +123,17 @@ class UnitOfMeasurement(Lookup):
 class TimeseriesGroup(models.Model):
     timeseries_set: Manager["Timeseries"]
 
-    last_modified: models.DateTimeField[dt.datetime, dt.datetime] = (
-        models.DateTimeField(default=now, null=True, editable=False)
-    )
-    gentity: models.ForeignKey[Gentity, Gentity] = models.ForeignKey(
-        Gentity, on_delete=models.CASCADE
-    )
-    variable: models.ForeignKey[Variable, Variable] = models.ForeignKey(
+    last_modified = models.DateTimeField(default=now, null=True, editable=False)
+    gentity = models.ForeignKey(Gentity, on_delete=models.CASCADE)
+    variable = models.ForeignKey(
         Variable, on_delete=models.CASCADE, verbose_name=_("Variable")
     )
-    unit_of_measurement: models.ForeignKey[UnitOfMeasurement, UnitOfMeasurement] = (
-        models.ForeignKey(
-            UnitOfMeasurement,
-            on_delete=models.CASCADE,
-            verbose_name=_("Unit of measurement"),
-        )
+    unit_of_measurement = models.ForeignKey(
+        UnitOfMeasurement,
+        on_delete=models.CASCADE,
+        verbose_name=_("Unit of measurement"),
     )
-    name: models.CharField[str, str] = models.CharField(
+    name = models.CharField(
         max_length=200,
         blank=True,
         help_text=_(
@@ -157,10 +144,10 @@ class TimeseriesGroup(models.Model):
         ),
         verbose_name=_("Name"),
     )
-    hidden: models.BooleanField[bool, bool] = models.BooleanField(
+    hidden = models.BooleanField(
         null=False, blank=False, default=False, verbose_name=_("Hidden")
     )
-    precision: models.SmallIntegerField[int, int] = models.SmallIntegerField(
+    precision = models.SmallIntegerField(
         help_text=_(
             "The number of decimal digits to which the values of the time series "
             "will be rounded. It's usually positive, but it can be zero or negative; "
@@ -172,9 +159,7 @@ class TimeseriesGroup(models.Model):
         ),
         verbose_name=_("Precision"),
     )
-    remarks: models.TextField[str, str] = models.TextField(
-        blank=True, verbose_name=_("Remarks")
-    )
+    remarks = models.TextField(blank=True, verbose_name=_("Remarks"))
 
     def get_name(self):
         if self.name:
@@ -213,7 +198,7 @@ class TimeseriesGroup(models.Model):
                 return self.default_timeseries.start_date
 
         return cache.get_or_set(
-            f"timeseries_group_start_date_{self.id}", get_start_date
+            f"timeseries_group_start_date_{self.pk}", get_start_date
         )
 
     @property
@@ -222,4 +207,4 @@ class TimeseriesGroup(models.Model):
             if self.default_timeseries:
                 return self.default_timeseries.end_date
 
-        return cache.get_or_set(f"timeseries_group_end_date_{self.id}", get_end_date)
+        return cache.get_or_set(f"timeseries_group_end_date_{self.pk}", get_end_date)

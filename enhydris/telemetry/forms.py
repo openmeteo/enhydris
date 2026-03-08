@@ -47,6 +47,7 @@ class ConnectionDataForm(FormBase):
         from enhydris.telemetry import TelemetryError
 
         cleaned_data = super().clean()
+        assert cleaned_data is not None
         try:
             telemetry = Telemetry(
                 username=cleaned_data.get("username"),
@@ -120,6 +121,7 @@ class ChooseSensorForm(FormBase):
 
     def clean(self):
         cleaned_data = super().clean()
+        assert cleaned_data is not None
         seen_timeseries_group_ids = set()
         for sensor_id, timeseries_group_id in cleaned_data.items():
             if not timeseries_group_id:

@@ -148,6 +148,7 @@ class TimeseriesGroupMigrator:
             timeseries = self._get_only_timeseries(timeseries_group)
             for attr in self.ATTRIBUTES_TO_MOVE:
                 setattr(timeseries, attr, getattr(timeseries_group, attr))
+            assert timeseries is not None
             timeseries.save()
 
     def _get_only_timeseries(self, timeseries_group):

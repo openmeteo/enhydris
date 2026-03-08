@@ -26,6 +26,7 @@ class InfluxConnectionDataForm(telemetry_forms.ConnectionDataForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        assert cleaned_data is not None
         cleaned_data["additional_config"] = {
             "bucket": cleaned_data.get("_bucket"),
             "measurement": cleaned_data.get("_measurement"),

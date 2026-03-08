@@ -6,8 +6,10 @@ import os.path
 import subprocess
 import sys
 import zoneinfo
-from io import StringIO
+from io import StringIO, TextIOBase
 from traceback import print_tb
+from types import TracebackType
+from typing import Any
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import IntegrityError, models
@@ -17,7 +19,7 @@ import enhydris
 from enhydris.models import Station, Timeseries, TimeseriesGroup
 
 
-def fix_zone_name(timezone):
+def fix_zone_name(timezone: str):
     if timezone.startswith("Etc/GMT+"):
         return "UTC-" + timezone[8:]
     elif timezone.startswith("Etc/GMT-"):
@@ -26,7 +28,7 @@ def fix_zone_name(timezone):
         return timezone
 
 
-def _get_type_choices():
+def _get_type_choices() -> list[tuple[str, str]]:
     from enhydris.telemetry import drivers
 
     return sorted([(x, drivers[x].name) for x in drivers], key=lambda x: x[1])
@@ -38,6 +40,8 @@ timezone_choices.sort()
 
 
 class Telemetry(models.Model):
+    sensor_set: models.QuerySet[Sensor]
+
     station = models.OneToOneField(Station, on_delete=models.CASCADE)
     type = models.CharField(
         max_length=30,
@@ -72,8 +76,8 @@ class Telemetry(models.Model):
     )
     device_locator = models.CharField(max_length=200, blank=True)
     username = models.CharField(max_length=200, blank=True)
-    password: models.CharField[str, str] = models.CharField(blank=True)
-    remote_station_id: models.CharField[str, str] = models.CharField(blank=True)
+    password = models.CharField(blank=True)
+    remote_station_id = models.CharField(blank=True)
 
     additional_config = models.JSONField(default=dict)
 
@@ -92,15 +96,17 @@ class Telemetry(models.Model):
             TelemetryLogMessage.log(self)
 
     def _setup_api_client(self):
-        self.api_client = enhydris.telemetry.drivers[self.type](self)
+        from enhydris.telemetry import drivers
+
+        self.api_client = drivers[self.type](self)
 
     def _fetch_sensors(self):
         for sensor in self.sensor_set.all():
             self._fetch_sensor(sensor)
 
-    def _fetch_sensor(self, sensor):
-        timeseries, created = Timeseries.objects.get_or_create(
-            timeseries_group_id=sensor.timeseries_group_id, type=Timeseries.INITIAL
+    def _fetch_sensor(self, sensor: Sensor):
+        timeseries, _created = Timeseries.objects.get_or_create(
+            timeseries_group_id=sensor.timeseries_group.pk, type=Timeseries.INITIAL
         )
         timeseries_end_date = timeseries.end_date
         measurements = self.api_client.get_measurements(
@@ -111,7 +117,7 @@ class Telemetry(models.Model):
             measurements, default_timezone=self.data_timezone
         )
 
-    def _cleanup_measurements(self, measurements):
+    def _cleanup_measurements(self, measurements: TextIOBase):
         result = StringIO()
         prev_timestamp = dt.datetime(1, 1, 1, 0, 0)
         measurements.seek(0)
@@ -129,7 +135,7 @@ class Telemetry(models.Model):
         if self.data_timezone not in [choice[0] for choice in timezone_choices]:
             raise IntegrityError(f"'{self.data_timezone}' is not a valid time zone")
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any):
         self._check_data_timezone()
         super().save(*args, **kwargs)
 
@@ -159,32 +165,44 @@ class TelemetryLogMessage(models.Model):
         ordering = ["telemetry", "-timestamp"]
 
     @classmethod
-    def log(cls, telemetry):
+    def log(cls, telemetry: Telemetry) -> None:
         """Logs the current exception."""
-        cls._exception_name = sys.exc_info()[0].__name__
-        cls._message = str(sys.exc_info()[1])
-        cls._traceback = cls._get_formatted_traceback(sys.exc_info()[2])
-        cls._enhydris_commit_id = cls.get_enhydris_commit_id_from_git()
-        cls._telemetry = telemetry
+        exc_info = sys.exc_info()
+        assert exc_info[0] is not None
+        assert exc_info[2] is not None
 
-        self = cls._log_to_db()
+        self = cls._log_to_db(
+            telemetry=telemetry,
+            exception_name=exc_info[0].__name__,
+            message=str(exc_info[1]),
+            traceback_text=cls._get_formatted_traceback(exc_info[2]),
+            enhydris_commit_id=cls.get_enhydris_commit_id_from_git(),
+        )
         self._log_to_logger()
 
     @staticmethod
-    def _get_formatted_traceback(traceback_info):
+    def _get_formatted_traceback(traceback_info: TracebackType):
         formatted_traceback = StringIO()
         print_tb(traceback_info, file=formatted_traceback)
         return formatted_traceback.getvalue()
 
     @classmethod
-    def _log_to_db(cls):
+    def _log_to_db(
+        cls,
+        *,
+        telemetry: Telemetry,
+        exception_name: str,
+        message: str,
+        traceback_text: str,
+        enhydris_commit_id: str,
+    ) -> TelemetryLogMessage:
         return cls.objects.create(
-            telemetry=cls._telemetry,
-            exception_name=cls._exception_name,
-            message=cls._message,
-            traceback=cls._traceback,
+            telemetry=telemetry,
+            exception_name=exception_name,
+            message=message,
+            traceback=traceback_text,
             enhydris_version=enhydris.__version__,
-            enhydris_commit_id=cls._enhydris_commit_id,
+            enhydris_commit_id=enhydris_commit_id,
         )
 
     def _log_to_logger(self):

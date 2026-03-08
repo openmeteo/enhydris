@@ -31,7 +31,7 @@ class CurveInterpolationTestCase(TestCase):
 
     def test_update(self):
         baker.make(CurveInterpolation, timeseries_group=self.timeseries_group1)
-        curve_interpolation = CurveInterpolation.objects.first()
+        curve_interpolation = CurveInterpolation.objects.get()
         curve_interpolation.timeseries_group = self.timeseries_group2
         curve_interpolation.save()
         self.assertEqual(
@@ -40,7 +40,7 @@ class CurveInterpolationTestCase(TestCase):
 
     def test_delete(self):
         baker.make(CurveInterpolation, timeseries_group=self.timeseries_group1)
-        curve_interpolation = CurveInterpolation.objects.first()
+        curve_interpolation = CurveInterpolation.objects.get()
         curve_interpolation.delete()
         self.assertEqual(CurveInterpolation.objects.count(), 0)
 
@@ -121,16 +121,16 @@ class CurvePeriodTestCase(TestCase):
 
     def test_update(self):
         baker.make(CurvePeriod)
-        curve_period = CurvePeriod.objects.first()
+        curve_period = CurvePeriod.objects.get()
         curve_period.start_date = dt.date(1963, 1, 1)
         curve_period.end_date = dt.date(1963, 12, 1)
         curve_period.save()
-        curve_period = CurvePeriod.objects.first()
+        curve_period = CurvePeriod.objects.get()
         self.assertEqual(curve_period.start_date, dt.date(1963, 1, 1))
 
     def test_delete(self):
         baker.make(CurvePeriod)
-        curve_period = CurvePeriod.objects.first()
+        curve_period = CurvePeriod.objects.get()
         curve_period.delete()
         self.assertEqual(CurvePeriod.objects.count(), 0)
 
@@ -161,15 +161,15 @@ class CurvePointTestCase(TestCase):
 
     def test_update(self):
         baker.make(CurvePoint)
-        point = CurvePoint.objects.first()
+        point = CurvePoint.objects.get()
         point.x = 2.718
         point.save()
-        point = CurvePoint.objects.first()
+        point = CurvePoint.objects.get()
         self.assertAlmostEqual(point.x, 2.718)
 
     def test_delete(self):
         baker.make(CurvePoint)
-        point = CurvePoint.objects.first()
+        point = CurvePoint.objects.get()
         point.delete()
         self.assertEqual(CurvePoint.objects.count(), 0)
 

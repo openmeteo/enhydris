@@ -83,7 +83,7 @@ class TimeseriesSerializerTestCase(APITestCase):
         serializer = TimeseriesSerializer(
             data={
                 "type": "Initial",
-                "timeseries_group": self.timeseries_group.id,
+                "timeseries_group": self.timeseries_group.pk,
                 "time_step": "",
             }
         )
@@ -94,7 +94,7 @@ class TimeseriesSerializerTestCase(APITestCase):
         serializer = TimeseriesSerializer(
             data={
                 "type": "Checked",
-                "timeseries_group": self.timeseries_group.id,
+                "timeseries_group": self.timeseries_group.pk,
                 "time_step": "",
             }
         )
@@ -144,7 +144,7 @@ class TimeseriesSerializerUniqueTypeTestCase(APITestCase):
         return TimeseriesSerializer(
             data={
                 "type": type,
-                "timeseries_group": self.timeseries_group.id,
+                "timeseries_group": self.timeseries_group.pk,
                 "time_step": "H",
             }
         )

@@ -219,14 +219,16 @@ class TestData:
         self._create_timeseries_for_agios_temperature()
         self._create_timeseries_for_agios_wind_speed()
 
-    def _create_timeseries_object(self, timeseries_group):
-        baker.make(
+    def _create_timeseries_object(
+        self, timeseries_group: TimeseriesGroup
+    ) -> Timeseries:
+        return baker.make(
             Timeseries, timeseries_group=timeseries_group, type=Timeseries.INITIAL
         )
 
     def _create_timeseries_for_komboti_rain(self):
-        self._create_timeseries_object(self.tsg_komboti_rain)
-        self.tsg_komboti_rain.default_timeseries.set_data(
+        default_timeseries = self._create_timeseries_object(self.tsg_komboti_rain)
+        default_timeseries.set_data(
             StringIO(
                 textwrap.dedent(
                     """\
@@ -240,8 +242,10 @@ class TestData:
         )
 
     def _create_timeseries_for_komboti_temperature(self):
-        self._create_timeseries_object(self.tsg_komboti_temperature)
-        self.tsg_komboti_temperature.default_timeseries.set_data(
+        default_timeseries = self._create_timeseries_object(
+            self.tsg_komboti_temperature
+        )
+        default_timeseries.set_data(
             StringIO(
                 textwrap.dedent(
                     """\
@@ -255,8 +259,8 @@ class TestData:
         )
 
     def _create_timeseries_for_komboti_wind_speed(self):
-        self._create_timeseries_object(self.tsg_komboti_wind_speed)
-        self.tsg_komboti_wind_speed.default_timeseries.set_data(
+        default_timeseries = self._create_timeseries_object(self.tsg_komboti_wind_speed)
+        default_timeseries.set_data(
             StringIO(
                 textwrap.dedent(
                     """\
@@ -270,8 +274,8 @@ class TestData:
         )
 
     def _create_timeseries_for_komboti_wind_gust(self):
-        self._create_timeseries_object(self.tsg_komboti_wind_gust)
-        self.tsg_komboti_wind_gust.default_timeseries.set_data(
+        default_timeseries = self._create_timeseries_object(self.tsg_komboti_wind_gust)
+        default_timeseries.set_data(
             StringIO(
                 textwrap.dedent(
                     """\
@@ -285,8 +289,8 @@ class TestData:
         )
 
     def _create_timeseries_for_agios_rain(self):
-        self._create_timeseries_object(self.tsg_agios_rain)
-        self.tsg_agios_rain.default_timeseries.set_data(
+        default_timeseries = self._create_timeseries_object(self.tsg_agios_rain)
+        default_timeseries.set_data(
             StringIO(
                 textwrap.dedent(
                     """\
@@ -301,8 +305,8 @@ class TestData:
         )
 
     def _create_timeseries_for_agios_temperature(self):
-        self._create_timeseries_object(self.tsg_agios_temperature)
-        self.tsg_agios_temperature.default_timeseries.set_data(
+        default_timeseries = self._create_timeseries_object(self.tsg_agios_temperature)
+        default_timeseries.set_data(
             StringIO(
                 textwrap.dedent(
                     """\
@@ -325,8 +329,8 @@ class TestData:
         # many ticks). So we add a time series full of nulls to test this case. It still
         # has the problem that in the report it shows "nan m/s" instead of something
         # more elegant, but we'll fix this another time.
-        self._create_timeseries_object(self.tsg_agios_wind_speed)
-        self.tsg_agios_wind_speed.default_timeseries.set_data(
+        default_timeseries = self._create_timeseries_object(self.tsg_agios_wind_speed)
+        default_timeseries.set_data(
             StringIO(
                 textwrap.dedent(
                     """\

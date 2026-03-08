@@ -9,7 +9,7 @@ from django.contrib.sites.models import Site
 from django.test import TestCase, override_settings
 
 from bs4 import BeautifulSoup
-from django_selenium_clean import PageElement
+from django_selenium_clean import PageElement  # type: ignore
 from model_bakery import baker
 from selenium.webdriver.common.by import By
 
@@ -20,7 +20,7 @@ from enhydris.tests import SeleniumTestCase, TimeseriesDataMixin
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class StationListTestCase(TestCase):
     @staticmethod
-    def _create_station(name, x, y, srid=4326):
+    def _create_station(name, x, y, srid: int | None = 4326):
         baker.make(
             Station,
             name=name,
@@ -56,15 +56,19 @@ class StationListTestCase(TestCase):
     def test_next_page_url(self):
         response = self.client.get("/?q=t")
         soup = BeautifulSoup(response.content, "html.parser")
-        next_page_url = soup.find("a", id="next-page").get("href")
+        next_page_element = soup.find("a", id="next-page")
+        assert next_page_element is not None
+        next_page_url = next_page_element.get("href")
         self.assertEqual(next_page_url, "?page=2&q=t")
 
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=2)
     def test_previous_page_url(self):
         response = self.client.get("/?q=t&page=2")
         soup = BeautifulSoup(response.content, "html.parser")
-        next_page_url = soup.find("a", id="previous-page").get("href")
-        self.assertEqual(next_page_url, "?page=1&q=t")
+        previous_page_element = soup.find("a", id="previous-page")
+        assert previous_page_element is not None
+        previous_page_url = previous_page_element.get("href")
+        self.assertEqual(previous_page_url, "?page=1&q=t")
 
     @override_settings(ENHYDRIS_STATIONS_PER_PAGE=100)
     def test_one_page(self):
@@ -134,7 +138,12 @@ class StationDetailImagesTestCase(TestCase):
     def test_first_image_is_featured_when_no_image_is_marked_as_featured(self):
         response = self.client.get(f"/stations/{self.station.id}/")
         soup = BeautifulSoup(response.content, "html.parser")
-        img = soup.find("div", class_="featured-image").a.img
+        featured_image_div = soup.find("div", class_="featured-image")
+        assert featured_image_div is not None
+        a = featured_image_div.a
+        assert a is not None
+        img = a.img
+        assert img is not None
         self.assertEqual(img["src"], "/media/image1.png")
 
     def test_featured_image_is_featured(self):
@@ -142,7 +151,12 @@ class StationDetailImagesTestCase(TestCase):
         self.image2.save()
         response = self.client.get(f"/stations/{self.station.id}/")
         soup = BeautifulSoup(response.content, "html.parser")
-        img = soup.find("div", class_="featured-image").a.img
+        featured_image_div = soup.find("div", class_="featured-image")
+        assert featured_image_div is not None
+        a = featured_image_div.a
+        assert a is not None
+        img = a.img
+        assert img is not None
         self.assertEqual(img["src"], "/media/image2.png")
 
     def test_first_non_featured_image_when_one_is_featured(self):
@@ -150,7 +164,12 @@ class StationDetailImagesTestCase(TestCase):
         self.image2.save()
         response = self.client.get(f"/stations/{self.station.id}/")
         soup = BeautifulSoup(response.content, "html.parser")
-        img = soup.find("div", class_="swiper-wrapper").a.img
+        swiper_wrapper_div = soup.find("div", class_="swiper-wrapper")
+        assert swiper_wrapper_div is not None
+        a = swiper_wrapper_div.a
+        assert a is not None
+        img = a.img
+        assert img is not None
         self.assertEqual(img["src"], "/media/image1.png")
 
 

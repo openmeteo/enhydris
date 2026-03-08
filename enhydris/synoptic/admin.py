@@ -1,3 +1,5 @@
+from typing import cast
+
 from django import forms
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
@@ -21,7 +23,7 @@ class StationInline(admin.TabularInline):
         foreign key pull-down menus in the inline.
         """
         formset = super().get_formset(request, obj, **kwargs)
-        form = formset.form
+        form = cast(type[forms.ModelForm], formset).form
         widget = form.base_fields["station"].widget
         widget.can_add_related = False
         widget.can_change_related = False
@@ -102,6 +104,7 @@ class SynopticTimeseriesGroupInline(admin.StackedInline):
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name in ("timeseries_group", "group_with"):
+            assert request.resolver_match is not None
             synopticgroupstation_id = int(request.resolver_match.kwargs["object_id"])
             station = SynopticGroupStation.objects.get(
                 id=synopticgroupstation_id

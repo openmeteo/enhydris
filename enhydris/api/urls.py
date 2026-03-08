@@ -1,11 +1,11 @@
 from django.contrib.auth import views as auth_views
-from django.urls import include, path
+from django.urls import URLPattern, URLResolver, include, path
 from rest_framework.routers import DefaultRouter
 from rest_framework.urlpatterns import format_suffix_patterns
 
 from . import views
 
-urlpatterns = [
+urlpatterns: list[URLPattern | URLResolver] = [
     path("auth/", include("dj_rest_auth.urls")),
     path(
         "auth/password/reset/confirm/<str:uidb64>/<str:token>/",

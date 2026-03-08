@@ -3,7 +3,7 @@ import datetime as dt
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from model_bakery import baker
 
 import enhydris.models
@@ -163,7 +163,7 @@ class TimeseriesGroupFormCreatesRangeCheckTestCase(TimeseriesGroupFormTestCaseBa
     def setUp(self):
         super().setUp()
         self._get_response()
-        self.range_check = models.RangeCheck.objects.first()
+        self.range_check = models.RangeCheck.objects.get()
 
     def _get_response(self):
         data = {
@@ -265,19 +265,27 @@ class TimeseriesGroupFormRangeCheckInitialValuesTestCase(
         self.soup = BeautifulSoup(self.response.content, "html.parser")
 
     def test_lower_bound(self):
-        value = self.soup.find(id="id_timeseriesgroup_set-0-lower_bound")["value"]
+        element = self.soup.find(id="id_timeseriesgroup_set-0-lower_bound")
+        assert isinstance(element, Tag)
+        value = element["value"]
         self.assertEqual(value, "1.0")
 
     def test_soft_lower_bound(self):
-        value = self.soup.find(id="id_timeseriesgroup_set-0-soft_lower_bound")["value"]
+        element = self.soup.find(id="id_timeseriesgroup_set-0-soft_lower_bound")
+        assert isinstance(element, Tag)
+        value = element["value"]
         self.assertEqual(value, "2.0")
 
     def test_soft_upper_bound(self):
-        value = self.soup.find(id="id_timeseriesgroup_set-0-soft_upper_bound")["value"]
+        element = self.soup.find(id="id_timeseriesgroup_set-0-soft_upper_bound")
+        assert isinstance(element, Tag)
+        value = element["value"]
         self.assertEqual(value, "3.0")
 
     def test_upper_bound(self):
-        value = self.soup.find(id="id_timeseriesgroup_set-0-upper_bound")["value"]
+        element = self.soup.find(id="id_timeseriesgroup_set-0-upper_bound")
+        assert isinstance(element, Tag)
+        value = element["value"]
         self.assertEqual(value, "4.0")
 
 
@@ -316,7 +324,7 @@ class TimeseriesGroupFormCreatesRocCheckTestCase(TimeseriesGroupFormTestCaseBase
     def setUp(self):
         super().setUp()
         self._get_response()
-        self.roc_check = models.RateOfChangeCheck.objects.first()
+        self.roc_check = models.RateOfChangeCheck.objects.get()
 
     def _get_response(self):
         data = {
@@ -411,7 +419,9 @@ class TimeseriesGroupFormRocCheckInitialValuesTestCase(TimeseriesGroupFormTestCa
         self.soup = BeautifulSoup(self.response.content, "html.parser")
 
     def test_thresholds(self):
-        value = self.soup.find(id="id_timeseriesgroup_set-0-rocc_thresholds").text
+        element = self.soup.find(id="id_timeseriesgroup_set-0-rocc_thresholds")
+        assert isinstance(element, Tag)
+        value = element.text
         self.assertEqual(value.strip(), "10min\t25.0\n1h\t35.0")
 
 
@@ -572,9 +582,10 @@ class CurveInterpolationInlineTargetTimeseriesGroupTestCase(TestCaseBase):
         select_id = (
             "id_timeseriesgroup_set-1-curveinterpolation_set-0-target_timeseries_group"
         )
-        self.assertIsNotNone(
-            soup.find(id=select_id).find("option", value=f"{self.timeseries_group.id}")
-        )
+        select = soup.find(id=select_id)
+        assert isinstance(select, Tag)
+        option_element = select.find("option", value=f"{self.timeseries_group.id}")
+        self.assertIsNotNone(option_element)
 
     def test_target_timeseries_group_dropdown_not_contains_options_from_station2(self):
         response = self._get_form()
@@ -582,9 +593,10 @@ class CurveInterpolationInlineTargetTimeseriesGroupTestCase(TestCaseBase):
         select_id = (
             "id_timeseriesgroup_set-1-curveinterpolation_set-0-target_timeseries_group"
         )
-        self.assertIsNone(
-            soup.find(id=select_id).find("option", value=f"{self.timeseries_group2.id}")
-        )
+        select = soup.find(id=select_id)
+        assert isinstance(select, Tag)
+        option_element = select.find("option", value=f"{self.timeseries_group2.id}")
+        self.assertIsNone(option_element)
 
     def test_target_timeseries_group_dropdown_is_empty_when_adding_station(self):
         response = self.client.get("/admin/enhydris/station/add/")
@@ -592,10 +604,8 @@ class CurveInterpolationInlineTargetTimeseriesGroupTestCase(TestCaseBase):
         select_id = (
             "id_timeseriesgroup_set-0-curveinterpolation_set-0-target_timeseries_group"
         )
-        self.assertIsNotNone(soup.find(id=select_id).find("option", value=""))
-        self.assertIsNone(
-            soup.find(id=select_id).find("option", value=f"{self.timeseries_group.id}")
-        )
-        self.assertIsNone(
-            soup.find(id=select_id).find("option", value=f"{self.timeseries_group2.id}")
-        )
+        select = soup.find(id=select_id)
+        assert isinstance(select, Tag)
+        self.assertIsNotNone(select.find("option", value=""))
+        self.assertIsNone(select.find("option", value=f"{self.timeseries_group.id}"))
+        self.assertIsNone(select.find("option", value=f"{self.timeseries_group2.id}"))

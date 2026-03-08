@@ -122,10 +122,9 @@ class TimeseriesPrecisionTestCase(TestSaveTimeseriesDataMixin, TestCase):
         # Although the time series has a specified precision of 2, we want it to store
         # all the decimal digits to avoid losing data when the user makes an error when
         # entering the precision.
-        self.assertAlmostEqual(
-            models.Timeseries.objects.first().timeseriesrecord_set.first().value,
-            0.12345678901234,
-        )
+        first_record = models.Timeseries.objects.get().timeseriesrecord_set.first()
+        assert first_record is not None
+        self.assertAlmostEqual(first_record.value, 0.12345678901234)
 
     def test_appends_data_with_full_precision(self):
         self._delete_data_dir()
@@ -137,10 +136,9 @@ class TimeseriesPrecisionTestCase(TestSaveTimeseriesDataMixin, TestCase):
             username="alice",
             default_timezone="Etc/GMT-2",
         )
-        self.assertAlmostEqual(
-            models.Timeseries.objects.first().timeseriesrecord_set.last().value,
-            3.14159065358979,
-        )
+        last_record = models.Timeseries.objects.get().timeseriesrecord_set.last()
+        assert last_record is not None
+        self.assertAlmostEqual(last_record.value, 3.14159065358979)
 
 
 class TimeseriesFileWithUnicodeHeadersTestCase(TestSaveTimeseriesDataMixin, TestCase):

@@ -33,14 +33,14 @@ class AutoProcessTestCase(TestCase):
 
     def test_update(self):
         baker.make(Checks, timeseries_group=self.timeseries_group1)
-        auto_process = AutoProcess.objects.first()
+        auto_process = AutoProcess.objects.get()
         auto_process.timeseries_group = self.timeseries_group2
         auto_process.save()
         self.assertEqual(auto_process.timeseries_group.id, self.timeseries_group2.id)
 
     def test_delete(self):
         baker.make(Checks, timeseries_group=self.timeseries_group1)
-        auto_process = AutoProcess.objects.first()
+        auto_process = AutoProcess.objects.get()
         auto_process.delete()
         self.assertEqual(AutoProcess.objects.count(), 0)
 
@@ -106,6 +106,8 @@ class AutoProcessExecuteTestCase(ClearCacheMixin, TestCase):
 
 
 class AutoProcessRecalculateTestCaseBase(TestCase):
+    recalculate: bool
+
     @mock.patch(
         "enhydris.autoprocess.models.Checks.process_timeseries",
         side_effect=lambda self: self.htimeseries,

@@ -59,6 +59,8 @@ jobs:
         black --check . --exclude "/node_modules/"
         flake8 --extend-ignore=E501 --exclude=node_modules .
         isort --check-only --diff --profile=black --skip node_modules .
+        pyright .
+        mypy .
         npm run lint
         coverage run --include="./*" --omit="*/tests/*","*/tests.py","*/migrations/*","./enhydris_project/*","*.pyx" manage.py test -v2
         coverage json

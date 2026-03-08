@@ -10,9 +10,11 @@ the token for a user, creating it if it does not already exist.
 """
 
 import re
+from typing import cast
 
-import django
+import django.core.mail
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import UserManager
 from django.test.utils import override_settings
 from rest_framework.test import APITestCase
 
@@ -21,7 +23,7 @@ from rest_framework.test import APITestCase
 class AuthTestCase(APITestCase):
     def setUp(self):
         User = get_user_model()
-        self.user = User.objects.create_user(
+        self.user = cast(UserManager[User], User.objects).create_user(
             username="alice",
             email="alice@alice.com",
             password="topsecret",
@@ -60,7 +62,7 @@ class ResetPasswordTestCase(APITestCase):
     def test_reset_password(self):
         # Create a user
         User = get_user_model()
-        self.user = User.objects.create_user(
+        self.user = cast(UserManager[User], User.objects).create_user(
             username="alice", email="alice@example.com", password="topsecret1"
         )
 
@@ -79,7 +81,10 @@ class ResetPasswordTestCase(APITestCase):
         self.assertEqual(len(django.core.mail.outbox), 1)
 
         # Get the link from the email
-        m = re.search(r"http://[^/]+(\S+)", django.core.mail.outbox[0].body)
+        body = django.core.mail.outbox[0].body
+        assert isinstance(body, str)
+        m = re.search(r"http://[^/]+(\S+)", body)
+        assert m is not None
         reset_link = m.group(1)
 
         # Visit the link and submit the form

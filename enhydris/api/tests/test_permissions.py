@@ -46,24 +46,24 @@ class AuthenticationRequiredTestCase(TestTimeseriesMixin, APITestCase):
 
     def test_can_get_timeseries_groups_when_authenticated(self):
         self._use_token()
-        response = self.client.get(f"/api/stations/{self.station.id}/timeseriesgroups/")
+        response = self.client.get(f"/api/stations/{self.station.pk}/timeseriesgroups/")
         self.assertEqual(response.status_code, 200)
 
     def test_cannot_get_timeseries_groups_when_not_authenticated(self):
-        response = self.client.get(f"/api/stations/{self.station.id}/timeseriesgroups/")
+        response = self.client.get(f"/api/stations/{self.station.pk}/timeseriesgroups/")
         self.assertEqual(response.status_code, 401)
 
     def test_can_get_timeseries_when_authenticated(self):
         self._use_token()
         response = self.client.get(
-            f"/api/stations/{self.station.id}/timeseriesgroups/"
-            f"{self.timeseries_group.id}/timeseries/"
+            f"/api/stations/{self.station.pk}/timeseriesgroups/"
+            f"{self.timeseries_group.pk}/timeseries/"
         )
         self.assertEqual(response.status_code, 200)
 
     def test_cannot_get_timeseries_when_not_authenticated(self):
         response = self.client.get(
-            f"/api/stations/{self.station.id}/timeseriesgroups/"
-            f"{self.timeseries_group.id}/timeseries/"
+            f"/api/stations/{self.station.pk}/timeseriesgroups/"
+            f"{self.timeseries_group.pk}/timeseries/"
         )
         self.assertEqual(response.status_code, 401)

@@ -1,8 +1,10 @@
+from typing import Any
+
 from django.apps.registry import Apps
 from django.db import migrations
 
 
-def forward(apps: Apps, _) -> None:
+def forward(apps: Apps, _: Any) -> None:
     VariableTranslation = apps.get_model("enhydris", "VariableTranslation")
     NewVariableTranslation = apps.get_model("enhydris", "NewVariableTranslation")
 
@@ -14,7 +16,7 @@ def forward(apps: Apps, _) -> None:
         )
 
 
-def backward(apps: Apps, _) -> None:
+def backward(apps: Apps, _: Any) -> None:
     VariableTranslation = apps.get_model("enhydris", "VariableTranslation")
     NewVariableTranslation = apps.get_model("enhydris", "NewVariableTranslation")
     for nvt in NewVariableTranslation.objects.all():

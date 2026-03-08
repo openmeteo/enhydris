@@ -44,6 +44,7 @@ class Tsdata404TestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class TsdataGetPermissionsTestCase(APITestCase):
     timeseries: models.Timeseries
+    url: str
 
     @classmethod
     def setUpTestData(cls):
@@ -925,6 +926,8 @@ class TimeseriesChartTestBase(APITestCase):
 @patch("enhydris.models.Timeseries.get_data")
 @override_settings(ENHYDRIS_ENABLE_TIMESERIES_DATA_VIEWERS=False)
 class TimeseriesChartTestCase(TimeseriesDataMixin, TimeseriesChartTestBase):
+    url: str
+
     @classmethod
     def _create_timeseries(cls, publicly_available: bool | None = None):
         # Create the timeseries so that we have 5 entries, one per year
@@ -1041,5 +1044,5 @@ class TimeseriesChartValuesTestCase(TimeseriesDataMixin, TimeseriesChartTestBase
             columns=["value", "flags"],
         )
         response = self.client.get(self.url)
-        expected = []
+        expected: list[dict[str, Any]] = []
         self._assertChartResponse(response, expected)

@@ -58,6 +58,7 @@ class Migrator:
 
     def _do_obj_with_translation(self, obj):
         m = re.match(r"(.*?)\s*\[([^[\]]*)\]\s*$", obj.descr)
+        assert m is not None
         main = m.group(1)
         translation = m.group(2)
         self._create_translation(obj, self.default_language_code, main)

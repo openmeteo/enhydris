@@ -29,18 +29,18 @@ class SynopticGroupTestCase(TestCase):
             timezone="Etc/GMT-2",
         )
         sg.save()
-        self.assertEqual(SynopticGroup.objects.first().slug, "world")
+        self.assertEqual(SynopticGroup.objects.get().slug, "world")
 
     def test_update(self):
         baker.make(SynopticGroup, slug="hello")
-        sg = SynopticGroup.objects.first()
+        sg = SynopticGroup.objects.get()
         sg.name = "hello world"
         sg.save()
-        self.assertEqual(SynopticGroup.objects.first().name, "hello world")
+        self.assertEqual(SynopticGroup.objects.get().name, "hello world")
 
     def test_delete(self):
         baker.make(SynopticGroup)
-        sg = SynopticGroup.objects.first()
+        sg = SynopticGroup.objects.get()
         sg.delete()
         self.assertFalse(SynopticGroup.objects.exists())
 
@@ -55,18 +55,18 @@ class SynopticGroupStationTestCase(TestCase):
         station = baker.make(Station)
         sgs = SynopticGroupStation(synoptic_group=sg, order=1, station=station)
         sgs.save()
-        self.assertEqual(SynopticGroupStation.objects.first().order, 1)
+        self.assertEqual(SynopticGroupStation.objects.get().order, 1)
 
     def test_update(self):
         baker.make(SynopticGroupStation, order=1)
-        sgs = SynopticGroupStation.objects.first()
+        sgs = SynopticGroupStation.objects.get()
         sgs.order = 2
         sgs.save()
-        self.assertEqual(SynopticGroupStation.objects.first().order, 2)
+        self.assertEqual(SynopticGroupStation.objects.get().order, 2)
 
     def test_delete(self):
         baker.make(SynopticGroupStation)
-        sgs = SynopticGroupStation.objects.first()
+        sgs = SynopticGroupStation.objects.get()
         sgs.delete()
         self.assertFalse(SynopticGroupStation.objects.exists())
 
@@ -223,18 +223,18 @@ class SynopticTimeseriesGroupTestCase(TestCase):
             title="hello",
         )
         stg.save()
-        self.assertEqual(SynopticTimeseriesGroup.objects.first().title, "hello")
+        self.assertEqual(SynopticTimeseriesGroup.objects.get().title, "hello")
 
     def test_update(self):
         baker.make(SynopticTimeseriesGroup)
-        stg = SynopticTimeseriesGroup.objects.first()
+        stg = SynopticTimeseriesGroup.objects.get()
         stg.title = "hello"
         stg.save()
-        self.assertEqual(SynopticTimeseriesGroup.objects.first().title, "hello")
+        self.assertEqual(SynopticTimeseriesGroup.objects.get().title, "hello")
 
     def test_delete(self):
         baker.make(SynopticTimeseriesGroup)
-        stg = SynopticTimeseriesGroup.objects.first()
+        stg = SynopticTimeseriesGroup.objects.get()
         stg.delete()
         self.assertFalse(SynopticTimeseriesGroup.objects.exists())
 

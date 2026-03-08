@@ -41,14 +41,14 @@ class AggregationTestCase(TestCase):
 
     def test_update(self):
         self._baker_make_aggregation()
-        aggregation = Aggregation.objects.first()
+        aggregation = Aggregation.objects.get()
         aggregation.method = "max"
         aggregation.save()
         self.assertEqual(aggregation.method, "max")
 
     def test_delete(self):
         self._baker_make_aggregation()
-        aggregation = Aggregation.objects.first()
+        aggregation = Aggregation.objects.get()
         aggregation.delete()
         self.assertEqual(Aggregation.objects.count(), 0)
 
@@ -256,7 +256,7 @@ class AggregationProcessTimeseriesTestCase(TestCase):
         # Now the target time series is complete. Executing a second time should do
         # nothing. (We need to get the aggregation from the db rather than using
         # self.aggregation, to ensure aggregation.htimeseries is created anew.)
-        aggregation = Aggregation.objects.first()
+        aggregation = Aggregation.objects.get()
         result = aggregation.process_timeseries().data
         self.assertTrue(result.empty)
 

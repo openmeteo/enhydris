@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime as dt
 import re
 from zoneinfo import ZoneInfo
@@ -32,7 +34,9 @@ from enhydris.models import DISPLAY_TIMEZONE_CHOICES, Station, TimeseriesGroup
 class SynopticGroup(models.Model):
     name = models.CharField(max_length=50)
     slug = models.SlugField(unique=True, help_text="Identifier to be used in URL")
-    stations = models.ManyToManyField(Station, through="SynopticGroupStation")
+    stations: models.ManyToManyField[Station, Station] = models.ManyToManyField(
+        Station, through="SynopticGroupStation"
+    )
     timezone = models.CharField(
         max_length=50,
         default="Etc/GMT",
@@ -99,8 +103,8 @@ class SynopticGroupStation(models.Model):
     synoptic_group = models.ForeignKey(SynopticGroup, on_delete=models.CASCADE)
     station = models.ForeignKey(Station, on_delete=models.CASCADE)
     order = models.PositiveSmallIntegerField()
-    timeseries_groups = models.ManyToManyField(
-        TimeseriesGroup, through="SynopticTimeseriesGroup"
+    timeseries_groups: models.ManyToManyField[TimeseriesGroup, TimeseriesGroup] = (
+        models.ManyToManyField(TimeseriesGroup, through="SynopticTimeseriesGroup")
     )
 
     class Meta:
@@ -138,7 +142,8 @@ class SynopticGroupStation(models.Model):
             current_synopticgroup_leader = (
                 current_synopticgroup_leader or previous_synoptictimeseriesgroup
             )
-            if syn_tsg.group_with.id != current_synopticgroup_leader.id:
+            assert current_synopticgroup_leader is not None
+            if syn_tsg.group_with.id != current_synopticgroup_leader.pk:
                 raise IntegrityError(
                     _("Groupped time series must be ordered together.")
                 )
@@ -204,6 +209,7 @@ class SynopticGroupStation(models.Model):
             self.synoptic_group.queue_warning(asyntsg, check_rate_of_change_results)
 
     def _out_of_limits_message(self, asyntsg, clarification):
+        assert self.last_common_date is not None
         timestr = self.last_common_date.replace(tzinfo=None).isoformat(
             sep=" ", timespec="minutes"
         )
@@ -212,6 +218,7 @@ class SynopticGroupStation(models.Model):
     def _check_rate_of_change(self, asyntsg):
         if not asyntsg.roc_thresholds:
             return None
+        assert self.last_common_date is not None
         start_date = self.last_common_date - self._get_roc_timedelta(asyntsg)
         timeseries = asyntsg.timeseries_group.default_timeseries.get_data(
             start_date=start_date, end_date=self.last_common_date
@@ -235,7 +242,8 @@ class SynopticGroupStation(models.Model):
             for x in asyntsg.get_roc_thresholds_as_text().splitlines()
         ]
         if roc_timedeltas:
-            return max(roc_timedeltas)
+            assert all([x is not None for x in roc_timedeltas])
+            return max(roc_timedeltas)  # type: ignore
         else:
             return dt.timedelta(0)
 

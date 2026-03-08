@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import View
 
-from registration.backends.default.views import RegistrationView
+from registration.backends.default.views import RegistrationView  # type: ignore
 
 from enhydris import views
 from enhydris.api import urls as enhydris_api_urls

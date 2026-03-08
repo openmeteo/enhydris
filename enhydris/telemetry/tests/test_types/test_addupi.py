@@ -3,7 +3,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from freezegun import freeze_time
-from parameterized import parameterized
+from parameterized import parameterized  # type: ignore
 from requests import Timeout
 
 from enhydris.telemetry import TelemetryError

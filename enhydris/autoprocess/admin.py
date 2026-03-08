@@ -1,10 +1,11 @@
 from io import StringIO
+from typing import ClassVar
 
 from django import forms
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-import nested_admin
+import nested_admin  # type: ignore
 
 from enhydris.admin.station import (
     InlinePermissionsMixin,
@@ -33,7 +34,7 @@ def render_change_form(self, *args, **kwargs):
     return super(StationAdmin, self).render_change_form(*args, **kwargs)
 
 
-StationAdmin.render_change_form = render_change_form
+setattr(StationAdmin, "render_change_form", render_change_form)
 
 
 class TimeseriesGroupForm(forms.ModelForm):
@@ -265,7 +266,7 @@ TimeseriesGroupInline.fieldsets.append(
         _("Time consistency check"),
         {
             "fields": (
-                ("rocc_thresholds",),
+                "rocc_thresholds",
                 ("rocc_symmetric", "rocc_remove_failing_values"),
             ),
             "classes": ("grp-collapse grp-closed",),
@@ -320,7 +321,7 @@ class CurvePeriodForm(forms.ModelForm):
 class CurvePeriodInline(InlinePermissionsMixin, nested_admin.NestedTabularInline):
     model = CurvePeriod
     form = CurvePeriodForm
-    points = models.CharField()
+    points: ClassVar[models.CharField] = models.CharField()
     extra = 1
 
 

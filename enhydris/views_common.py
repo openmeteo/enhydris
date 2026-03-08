@@ -1,18 +1,20 @@
 """Functionality common to API views and old-fashioned views.
 
-   Unit tested mostly in the API tests.
+Unit tested mostly in the API tests.
 """
+
+from typing import Any
 
 from django.conf import settings
 from django.contrib.gis.db.models import Extent
 from django.contrib.gis.geos import Polygon
-from django.db.models import Count, Q
+from django.db.models import Count, Q, QuerySet
 from django.http import Http404
 
 from . import models
 
 
-def ensure_extent_is_large_enough(extent):
+def ensure_extent_is_large_enough(extent: list[float]):
     min_viewport = settings.ENHYDRIS_MAP_MIN_VIEWPORT_SIZE
     dx = abs(extent[2] - extent[0])
     if dx < min_viewport:
@@ -31,7 +33,9 @@ class StationListViewMixin:
     functionality common to both.
     """
 
-    def _get_unsorted_undistinct_queryset(self, **kwargs):
+    request: Any
+
+    def _get_unsorted_undistinct_queryset(self, **kwargs: Any):
         queryset = models.Station.on_site.all()
 
         # If a gentity_id query parameter is specified, ignore all the rest
@@ -54,7 +58,7 @@ class StationListViewMixin:
 
         return queryset
 
-    def get_queryset(self, **kwargs):
+    def get_queryset(self, **kwargs: Any):
         result = self._get_unsorted_undistinct_queryset(**kwargs).distinct()
         sort_order = self._get_sort_order()
         self.request.session["sort"] = sort_order
@@ -62,7 +66,7 @@ class StationListViewMixin:
             result = result.order_by(*sort_order)
         return result
 
-    def _get_sort_order(self):
+    def _get_sort_order(self) -> list[str]:
         """Return sort_order as a list.
 
         Gets sort order from the request parameters, otherwise from request.session,
@@ -77,9 +81,9 @@ class StationListViewMixin:
             sort_order = self.request.session.get("sort", ["name"])
 
         # Create a copy of sort_order with duplicates and invalid fields removed
-        result = []
+        result: list[str] = []
         fields = [x.name for x in models.Station._meta.get_fields()]
-        fields_seen = set()
+        fields_seen: set[str] = set()
         for item in sort_order:
             if not item:
                 continue
@@ -91,7 +95,7 @@ class StationListViewMixin:
 
         return result
 
-    def _refine_queryset(self, queryset, search_term):
+    def _refine_queryset(self, queryset: QuerySet[models.Station], search_term: str):
         """Return the queryset refined according to search_term.
 
         search_term can either be a word or a "name:value" string, such as
@@ -100,10 +104,10 @@ class StationListViewMixin:
         if ":" not in search_term:
             return self._general_filter(queryset, search_term)
         else:
-            name, dummy, value = search_term.partition(":")
+            name, _dummy, value = search_term.partition(":")
             return self._specific_filter(queryset, name, value)
 
-    def _general_filter(self, queryset, search_term):
+    def _general_filter(self, queryset: QuerySet[models.Station], search_term: str):
         """Return the queryset refined according to search_term.
 
         search_term is a simple word searched in various places.
@@ -118,7 +122,9 @@ class StationListViewMixin:
             | Q(timeseriesgroup__remarks__unaccent__icontains=search_term)
         )
 
-    def _specific_filter(self, queryset, name, value):
+    def _specific_filter(
+        self, queryset: QuerySet[models.Station], name: str, value: str
+    ):
         """Return the queryset refined according to the specified name and value.
 
         E.g. name can be "variable" and value can be "temperature". Value can also
@@ -131,21 +137,21 @@ class StationListViewMixin:
             method = getattr(self, method_name)
             return method(queryset, value)
 
-    def _filter_by_owner(self, queryset, value):
+    def _filter_by_owner(self, queryset: QuerySet[models.Station], value: str):
         return queryset.filter(
             Q(owner__organization__name__unaccent__icontains=value)
             | Q(owner__person__first_name__unaccent__icontains=value)
             | Q(owner__person__last_name__unaccent__icontains=value)
         )
 
-    def _filter_by_variable(self, queryset, value):
+    def _filter_by_variable(self, queryset: QuerySet[models.Station], value: str):
         return queryset.filter(
             timeseriesgroup__variable__in=models.Variable.objects.filter(
                 translations__descr__unaccent__icontains=value
             )
         )
 
-    def _filter_by_bbox(self, queryset, value):
+    def _filter_by_bbox(self, queryset: QuerySet[models.Station], value: str):
         try:
             minx, miny, maxx, maxy = [float(i) for i in value.split(",")]
         except ValueError:
@@ -156,10 +162,10 @@ class StationListViewMixin:
         )
         return queryset.filter(geom__contained=geom)
 
-    def _filter_by_ts_only(self, queryset, value):
+    def _filter_by_ts_only(self, queryset: QuerySet[models.Station], value: str):
         return queryset.annotate(tsnum=Count("timeseriesgroup")).exclude(tsnum=0)
 
-    def _filter_by_ts_has_years(self, queryset, value):
+    def _filter_by_ts_has_years(self, queryset: QuerySet[models.Station], value: str):
         try:
             years = [int(y) for y in value.split(",")]
         except ValueError:
@@ -170,7 +176,7 @@ class StationListViewMixin:
             )
         return queryset
 
-    def _filter_by_in(self, queryset, value):
+    def _filter_by_in(self, queryset: QuerySet[models.Station], value: str):
         gareas = models.Garea.objects.filter(
             Q(name__unaccent__icontains=value) | Q(code__unaccent__icontains=value)
         )

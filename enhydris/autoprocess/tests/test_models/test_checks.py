@@ -32,7 +32,7 @@ class ChecksTestCase(TestCase):
         checks = baker.make(Checks, timeseries_group=timeseries_group1)
         checks.timeseries_group = timeseries_group2
         checks.save()
-        self.assertEqual(Checks.objects.first().timeseries_group.id, 43)
+        self.assertEqual(Checks.objects.get().timeseries_group.id, 43)
 
     def test_delete(self):
         checks = baker.make(Checks)
@@ -151,14 +151,14 @@ class RangeCheckTestCase(TestCase):
 
     def test_update(self):
         self._baker_make_range_check()
-        range_check = RangeCheck.objects.first()
+        range_check = RangeCheck.objects.get()
         range_check.upper_bound = 1831.7
         range_check.save()
         self.assertAlmostEqual(range_check.upper_bound, 1831.7)
 
     def test_delete(self):
         self._baker_make_range_check()
-        range_check = RangeCheck.objects.first()
+        range_check = RangeCheck.objects.get()
         range_check.delete()
         self.assertEqual(RangeCheck.objects.count(), 0)
 

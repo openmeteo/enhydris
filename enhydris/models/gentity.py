@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import datetime as dt
+from typing import Any, ClassVar
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
-from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.sites.managers import CurrentSiteManager
 from django.contrib.sites.models import Site
 from django.core.cache import cache
@@ -51,20 +50,12 @@ class Gentity(models.Model):
     gpoint: "Gpoint"
     garea: "Garea"
 
-    last_modified: models.DateTimeField[dt.datetime, dt.datetime] = (
-        models.DateTimeField(default=now, null=True, editable=False)
-    )
-    name: models.CharField[str, str] = models.CharField(
-        max_length=200, blank=True, verbose_name=_("Name")
-    )
-    code: models.CharField[str, str] = models.CharField(
-        max_length=50, blank=True, verbose_name=_("Code")
-    )
-    remarks: models.TextField[str, str] = models.TextField(
-        blank=True, verbose_name=_("Remarks")
-    )
-    geom: models.GeometryField[GEOSGeometry, GEOSGeometry] = models.GeometryField()
-    display_timezone: models.CharField[str, str] = models.CharField(
+    last_modified = models.DateTimeField(default=now, null=True, editable=False)
+    name = models.CharField(max_length=200, blank=True, verbose_name=_("Name"))
+    code = models.CharField(max_length=50, blank=True, verbose_name=_("Code"))
+    remarks = models.TextField(blank=True, verbose_name=_("Remarks"))
+    geom = models.GeometryField()
+    display_timezone = models.CharField(
         max_length=50,
         default="Etc/GMT",
         verbose_name=_("Display time zone"),
@@ -81,26 +72,24 @@ class Gentity(models.Model):
         ordering = ("name",)
 
     def __str__(self):
-        return self.name or self.code or str(self.id)
+        return self.name or self.code or str(self.pk)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any):
         inserting = self._state.adding
         super().save(*args, **kwargs)
         if inserting:
             sites = settings.ENHYDRIS_SITES_FOR_NEW_STATIONS.copy()
-            sites.add(Site.objects.get_current())
+            sites.add(Site.objects.get_current().pk)
             self.sites.set(sites)
 
 
 class Gpoint(Gentity):
-    altitude: models.FloatField[float | None, float | None] = models.FloatField(
-        null=True, blank=True, verbose_name=_("Altitude")
-    )
+    altitude = models.FloatField(null=True, blank=True, verbose_name=_("Altitude"))
     f_dependencies = ["Gentity"]
 
 
 class GareaCategory(Lookup):
-    class Meta:
+    class Meta:  # type: ignore
         verbose_name = _("Area category")
         verbose_name_plural = _("Area categories")
 
@@ -111,16 +100,18 @@ class Garea(Gentity):
     )
     f_dependencies = ["Gentity"]
 
-    class Meta:
+    class Meta:  # type: ignore
         verbose_name = _("Area")
         verbose_name_plural = _("Areas")
 
 
 class RelatedStationMixin:
+    gentity_id: int
+
     @property
-    def related_station(self):
+    def related_station(self) -> Station | None:
         try:
-            return Station.objects.get(id=self.gentity.id)
+            return Station.objects.get(id=self.gentity_id)
         except Station.DoesNotExist:
             return None
 
@@ -141,7 +132,7 @@ class GentityImage(models.Model, RelatedStationMixin):
 
     def __str__(self):
         return (
-            self.descr or (self.date and self.date.date().isoformat()) or str(self.id)
+            self.descr or (self.date and self.date.date().isoformat()) or str(self.pk)
         )
 
 
@@ -159,11 +150,11 @@ class GentityFile(models.Model, RelatedStationMixin):
         ordering = ("descr",)
 
     def __str__(self):
-        return self.descr or str(self.id)
+        return self.descr or str(self.pk)
 
 
 class EventType(Lookup):
-    class Meta:
+    class Meta:  # type: ignore
         verbose_name = _("Log entry type")
         verbose_name_plural = _("Log entry types")
 
@@ -189,7 +180,7 @@ class GentityEvent(models.Model):
     @property
     def related_station(self):
         try:
-            return Station.objects.get(id=self.gentity.id)
+            return Station.objects.get(id=self.gentity.pk)
         except Station.DoesNotExist:
             return None
 
@@ -238,11 +229,11 @@ class Station(Gpoint):
         help_text=_("Users with permission to view time series data"),
     )
 
-    objects = models.Manager()
-    on_site = CurrentSiteManager()
+    objects: ClassVar = models.Manager["Station"]()
+    on_site: CurrentSiteManager = CurrentSiteManager()
     f_dependencies = ["Gpoint"]
 
-    class Meta:
+    class Meta:  # type: ignore
         verbose_name = _("Station")
         verbose_name_plural = _("Stations")
 
@@ -251,7 +242,7 @@ class Station(Gpoint):
         def get_last_update():
             from .timeseries import Timeseries
 
-            timeseries = Timeseries.objects.filter(timeseries_group__gentity_id=self.id)
+            timeseries = Timeseries.objects.filter(timeseries_group__gentity_id=self.pk)
             result = None
             for t in timeseries:
                 t_end_date = t.end_date
@@ -261,4 +252,4 @@ class Station(Gpoint):
                     result = t_end_date
             return result
 
-        return cache.get_or_set(f"station_last_update_{self.id}", get_last_update)
+        return cache.get_or_set(f"station_last_update_{self.pk}", get_last_update)

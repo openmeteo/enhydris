@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-#
-extensions = []
+extensions: list[str] = []
 templates_path = ["_templates"]
 source_suffix = ".rst"
 master_doc = "index"

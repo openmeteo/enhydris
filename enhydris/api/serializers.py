@@ -7,15 +7,17 @@ from rest_framework import serializers
 from enhydris import models
 
 
-class TimeseriesTypeField(serializers.Field):
+class TimeseriesTypeField(serializers.Field[int, str, str, Any]):
     timeseries_types = dict(models.Timeseries.TIMESERIES_TYPES)
-    reverse_timeseries_types = {k: v for v, k in models.Timeseries.TIMESERIES_TYPES}
+    reverse_timeseries_types = {
+        str(k): v for v, k in models.Timeseries.TIMESERIES_TYPES
+    }
 
-    def to_representation(self, value):
+    def to_representation(self, value: int):
         with translation.override(None):
             return str(self.timeseries_types[value])
 
-    def to_internal_value(self, data):
+    def to_internal_value(self, data: str):
         try:
             return self.reverse_timeseries_types[data]
         except KeyError:
@@ -27,7 +29,7 @@ class TimeseriesTypeField(serializers.Field):
 class TimeseriesSerializer(serializers.ModelSerializer[models.Timeseries]):
     type = TimeseriesTypeField()
 
-    class Meta:
+    class Meta:  # type: ignore
         model = models.Timeseries
         fields = "__all__"
 
@@ -52,7 +54,10 @@ class TimeseriesSerializer(serializers.ModelSerializer[models.Timeseries]):
             models.Timeseries.CHECKED,
             models.Timeseries.REGULARIZED,
         )
-        tg = data.get("timeseries_group") or self.instance.timeseries_group
+        tg = data.get("timeseries_group")
+        if not tg:
+            assert self.instance is not None
+            tg = self.instance.timeseries_group
         if data.get("type") in types:
             self._check_timeseries_does_not_exist(tg, data["type"])
 
@@ -61,50 +66,50 @@ class TimeseriesSerializer(serializers.ModelSerializer[models.Timeseries]):
     ):
         queryset = models.Timeseries.objects.filter(
             timeseries_group=timeseries_group, type=type
-        ).exclude(id=getattr(self.instance, "id", None))
+        ).exclude(id=getattr(self.instance, "id", 0))
         if queryset.exists():
             with translation.override(None):
                 type_str = str(dict(models.Timeseries.TIMESERIES_TYPES)[type])
             raise serializers.ValidationError(
-                f"A time series with timeseries_group_id={timeseries_group.id} and "
+                f"A time series with timeseries_group_id={timeseries_group.pk} and "
                 f"type={type_str} already exists"
             )
 
 
-class GareaSerializer(serializers.ModelSerializer):
+class GareaSerializer(serializers.ModelSerializer[models.Garea]):
     # To see why we specify the id, check https://stackoverflow.com/questions/36473795/
     id = serializers.IntegerField(required=False)
 
-    class Meta:
+    class Meta:  # type: ignore
         model = models.Garea
         fields = "__all__"
 
 
-class OrganizationSerializer(serializers.ModelSerializer):
-    class Meta:
+class OrganizationSerializer(serializers.ModelSerializer[models.Organization]):
+    class Meta:  # type: ignore
         model = models.Organization
         fields = "__all__"
 
 
-class PersonSerializer(serializers.ModelSerializer):
+class PersonSerializer(serializers.ModelSerializer[models.Person]):
     # To see why we specify the id, check https://stackoverflow.com/questions/36473795/
     id = serializers.IntegerField(required=False)
 
-    class Meta:
+    class Meta:  # type: ignore
         model = models.Person
         fields = "__all__"
 
 
-class EventTypeSerializer(serializers.ModelSerializer):
-    class Meta:
+class EventTypeSerializer(serializers.ModelSerializer[models.EventType]):
+    class Meta:  # type: ignore
         model = models.EventType
         fields = "__all__"
 
 
-class VariableSerializer(serializers.ModelSerializer):
+class VariableSerializer(serializers.ModelSerializer[models.Variable]):
     translations = serializers.SerializerMethodField()
 
-    class Meta:
+    class Meta:  # type: ignore
         model = models.Variable
         fields = "__all__"
 
@@ -112,40 +117,42 @@ class VariableSerializer(serializers.ModelSerializer):
         return {t.language_code: {"descr": t.descr} for t in obj.translations.all()}
 
 
-class UnitOfMeasurementSerializer(serializers.ModelSerializer):
-    class Meta:
+class UnitOfMeasurementSerializer(
+    serializers.ModelSerializer[models.UnitOfMeasurement]
+):
+    class Meta:  # type: ignore
         model = models.UnitOfMeasurement
         fields = "__all__"
 
 
-class GentityFileSerializer(serializers.ModelSerializer):
-    class Meta:
+class GentityFileSerializer(serializers.ModelSerializer[models.GentityFile]):
+    class Meta:  # type: ignore
         model = models.GentityFile
         fields = "__all__"
 
 
-class GentityImageSerializer(serializers.ModelSerializer):
-    class Meta:
+class GentityImageSerializer(serializers.ModelSerializer[models.GentityImage]):
+    class Meta:  # type: ignore
         model = models.GentityImage
         fields = "__all__"
 
 
-class GentityEventSerializer(serializers.ModelSerializer):
-    class Meta:
+class GentityEventSerializer(serializers.ModelSerializer[models.GentityEvent]):
+    class Meta:  # type: ignore
         model = models.GentityEvent
         fields = "__all__"
 
 
-class StationSerializer(serializers.ModelSerializer):
+class StationSerializer(serializers.ModelSerializer[models.Station]):
     last_update = serializers.DateTimeField(
         read_only=True, default_timezone=dt.timezone.utc
     )
 
-    class Meta:
+    class Meta:  # type: ignore
         model = models.Station
         exclude = ("creator", "maintainers", "sites", "timeseries_data_viewers")
 
-    def validate_nested_many_serializer(self, value):
+    def validate_nested_many_serializer(self, value: list[dict[str, int]]):
         try:
             return [x["id"] for x in value]
         except KeyError as e:
@@ -155,7 +162,7 @@ class StationSerializer(serializers.ModelSerializer):
 
 
 class TimeseriesGroupSerializer(serializers.ModelSerializer[models.TimeseriesGroup]):
-    class Meta:
+    class Meta:  # type: ignore
         model = models.TimeseriesGroup
         fields = "__all__"
 
@@ -172,7 +179,7 @@ class TimeseriesGroupSerializer(serializers.ModelSerializer[models.TimeseriesGro
             raise serializers.ValidationError({"gentity": msg})
 
 
-class TimeseriesRecordChartSerializer(serializers.Serializer):
+class TimeseriesRecordChartSerializer(serializers.Serializer[dict[str, float]]):
     timestamp = serializers.IntegerField()
     min = serializers.FloatField()
     max = serializers.FloatField()

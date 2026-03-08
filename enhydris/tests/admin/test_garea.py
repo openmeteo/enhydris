@@ -10,7 +10,7 @@ from django.contrib.messages import get_messages
 from django.test import TestCase
 
 from model_bakery import baker
-from osgeo import ogr, osr
+from osgeo import ogr, osr  # type: ignore
 
 from enhydris import models
 from enhydris.admin.garea import GareaAdmin, MissingAttribute
@@ -49,22 +49,17 @@ class GareaBulkAddGetTestCase(TestCase):
 
 
 class GareaBulkAddPostSuccessfulTestCase(TestCase):
-    patch1 = patch(
-        "enhydris.admin.garea.ZipFile",
-        **{"return_value.namelist.return_value": [".shp", ".shx", ".dbf"]},
-    )
-    patch2 = patch(
-        "enhydris.admin.garea.GareaAdmin._process_uploaded_shapefile",
-        return_value=(18, 5),
-    )
-
     def setUp(self):
         self.alice = User.objects.create_user(
             username="alice", password="topsecret", is_staff=True, is_superuser=True
         )
         self.water_basins = baker.make(models.GareaCategory, descr="Water basins")
         self.client.force_login(user=self.alice)
-        with self.patch1, self.patch2:
+        patch1 = patch("enhydris.admin.garea.ZipFile")
+        patch2 = patch("enhydris.admin.garea.GareaAdmin._process_uploaded_shapefile")
+        with patch1 as m1, patch2 as m2:
+            m1.return_value.namelist.return_value = [".shp", ".shx", ".dbf"]
+            m2.return_value = (18, 5)
             self.response = self.client.post(
                 "/admin/enhydris/garea/bulk_add/",
                 {"category": [self.water_basins.id], "file": StringIO("hello")},
@@ -157,8 +152,8 @@ class ProcessUploadedShapefileTestCaseBase(TestCase):
             feature = None
 
     def _process_shapefile(self):
-        self.result = GareaAdmin(MagicMock(), MagicMock())._process_uploaded_shapefile(
-            self.water_basins, self.zip_filename
+        self.result = GareaAdmin(MagicMock(), MagicMock())._process_uploaded_shapefile(  # type: ignore
+            self.water_basins, self.zip_filename  # type: ignore
         )
 
     def tearDown(self):

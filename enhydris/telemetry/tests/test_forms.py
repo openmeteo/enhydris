@@ -96,14 +96,14 @@ class ConnectionDataFormTestCase(TestCase):
 
 class ConnectionDataFormHideStuffTestCase(TestCase):
     @classmethod
-    def setUpClass(self):
+    def setUpClass(cls):
         super().setUpClass()
         username = "hello@world.com"
         password = "topsecret"
-        self.form_args = (
+        cls.form_args = (
             {"username": username, "password": password, "device_locator": ""},
         )
-        self.form_kwargs = {
+        cls.form_kwargs = {
             "driver": TestTelemetryAPIClient,
             "station": "irrelevant",
         }

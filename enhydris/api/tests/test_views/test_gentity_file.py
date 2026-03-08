@@ -20,32 +20,32 @@ class GentityFileTestCase(APITestCase):
         self.gentity_file2 = baker.make(models.GentityFile, gentity=self.station2)
 
     def test_list_status_code(self):
-        r = self.client.get("/api/stations/{}/files/".format(self.station.id))
+        r = self.client.get("/api/stations/{}/files/".format(self.station.pk))
         self.assertEqual(r.status_code, 200)
 
     def test_list_length(self):
-        r = self.client.get("/api/stations/{}/files/".format(self.station.id))
+        r = self.client.get("/api/stations/{}/files/".format(self.station.pk))
         self.assertEqual(len(r.json()["results"]), 1)
 
     def test_list_content(self):
-        r = self.client.get("/api/stations/{}/files/".format(self.station.id))
+        r = self.client.get("/api/stations/{}/files/".format(self.station.pk))
         self.assertEqual(r.json()["results"][0]["descr"], "hello")
 
     def test_detail_status_code(self):
         r = self.client.get(
-            "/api/stations/{}/files/{}/".format(self.station.id, self.gentity_file.id)
+            "/api/stations/{}/files/{}/".format(self.station.pk, self.gentity_file.pk)
         )
         self.assertEqual(r.status_code, 200)
 
     def test_detail_content(self):
         r = self.client.get(
-            "/api/stations/{}/files/{}/".format(self.station.id, self.gentity_file.id)
+            "/api/stations/{}/files/{}/".format(self.station.pk, self.gentity_file.pk)
         )
         self.assertEqual(r.json()["descr"], "hello")
 
     def test_detail_returns_nothing_if_wrong_station(self):
         r = self.client.get(
-            "/api/stations/{}/files/{}/".format(self.station2.id, self.gentity_file.id)
+            "/api/stations/{}/files/{}/".format(self.station2.pk, self.gentity_file.pk)
         )
         self.assertEqual(r.status_code, 404)
 
@@ -58,7 +58,8 @@ class GentityFileContentTestCase(APITestCase):
         #   2) Its data appears to be ABCDEF
         #   3) Its size appears to be 6
         self.saved_fieldfile_file = FieldFile.file
-        self.filemock = MagicMock(**{"return_value.name": "some_image.jpg"})
+        self.filemock = MagicMock()
+        self.filemock.return_value.name = "some_image.jpg"
         FieldFile.file = property(self.filemock, MagicMock(), MagicMock())
         patch1 = patch("enhydris.api.views.open", mock_open(read_data="ABCDEF"))
         patch2 = patch("os.path.getsize", return_value=6)
@@ -68,7 +69,7 @@ class GentityFileContentTestCase(APITestCase):
         with patch1, patch2:
             self.response = self.client.get(
                 "/api/stations/{}/files/{}/content/".format(
-                    self.station.id, self.gentity_file.id
+                    self.station.pk, self.gentity_file.pk
                 )
             )
 
@@ -95,7 +96,7 @@ class GentityFileContentWithoutFileTestCase(APITestCase):
 
         self.response = self.client.get(
             "/api/stations/{}/files/{}/content/".format(
-                self.station.id, self.gentity_file.id
+                self.station.pk, self.gentity_file.pk
             )
         )
 

@@ -24,4 +24,4 @@ class TelemetryConfig(AppConfig):
             TelemetryAPIClient = getattr(module, "TelemetryAPIClient")
             drivers[module_name] = TelemetryAPIClient
 
-        sys.modules["enhydris.telemetry"].drivers = drivers
+        sys.modules["enhydris.telemetry"].drivers = drivers  # type: ignore
