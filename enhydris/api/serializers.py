@@ -4,9 +4,6 @@ from typing import Any
 from django.utils import translation
 from rest_framework import serializers
 
-from parler_rest.fields import TranslatedFieldsField
-from parler_rest.serializers import TranslatableModelSerializer
-
 from enhydris import models
 
 
@@ -104,12 +101,15 @@ class EventTypeSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class VariableSerializer(TranslatableModelSerializer):
-    translations = TranslatedFieldsField(shared_model=models.Variable, required=False)
+class VariableSerializer(serializers.ModelSerializer):
+    translations = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Variable
         fields = "__all__"
+
+    def get_translations(self, obj: models.Variable) -> dict[str, dict[str, str]]:
+        return {t.language_code: {"descr": t.descr} for t in obj.translations.all()}
 
 
 class UnitOfMeasurementSerializer(serializers.ModelSerializer):

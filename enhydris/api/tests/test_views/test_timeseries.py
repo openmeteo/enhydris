@@ -469,8 +469,10 @@ class TsdataHeadTestCase(APITestCase):
         self.timeseries_group = baker.make(
             models.TimeseriesGroup,
             gentity=self.station,
-            variable__descr="irrelevant",
             precision=2,
+        )
+        self.timeseries_group.variable.translations.create(
+            language_code="en", descr="irrelevant"
         )
         self.timeseries = baker.make(
             models.Timeseries,
@@ -583,7 +585,8 @@ class TimeseriesPostTestCase(APITestCase):
     def setUp(self):
         self.user1 = baker.make(User, is_active=True, is_superuser=False)
         self.user2 = baker.make(User, is_active=True, is_superuser=False)
-        self.variable = baker.make(models.Variable, descr="Temperature")
+        self.variable = models.Variable.objects.create()
+        self.variable.translations.create(language_code="en", descr="Temperature")
         self.unit_of_measurement = baker.make(models.UnitOfMeasurement)
         self.station = baker.make(models.Station, creator=self.user1)
         self.timeseries_group = baker.make(models.TimeseriesGroup, gentity=self.station)
@@ -629,7 +632,8 @@ class TimeseriesPostTestCase(APITestCase):
 class TimeseriesPostWithWrongStationOrTimeseriesGroupTestCase(APITestCase):
     def setUp(self):
         self.user = baker.make(User, is_active=True, is_superuser=False)
-        self.variable = baker.make(models.Variable, descr="Temperature")
+        self.variable = models.Variable.objects.create()
+        self.variable.translations.create(language_code="en", descr="Temperature")
         self.unit_of_measurement = baker.make(models.UnitOfMeasurement)
         self.station1 = baker.make(models.Station, creator=self.user)
         self.timeseries_group_1_1 = baker.make(
@@ -690,7 +694,8 @@ class TimeseriesPostWithWrongStationOrTimeseriesGroupTestCase(APITestCase):
 class TimeseriesPostWithWrongTimeseriesTypeTestCase(APITestCase):
     def setUp(self):
         self.user = baker.make(User, is_active=True, is_superuser=False)
-        self.variable = baker.make(models.Variable, descr="Temperature")
+        self.variable = models.Variable.objects.create()
+        self.variable.translations.create(language_code="en", descr="Temperature")
         self.unit_of_measurement = baker.make(models.UnitOfMeasurement)
         self.station = baker.make(models.Station, creator=self.user)
         self.timeseries_group = baker.make(models.TimeseriesGroup, gentity=self.station)

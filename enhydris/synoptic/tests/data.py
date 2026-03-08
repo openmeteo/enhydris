@@ -81,10 +81,15 @@ class TestData:
         )
 
     def _create_variables(self):
-        self.var_rain = baker.make(Variable, descr="Rain")
-        self.var_temperature = baker.make(Variable, descr="Temperature")
-        self.var_wind_speed = baker.make(Variable, descr="Wind speed")
-        self.var_wind_gust = baker.make(Variable, descr="Wind gust")
+        self.var_rain = self._create_variable("Rain")
+        self.var_temperature = self._create_variable("Temperature")
+        self.var_wind_speed = self._create_variable("Wind speed")
+        self.var_wind_gust = self._create_variable("Wind gust")
+
+    def _create_variable(self, name: str):
+        variable = Variable.objects.create()
+        variable.translations.create(language_code="en", descr=name)
+        return variable
 
     def _create_timeseries_groups(self):
         self._create_timeseries_groups_for_komboti()

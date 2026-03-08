@@ -33,7 +33,8 @@ class TestCaseBase(ClearCacheMixin, TestCase):
         cls.organization = enhydris.models.Organization.objects.create(
             name="Serial killers SA"
         )
-        cls.variable = baker.make(enhydris.models.Variable, descr="myvar")
+        cls.variable = enhydris.models.Variable.objects.create()
+        cls.variable.translations.create(language_code="en", descr="myvar")
         cls.unit = baker.make(enhydris.models.UnitOfMeasurement)
         cls.station = baker.make(
             enhydris.models.Station, creator=cls.user, owner=cls.organization

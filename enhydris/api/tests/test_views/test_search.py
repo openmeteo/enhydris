@@ -6,7 +6,6 @@ from django.test import override_settings
 from rest_framework.test import APITestCase
 
 from model_bakery import baker
-from parler.utils.context import switch_language
 
 from enhydris import models
 
@@ -101,10 +100,6 @@ class SearchByRemarksWithAccentsTestCase(SearchByRemarksTestCase):
 
 language_settings = {
     "LANGUAGE_CODE": "en",
-    "PARLER_LANGUAGES": {
-        settings.SITE_ID: ({"code": "en"}, {"code": "fr"}),
-        "default": {"fallbacks": ["en"], "hide_untranslated": False},
-    },
 }
 
 
@@ -119,13 +114,10 @@ class SearchByVariableTestCase(SearchTestCaseBase, APITestCase):
         self._create_timeseries(station1, "Rain", "Pluie")
         self._create_timeseries(station2, "Humidity", "Humidité")
 
-    def _create_timeseries(self, station, var_en, var_fr):
-        variable = models.Variable()
-        with switch_language(variable, "en"):
-            variable.descr = var_en
-        with switch_language(variable, "fr"):
-            variable.descr = var_fr
-        variable.save()
+    def _create_timeseries(self, station: models.Station, var_en: str, var_fr: str):
+        variable = models.Variable.objects.create()
+        variable.translations.create(language_code="en", descr=var_en)
+        variable.translations.create(language_code="fr", descr=var_fr)
         baker.make(
             models.Timeseries,
             timeseries_group__gentity=station,

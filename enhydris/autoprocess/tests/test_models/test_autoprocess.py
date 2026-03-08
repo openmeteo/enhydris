@@ -81,10 +81,9 @@ class AutoProcessSaveTestCase(TransactionTestCase):
 class AutoProcessExecuteTestCase(ClearCacheMixin, TestCase):
     def setUp(self):
         station = baker.make(Station, display_timezone="Etc/GMT-2")
-        self.timeseries_group = baker.make(
-            TimeseriesGroup,
-            gentity=station,
-            variable__descr="irrelevant",
+        self.timeseries_group = baker.make(TimeseriesGroup, gentity=station)
+        self.timeseries_group.variable.translations.create(
+            language_code="en", descr="irrelevant"
         )
         self.checks = baker.make(Checks, timeseries_group=self.timeseries_group)
         self.range_check = baker.make(RangeCheck, checks=self.checks)
@@ -115,10 +114,9 @@ class AutoProcessRecalculateTestCaseBase(TestCase):
     def setUp(self, m: mock.MagicMock):
         self.mock_process_timeseries = m
         station = baker.make(Station, display_timezone="Etc/GMT-2")
-        self.timeseries_group = baker.make(
-            TimeseriesGroup,
-            gentity=station,
-            variable__descr="h",
+        self.timeseries_group = baker.make(TimeseriesGroup, gentity=station)
+        self.timeseries_group.variable.translations.create(
+            language_code="en", descr="h"
         )
         self.source_timeseries = baker.make(
             Timeseries, timeseries_group=self.timeseries_group, type=Timeseries.INITIAL

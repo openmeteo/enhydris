@@ -18,7 +18,8 @@ from enhydris.tests.test_models.test_timeseries import get_tzinfo
 class AggregationTestCase(TestCase):
     def setUp(self):
         self.station = baker.make(Station)
-        variable = baker.make(Variable, descr="Irrelevant")
+        variable = Variable.objects.create()
+        variable.translations.create(language_code="en", descr="irrelevant")
         self.timeseries_group = baker.make(
             TimeseriesGroup, gentity=self.station, variable=variable
         )
@@ -59,7 +60,8 @@ class AggregationTestCase(TestCase):
 
     def test_no_extra_queries_for_str(self):
         self._baker_make_aggregation()
-        with self.assertNumQueries(1):
+        # One query for the aggregation, one for prefetching of variable translations
+        with self.assertNumQueries(2):
             str(Aggregation.objects.first())
 
     def test_wrong_resulting_timestamp_offset_1(self):
@@ -225,11 +227,13 @@ class AggregationProcessTimeseriesTestCase(TestCase):
         self.aggregation = baker.make(
             Aggregation,
             timeseries_group__gentity=station,
-            timeseries_group__variable__descr="Hello",
             target_time_step="1h",
             method="sum",
             max_missing=max_missing,
             resulting_timestamp_offset="1min",
+        )
+        self.aggregation.timeseries_group.variable.translations.create(
+            language_code="en", descr="Hello"
         )
         self.aggregation._htimeseries = HTimeseries(self.source_timeseries)
         self.aggregation._htimeseries.time_step = "10min"
@@ -283,9 +287,8 @@ class AggregationProcessTimeseriesWhenNoTimeStepTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         station = baker.make(Station)
-        timeseries_group = baker.make(
-            TimeseriesGroup, gentity=station, variable__descr="hello"
-        )
+        timeseries_group = baker.make(TimeseriesGroup, gentity=station)
+        timeseries_group.variable.translations.create(language_code="en", descr="hello")
         cls.aggregation = baker.make(
             Aggregation,
             timeseries_group=timeseries_group,
@@ -319,9 +322,8 @@ class AggregationRegularizationModeTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         station = baker.make(Station)
-        timeseries_group = baker.make(
-            TimeseriesGroup, gentity=station, variable__descr="hello"
-        )
+        timeseries_group = baker.make(TimeseriesGroup, gentity=station)
+        timeseries_group.variable.translations.create(language_code="en", descr="hello")
         cls.aggregation = baker.make(
             Aggregation,
             timeseries_group=timeseries_group,
@@ -389,12 +391,8 @@ class AggregationRecalculatesLastValueIfNeededTestCase(TestCase):
 
     def setUp(self):
         station = baker.make(Station, name="Hobbiton", display_timezone="Etc/GMT-2")
-        timeseries_group = baker.make(
-            TimeseriesGroup,
-            gentity=station,
-            variable__descr="h",
-            precision=0,
-        )
+        timeseries_group = baker.make(TimeseriesGroup, gentity=station, precision=0)
+        timeseries_group.variable.translations.create(language_code="en", descr="h")
         source_timeseries = baker.make(
             Timeseries,
             timeseries_group=timeseries_group,
@@ -482,12 +480,8 @@ class AggregationTooFewValuesTestCase(TestCase):
 
     def setUp(self):
         station = baker.make(Station, name="Hobbiton", display_timezone="Etc/GMT-2")
-        timeseries_group = baker.make(
-            TimeseriesGroup,
-            gentity=station,
-            variable__descr="h",
-            precision=0,
-        )
+        timeseries_group = baker.make(TimeseriesGroup, gentity=station, precision=0)
+        timeseries_group.variable.translations.create(language_code="en", descr="h")
         source_timeseries = baker.make(
             Timeseries,
             timeseries_group=timeseries_group,

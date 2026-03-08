@@ -134,8 +134,10 @@ class TelemetryFetchTestCaseBase(TestCase):
             TimeseriesGroup,
             id=42,
             gentity=cls.station,
-            variable__descr="Temperature",
             precision=1,
+        )
+        cls.timeseries_group.variable.translations.create(
+            language_code="en", descr="Temperature"
         )
         cls.telemetry = baker.make(
             Telemetry,

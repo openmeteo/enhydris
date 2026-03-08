@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     "grappelli",
     "django.contrib.admin",
     "rules.apps.AutodiscoverRulesConfig",
-    "parler",
     "nested_admin",
     "crequest",
     "bootstrap4",

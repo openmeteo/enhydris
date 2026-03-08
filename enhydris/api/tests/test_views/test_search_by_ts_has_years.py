@@ -36,7 +36,9 @@ class SearchWithYearExistingInOneStationTest(
         result = baker.make(
             models.Timeseries,
             timeseries_group__gentity=station,
-            timeseries_group__variable__descr=variable_descr,
+        )
+        result.timeseries_group.variable.translations.create(
+            language_code="en", descr=variable_descr
         )
         result.set_data(StringIO(datastr), default_timezone="Etc/GMT-2")
         return result

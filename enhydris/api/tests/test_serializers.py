@@ -105,9 +105,9 @@ class TimeseriesSerializerTestCase(APITestCase):
 class TimeseriesSerializerUniqueTypeTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.timeseries_group = baker.make(
-            models.TimeseriesGroup,
-            variable__descr="Temperature",
+        cls.timeseries_group = baker.make(models.TimeseriesGroup)
+        cls.timeseries_group.variable.translations.create(
+            language_code="en", descr="Temperature"
         )
 
     def test_only_one_initial_timeseries_per_group(self):

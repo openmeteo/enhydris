@@ -13,7 +13,12 @@ from .gentity import (
 )
 from .lentity import Lentity, Organization, Person
 from .timeseries import Timeseries, TimeseriesRecord, TimeseriesStorage, check_time_step
-from .timeseries_group import TimeseriesGroup, UnitOfMeasurement, Variable
+from .timeseries_group import (
+    TimeseriesGroup,
+    UnitOfMeasurement,
+    Variable,
+    VariableTranslation,
+)
 
 __all__ = (
     "DISPLAY_TIMEZONE_CHOICES",
@@ -35,5 +40,6 @@ __all__ = (
     "check_time_step",
     "TimeseriesGroup",
     "Variable",
+    "VariableTranslation",
     "UnitOfMeasurement",
 )

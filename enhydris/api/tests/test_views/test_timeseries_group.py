@@ -34,7 +34,8 @@ class TimeseriesGroupPostTestCase(APITestCase):
     def setUp(self):
         self.user1 = baker.make(User, is_active=True, is_superuser=False)
         self.user2 = baker.make(User, is_active=True, is_superuser=False)
-        self.variable = baker.make(models.Variable, descr="Temperature")
+        self.variable = models.Variable.objects.create()
+        self.variable.translations.create(language_code="en", descr="Temperature")
         self.unit_of_measurement = baker.make(models.UnitOfMeasurement)
         self.station = baker.make(models.Station, creator=self.user1)
         self.station2 = baker.make(models.Station, creator=self.user1)

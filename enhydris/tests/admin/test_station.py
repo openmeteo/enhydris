@@ -1,6 +1,7 @@
 import os
 from io import StringIO
 from locale import LC_CTYPE, getlocale, setlocale
+from typing import Any
 from unittest import mock
 
 from django.contrib.auth.models import Permission, User
@@ -522,7 +523,9 @@ class TimeseriesInlineAdminFormAcceptsReplacingTestCase(
 
 
 class TimeseriesUploadFileMixin:
-    def _get_basic_form_contents(self):
+    def _get_basic_form_contents(self) -> dict[str, Any]:
+        variable = models.Variable.objects.create()
+        variable.translations.create(language_code="en", descr="myvar")
         return {
             "name": "Hobbiton",
             "owner": models.Organization.objects.create(name="Serial killers SA").id,
@@ -532,9 +535,7 @@ class TimeseriesUploadFileMixin:
             **get_formset_parameters(self.client, "/admin/enhydris/station/add/"),
             "timeseriesgroup_set-TOTAL_FORMS": "1",
             "timeseriesgroup_set-INITIAL_FORMS": "0",
-            "timeseriesgroup_set-0-variable": baker.make(
-                models.Variable, descr="myvar"
-            ).id,
+            "timeseriesgroup_set-0-variable": variable.pk,
             "timeseriesgroup_set-0-unit_of_measurement": baker.make(
                 models.UnitOfMeasurement
             ).id,
@@ -699,7 +700,9 @@ class TimeseriesInlineFormSetTestCase(TestCase):
         )
         self.client.login(username="alice", password="topsecret")
 
-    def _get_basic_form_contents(self):
+    def _get_basic_form_contents(self) -> dict[str, Any]:
+        variable = models.Variable.objects.create()
+        variable.translations.create(language_code="en", descr="myvar")
         return {
             "name": "Hobbiton",
             "owner": models.Organization.objects.create(name="Serial killers SA").id,
@@ -709,9 +712,7 @@ class TimeseriesInlineFormSetTestCase(TestCase):
             **get_formset_parameters(self.client, "/admin/enhydris/station/add/"),
             "timeseriesgroup_set-TOTAL_FORMS": "1",
             "timeseriesgroup_set-INITIAL_FORMS": "0",
-            "timeseriesgroup_set-0-variable": baker.make(
-                models.Variable, descr="myvar"
-            ).id,
+            "timeseriesgroup_set-0-variable": variable.pk,
             "timeseriesgroup_set-0-unit_of_measurement": baker.make(
                 models.UnitOfMeasurement
             ).id,

@@ -49,11 +49,25 @@ class EventTypeTestCase(APITestCase):
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)
 class VariableTestCase(APITestCase):
     def setUp(self):
-        self.variable = baker.make(models.Variable, descr="Temperature")
+        self.variable = models.Variable.objects.create()
+        self.variable.translations.create(language_code="en", descr="Temperature")
+        self.variable.translations.create(language_code="el", descr="Θερμοκρασία")
 
     def test_get_variable(self):
         r = self.client.get("/api/variables/{}/".format(self.variable.id))
         self.assertEqual(r.status_code, 200)
+        self.assertEqual(
+            r.json()["translations"],
+            {"en": {"descr": "Temperature"}, "el": {"descr": "Θερμοκρασία"}},
+        )
+
+    def test_list_variable(self):
+        r = self.client.get("/api/variables/")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(
+            r.json()["results"][0]["translations"],
+            {"en": {"descr": "Temperature"}, "el": {"descr": "Θερμοκρασία"}},
+        )
 
 
 @override_settings(ENHYDRIS_AUTHENTICATION_REQUIRED=False)

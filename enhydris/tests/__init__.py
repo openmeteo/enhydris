@@ -18,7 +18,6 @@ import django_selenium_clean
 import pandas as pd
 from htimeseries import HTimeseries
 from model_bakery import baker
-from parler.utils.context import switch_language
 
 from enhydris import models
 
@@ -58,9 +57,11 @@ class TestTimeseriesMixin(ClearCacheMixin):
             name="Daily temperature",
             gentity=cls.station,
             unit_of_measurement__symbol="mm",
-            variable__descr="Temperature",
             precision=1,
             remarks="This timeseries group rocks",
+        )
+        cls.timeseries_group.variable.translations.create(
+            language_code="en", descr="Temperature"
         )
         more_kwargs: dict[str, Any] = {}
         if publicly_available is not None:
@@ -100,10 +101,8 @@ class TimeseriesDataMixin(ClearCacheMixin):
             geom=Point(x=21.00000, y=39.00000, srid=4326),
             display_timezone=cls.timezone,
         )
-        cls.variable = models.Variable()
-        with switch_language(cls.variable, "en"):
-            cls.variable.descr = "Beauty"
-            cls.variable.save()
+        cls.variable = models.Variable.objects.create()
+        cls.variable.translations.create(language_code="en", descr="Beauty")
         cls.timeseries_group = baker.make(
             models.TimeseriesGroup,
             gentity=cls.station,

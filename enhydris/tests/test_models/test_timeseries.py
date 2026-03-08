@@ -438,6 +438,7 @@ class TimeseriesGetDataCacheTestCase(DataTestCase):
 
     def setUp(self):
         cache.clear()
+        self.timeseries.timeseries_group.variable.__dict__.pop("_descr_cache", None)
 
         # Make sure we've accessed gpoint already, otherwise it screws up the number of
         # queries later
@@ -450,20 +451,26 @@ class TimeseriesGetDataCacheTestCase(DataTestCase):
     def test_cache(self):
         self.expected_result = self.original_expected_result
 
-        self._get_data_and_check_num_queries(1, start_date=None, end_date=None)
+        # Two queries: getting data and prefetching variable translations.
+        self._get_data_and_check_num_queries(2, start_date=None, end_date=None)
         self._get_data_and_check_num_queries(0, start_date=None, end_date=None)
 
         # Check cache invalidation
         self.timeseries.save()
+        # This time there's one query; the prefetched variable translations are
+        # still cached.
         self._get_data_and_check_num_queries(1, start_date=None, end_date=None)
 
     def test_refetches_if_does_not_include_everything_from_start_date(self):
         start_date_1 = dt.datetime(2017, 12, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
         self.expected_result = self.original_expected_result.iloc[1:]
-        self._get_data_and_check_num_queries(1, start_date=start_date_1, end_date=None)
+        # Two queries: getting data and prefetching variable translations.
+        self._get_data_and_check_num_queries(2, start_date=start_date_1, end_date=None)
 
         start_date_2 = dt.datetime(2017, 11, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
         self.expected_result = self.original_expected_result
+        # This time there's one query; the prefetched variable translations are
+        # still cached.
         self._get_data_and_check_num_queries(1, start_date=start_date_2, end_date=None)
 
         # Try again with start_date_1; this time we should have everything in cache
@@ -473,10 +480,13 @@ class TimeseriesGetDataCacheTestCase(DataTestCase):
     def test_refetches_if_does_not_include_everything_to_end_date(self):
         end_date_1 = dt.datetime(2018, 10, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
         self.expected_result = self.original_expected_result.iloc[:-1]
-        self._get_data_and_check_num_queries(1, start_date=None, end_date=end_date_1)
+        # Two queries: getting data and prefetching variable translations.
+        self._get_data_and_check_num_queries(2, start_date=None, end_date=end_date_1)
 
         end_date_2 = dt.datetime(2018, 12, 1, 1, 0, 0, tzinfo=dt.timezone.utc)
         self.expected_result = self.original_expected_result
+        # This time there's one query; the prefetched variable translations are
+        # still cached.
         self._get_data_and_check_num_queries(1, start_date=None, end_date=end_date_2)
 
         # Try again with end_date_1; this time we should have everything in cache
@@ -526,8 +536,9 @@ class TimeseriesGetDataCacheTestCase(DataTestCase):
 
     @mock.patch("enhydris.models.timeseries.Timeseries._invalidate_cached_data")
     def test_race_condition(self, m: mock.MagicMock):
-        # Populate cache
-        self._get_data_and_check_num_queries(1, start_date=None, end_date=None)
+        # Populate cache. There are two queries: one for getting the data and
+        # one for prefetching variable translations.
+        self._get_data_and_check_num_queries(2, start_date=None, end_date=None)
 
         # Pretend there's a race condition. We delete the time series data, but
         # because we've mocked _invalidate_cached_data, the cache will not be deleted.

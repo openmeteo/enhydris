@@ -92,23 +92,29 @@ class ChecksTestCase(TestCase):
     @mock.patch("enhydris.models.Timeseries.insert_or_append_data")
     def test_runs_range_check(self, m1, m2):
         station = baker.make(Station, display_timezone="Etc/GMT")
-        range_check = baker.make(
-            RangeCheck,
-            checks__timeseries_group__gentity=station,
-            checks__timeseries_group__variable__descr="Temperature",
+        range_check = baker.make(RangeCheck, checks__timeseries_group__gentity=station)
+        range_check.checks.timeseries_group.variable.translations.create(
+            language_code="en", descr="Temperature"
         )
         range_check.checks.execute(recalculate=False)
         m2.assert_called_once()
 
     def test_no_extra_queries_for_str(self):
-        baker.make(Checks, timeseries_group__variable__descr="Temperature")
-        with self.assertNumQueries(1):
+        checks = baker.make(Checks)
+        checks.timeseries_group.variable.translations.create(
+            language_code="en", descr="Temperature"
+        )
+        # One query for the checks, one for prefetching of variable translations
+        with self.assertNumQueries(2):
             str(Checks.objects.first())
 
 
 class ChecksAutoDeletionTestCase(TestCase):
     def setUp(self):
-        self.checks = baker.make(Checks, timeseries_group__variable__descr="pH")
+        self.checks = baker.make(Checks)
+        self.checks.timeseries_group.variable.translations.create(
+            language_code="en", descr="pH"
+        )
         self.range_check = baker.make(RangeCheck, checks=self.checks)
         self.roc_check = baker.make(RateOfChangeCheck, checks=self.checks)
 

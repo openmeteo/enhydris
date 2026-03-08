@@ -169,8 +169,10 @@ class StationLastUpdateTestCase(ClearCacheMixin, TestCase):
         self.timeseries_group = baker.make(
             models.TimeseriesGroup,
             gentity=self.station,
-            variable__descr="irrelevant",
             precision=2,
+        )
+        self.timeseries_group.variable.translations.create(
+            language_code="en", descr="irrelevant"
         )
 
     def _create_timeseries(

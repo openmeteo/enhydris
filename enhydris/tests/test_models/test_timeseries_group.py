@@ -7,42 +7,24 @@ from django.test import TestCase, override_settings
 from django.utils import translation
 
 from model_bakery import baker
-from parler.utils.context import switch_language
 
 from enhydris import models
 from enhydris.tests import TimeseriesDataMixin
 
 
 class VariableTestCase(TestCase):
-    def test_create(self):
-        gact = models.Variable(descr="Temperature")
-        gact.save()
-        self.assertEqual(models.Variable.objects.first().descr, "Temperature")
-
-    def test_update(self):
-        baker.make(models.Variable, descr="Irrelevant")
-        gact = models.Variable.objects.first()
-        gact.descr = "Temperature"
-        gact.save()
-        self.assertEqual(models.Variable.objects.first().descr, "Temperature")
-
-    def test_delete(self):
-        baker.make(models.Variable, descr="Temperature")
-        gact = models.Variable.objects.first()
-        gact.delete()
-        self.assertEqual(models.Variable.objects.count(), 0)
-
     def test_str(self):
         gact = self._create_variable("Temperature", "Θερμοκρασία")
         self.assertEqual(str(gact), "Temperature")
-        with switch_language(gact, "el"):
+        with translation.override("el"):
             self.assertEqual(str(gact), "Θερμοκρασία")
 
     def test_manager_includes_objects_with_missing_translations(self):
-        variable = baker.make(models.Variable, descr="hello")
+        variable = models.Variable.objects.create()
+        variable.translations.create(language_code="en", descr="hello")
         self.assertEqual(str(variable), "hello")
-        with switch_language(variable, "el"):
-            models.Variable.objects.get(id=variable.id)  # Shouldn't raise anything
+        with translation.override("el"):
+            models.Variable.objects.get(id=variable.pk)  # Shouldn't raise anything
 
     def test_sort(self):
         self._create_variable("Temperature", "Θερμοκρασία")
@@ -57,10 +39,14 @@ class VariableTestCase(TestCase):
                 ["Θερμοκρασία", "Υγρασία"],
             )
 
-    def _create_variable(self, english_name, greek_name):
-        baker.make(models.Variable, descr=english_name)
-        variable = models.Variable.objects.get(translations__descr=english_name)
-        variable.translations.create(language_code="el", descr=greek_name)
+    def _create_variable(self, english_name: str, greek_name: str):
+        variable = models.Variable.objects.create()
+        models.VariableTranslation.objects.create(
+            variable=variable, language_code="el", descr=greek_name
+        )
+        models.VariableTranslation.objects.create(
+            variable=variable, language_code="en", descr=english_name
+        )
         return variable
 
     @override_settings(
@@ -69,28 +55,13 @@ class VariableTestCase(TestCase):
         LANGUAGES={("en", "English"), ("el", "Ελληνικά")},
     )
     def test_translation_bug(self):
-        # Normally Variable.__str__() should return a simple "return self.descr".
-        # However, there's a tricky bug somewhere, most probably in django-parler, but I
-        # can't nail it.  Sometimes, when there's no registered translation in the
-        # active language, self.descr is None (when it should fall back to the fallback
-        # language). It occurs when trying to visit /admin/enhydris/station/add/, the
-        # active language is Greek, and one of the variables has an English translation
-        # but not a Greek translation. We work around it by changing Variable.__str__()
-        # to return whatever translation exists.
-        #
-        # Unfortunately, PARLER_LANGUAGES seems to not be overridable in tests;
-        # therefore, if you change Variable.__str__() to a simple "return self.descr",
-        # the only way to make this test fail is by manually specifying this in the
-        # settings:
-        #     PARLER_LANGUAGES={
-        #         SITE_ID: [{"code": "en"}, {"code": "el"}],
-        #         "default": {"fallbacks": ["en"], "hide_untranslated": True},
-        #     }
+        # The admin must render even when active language has no translation.
         User.objects.create_user(
             username="alice", password="topsecret", is_active=True, is_staff=True
         )
         self.client.login(username="alice", password="topsecret")
-        baker.make(models.Variable, descr="pH")
+        variable = models.Variable.objects.create()
+        variable.translations.create(language_code="en", descr="pH")
         response = self.client.get(
             "/admin/enhydris/station/add/", HTTP_ACCEPT_LANGUAGE="el"
         )
@@ -109,8 +80,9 @@ class UnitOfMeasurementTestCase(TestCase):
 
 class TimeseriesGroupGetNameTestCase(TestCase):
     def setUp(self):
-        self.timeseries_group = baker.make(
-            models.TimeseriesGroup, variable__descr="Temperature", name=""
+        self.timeseries_group = baker.make(models.TimeseriesGroup, name="")
+        self.timeseries_group.variable.translations.create(
+            language_code="en", descr="Temperature"
         )
 
     def test_get_name_when_name_is_blank(self):
@@ -122,18 +94,12 @@ class TimeseriesGroupGetNameTestCase(TestCase):
 
     def test_get_name_when_translations_are_inactive(self):
         with translation.override(None):
-            self.timeseries_group.variable._current_language = None
-            self.assertEqual(
-                self.timeseries_group.get_name(),
-                f"Timeseries group {self.timeseries_group.id}",
-            )
+            self.assertEqual(self.timeseries_group.get_name(), "Temperature")
 
 
 class TimeseriesGroupDefaultTimeseriesTestCase(TestCase):
     def setUp(self):
-        self.timeseries_group = baker.make(
-            models.TimeseriesGroup, variable__descr="Temperature", name=""
-        )
+        self.timeseries_group = baker.make(models.TimeseriesGroup, name="")
         self.initial_timeseries = self._make_timeseries(models.Timeseries.INITIAL)
         self.checked_timeseries = self._make_timeseries(models.Timeseries.CHECKED)
         self.regularized_timeseries = self._make_timeseries(

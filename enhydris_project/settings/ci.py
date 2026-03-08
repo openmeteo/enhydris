@@ -18,10 +18,6 @@ LANGUAGES = {
     ("en", "English"),
     ("el", "Ελληνικά"),
 }
-PARLER_LANGUAGES = {
-    SITE_ID: [{"code": LANGUAGE_CODE}, {"code": "el"}],  # NOQA
-    "default": {"fallbacks": ["en"], "hide_untranslated": True},
-}
 
 headless = ChromeOptions()
 headless.add_argument("--headless")

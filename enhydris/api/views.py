@@ -56,7 +56,13 @@ class StationViewSet(StationListViewMixin, ModelViewSet[models.Station]):
                     queryset=models.TimeseriesGroup.objects.select_related(
                         "variable", "unit_of_measurement"
                     )
-                    .prefetch_related("timeseries_set")
+                    .prefetch_related(
+                        "timeseries_set",
+                        Prefetch(
+                            "variable__translations",
+                            to_attr="prefetched_translations",
+                        ),
+                    )
                     .order_by("variable__id"),
                 )
             )
@@ -90,7 +96,7 @@ class EventTypeViewSet(ReadOnlyModelViewSet[models.EventType]):
 
 class VariableViewSet(ReadOnlyModelViewSet[models.Variable]):
     serializer_class = serializers.VariableSerializer
-    queryset = models.Variable.objects.all()  # type: ignore
+    queryset = models.Variable.objects.prefetch_related("translations")  # type: ignore
 
 
 class UnitOfMeasurementViewSet(ReadOnlyModelViewSet[models.UnitOfMeasurement]):

@@ -6,16 +6,13 @@ from typing import TYPE_CHECKING
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.cache import cache
-from django.db.models import FilteredRelation, Q
+from django.db.models import FilteredRelation, Q, Value
 from django.db.models.functions import Coalesce
 from django.db.models.manager import Manager
 from django.utils.functional import cached_property
 from django.utils.timezone import now
+from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
-
-from parler.managers import TranslatableManager
-from parler.models import TranslatableModel, TranslatedFields
-from parler.utils import get_active_language_choices
 
 from .base import Lookup
 from .gentity import Gentity
@@ -24,43 +21,29 @@ if TYPE_CHECKING:
     from enhydris.models import Timeseries
 
 
-class VariableManager(TranslatableManager):
+class VariableManager(models.Manager["Variable"]):
     def get_queryset(self):
-        try:
-            langs = get_active_language_choices()
-            lang1 = langs[0]
-            lang2 = langs[1] if len(langs) > 1 else "nonexistent"
-        except ValueError:
-            lang1 = settings.LANGUAGE_CODE
-            try:
-                lang2 = settings.LANGUAGES[1][0]
-            except IndexError:
-                lang2 = "nonexistent"
+        lang1 = get_language()
+        lang2 = settings.LANGUAGE_CODE
         return (
             super()
             .get_queryset()
-            .annotate(
-                translation1=FilteredRelation(
-                    "translations", condition=Q(translations__language_code=lang1)
-                )
-            )
-            .annotate(
-                translation2=FilteredRelation(
-                    "translations", condition=Q(translations__language_code=lang2)
-                )
-            )
-            .annotate(descr=Coalesce("translation1__descr", "translation2__descr"))
-            .order_by("descr")
+            .annotate(t1=self._filtered_relation(lang1))
+            .annotate(t2=self._filtered_relation(lang2))
+            .annotate(sort_key=Coalesce("t1__descr", "t2__descr", Value("")))
+            .order_by("sort_key")
+        )
+
+    def _filtered_relation(self, language_code: str | None):
+        return FilteredRelation(
+            "translations", condition=Q(translations__language_code=language_code)
         )
 
 
-class Variable(TranslatableModel):
+class Variable(models.Model):
+    translations: Manager["VariableTranslation"]
+
     last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    translations = TranslatedFields(
-        descr=models.CharField(
-            max_length=200, blank=True, verbose_name=_("Description")
-        )
-    )
 
     objects = VariableManager()
 
@@ -68,13 +51,63 @@ class Variable(TranslatableModel):
         verbose_name = _("Variable")
         verbose_name_plural = _("Variables")
 
+    @property
+    def descr(self) -> str:
+        # Return the VariableManager's annotation if it exists.
+        if "sort_key" in vars(self):
+            return vars(self)["sort_key"]
+
+        language_code = get_language()
+        descr_cache = vars(self).setdefault("_descr_cache", {})
+        if language_code in descr_cache:
+            return descr_cache[language_code]
+        prefetched_translations = getattr(self, "prefetched_translations", None)
+        if prefetched_translations is not None:
+            for preferred_language in (language_code, settings.LANGUAGE_CODE):
+                for t in prefetched_translations:
+                    if t.language_code == preferred_language:
+                        descr_cache[language_code] = t.descr
+                        return t.descr
+            descr_cache[language_code] = ""
+            return ""
+
+        try:
+            descr = self.translations.get(language_code=language_code).descr
+        except VariableTranslation.DoesNotExist:
+            try:
+                descr = self.translations.get(
+                    language_code=settings.LANGUAGE_CODE
+                ).descr
+            except VariableTranslation.DoesNotExist:
+                descr = ""
+        descr_cache[language_code] = descr
+        return descr
+
     def __str__(self):
-        # For an explanation of this, see
-        # enhydris.tests.test_models.VariableTestCase.test_translation_bug()
-        result = self.descr
-        if result is None:
-            return self.translations.first().descr
-        return result
+        return self.descr
+
+
+class VariableTranslation(models.Model):
+    variable: models.ForeignKey[Variable, Variable] = models.ForeignKey(
+        Variable,
+        on_delete=models.CASCADE,
+        related_name="translations",
+        verbose_name=_("Variable"),
+    )
+    language_code: models.CharField[str, str] = models.CharField(
+        max_length=15, verbose_name=_("Language")
+    )
+    descr: models.CharField[str, str] = models.CharField(
+        max_length=200, verbose_name=_("Description")
+    )
+
+    class Meta:
+        unique_together = (
+            (
+                "variable",
+                "language_code",
+            ),
+        )
 
 
 class UnitOfMeasurement(Lookup):
@@ -146,16 +179,7 @@ class TimeseriesGroup(models.Model):
     def get_name(self):
         if self.name:
             return self.name
-        try:
-            return self.variable.descr
-        except ValueError:
-            # Sometimes the current language is set to null; this happens particularly
-            # when the Django admin is recording what changes happened to an object (see
-            # django.contrib.admin.utils.construct_change_message). In that case,
-            # django-parler raises a ValueError exception when we attempt to access
-            # self.variable.descr. Not sure whether this is a Django problem or a
-            # django-parler problem. Working around by returning the group id.
-            return f"Timeseries group {self.id}"
+        return self.variable.descr
 
     class Meta:
         verbose_name = _("Time series group")

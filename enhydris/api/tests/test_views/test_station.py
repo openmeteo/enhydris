@@ -225,8 +225,9 @@ class StationCsvTestCase(APITestCase):
         self._create_timeseries_group(self.station_agios_athanasios, "Humidity")
 
     def _create_timeseries_group(self, station, variable_descr):
-        baker.make(
-            models.TimeseriesGroup, gentity=station, variable__descr=variable_descr
+        timeseries_group = baker.make(models.TimeseriesGroup, gentity=station)
+        timeseries_group.variable.translations.create(
+            language_code="en", descr=variable_descr
         )
 
     def test_station_csv(self):
@@ -247,8 +248,8 @@ class StationCsvTestCase(APITestCase):
 
     def test_num_queries(self):
         self._create_timeseries_groups()
-        # There should be seven queries: one for stations, one for timeseries_groups,
-        # one for timeseries. The other four are two for django_session and two
-        # for a savepoint.
-        with self.assertNumQueries(7):
+        # There should be eight queries: one for stations, one for timeseries_groups,
+        # one for timeseries, one for prefetching variable translations. The
+        # other four are two for django_session and two for a savepoint.
+        with self.assertNumQueries(8):
             self.client.get("/api/stations/csv/")
