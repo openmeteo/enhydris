@@ -1,8 +1,14 @@
+from __future__ import annotations
+
+import datetime as dt
+from typing import TYPE_CHECKING
+
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.cache import cache
 from django.db.models import FilteredRelation, Q
 from django.db.models.functions import Coalesce
+from django.db.models.manager import Manager
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
@@ -13,6 +19,9 @@ from parler.utils import get_active_language_choices
 
 from .base import Lookup
 from .gentity import Gentity
+
+if TYPE_CHECKING:
+    from enhydris.models import Timeseries
 
 
 class VariableManager(TranslatableManager):
@@ -69,7 +78,9 @@ class Variable(TranslatableModel):
 
 
 class UnitOfMeasurement(Lookup):
-    symbol = models.CharField(max_length=50, verbose_name=_("Symbol"))
+    symbol: models.CharField[str, str] = models.CharField(
+        max_length=50, verbose_name=_("Symbol")
+    )
     variables = models.ManyToManyField(Variable)
 
     def __str__(self):
@@ -84,17 +95,25 @@ class UnitOfMeasurement(Lookup):
 
 
 class TimeseriesGroup(models.Model):
-    last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    gentity = models.ForeignKey(Gentity, on_delete=models.CASCADE)
-    variable = models.ForeignKey(
+    timeseries_set: Manager["Timeseries"]
+
+    last_modified: models.DateTimeField[dt.datetime, dt.datetime] = (
+        models.DateTimeField(default=now, null=True, editable=False)
+    )
+    gentity: models.ForeignKey[Gentity, Gentity] = models.ForeignKey(
+        Gentity, on_delete=models.CASCADE
+    )
+    variable: models.ForeignKey[Variable, Variable] = models.ForeignKey(
         Variable, on_delete=models.CASCADE, verbose_name=_("Variable")
     )
-    unit_of_measurement = models.ForeignKey(
-        UnitOfMeasurement,
-        on_delete=models.CASCADE,
-        verbose_name=_("Unit of measurement"),
+    unit_of_measurement: models.ForeignKey[UnitOfMeasurement, UnitOfMeasurement] = (
+        models.ForeignKey(
+            UnitOfMeasurement,
+            on_delete=models.CASCADE,
+            verbose_name=_("Unit of measurement"),
+        )
     )
-    name = models.CharField(
+    name: models.CharField[str, str] = models.CharField(
         max_length=200,
         blank=True,
         help_text=_(
@@ -105,10 +124,10 @@ class TimeseriesGroup(models.Model):
         ),
         verbose_name=_("Name"),
     )
-    hidden = models.BooleanField(
+    hidden: models.BooleanField[bool, bool] = models.BooleanField(
         null=False, blank=False, default=False, verbose_name=_("Hidden")
     )
-    precision = models.SmallIntegerField(
+    precision: models.SmallIntegerField[int, int] = models.SmallIntegerField(
         help_text=_(
             "The number of decimal digits to which the values of the time series "
             "will be rounded. It's usually positive, but it can be zero or negative; "
@@ -120,7 +139,9 @@ class TimeseriesGroup(models.Model):
         ),
         verbose_name=_("Precision"),
     )
-    remarks = models.TextField(blank=True, verbose_name=_("Remarks"))
+    remarks: models.TextField[str, str] = models.TextField(
+        blank=True, verbose_name=_("Remarks")
+    )
 
     def get_name(self):
         if self.name:
@@ -154,7 +175,7 @@ class TimeseriesGroup(models.Model):
             or self._get_timeseries(Timeseries.INITIAL)
         )
 
-    def _get_timeseries(self, type):
+    def _get_timeseries(self, type: int):
         # We don't just do self.timeseries_set.get(type=type) because sometimes we have
         # the timeseries prefetched and this would cause another query.
         for timeseries in self.timeseries_set.all():

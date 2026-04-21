@@ -1,6 +1,13 @@
+from __future__ import annotations
+
 import csv
 from io import BytesIO, StringIO
+from typing import Any
 from zipfile import ZIP_DEFLATED, ZipFile
+
+from django.db.models import QuerySet
+
+from enhydris import models
 
 _station_list_csv_headers = [
     "id",
@@ -17,9 +24,9 @@ _station_list_csv_headers = [
 ]
 
 
-def _station_csv(s):
+def _station_csv(s: models.Station) -> list[Any]:
     return [
-        s.id,
+        s.pk,
         s.name,
         s.code,
         s.owner,
@@ -45,11 +52,11 @@ _timeseries_list_csv_headers = [
 ]
 
 
-def _timeseries_group_csv(tg):
+def _timeseries_group_csv(tg: models.TimeseriesGroup) -> list[Any]:
     time_step = tg.default_timeseries.time_step if tg.default_timeseries else ""
     return [
-        tg.id,
-        tg.gentity.id,
+        tg.pk,
+        tg.gentity.pk,
         tg.variable.descr if tg.variable else "",
         tg.unit_of_measurement.symbol,
         tg.name,
@@ -58,7 +65,7 @@ def _timeseries_group_csv(tg):
     ]
 
 
-def prepare_csv(queryset):
+def prepare_csv(queryset: "QuerySet[models.Station]") -> bytes:
     with BytesIO() as result:
         with ZipFile(result, "w", ZIP_DEFLATED) as zipfile:
             with StringIO() as stations_csv:

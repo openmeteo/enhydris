@@ -624,15 +624,22 @@ Response::
 
     2018-07-09 11:19,0.000000,
 
-**Append data** to the time series::
+**Append or insert data** to the time series::
 
     curl -X POST -H "Authorization: token OAUTH-TOKEN" \
         -d $'timeseries_records=2018-12-19T11:50,25.0,\n2018-12-19T12:00,25.1,\n' \
         -d 'timezone=Etc/GMT-2' \
+        -d 'mode=append' \
         https://openmeteo.org/api/stations/1334/timeseriesgroups/235/timeseries/10659/data/
 
 (The ``$'...'`` is a bash idiom that does nothing more than escape the
 ``\n`` in the string.)
+
+``mode`` can be ``append`` or ``insert``. There is essentially no
+difference between the two modes other than checking. In ``append``, it
+is checked that the new records are after the last existing record; in
+``insert``, it is checked that the new records will not overwrite
+existing records. The default is ``append``.
 
 The response is normally 204 (no content).
 

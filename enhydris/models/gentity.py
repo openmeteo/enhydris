@@ -1,6 +1,11 @@
+from __future__ import annotations
+
+import datetime as dt
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
+from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.sites.managers import CurrentSiteManager
 from django.contrib.sites.models import Site
 from django.core.cache import cache
@@ -43,12 +48,23 @@ DISPLAY_TIMEZONE_CHOICES = [
 
 
 class Gentity(models.Model):
-    last_modified = models.DateTimeField(default=now, null=True, editable=False)
-    name = models.CharField(max_length=200, blank=True, verbose_name=_("Name"))
-    code = models.CharField(max_length=50, blank=True, verbose_name=_("Code"))
-    remarks = models.TextField(blank=True, verbose_name=_("Remarks"))
-    geom = models.GeometryField()
-    display_timezone = models.CharField(
+    gpoint: "Gpoint"
+    garea: "Garea"
+
+    last_modified: models.DateTimeField[dt.datetime, dt.datetime] = (
+        models.DateTimeField(default=now, null=True, editable=False)
+    )
+    name: models.CharField[str, str] = models.CharField(
+        max_length=200, blank=True, verbose_name=_("Name")
+    )
+    code: models.CharField[str, str] = models.CharField(
+        max_length=50, blank=True, verbose_name=_("Code")
+    )
+    remarks: models.TextField[str, str] = models.TextField(
+        blank=True, verbose_name=_("Remarks")
+    )
+    geom: models.GeometryField[GEOSGeometry, GEOSGeometry] = models.GeometryField()
+    display_timezone: models.CharField[str, str] = models.CharField(
         max_length=50,
         default="Etc/GMT",
         verbose_name=_("Display time zone"),
@@ -77,7 +93,9 @@ class Gentity(models.Model):
 
 
 class Gpoint(Gentity):
-    altitude = models.FloatField(null=True, blank=True, verbose_name=_("Altitude"))
+    altitude: models.FloatField[float | None, float | None] = models.FloatField(
+        null=True, blank=True, verbose_name=_("Altitude")
+    )
     f_dependencies = ["Gentity"]
 
 

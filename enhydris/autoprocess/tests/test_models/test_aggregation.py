@@ -469,7 +469,7 @@ class AggregationRecalculatesLastValueIfNeededTestCase(TestCase):
             columns=["value", "flags"],
             index=new_dates,
         )
-        source_timeseries.append_data(new_data)
+        source_timeseries.insert_or_append_data(new_data)
 
 
 @mock.patch("enhydris.autoprocess.models.logging")

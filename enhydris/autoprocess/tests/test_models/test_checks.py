@@ -89,7 +89,7 @@ class ChecksTestCase(TestCase):
         self.assertTrue(Timeseries.objects.exists())
 
     @mock.patch("enhydris.autoprocess.models.RangeCheck.check_timeseries")
-    @mock.patch("enhydris.models.Timeseries.append_data")
+    @mock.patch("enhydris.models.Timeseries.insert_or_append_data")
     def test_runs_range_check(self, m1, m2):
         station = baker.make(Station, display_timezone="Etc/GMT")
         range_check = baker.make(

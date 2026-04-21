@@ -109,7 +109,9 @@ class Telemetry(models.Model):
             sensor_id=sensor.sensor_id, timeseries_end_date=timeseries_end_date
         )
         measurements = self._cleanup_measurements(measurements)
-        timeseries.append_data(measurements, default_timezone=self.data_timezone)
+        timeseries.insert_or_append_data(
+            measurements, default_timezone=self.data_timezone
+        )
 
     def _cleanup_measurements(self, measurements):
         result = StringIO()
